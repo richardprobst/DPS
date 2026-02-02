@@ -5351,95 +5351,2670 @@ DPS_Services_API::get_price_history($service_id)
 Estes add-ons fornecem funcionalidades especializadas. A maioria segue o padrão singleton com método `get_instance()` e funções `activate()`/`deactivate()`.
 
 
-### Backup Add-on
+## 💾 BACKUP ADD-ON
 
-**Descrição:** Sistema de backup e exportação de dados
+### Overview
+
+Sistema completo de backup, exportação e restauração de dados do DPS. Suporta backups completos, seletivos e diferenciais (desde data específica), com agendamento automático via cron, comparação de diferenças, histórico com retenção configurável e interface administrativa integrada.
 
 **Diretório:** `plugins/desi-pet-shower-backup/`
 
 **Arquivo principal:** `desi-pet-shower-backup-addon.php`
 
-**Classes (5):**
-- `class-dps-backup-comparator.php`
-- `class-dps-backup-exporter.php`
-- `class-dps-backup-history.php`
-- `class-dps-backup-scheduler.php`
-- `class-dps-backup-settings.php`
-
-*Para documentação detalhada, consulte o arquivo fonte do add-on.*
+**Versão:** 1.3.1
 
 
-### Booking Add-on
+### DPS_Backup_Addon
 
-**Descrição:** Sistema de reservas online
+Classe principal de gerenciamento; registra menus, renderiza interface administrativa, processa formulários e requisições AJAX.
+
+**Arquivo:** `plugins/desi-pet-shower-backup/desi-pet-shower-backup-addon.php`
+
+**Métodos públicos:** 12
+
+#### 🔧 get_instance()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Retorna a instância singleton do add-on.
+
+**Assinatura:**
+
+```php
+DPS_Backup_Addon::get_instance()
+```
+
+**Retorno:** `DPS_Backup_Addon` Instância singleton.
+
+---
+
+#### 🎯 register_admin_menu()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Registra o submenu "Backup" no admin do WordPress sob o menu principal "desi.pet by PRObst".
+
+**Assinatura:**
+
+```php
+$instance->register_admin_menu()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 enqueue_admin_assets()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Enfileira CSS e JavaScript para a página de backup no admin.
+
+**Assinatura:**
+
+```php
+$instance->enqueue_admin_assets($hook)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$hook` | `string` | Hook da página atual do admin |
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 render_admin_page()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Renderiza a página principal de backup e restauração no admin, incluindo configurações, botões de ação e histórico.
+
+**Assinatura:**
+
+```php
+$instance->render_admin_page()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 handle_save_settings()
+
+**Método de Instância** | **Desde:** 1.2.0
+
+Processa o formulário de configurações de agendamento de backup.
+
+**Assinatura:**
+
+```php
+$instance->handle_save_settings()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 handle_export()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Processa a requisição de exportação manual de backup (download JSON).
+
+**Assinatura:**
+
+```php
+$instance->handle_export()
+```
+
+**Retorno:** `void` (força download ou exibe erro)
+
+---
+
+#### 🎯 handle_import()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Processa o upload e restauração de arquivo de backup.
+
+**Assinatura:**
+
+```php
+$instance->handle_import()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 ajax_compare_backup()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Endpoint AJAX para comparar backup com dados atuais.
+
+**Assinatura:**
+
+```php
+$instance->ajax_compare_backup()
+```
+
+**Retorno:** `void` (responde JSON)
+
+---
+
+#### 🎯 ajax_delete_backup()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Endpoint AJAX para deletar backup do histórico.
+
+**Assinatura:**
+
+```php
+$instance->ajax_delete_backup()
+```
+
+**Retorno:** `void` (responde JSON)
+
+---
+
+#### 🎯 ajax_download_backup()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Endpoint AJAX para baixar backup do histórico.
+
+**Assinatura:**
+
+```php
+$instance->ajax_download_backup()
+```
+
+**Retorno:** `void` (força download)
+
+---
+
+#### 🎯 ajax_restore_from_history()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Endpoint AJAX para restaurar backup do histórico.
+
+**Assinatura:**
+
+```php
+$instance->ajax_restore_from_history()
+```
+
+**Retorno:** `void` (responde JSON)
+
+
+### DPS_Backup_Exporter
+
+Exportador de dados em formatos completo, seletivo ou diferencial.
+
+**Arquivo:** `plugins/desi-pet-shower-backup/includes/class-dps-backup-exporter.php`
+
+**Métodos públicos:** 13
+
+#### 🎯 build_complete_backup()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Cria backup completo de todos os componentes disponíveis.
+
+**Assinatura:**
+
+```php
+$exporter->build_complete_backup()
+```
+
+**Retorno:** `array|WP_Error` Dados do backup ou erro.
+
+---
+
+#### 🎯 build_selective_backup()
+
+**Método de Instância** | **Desde:** 1.1.0
+
+Cria backup seletivo com componentes especificados.
+
+**Assinatura:**
+
+```php
+$exporter->build_selective_backup($components)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$components` | `array` | Array de chaves de componentes (ex: ['clients', 'pets']) |
+
+**Retorno:** `array|WP_Error` Dados do backup ou erro.
+
+---
+
+#### 🎯 build_differential_backup()
+
+**Método de Instância** | **Desde:** 1.2.0
+
+Cria backup diferencial desde uma data específica (apenas registros modificados).
+
+**Assinatura:**
+
+```php
+$exporter->build_differential_backup($since)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$since` | `string` | Data em formato ISO 8601 ou timestamp |
+
+**Retorno:** `array|WP_Error` Dados do backup ou erro.
+
+---
+
+#### 🎯 export_transactions()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Exporta transações financeiras com validação de relacionamentos.
+
+**Assinatura:**
+
+```php
+$exporter->export_transactions()
+```
+
+**Retorno:** `array` Array de transações.
+
+---
+
+#### 🎯 get_component_counts()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Retorna contagem de registros para todos os componentes disponíveis.
+
+**Assinatura:**
+
+```php
+$exporter->get_component_counts()
+```
+
+**Retorno:** `array` Array associativo com contagens por componente.
+
+**Exemplo:**
+
+```php
+$exporter = new DPS_Backup_Exporter();
+$counts = $exporter->get_component_counts();
+// ['clients' => 150, 'pets' => 300, 'appointments' => 1200, ...]
+```
+
+
+### DPS_Backup_History
+
+Gerencia registros de histórico de backups e armazenamento de arquivos.
+
+**Arquivo:** `plugins/desi-pet-shower-backup/includes/class-dps-backup-history.php`
+
+**Métodos públicos:** 10 (todos estáticos)
+
+#### 🔧 get_history()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Recupera histórico de backups, ordenado do mais recente para o mais antigo.
+
+**Assinatura:**
+
+```php
+DPS_Backup_History::get_history($limit = 0)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$limit` | `int` | Número de registros a retornar (0 = todos) |
+
+**Retorno:** `array` Array de entradas de backup.
+
+---
+
+#### 🔧 add_entry()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Adiciona nova entrada ao histórico, aplicando retenção automática.
+
+**Assinatura:**
+
+```php
+DPS_Backup_History::add_entry($entry)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$entry` | `array` | Dados da entrada (id, timestamp, type, stats, filepath, size) |
+
+**Retorno:** `bool` True em caso de sucesso.
+
+---
+
+#### 🔧 remove_entry()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Remove backup do histórico e deleta o arquivo.
+
+**Assinatura:**
+
+```php
+DPS_Backup_History::remove_entry($id)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$id` | `string` | UUID do backup |
+
+**Retorno:** `bool` True em caso de sucesso.
+
+---
+
+#### 🔧 save_backup_file()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Salva conteúdo JSON do backup no disco com segurança.
+
+**Assinatura:**
+
+```php
+DPS_Backup_History::save_backup_file($filename, $content)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$filename` | `string` | Nome do arquivo |
+| `$content` | `string` | Conteúdo JSON do backup |
+
+**Retorno:** `string|WP_Error` Caminho completo do arquivo ou erro.
+
+---
+
+#### 🔧 format_size()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Formata bytes para formato legível (KB, MB, GB).
+
+**Assinatura:**
+
+```php
+DPS_Backup_History::format_size($bytes)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$bytes` | `int` | Tamanho em bytes |
+
+**Retorno:** `string` Tamanho formatado (ex: "2.5 MB").
+
+
+### DPS_Backup_Scheduler
+
+Gerencia agendamento automático de backups via WordPress cron.
+
+**Arquivo:** `plugins/desi-pet-shower-backup/includes/class-dps-backup-scheduler.php`
+
+**Métodos públicos:** 6 (todos estáticos)
+
+#### 🔧 init()
+
+**Método Estático** | **Desde:** 1.2.0
+
+Inicializa hooks e filtros do agendador.
+
+**Assinatura:**
+
+```php
+DPS_Backup_Scheduler::init()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 🔧 schedule()
+
+**Método Estático** | **Desde:** 1.2.0
+
+Agenda backup automático baseado nas configurações.
+
+**Assinatura:**
+
+```php
+DPS_Backup_Scheduler::schedule()
+```
+
+**Retorno:** `bool` True se agendado com sucesso.
+
+---
+
+#### 🔧 is_scheduled()
+
+**Método Estático** | **Desde:** 1.2.0
+
+Verifica se backup está agendado.
+
+**Assinatura:**
+
+```php
+DPS_Backup_Scheduler::is_scheduled()
+```
+
+**Retorno:** `bool` True se agendado.
+
+---
+
+#### 🔧 get_next_run()
+
+**Método Estático** | **Desde:** 1.2.0
+
+Retorna timestamp da próxima execução agendada.
+
+**Assinatura:**
+
+```php
+DPS_Backup_Scheduler::get_next_run()
+```
+
+**Retorno:** `int|false` Timestamp Unix ou false se não agendado.
+
+
+### DPS_Backup_Comparator
+
+Compara dados de backup com estado atual do sistema.
+
+**Arquivo:** `plugins/desi-pet-shower-backup/includes/class-dps-backup-comparator.php`
+
+**Métodos públicos:** 2 (ambos estáticos)
+
+#### 🔧 compare()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Compara backup com dados atuais, retorna comparação detalhada.
+
+**Assinatura:**
+
+```php
+DPS_Backup_Comparator::compare($payload)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$payload` | `array` | Dados do backup a comparar |
+
+**Retorno:** `array` Comparação detalhada por componente.
+
+---
+
+#### 🔧 format_summary()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Formata comparação como tabela HTML com avisos.
+
+**Assinatura:**
+
+```php
+DPS_Backup_Comparator::format_summary($comparison)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$comparison` | `array` | Resultado de compare() |
+
+**Retorno:** `string` HTML formatado.
+
+
+### DPS_Backup_Settings
+
+Gerencia configurações de operações de backup.
+
+**Arquivo:** `plugins/desi-pet-shower-backup/includes/class-dps-backup-settings.php`
+
+**Métodos públicos:** 7 (todos estáticos)
+
+#### 🔧 get_all()
+
+**Método Estático** | **Desde:** 1.2.0
+
+Recupera todas as configurações com defaults mesclados.
+
+**Assinatura:**
+
+```php
+DPS_Backup_Settings::get_all()
+```
+
+**Retorno:** `array` Array de configurações.
+
+---
+
+#### 🔧 get()
+
+**Método Estático** | **Desde:** 1.2.0
+
+Obtém valor de uma configuração específica.
+
+**Assinatura:**
+
+```php
+DPS_Backup_Settings::get($key, $default = null)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$key` | `string` | Chave da configuração |
+| `$default` | `mixed` | Valor padrão se não existir |
+
+**Retorno:** `mixed` Valor da configuração.
+
+---
+
+#### 🔧 set()
+
+**Método Estático** | **Desde:** 1.2.0
+
+Define valor de uma configuração.
+
+**Assinatura:**
+
+```php
+DPS_Backup_Settings::set($key, $value)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$key` | `string` | Chave da configuração |
+| `$value` | `mixed` | Valor a salvar |
+
+**Retorno:** `bool` True em caso de sucesso.
+
+---
+
+#### 🔧 get_available_components()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Retorna componentes disponíveis para backup.
+
+**Assinatura:**
+
+```php
+DPS_Backup_Settings::get_available_components()
+```
+
+**Retorno:** `array` Array de componentes (clients, pets, appointments, transactions, etc.).
+
+
+## 📅 BOOKING ADD-ON
+
+### Overview
+
+Sistema de reservas online integrado ao painel principal do DPS. Fornece página dedicada de agendamento com mesmas funcionalidades do painel de gestão, mas focada exclusivamente em criação de novos agendamentos. Ideal para recepção ou ambientes onde se deseja restringir acesso apenas à função de agendamento.
 
 **Diretório:** `plugins/desi-pet-shower-booking/`
 
 **Arquivo principal:** `desi-pet-shower-booking-addon.php`
 
-*Para documentação detalhada, consulte o arquivo fonte do add-on.*
+**Versão:** 1.0.0
 
 
-### Groomers Add-on
+### Funções Globais
 
-**Descrição:** Portal de tosadores com autenticação
+#### 📦 dps_booking_check_base_plugin()
+
+**Função Global** | **Desde:** 1.0.0
+
+Verifica se o plugin base está ativo; exibe aviso de erro se ausente.
+
+**Assinatura:**
+
+```php
+dps_booking_check_base_plugin()
+```
+
+**Retorno:** `bool` True se plugin base existe, false caso contrário.
+
+---
+
+#### 📦 dps_booking_load_textdomain()
+
+**Função Global** | **Desde:** 1.0.0
+
+Carrega arquivos de tradução para o add-on de booking.
+
+**Assinatura:**
+
+```php
+dps_booking_load_textdomain()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 📦 dps_booking_init_addon()
+
+**Função Global** | **Desde:** 1.0.0
+
+Inicializa a instância singleton do Booking Add-on.
+
+**Assinatura:**
+
+```php
+dps_booking_init_addon()
+```
+
+**Retorno:** `void`
+
+
+### DPS_Booking_Addon
+
+Classe principal fornecendo página dedicada de agendamento com mesma funcionalidade do Painel de Gestão DPS.
+
+**Arquivo:** `plugins/desi-pet-shower-booking/desi-pet-shower-booking-addon.php`
+
+**Métodos públicos:** 5
+
+#### 🔧 get_instance()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Retorna instância singleton do add-on.
+
+**Assinatura:**
+
+```php
+DPS_Booking_Addon::get_instance()
+```
+
+**Retorno:** `DPS_Booking_Addon` Instância singleton.
+
+---
+
+#### 🎯 activate()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Cria página de agendamento na ativação do plugin.
+
+**Assinatura:**
+
+```php
+$instance->activate()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Cria página com título "Agendamento" e shortcode `[dps_booking_form]` se não existir.
+
+---
+
+#### 🎯 enqueue_assets()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Enfileira CSS/JS para página de agendamento; carrega apenas na página de booking ou onde o shortcode existe.
+
+**Assinatura:**
+
+```php
+$instance->enqueue_assets()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 render_booking_form()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Renderiza formulário completo de agendamento com verificações de permissão.
+
+**Assinatura:**
+
+```php
+$instance->render_booking_form()
+```
+
+**Retorno:** `string` HTML do formulário.
+
+**Descrição:** Exibe requisito de login ou página de confirmação se necessário.
+
+---
+
+#### 🎯 capture_saved_appointment()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Captura dados de agendamento salvo e armazena em transient para exibição de confirmação.
+
+**Assinatura:**
+
+```php
+$instance->capture_saved_appointment($appointment_id, $appointment_type)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$appointment_id` | `int` | ID do agendamento |
+| `$appointment_type` | `string` | Tipo do agendamento |
+
+**Retorno:** `void`
+
+
+### Shortcode
+
+#### [dps_booking_form]
+
+Renderiza o formulário de agendamento em qualquer página.
+
+**Uso:**
+
+```
+[dps_booking_form]
+```
+
+**Atributos:** Nenhum
+
+**Exemplo:**
+
+```php
+// Em um template ou página
+echo do_shortcode('[dps_booking_form]');
+```
+
+
+### Hooks WordPress Utilizados
+
+**Action Hooks:**
+- `wp_enqueue_scripts` - Enfileira assets
+- `dps_base_after_save_appointment` - Captura agendamento para confirmação
+- `init` - Carrega text domain e inicializa add-on
+
+
+## 👤 GROOMERS ADD-ON
+
+### Overview
+
+Portal completo de tosadores com autenticação via magic links (sem login tradicional). Gerencia perfis de staff (tosadores, banhistas, auxiliares, recepção), tokens de acesso permanentes e temporários, comissões automáticas, avaliações de clientes e dashboard com estatísticas de desempenho.
 
 **Diretório:** `plugins/desi-pet-shower-groomers/`
 
 **Arquivo principal:** `desi-pet-shower-groomers-addon.php`
 
-**Classes (2):**
-- `class-dps-groomer-session-manager.php`
-- `class-dps-groomer-token-manager.php`
-
-*Para documentação detalhada, consulte o arquivo fonte do add-on.*
+**Versão:** 1.8.6
 
 
-### Payment Add-on
+### DPS_Groomer_Session_Manager
 
-**Descrição:** Integração com MercadoPago
+Gerencia autenticação e sessões do portal de tosadores via magic links sem login tradicional.
+
+**Arquivo:** `plugins/desi-pet-shower-groomers/includes/class-dps-groomer-session-manager.php`
+
+**Padrão:** Singleton - use `DPS_Groomer_Session_Manager::get_instance()`
+
+**Métodos públicos:** 10
+
+#### 🔧 get_instance()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Recupera a instância singleton do gerenciador de sessões.
+
+**Assinatura:**
+
+```php
+DPS_Groomer_Session_Manager::get_instance()
+```
+
+**Retorno:** `DPS_Groomer_Session_Manager` Instância singleton.
+
+---
+
+#### 🎯 authenticate_groomer()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Autentica um tosador, retorna true em caso de sucesso; valida role do usuário e regenera session ID.
+
+**Assinatura:**
+
+```php
+$manager->authenticate_groomer($groomer_id)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$groomer_id` | `int` | ID do usuário tosador |
+
+**Retorno:** `bool` True se autenticação bem-sucedida.
+
+---
+
+#### 🎯 get_authenticated_groomer_id()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Retorna ID do tosador autenticado ou 0 se não autenticado.
+
+**Assinatura:**
+
+```php
+$manager->get_authenticated_groomer_id()
+```
+
+**Retorno:** `int` ID do tosador ou 0.
+
+---
+
+#### 🎯 is_groomer_authenticated()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Verifica se algum tosador está atualmente autenticado.
+
+**Assinatura:**
+
+```php
+$manager->is_groomer_authenticated()
+```
+
+**Retorno:** `bool` True se autenticado.
+
+---
+
+#### 🎯 validate_session()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Valida expiração da sessão atual (tempo de vida de 24h).
+
+**Assinatura:**
+
+```php
+$manager->validate_session()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 logout()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Limpa dados de sessão do tosador.
+
+**Assinatura:**
+
+```php
+$manager->logout()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 get_logout_url()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Gera URL de logout com nonce e parâmetro de redirecionamento opcional.
+
+**Assinatura:**
+
+```php
+$manager->get_logout_url($redirect_to = '')
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$redirect_to` | `string` | URL para redirecionar após logout (opcional) |
+
+**Retorno:** `string` URL de logout.
+
+---
+
+#### 🎯 get_authenticated_groomer()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Retorna objeto WP_User do tosador autenticado ou false.
+
+**Assinatura:**
+
+```php
+$manager->get_authenticated_groomer()
+```
+
+**Retorno:** `WP_User|false` Objeto do usuário ou false.
+
+
+### DPS_Groomer_Token_Manager
+
+Gerencia geração, validação, revogação e limpeza de tokens de magic link para acesso ao portal.
+
+**Arquivo:** `plugins/desi-pet-shower-groomers/includes/class-dps-groomer-token-manager.php`
+
+**Padrão:** Singleton - use `DPS_Groomer_Token_Manager::get_instance()`
+
+**Métodos públicos:** 10
+
+#### 🔧 get_instance()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Recupera a instância singleton do gerenciador de tokens.
+
+**Assinatura:**
+
+```php
+DPS_Groomer_Token_Manager::get_instance()
+```
+
+**Retorno:** `DPS_Groomer_Token_Manager` Instância singleton.
+
+---
+
+#### 🎯 generate_token()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Gera novo token de acesso; retorna token em texto plano ou false em caso de erro.
+
+**Assinatura:**
+
+```php
+$manager->generate_token($groomer_id, $type = 'login', $expiration_minutes = null)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$groomer_id` | `int` | ID do tosador |
+| `$type` | `string` | Tipo: 'login' (30min) ou 'permanent' (10 anos) |
+| `$expiration_minutes` | `int` | Minutos de validade (opcional) |
+
+**Retorno:** `string|false` Token em texto plano ou false em erro.
+
+---
+
+#### 🎯 validate_token()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Valida token e retorna dados se válido; verifica expiração, uso e status de revogação.
+
+**Assinatura:**
+
+```php
+$manager->validate_token($token_plain)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$token_plain` | `string` | Token em texto plano |
+
+**Retorno:** `array|false` Dados do token se válido, false caso contrário.
+
+---
+
+#### 🎯 revoke_tokens()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Revoga todos os tokens ativos de um tosador; retorna contagem de revogados ou false em erro.
+
+**Assinatura:**
+
+```php
+$manager->revoke_tokens($groomer_id)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$groomer_id` | `int` | ID do tosador |
+
+**Retorno:** `int|false` Número de tokens revogados ou false.
+
+---
+
+#### 🎯 get_groomer_stats()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Retorna estatísticas de tokens: total_generated, total_used, active_tokens, last_used_at.
+
+**Assinatura:**
+
+```php
+$manager->get_groomer_stats($groomer_id)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$groomer_id` | `int` | ID do tosador |
+
+**Retorno:** `array` Estatísticas de tokens.
+
+---
+
+#### 🎯 get_active_tokens()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Lista todos os tokens ativos de um tosador com ID, tipo, datas e IP.
+
+**Assinatura:**
+
+```php
+$manager->get_active_tokens($groomer_id)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$groomer_id` | `int` | ID do tosador |
+
+**Retorno:** `array` Array de tokens ativos.
+
+
+### DPS_Groomers_Addon
+
+Classe principal do add-on gerenciando perfis de staff, portal via shortcodes, avaliações e comissões.
+
+**Arquivo:** `plugins/desi-pet-shower-groomers/desi-pet-shower-groomers-addon.php`
+
+**Padrão:** Singleton - use `DPS_Groomers_Addon::get_instance()`
+
+**Métodos públicos:** 25+
+
+#### 🔧 get_instance()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Recupera instância singleton do add-on.
+
+**Assinatura:**
+
+```php
+DPS_Groomers_Addon::get_instance()
+```
+
+**Retorno:** `DPS_Groomers_Addon` Instância singleton.
+
+---
+
+#### 🎯 get_portal_page_url()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Retorna URL da página do portal de tosadores.
+
+**Assinatura:**
+
+```php
+$addon->get_portal_page_url()
+```
+
+**Retorno:** `string` URL do portal ou fallback home_url/portal-groomer/.
+
+---
+
+#### 🎯 render_groomer_portal_shortcode()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Renderiza shortcode `[dps_groomer_portal]` com dashboard, agenda e abas de avaliações.
+
+**Assinatura:**
+
+```php
+$addon->render_groomer_portal_shortcode($atts)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$atts` | `array` | Atributos do shortcode |
+
+**Retorno:** `string` HTML do portal.
+
+---
+
+#### 🎯 render_groomer_dashboard_shortcode()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Renderiza shortcode `[dps_groomer_dashboard]` com stats e gráficos de desempenho.
+
+**Assinatura:**
+
+```php
+$addon->render_groomer_dashboard_shortcode($atts)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$atts` | `array` | Atributos do shortcode |
+
+**Retorno:** `string` HTML do dashboard.
+
+---
+
+#### 🎯 render_groomer_agenda_shortcode()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Renderiza shortcode `[dps_groomer_agenda]` com calendário de agendamentos do tosador.
+
+**Assinatura:**
+
+```php
+$addon->render_groomer_agenda_shortcode($atts)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$atts` | `array` | Atributos do shortcode |
+
+**Retorno:** `string` HTML da agenda.
+
+---
+
+#### 🎯 generate_staff_commission()
+
+**Método de Instância** | **Desde:** 1.5.0
+
+Gera automaticamente comissões de staff quando pagamento é confirmado; divide proporcionalmente entre staff vinculado.
+
+**Assinatura:**
+
+```php
+$addon->generate_staff_commission($charge_id, $client_id, $value_cents)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$charge_id` | `int` | ID da cobrança |
+| `$client_id` | `int` | ID do cliente |
+| `$value_cents` | `int` | Valor em centavos |
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 get_groomer_rating()
+
+**Método de Instância** | **Desde:** 1.6.0
+
+Retorna avaliação média do tosador e contagem total de avaliações.
+
+**Assinatura:**
+
+```php
+$addon->get_groomer_rating($groomer_id)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$groomer_id` | `int` | ID do tosador |
+
+**Retorno:** `array` Array com 'average' e 'count'.
+
+---
+
+#### 🔧 get_staff_types()
+
+**Método Estático** | **Desde:** 1.7.0
+
+Retorna tipos de staff disponíveis com traduções.
+
+**Assinatura:**
+
+```php
+DPS_Groomers_Addon::get_staff_types()
+```
+
+**Retorno:** `array` Array associativo ['groomer' => 'Tosador', 'banhista' => 'Banhista', ...].
+
+---
+
+#### 🔧 activate()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Adiciona role dps_groomer na ativação do plugin.
+
+**Assinatura:**
+
+```php
+DPS_Groomers_Addon::activate()
+```
+
+**Retorno:** `void`
+
+
+### Shortcodes
+
+#### [dps_groomer_portal]
+
+Portal completo do tosador com abas de dashboard, agenda e avaliações.
+
+**Uso:**
+
+```
+[dps_groomer_portal]
+```
+
+---
+
+#### [dps_groomer_login]
+
+Formulário de login/mensagem de autenticação com redirecionamento.
+
+**Uso:**
+
+```
+[dps_groomer_login]
+```
+
+---
+
+#### [dps_groomer_dashboard]
+
+Dashboard com estatísticas e gráficos de desempenho.
+
+**Uso:**
+
+```
+[dps_groomer_dashboard]
+```
+
+---
+
+#### [dps_groomer_agenda]
+
+Calendário de agendamentos do tosador.
+
+**Uso:**
+
+```
+[dps_groomer_agenda]
+```
+
+---
+
+#### [dps_groomer_review]
+
+Formulário para clientes enviarem avaliações.
+
+**Uso:**
+
+```
+[dps_groomer_review]
+```
+
+---
+
+#### [dps_groomer_reviews]
+
+Lista de avaliações e notas do tosador.
+
+**Uso:**
+
+```
+[dps_groomer_reviews groomer_id="123"]
+```
+
+
+### Constantes
+
+**DPS_Groomer_Session_Manager:**
+- `SESSION_KEY = 'dps_groomer_id'`
+- `SESSION_LIFETIME = 86400` (24 horas)
+
+**DPS_Groomer_Token_Manager:**
+- `DEFAULT_EXPIRATION_MINUTES = 30`
+- `PERMANENT_EXPIRATION_MINUTES = 525600` (10 anos)
+
+**DPS_Groomers_Addon:**
+- `VERSION = '1.8.6'`
+- `STAFF_TYPES = ['groomer', 'banhista', 'auxiliar', 'recepcao']`
+
+
+## 💳 PAYMENT ADD-ON
+
+### Overview
+
+Integração completa com MercadoPago para geração de links de pagamento PIX, processamento de webhooks/IPN e marcação automática de pagamentos. Suporta configuração via constantes (wp-config.php) ou interface administrativa, com validação de webhooks via rate limiting e idempotência.
 
 **Diretório:** `plugins/desi-pet-shower-payment/`
 
 **Arquivo principal:** `desi-pet-shower-payment-addon.php`
 
-**Classes (1):**
-- `class-dps-mercadopago-config.php`
-
-*Para documentação detalhada, consulte o arquivo fonte do add-on.*
+**Versão:** 1.0.0
 
 
-### Registration Add-on
+### DPS_Payment_Addon
 
-**Descrição:** Formulário de registro de clientes
+Gerenciador principal de integração MercadoPago: geração de links, webhooks e injeção de informações de pagamento em mensagens.
+
+**Arquivo:** `plugins/desi-pet-shower-payment/desi-pet-shower-payment-addon.php`
+
+**Padrão:** Singleton - use `DPS_Payment_Addon::get_instance()`
+
+**Métodos públicos:** 12
+
+#### 🔧 get_instance()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Recupera instância singleton do add-on de pagamentos.
+
+**Assinatura:**
+
+```php
+DPS_Payment_Addon::get_instance()
+```
+
+**Retorno:** `DPS_Payment_Addon` Instância singleton.
+
+---
+
+#### 🎯 enqueue_admin_assets()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Enfileira CSS e JavaScript na página de configurações de pagamento.
+
+**Assinatura:**
+
+```php
+$addon->enqueue_admin_assets($hook)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$hook` | `string` | Hook da página atual do admin |
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 register_settings()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Registra configurações WordPress para access token, chave PIX e webhook secret com callbacks de sanitização.
+
+**Assinatura:**
+
+```php
+$addon->register_settings()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 sanitize_access_token()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Sanitiza access token do MercadoPago - remove espaços e caracteres inválidos.
+
+**Assinatura:**
+
+```php
+$addon->sanitize_access_token($token)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$token` | `string` | Token bruto |
+
+**Retorno:** `string` Token sanitizado (permite alfanuméricos, traços e underscores).
+
+---
+
+#### 🎯 sanitize_webhook_secret()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Sanitiza webhook secret - remove caracteres de controle mas permite especiais para senhas fortes.
+
+**Assinatura:**
+
+```php
+$addon->sanitize_webhook_secret($secret)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$secret` | `string` | Secret bruto |
+
+**Retorno:** `string` Secret sanitizado.
+
+---
+
+#### 🎯 add_settings_page()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Adiciona página de configurações no submenu "desi.pet by PRObst".
+
+**Assinatura:**
+
+```php
+$addon->add_settings_page()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 render_settings_page()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Renderiza página completa de configurações de pagamento com indicador de status.
+
+**Assinatura:**
+
+```php
+$addon->render_settings_page()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 maybe_generate_payment_link()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Gera link de pagamento para agendamentos finalizados e armazena como post meta.
+
+**Assinatura:**
+
+```php
+$addon->maybe_generate_payment_link($appt_id, $appt_type)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$appt_id` | `int` | ID do agendamento |
+| `$appt_type` | `string` | Tipo: "simple" ou "subscription" |
+
+**Retorno:** `void`
+
+**Disparado por:** Hook `dps_base_after_save_appointment`
+
+---
+
+#### 🎯 inject_payment_link_in_message()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Filtro que injeta link de pagamento e informações PIX em mensagens WhatsApp.
+
+**Assinatura:**
+
+```php
+$addon->inject_payment_link_in_message($message, $appt, $context)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$message` | `string` | Mensagem original |
+| `$appt` | `WP_Post` | Objeto do agendamento |
+| `$context` | `string` | Contexto de uso |
+
+**Retorno:** `string` Mensagem modificada (apenas para contexto "agenda").
+
+**Filtro:** `dps_agenda_whatsapp_message`
+
+---
+
+#### 🎯 maybe_handle_mp_notification()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+⚠️ **Segurança Crítica** - Processa webhooks/notificações IPN do MercadoPago com validação e rate limiting.
+
+**Assinatura:**
+
+```php
+$addon->maybe_handle_mp_notification()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Valida webhook secret, aplica rate limiting (10 tentativas/5 min), verifica idempotência e atualiza status de pagamento.
+
+**Disparado por:** Hook `init` (early)
+
+
+### DPS_MercadoPago_Config
+
+Gerencia credenciais seguras do MercadoPago com sistema de fallback prioritário (constantes → opções do banco).
+
+**Arquivo:** `plugins/desi-pet-shower-payment/includes/class-dps-mercadopago-config.php`
+
+**Métodos públicos:** 7 (todos estáticos)
+
+#### 🔧 get_access_token()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Recupera access token do MercadoPago.
+
+**Assinatura:**
+
+```php
+DPS_MercadoPago_Config::get_access_token()
+```
+
+**Retorno:** `string` Access token.
+
+**Prioridade:** Constante `DPS_MERCADOPAGO_ACCESS_TOKEN` → opção `dps_mercadopago_access_token` → string vazia
+
+---
+
+#### 🔧 get_public_key()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Recupera public key do MercadoPago.
+
+**Assinatura:**
+
+```php
+DPS_MercadoPago_Config::get_public_key()
+```
+
+**Retorno:** `string` Public key.
+
+**Prioridade:** Constante `DPS_MERCADOPAGO_PUBLIC_KEY` → opção `dps_mercadopago_public_key` → string vazia
+
+---
+
+#### 🔧 get_webhook_secret()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Recupera webhook secret para validação.
+
+**Assinatura:**
+
+```php
+DPS_MercadoPago_Config::get_webhook_secret()
+```
+
+**Retorno:** `string` Webhook secret.
+
+**Prioridade:** Constante `DPS_MERCADOPAGO_WEBHOOK_SECRET` → opção `dps_mercadopago_webhook_secret` → access token (fallback legado)
+
+---
+
+#### 🔧 is_access_token_from_constant()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Verifica se access token é definido via constante `DPS_MERCADOPAGO_ACCESS_TOKEN`.
+
+**Assinatura:**
+
+```php
+DPS_MercadoPago_Config::is_access_token_from_constant()
+```
+
+**Retorno:** `bool` True se definido via constante (útil para UI read-only).
+
+---
+
+#### 🔧 get_masked_credential()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Retorna credencial mascarada para exibição segura na UI.
+
+**Assinatura:**
+
+```php
+DPS_MercadoPago_Config::get_masked_credential($credential)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$credential` | `string` | Valor completo da credencial |
+
+**Retorno:** `string` Últimos 4 caracteres prefixados com "••••" ou "••••" se vazio/curto.
+
+**Exemplo:**
+
+```php
+$masked = DPS_MercadoPago_Config::get_masked_credential('APP-1234567890ABCDEF');
+// Retorna: "••••CDEF"
+```
+
+
+### Hooks Utilizados
+
+- `dps_base_after_save_appointment` - Gera link de pagamento
+- `dps_agenda_whatsapp_message` - Injeta link em mensagens
+- `admin_init` - Registra configurações
+- `admin_menu` - Adiciona página de settings
+- `admin_enqueue_scripts` - Enfileira assets
+- `init` - Processa webhooks
+
+
+### Integração com Finance Add-on
+
+Trabalha com tabela `wp_dps_transacoes` do Finance Add-on. Degrada graciosamente se tabela não disponível.
+
+**Fluxo:**
+1. Agendamento finalizado → gera link de pagamento
+2. Cliente paga via MercadoPago
+3. Webhook recebido → valida credenciais
+4. Marca transação como paga em `wp_dps_transacoes`
+5. Dispara hook `dps_finance_booking_paid` (Loyalty integra aqui)
+
+
+## 📝 REGISTRATION ADD-ON
+
+### Overview
+
+Formulário multi-etapa de registro de clientes e pets com validação avançada (CPF, duplicatas, reCAPTCHA v3, honeypot), confirmação por email com tokens de 48h, lembretes automáticos, integração com Google Maps API para endereços, e REST API pública com autenticação por chave para integrações externas.
 
 **Diretório:** `plugins/desi-pet-shower-registration/`
 
 **Arquivo principal:** `desi-pet-shower-registration-addon.php`
 
-*Para documentação detalhada, consulte o arquivo fonte do add-on.*
+**Versão:** 1.0.0
 
 
-### Stock Add-on
+### Funções Globais
 
-**Descrição:** Controle de estoque de produtos
+#### 📦 dps_registration_check_base_plugin()
+
+**Função Global** | **Desde:** 1.0.0
+
+Verifica se o plugin base DPS está ativo; exibe aviso administrativo se ausente.
+
+**Assinatura:**
+
+```php
+dps_registration_check_base_plugin()
+```
+
+**Retorno:** `bool` True se plugin base existe.
+
+---
+
+#### 📦 dps_registration_load_textdomain()
+
+**Função Global** | **Desde:** 1.0.0
+
+Carrega domínio de tradução do plugin para localização.
+
+**Assinatura:**
+
+```php
+dps_registration_load_textdomain()
+```
+
+**Retorno:** `void`
+
+
+### DPS_Registration_Addon
+
+Classe principal gerenciando formulário de registro de clientes/pets, confirmação por email, API endpoints e configurações.
+
+**Arquivo:** `plugins/desi-pet-shower-registration/desi-pet-shower-registration-addon.php`
+
+**Padrão:** Singleton - use `DPS_Registration_Addon::get_instance()`
+
+**Métodos públicos:** 20+
+
+#### 🔧 get_instance()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Retorna instância singleton do add-on.
+
+**Assinatura:**
+
+```php
+DPS_Registration_Addon::get_instance()
+```
+
+**Retorno:** `DPS_Registration_Addon` Instância singleton.
+
+---
+
+#### 🔧 deactivate()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Limpeza na desativação do plugin.
+
+**Assinatura:**
+
+```php
+DPS_Registration_Addon::deactivate()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Limpa eventos cron agendados de lembretes de confirmação.
+
+---
+
+#### 🎯 activate()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Cria página de registro na ativação do plugin.
+
+**Assinatura:**
+
+```php
+$addon->activate()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Cria página "Cadastro de Clientes e Pets" com shortcode `[dps_registration_form]` se não existir.
+
+---
+
+#### 🎯 register_settings()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Registra configurações WordPress para configuração do plugin.
+
+**Assinatura:**
+
+```php
+$addon->register_settings()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Registra settings para Google Maps API, reCAPTCHA, templates de email, e configuração de API com callbacks de sanitização.
+
+---
+
+#### 🎯 render_settings_page()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Renderiza página de configurações no admin.
+
+**Assinatura:**
+
+```php
+$addon->render_settings_page()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Exibe formulários de configuração para Google Maps API, reCAPTCHA, email, API, e seção de teste de email.
+
+---
+
+#### 🎯 render_pending_clients_page()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Renderiza lista de confirmações de clientes pendentes.
+
+**Assinatura:**
+
+```php
+$addon->render_pending_clients_page()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Exibe tabela paginada de clientes com emails não confirmados, pesquisável por nome/telefone.
+
+---
+
+#### 🎯 register_rest_routes()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Registra endpoint REST API para registro.
+
+**Assinatura:**
+
+```php
+$addon->register_rest_routes()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Registra endpoint `POST /dps/v1/register` com handlers de permissão e callback.
+
+---
+
+#### 🎯 rest_register_permission_check()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+⚠️ **Segurança** - Valida chave API para endpoint REST de registro.
+
+**Assinatura:**
+
+```php
+$addon->rest_register_permission_check($request)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$request` | `WP_REST_Request` | Objeto da requisição |
+
+**Retorno:** `bool|WP_Error` True ou WP_Error.
+
+**Descrição:** Verifica status de API habilitada e valida hash da chave API fornecida.
+
+---
+
+#### 🎯 handle_rest_register()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Processa registro de cliente via REST API.
+
+**Assinatura:**
+
+```php
+$addon->handle_rest_register($request)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$request` | `WP_REST_Request` | Objeto da requisição |
+
+**Retorno:** `WP_REST_Response|WP_Error` Resposta de sucesso com IDs ou erro.
+
+**Descrição:** Valida rate limits, processa dados JSON de registro, cria cliente/pets, envia emails.
+
+---
+
+#### 🎯 maybe_handle_registration()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Processa submissão de formulário do frontend.
+
+**Assinatura:**
+
+```php
+$addon->maybe_handle_registration()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Valida nonce, honeypot, rate limit, reCAPTCHA, CPF/telefone/email. Cria registros de cliente e pet. Trata duplicatas e opções de admin.
+
+---
+
+#### 🎯 maybe_handle_email_confirmation()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Processa confirmação de email via token na URL.
+
+**Assinatura:**
+
+```php
+$addon->maybe_handle_email_confirmation()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Valida token (expiração de 48h), confirma email, ativa registro de cliente, redireciona em sucesso.
+
+---
+
+#### 🎯 render_registration_form()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Renderiza shortcode de formulário de registro multi-etapa.
+
+**Assinatura:**
+
+```php
+$addon->render_registration_form()
+```
+
+**Retorno:** `string` HTML do formulário.
+
+**Descrição:** Exibe formulário de 3 etapas (dados do cliente → pets → preferências de produtos) com template JavaScript para campos dinâmicos de pets. Mostra mensagens de sucesso quando aplicável.
+
+---
+
+#### 🎯 send_confirmation_reminders()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Envia emails de lembrete para clientes não confirmados após 24h.
+
+**Assinatura:**
+
+```php
+$addon->send_confirmation_reminders()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Processa clientes pendentes em lote, envia lembretes via WhatsApp/email usando DPS_Communications_API.
+
+---
+
+#### 🎯 get_pet_fieldset_html()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Gera HTML para um único fieldset de pet.
+
+**Assinatura:**
+
+```php
+$addon->get_pet_fieldset_html($index)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$index` | `int` | Número do pet (1, 2, 3, etc.) |
+
+**Retorno:** `string` HTML do fieldset.
+
+**Descrição:** Retorna fieldset com inputs para nome do pet, espécie, raça, tamanho, peso, pelagem, cor, data de nascimento, sexo, notas de cuidado, flag de agressividade.
+
+
+### REST API
+
+#### POST /dps/v1/register
+
+**Autenticação:** Header `X-DPS-Registration-Key` (hash SHA-256)
+
+**Body (JSON):**
+
+```json
+{
+  "client_name": "João Silva",
+  "client_phone": "11987654321",
+  "client_email": "joao@example.com",
+  "client_cpf": "12345678900",
+  "pets": [
+    {
+      "name": "Rex",
+      "species": "Cachorro",
+      "breed": "Labrador"
+    }
+  ]
+}
+```
+
+**Resposta de Sucesso (200):**
+
+```json
+{
+  "success": true,
+  "client_id": 123,
+  "pets_created": 1
+}
+```
+
+**Erros:**
+- 401: API desabilitada ou chave inválida
+- 429: Rate limit excedido
+- 400: Validação falhou
+
+
+### Shortcode
+
+#### [dps_registration_form]
+
+Exibe formulário multi-etapa de registro com todas as validações e estilização.
+
+**Uso:**
+
+```
+[dps_registration_form]
+```
+
+
+### Constantes
+
+- `RECAPTCHA_ACTION = 'dps_registration'` - Nome da ação para reCAPTCHA v3
+- `TOKEN_EXPIRATION_SECONDS = 172800` - Validade do token de confirmação de email (48 horas)
+- `CONFIRMATION_REMINDER_CRON = 'dps_registration_confirmation_reminder'` - Nome do hook cron
+
+
+### Hooks Disparados
+
+- `dps_registration_after_client_created` - Disparado após criação de cliente/pet
+
+
+## 📦 STOCK ADD-ON
+
+### Overview
+
+Sistema de controle de inventário de insumos com dedução automática em agendamentos finalizados. Fornece CPT para itens de estoque, rastreamento de quantidades mínimas, alertas de estoque crítico e interface integrada ao painel principal do DPS.
 
 **Diretório:** `plugins/desi-pet-shower-stock/`
 
 **Arquivo principal:** `desi-pet-shower-stock.php`
 
-*Para documentação detalhada, consulte o arquivo fonte do add-on.*
+**Versão:** 1.2.0
 
 
-### Subscription Add-on
+### Funções Globais
 
-**Descrição:** Sistema de assinaturas e planos
+#### 📦 dps_stock_check_base_plugin()
+
+**Função Global** | **Desde:** 1.0.0
+
+Verifica se o plugin base DPS está ativo antes de carregar o add-on.
+
+**Assinatura:**
+
+```php
+dps_stock_check_base_plugin()
+```
+
+**Retorno:** `bool` True se plugin base existe.
+
+**Descrição:** Exibe aviso administrativo e retorna false se classe DPS_Base_Plugin não existe.
+
+---
+
+#### 📦 dps_stock_load_textdomain()
+
+**Função Global** | **Desde:** 1.0.0
+
+Carrega domínio de texto para traduções do Stock add-on.
+
+**Assinatura:**
+
+```php
+dps_stock_load_textdomain()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Carrega traduções do diretório languages para domínio 'dps-stock-addon'.
+
+---
+
+#### 📦 dps_stock_init_addon()
+
+**Função Global** | **Desde:** 1.0.0
+
+Inicializa o Stock add-on após disparo do hook init.
+
+**Assinatura:**
+
+```php
+dps_stock_init_addon()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Instancia classe DPS_Stock_Addon se existir; roda no hook init com prioridade 5.
+
+
+### DPS_Stock_Addon
+
+Classe principal gerenciando sistema de inventário, registro de CPT, integração de UI e dedução de estoque.
+
+**Arquivo:** `plugins/desi-pet-shower-stock/desi-pet-shower-stock.php`
+
+**Métodos públicos:** 11
+
+#### 🎯 register_stock_cpt()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Registra custom post type para itens de estoque.
+
+**Assinatura:**
+
+```php
+$addon->register_stock_cpt()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Registra CPT usando `DPS_CPT_Helper` para itens de estoque.
+
+---
+
+#### 🎯 register_meta_boxes()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Adiciona meta box 'dps_stock_details' ao CPT de estoque para edição.
+
+**Assinatura:**
+
+```php
+$addon->register_meta_boxes()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 render_stock_metabox()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Renderiza UI da metabox com campos de unidade, quantidade e quantidade mínima.
+
+**Assinatura:**
+
+```php
+$addon->render_stock_metabox($post)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$post` | `WP_Post` | Post do item de estoque |
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 save_stock_meta()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Salva unidade, quantidade e valores mínimos em post meta com validação.
+
+**Assinatura:**
+
+```php
+$addon->save_stock_meta($post_id, $post, $update)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$post_id` | `int` | ID do post |
+| `$post` | `WP_Post` | Objeto do post |
+| `$update` | `bool` | Se é atualização |
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 can_access_stock()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Verifica se usuário atual tem capability de gestão de estoque ou é admin.
+
+**Assinatura:**
+
+```php
+$addon->can_access_stock()
+```
+
+**Retorno:** `bool` True se tem permissão.
+
+---
+
+#### 🎯 add_stock_tab()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Adiciona aba "Estoque" à navegação do dashboard principal.
+
+**Assinatura:**
+
+```php
+$addon->add_stock_tab($visitor_only)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$visitor_only` | `bool` | Se em modo visitante |
+
+**Retorno:** `void`
+
+**Descrição:** Pula se em modo visitante.
+
+---
+
+#### 🎯 add_stock_section()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Renderiza seção de gestão de estoque no dashboard principal.
+
+**Assinatura:**
+
+```php
+$addon->add_stock_section($visitor_only)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$visitor_only` | `bool` | Se em modo visitante |
+
+**Retorno:** `void`
+
+**Descrição:** Pula se em modo visitante.
+
+---
+
+#### 🎯 render_stock_page()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Retorna HTML completo para página de inventário de estoque.
+
+**Assinatura:**
+
+```php
+$addon->render_stock_page()
+```
+
+**Retorno:** `string` HTML da página.
+
+**Descrição:** Retorna página com estatísticas, alertas e tabela paginada de itens.
+
+---
+
+#### 🎯 maybe_handle_appointment_completion()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Deduz automaticamente estoque quando agendamento é finalizado.
+
+**Assinatura:**
+
+```php
+$addon->maybe_handle_appointment_completion($appointment_id, $appointment_type)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$appointment_id` | `int` | ID do agendamento |
+| `$appointment_type` | `string` | Tipo do agendamento |
+
+**Retorno:** `void`
+
+**Descrição:** Deduz estoque quando status se torna 'finalizado' ou 'finalizado_pago'.
+
+---
+
+#### 🔧 activate()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Executa na ativação do plugin.
+
+**Assinatura:**
+
+```php
+DPS_Stock_Addon::activate()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Garante que roles tenham capabilities, registra CPT, faz flush de rewrite rules.
+
+---
+
+#### 🔧 ensure_roles_have_capability()
+
+**Método Estático** | **Desde:** 1.0.0
+
+Concede capability 'dps_manage_stock' para roles administrator e dps_reception.
+
+**Assinatura:**
+
+```php
+DPS_Stock_Addon::ensure_roles_have_capability()
+```
+
+**Retorno:** `void`
+
+
+### Constantes
+
+- `CPT = 'dps_stock_item'` - Custom post type para itens de estoque
+- `ALERT_OPTION = 'dps_stock_alerts'` - Chave de option WordPress para alertas críticos
+- `CAPABILITY = 'dps_manage_stock'` - Capability customizada para gestão de estoque
+
+
+### Pontos de Integração
+
+**Hooks WordPress Utilizados:**
+- `dps_base_nav_tabs_after_history` - Adiciona aba de estoque à UI
+- `dps_base_sections_after_history` - Adiciona seção de estoque à UI
+- `dps_base_after_save_appointment` - Dispara dedução de estoque na finalização de agendamento
+
+
+## 🔄 SUBSCRIPTION ADD-ON
+
+### Overview
+
+Sistema completo de assinaturas e planos recorrentes com geração automática de agendamentos, sincronização financeira, gerenciamento de status de pagamento e renovação manual. Suporta múltiplos ciclos de cobrança e integração com gateway de pagamento via hooks.
 
 **Diretório:** `plugins/desi-pet-shower-subscription/`
 
 **Arquivo principal:** `desi-pet-shower-subscription.php`
 
-*Para documentação detalhada, consulte o arquivo fonte do add-on.*
+**Versão:** 1.0.0
+
+
+### Funções Globais
+
+#### 📦 dps_subscription_check_base_plugin()
+
+**Função Global** | **Desde:** 1.0.0
+
+Verifica se o plugin base DPS está ativo.
+
+**Assinatura:**
+
+```php
+dps_subscription_check_base_plugin()
+```
+
+**Retorno:** `bool` True se plugin base existe.
+
+**Descrição:** Verifica se classe DPS_Base_Plugin existe; exibe aviso administrativo e retorna false se ausente.
+
+---
+
+#### 📦 dps_subscription_load_textdomain()
+
+**Função Global** | **Desde:** 1.0.0
+
+Carrega arquivos de tradução para o subscription add-on.
+
+**Assinatura:**
+
+```php
+dps_subscription_load_textdomain()
+```
+
+**Retorno:** `bool` Sucesso do carregamento.
+
+**Descrição:** Registra domínio de texto 'dps-subscription-addon' com prioridade 1 (inicialização precoce).
+
+
+### DPS_Subscription_Addon
+
+Classe principal de implementação do add-on de assinaturas.
+
+**Arquivo:** `plugins/desi-pet-shower-subscription/dps_subscription/desi-pet-shower-subscription-addon.php`
+
+**Métodos públicos:** 8
+
+#### 🎯 enqueue_assets()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Enfileira assets CSS/JS e localiza strings i18n para UI de gestão de assinaturas.
+
+**Assinatura:**
+
+```php
+$addon->enqueue_assets()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 register_subscription_cpt()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Registra custom post type 'dps_subscription' para armazenar dados de assinaturas.
+
+**Assinatura:**
+
+```php
+$addon->register_subscription_cpt()
+```
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 add_subscriptions_tab()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Adiciona aba de navegação "Assinaturas" à UI do plugin base.
+
+**Assinatura:**
+
+```php
+$addon->add_subscriptions_tab($visitor_only)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$visitor_only` | `bool` | Se true, oculta aba de visitantes |
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 add_subscriptions_section()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Renderiza conteúdo da seção de assinaturas na UI do plugin base.
+
+**Assinatura:**
+
+```php
+$addon->add_subscriptions_section($visitor_only)
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$visitor_only` | `bool` | Se true, oculta seção de visitantes |
+
+**Retorno:** `void`
+
+---
+
+#### 🎯 maybe_handle_subscription_request()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Processa todas as ações de assinatura: save, cancel, restore, delete, renew e atualizações de status de pagamento (com validação de nonce).
+
+**Assinatura:**
+
+```php
+$addon->maybe_handle_subscription_request()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Roteador central para operações de assinatura.
+
+---
+
+#### 🎯 handle_subscription_payment_status()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Atualiza status de pagamento de assinatura desde gateway de pagamento externo; sincroniza com módulo financeiro.
+
+**Assinatura:**
+
+```php
+$addon->handle_subscription_payment_status($sub_id, $cycle_key = '', $payment_status = '')
+```
+
+**Parâmetros:**
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `$sub_id` | `int` | ID da assinatura |
+| `$cycle_key` | `string` | Chave do ciclo (formato Y-m) |
+| `$payment_status` | `string` | Status: paid\|failed\|pending |
+
+**Retorno:** `void`
+
+**Descrição:** Hook de integração: `dps_subscription_payment_status`
+
+---
+
+#### 🎯 maybe_sync_finance_on_save()
+
+**Método de Instância** | **Desde:** 1.0.0
+
+Sincroniza registros financeiros de assinatura após operações de salvamento.
+
+**Assinatura:**
+
+```php
+$addon->maybe_sync_finance_on_save()
+```
+
+**Retorno:** `void`
+
+**Descrição:** Método de compatibilidade para sincronização financeira.
+
+
+### Hooks Registrados
+
+**Action Hooks:**
+- `dps_base_nav_tabs_after_pets` → `add_subscriptions_tab`
+- `dps_base_sections_after_pets` → `add_subscriptions_section`
+- `wp_enqueue_scripts` / `admin_enqueue_scripts` → `enqueue_assets`
+- `dps_subscription_payment_status` → `handle_subscription_payment_status` (integração com gateway de pagamento)
+
+
+### Integração com Payment Gateway
+
+Para integrar gateway de pagamento, dispare o hook:
+
+```php
+do_action('dps_subscription_payment_status', $subscription_id, $cycle_key, $payment_status);
+```
+
+**Exemplo:**
+
+```php
+// Quando webhook do gateway recebe confirmação de pagamento
+do_action('dps_subscription_payment_status', 123, '2024-01', 'paid');
+```
 
 
 ---
