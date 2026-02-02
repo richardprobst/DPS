@@ -644,11 +644,13 @@ final class DPS_Tosa_Consent {
 
         $consent_page = get_page_by_path( 'consentimento-tosa-maquina' );
         if ( $consent_page instanceof WP_Post && 'publish' === $consent_page->post_status ) {
-            // Se a página existe mas não tem o shortcode, adiciona
+            // Se a página existe mas não tem o shortcode, adiciona ao final do conteúdo existente
             if ( ! has_shortcode( $consent_page->post_content, 'dps_tosa_consent' ) ) {
+                $new_content = trim( $consent_page->post_content );
+                $new_content = $new_content ? $new_content . "\n\n[dps_tosa_consent]" : '[dps_tosa_consent]';
                 wp_update_post( [
                     'ID'           => $consent_page->ID,
-                    'post_content' => '[dps_tosa_consent]',
+                    'post_content' => $new_content,
                 ] );
             }
             $permalink = get_permalink( $consent_page->ID );
@@ -694,16 +696,26 @@ final class DPS_Tosa_Consent {
         // Verifica se já existe uma página pelo slug
         $existing_by_slug = get_page_by_path( 'consentimento-tosa-maquina' );
         if ( $existing_by_slug instanceof WP_Post && 'publish' === $existing_by_slug->post_status ) {
-            // Garante que tem o shortcode
+            // Garante que tem o shortcode - adiciona ao final do conteúdo existente
             if ( ! has_shortcode( $existing_by_slug->post_content, 'dps_tosa_consent' ) ) {
+                $new_content = trim( $existing_by_slug->post_content );
+                $new_content = $new_content ? $new_content . "\n\n[dps_tosa_consent]" : '[dps_tosa_consent]';
                 wp_update_post( [
                     'ID'           => $existing_by_slug->ID,
-                    'post_content' => '[dps_tosa_consent]',
+                    'post_content' => $new_content,
                 ] );
             }
             update_option( 'dps_tosa_consent_page_id', $existing_by_slug->ID );
             return $existing_by_slug->ID;
         }
+
+        // Obtém o primeiro usuário administrador para usar como autor
+        $admin_users = get_users( [
+            'role'   => 'administrator',
+            'number' => 1,
+            'fields' => 'ID',
+        ] );
+        $author_id = ! empty( $admin_users ) ? (int) $admin_users[0] : 1;
 
         // Cria nova página
         $page_id = wp_insert_post( [
@@ -712,7 +724,7 @@ final class DPS_Tosa_Consent {
             'post_title'   => __( 'Consentimento de Tosa', 'desi-pet-shower' ),
             'post_name'    => 'consentimento-tosa-maquina',
             'post_content' => '[dps_tosa_consent]',
-            'post_author'  => 1,
+            'post_author'  => $author_id,
             'meta_input'   => [
                 '_wp_page_template' => 'default',
             ],
