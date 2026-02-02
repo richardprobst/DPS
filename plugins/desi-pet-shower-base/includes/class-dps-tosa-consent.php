@@ -71,14 +71,11 @@ final class DPS_Tosa_Consent {
 
         global $post;
         if ( $post && has_shortcode( $post->post_content, 'dps_tosa_consent' ) ) {
-            $css_file    = DPS_BASE_DIR . 'assets/css/tosa-consent-form.css';
-            $css_version = file_exists( $css_file ) ? (string) filemtime( $css_file ) : DPS_BASE_VERSION;
-            
             wp_enqueue_style(
                 'dps-tosa-consent-form',
                 DPS_BASE_URL . 'assets/css/tosa-consent-form.css',
                 [],
-                $css_version
+                $this->get_css_version()
             );
         }
     }
@@ -598,18 +595,25 @@ final class DPS_Tosa_Consent {
         
         $enqueued = true;
         
-        $css_file    = DPS_BASE_DIR . 'assets/css/tosa-consent-form.css';
-        $css_version = file_exists( $css_file ) ? (string) filemtime( $css_file ) : DPS_BASE_VERSION;
-        
         // Enfileira se ainda não foi registrado
         if ( ! wp_style_is( 'dps-tosa-consent-form', 'enqueued' ) ) {
             wp_enqueue_style(
                 'dps-tosa-consent-form',
                 DPS_BASE_URL . 'assets/css/tosa-consent-form.css',
                 [],
-                $css_version
+                $this->get_css_version()
             );
         }
+    }
+
+    /**
+     * Obtém versão do arquivo CSS baseada no timestamp de modificação.
+     *
+     * @return string|int Versão do arquivo ou versão base do plugin.
+     */
+    private function get_css_version() {
+        $css_file = DPS_BASE_DIR . 'assets/css/tosa-consent-form.css';
+        return file_exists( $css_file ) ? filemtime( $css_file ) : DPS_BASE_VERSION;
     }
 
     /**
