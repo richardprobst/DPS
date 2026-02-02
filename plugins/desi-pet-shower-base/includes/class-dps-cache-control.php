@@ -70,6 +70,10 @@ class DPS_Cache_Control {
      * Registra hooks para detecção de páginas DPS e envio de headers.
      */
     public static function init() {
+        // Hook muito cedo para detectar URLs com parâmetros de consentimento
+        // Isso acontece antes de template_redirect para garantir que caches agressivos sejam desabilitados
+        add_action( 'wp', [ __CLASS__, 'maybe_disable_cache_by_url_params' ], 1 );
+        
         // Hook antes do envio de headers para detectar páginas com shortcodes DPS
         add_action( 'template_redirect', [ __CLASS__, 'maybe_disable_page_cache' ], 1 );
         
@@ -78,6 +82,39 @@ class DPS_Cache_Control {
         
         // Para páginas admin, sempre desabilitar cache
         add_action( 'admin_init', [ __CLASS__, 'disable_admin_cache' ], 1 );
+    }
+
+    /**
+     * Desabilita cache baseado em parâmetros de URL específicos do DPS.
+     *
+     * Esta função é executada muito cedo (hook 'wp') para capturar requisições
+     * com parâmetros dinâmicos como client_id e token antes que caches agressivos
+     * (ex.: page builders, LiteSpeed Cache, WP Rocket) sirvam conteúdo cacheado.
+     *
+     * @since 1.2.1
+     */
+    public static function maybe_disable_cache_by_url_params() {
+        // Ignora requisições de admin, AJAX, REST e cron
+        if ( is_admin() || wp_doing_ajax() || wp_doing_cron() ) {
+            return;
+        }
+
+        if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+            return;
+        }
+
+        // Detecta URLs de consentimento de tosa (parâmetros client_id + token)
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para detecção de página
+        $has_consent_params = isset( $_GET['client_id'] ) && isset( $_GET['token'] );
+
+        if ( $has_consent_params ) {
+            self::disable_cache();
+            
+            // Envia headers imediatamente se possível
+            if ( ! headers_sent() ) {
+                self::send_nocache_headers();
+            }
+        }
     }
 
     /**
@@ -106,6 +143,9 @@ class DPS_Cache_Control {
     /**
      * Verifica se o conteúdo da página atual contém shortcodes do DPS.
      *
+     * Além do conteúdo principal do post, também verifica metadados comuns
+     * de page builders como Elementor, YooTheme e Beaver Builder.
+     *
      * @return bool True se a página contém shortcodes DPS.
      */
     private static function page_has_dps_shortcode() {
@@ -118,10 +158,31 @@ class DPS_Cache_Control {
 
         $content = $post->post_content;
 
-        // Verifica cada shortcode DPS
+        // Verifica cada shortcode DPS no conteúdo principal
         foreach ( self::$dps_shortcodes as $shortcode ) {
             if ( has_shortcode( $content, $shortcode ) ) {
                 return true;
+            }
+        }
+
+        // Verifica em metadados de page builders populares
+        // Elementor armazena dados em _elementor_data
+        $elementor_data = get_post_meta( $post->ID, '_elementor_data', true );
+        if ( $elementor_data && is_string( $elementor_data ) ) {
+            foreach ( self::$dps_shortcodes as $shortcode ) {
+                if ( strpos( $elementor_data, '[' . $shortcode ) !== false ) {
+                    return true;
+                }
+            }
+        }
+
+        // YooTheme armazena dados em _yootheme_source ou builder JSON
+        $yootheme_source = get_post_meta( $post->ID, '_yootheme_source', true );
+        if ( $yootheme_source && is_string( $yootheme_source ) ) {
+            foreach ( self::$dps_shortcodes as $shortcode ) {
+                if ( strpos( $yootheme_source, $shortcode ) !== false ) {
+                    return true;
+                }
             }
         }
 
