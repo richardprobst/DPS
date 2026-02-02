@@ -545,7 +545,7 @@ final class DPS_Tosa_Consent {
         }
 
         // Check if this is a redirect after successful consent submission
-        $consent_saved = isset( $_GET['consent_saved'] ) && '1' === $_GET['consent_saved'];
+        $consent_saved = isset( $_GET['consent_saved'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['consent_saved'] ) );
         if ( $consent_saved ) {
             return $this->render_success_page();
         }
@@ -624,7 +624,7 @@ final class DPS_Tosa_Consent {
 
         $html  = '<div class="dps-consent-success-page">';
         $html .= '<div class="dps-consent-container">';
-        $html .= '<div class="dps-consent-success-icon" aria-hidden="true">✅</div>';
+        $html .= '<div class="dps-consent-success-icon" role="img" aria-label="' . esc_attr__( 'Sucesso', 'desi-pet-shower' ) . '">✅</div>';
         $html .= '<h1 class="dps-consent-title">' . esc_html__( 'Consentimento Registrado', 'desi-pet-shower' ) . '</h1>';
 
         if ( $messages_html ) {
