@@ -176,41 +176,44 @@ class DPS_Cache_Control {
 
         // Pré-constrói padrões de busca para shortcodes (otimização para loops)
         // Inclui espaço ou ] após o nome para evitar falsos positivos (ex: [dps_tosa vs [dps_tosa_extra])
-        $shortcode_patterns_space = [];
-        $shortcode_patterns_close = [];
+        // Nota: shortcodes DPS são nomes seguros sem caracteres especiais, então string literal é segura para strpos
+        $shortcode_patterns = [];
         foreach ( self::$dps_shortcodes as $shortcode ) {
-            $shortcode_patterns_space[] = '[' . $shortcode . ' ';
-            $shortcode_patterns_close[] = '[' . $shortcode . ']';
+            $shortcode_patterns[] = '[' . $shortcode . ' ';
+            $shortcode_patterns[] = '[' . $shortcode . ']';
         }
 
         // Verifica em metadados de page builders populares
         // Elementor armazena dados em _elementor_data (formato JSON)
         $elementor_data = get_post_meta( $post->ID, '_elementor_data', true );
-        if ( $elementor_data && is_string( $elementor_data ) ) {
-            foreach ( $shortcode_patterns_space as $pattern ) {
-                if ( strpos( $elementor_data, $pattern ) !== false ) {
-                    return true;
-                }
-            }
-            foreach ( $shortcode_patterns_close as $pattern ) {
-                if ( strpos( $elementor_data, $pattern ) !== false ) {
-                    return true;
-                }
-            }
+        if ( self::metadata_contains_shortcode( $elementor_data, $shortcode_patterns ) ) {
+            return true;
         }
 
         // YooTheme armazena dados em _yootheme_source (formato JSON)
         $yootheme_source = get_post_meta( $post->ID, '_yootheme_source', true );
-        if ( $yootheme_source && is_string( $yootheme_source ) ) {
-            foreach ( $shortcode_patterns_space as $pattern ) {
-                if ( strpos( $yootheme_source, $pattern ) !== false ) {
-                    return true;
-                }
-            }
-            foreach ( $shortcode_patterns_close as $pattern ) {
-                if ( strpos( $yootheme_source, $pattern ) !== false ) {
-                    return true;
-                }
+        if ( self::metadata_contains_shortcode( $yootheme_source, $shortcode_patterns ) ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Verifica se uma string de metadados contém padrões de shortcode.
+     *
+     * @param mixed $metadata String de metadados ou valor vazio.
+     * @param array $patterns Padrões de shortcode para buscar.
+     * @return bool True se algum padrão foi encontrado.
+     */
+    private static function metadata_contains_shortcode( $metadata, array $patterns ) {
+        if ( ! $metadata || ! is_string( $metadata ) ) {
+            return false;
+        }
+
+        foreach ( $patterns as $pattern ) {
+            if ( strpos( $metadata, $pattern ) !== false ) {
+                return true;
             }
         }
 
