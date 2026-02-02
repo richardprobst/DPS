@@ -6,7 +6,7 @@ Este diretório contém a documentação detalhada de UX, layout, refatoração 
 
 > **🌟 [GUIA_SISTEMA_DPS.md](GUIA_SISTEMA_DPS.md)** - Guia completo de apresentação, instalação, configuração e uso do sistema. Documento principal para usuários e administradores.
 
-> **🔧 Novo! [FUNCTIONS_REFERENCE.md](FUNCTIONS_REFERENCE.md)** - Referência completa de TODAS as funções e métodos do DPS. Guia definitivo para desenvolvedores trabalhando com o sistema (2.284 linhas, 80+ métodos documentados).
+> **🔧 [FUNCTIONS_REFERENCE.md](FUNCTIONS_REFERENCE.md)** - Referência completa de TODAS as funções e métodos do DPS. Guia definitivo para desenvolvedores trabalhando com o sistema (8.233 linhas, 385+ funções/métodos documentados, cobrindo plugin base + 16 add-ons).
 
 O guia inclui:
 - Apresentação do sistema e funcionalidades
