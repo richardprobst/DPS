@@ -105,14 +105,15 @@ class DPS_Cache_Control {
         }
 
         // Detecta URLs de consentimento de tosa (parâmetros client_id + token)
-        // Validação básica: client_id deve ser numérico e token deve ter formato alfanumérico
+        // Sanitização e validação básica para prevenir abuso de cache bypass
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para detecção de página
-        $client_id = isset( $_GET['client_id'] ) ? $_GET['client_id'] : '';
-        $token     = isset( $_GET['token'] ) ? $_GET['token'] : '';
+        $raw_client_id = isset( $_GET['client_id'] ) ? sanitize_text_field( wp_unslash( $_GET['client_id'] ) ) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para detecção de página
+        $raw_token     = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : '';
         
-        // client_id deve ser numérico e token deve ter formato hexadecimal (64 caracteres)
-        $is_valid_client_id = ctype_digit( (string) $client_id ) && (int) $client_id > 0;
-        $is_valid_token     = ! empty( $token ) && preg_match( '/^[a-f0-9]{64}$/i', $token );
+        // client_id deve ser numérico positivo e token deve ter formato hexadecimal (64 caracteres)
+        $is_valid_client_id = ctype_digit( $raw_client_id ) && absint( $raw_client_id ) > 0;
+        $is_valid_token     = ! empty( $raw_token ) && preg_match( '/^[a-f0-9]{64}$/i', $raw_token );
 
         if ( $is_valid_client_id && $is_valid_token ) {
             self::disable_cache();
@@ -172,12 +173,18 @@ class DPS_Cache_Control {
             }
         }
 
+        // Pré-constrói padrões de busca para shortcodes (otimização para loops)
+        $shortcode_patterns = [];
+        foreach ( self::$dps_shortcodes as $shortcode ) {
+            $shortcode_patterns[] = '[' . $shortcode;
+        }
+
         // Verifica em metadados de page builders populares
         // Elementor armazena dados em _elementor_data (formato JSON)
         $elementor_data = get_post_meta( $post->ID, '_elementor_data', true );
         if ( $elementor_data && is_string( $elementor_data ) ) {
-            foreach ( self::$dps_shortcodes as $shortcode ) {
-                if ( strpos( $elementor_data, '[' . $shortcode ) !== false ) {
+            foreach ( $shortcode_patterns as $pattern ) {
+                if ( strpos( $elementor_data, $pattern ) !== false ) {
                     return true;
                 }
             }
@@ -186,8 +193,8 @@ class DPS_Cache_Control {
         // YooTheme armazena dados em _yootheme_source (formato JSON)
         $yootheme_source = get_post_meta( $post->ID, '_yootheme_source', true );
         if ( $yootheme_source && is_string( $yootheme_source ) ) {
-            foreach ( self::$dps_shortcodes as $shortcode ) {
-                if ( strpos( $yootheme_source, $shortcode ) !== false ) {
+            foreach ( $shortcode_patterns as $pattern ) {
+                if ( strpos( $yootheme_source, $pattern ) !== false ) {
                     return true;
                 }
             }
