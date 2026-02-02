@@ -234,6 +234,19 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Formulário de Consentimento de Tosa não exibindo versão atualizada (Base v1.2.2)**
+
+- **Template do tema sobrescrevendo versão do plugin**: O sistema de templates permite que temas sobrescrevam arquivos via `dps-templates/`. Se o tema tinha uma versão antiga do template `tosa-consent-form.php`, a versão melhorada da PR #518 não era exibida no site, mesmo após o merge.
+- **Solução implementada**: 
+  - Template de consentimento agora força uso da versão do plugin por padrão, garantindo que melhorias sejam imediatamente visíveis.
+  - Novo filtro `dps_allow_consent_template_override` para permitir que temas sobrescrevam quando desejado: `add_filter( 'dps_allow_consent_template_override', '__return_true' );`
+  - Logging de warning quando override do tema é detectado e ignorado, facilitando diagnóstico de problemas.
+- **Melhorias no sistema de templates**:
+  - Novo filtro `dps_use_plugin_template` para forçar uso do template do plugin em qualquer template.
+  - Nova action `dps_template_loaded` disparada quando um template é carregado, útil para debug.
+  - Nova função `dps_get_template_path()` retorna caminho do template sem incluí-lo.
+  - Nova função `dps_is_template_overridden()` verifica se um template está sendo sobrescrito pelo tema.
+
 **Services Add-on - Correção de ativação do catálogo de serviços (v1.6.2)**
 
 - **Hook de ativação movido para arquivo wrapper**: O `register_activation_hook` que popula os 30+ serviços padrão estava incorretamente registrado dentro do construtor da classe `DPS_Services_Addon`, que só era instanciada no hook `init`. Como o WordPress processa hooks de ativação ANTES do hook `init` rodar, o callback nunca era executado, resultando em catálogo vazio mesmo após desativar/reativar o plugin.
