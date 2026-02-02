@@ -469,11 +469,45 @@ final class DPS_Tosa_Consent {
             return;
         }
 
+        // Validar campos obrigatórios de autorização e riscos
+        if ( empty( $_POST['dps_consent_authorize_procedure'] ) ) {
+            DPS_Message_Helper::add_error( __( 'Você precisa autorizar expressamente o procedimento de tosa com máquina.', 'desi-pet-shower' ) );
+            return;
+        }
+
+        if ( empty( $_POST['dps_consent_risk_skin'] ) ) {
+            DPS_Message_Helper::add_error( __( 'Você precisa confirmar ciência sobre os riscos de pele sensível.', 'desi-pet-shower' ) );
+            return;
+        }
+
+        if ( empty( $_POST['dps_consent_risk_knots'] ) ) {
+            DPS_Message_Helper::add_error( __( 'Você precisa autorizar a remoção de nós e confirmar ciência sobre a altura da tosa.', 'desi-pet-shower' ) );
+            return;
+        }
+
+        if ( empty( $_POST['dps_consent_risk_behavior'] ) ) {
+            DPS_Message_Helper::add_error( __( 'Você precisa confirmar ciência sobre os riscos relacionados ao comportamento do pet.', 'desi-pet-shower' ) );
+            return;
+        }
+
+        if ( empty( $_POST['dps_consent_risk_health'] ) ) {
+            DPS_Message_Helper::add_error( __( 'Você precisa confirmar ciência sobre os riscos para pets idosos ou com problemas de saúde.', 'desi-pet-shower' ) );
+            return;
+        }
+
         $signature_name     = isset( $_POST['dps_consent_signature_name'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_consent_signature_name'] ) ) : '';
         $signature_document = isset( $_POST['dps_consent_signature_document'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_consent_signature_document'] ) ) : '';
         $signature_phone    = isset( $_POST['dps_consent_signature_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_consent_signature_phone'] ) ) : '';
         $signature_email    = isset( $_POST['dps_consent_signature_email'] ) ? sanitize_email( wp_unslash( $_POST['dps_consent_signature_email'] ) ) : '';
         $relationship       = isset( $_POST['dps_consent_relationship'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_consent_relationship'] ) ) : '';
+
+        // Novos campos de contato de emergência
+        $vet_name         = isset( $_POST['dps_consent_vet_name'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_consent_vet_name'] ) ) : '';
+        $vet_phone        = isset( $_POST['dps_consent_vet_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_consent_vet_phone'] ) ) : '';
+        $use_store_vet    = ! empty( $_POST['dps_consent_use_store_vet'] ) ? 1 : 0;
+
+        // Campos de riscos aceitos
+        $risk_double_coat = ! empty( $_POST['dps_consent_risk_double_coat'] ) ? 1 : 0;
 
         if ( empty( $signature_name ) ) {
             DPS_Message_Helper::add_error( __( 'Informe o nome completo do responsável.', 'desi-pet-shower' ) );
@@ -493,6 +527,18 @@ final class DPS_Tosa_Consent {
         update_post_meta( $client_id, 'dps_consent_tosa_maquina_signature_phone', $signature_phone );
         update_post_meta( $client_id, 'dps_consent_tosa_maquina_signature_email', $signature_email );
         update_post_meta( $client_id, 'dps_consent_tosa_maquina_relationship', $relationship );
+
+        // Salvar campos de contato de emergência
+        update_post_meta( $client_id, 'dps_consent_tosa_maquina_vet_name', $vet_name );
+        update_post_meta( $client_id, 'dps_consent_tosa_maquina_vet_phone', $vet_phone );
+        update_post_meta( $client_id, 'dps_consent_tosa_maquina_use_store_vet', $use_store_vet );
+
+        // Salvar confirmações de riscos (todos são obrigatórios exceto pelagem dupla)
+        update_post_meta( $client_id, 'dps_consent_tosa_maquina_risk_skin', 1 );
+        update_post_meta( $client_id, 'dps_consent_tosa_maquina_risk_knots', 1 );
+        update_post_meta( $client_id, 'dps_consent_tosa_maquina_risk_behavior', 1 );
+        update_post_meta( $client_id, 'dps_consent_tosa_maquina_risk_health', 1 );
+        update_post_meta( $client_id, 'dps_consent_tosa_maquina_risk_double_coat', $risk_double_coat );
 
         $ip_address = '';
         if ( class_exists( 'DPS_IP_Helper' ) && method_exists( 'DPS_IP_Helper', 'get_ip_with_proxy_support' ) ) {
@@ -514,6 +560,8 @@ final class DPS_Tosa_Consent {
         $this->log_event( 'info', 'Consentimento registrado com sucesso', [
             'client_id'      => $client_id,
             'signature_name' => $signature_name,
+            'vet_name'       => $vet_name,
+            'use_store_vet'  => $use_store_vet,
             'ip'             => $ip_address,
         ] );
 

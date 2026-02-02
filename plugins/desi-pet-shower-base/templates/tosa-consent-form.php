@@ -12,6 +12,7 @@
  * @package DesiPetShower
  * @since 1.1.1
  * @updated 1.2.0 - Melhorias de UX/UI e informações adicionais
+ * @updated 1.2.4 - Adição de campos de riscos específicos e contato de emergência
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -70,6 +71,64 @@ $get_coat_label = function( $coat ) {
     ];
     return $labels[ $coat ] ?? ucfirst( $coat );
 };
+
+// Helper function para calcular idade do pet
+$get_pet_age = function( $birth_date ) {
+    if ( empty( $birth_date ) ) {
+        return null;
+    }
+    $birth = strtotime( $birth_date );
+    if ( ! $birth ) {
+        return null;
+    }
+    $diff = time() - $birth;
+    return floor( $diff / YEAR_IN_SECONDS );
+};
+
+// Helper function para verificar se é pet idoso (7+ anos para cães, 10+ para gatos)
+$is_senior_pet = function( $species, $birth_date ) use ( $get_pet_age ) {
+    $age = $get_pet_age( $birth_date );
+    if ( null === $age ) {
+        return false;
+    }
+    // Cães: 7+ anos é considerado idoso
+    // Gatos: 10+ anos é considerado idoso
+    $senior_threshold = ( 'gato' === strtolower( $species ) ) ? 10 : 7;
+    return $age >= $senior_threshold;
+};
+
+// Verificar se há algum pet idoso ou com observações de saúde
+$has_senior_pets   = false;
+$has_health_notes  = false;
+$has_aggressive    = false;
+$has_double_coat   = false;
+
+if ( ! empty( $pets ) ) {
+    foreach ( $pets as $pet ) {
+        $pet_species = get_post_meta( $pet->ID, 'pet_species', true );
+        $pet_birth   = get_post_meta( $pet->ID, 'pet_birth', true );
+        $pet_care    = get_post_meta( $pet->ID, 'pet_care', true );
+        $pet_coat    = get_post_meta( $pet->ID, 'pet_coat', true );
+        $pet_aggro   = get_post_meta( $pet->ID, 'pet_aggressive', true );
+        
+        if ( $is_senior_pet( $pet_species, $pet_birth ) ) {
+            $has_senior_pets = true;
+        }
+        if ( ! empty( $pet_care ) ) {
+            $has_health_notes = true;
+        }
+        if ( $pet_aggro ) {
+            $has_aggressive = true;
+        }
+        if ( in_array( strtolower( $pet_coat ), [ 'dupla', 'double', 'duplo' ], true ) ) {
+            $has_double_coat = true;
+        }
+    }
+}
+
+// Obter telefone da loja/estabelecimento para emergências
+$store_phone = get_option( 'dps_store_phone', '' );
+$store_emergency_vet = get_option( 'dps_emergency_vet_contact', '' );
 ?>
 
 <div class="dps-consent-page" role="main">
@@ -151,6 +210,42 @@ $get_coat_label = function( $coat ) {
                 </div>
             </section>
 
+            <section class="dps-consent-card dps-consent-card--emergency" aria-labelledby="section-emergencia">
+                <h2 id="section-emergencia">
+                    <span class="dps-section-icon" aria-hidden="true">🏥</span>
+                    <?php echo esc_html__( 'Contato de Emergência', 'desi-pet-shower' ); ?>
+                </h2>
+                <p class="dps-consent-section-desc"><?php echo esc_html__( 'Informe um contato veterinário para emergências durante o atendimento.', 'desi-pet-shower' ); ?></p>
+                
+                <div class="dps-consent-emergency-info">
+                    <div class="dps-alert dps-alert--info" role="note">
+                        <span aria-hidden="true">ℹ️</span>
+                        <span>
+                            <?php
+                            echo esc_html__( 'Em caso de emergência médica durante o procedimento, utilizaremos este contato veterinário para buscar atendimento imediato. Se não houver veterinário disponível, a equipe encaminhará para o atendimento veterinário mais próximo.', 'desi-pet-shower' );
+                            ?>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="dps-consent-grid">
+                    <div class="dps-consent-field">
+                        <label for="dps_consent_vet_name"><?php echo esc_html__( 'Nome do Veterinário/Clínica', 'desi-pet-shower' ); ?> <span class="dps-optional"><?php echo esc_html__( '(opcional)', 'desi-pet-shower' ); ?></span></label>
+                        <input type="text" id="dps_consent_vet_name" name="dps_consent_vet_name" placeholder="<?php echo esc_attr__( 'Ex: Dr. João / Clínica Pet Care', 'desi-pet-shower' ); ?>" autocomplete="off">
+                    </div>
+                    <div class="dps-consent-field">
+                        <label for="dps_consent_vet_phone"><?php echo esc_html__( 'Telefone do Veterinário', 'desi-pet-shower' ); ?> <span class="dps-optional"><?php echo esc_html__( '(opcional)', 'desi-pet-shower' ); ?></span></label>
+                        <input type="tel" id="dps_consent_vet_phone" name="dps_consent_vet_phone" placeholder="(00) 00000-0000" autocomplete="tel">
+                    </div>
+                    <div class="dps-consent-field dps-consent-field--full">
+                        <label class="dps-consent-check dps-consent-check--inline">
+                            <input type="checkbox" name="dps_consent_use_store_vet" value="1">
+                            <span><?php echo esc_html__( 'Autorizo a equipe a utilizar o veterinário de referência do estabelecimento, caso eu não tenha um contato disponível.', 'desi-pet-shower' ); ?></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
             <section class="dps-consent-card" aria-labelledby="section-pets">
                 <h2 id="section-pets">
                     <span class="dps-section-icon" aria-hidden="true">🐾</span>
@@ -160,17 +255,32 @@ $get_coat_label = function( $coat ) {
                 <?php if ( ! empty( $pets ) ) : ?>
                     <div class="dps-consent-pets-grid" role="list">
                         <?php foreach ( $pets as $pet ) : 
-                            $pet_species = get_post_meta( $pet->ID, 'pet_species', true );
-                            $pet_breed   = get_post_meta( $pet->ID, 'pet_breed', true );
-                            $pet_size    = get_post_meta( $pet->ID, 'pet_size', true );
-                            $pet_coat    = get_post_meta( $pet->ID, 'pet_coat', true );
-                            $pet_weight  = get_post_meta( $pet->ID, 'pet_weight', true );
+                            $pet_species    = get_post_meta( $pet->ID, 'pet_species', true );
+                            $pet_breed      = get_post_meta( $pet->ID, 'pet_breed', true );
+                            $pet_size       = get_post_meta( $pet->ID, 'pet_size', true );
+                            $pet_coat       = get_post_meta( $pet->ID, 'pet_coat', true );
+                            $pet_weight     = get_post_meta( $pet->ID, 'pet_weight', true );
+                            $pet_birth      = get_post_meta( $pet->ID, 'pet_birth', true );
+                            $pet_care       = get_post_meta( $pet->ID, 'pet_care', true );
+                            $pet_aggressive = get_post_meta( $pet->ID, 'pet_aggressive', true );
                             $is_double_coat = in_array( strtolower( $pet_coat ), [ 'dupla', 'double', 'duplo' ], true );
+                            $is_senior      = $is_senior_pet( $pet_species, $pet_birth );
+                            $pet_age        = $get_pet_age( $pet_birth );
                         ?>
-                            <div class="dps-consent-pet-card" role="listitem">
+                            <div class="dps-consent-pet-card <?php echo $is_senior ? 'dps-consent-pet-card--senior' : ''; ?>" role="listitem">
                                 <div class="dps-consent-pet-header">
                                     <span class="dps-consent-pet-emoji" aria-hidden="true"><?php echo esc_html( $get_species_emoji( $pet_species ) ); ?></span>
                                     <strong class="dps-consent-pet-name"><?php echo esc_html( $pet->post_title ); ?></strong>
+                                    <?php if ( $is_senior ) : ?>
+                                        <span class="dps-consent-pet-badge dps-consent-pet-badge--senior" title="<?php echo esc_attr__( 'Pet idoso - cuidados especiais', 'desi-pet-shower' ); ?>">
+                                            <?php echo esc_html__( 'Idoso', 'desi-pet-shower' ); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if ( $pet_aggressive ) : ?>
+                                        <span class="dps-consent-pet-badge dps-consent-pet-badge--aggressive" title="<?php echo esc_attr__( 'Possui histórico de agitação/agressividade', 'desi-pet-shower' ); ?>">
+                                            <?php echo esc_html__( 'Atenção', 'desi-pet-shower' ); ?>
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="dps-consent-pet-details">
                                     <?php if ( $pet_species ) : ?>
@@ -178,6 +288,17 @@ $get_coat_label = function( $coat ) {
                                     <?php endif; ?>
                                     <?php if ( $pet_breed ) : ?>
                                         <span class="dps-consent-pet-tag"><?php echo esc_html( $pet_breed ); ?></span>
+                                    <?php endif; ?>
+                                    <?php if ( null !== $pet_age ) : ?>
+                                        <span class="dps-consent-pet-tag <?php echo $is_senior ? 'dps-consent-pet-tag--warning' : ''; ?>">
+                                            <?php
+                                            printf(
+                                                /* translators: %d: idade em anos */
+                                                esc_html( _n( '%d ano', '%d anos', $pet_age, 'desi-pet-shower' ) ),
+                                                $pet_age
+                                            );
+                                            ?>
+                                        </span>
                                     <?php endif; ?>
                                     <?php if ( $pet_size ) : ?>
                                         <span class="dps-consent-pet-tag"><?php echo esc_html__( 'Porte:', 'desi-pet-shower' ); ?> <?php echo esc_html( $get_size_label( $pet_size ) ); ?></span>
@@ -194,6 +315,12 @@ $get_coat_label = function( $coat ) {
                                         <span class="dps-consent-pet-tag"><?php echo esc_html( $pet_weight ); ?> kg</span>
                                     <?php endif; ?>
                                 </div>
+                                <?php if ( ! empty( $pet_care ) ) : ?>
+                                    <div class="dps-consent-pet-notes">
+                                        <span class="dps-consent-pet-notes__icon" aria-hidden="true">📋</span>
+                                        <span class="dps-consent-pet-notes__text"><?php echo esc_html( $pet_care ); ?></span>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -217,47 +344,124 @@ $get_coat_label = function( $coat ) {
             <section class="dps-consent-card dps-consent-card--important" aria-labelledby="section-termos">
                 <h2 id="section-termos">
                     <span class="dps-section-icon" aria-hidden="true">📋</span>
-                    <?php echo esc_html__( 'Termos e Condições do Consentimento', 'desi-pet-shower' ); ?>
+                    <?php echo esc_html__( 'Autorização e Termos de Ciência', 'desi-pet-shower' ); ?>
                 </h2>
                 
                 <div class="dps-consent-terms-intro">
-                    <p><?php echo esc_html__( 'Ao autorizar a tosa com máquina, você declara estar ciente e de acordo com os seguintes termos:', 'desi-pet-shower' ); ?></p>
+                    <p><?php echo esc_html__( 'Para prosseguir com o serviço de tosa com máquina, você precisa autorizar expressamente o procedimento e declarar ciência dos riscos associados.', 'desi-pet-shower' ); ?></p>
+                </div>
+
+                <!-- Autorização do Procedimento -->
+                <div class="dps-consent-authorization-section">
+                    <h3 class="dps-consent-terms-title">
+                        <span aria-hidden="true">✅</span>
+                        <?php echo esc_html__( 'Autorização do Procedimento', 'desi-pet-shower' ); ?>
+                    </h3>
+                    <div class="dps-consent-check-box">
+                        <label class="dps-consent-check dps-consent-check--important">
+                            <input type="checkbox" name="dps_consent_authorize_procedure" value="1" required aria-required="true">
+                            <span>
+                                <strong><?php echo esc_html__( 'Autorizo expressamente', 'desi-pet-shower' ); ?></strong>
+                                <?php
+                                printf(
+                                    /* translators: %s: nome do estabelecimento */
+                                    esc_html__( 'a equipe do %s a utilizar máquina de tosa nos meus pets quando necessário para o bem-estar do animal e realização do serviço contratado.', 'desi-pet-shower' ),
+                                    '<strong>' . esc_html( $site_name ) . '</strong>'
+                                );
+                                ?>
+                            </span>
+                        </label>
+                    </div>
                 </div>
                 
-                <div class="dps-consent-terms-section">
-                    <h3 class="dps-consent-terms-title"><?php echo esc_html__( 'Sobre o Procedimento', 'desi-pet-shower' ); ?></h3>
-                    <ul class="dps-consent-list">
-                        <li><?php echo esc_html__( 'A tosa com máquina pode expor pequenas imperfeições, nódulos, irritações ou sensibilidades já existentes na pele do pet que estavam ocultas pela pelagem.', 'desi-pet-shower' ); ?></li>
-                        <li><?php echo esc_html__( 'Pelagens muito embaraçadas, com nós ou feltradas podem exigir o uso de máquina para preservar o bem-estar e evitar dor ao pet.', 'desi-pet-shower' ); ?></li>
-                        <li><?php echo esc_html__( 'Em casos de pelagem dupla (subpelo denso), a tosa pode afetar a textura e o padrão de crescimento do pelo.', 'desi-pet-shower' ); ?></li>
-                    </ul>
+                <!-- Riscos Associados (Termo de Ciência) -->
+                <div class="dps-consent-risks-section">
+                    <h3 class="dps-consent-terms-title">
+                        <span aria-hidden="true">⚠️</span>
+                        <?php echo esc_html__( 'Riscos Associados (Termo de Ciência)', 'desi-pet-shower' ); ?>
+                    </h3>
+                    <p class="dps-consent-risks-intro"><?php echo esc_html__( 'Marque cada item abaixo para confirmar que você está ciente dos possíveis riscos:', 'desi-pet-shower' ); ?></p>
+                    
+                    <!-- 1. Pele Sensível -->
+                    <div class="dps-consent-risk-item">
+                        <label class="dps-consent-check">
+                            <input type="checkbox" name="dps_consent_risk_skin" value="1" required aria-required="true">
+                            <span>
+                                <strong><?php echo esc_html__( 'Pele Sensível:', 'desi-pet-shower' ); ?></strong>
+                                <?php echo esc_html__( 'Declaro estar ciente de que a máquina de tosa pode causar possíveis irritações, vermelhidão ou pequenos cortes superficiais (processo irritativo da máquina), especialmente em pets com pele sensível. Essas reações são temporárias e fazem parte do processo natural da tosa.', 'desi-pet-shower' ); ?>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <!-- 2. Nós e Pelagem Embaraçada -->
+                    <div class="dps-consent-risk-item">
+                        <label class="dps-consent-check">
+                            <input type="checkbox" name="dps_consent_risk_knots" value="1" required aria-required="true">
+                            <span>
+                                <strong><?php echo esc_html__( 'Nós e Pelagem Embaraçada:', 'desi-pet-shower' ); ?></strong>
+                                <?php echo esc_html__( 'Autorizo a remoção de nós e pelagem embaraçada, estando ciente de que, devido à proximidade dos nós com a pele, a tosa poderá ficar mais baixa que o desejado inicialmente. Entendo que essa medida é necessária para o bem-estar e conforto do pet.', 'desi-pet-shower' ); ?>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <!-- 3. Comportamento do Pet -->
+                    <div class="dps-consent-risk-item">
+                        <label class="dps-consent-check">
+                            <input type="checkbox" name="dps_consent_risk_behavior" value="1" required aria-required="true">
+                            <span>
+                                <strong><?php echo esc_html__( 'Comportamento do Pet:', 'desi-pet-shower' ); ?></strong>
+                                <?php echo esc_html__( 'Estou ciente de que o estabelecimento não se responsabiliza por pequenos acidentes (arranhões, mordidas na máquina, cortes superficiais) causados por movimentação excessiva ou comportamento agressivo do pet durante o procedimento. Caso o animal apresente estresse extremo, o serviço poderá ser interrompido.', 'desi-pet-shower' ); ?>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <!-- 4. Pets Idosos ou com Problemas de Saúde -->
+                    <div class="dps-consent-risk-item <?php echo ( $has_senior_pets || $has_health_notes ) ? 'dps-consent-risk-item--highlighted' : ''; ?>">
+                        <label class="dps-consent-check">
+                            <input type="checkbox" name="dps_consent_risk_health" value="1" required aria-required="true">
+                            <span>
+                                <strong><?php echo esc_html__( 'Pets Idosos e/ou com Problemas de Saúde:', 'desi-pet-shower' ); ?></strong>
+                                <?php echo esc_html__( 'Declaro que estou ciente de que pets idosos ou com condições médicas conhecidas podem apresentar maior sensibilidade ou estresse durante o procedimento de tosa. Reconheço que o serviço será realizado com todo cuidado possível, mas que o próprio procedimento pode gerar estresse ou desconforto ao animal.', 'desi-pet-shower' ); ?>
+                                <?php if ( $has_senior_pets ) : ?>
+                                    <span class="dps-consent-risk-note">
+                                        <em><?php echo esc_html__( '(Um ou mais pets cadastrados são considerados idosos)', 'desi-pet-shower' ); ?></em>
+                                    </span>
+                                <?php endif; ?>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <!-- 5. Pelagem Dupla (se aplicável) -->
+                    <?php if ( $has_double_coat ) : ?>
+                    <div class="dps-consent-risk-item dps-consent-risk-item--highlighted">
+                        <label class="dps-consent-check">
+                            <input type="checkbox" name="dps_consent_risk_double_coat" value="1" required aria-required="true">
+                            <span>
+                                <strong><?php echo esc_html__( 'Pelagem Dupla:', 'desi-pet-shower' ); ?></strong>
+                                <?php echo esc_html__( 'Estou ciente de que um ou mais dos meus pets possui pelagem dupla (subpelo denso) e que a tosa pode afetar permanentemente a textura, cor e padrão de crescimento do pelo. Entendo que a pelagem pode não voltar ao estado original após a tosa.', 'desi-pet-shower' ); ?>
+                            </span>
+                        </label>
+                    </div>
+                    <?php endif; ?>
                 </div>
-                
+
+                <!-- Informações Adicionais -->
                 <div class="dps-consent-terms-section">
-                    <h3 class="dps-consent-terms-title"><?php echo esc_html__( 'Cuidados e Segurança', 'desi-pet-shower' ); ?></h3>
-                    <ul class="dps-consent-list">
-                        <li><?php echo esc_html__( 'Nossa equipe é treinada e prioriza a segurança, o conforto e pausas quando necessário para o bem-estar do pet.', 'desi-pet-shower' ); ?></li>
-                        <li><?php echo esc_html__( 'Apesar de todos os cuidados, pequenos arranhões, irritações ou cortes superficiais podem ocorrer, especialmente em pets agitados ou com pele sensível.', 'desi-pet-shower' ); ?></li>
-                        <li><?php echo esc_html__( 'Caso o pet apresente comportamento agressivo ou excessivamente estressado, o procedimento poderá ser interrompido por segurança.', 'desi-pet-shower' ); ?></li>
-                    </ul>
-                </div>
-                
-                <div class="dps-consent-terms-section">
-                    <h3 class="dps-consent-terms-title"><?php echo esc_html__( 'Pós-Tosa', 'desi-pet-shower' ); ?></h3>
+                    <h3 class="dps-consent-terms-title"><?php echo esc_html__( 'Cuidados Pós-Tosa', 'desi-pet-shower' ); ?></h3>
                     <ul class="dps-consent-list">
                         <li><?php echo esc_html__( 'É normal o pet coçar-se mais nas primeiras horas após a tosa. Se a coceira persistir por mais de 24 horas, entre em contato conosco.', 'desi-pet-shower' ); ?></li>
-                        <li><?php echo esc_html__( 'Evite exposição prolongada ao sol nos primeiros dias após uma tosa curta.', 'desi-pet-shower' ); ?></li>
+                        <li><?php echo esc_html__( 'Evite exposição prolongada ao sol nos primeiros dias após uma tosa curta para proteger a pele do pet.', 'desi-pet-shower' ); ?></li>
                     </ul>
                 </div>
                 
                 <div class="dps-consent-terms-section">
-                    <h3 class="dps-consent-terms-title"><?php echo esc_html__( 'Emergências', 'desi-pet-shower' ); ?></h3>
+                    <h3 class="dps-consent-terms-title"><?php echo esc_html__( 'Emergências Médicas', 'desi-pet-shower' ); ?></h3>
                     <ul class="dps-consent-list">
                         <li>
                             <?php
                             printf(
                                 /* translators: %s: nome do estabelecimento */
-                                esc_html__( 'Em caso de emergência médica durante o atendimento, autorizo a equipe do %s a buscar atendimento veterinário de urgência, ficando os custos sob minha responsabilidade.', 'desi-pet-shower' ),
+                                esc_html__( 'Em caso de emergência médica durante o atendimento, autorizo a equipe do %s a buscar atendimento veterinário de urgência, utilizando preferencialmente o contato informado no início deste formulário. Os custos do atendimento veterinário ficam sob minha responsabilidade.', 'desi-pet-shower' ),
                                 esc_html( $site_name )
                             );
                             ?>
@@ -274,10 +478,11 @@ $get_coat_label = function( $coat ) {
                     </ul>
                 </div>
                 
+                <!-- Aceite Final -->
                 <div class="dps-consent-accept-box">
                     <label class="dps-consent-check">
                         <input type="checkbox" name="dps_tosa_consent_accept" value="1" required aria-required="true">
-                        <span><?php echo esc_html__( 'Li, compreendi e aceito todos os termos e condições acima descritos.', 'desi-pet-shower' ); ?></span>
+                        <span><?php echo esc_html__( 'Li, compreendi e aceito TODOS os termos e condições acima descritos, confirmando estar ciente dos riscos e autorizando o procedimento.', 'desi-pet-shower' ); ?></span>
                     </label>
                 </div>
             </section>
