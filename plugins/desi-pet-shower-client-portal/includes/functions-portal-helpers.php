@@ -121,38 +121,52 @@ function dps_get_page_by_title_compat( $title, $output = OBJECT, $post_type = 'p
 /**
  * Obtém a URL da página de Consentimento de Tosa com Máquina
  * 
- * Prioriza a configuração armazenada em options, com fallbacks:
- * 1. Página configurada via dps_tosa_consent_page_id
- * 2. Página pelo slug 'consentimento-tosa-maquina'
- * 3. URL padrão /consentimento-tosa-maquina/
+ * Esta função é um wrapper que delega para a classe principal DPS_Tosa_Consent
+ * que cria a página automaticamente se não existir.
  *
  * @return string URL da página de consentimento
  * @since 2.5.0
  */
 function dps_get_tosa_consent_page_url() {
-    // Tenta obter da configuração
-    $page_id = (int) get_option( 'dps_tosa_consent_page_id', 0 );
-    
-    if ( $page_id > 0 ) {
-        $permalink = get_permalink( $page_id );
-        if ( $permalink && is_string( $permalink ) ) {
-            return $permalink;
+    // Usa a classe principal que cria a página automaticamente
+    if ( class_exists( 'DPS_Tosa_Consent' ) ) {
+        // A classe principal será chamada ao gerar o link
+        // Por agora, verifica se a página existe ou cria
+        $page_id = (int) get_option( 'dps_tosa_consent_page_id', 0 );
+        
+        if ( $page_id > 0 ) {
+            $page = get_post( $page_id );
+            if ( $page && 'publish' === $page->post_status ) {
+                $permalink = get_permalink( $page_id );
+                if ( $permalink && is_string( $permalink ) ) {
+                    return $permalink;
+                }
+            }
         }
-    }
-    
-    // Fallback: busca pelo slug
-    $consent_page = get_page_by_path( 'consentimento-tosa-maquina' );
-    if ( $consent_page instanceof WP_Post ) {
-        $permalink = get_permalink( $consent_page->ID );
-        if ( $permalink && is_string( $permalink ) ) {
-            return $permalink;
+        
+        // Fallback: busca pelo slug
+        $consent_page = get_page_by_path( 'consentimento-tosa-maquina' );
+        if ( $consent_page instanceof WP_Post && 'publish' === $consent_page->post_status ) {
+            $permalink = get_permalink( $consent_page->ID );
+            if ( $permalink && is_string( $permalink ) ) {
+                return $permalink;
+            }
+        }
+        
+        // Página não existe, cria automaticamente
+        $new_page_id = DPS_Tosa_Consent::create_consent_page();
+        if ( $new_page_id > 0 ) {
+            $permalink = get_permalink( $new_page_id );
+            if ( $permalink && is_string( $permalink ) ) {
+                return $permalink;
+            }
         }
     }
     
     // Fallback final: URL genérica
     $fallback = home_url( '/consentimento-tosa-maquina/' );
     
-    return (string) apply_filters( 'dps_tosa_consent_page_url', $fallback, $page_id );
+    return (string) apply_filters( 'dps_tosa_consent_page_url', $fallback, 0 );
 }
 
 /**

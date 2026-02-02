@@ -1,12 +1,22 @@
 # Solução de Problemas: Formulário de Consentimento de Tosa
 
 **Data:** 02/02/2026  
-**Versão do plugin:** 1.2.2  
-**PR relacionadas:** #518, #524
+**Versão do plugin:** 1.2.3  
+**PR relacionadas:** #518, #524, #526
 
 ## Situação Atual
 
 O formulário de "Consentimento Permanente • Tosa na Máquina" **JÁ ESTÁ ATUALIZADO** com o design reformulado da PR #518. 
+
+### ✅ Criação Automática da Página (v1.2.3)
+
+A partir da versão 1.2.3, a página de consentimento é **criada automaticamente**:
+
+1. **Na ativação do plugin**: O sistema cria a página `/consentimento-tosa-maquina/` com o shortcode correto
+2. **Ao gerar um link**: Se a página não existir, ela é criada automaticamente quando o administrador gera o primeiro link
+3. **Recuperação automática**: Se a página for deletada ou perder o shortcode, o sistema corrige automaticamente
+
+**Isso significa que não é mais necessário criar manualmente a página!**
 
 ### Arquivos Atualizados
 

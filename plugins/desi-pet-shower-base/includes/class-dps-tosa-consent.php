@@ -623,28 +623,180 @@ final class DPS_Tosa_Consent {
     /**
      * Obtém URL da página de consentimento.
      *
+     * Busca a página na seguinte ordem:
+     * 1. Página configurada via option 'dps_tosa_consent_page_id'
+     * 2. Página pelo slug 'consentimento-tosa-maquina'
+     * 3. Se não existir, cria automaticamente a página
+     *
      * @return string
      */
     private function get_consent_page_url() {
         $page_id = (int) get_option( 'dps_tosa_consent_page_id', 0 );
         if ( $page_id > 0 ) {
-            $permalink = get_permalink( $page_id );
-            if ( $permalink && is_string( $permalink ) ) {
-                return $permalink;
+            $page = get_post( $page_id );
+            if ( $page && 'publish' === $page->post_status ) {
+                $permalink = get_permalink( $page_id );
+                if ( $permalink && is_string( $permalink ) ) {
+                    return $permalink;
+                }
             }
         }
 
         $consent_page = get_page_by_path( 'consentimento-tosa-maquina' );
-        if ( $consent_page instanceof WP_Post ) {
+        if ( $consent_page instanceof WP_Post && 'publish' === $consent_page->post_status ) {
+            // Se a página existe mas não tem o shortcode, adiciona
+            if ( ! has_shortcode( $consent_page->post_content, 'dps_tosa_consent' ) ) {
+                wp_update_post( [
+                    'ID'           => $consent_page->ID,
+                    'post_content' => '[dps_tosa_consent]',
+                ] );
+            }
             $permalink = get_permalink( $consent_page->ID );
             if ( $permalink && is_string( $permalink ) ) {
                 return $permalink;
             }
         }
 
+        // Página não existe, cria automaticamente
+        $new_page_id = self::create_consent_page();
+        if ( $new_page_id > 0 ) {
+            $permalink = get_permalink( $new_page_id );
+            if ( $permalink && is_string( $permalink ) ) {
+                return $permalink;
+            }
+        }
+
+        // Fallback final (não deve acontecer se a criação funcionou)
         $fallback = home_url( '/consentimento-tosa-maquina/' );
 
         return (string) apply_filters( 'dps_tosa_consent_page_url', $fallback, $page_id );
+    }
+
+    /**
+     * Cria a página de consentimento de tosa se não existir.
+     *
+     * Esta função é chamada automaticamente quando o link de consentimento
+     * é gerado e a página não existe. Também pode ser chamada na ativação
+     * do plugin.
+     *
+     * @return int ID da página criada ou 0 em caso de erro.
+     */
+    public static function create_consent_page() {
+        // Verifica se já existe uma página configurada
+        $existing_page_id = (int) get_option( 'dps_tosa_consent_page_id', 0 );
+        if ( $existing_page_id > 0 ) {
+            $existing = get_post( $existing_page_id );
+            if ( $existing && 'publish' === $existing->post_status ) {
+                return $existing_page_id;
+            }
+        }
+
+        // Verifica se já existe uma página pelo slug
+        $existing_by_slug = get_page_by_path( 'consentimento-tosa-maquina' );
+        if ( $existing_by_slug instanceof WP_Post && 'publish' === $existing_by_slug->post_status ) {
+            // Garante que tem o shortcode
+            if ( ! has_shortcode( $existing_by_slug->post_content, 'dps_tosa_consent' ) ) {
+                wp_update_post( [
+                    'ID'           => $existing_by_slug->ID,
+                    'post_content' => '[dps_tosa_consent]',
+                ] );
+            }
+            update_option( 'dps_tosa_consent_page_id', $existing_by_slug->ID );
+            return $existing_by_slug->ID;
+        }
+
+        // Cria nova página
+        $page_id = wp_insert_post( [
+            'post_type'    => 'page',
+            'post_status'  => 'publish',
+            'post_title'   => __( 'Consentimento de Tosa', 'desi-pet-shower' ),
+            'post_name'    => 'consentimento-tosa-maquina',
+            'post_content' => '[dps_tosa_consent]',
+            'post_author'  => 1,
+            'meta_input'   => [
+                '_wp_page_template' => 'default',
+            ],
+        ] );
+
+        if ( $page_id && ! is_wp_error( $page_id ) ) {
+            update_option( 'dps_tosa_consent_page_id', $page_id );
+
+            // Log da criação para debug
+            if ( class_exists( 'DPS_Logger' ) ) {
+                DPS_Logger::log( 'info', 'Página de consentimento criada automaticamente', [
+                    'page_id' => $page_id,
+                    'url'     => get_permalink( $page_id ),
+                ], 'tosa_consent' );
+            }
+
+            return $page_id;
+        }
+
+        // Log do erro
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::log( 'error', 'Falha ao criar página de consentimento', [
+                'error' => is_wp_error( $page_id ) ? $page_id->get_error_message() : 'Erro desconhecido',
+            ], 'tosa_consent' );
+        }
+
+        return 0;
+    }
+
+    /**
+     * Verifica e corrige a página de consentimento.
+     *
+     * Use esta função para diagnóstico e reparo da página de consentimento.
+     * Retorna um array com informações sobre o status da página.
+     *
+     * @return array Informações de diagnóstico.
+     */
+    public static function diagnose_consent_page() {
+        $result = [
+            'page_id'       => 0,
+            'page_exists'   => false,
+            'has_shortcode' => false,
+            'is_published'  => false,
+            'url'           => '',
+            'message'       => '',
+        ];
+
+        $page_id = (int) get_option( 'dps_tosa_consent_page_id', 0 );
+
+        if ( $page_id > 0 ) {
+            $page = get_post( $page_id );
+            if ( $page ) {
+                $result['page_id']       = $page_id;
+                $result['page_exists']   = true;
+                $result['is_published']  = 'publish' === $page->post_status;
+                $result['has_shortcode'] = has_shortcode( $page->post_content, 'dps_tosa_consent' );
+                $result['url']           = get_permalink( $page_id );
+            }
+        }
+
+        // Se não encontrou pela option, tenta pelo slug
+        if ( ! $result['page_exists'] ) {
+            $page_by_slug = get_page_by_path( 'consentimento-tosa-maquina' );
+            if ( $page_by_slug instanceof WP_Post ) {
+                $result['page_id']       = $page_by_slug->ID;
+                $result['page_exists']   = true;
+                $result['is_published']  = 'publish' === $page_by_slug->post_status;
+                $result['has_shortcode'] = has_shortcode( $page_by_slug->post_content, 'dps_tosa_consent' );
+                $result['url']           = get_permalink( $page_by_slug->ID );
+            }
+        }
+
+        // Define mensagem de diagnóstico
+        if ( ! $result['page_exists'] ) {
+            $result['message'] = __( 'Página de consentimento não existe. Será criada automaticamente ao gerar o primeiro link.', 'desi-pet-shower' );
+        } elseif ( ! $result['is_published'] ) {
+            $result['message'] = __( 'Página existe mas não está publicada. Publique a página para funcionar corretamente.', 'desi-pet-shower' );
+        } elseif ( ! $result['has_shortcode'] ) {
+            $result['message'] = __( 'Página existe mas não contém o shortcode [dps_tosa_consent]. Shortcode será adicionado automaticamente.', 'desi-pet-shower' );
+        } else {
+            $result['message'] = __( 'Página de consentimento configurada corretamente.', 'desi-pet-shower' );
+        }
+
+        return $result;
     }
 
     /**

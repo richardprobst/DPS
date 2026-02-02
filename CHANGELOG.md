@@ -234,6 +234,17 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Página de Consentimento de Tosa não exibida (Base v1.2.3)**
+
+- **Causa raiz identificada**: O formulário de consentimento de tosa não era exibido porque a página com o shortcode `[dps_tosa_consent]` não existia. O sistema gerava um link para `/consentimento-tosa-maquina/` que resultava em erro 404.
+- **Solução implementada**:
+  - Página de consentimento agora é criada automaticamente na ativação do plugin ou quando o primeiro link é gerado.
+  - Novo método estático `DPS_Tosa_Consent::create_consent_page()` cria a página com shortcode correto.
+  - Método `get_consent_page_url()` refatorado para verificar existência da página e criá-la se necessário.
+  - Se a página existir mas não tiver o shortcode, ele é adicionado automaticamente.
+- **Método de diagnóstico**: `DPS_Tosa_Consent::diagnose_consent_page()` permite verificar status da página.
+- **Documentação atualizada**: Catálogo de shortcodes agora indica que a página é criada automaticamente.
+
 **Formulário de Consentimento de Tosa não exibindo versão atualizada (Base v1.2.2)**
 
 - **Template do tema sobrescrevendo versão do plugin**: O sistema de templates permite que temas sobrescrevam arquivos via `dps-templates/`. Se o tema tinha uma versão antiga do template `tosa-consent-form.php`, a versão melhorada da PR #518 não era exibida no site, mesmo após o merge.
