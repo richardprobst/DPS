@@ -59,7 +59,7 @@ final class DPS_Tosa_Consent {
         add_action( 'wp_ajax_dps_revoke_tosa_consent', [ $this, 'ajax_revoke_consent' ] );
         add_action( 'init', [ $this, 'handle_consent_form' ], 10 );
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_consent_assets' ] );
-        
+
         // Força uso do template do plugin para garantir versão mais recente
         // Isso evita problemas com templates desatualizados no tema
         add_filter( 'dps_use_plugin_template', [ $this, 'force_consent_template' ], 10, 2 );
@@ -83,7 +83,7 @@ final class DPS_Tosa_Consent {
         if ( 'tosa-consent-form.php' !== $template_name ) {
             return $use_plugin;
         }
-        
+
         /**
          * Permite que temas sobrescrevam o template de consentimento.
          *
@@ -94,7 +94,7 @@ final class DPS_Tosa_Consent {
          * @param bool $allow_override Se deve permitir override do tema. Default false.
          */
         $allow_theme_override = apply_filters( 'dps_allow_consent_template_override', false );
-        
+
         // Se override do tema for permitido, não força o template do plugin
         if ( $allow_theme_override ) {
             // Loga quando override do tema é detectado para diagnóstico
@@ -106,7 +106,7 @@ final class DPS_Tosa_Consent {
             }
             return false;
         }
-        
+
         // Loga quando override do tema é ignorado
         if ( function_exists( 'dps_is_template_overridden' ) && dps_is_template_overridden( 'tosa-consent-form.php' ) ) {
             $this->log_event( 'warning', 'Template de consentimento do tema ignorado - usando versão do plugin', [
@@ -115,7 +115,7 @@ final class DPS_Tosa_Consent {
                 'reason'   => 'Forçado para garantir versão mais recente do formulário',
             ] );
         }
-        
+
         // Força uso do template do plugin
         return true;
     }
@@ -531,12 +531,12 @@ final class DPS_Tosa_Consent {
     public function render_consent_shortcode( $atts ) {
         // Garante que CSS seja carregado mesmo se wp_enqueue_scripts já passou
         $this->maybe_enqueue_assets_inline();
-        
+
         // Força desabilitação de cache para esta página
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();
         }
-        
+
         $token     = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : '';
         $client_id = isset( $_GET['client_id'] ) ? absint( wp_unslash( $_GET['client_id'] ) ) : 0;
 
@@ -551,7 +551,7 @@ final class DPS_Tosa_Consent {
         // Limpa o cache do cliente para garantir dados frescos
         // Isso é necessário quando object cache (Redis/Memcached) está ativo
         clean_post_cache( $client_id );
-        
+
         $client = get_post( $client_id );
         if ( ! $client || 'dps_cliente' !== $client->post_type ) {
             return $this->render_error_message( __( 'Cliente não encontrado.', 'desi-pet-shower' ) );
@@ -656,13 +656,13 @@ final class DPS_Tosa_Consent {
      */
     private function maybe_enqueue_assets_inline() {
         static $enqueued = false;
-        
+
         if ( $enqueued ) {
             return;
         }
-        
+
         $enqueued = true;
-        
+
         // Enfileira se ainda não foi registrado
         if ( ! wp_style_is( 'dps-tosa-consent-form', 'enqueued' ) ) {
             wp_enqueue_style(

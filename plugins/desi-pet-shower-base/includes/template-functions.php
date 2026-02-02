@@ -36,7 +36,7 @@ if ( ! function_exists( 'dps_get_template' ) ) {
 
         $template_name = ltrim( $template_name, '/' );
         $plugin_path   = trailingslashit( DPS_BASE_DIR . 'templates' ) . $template_name;
-        
+
         /**
          * Permite forçar o uso do template do plugin, ignorando override do tema.
          *
@@ -47,7 +47,7 @@ if ( ! function_exists( 'dps_get_template' ) ) {
          * @param string $template_name Nome do arquivo de template.
          */
         $force_plugin_template = apply_filters( 'dps_use_plugin_template', false, $template_name );
-        
+
         if ( $force_plugin_template && file_exists( $plugin_path ) ) {
             $path_to_load      = $plugin_path;
             $is_theme_override = false;
@@ -96,13 +96,13 @@ if ( ! function_exists( 'dps_get_template_path' ) ) {
 
         $template_name = ltrim( $template_name, '/' );
         $plugin_path   = trailingslashit( DPS_BASE_DIR . 'templates' ) . $template_name;
-        
+
         $force_plugin_template = apply_filters( 'dps_use_plugin_template', false, $template_name );
-        
+
         if ( $force_plugin_template && file_exists( $plugin_path ) ) {
             return $plugin_path;
         }
-        
+
         $theme_path   = locate_template( 'dps-templates/' . $template_name );
         $path_to_load = $theme_path ? $theme_path : $plugin_path;
 
