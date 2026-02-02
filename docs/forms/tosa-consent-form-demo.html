@@ -634,6 +634,153 @@ body {
     }
 }
 
+/* Seção de Contato de Emergência */
+.dps-consent-card--emergency {
+    border-color: #0ea5e9;
+    border-width: 2px;
+    background: linear-gradient(180deg, #f0f9ff 0%, #fff 50px);
+}
+
+.dps-consent-emergency-info {
+    margin-bottom: 20px;
+}
+
+.dps-alert--info {
+    background: #eff6ff;
+    border: 1px solid #93c5fd;
+    color: #1e40af;
+}
+
+/* Badges de Pet */
+.dps-consent-pet-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-left: 8px;
+}
+
+.dps-consent-pet-badge--senior {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fbbf24;
+}
+
+.dps-consent-pet-badge--aggressive {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.dps-consent-pet-card--senior {
+    border-color: #fbbf24;
+    border-width: 2px;
+    background: linear-gradient(180deg, #fffbeb 0%, #f9fafb 30px);
+}
+
+.dps-consent-pet-notes {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.dps-consent-pet-notes__icon {
+    flex-shrink: 0;
+    font-size: 14px;
+}
+
+.dps-consent-pet-notes__text {
+    line-height: 1.5;
+}
+
+/* Seção de Riscos e Autorizações */
+.dps-consent-authorization-section,
+.dps-consent-risks-section {
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.dps-consent-risks-intro {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 16px;
+    font-style: italic;
+}
+
+.dps-consent-check-box {
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.dps-consent-check--important span strong {
+    color: #0284c7;
+}
+
+.dps-consent-risk-item {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: border-color 0.15s ease;
+}
+
+.dps-consent-risk-item:hover {
+    border-color: #d1d5db;
+}
+
+.dps-consent-risk-item--highlighted {
+    border-color: #fbbf24;
+    border-width: 2px;
+    background: linear-gradient(180deg, #fffbeb 0%, #fff 20px);
+}
+
+.dps-consent-risk-item .dps-consent-check span {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #4b5563;
+}
+
+.dps-consent-risk-item .dps-consent-check span strong {
+    color: #1f2937;
+}
+
+.dps-consent-risk-note {
+    display: block;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #fef3c7;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #92400e;
+}
+
+.dps-consent-check--inline {
+    padding: 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.dps-consent-check--inline span {
+    font-weight: 400;
+    font-size: 14px;
+}
+
 /* Animações */
 @keyframes fadeIn {
     from {
@@ -699,6 +846,39 @@ body {
                     </div>
                 </section>
 
+                <!-- Seção de Contato de Emergência -->
+                <section class="dps-consent-card dps-consent-card--emergency" aria-labelledby="section-emergencia">
+                    <h2 id="section-emergencia">
+                        <span class="dps-section-icon" aria-hidden="true">🏥</span>
+                        Contato de Emergência
+                    </h2>
+                    <p class="dps-consent-section-desc">Informe um contato veterinário para emergências durante o atendimento.</p>
+                    
+                    <div class="dps-consent-emergency-info">
+                        <div class="dps-alert dps-alert--info" role="note">
+                            <span aria-hidden="true">ℹ️</span>
+                            <span>Em caso de emergência médica durante o procedimento, utilizaremos este contato veterinário para buscar atendimento imediato. Se não houver veterinário disponível, a equipe encaminhará para o atendimento veterinário mais próximo.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="dps-consent-grid">
+                        <div class="dps-consent-field">
+                            <label for="dps_consent_vet_name">Nome do Veterinário/Clínica <span class="dps-optional">(opcional)</span></label>
+                            <input type="text" id="dps_consent_vet_name" name="dps_consent_vet_name" placeholder="Ex: Dr. João / Clínica Pet Care" autocomplete="off">
+                        </div>
+                        <div class="dps-consent-field">
+                            <label for="dps_consent_vet_phone">Telefone do Veterinário <span class="dps-optional">(opcional)</span></label>
+                            <input type="tel" id="dps_consent_vet_phone" name="dps_consent_vet_phone" placeholder="(00) 00000-0000" autocomplete="tel">
+                        </div>
+                        <div class="dps-consent-field dps-consent-field--full">
+                            <label class="dps-consent-check dps-consent-check--inline">
+                                <input type="checkbox" name="dps_consent_use_store_vet" value="1">
+                                <span>Autorizo a equipe a utilizar o veterinário de referência do estabelecimento, caso eu não tenha um contato disponível.</span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
                 <section class="dps-consent-card" aria-labelledby="section-pets">
                     <h2 id="section-pets">
                         <span class="dps-section-icon" aria-hidden="true">🐾</span>
@@ -707,21 +887,27 @@ body {
                     <p class="dps-consent-section-desc">Este consentimento será válido para todos os pets listados abaixo.</p>
                     
                     <div class="dps-consent-pets-grid" role="list">
-                        <!-- Pet 1 - Cachorro com pelagem dupla -->
-                        <div class="dps-consent-pet-card" role="listitem">
+                        <!-- Pet 1 - Cachorro idoso com pelagem dupla -->
+                        <div class="dps-consent-pet-card dps-consent-pet-card--senior" role="listitem">
                             <div class="dps-consent-pet-header">
                                 <span class="dps-consent-pet-emoji" aria-hidden="true">🐕</span>
                                 <strong class="dps-consent-pet-name">Thor</strong>
+                                <span class="dps-consent-pet-badge dps-consent-pet-badge--senior" title="Pet idoso - cuidados especiais">Idoso</span>
                             </div>
                             <div class="dps-consent-pet-details">
                                 <span class="dps-consent-pet-tag">Cachorro</span>
                                 <span class="dps-consent-pet-tag">Golden Retriever</span>
+                                <span class="dps-consent-pet-tag dps-consent-pet-tag--warning">9 anos</span>
                                 <span class="dps-consent-pet-tag">Porte: Grande</span>
                                 <span class="dps-consent-pet-tag dps-consent-pet-tag--warning">
                                     Pelagem: Dupla
                                     <span class="dps-tooltip" title="Pelagem dupla requer cuidados especiais na tosa">⚠️</span>
                                 </span>
                                 <span class="dps-consent-pet-tag">32 kg</span>
+                            </div>
+                            <div class="dps-consent-pet-notes">
+                                <span class="dps-consent-pet-notes__icon" aria-hidden="true">📋</span>
+                                <span class="dps-consent-pet-notes__text">Possui artrite leve, evitar movimentos bruscos.</span>
                             </div>
                         </div>
 
@@ -734,21 +920,24 @@ body {
                             <div class="dps-consent-pet-details">
                                 <span class="dps-consent-pet-tag">Cachorro</span>
                                 <span class="dps-consent-pet-tag">Shih Tzu</span>
+                                <span class="dps-consent-pet-tag">3 anos</span>
                                 <span class="dps-consent-pet-tag">Porte: Pequeno</span>
                                 <span class="dps-consent-pet-tag">Pelagem: Longa</span>
                                 <span class="dps-consent-pet-tag">5.5 kg</span>
                             </div>
                         </div>
 
-                        <!-- Pet 3 - Gato -->
+                        <!-- Pet 3 - Gato com alerta de comportamento -->
                         <div class="dps-consent-pet-card" role="listitem">
                             <div class="dps-consent-pet-header">
                                 <span class="dps-consent-pet-emoji" aria-hidden="true">🐱</span>
                                 <strong class="dps-consent-pet-name">Mia</strong>
+                                <span class="dps-consent-pet-badge dps-consent-pet-badge--aggressive" title="Possui histórico de agitação/agressividade">Atenção</span>
                             </div>
                             <div class="dps-consent-pet-details">
                                 <span class="dps-consent-pet-tag">Gato</span>
                                 <span class="dps-consent-pet-tag">Persa</span>
+                                <span class="dps-consent-pet-tag">5 anos</span>
                                 <span class="dps-consent-pet-tag">Porte: Médio</span>
                                 <span class="dps-consent-pet-tag">Pelagem: Longa</span>
                                 <span class="dps-consent-pet-tag">4.2 kg</span>
@@ -764,43 +953,104 @@ body {
                 <section class="dps-consent-card dps-consent-card--important" aria-labelledby="section-termos">
                     <h2 id="section-termos">
                         <span class="dps-section-icon" aria-hidden="true">📋</span>
-                        Termos e Condições do Consentimento
+                        Autorização e Termos de Ciência
                     </h2>
                     
                     <div class="dps-consent-terms-intro">
-                        <p>Ao autorizar a tosa com máquina, você declara estar ciente e de acordo com os seguintes termos:</p>
+                        <p>Para prosseguir com o serviço de tosa com máquina, você precisa autorizar expressamente o procedimento e declarar ciência dos riscos associados.</p>
+                    </div>
+
+                    <!-- Autorização do Procedimento -->
+                    <div class="dps-consent-authorization-section">
+                        <h3 class="dps-consent-terms-title">
+                            <span aria-hidden="true">✅</span>
+                            Autorização do Procedimento
+                        </h3>
+                        <div class="dps-consent-check-box">
+                            <label class="dps-consent-check dps-consent-check--important">
+                                <input type="checkbox" name="dps_consent_authorize_procedure" value="1" required aria-required="true">
+                                <span>
+                                    <strong>Autorizo expressamente</strong> a equipe do <strong>Desi Pet Shower</strong> a utilizar máquina de tosa nos meus pets quando necessário para o bem-estar do animal e realização do serviço contratado.
+                                </span>
+                            </label>
+                        </div>
                     </div>
                     
-                    <div class="dps-consent-terms-section">
-                        <h3 class="dps-consent-terms-title">Sobre o Procedimento</h3>
-                        <ul class="dps-consent-list">
-                            <li>A tosa com máquina pode expor pequenas imperfeições, nódulos, irritações ou sensibilidades já existentes na pele do pet que estavam ocultas pela pelagem.</li>
-                            <li>Pelagens muito embaraçadas, com nós ou feltradas podem exigir o uso de máquina para preservar o bem-estar e evitar dor ao pet.</li>
-                            <li>Em casos de pelagem dupla (subpelo denso), a tosa pode afetar a textura e o padrão de crescimento do pelo.</li>
-                        </ul>
+                    <!-- Riscos Associados (Termo de Ciência) -->
+                    <div class="dps-consent-risks-section">
+                        <h3 class="dps-consent-terms-title">
+                            <span aria-hidden="true">⚠️</span>
+                            Riscos Associados (Termo de Ciência)
+                        </h3>
+                        <p class="dps-consent-risks-intro">Marque cada item abaixo para confirmar que você está ciente dos possíveis riscos:</p>
+                        
+                        <!-- 1. Pele Sensível -->
+                        <div class="dps-consent-risk-item">
+                            <label class="dps-consent-check">
+                                <input type="checkbox" name="dps_consent_risk_skin" value="1" required aria-required="true">
+                                <span>
+                                    <strong>Pele Sensível:</strong> Declaro estar ciente de que a máquina de tosa pode causar possíveis irritações, vermelhidão ou pequenos cortes superficiais (processo irritativo da máquina), especialmente em pets com pele sensível. Essas reações são temporárias e fazem parte do processo natural da tosa.
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <!-- 2. Nós e Pelagem Embaraçada -->
+                        <div class="dps-consent-risk-item">
+                            <label class="dps-consent-check">
+                                <input type="checkbox" name="dps_consent_risk_knots" value="1" required aria-required="true">
+                                <span>
+                                    <strong>Nós e Pelagem Embaraçada:</strong> Autorizo a remoção de nós e pelagem embaraçada, estando ciente de que, devido à proximidade dos nós com a pele, a tosa poderá ficar mais baixa que o desejado inicialmente. Entendo que essa medida é necessária para o bem-estar e conforto do pet.
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <!-- 3. Comportamento do Pet -->
+                        <div class="dps-consent-risk-item">
+                            <label class="dps-consent-check">
+                                <input type="checkbox" name="dps_consent_risk_behavior" value="1" required aria-required="true">
+                                <span>
+                                    <strong>Comportamento do Pet:</strong> Estou ciente de que o estabelecimento não se responsabiliza por pequenos acidentes (arranhões, mordidas na máquina, cortes superficiais) causados por movimentação excessiva ou comportamento agressivo do pet durante o procedimento. Caso o animal apresente estresse extremo, o serviço poderá ser interrompido.
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <!-- 4. Pets Idosos ou com Problemas de Saúde -->
+                        <div class="dps-consent-risk-item dps-consent-risk-item--highlighted">
+                            <label class="dps-consent-check">
+                                <input type="checkbox" name="dps_consent_risk_health" value="1" required aria-required="true">
+                                <span>
+                                    <strong>Pets Idosos e/ou com Problemas de Saúde:</strong> Declaro que estou ciente de que pets idosos ou com condições médicas conhecidas podem apresentar maior sensibilidade ou estresse durante o procedimento de tosa. Reconheço que o serviço será realizado com todo cuidado possível, mas que o próprio procedimento pode gerar estresse ou desconforto ao animal.
+                                    <span class="dps-consent-risk-note">
+                                        <em>(Um ou mais pets cadastrados são considerados idosos)</em>
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <!-- 5. Pelagem Dupla -->
+                        <div class="dps-consent-risk-item dps-consent-risk-item--highlighted">
+                            <label class="dps-consent-check">
+                                <input type="checkbox" name="dps_consent_risk_double_coat" value="1" required aria-required="true">
+                                <span>
+                                    <strong>Pelagem Dupla:</strong> Estou ciente de que um ou mais dos meus pets possui pelagem dupla (subpelo denso) e que a tosa pode afetar permanentemente a textura, cor e padrão de crescimento do pelo. Entendo que a pelagem pode não voltar ao estado original após a tosa.
+                                </span>
+                            </label>
+                        </div>
                     </div>
-                    
+
+                    <!-- Informações Adicionais -->
                     <div class="dps-consent-terms-section">
-                        <h3 class="dps-consent-terms-title">Cuidados e Segurança</h3>
-                        <ul class="dps-consent-list">
-                            <li>Nossa equipe é treinada e prioriza a segurança, o conforto e pausas quando necessário para o bem-estar do pet.</li>
-                            <li>Apesar de todos os cuidados, pequenos arranhões, irritações ou cortes superficiais podem ocorrer, especialmente em pets agitados ou com pele sensível.</li>
-                            <li>Caso o pet apresente comportamento agressivo ou excessivamente estressado, o procedimento poderá ser interrompido por segurança.</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="dps-consent-terms-section">
-                        <h3 class="dps-consent-terms-title">Pós-Tosa</h3>
+                        <h3 class="dps-consent-terms-title">Cuidados Pós-Tosa</h3>
                         <ul class="dps-consent-list">
                             <li>É normal o pet coçar-se mais nas primeiras horas após a tosa. Se a coceira persistir por mais de 24 horas, entre em contato conosco.</li>
-                            <li>Evite exposição prolongada ao sol nos primeiros dias após uma tosa curta.</li>
+                            <li>Evite exposição prolongada ao sol nos primeiros dias após uma tosa curta para proteger a pele do pet.</li>
                         </ul>
                     </div>
                     
                     <div class="dps-consent-terms-section">
-                        <h3 class="dps-consent-terms-title">Emergências</h3>
+                        <h3 class="dps-consent-terms-title">Emergências Médicas</h3>
                         <ul class="dps-consent-list">
-                            <li>Em caso de emergência médica durante o atendimento, autorizo a equipe do <strong>Desi Pet Shower</strong> a buscar atendimento veterinário de urgência, ficando os custos sob minha responsabilidade.</li>
+                            <li>Em caso de emergência médica durante o atendimento, autorizo a equipe do <strong>Desi Pet Shower</strong> a buscar atendimento veterinário de urgência, utilizando preferencialmente o contato informado no início deste formulário. Os custos do atendimento veterinário ficam sob minha responsabilidade.</li>
                         </ul>
                     </div>
                     
@@ -813,10 +1063,11 @@ body {
                         </ul>
                     </div>
                     
+                    <!-- Aceite Final -->
                     <div class="dps-consent-accept-box">
                         <label class="dps-consent-check">
                             <input type="checkbox" name="dps_tosa_consent_accept" value="1" required aria-required="true">
-                            <span>Li, compreendi e aceito todos os termos e condições acima descritos.</span>
+                            <span>Li, compreendi e aceito TODOS os termos e condições acima descritos, confirmando estar ciente dos riscos e autorizando o procedimento.</span>
                         </label>
                     </div>
                 </section>

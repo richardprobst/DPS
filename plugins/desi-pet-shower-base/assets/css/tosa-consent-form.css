@@ -715,6 +715,181 @@
 }
 
 /* ==========================================================================
+   Seção de Contato de Emergência
+   ========================================================================== */
+.dps-consent-card--emergency {
+    border-color: #0ea5e9;
+    border-width: 2px;
+    background: linear-gradient(180deg, #f0f9ff 0%, #fff 50px);
+}
+
+.dps-consent-emergency-info {
+    margin-bottom: 20px;
+}
+
+.dps-alert--info {
+    background: #eff6ff;
+    border: 1px solid #93c5fd;
+    color: #1e40af;
+}
+
+/* ==========================================================================
+   Badges de Pet (Idoso, Atenção)
+   ========================================================================== */
+.dps-consent-pet-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-left: 8px;
+}
+
+.dps-consent-pet-badge--senior {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fbbf24;
+}
+
+.dps-consent-pet-badge--aggressive {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.dps-consent-pet-card--senior {
+    border-color: #fbbf24;
+    border-width: 2px;
+    background: linear-gradient(180deg, #fffbeb 0%, #f9fafb 30px);
+}
+
+/* Notas de cuidados do pet */
+.dps-consent-pet-notes {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.dps-consent-pet-notes__icon {
+    flex-shrink: 0;
+    font-size: 14px;
+}
+
+.dps-consent-pet-notes__text {
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+   Seção de Riscos e Autorizações
+   ========================================================================== */
+.dps-consent-authorization-section,
+.dps-consent-risks-section {
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.dps-consent-authorization-section:last-of-type,
+.dps-consent-risks-section:last-of-type {
+    margin-bottom: 20px;
+    border-bottom: none;
+}
+
+.dps-consent-risks-intro {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 16px;
+    font-style: italic;
+}
+
+.dps-consent-check-box {
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.dps-consent-check--important span {
+    line-height: 1.6;
+}
+
+.dps-consent-check--important span strong {
+    color: #0284c7;
+}
+
+/* Items de risco individuais */
+.dps-consent-risk-item {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.dps-consent-risk-item:last-child {
+    margin-bottom: 0;
+}
+
+.dps-consent-risk-item:hover {
+    border-color: #d1d5db;
+}
+
+.dps-consent-risk-item--highlighted {
+    border-color: #fbbf24;
+    border-width: 2px;
+    background: linear-gradient(180deg, #fffbeb 0%, #fff 20px);
+}
+
+.dps-consent-risk-item .dps-consent-check {
+    gap: 12px;
+}
+
+.dps-consent-risk-item .dps-consent-check span {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #4b5563;
+}
+
+.dps-consent-risk-item .dps-consent-check span strong {
+    color: #1f2937;
+    display: inline;
+}
+
+.dps-consent-risk-note {
+    display: block;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #fef3c7;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #92400e;
+}
+
+/* Checkbox inline para autorização vet */
+.dps-consent-check--inline {
+    padding: 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.dps-consent-check--inline span {
+    font-weight: 400;
+    font-size: 14px;
+}
+
+/* ==========================================================================
    Animações
    ========================================================================== */
 @keyframes fadeIn {
@@ -725,5 +900,74 @@
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* ==========================================================================
+   Responsividade adicional para novos elementos
+   ========================================================================== */
+@media (max-width: 768px) {
+    .dps-consent-risk-item {
+        padding: 14px;
+    }
+    
+    .dps-consent-risk-item .dps-consent-check span {
+        font-size: 13px;
+    }
+    
+    .dps-consent-pet-badge {
+        font-size: 10px;
+        padding: 2px 6px;
+        margin-left: 6px;
+    }
+    
+    .dps-consent-pet-notes {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-consent-check-box {
+        padding: 12px;
+    }
+    
+    .dps-consent-risk-item {
+        padding: 12px;
+    }
+    
+    .dps-consent-risk-item .dps-consent-check {
+        gap: 10px;
+    }
+    
+    .dps-consent-risk-item .dps-consent-check span {
+        font-size: 12px;
+    }
+    
+    .dps-consent-risk-note {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    .dps-consent-pet-header {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .dps-consent-pet-badge {
+        margin-left: 0;
+        margin-top: 4px;
+    }
+    
+    .dps-consent-pet-notes {
+        margin-top: 10px;
+        padding-top: 10px;
+    }
+    
+    .dps-consent-check--inline {
+        padding: 10px;
+    }
+    
+    .dps-consent-check--inline span {
+        font-size: 13px;
     }
 }
