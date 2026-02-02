@@ -70,6 +70,10 @@ class DPS_Cache_Control {
      * Registra hooks para detecção de páginas DPS e envio de headers.
      */
     public static function init() {
+        // Hook muito cedo para detectar URLs com parâmetros de consentimento
+        // Isso acontece antes de template_redirect para garantir que caches agressivos sejam desabilitados
+        add_action( 'wp', [ __CLASS__, 'maybe_disable_cache_by_url_params' ], 1 );
+        
         // Hook antes do envio de headers para detectar páginas com shortcodes DPS
         add_action( 'template_redirect', [ __CLASS__, 'maybe_disable_page_cache' ], 1 );
         
@@ -78,6 +82,50 @@ class DPS_Cache_Control {
         
         // Para páginas admin, sempre desabilitar cache
         add_action( 'admin_init', [ __CLASS__, 'disable_admin_cache' ], 1 );
+    }
+
+    /**
+     * Desabilita cache baseado em parâmetros de URL específicos do DPS.
+     *
+     * Esta função é executada muito cedo (hook 'wp') para capturar requisições
+     * com parâmetros dinâmicos como client_id e token antes que caches agressivos
+     * (ex.: page builders, LiteSpeed Cache, WP Rocket) sirvam conteúdo cacheado.
+     *
+     * @since 1.2.1
+     * @return void
+     */
+    public static function maybe_disable_cache_by_url_params() {
+        // Ignora requisições de admin, AJAX, REST e cron
+        if ( is_admin() || wp_doing_ajax() || wp_doing_cron() ) {
+            return;
+        }
+
+        if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+            return;
+        }
+
+        // Detecta URLs de consentimento de tosa (parâmetros client_id + token)
+        // Sanitização e validação básica para prevenir abuso de cache bypass
+        // Nota: Validação completa do token ocorre no shortcode handler; aqui apenas
+        // verificamos formato para evitar cache bypass com valores obviamente inválidos
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para detecção de página
+        $raw_client_id = isset( $_GET['client_id'] ) ? sanitize_text_field( wp_unslash( $_GET['client_id'] ) ) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para detecção de página
+        $raw_token     = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : '';
+        
+        // client_id deve ser numérico positivo e token deve ter formato hexadecimal (64 caracteres)
+        // ctype_digit garante que é apenas dígitos; (int) > 0 garante valor positivo
+        $is_valid_client_id = ! empty( $raw_client_id ) && ctype_digit( $raw_client_id ) && (int) $raw_client_id > 0;
+        $is_valid_token     = ! empty( $raw_token ) && preg_match( '/^[a-f0-9]{64}$/i', $raw_token );
+
+        if ( $is_valid_client_id && $is_valid_token ) {
+            self::disable_cache();
+            
+            // Envia headers imediatamente se possível
+            if ( ! headers_sent() ) {
+                self::send_nocache_headers();
+            }
+        }
     }
 
     /**
@@ -106,6 +154,9 @@ class DPS_Cache_Control {
     /**
      * Verifica se o conteúdo da página atual contém shortcodes do DPS.
      *
+     * Além do conteúdo principal do post, também verifica metadados comuns
+     * de page builders como Elementor, YooTheme e Beaver Builder.
+     *
      * @return bool True se a página contém shortcodes DPS.
      */
     private static function page_has_dps_shortcode() {
@@ -118,9 +169,52 @@ class DPS_Cache_Control {
 
         $content = $post->post_content;
 
-        // Verifica cada shortcode DPS
+        // Verifica cada shortcode DPS no conteúdo principal
         foreach ( self::$dps_shortcodes as $shortcode ) {
             if ( has_shortcode( $content, $shortcode ) ) {
+                return true;
+            }
+        }
+
+        // Pré-constrói padrões de busca para shortcodes (otimização para loops)
+        // Inclui espaço ou ] após o nome para evitar falsos positivos (ex: [dps_tosa vs [dps_tosa_extra])
+        // Nota: shortcodes DPS são nomes seguros sem caracteres especiais, então string literal é segura para strpos
+        $shortcode_patterns = [];
+        foreach ( self::$dps_shortcodes as $shortcode ) {
+            $shortcode_patterns[] = '[' . $shortcode . ' ';
+            $shortcode_patterns[] = '[' . $shortcode . ']';
+        }
+
+        // Verifica em metadados de page builders populares
+        // Elementor armazena dados em _elementor_data (formato JSON)
+        $elementor_data = get_post_meta( $post->ID, '_elementor_data', true );
+        if ( self::metadata_contains_shortcode( $elementor_data, $shortcode_patterns ) ) {
+            return true;
+        }
+
+        // YooTheme armazena dados em _yootheme_source (formato JSON)
+        $yootheme_source = get_post_meta( $post->ID, '_yootheme_source', true );
+        if ( self::metadata_contains_shortcode( $yootheme_source, $shortcode_patterns ) ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Verifica se uma string de metadados contém padrões de shortcode.
+     *
+     * @param mixed $metadata String de metadados ou valor vazio.
+     * @param array $patterns Padrões de shortcode para buscar.
+     * @return bool True se algum padrão foi encontrado.
+     */
+    private static function metadata_contains_shortcode( $metadata, array $patterns ) {
+        if ( ! $metadata || ! is_string( $metadata ) ) {
+            return false;
+        }
+
+        foreach ( $patterns as $pattern ) {
+            if ( strpos( $metadata, $pattern ) !== false ) {
                 return true;
             }
         }

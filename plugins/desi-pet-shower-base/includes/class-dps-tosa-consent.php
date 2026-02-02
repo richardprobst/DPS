@@ -489,17 +489,26 @@ final class DPS_Tosa_Consent {
             return $this->render_error_message( __( 'Este link não é mais válido. Solicite um novo link ao administrador.', 'desi-pet-shower' ) );
         }
 
+        // Limpa o cache do cliente para garantir dados frescos
+        // Isso é necessário quando object cache (Redis/Memcached) está ativo
+        clean_post_cache( $client_id );
+        
         $client = get_post( $client_id );
         if ( ! $client || 'dps_cliente' !== $client->post_type ) {
             return $this->render_error_message( __( 'Cliente não encontrado.', 'desi-pet-shower' ) );
         }
 
+        // Query de pets com cache desabilitado para garantir dados atualizados
+        // suppress_filters evita que plugins de cache interceptem a query
+        // cache_results=false ignora o object cache do WordPress
         $pets = get_posts( [
-            'post_type'      => 'dps_pet',
-            'posts_per_page' => -1,
-            'post_status'    => 'publish',
-            'meta_key'       => 'owner_id',
-            'meta_value'     => $client_id,
+            'post_type'        => 'dps_pet',
+            'posts_per_page'   => -1,
+            'post_status'      => 'publish',
+            'meta_key'         => 'owner_id',
+            'meta_value'       => $client_id,
+            'suppress_filters' => true,
+            'cache_results'    => false,
         ] );
 
         if ( $pets ) {
