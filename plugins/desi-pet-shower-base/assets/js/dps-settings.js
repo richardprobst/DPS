@@ -53,6 +53,7 @@
          */
         bindEvents: function() {
             var self = this;
+            var searchTimer = null;
 
             // Navegação entre abas (client-side)
             this.$tabs.on( 'click', function( e ) {
@@ -80,19 +81,25 @@
                 $( this ).attr( 'aria-expanded', $navContainer.hasClass( 'is-open' ) );
             });
 
-            // Busca de configurações
+            // Busca de configurações (debounced)
             if ( this.$search.length ) {
                 this.$search.on( 'input', function() {
-                    self.handleSearch( $( this ).val() );
+                    var value = $( this ).val();
+                    clearTimeout( searchTimer );
+                    searchTimer = setTimeout( function() {
+                        self.handleSearch( value );
+                    }, 250 );
                 });
 
                 this.$clearBtn.on( 'click', function() {
+                    clearTimeout( searchTimer );
                     self.clearSearch();
                 });
 
                 // Atalho de teclado: Escape limpa busca
                 this.$search.on( 'keydown', function( e ) {
                     if ( e.key === 'Escape' ) {
+                        clearTimeout( searchTimer );
                         self.clearSearch();
                         $( this ).blur();
                     }
@@ -264,9 +271,10 @@
             });
 
             // Aviso ao sair com alterações não salvas
-            $( window ).on( 'beforeunload', function() {
+            $( window ).on( 'beforeunload', function( e ) {
                 if ( self.$wrapper.find( '.dps-settings-form.is-dirty' ).length > 0 ) {
-                    return true;
+                    e.preventDefault();
+                    return '';
                 }
             });
         }
