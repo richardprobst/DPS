@@ -327,13 +327,17 @@ class DPS_Settings_Frontend {
             return self::render_access_denied();
         }
 
+        // Enfileira assets dedicados de configurações
+        self::enqueue_settings_assets();
+
         $active_tab = self::get_active_tab();
+        $tab_count  = count( self::$tabs );
 
         ob_start();
         ?>
         <div class="dps-base-wrapper dps-settings-wrapper">
             <h1 class="dps-page-title">
-                <span class="dashicons dashicons-admin-settings" style="font-size: 28px; width: 28px; height: 28px; margin-right: 8px; vertical-align: middle; color: #0ea5e9;"></span>
+                <span class="dashicons dashicons-admin-settings"></span>
                 <?php esc_html_e( 'Configurações do Sistema', 'desi-pet-shower' ); ?>
             </h1>
 
@@ -343,14 +347,50 @@ class DPS_Settings_Frontend {
             echo DPS_Message_Helper::display_messages();
             ?>
 
+            <div class="dps-settings-status-bar">
+                <span class="dps-status-item">
+                    <span class="dashicons dashicons-category"></span>
+                    <span class="dps-status-count"><?php echo esc_html( $tab_count ); ?></span>
+                    <?php esc_html_e( 'categorias', 'desi-pet-shower' ); ?>
+                </span>
+                <span class="dps-status-separator"></span>
+                <span class="dps-status-item">
+                    <span class="dashicons dashicons-admin-users"></span>
+                    <?php
+                    $current_user = wp_get_current_user();
+                    printf(
+                        /* translators: %s: Current user display name */
+                        esc_html__( 'Logado como %s', 'desi-pet-shower' ),
+                        esc_html( $current_user->display_name )
+                    );
+                    ?>
+                </span>
+            </div>
+
+            <div class="dps-settings-search-wrapper">
+                <span class="dashicons dashicons-search"></span>
+                <input type="text" 
+                       id="dps-settings-search" 
+                       class="dps-settings-search" 
+                       placeholder="<?php esc_attr_e( 'Buscar configuração... (ex: WhatsApp, senha, API)', 'desi-pet-shower' ); ?>" 
+                       autocomplete="off" />
+                <button type="button" class="dps-settings-search-clear" aria-label="<?php esc_attr_e( 'Limpar busca', 'desi-pet-shower' ); ?>">✕</button>
+            </div>
+
             <nav class="dps-nav-container dps-settings-nav" aria-label="<?php esc_attr_e( 'Navegação de configurações', 'desi-pet-shower' ); ?>">
                 <button type="button" class="dps-nav-mobile-toggle" aria-expanded="false" aria-controls="dps-settings-nav">
                     <?php esc_html_e( 'Selecionar categoria', 'desi-pet-shower' ); ?>
+                    <span class="dashicons dashicons-arrow-down-alt2"></span>
                 </button>
                 <ul class="dps-nav" id="dps-settings-nav" role="tablist">
                     <?php self::render_nav_tabs( $active_tab ); ?>
                 </ul>
             </nav>
+
+            <div class="dps-settings-no-results">
+                <span class="dashicons dashicons-search"></span>
+                <?php esc_html_e( 'Nenhuma configuração encontrada para o termo pesquisado.', 'desi-pet-shower' ); ?>
+            </div>
 
             <div class="dps-settings-content">
                 <?php self::render_tab_content( $active_tab ); ?>
@@ -358,6 +398,47 @@ class DPS_Settings_Frontend {
         </div>
         <?php
         return ob_get_clean();
+    }
+
+    /**
+     * Enfileira CSS e JS dedicados da página de configurações.
+     *
+     * @since 2.6.0
+     * @return void
+     */
+    private static function enqueue_settings_assets() {
+        static $enqueued = false;
+
+        if ( $enqueued ) {
+            return;
+        }
+
+        $enqueued = true;
+
+        $css_file = DPS_BASE_DIR . 'assets/css/dps-settings.css';
+        $js_file  = DPS_BASE_DIR . 'assets/js/dps-settings.js';
+
+        $css_version = file_exists( $css_file ) ? (string) filemtime( $css_file ) : DPS_BASE_VERSION;
+        $js_version  = file_exists( $js_file ) ? (string) filemtime( $js_file ) : DPS_BASE_VERSION;
+
+        wp_enqueue_style(
+            'dps-settings-style',
+            DPS_BASE_URL . 'assets/css/dps-settings.css',
+            [ 'dps-base-style' ],
+            $css_version
+        );
+
+        wp_enqueue_script(
+            'dps-settings-script',
+            DPS_BASE_URL . 'assets/js/dps-settings.js',
+            [ 'jquery' ],
+            $js_version,
+            true
+        );
+
+        wp_localize_script( 'dps-settings-script', 'dpsSettingsL10n', [
+            'unsavedChanges' => __( 'Alterações não salvas', 'desi-pet-shower' ),
+        ] );
     }
 
     /**

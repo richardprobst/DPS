@@ -1,0 +1,555 @@
+/**
+ * DPS Settings Page Styles
+ *
+ * Estilos dedicados para a página de configurações do sistema
+ * renderizada pelo shortcode [dps_configuracoes].
+ *
+ * @package DPS_Base_Plugin
+ * @since 2.6.0
+ */
+
+/* ========================================
+   1. Layout da Página de Configurações
+   ======================================== */
+
+.dps-settings-wrapper {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.dps-settings-wrapper .dps-page-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+    padding: 0;
+    line-height: 1.3;
+}
+
+.dps-settings-wrapper .dps-page-title .dashicons {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    color: #0ea5e9;
+}
+
+/* ========================================
+   2. Barra de Informações (Status Bar)
+   ======================================== */
+
+.dps-settings-status-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: #64748b;
+    flex-wrap: wrap;
+}
+
+.dps-settings-status-bar .dps-status-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.dps-settings-status-bar .dps-status-item .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #94a3b8;
+}
+
+.dps-settings-status-bar .dps-status-count {
+    font-weight: 600;
+    color: #0ea5e9;
+}
+
+.dps-settings-status-bar .dps-status-separator {
+    width: 1px;
+    height: 16px;
+    background: #e2e8f0;
+}
+
+/* ========================================
+   3. Campo de Busca de Configurações
+   ======================================== */
+
+.dps-settings-search-wrapper {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.dps-settings-search-wrapper .dashicons-search {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+.dps-settings-search {
+    width: 100%;
+    padding: 10px 12px 10px 38px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #374151;
+    background: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+
+.dps-settings-search:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.dps-settings-search::placeholder {
+    color: #94a3b8;
+}
+
+.dps-settings-search-clear {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #94a3b8;
+    font-size: 16px;
+    line-height: 1;
+    display: none;
+}
+
+.dps-settings-search-clear:hover {
+    color: #64748b;
+}
+
+.dps-settings-search-wrapper.has-value .dps-settings-search-clear {
+    display: block;
+}
+
+/* ========================================
+   4. Navegação de Abas (Melhorada)
+   ======================================== */
+
+.dps-settings-wrapper .dps-settings-nav {
+    margin-bottom: 24px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 6px;
+}
+
+.dps-settings-wrapper .dps-settings-nav .dps-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dps-settings-wrapper .dps-settings-nav .dps-nav li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dps-settings-wrapper .dps-settings-nav .dps-nav .dps-tab-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    line-height: 1.4;
+}
+
+.dps-settings-wrapper .dps-settings-nav .dps-nav .dps-tab-link:hover {
+    background: #f1f5f9;
+    color: #334155;
+    text-decoration: none;
+}
+
+.dps-settings-wrapper .dps-settings-nav .dps-nav .dps-tab-link.active {
+    background: #0ea5e9;
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(14, 165, 233, 0.3);
+}
+
+.dps-settings-wrapper .dps-settings-nav .dps-nav .dps-tab-link.active:hover {
+    background: #0284c7;
+}
+
+/* Resultado da busca - destaque nas tabs */
+.dps-settings-wrapper .dps-settings-nav .dps-nav .dps-tab-link.search-match {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dps-settings-wrapper .dps-settings-nav .dps-nav .dps-tab-link.search-match.active {
+    background: #0ea5e9;
+    color: #fff;
+}
+
+/* ========================================
+   5. Conteúdo das Abas
+   ======================================== */
+
+.dps-settings-content {
+    min-height: 200px;
+}
+
+.dps-settings-section {
+    animation: dpsSettingsFadeIn 0.25s ease-out;
+}
+
+@keyframes dpsSettingsFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   6. Formulários de Configurações
+   ======================================== */
+
+.dps-settings-form .dps-surface {
+    margin-bottom: 20px;
+}
+
+.dps-settings-form .dps-fieldset {
+    margin-bottom: 20px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fafbfc;
+}
+
+.dps-settings-form .dps-fieldset legend {
+    font-weight: 600;
+    font-size: 14px;
+    color: #374151;
+    padding: 0 8px;
+}
+
+.dps-settings-form .dps-form-row {
+    margin-bottom: 16px;
+}
+
+.dps-settings-form .dps-form-row:last-child {
+    margin-bottom: 0;
+}
+
+.dps-settings-form .dps-form-row > label:first-child {
+    display: block;
+    font-weight: 500;
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.dps-settings-form input[type="text"],
+.dps-settings-form input[type="password"],
+.dps-settings-form input[type="email"],
+.dps-settings-form input[type="url"],
+.dps-settings-form input[type="number"],
+.dps-settings-form input[type="time"],
+.dps-settings-form input[type="color"],
+.dps-settings-form select,
+.dps-settings-form textarea {
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #374151;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-settings-form input:focus,
+.dps-settings-form select:focus,
+.dps-settings-form textarea:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.dps-settings-form .description {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 4px;
+    line-height: 1.5;
+}
+
+/* ========================================
+   7. Botões de Ação
+   ======================================== */
+
+.dps-settings-form .dps-form-actions {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dps-settings-form .dps-form-actions .button-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.dps-settings-form .dps-form-actions .button-primary .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* ========================================
+   8. Avisos e Notificações
+   ======================================== */
+
+.dps-settings-form .dps-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.dps-settings-form .dps-notice .dashicons {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.dps-settings-form .dps-notice--info {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #dbeafe;
+}
+
+.dps-settings-form .dps-notice--warning {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fef3c7;
+}
+
+/* ========================================
+   9. Indicador de Próximo Agendamento
+   ======================================== */
+
+.dps-next-schedule {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-left: 8px;
+    font-weight: 500;
+}
+
+/* ========================================
+   10. Mensagem de Busca Sem Resultados
+   ======================================== */
+
+.dps-settings-no-results {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+    color: #94a3b8;
+    font-size: 15px;
+}
+
+.dps-settings-no-results .dashicons {
+    display: block;
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 12px;
+    color: #cbd5e1;
+}
+
+.dps-settings-no-results.visible {
+    display: block;
+}
+
+/* ========================================
+   11. Destaque de Busca (Highlight)
+   ======================================== */
+
+.dps-settings-section .dps-fieldset.search-highlight {
+    border-color: #fbbf24;
+    background: #fffbeb;
+    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
+}
+
+.dps-settings-section .dps-form-row.search-highlight label {
+    color: #92400e;
+    font-weight: 600;
+}
+
+/* ========================================
+   12. Indicador de Modificações (Unsaved)
+   ======================================== */
+
+.dps-settings-form.is-dirty .dps-form-actions {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    z-index: 10;
+    padding: 16px 20px;
+    margin: 24px -20px 0;
+    border-top: 2px solid #0ea5e9;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 0;
+}
+
+.dps-unsaved-indicator {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #f59e0b;
+    font-weight: 500;
+}
+
+.dps-unsaved-indicator .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.dps-settings-form.is-dirty .dps-unsaved-indicator {
+    display: inline-flex;
+}
+
+/* ========================================
+   13. Mobile / Responsivo
+   ======================================== */
+
+@media (max-width: 768px) {
+    .dps-settings-wrapper {
+        padding: 12px;
+    }
+
+    .dps-settings-wrapper .dps-page-title {
+        font-size: 20px;
+    }
+
+    .dps-settings-status-bar {
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 12px;
+    }
+
+    .dps-settings-status-bar .dps-status-separator {
+        display: none;
+    }
+
+    .dps-settings-wrapper .dps-settings-nav {
+        padding: 4px;
+    }
+
+    .dps-settings-wrapper .dps-settings-nav .dps-nav-mobile-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 10px 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #374151;
+        cursor: pointer;
+    }
+
+    .dps-settings-wrapper .dps-settings-nav .dps-nav {
+        display: none;
+        flex-direction: column;
+        margin-top: 6px;
+    }
+
+    .dps-settings-wrapper .dps-settings-nav.is-open .dps-nav {
+        display: flex;
+    }
+
+    .dps-settings-wrapper .dps-settings-nav .dps-nav .dps-tab-link {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 4px;
+    }
+
+    .dps-settings-form .dps-fieldset {
+        padding: 12px;
+    }
+
+    .dps-settings-form .dps-form-actions {
+        flex-direction: column;
+    }
+
+    .dps-settings-form .dps-form-actions .button-primary {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .dps-settings-form.is-dirty .dps-form-actions {
+        margin: 24px -12px 0;
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-settings-wrapper .dps-page-title {
+        font-size: 18px;
+    }
+
+    .dps-settings-wrapper .dps-page-title .dashicons {
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
+    }
+}
