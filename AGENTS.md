@@ -157,9 +157,11 @@ O DPS adota padrão **minimalista/clean** no admin.
 - Mantenha hierarquia semântica (H1 único, H2 seções, H3 subseções).
 - Feedback consistente: use `DPS_Message_Helper` para sucesso/erro/aviso.
 - Responsividade básica quando necessário (480/768/1024).
+- **Antes de criar qualquer frontend**, consulte `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` para metodologia de design, contextos de uso e checklist de implementação.
 
 Referências completas:
-- `docs/visual/VISUAL_STYLE_GUIDE.md`
+- `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` — **instruções completas de design frontend** (metodologia, contextos, acessibilidade, performance)
+- `docs/visual/VISUAL_STYLE_GUIDE.md` — paleta, componentes e espaçamento
 - `docs/layout/admin/ADMIN_LAYOUT_ANALYSIS.md`
 - `docs/implementation/UI_UX_IMPROVEMENTS_SUMMARY.md`
 

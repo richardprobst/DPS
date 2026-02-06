@@ -207,9 +207,10 @@ Documentação de segurança e auditoria.
 
 ### 📁 /docs/visual
 
-Guia de estilo visual (cores, tipografia, componentes).
+Guia de estilo visual (cores, tipografia, componentes) e instruções de design frontend.
 
 **Arquivos:**
+- `FRONTEND_DESIGN_INSTRUCTIONS.md` - **🆕 Instruções completas de design frontend** (metodologia, contextos de uso, tipografia, motion, acessibilidade, performance, checklists)
 - `VISUAL_STYLE_GUIDE.md` - Guia oficial de estilo visual minimalista
 - `visual-comparison.html` - Comparação visual de componentes
 
@@ -236,7 +237,8 @@ Os seguintes documentos permanecem na raiz do repositório como **documentos cen
 8. **Para detalhes de UX/UI**: navegue até a subpasta correspondente em `/docs/layout`
 9. **Para planos de refatoração**: consulte `/docs/refactoring`
 10. **Para padrões visuais**: veja `/docs/visual/VISUAL_STYLE_GUIDE.md`
-11. **Para página de configurações front-end**: veja `docs/settings/FRONTEND_SETTINGS_IMPLEMENTATION_PLAN.md`
+11. **Para criar/modificar frontends**: veja `/docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`
+12. **Para página de configurações front-end**: veja `docs/settings/FRONTEND_SETTINGS_IMPLEMENTATION_PLAN.md`
 
 ## Navegação Rápida
 
