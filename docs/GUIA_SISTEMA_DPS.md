@@ -141,8 +141,8 @@ O sistema é composto por um **plugin base** e **17 add-ons opcionais**:
 
 | Requisito | Versão Mínima | Recomendado |
 |-----------|---------------|-------------|
-| WordPress | 6.0+ | 6.9+ |
-| PHP | 7.4+ | 8.3+ |
+| WordPress | 6.9+ | 6.9+ |
+| PHP | 8.4+ | 8.4+ |
 | MySQL | 5.7+ | 8.0+ |
 | MariaDB | 10.2+ | 10.6+ |
 

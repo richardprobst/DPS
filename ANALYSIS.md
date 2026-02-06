@@ -712,7 +712,7 @@ O sistema suporta três tipos de agendamentos, identificados pelo metadado `appo
 - Clientes, pets e serviços relacionados são resolvidos com caches em memória por ID, evitando `get_post` duplicadas quando o mesmo registro aparece em várias linhas.
 - O botão de exportação gera CSV apenas com as colunas exibidas e respeita os filtros aplicados na tabela, o que limita o volume exportado a um subconjunto relevante e já paginado/filtrado pelo usuário.
 
-## Add-ons complementares (`add-ons/`)
+## Add-ons complementares (`plugins/`)
 
 ### Text Domains para Internacionalização (i18n)
 
@@ -725,6 +725,7 @@ Todos os plugins e add-ons do DPS seguem o padrão WordPress de text domains par
 - `dps-agenda-addon` - Agenda e agendamentos
 - `dps-ai` - Assistente de IA
 - `dps-backup-addon` - Backup e restauração
+- `dps-booking-addon` - Página dedicada de agendamentos
 - `dps-client-portal` - Portal do cliente
 - `dps-communications-addon` - Comunicações (WhatsApp, SMS, email)
 - `dps-finance-addon` - Financeiro (transações, parcelas, cobranças)
@@ -754,7 +755,7 @@ Todos os plugins e add-ons do DPS seguem o padrão WordPress de text domains par
 - **Não** carregar text domains ou instanciar classes antes do hook `init` (evitar `plugins_loaded` ou escopo global)
 
 **Status de localização pt_BR**:
-- ✅ Todos os 16 plugins (1 base + 15 add-ons) possuem headers `Text Domain` e `Domain Path` corretos
+- ✅ Todos os 17 plugins (1 base + 16 add-ons) possuem headers `Text Domain` e `Domain Path` corretos
 - ✅ Todos os plugins carregam text domain no hook `init` com prioridade 1
 - ✅ Todas as classes são inicializadas no hook `init` com prioridade 5
 - ✅ Todo código, comentários e strings estão em Português do Brasil
@@ -924,6 +925,49 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - Mapeamento inteligente de IDs: clientes → pets → agendamentos → transações
 
 **Análise completa**: Consulte `docs/analysis/BACKUP_ADDON_ANALYSIS.md` para análise detalhada de código, funcionalidades, segurança e melhorias propostas
+
+---
+
+### Booking (`desi-pet-shower-booking_addon`)
+
+**Diretório**: `plugins/desi-pet-shower-booking`
+
+**Propósito e funcionalidades principais**:
+- Página dedicada de agendamentos para administradores
+- Mesma funcionalidade da aba Agendamentos do Painel de Gestão DPS, porém em página independente
+- Formulário completo com seleção de cliente, pets, serviços, data/hora, tipo de agendamento (avulso/assinatura) e status de pagamento
+- Tela de confirmação pós-agendamento com resumo e ações rápidas (WhatsApp, novo agendamento, voltar ao painel)
+
+**Shortcodes expostos**:
+- `[dps_booking_form]`: renderiza formulário completo de agendamento
+
+**CPTs, tabelas e opções**:
+- Não cria CPTs ou tabelas próprias; consome `dps_agendamento` do núcleo
+- Cria página automaticamente na ativação: "Agendamento de Serviços"
+- Options: `dps_booking_page_id`
+
+**Hooks consumidos**:
+- `dps_base_after_save_appointment`: captura agendamento salvo para exibir tela de confirmação
+
+**Hooks disparados**: Nenhum hook próprio
+
+**Endpoints AJAX**: Nenhum
+
+**Dependências**:
+- Depende do plugin base para CPTs de agendamento e helpers globais
+- Integra-se com Services Add-on para listagem de serviços disponíveis
+- Integra-se com Groomers Add-on para atribuição de profissionais (se ativo)
+
+**Introduzido em**: v1.0.0
+
+**Assets**:
+- `assets/css/dps-booking-form.css`: estilos do formulário de agendamento
+- `assets/js/dps-booking-form.js`: interações do formulário (seleção de pets, datas, etc.)
+
+**Observações**:
+- Assets carregados condicionalmente apenas na página de agendamento (`dps_booking_page_id`)
+- Implementa `register_activation_hook` para criar página automaticamente
+- Formulário reutiliza lógica de salvamento do plugin base (`save_appointment`)
 
 ---
 
@@ -1888,7 +1932,7 @@ Esta seção consolida os principais hooks expostos pelo núcleo e pelos add-ons
 Para novos add-ons ou refatorações futuras, recomenda-se seguir a estrutura modular:
 
 ```
-add-ons/desi-pet-shower-NOME_addon/
+plugins/desi-pet-shower-NOME_addon/
 ├── desi-pet-shower-NOME-addon.php    # Arquivo principal (apenas bootstrapping)
 ├── includes/                          # Classes e lógica do negócio
 │   ├── class-dps-NOME-cpt.php        # Registro de Custom Post Types
@@ -2048,7 +2092,7 @@ public function exemplo_metodo( $param1, $param2, $args = [] ) {
 
 ## Add-on: White Label (Personalização de Marca)
 
-**Diretório**: `add-ons/desi-pet-shower-whitelabel_addon/`
+**Diretório**: `plugins/desi-pet-shower-whitelabel_addon/`
 
 **Versão**: 1.0.0
 

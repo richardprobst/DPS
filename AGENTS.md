@@ -79,7 +79,10 @@ Toda documentação adicional deve ser organizada nas seguintes subpastas:
 | `docs/refactoring/` | Refatoração de código | Planos, análises, diagramas |
 | `docs/review/` | Revisões de código e PRs | Verificações de PRs (ex: `pr-161/`) |
 | `docs/security/` | Segurança e auditoria | Correções de segurança, exemplos de vulnerabilidades |
+| `docs/settings/` | Configurações do sistema | Planos de implementação, verificações de configurações |
+| `docs/screenshots/` | Documentação visual e capturas | Screenshots, guias visuais de componentes |
 | `docs/visual/` | Estilo visual e design | Guias de estilo, comparações visuais |
+| `docs/qa/` | Quality assurance e validação funcional | Relatórios de QA, validações de add-ons |
 
 ### Regras para novos arquivos de documentação
 1. **NUNCA** criar arquivos `.md` soltos na raiz (exceto os listados acima)
