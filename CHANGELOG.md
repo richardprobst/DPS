@@ -83,6 +83,15 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Front-end de Configurações do Sistema (Base v2.6.0)**
+
+- **CSS dedicado para configurações** (`dps-settings.css`): Folha de estilos exclusiva para a página de configurações com layout melhorado, barra de status, campo de busca, navegação por abas aprimorada, indicador de alterações não salvas e design responsivo completo.
+- **JavaScript dedicado para configurações** (`dps-settings.js`): Navegação client-side entre abas sem recarregar a página, busca em tempo real com destaque visual dos resultados encontrados, rastreamento de alterações não salvas com aviso ao sair da página.
+- **Barra de status**: Exibe contagem de categorias de configuração disponíveis e nome do usuário logado.
+- **Busca de configurações**: Campo de pesquisa que filtra e destaca configurações em todas as abas simultaneamente, com indicador visual de "sem resultados" e destaque nas abas que contêm resultados.
+- **Indicador de alterações não salvas**: Detecção automática de modificações em formulários com barra de ação fixa (sticky) e aviso `beforeunload` para prevenir perda de dados.
+- **Enfileiramento automático de assets**: CSS e JS de configurações são carregados apenas na página de configurações, com versionamento automático por data de modificação do arquivo.
+
 **Redesign da Página de Detalhes do Cliente (Base v1.3.0)**
 
 - **Novo layout de cabeçalho**: Reorganização visual com navegação separada, título com badges e ações primárias destacadas.
