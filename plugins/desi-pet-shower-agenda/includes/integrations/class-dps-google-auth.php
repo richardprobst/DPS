@@ -393,12 +393,17 @@ class DPS_Google_Auth {
             return DPS_ENCRYPTION_KEY;
         }
         
-        // Fallback: usa hash de AUTH_KEY do WordPress
-        if ( defined( 'AUTH_KEY' ) ) {
+        // Fallback: usa hash de AUTH_KEY do WordPress (se configurada com entropia suficiente)
+        if ( defined( 'AUTH_KEY' ) && strlen( AUTH_KEY ) >= 32 && ! str_contains( AUTH_KEY, 'put your unique phrase here' ) ) {
             return hash( 'sha256', AUTH_KEY . 'dps_google_integrations' );
         }
         
-        // Último recurso (não recomendado para produção)
-        return hash( 'sha256', 'dps_google_integrations_fallback' );
+        // Último recurso: gera chave única por instalação e persiste (autoload desativado)
+        $stored_key = get_option( 'dps_encryption_key_fallback' );
+        if ( ! $stored_key ) {
+            $stored_key = wp_generate_password( 64, true, true );
+            update_option( 'dps_encryption_key_fallback', $stored_key, false );
+        }
+        return hash( 'sha256', $stored_key );
     }
 }

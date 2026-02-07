@@ -176,37 +176,18 @@ class DPS_Agenda_Capacity_Helper {
     }
 
     /**
-     * Retorna a cor CSS baseada na ocupação.
+     * Retorna a classe CSS de ocupação baseada no nível.
      *
      * @param float $occupancy Ocupação (0 a 1+).
-     * @return string Cor CSS.
+     * @return string Classe CSS ('available', 'busy' ou 'full').
      */
-    public static function get_occupancy_color( $occupancy ) {
+    public static function get_occupancy_level( $occupancy ) {
         if ( $occupancy <= 0.5 ) {
-            // 0-50%: verde
-            return '#d1fae5';
+            return 'available';
         } elseif ( $occupancy <= 0.8 ) {
-            // 51-80%: amarelo
-            return '#fef3c7';
+            return 'busy';
         } else {
-            // >80%: vermelho
-            return '#fee2e2';
-        }
-    }
-
-    /**
-     * Retorna a cor do texto baseada na ocupação.
-     *
-     * @param float $occupancy Ocupação (0 a 1+).
-     * @return string Cor CSS do texto.
-     */
-    public static function get_occupancy_text_color( $occupancy ) {
-        if ( $occupancy <= 0.5 ) {
-            return '#10b981';
-        } elseif ( $occupancy <= 0.8 ) {
-            return '#f59e0b';
-        } else {
-            return '#ef4444';
+            return 'full';
         }
     }
 
@@ -286,11 +267,10 @@ class DPS_Agenda_Capacity_Helper {
                         $current_date = $start_date;
                         while ( $current_date <= $end_date ) :
                             $data = $heatmap_data[ $current_date ]['morning'];
-                            $bg_color = self::get_occupancy_color( $data['occupancy'] );
-                            $text_color = self::get_occupancy_text_color( $data['occupancy'] );
+                            $level = self::get_occupancy_level( $data['occupancy'] );
                             $percentage = round( $data['occupancy'] * 100 );
                             ?>
-                            <td style="background-color: <?php echo esc_attr( $bg_color ); ?>; color: <?php echo esc_attr( $text_color ); ?>;">
+                            <td class="dps-heatmap-cell-<?php echo esc_attr( $level ); ?>">
                                 <div class="dps-heatmap-cell">
                                     <div class="dps-heatmap-ratio">
                                         <?php echo esc_html( $data['scheduled'] . '/' . $data['capacity'] ); ?>
@@ -316,11 +296,10 @@ class DPS_Agenda_Capacity_Helper {
                         $current_date = $start_date;
                         while ( $current_date <= $end_date ) :
                             $data = $heatmap_data[ $current_date ]['afternoon'];
-                            $bg_color = self::get_occupancy_color( $data['occupancy'] );
-                            $text_color = self::get_occupancy_text_color( $data['occupancy'] );
+                            $level = self::get_occupancy_level( $data['occupancy'] );
                             $percentage = round( $data['occupancy'] * 100 );
                             ?>
-                            <td style="background-color: <?php echo esc_attr( $bg_color ); ?>; color: <?php echo esc_attr( $text_color ); ?>;">
+                            <td class="dps-heatmap-cell-<?php echo esc_attr( $level ); ?>">
                                 <div class="dps-heatmap-cell">
                                     <div class="dps-heatmap-ratio">
                                         <?php echo esc_html( $data['scheduled'] . '/' . $data['capacity'] ); ?>
@@ -341,15 +320,15 @@ class DPS_Agenda_Capacity_Helper {
             <!-- Legenda -->
             <div class="dps-heatmap-legend">
                 <div class="dps-heatmap-legend-item">
-                    <span class="dps-heatmap-legend-color" style="background-color: #d1fae5;"></span>
+                    <span class="dps-heatmap-legend-color dps-heatmap-legend-color--available"></span>
                     <span><?php esc_html_e( '0-50% (Disponível)', 'dps-agenda-addon' ); ?></span>
                 </div>
                 <div class="dps-heatmap-legend-item">
-                    <span class="dps-heatmap-legend-color" style="background-color: #fef3c7;"></span>
+                    <span class="dps-heatmap-legend-color dps-heatmap-legend-color--busy"></span>
                     <span><?php esc_html_e( '51-80% (Ocupado)', 'dps-agenda-addon' ); ?></span>
                 </div>
                 <div class="dps-heatmap-legend-item">
-                    <span class="dps-heatmap-legend-color" style="background-color: #fee2e2;"></span>
+                    <span class="dps-heatmap-legend-color dps-heatmap-legend-color--full"></span>
                     <span><?php esc_html_e( '>80% (Lotado)', 'dps-agenda-addon' ); ?></span>
                 </div>
             </div>
