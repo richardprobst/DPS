@@ -279,7 +279,7 @@ function dps_client_portal_check_configuration() {
         add_action( 'admin_notices', function() use ( $messages ) {
             foreach ( $messages as $msg ) {
                 $class = 'notice notice-' . esc_attr( $msg['type'] ) . ' is-dismissible';
-                printf( '<div class="%s"><p>%s</p></div>', $class, $msg['message'] );
+                printf( '<div class="%s"><p>%s</p></div>', $class, wp_kses_post( $msg['message'] ) );
             }
         } );
     }

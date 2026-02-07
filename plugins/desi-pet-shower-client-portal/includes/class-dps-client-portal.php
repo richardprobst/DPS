@@ -116,17 +116,17 @@ final class DPS_Client_Portal {
         // add_action( 'dps_settings_nav_tabs', [ $this, 'render_logins_tab' ], 20, 1 );
         // add_action( 'dps_settings_sections', [ $this, 'render_logins_section' ], 20, 1 );
         
-        // AJAX handlers para o chat do portal
-        add_action( 'wp_ajax_dps_chat_get_messages', [ $this, 'ajax_get_chat_messages' ] );
-        add_action( 'wp_ajax_nopriv_dps_chat_get_messages', [ $this, 'ajax_get_chat_messages' ] );
-        add_action( 'wp_ajax_dps_chat_send_message', [ $this, 'ajax_send_chat_message' ] );
-        add_action( 'wp_ajax_nopriv_dps_chat_send_message', [ $this, 'ajax_send_chat_message' ] );
-        add_action( 'wp_ajax_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
-        add_action( 'wp_ajax_nopriv_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
-        
-        // AJAX handler para notificação de solicitação de acesso (Fase 1.4)
-        add_action( 'wp_ajax_dps_request_portal_access', [ $this, 'ajax_request_portal_access' ] );
-        add_action( 'wp_ajax_nopriv_dps_request_portal_access', [ $this, 'ajax_request_portal_access' ] );
+        // REMOVIDO: Hooks AJAX legados para chat e solicitação de acesso
+        // Estes handlers agora são registrados exclusivamente por DPS_Portal_AJAX_Handler (Fase 3.0.0)
+        // Manter ambos causava execução duplicada dos callbacks.
+        // add_action( 'wp_ajax_dps_chat_get_messages', [ $this, 'ajax_get_chat_messages' ] );
+        // add_action( 'wp_ajax_nopriv_dps_chat_get_messages', [ $this, 'ajax_get_chat_messages' ] );
+        // add_action( 'wp_ajax_dps_chat_send_message', [ $this, 'ajax_send_chat_message' ] );
+        // add_action( 'wp_ajax_nopriv_dps_chat_send_message', [ $this, 'ajax_send_chat_message' ] );
+        // add_action( 'wp_ajax_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
+        // add_action( 'wp_ajax_nopriv_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
+        // add_action( 'wp_ajax_dps_request_portal_access', [ $this, 'ajax_request_portal_access' ] );
+        // add_action( 'wp_ajax_nopriv_dps_request_portal_access', [ $this, 'ajax_request_portal_access' ] );
         
         // AJAX handler para auto-envio de link de acesso por email
         add_action( 'wp_ajax_dps_request_access_link_by_email', [ $this, 'ajax_request_access_link_by_email' ] );
@@ -683,7 +683,10 @@ final class DPS_Client_Portal {
             update_post_meta( $client_id, 'client_period_preference', $period_pref );
             
             // Hook: Após atualizar preferências
-            do_action( 'dps_portal_after_update_preferences', $client_id, $_POST );
+            do_action( 'dps_portal_after_update_preferences', $client_id, [
+                'contact_preference' => $contact_pref,
+                'period_preference'  => $period_pref,
+            ] );
             
             $redirect_url = add_query_arg( 'portal_msg', 'preferences_updated', $redirect_url );
         } elseif ( 'update_pet_preferences' === $action && isset( $_POST['pet_id'] ) ) {
@@ -706,7 +709,11 @@ final class DPS_Client_Portal {
             update_post_meta( $pet_id, 'pet_product_notes', $product_notes );
             
             // Hook: Após atualizar preferências do pet
-            do_action( 'dps_portal_after_update_pet_preferences', $pet_id, $client_id, $_POST );
+            do_action( 'dps_portal_after_update_pet_preferences', $pet_id, $client_id, [
+                'behavior_notes'     => $behavior_notes,
+                'grooming_preference' => $grooming_pref,
+                'product_notes'      => $product_notes,
+            ] );
             
             $redirect_url = add_query_arg( 'portal_msg', 'pet_preferences_updated', $redirect_url );
         } elseif ( 'submit_internal_review' === $action ) {
@@ -760,7 +767,7 @@ final class DPS_Client_Portal {
             }
         }
 
-        wp_redirect( $redirect_url );
+        wp_safe_redirect( $redirect_url );
         exit;
     }
 
