@@ -1,37 +1,44 @@
 /**
  * Estilos da Agenda de Atendimentos - DPS
+ * Material Design 3 Expressive
  * 
- * Arquivo criado para centralizar os estilos da agenda, seguindo o padrão minimalista/clean:
- * - Paleta enxuta de cores
- * - Bordas simples (sem sombras exageradas)
- * - Sem transformações de movimento em hover
- * - Foco em legibilidade e espaço em branco
+ * Este arquivo segue o sistema de design M3 Expressive do DPS:
+ * - Todas as cores via var(--dps-color-*) / var(--dps-*) tokens
+ * - Formas via var(--dps-shape-*) tokens
+ * - Elevação via var(--dps-elevation-*) tokens
+ * - Movimento via var(--dps-motion-*) tokens
+ * - Espaçamento via var(--dps-space-*) tokens
+ * - Tipografia via var(--dps-typescale-*) tokens
+ *
+ * Requer: dps-design-tokens.css carregado antes deste arquivo.
  *
  * Compatibilidade com Microsoft Edge e outros navegadores:
  * - Propriedade 'inset:' substituída por top/right/bottom/left para Edge antigo
  * - backdrop-filter inclui prefixo -webkit- para Safari/Edge antigo
  * - Fallbacks via classes JS para seletores :has() quando necessário
+ *
+ * @version 2.0.0
  */
 
-/* === Variáveis CSS e Estrutura Base === */
+/* === Variáveis CSS e Estrutura Base (M3 Expressive) === */
 .dps-agenda-wrapper {
-    --dps-accent: #2563eb;
-    --dps-accent-strong: #1d4ed8;
-    --dps-accent-soft: #eff6ff;
-    --dps-surface: #ffffff;
-    --dps-background: #f8fafc;
-    --dps-border: #e2e8f0;
-    --dps-muted: #64748b;
-    --dps-text-primary: #0f172a;
-    --dps-text-secondary: #374151;
-    --dps-btn-gradient-start: #0ea5e9;
-    --dps-btn-gradient-end: #0284c7;
-    --dps-status-pending: #f59e0b;
-    --dps-status-finished: #0ea5e9;
-    --dps-status-paid: #22c55e;
-    --dps-status-cancelled: #ef4444;
+    /* Tokens semânticos mapeados para M3 (via dps-design-tokens.css) */
+    --dps-accent: var(--dps-color-primary);
+    --dps-accent-strong: var(--dps-color-primary-pressed);
+    --dps-accent-soft: var(--dps-color-primary-container);
+    --dps-surface: var(--dps-color-surface-container-lowest);
+    --dps-background: var(--dps-color-surface);
+    --dps-border: var(--dps-color-outline-variant);
+    --dps-muted: var(--dps-color-on-surface-variant);
+    --dps-text-primary: var(--dps-color-on-surface);
+    --dps-text-secondary: var(--dps-color-on-surface-variant);
+    --dps-status-pending: var(--dps-color-warning);
+    --dps-status-finished: var(--dps-color-primary);
+    --dps-status-paid: var(--dps-color-success);
+    --dps-status-cancelled: var(--dps-color-error);
     max-width: 100%;
-    color: var(--dps-text-primary);
+    color: var(--dps-color-on-surface);
+    font-family: var(--dps-font-system);
 }
 
 .dps-agenda-wrapper * {
@@ -43,12 +50,12 @@
 .dps-agenda-wrapper h4,
 .dps-agenda-wrapper h5 {
     margin: 0 0 0.75rem;
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-agenda-wrapper h4 {
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .dps-agenda-header {
@@ -58,10 +65,10 @@
     gap: 1rem;
     margin-bottom: 1rem;
     padding: 1rem 1.25rem;
-    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    background: var(--dps-color-surface-container-low);
     border: 1px solid var(--dps-border);
-    border-radius: 0.75rem;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+    border-radius: var(--dps-shape-card);
+    box-shadow: var(--dps-elevation-1);
 }
 
 .dps-agenda-title h3 {
@@ -92,7 +99,7 @@
 
 .dps-agenda-header .dps-current-date {
     font-size: 0.9375rem;
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-agenda-header .dps-date-nav {
@@ -111,7 +118,7 @@
     padding: 1rem 1.25rem;
     background: var(--dps-surface);
     border: 1px solid var(--dps-border);
-    border-radius: 0.75rem;
+    border-radius: var(--dps-shape-card);
     /* Estilo minimalista: sem sombras decorativas */
 }
 
@@ -151,18 +158,19 @@
     min-width: 11.5rem;
     padding: 0.55rem 0.75rem;
     border: 1px solid var(--dps-border);
-    border-radius: 0.65rem;
-    background: #fff;
-    color: #0f172a;
+    border-radius: var(--dps-shape-card);
+    background: var(--dps-color-surface-container-lowest);
+    color: var(--dps-color-on-surface);
     font-size: 0.95rem;
     line-height: 1.4;
-    transition: border-color .2s ease, box-shadow .2s ease;
+    transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
 }
 
 .dps-status-select:focus {
     outline: none;
     border-color: var(--dps-accent);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 /* === Barra de contexto === */
@@ -175,7 +183,7 @@
     padding: 0.9rem 1.1rem;
     background: var(--dps-background);
     border: 1px dashed var(--dps-border);
-    border-radius: 0.75rem;
+    border-radius: var(--dps-shape-card);
     margin-bottom: 1.5rem;
 }
 
@@ -191,18 +199,18 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.45rem 0.8rem;
-    background: #f3f4f6;
+    background: var(--dps-color-surface-container);
     border: 1px solid var(--dps-border);
-    border-radius: 999px;
+    border-radius: var(--dps-shape-full);
     font-size: 0.875rem;
-    font-weight: 600;
-    color: #374151;
+    font-weight: 500;
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-context-pill--accent {
-    background: #e0f2fe;
-    border-color: #bae6fd;
-    color: #0ea5e9;
+    background: var(--dps-color-primary-container);
+    border-color: var(--dps-color-primary-container);
+    color: var(--dps-color-primary);
 }
 
 .dps-context-hint {
@@ -233,72 +241,73 @@
     color: var(--dps-muted);
     background: var(--dps-background);
     border: 1px dashed var(--dps-border);
-    border-radius: 0.85rem;
+    border-radius: var(--dps-shape-card);
     word-break: break-word;
 }
 
-/* === Botões (Estilo Moderno - Padronizado com o Sistema DPS) === */
+/* === Botões (M3 Expressive - Padronizado com o Sistema DPS) === */
 .dps-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 15px;
-    line-height: 1.1;
+    gap: var(--dps-space-2);
+    padding: var(--dps-space-3) var(--dps-space-6);
+    border-radius: var(--dps-shape-button);
+    font-weight: var(--dps-typescale-label-large-weight);
+    font-size: var(--dps-typescale-label-large-size);
+    letter-spacing: var(--dps-typescale-label-large-tracking);
+    line-height: var(--dps-typescale-label-large-line);
     text-decoration: none;
     border: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dps-motion-hover);
+    min-height: 40px;
 }
 
 .dps-btn:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3);
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 .dps-btn--primary {
-    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-    color: #ffffff;
-    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+    background: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+    box-shadow: var(--dps-elevation-button);
 }
 
 .dps-btn--primary:hover {
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
-    transform: translateY(-1px);
-    color: #ffffff;
+    background: var(--dps-color-primary-hover);
+    box-shadow: var(--dps-elevation-2);
+    color: var(--dps-color-on-primary);
 }
 
 .dps-btn--primary:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
+    background: var(--dps-color-primary-pressed);
+    box-shadow: var(--dps-elevation-1);
 }
 
 .dps-btn--ghost {
     background: transparent;
-    border: 2px solid #0ea5e9;
-    color: #0ea5e9;
+    border: 1px solid var(--dps-color-outline);
+    color: var(--dps-color-primary);
 }
 
 .dps-btn--ghost:hover {
-    background: #f0f9ff;
-    border-color: #0284c7;
-    color: #0284c7;
+    background: rgba(11, 107, 203, 0.08);
+    border-color: var(--dps-color-outline);
+    color: var(--dps-color-primary);
 }
 
 .dps-btn--soft {
-    background: #ffffff;
-    border: 2px solid #e5e7eb;
-    color: #374151;
+    background: var(--dps-color-secondary-container);
+    border: none;
+    color: var(--dps-color-on-secondary-container);
 }
 
 .dps-btn--soft:hover {
-    border-color: #0ea5e9;
-    color: #0ea5e9;
-    background: #f9fafb;
+    box-shadow: var(--dps-elevation-1);
+    color: var(--dps-color-on-secondary-container);
+    background: var(--dps-color-secondary-container);
 }
 
 /* Botão Novo na barra de navegação - destaque especial */
@@ -325,10 +334,10 @@
     justify-content: center;
     margin: 1rem 0 1.5rem;
     padding: 1rem 1.25rem;
-    background: linear-gradient(135deg, var(--dps-accent-soft) 0%, #f0f9ff 100%);
-    border: 1px solid rgba(37, 99, 235, 0.15);
-    border-radius: 0.75rem;
-    color: #0f172a;
+    background: var(--dps-color-primary-container);
+    border: 1px solid rgba(11, 107, 203, 0.12);
+    border-radius: var(--dps-shape-card);
+    color: var(--dps-color-on-surface);
 }
 
 .dps-summary-item {
@@ -337,15 +346,15 @@
     gap: 0.5rem;
     padding: 0.5rem 1rem;
     background: var(--dps-surface);
-    border-radius: 0.5rem;
+    border-radius: var(--dps-shape-chip);
     border: 1px solid var(--dps-border);
     font-size: 0.9rem;
-    transition: all 0.15s ease;
+    transition: all var(--dps-motion-press);
 }
 
 .dps-summary-item:hover {
     border-color: var(--dps-accent);
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+    box-shadow: var(--dps-elevation-1);
 }
 
 .dps-summary-icon {
@@ -354,20 +363,20 @@
 
 .dps-summary-item strong {
     font-size: 1.15rem;
-    font-weight: 700;
+    font-weight: 500;
     color: var(--dps-accent);
 }
 
 .dps-summary-item--pending strong {
-    color: #f59e0b;
+    color: var(--dps-color-warning);
 }
 
 .dps-summary-item--done strong {
-    color: #22c55e;
+    color: var(--dps-color-success);
 }
 
 .dps-summary-item--total strong {
-    color: #2563eb;
+    color: var(--dps-color-primary);
 }
 
 .dps-agenda-summary span {
@@ -385,7 +394,7 @@
 .dps-agenda-table-container {
     overflow-x: auto;
     margin-bottom: 1.5rem;
-    border-radius: 0.75rem;
+    border-radius: var(--dps-shape-card);
     background: var(--dps-surface);
     border: 1px solid var(--dps-border);
     -webkit-overflow-scrolling: touch;
@@ -397,7 +406,7 @@
 
 .dps-agenda-table-container::-webkit-scrollbar-thumb {
     background: rgba(15, 23, 42, 0.2);
-    border-radius: 999px;
+    border-radius: var(--dps-shape-full);
 }
 
 /* === Tabela de Agendamentos === */
@@ -413,7 +422,7 @@
     text-align: left;
     padding: 0.75rem 1rem;
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.02em;
     color: var(--dps-muted);
@@ -421,20 +430,20 @@
 }
 
 .dps-agenda-wrapper table.dps-table tbody tr {
-    transition: background .2s ease, border-left-color .2s ease;
+    transition: background var(--dps-motion-hover), border-left-color .2s ease;
     border-left: 3px solid transparent; /* Reduzido de 4px para 3px (estilo mais clean) */
     background: transparent;
 }
 
 .dps-agenda-wrapper table.dps-table tbody tr:hover {
-    background: #f9fafb;
+    background: var(--dps-color-surface-container-low);
 }
 
 .dps-agenda-wrapper table.dps-table tbody td {
     padding: 0.85rem 1rem;
     border-top: 1px solid var(--dps-border);
     vertical-align: middle;
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
     font-size: 0.95rem;
     line-height: 1.4;
 }
@@ -463,7 +472,7 @@
 /* === Links e Feedback === */
 .dps-services-link {
     color: var(--dps-accent);
-    font-weight: 600;
+    font-weight: 500;
     text-decoration: none;
 }
 
@@ -479,7 +488,7 @@
 }
 
 .dps-status-feedback--error {
-    color: #ef4444;
+    color: var(--dps-color-error);
 }
 
 .dps-status-select.is-loading {
@@ -489,8 +498,8 @@
 
 /* === Flag de Pet Agressivo === */
 .dps-aggressive-flag {
-    color: #ef4444;
-    font-weight: 700;
+    color: var(--dps-color-error);
+    font-weight: 500;
     cursor: help;
     margin-left: 0.25rem;
 }
@@ -505,19 +514,19 @@
 /* === Modal de Serviços === */
 .dps-modal-overlay {
     /* CSS Variables para o modal (necessárias pois o modal é anexado ao body e não herda de .dps-agenda-wrapper) */
-    --dps-accent: #2563eb;
-    --dps-accent-strong: #1d4ed8;
-    --dps-surface: #ffffff;
-    --dps-background: #f8fafc;
-    --dps-border: #e2e8f0;
-    --dps-muted: #64748b;
+    --dps-accent: var(--dps-color-primary);
+    --dps-accent-strong: var(--dps-color-primary-pressed);
+    --dps-surface: var(--dps-color-surface-container-lowest);
+    --dps-background: var(--dps-color-surface);
+    --dps-border: var(--dps-color-outline-variant);
+    --dps-muted: var(--dps-color-on-surface-variant);
     
     position: fixed;
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
-    background: rgba(15, 23, 42, 0.5);
+    background: rgba(0, 0, 0, 0.32);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -528,7 +537,7 @@
 .dps-modal-content {
     background: white;
     padding: 1.5rem;
-    border-radius: 0.75rem;
+    border-radius: var(--dps-shape-card);
     max-width: 500px;
     width: 100%;
     border: 1px solid var(--dps-border);
@@ -546,9 +555,9 @@
 
 .dps-modal-title {
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 500;
     margin: 0;
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-modal-close {
@@ -564,13 +573,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 0.375rem;
-    transition: background .2s ease, color .2s ease;
+    border-radius: var(--dps-shape-extra-small);
+    transition: background var(--dps-motion-hover), color var(--dps-motion-hover);
 }
 
 .dps-modal-close:hover {
     background: var(--dps-background);
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-modal-body {
@@ -596,11 +605,11 @@
 
 .dps-service-name {
     font-weight: 500;
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-service-price {
-    font-weight: 600;
+    font-weight: 500;
     color: var(--dps-accent);
 }
 
@@ -610,7 +619,7 @@
     padding: 1rem 0 0.5rem;
     margin-top: 0.5rem;
     border-top: 2px solid var(--dps-border);
-    font-weight: 700;
+    font-weight: 500;
     font-size: 1.05rem;
 }
 
@@ -632,7 +641,7 @@
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    background: rgba(15, 23, 42, 0.55);
+    background: rgba(0, 0, 0, 0.32);
     z-index: 12000;
 }
 
@@ -650,13 +659,13 @@
 
 .dps-appointment-modal__content {
     position: relative;
-    background: #ffffff;
+    background: var(--dps-color-surface-container-lowest);
     border: 1px solid var(--dps-border);
-    border-radius: 0.85rem;
+    border-radius: var(--dps-shape-card);
     width: min(100%, 880px);
     max-height: 90vh;
     overflow: hidden;
-    box-shadow: 0 16px 48px rgba(15, 23, 42, 0.18);
+    box-shadow: var(--dps-elevation-4);
     display: flex;
     flex-direction: column;
 }
@@ -667,41 +676,41 @@
     justify-content: space-between;
     gap: 0.75rem;
     padding: 1.1rem 1.5rem;
-    background: #f9fafb;
+    background: var(--dps-color-surface-container-low);
     border-bottom: 1px solid var(--dps-border);
 }
 
 .dps-appointment-modal__title {
     margin: 0;
     font-size: 1.2rem;
-    font-weight: 600;
-    color: #374151;
+    font-weight: 500;
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-appointment-modal__close {
     border: 1px solid var(--dps-border);
-    background: #fff;
+    background: var(--dps-color-surface-container-lowest);
     width: 2.25rem;
     height: 2.25rem;
-    border-radius: 0.5rem;
+    border-radius: var(--dps-shape-chip);
     display: grid;
     place-items: center;
     font-size: 1.1rem;
-    color: #6b7280;
+    color: var(--dps-color-on-surface-variant);
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    transition: background var(--dps-motion-hover), color var(--dps-motion-hover), border-color var(--dps-motion-hover);
 }
 
 .dps-appointment-modal__close:hover {
-    background: #f3f4f6;
-    color: #111827;
-    border-color: #d1d5db;
+    background: var(--dps-color-surface-container);
+    color: var(--dps-color-on-surface);
+    border-color: var(--dps-color-outline-variant);
 }
 
 .dps-appointment-modal__body {
     padding: 1.5rem;
     overflow-y: auto;
-    background: #fff;
+    background: var(--dps-color-surface-container-lowest);
 }
 
 .dps-appointment-modal__messages {
@@ -711,8 +720,8 @@
 .dps-appointment-modal__loader {
     text-align: center;
     padding: 2rem 1rem;
-    color: #374151;
-    font-weight: 600;
+    color: var(--dps-color-on-surface-variant);
+    font-weight: 500;
 }
 
 .dps-section--modal {
@@ -742,15 +751,15 @@
 .dps-section--modal .dps-fieldset {
     margin-bottom: 1.5rem;
     padding: 1rem;
-    background: var(--dps-background, #f8fafc);
-    border-radius: 8px;
-    border: 1px solid var(--dps-border, #e2e8f0);
+    background: var(--dps-background, var(--dps-color-surface));
+    border-radius: var(--dps-shape-chip);
+    border: 1px solid var(--dps-border, var(--dps-color-outline-variant));
 }
 
 .dps-section--modal .dps-fieldset__legend {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 0.95rem;
-    color: var(--dps-text-secondary, #374151);
+    color: var(--dps-text-secondary, var(--dps-color-on-surface-variant));
     margin-bottom: 1rem;
 }
 
@@ -761,9 +770,9 @@
 .dps-section--modal .dps-form-field label {
     display: block;
     margin-bottom: 0.35rem;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 0.9rem;
-    color: var(--dps-text-secondary, #374151);
+    color: var(--dps-text-secondary, var(--dps-color-on-surface-variant));
 }
 
 .dps-section--modal select,
@@ -773,39 +782,40 @@
 .dps-section--modal textarea {
     width: 100%;
     padding: 0.65rem 0.85rem;
-    border: 1px solid var(--dps-border, #e2e8f0);
-    border-radius: 8px;
+    border: 1px solid var(--dps-border, var(--dps-color-outline-variant));
+    border-radius: var(--dps-shape-chip);
     font-size: 0.95rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
 }
 
 .dps-section--modal select:focus,
 .dps-section--modal input:focus,
 .dps-section--modal textarea:focus {
     outline: none;
-    border-color: var(--dps-accent, #2563eb);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    border-color: var(--dps-accent, var(--dps-color-primary));
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 /* Botão de submit no modal */
 .dps-section--modal .dps-appointment-submit,
 .dps-section--modal .button-primary {
-    background: linear-gradient(135deg, var(--dps-btn-gradient-start, #0ea5e9) 0%, var(--dps-btn-gradient-end, #0284c7) 100%);
-    color: #ffffff;
+    background: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
     border: none;
     padding: 0.85rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: var(--dps-shape-button);
+    font-weight: 500;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+    transition: all var(--dps-motion-hover);
+    box-shadow: var(--dps-elevation-button);
 }
 
 .dps-section--modal .dps-appointment-submit:hover,
 .dps-section--modal .button-primary:hover {
-    background: linear-gradient(135deg, var(--dps-btn-gradient-end, #0284c7) 0%, #0369a1 100%);
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+    background: var(--dps-color-primary-hover);
+    box-shadow: var(--dps-elevation-2);
 }
 
 .dps-modal-open {
@@ -813,11 +823,11 @@
 }
 
 .dps-modal-alert {
-    background: #fef3c7;
-    border: 1px solid #f59e0b;
-    color: #92400e;
+    background: var(--dps-color-warning-container);
+    border: 1px solid var(--dps-color-warning);
+    color: var(--dps-color-on-warning-container);
     padding: 0.85rem 1rem;
-    border-radius: 0.65rem;
+    border-radius: var(--dps-shape-card);
     margin: 0.75rem 0 0;
 }
 
@@ -966,7 +976,7 @@
     }
     
     .dps-agenda-table-container {
-        border-radius: 0.5rem;
+        border-radius: var(--dps-shape-chip);
     }
     
     .dps-agenda-wrapper table.dps-table {
@@ -995,7 +1005,7 @@
         flex-direction: column;
         border: 1px solid var(--dps-border);
         border-left-width: 3px; /* Mantido em 3px para consistência */
-        border-radius: 0.75rem;
+        border-radius: var(--dps-shape-card);
         background: var(--dps-surface);
         padding: 1rem;
         /* Estilo minimalista: sem sombras em cards */
@@ -1017,7 +1027,7 @@
     .dps-agenda-wrapper table.dps-table tbody td::before {
         content: attr(data-label);
         font-size: 0.8rem;
-        font-weight: 600;
+        font-weight: 500;
         color: var(--dps-muted);
         text-transform: uppercase;
     }
@@ -1042,7 +1052,7 @@
     
     .dps-agenda-empty {
         padding: 1.1rem;
-        border-radius: 0.75rem;
+        border-radius: var(--dps-shape-card);
     }
     
     .dps-context-actions {
@@ -1054,16 +1064,16 @@
 .dps-occupancy-report {
     margin-bottom: 1.25rem;
     border: 1px solid var(--dps-border);
-    border-radius: 0.75rem;
+    border-radius: var(--dps-shape-card);
     background: var(--dps-surface);
 }
 
 .dps-occupancy-report > summary {
     padding: 0.85rem 1rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
     background: var(--dps-background);
-    border-radius: 0.75rem;
+    border-radius: var(--dps-shape-card);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -1071,7 +1081,7 @@
 
 .dps-occupancy-report[open] > summary {
     border-bottom: 1px solid var(--dps-border);
-    border-radius: 0.75rem 0.75rem 0 0;
+    border-radius: var(--dps-shape-card) 0.75rem 0 0;
 }
 
 .dps-occupancy-content {
@@ -1091,22 +1101,22 @@
     align-items: center;
     padding: 0.85rem;
     background: var(--dps-background);
-    border-radius: 0.65rem;
+    border-radius: var(--dps-shape-card);
     text-align: center;
 }
 
 .dps-occupancy-value {
     font-size: 1.5rem;
-    font-weight: 700;
-    color: #0f172a;
+    font-weight: 500;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-occupancy-value.dps-occupancy-success {
-    color: #22c55e;
+    color: var(--dps-color-success);
 }
 
 .dps-occupancy-value.dps-occupancy-warning {
-    color: #f59e0b;
+    color: var(--dps-color-warning);
 }
 
 .dps-occupancy-label {
@@ -1117,7 +1127,7 @@
 
 .dps-occupancy-status h6 {
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 500;
     margin: 0 0 0.5rem;
     color: var(--dps-muted);
 }
@@ -1125,7 +1135,7 @@
 .dps-occupancy-bars {
     display: flex;
     height: 28px;
-    border-radius: 4px;
+    border-radius: var(--dps-shape-extra-small);
     overflow: hidden;
     background: var(--dps-background);
 }
@@ -1136,24 +1146,24 @@
     justify-content: center;
     min-width: 20px;
     font-size: 0.75rem;
-    font-weight: 600;
-    color: #fff;
+    font-weight: 500;
+    color: var(--dps-color-on-primary);
 }
 
 .dps-occupancy-bar.dps-status-pendente {
-    background: #f59e0b;
+    background: var(--dps-color-warning);
 }
 
 .dps-occupancy-bar.dps-status-finalizado {
-    background: #0ea5e9;
+    background: var(--dps-color-primary);
 }
 
 .dps-occupancy-bar.dps-status-pago {
-    background: #22c55e;
+    background: var(--dps-color-success);
 }
 
 .dps-occupancy-bar.dps-status-cancelado {
-    background: #ef4444;
+    background: var(--dps-color-error);
 }
 
 /* === FASE 2: Agrupamento por Cliente === */
@@ -1165,7 +1175,7 @@
 
 .dps-client-group {
     border: 1px solid var(--dps-border);
-    border-radius: 0.75rem;
+    border-radius: var(--dps-shape-card);
     background: var(--dps-surface);
     overflow: hidden;
 }
@@ -1185,8 +1195,8 @@
 }
 
 .dps-client-name {
-    font-weight: 600;
-    color: #0f172a;
+    font-weight: 500;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-client-stats {
@@ -1195,8 +1205,8 @@
 }
 
 .dps-client-pending {
-    color: #f59e0b;
-    font-weight: 600;
+    color: var(--dps-color-warning);
+    font-weight: 500;
 }
 
 .dps-client-whatsapp {
@@ -1213,7 +1223,7 @@
     display: flex;
     gap: 1rem;
     padding: 0.5rem 0.75rem;
-    border-radius: 0.5rem;
+    border-radius: var(--dps-shape-chip);
     align-items: center;
     border-left: 3px solid transparent;
 }
@@ -1223,30 +1233,30 @@
 }
 
 .dps-client-appt.status-pendente {
-    border-left-color: #f59e0b;
-    background: #fffbeb;
+    border-left-color: var(--dps-color-warning);
+    background: var(--dps-color-warning-container);
 }
 
 .dps-client-appt.status-finalizado {
-    border-left-color: #0ea5e9;
-    background: #f0f9ff;
+    border-left-color: var(--dps-color-primary);
+    background: var(--dps-color-primary-container);
 }
 
 .dps-client-appt.status-finalizado_pago {
-    border-left-color: #22c55e;
-    background: #f0fdf4;
+    border-left-color: var(--dps-color-success);
+    background: var(--dps-color-success-container);
 }
 
 .dps-client-appt.status-cancelado {
-    border-left-color: #ef4444;
-    background: #fef2f2;
+    border-left-color: var(--dps-color-error);
+    background: var(--dps-color-error-container);
     opacity: 0.7;
 }
 
 .dps-appt-datetime {
-    font-weight: 600;
+    font-weight: 500;
     min-width: 90px;
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-appt-pet {
@@ -1257,28 +1267,28 @@
 .dps-appt-status {
     font-size: 0.8rem;
     padding: 0.15rem 0.5rem;
-    border-radius: 999px;
+    border-radius: var(--dps-shape-full);
     font-weight: 500;
 }
 
 .dps-client-appt.status-pendente .dps-appt-status {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--dps-color-warning-container);
+    color: var(--dps-color-on-warning-container);
 }
 
 .dps-client-appt.status-finalizado .dps-appt-status {
-    background: #e0f2fe;
-    color: #0369a1;
+    background: var(--dps-color-primary-container);
+    color: var(--dps-color-primary-pressed);
 }
 
 .dps-client-appt.status-finalizado_pago .dps-appt-status {
-    background: #dcfce7;
-    color: #166534;
+    background: var(--dps-color-success-container);
+    color: var(--dps-color-on-success-container);
 }
 
 .dps-client-appt.status-cancelado .dps-appt-status {
-    background: #fee2e2;
-    color: #991b1b;
+    background: var(--dps-color-error-container);
+    color: var(--dps-color-on-error-container);
 }
 
 /* === Responsividade Fase 2 === */
@@ -1310,7 +1320,7 @@
     margin-bottom: 1rem;
     padding: 0.75rem 1rem;
     background: var(--dps-background);
-    border-radius: 0.75rem;
+    border-radius: var(--dps-shape-card);
     border: 1px solid var(--dps-border);
     gap: 0.75rem;
 }
@@ -1326,8 +1336,8 @@
 .dps-calendar-title {
     margin: 0;
     font-size: 1.25rem;
-    font-weight: 600;
-    color: #0f172a;
+    font-weight: 500;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-calendar-today-btn {
@@ -1335,10 +1345,10 @@
     font-size: 0.8rem;
     color: var(--dps-accent);
     text-decoration: none;
-    border-radius: 999px;
+    border-radius: var(--dps-shape-full);
     border: 1px solid var(--dps-accent);
-    font-weight: 600;
-    transition: background 0.2s;
+    font-weight: 500;
+    transition: background var(--dps-motion-hover);
 }
 
 .dps-calendar-today-btn:hover {
@@ -1350,10 +1360,10 @@
     font-size: 0.875rem;
     color: var(--dps-accent);
     text-decoration: none;
-    border-radius: 999px;
+    border-radius: var(--dps-shape-full);
     border: 1px solid var(--dps-accent);
-    transition: background 0.2s, color 0.2s;
-    font-weight: 600;
+    transition: background var(--dps-motion-hover), color 0.2s;
+    font-weight: 500;
 }
 
 .dps-calendar-nav-btn:hover {
@@ -1363,7 +1373,7 @@
 
 .dps-calendar {
     border: 1px solid var(--dps-border);
-    border-radius: 0.75rem;
+    border-radius: var(--dps-shape-card);
     overflow: hidden;
     background: var(--dps-surface);
 }
@@ -1383,7 +1393,7 @@
 .dps-calendar-weekday {
     padding: 0.75rem 0.5rem;
     text-align: center;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 0.8rem;
     color: var(--dps-muted);
     text-transform: uppercase;
@@ -1400,7 +1410,7 @@
     border-bottom: 1px solid var(--dps-border);
     padding: 0.25rem;
     background: var(--dps-surface);
-    transition: background 0.2s;
+    transition: background var(--dps-motion-hover);
 }
 
 .dps-calendar-day:nth-child(7n) {
@@ -1412,11 +1422,11 @@
 }
 
 .dps-calendar-day--today {
-    background: #eff6ff;
+    background: var(--dps-color-primary-container);
 }
 
 .dps-calendar-day--has-events:hover {
-    background: #f0f9ff;
+    background: var(--dps-color-primary-container);
 }
 
 .dps-calendar-day-link {
@@ -1430,14 +1440,14 @@
 .dps-calendar-day-number {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #374151;
+    color: var(--dps-color-on-surface-variant);
     padding: 0.25rem;
 }
 
 .dps-calendar-day--today .dps-calendar-day-number {
-    background: #0ea5e9;
-    color: #fff;
-    border-radius: 999px;
+    background: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+    border-radius: var(--dps-shape-full);
     width: 26px;
     height: 26px;
     display: flex;
@@ -1455,26 +1465,26 @@
 
 .dps-calendar-badge {
     font-size: 0.7rem;
-    font-weight: 600;
+    font-weight: 500;
     padding: 2px 6px;
-    border-radius: 4px;
-    color: #fff;
+    border-radius: var(--dps-shape-extra-small);
+    color: var(--dps-color-on-primary);
 }
 
 .dps-calendar-badge.dps-status-pendente {
-    background: #f59e0b;
+    background: var(--dps-color-warning);
 }
 
 .dps-calendar-badge.dps-status-finalizado {
-    background: #0ea5e9;
+    background: var(--dps-color-primary);
 }
 
 .dps-calendar-badge.dps-status-pago {
-    background: #22c55e;
+    background: var(--dps-color-success);
 }
 
 .dps-calendar-badge.dps-status-cancelado {
-    background: #ef4444;
+    background: var(--dps-color-error);
 }
 
 .dps-calendar-legend {
@@ -1484,7 +1494,7 @@
     margin-top: 1rem;
     padding: 0.75rem 1rem;
     background: var(--dps-background);
-    border-radius: 0.5rem;
+    border-radius: var(--dps-shape-chip);
     justify-content: center;
 }
 
@@ -1499,23 +1509,23 @@
 .dps-legend-color {
     width: 12px;
     height: 12px;
-    border-radius: 2px;
+    border-radius: var(--dps-shape-extra-small);
 }
 
 .dps-legend-color.dps-status-pendente {
-    background: #f59e0b;
+    background: var(--dps-color-warning);
 }
 
 .dps-legend-color.dps-status-finalizado {
-    background: #0ea5e9;
+    background: var(--dps-color-primary);
 }
 
 .dps-legend-color.dps-status-pago {
-    background: #22c55e;
+    background: var(--dps-color-success);
 }
 
 .dps-legend-color.dps-status-cancelado {
-    background: #ef4444;
+    background: var(--dps-color-error);
 }
 
 /* === Responsividade Fase 4 === */
@@ -1579,14 +1589,14 @@
     padding: 1rem 1.25rem;
     background: var(--dps-surface);
     border: 1px solid var(--dps-border);
-    border-radius: 0.75rem;
+    border-radius: var(--dps-shape-card);
 }
 
 .dps-dashboard-title {
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 500;
     margin: 0 0 1rem;
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -1605,10 +1615,10 @@
     justify-content: center;
     padding: 1rem;
     background: var(--dps-background);
-    border-radius: 0.65rem;
+    border-radius: var(--dps-shape-card);
     text-align: center;
     border-left: 3px solid var(--dps-border);
-    transition: border-color 0.2s ease;
+    transition: border-color var(--dps-motion-hover) ease;
 }
 
 .dps-kpi-card:hover {
@@ -1622,8 +1632,8 @@
 
 .dps-kpi-value {
     font-size: 1.5rem;
-    font-weight: 700;
-    color: #0f172a;
+    font-weight: 500;
+    color: var(--dps-color-on-surface);
     line-height: 1.2;
 }
 
@@ -1635,20 +1645,20 @@
     margin-top: 0.25rem;
 }
 
-.dps-kpi-pending { border-left-color: #f59e0b; }
-.dps-kpi-finished { border-left-color: #22c55e; }
-.dps-kpi-revenue { border-left-color: #0ea5e9; }
-.dps-kpi-cancel { border-left-color: #ef4444; }
-.dps-kpi-avg { border-left-color: #8b5cf6; }
+.dps-kpi-pending { border-left-color: var(--dps-color-warning); }
+.dps-kpi-finished { border-left-color: var(--dps-color-success); }
+.dps-kpi-revenue { border-left-color: var(--dps-color-primary); }
+.dps-kpi-cancel { border-left-color: var(--dps-color-error); }
+.dps-kpi-avg { border-left-color: var(--dps-color-tertiary); }
 
 /* === FASE 5: Modal de Reagendamento Rápido === */
 .dps-reschedule-modal {
     /* CSS Variables para o modal (necessárias pois o modal é anexado ao body e não herda de .dps-agenda-wrapper) */
-    --dps-accent: #2563eb;
-    --dps-accent-strong: #1d4ed8;
-    --dps-background: #f8fafc;
-    --dps-border: #e2e8f0;
-    --dps-muted: #64748b;
+    --dps-accent: var(--dps-color-primary);
+    --dps-accent-strong: var(--dps-color-primary-pressed);
+    --dps-background: var(--dps-color-surface);
+    --dps-border: var(--dps-color-outline-variant);
+    --dps-muted: var(--dps-color-on-surface-variant);
     
     position: fixed;
     top: 0;
@@ -1659,13 +1669,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(15, 23, 42, 0.5);
+    background: rgba(0, 0, 0, 0.32);
     padding: 1rem;
 }
 
 .dps-reschedule-content {
     background: white;
-    border-radius: 0.75rem;
+    border-radius: var(--dps-shape-card);
     width: 100%;
     max-width: 400px;
     overflow: hidden;
@@ -1683,7 +1693,7 @@
 
 .dps-reschedule-title {
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 500;
     margin: 0;
     display: flex;
     align-items: center;
@@ -1701,7 +1711,7 @@
 }
 
 .dps-reschedule-close:hover {
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-reschedule-body {
@@ -1718,8 +1728,8 @@
 
 .dps-reschedule-field label {
     display: block;
-    font-weight: 600;
-    color: #0f172a;
+    font-weight: 500;
+    color: var(--dps-color-on-surface);
     margin-bottom: 0.35rem;
     font-size: 0.9rem;
 }
@@ -1728,14 +1738,15 @@
     width: 100%;
     padding: 0.65rem 0.85rem;
     border: 1px solid var(--dps-border);
-    border-radius: 0.5rem;
+    border-radius: var(--dps-shape-chip);
     font-size: 0.95rem;
 }
 
 .dps-reschedule-field input:focus {
     outline: none;
     border-color: var(--dps-accent);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 .dps-reschedule-footer {
@@ -1749,11 +1760,11 @@
 
 .dps-reschedule-btn {
     padding: 0.55rem 1.25rem;
-    border-radius: 999px;
-    font-weight: 600;
+    border-radius: var(--dps-shape-full);
+    font-weight: 500;
     font-size: 0.9rem;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background var(--dps-motion-hover);
 }
 
 .dps-reschedule-btn--cancel {
@@ -1764,7 +1775,7 @@
 
 .dps-reschedule-btn--cancel:hover {
     background: var(--dps-background);
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-reschedule-btn--save {
@@ -1792,7 +1803,7 @@
     color: var(--dps-accent);
     text-decoration: none;
     border-radius: 0.35rem;
-    transition: background 0.2s ease;
+    transition: background var(--dps-motion-hover);
 }
 
 .dps-quick-action:hover {
@@ -1854,16 +1865,16 @@
     font-size: 0.8125rem;
     font-weight: 500;
     border: 1px solid var(--dps-border);
-    border-radius: 0.375rem;
+    border-radius: var(--dps-shape-extra-small);
     background: var(--dps-surface);
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--dps-motion-press);
 }
 
 .dps-quick-action-btn:hover:not(:disabled) {
     background: var(--dps-background);
-    border-color: #94a3b8;
+    border-color: var(--dps-color-outline);
 }
 
 .dps-quick-action-btn:disabled,
@@ -1874,39 +1885,39 @@
 
 /* Cores específicas para cada tipo de ação */
 .dps-quick-finish {
-    border-color: #10b981;
-    color: #059669;
+    border-color: var(--dps-color-success);
+    color: var(--dps-color-success);
 }
 
 .dps-quick-finish:hover:not(:disabled) {
-    background: #d1fae5;
-    border-color: #10b981;
+    background: var(--dps-color-success-container);
+    border-color: var(--dps-color-success);
 }
 
 .dps-quick-paid {
-    border-color: #0ea5e9;
-    color: #0284c7;
+    border-color: var(--dps-color-primary);
+    color: var(--dps-color-primary-hover);
 }
 
 .dps-quick-paid:hover:not(:disabled) {
-    background: #e0f2fe;
-    border-color: #0ea5e9;
+    background: var(--dps-color-primary-container);
+    border-color: var(--dps-color-primary);
 }
 
 .dps-quick-cancel {
-    border-color: #ef4444;
-    color: #dc2626;
+    border-color: var(--dps-color-error);
+    color: var(--dps-color-error);
 }
 
 .dps-quick-cancel:hover:not(:disabled) {
-    background: #fee2e2;
-    border-color: #ef4444;
+    background: var(--dps-color-error-container);
+    border-color: var(--dps-color-error);
 }
 
 /* === UX-3: Indicador de Atendimentos Atrasados === */
 tr.is-late {
-    background: #fef3c7 !important;
-    border-left: 4px solid #f59e0b;
+    background: var(--dps-color-warning-container) !important;
+    border-left: 4px solid var(--dps-color-warning);
 }
 
 tr.is-late td:first-child {
@@ -1916,10 +1927,10 @@ tr.is-late td:first-child {
 /* Animação sutil para chamar atenção (opcional) */
 @keyframes pulse-late {
     0%, 100% {
-        background-color: #fef3c7;
+        background-color: var(--dps-color-warning-container);
     }
     50% {
-        background-color: #fde68a;
+        background-color: var(--dps-color-warning-container);
     }
 }
 
@@ -1930,7 +1941,7 @@ tr.is-late.dps-late-critical {
 /* === UX-2: Feedback Visual de Atualização de Linha === */
 @keyframes row-updated {
     0% {
-        background-color: #d1fae5;
+        background-color: var(--dps-color-success-container);
     }
     100% {
         background-color: transparent;
@@ -1971,7 +1982,7 @@ tr.dps-row-updated {
     padding: 0.875rem 1.25rem;
     background: var(--dps-surface);
     border: 1px solid var(--dps-border);
-    border-radius: 0.75rem;
+    border-radius: var(--dps-shape-card);
     margin-bottom: 0.75rem;
 }
 
@@ -1983,7 +1994,7 @@ tr.dps-row-updated {
 
 .dps-current-date {
     font-size: 0.9375rem;
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-date-nav {
@@ -1999,18 +2010,18 @@ tr.dps-row-updated {
     min-width: 2.25rem;
     padding: 0.5rem 0.75rem;
     border: 1px solid var(--dps-border);
-    border-radius: 0.5rem;
+    border-radius: var(--dps-shape-chip);
     background: var(--dps-surface);
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
     font-size: 0.875rem;
     font-weight: 500;
     text-decoration: none;
-    transition: all 0.15s ease;
+    transition: all var(--dps-motion-press);
 }
 
 .dps-nav-btn:hover {
     background: var(--dps-background);
-    border-color: #94a3b8;
+    border-color: var(--dps-color-outline);
 }
 
 .dps-nav-btn--today {
@@ -2039,20 +2050,20 @@ tr.dps-row-updated {
     display: flex;
     gap: 0.25rem;
     border: 1px solid var(--dps-border);
-    border-radius: 0.5rem;
+    border-radius: var(--dps-shape-chip);
     padding: 0.25rem;
     background: var(--dps-background);
 }
 
 .dps-view-btn {
     padding: 0.375rem 0.75rem;
-    border-radius: 0.375rem;
+    border-radius: var(--dps-shape-extra-small);
     background: transparent;
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
     font-size: 0.8125rem;
     font-weight: 500;
     text-decoration: none;
-    transition: all 0.15s ease;
+    transition: all var(--dps-motion-press);
 }
 
 .dps-view-btn:hover:not(.dps-view-btn--active) {
@@ -2062,7 +2073,7 @@ tr.dps-row-updated {
 .dps-view-btn--active {
     background: var(--dps-surface);
     color: var(--dps-accent);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--dps-elevation-1);
 }
 
 .dps-agenda-nav-group--actions {
@@ -2142,38 +2153,38 @@ tr.dps-row-updated {
     padding: 0.375rem 0.625rem;
     font-size: 0.8125rem;
     font-weight: 500;
-    border-radius: 0.375rem;
+    border-radius: var(--dps-shape-extra-small);
     white-space: nowrap;
 }
 
 .status-confirmation-not-sent {
-    background: #f3f4f6;
-    color: #6b7280;
-    border: 1px solid #e5e7eb;
+    background: var(--dps-color-surface-container);
+    color: var(--dps-color-on-surface-variant);
+    border: 1px solid var(--dps-color-surface-container-high);
 }
 
 .status-confirmation-sent {
-    background: #dbeafe;
-    color: #1e40af;
-    border: 1px solid #93c5fd;
+    background: var(--dps-color-primary-container);
+    color: var(--dps-color-primary-pressed);
+    border: 1px solid var(--dps-color-primary-container);
 }
 
 .status-confirmation-confirmed {
-    background: #d1fae5;
-    color: #059669;
-    border: 1px solid #6ee7b7;
+    background: var(--dps-color-success-container);
+    color: var(--dps-color-success);
+    border: 1px solid var(--dps-color-success-container);
 }
 
 .status-confirmation-denied {
-    background: #fee2e2;
-    color: #dc2626;
-    border: 1px solid #fca5a5;
+    background: var(--dps-color-error-container);
+    color: var(--dps-color-error);
+    border: 1px solid var(--dps-color-error-container);
 }
 
 .status-confirmation-no-answer {
-    background: #fef3c7;
-    color: #d97706;
-    border: 1px solid #fcd34d;
+    background: var(--dps-color-warning-container);
+    color: var(--dps-color-warning);
+    border: 1px solid var(--dps-color-warning-container);
 }
 
 /* Botões de ação de confirmação */
@@ -2191,16 +2202,16 @@ tr.dps-row-updated {
     height: 2rem;
     padding: 0.25rem;
     border: 1px solid var(--dps-border);
-    border-radius: 0.375rem;
+    border-radius: var(--dps-shape-extra-small);
     background: var(--dps-surface);
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--dps-motion-press);
 }
 
 .dps-confirmation-btn:hover:not(:disabled) {
     background: var(--dps-background);
-    border-color: #94a3b8;
+    border-color: var(--dps-color-outline);
     transform: scale(1.05);
 }
 
@@ -2211,39 +2222,39 @@ tr.dps-row-updated {
 }
 
 .dps-confirmation-btn--confirmed {
-    border-color: #10b981;
+    border-color: var(--dps-color-success);
 }
 
 .dps-confirmation-btn--confirmed:hover:not(:disabled) {
-    background: #d1fae5;
-    border-color: #10b981;
+    background: var(--dps-color-success-container);
+    border-color: var(--dps-color-success);
 }
 
 .dps-confirmation-btn--no-answer {
-    border-color: #f59e0b;
+    border-color: var(--dps-color-warning);
 }
 
 .dps-confirmation-btn--no-answer:hover:not(:disabled) {
-    background: #fef3c7;
-    border-color: #f59e0b;
+    background: var(--dps-color-warning-container);
+    border-color: var(--dps-color-warning);
 }
 
 .dps-confirmation-btn--denied {
-    border-color: #ef4444;
+    border-color: var(--dps-color-error);
 }
 
 .dps-confirmation-btn--denied:hover:not(:disabled) {
-    background: #fee2e2;
-    border-color: #ef4444;
+    background: var(--dps-color-error-container);
+    border-color: var(--dps-color-error);
 }
 
 .dps-confirmation-btn--clear {
-    border-color: #6b7280;
+    border-color: var(--dps-color-on-surface-variant);
 }
 
 .dps-confirmation-btn--clear:hover:not(:disabled) {
-    background: #f3f4f6;
-    border-color: #6b7280;
+    background: var(--dps-color-surface-container);
+    border-color: var(--dps-color-on-surface-variant);
 }
 
 /* Link do WhatsApp */
@@ -2257,17 +2268,17 @@ tr.dps-row-updated {
     gap: 0.25rem;
     padding: 0.375rem 0.625rem;
     font-size: 0.8125rem;
-    color: #0ea5e9;
+    color: var(--dps-color-primary);
     text-decoration: none;
-    border: 1px solid #bae6fd;
-    border-radius: 0.375rem;
-    background: #f0f9ff;
-    transition: all 0.15s ease;
+    border: 1px solid var(--dps-color-primary-container);
+    border-radius: var(--dps-shape-extra-small);
+    background: var(--dps-color-primary-container);
+    transition: all var(--dps-motion-press);
 }
 
 .dps-whatsapp-link:hover {
-    background: #e0f2fe;
-    border-color: #0ea5e9;
+    background: var(--dps-color-primary-container);
+    border-color: var(--dps-color-primary);
 }
 
 /* Responsividade para confirmação */
@@ -2300,40 +2311,40 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.25rem;
     padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    border-radius: var(--dps-shape-extra-small);
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: help;
     position: relative;
 }
 
 .dps-payment-badge--paid {
-    background: #d1fae5;
-    color: #10b981;
+    background: var(--dps-color-success-container);
+    color: var(--dps-color-success);
 }
 
 .dps-payment-badge--pending {
-    background: #fef3c7;
-    color: #f59e0b;
+    background: var(--dps-color-warning-container);
+    color: var(--dps-color-warning);
 }
 
 .dps-payment-badge--error {
-    background: #fee2e2;
-    color: #ef4444;
+    background: var(--dps-color-error-container);
+    color: var(--dps-color-error);
 }
 
 .dps-payment-badge--none {
-    background: #f3f4f6;
-    color: #6b7280;
+    background: var(--dps-color-surface-container);
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-payment-tooltip {
     display: none;
     position: absolute;
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
     padding: 8px 12px;
-    border-radius: 4px;
+    border-radius: var(--dps-shape-extra-small);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     z-index: 1000;
     min-width: 200px;
@@ -2353,7 +2364,7 @@ tr.dps-row-updated {
 .dps-payment-tooltip strong {
     display: block;
     margin-bottom: 0.25rem;
-    color: #374151;
+    color: var(--dps-color-on-surface-variant);
 }
 
 /* === Resend Payment Button === */
@@ -2363,19 +2374,19 @@ tr.dps-row-updated {
     gap: 4px;
     padding: 4px 8px;
     margin-top: 4px;
-    background: #f3f4f6;
-    color: #374151;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
+    background: var(--dps-color-surface-container);
+    color: var(--dps-color-on-surface-variant);
+    border: 1px solid var(--dps-color-surface-container-high);
+    border-radius: var(--dps-shape-extra-small);
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--dps-motion-press);
 }
 
 .dps-resend-payment-btn:hover:not(:disabled) {
-    background: #e5e7eb;
-    border-color: #3b82f6;
+    background: var(--dps-color-surface-container-high);
+    border-color: var(--dps-color-primary);
     transform: translateY(-1px);
 }
 
@@ -2390,34 +2401,34 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.25rem;
     padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    border-radius: var(--dps-shape-extra-small);
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 500;
     margin-bottom: 0.25rem;
 }
 
 .dps-taxidog-badge--requested {
-    background: #fef3c7;
-    color: #f59e0b;
-    border: 1px solid #f59e0b;
+    background: var(--dps-color-warning-container);
+    color: var(--dps-color-warning);
+    border: 1px solid var(--dps-color-warning);
 }
 
 .dps-taxidog-badge--on-way {
-    background: #dbeafe;
-    color: #3b82f6;
-    border: 1px solid #3b82f6;
+    background: var(--dps-color-primary-container);
+    color: var(--dps-color-primary);
+    border: 1px solid var(--dps-color-primary);
 }
 
 .dps-taxidog-badge--on-board {
-    background: #ffedd5;
-    color: #f97316;
-    border: 1px solid #f97316;
+    background: var(--dps-color-warning-container);
+    color: var(--dps-color-warning);
+    border: 1px solid var(--dps-color-warning);
 }
 
 .dps-taxidog-badge--completed {
-    background: #d1fae5;
-    color: #10b981;
-    border: 1px solid #10b981;
+    background: var(--dps-color-success-container);
+    color: var(--dps-color-success);
+    border: 1px solid var(--dps-color-success);
 }
 
 /* === TaxiDog Action Buttons === */
@@ -2432,18 +2443,18 @@ tr.dps-row-updated {
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
     border: none;
-    background: #f3f4f6;
-    color: #374151;
-    border-radius: 4px;
+    background: var(--dps-color-surface-container);
+    color: var(--dps-color-on-surface-variant);
+    border-radius: var(--dps-shape-extra-small);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    transition: all 0.15s ease;
+    transition: all var(--dps-motion-press);
 }
 
 .dps-taxidog-action-btn:hover:not(:disabled) {
-    background: #e5e7eb;
+    background: var(--dps-color-surface-container-high);
     transform: translateY(-1px);
 }
 
@@ -2453,12 +2464,12 @@ tr.dps-row-updated {
 }
 
 .dps-taxidog-action-btn--danger {
-    background: #fee2e2;
-    color: #ef4444;
+    background: var(--dps-color-error-container);
+    color: var(--dps-color-error);
 }
 
 .dps-taxidog-action-btn--danger:hover:not(:disabled) {
-    background: #fecaca;
+    background: var(--dps-color-error-container);
 }
 
 /* === GPS Route Button === */
@@ -2467,20 +2478,20 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.25rem;
     padding: 0.25rem 0.5rem;
-    background: #3b82f6;
-    color: #fff;
+    background: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
     text-decoration: none;
-    border-radius: 4px;
+    border-radius: var(--dps-shape-extra-small);
     font-size: 0.8rem;
-    font-weight: 600;
-    transition: all 0.15s ease;
+    font-weight: 500;
+    transition: all var(--dps-motion-press);
     margin-top: 0.25rem;
 }
 
 .dps-route-btn:hover {
-    background: #2563eb;
+    background: var(--dps-color-primary);
     transform: translateY(-1px);
-    color: #fff;
+    color: var(--dps-color-on-primary);
 }
 
 /* === Responsive Adjustments for Phase 3 === */
@@ -2520,7 +2531,7 @@ tr.dps-row-updated {
 /* === Animation for row updates === */
 @keyframes fadeIn {
     from {
-        background-color: #d1fae5;
+        background-color: var(--dps-color-success-container);
     }
     to {
         background-color: transparent;
@@ -2550,8 +2561,8 @@ tr.dps-row-updated {
 
 .dps-agenda-tabs-title {
     font-size: 1.1rem;
-    font-weight: 600;
-    color: #0f172a;
+    font-weight: 500;
+    color: var(--dps-color-on-surface);
     margin: 0;
     display: flex;
     align-items: center;
@@ -2577,11 +2588,11 @@ tr.dps-row-updated {
     padding: 1rem 0.75rem;
     background: var(--dps-surface);
     border: 2px solid var(--dps-border);
-    border-radius: 0.75rem;
-    font-weight: 600;
+    border-radius: var(--dps-shape-card);
+    font-weight: 500;
     color: var(--dps-muted);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dps-motion-hover);
     text-align: center;
 }
 
@@ -2595,7 +2606,7 @@ tr.dps-row-updated {
     border-color: var(--dps-accent);
     background: var(--dps-accent-soft);
     color: var(--dps-accent);
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+    box-shadow: 0 2px 8px rgba(11, 107, 203, 0.12);
 }
 
 .dps-agenda-tab-button:focus {
@@ -2611,7 +2622,7 @@ tr.dps-row-updated {
 
 .dps-tab-label {
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 500;
     color: inherit;
 }
 
@@ -2710,16 +2721,16 @@ tr.dps-row-updated {
 }
 
 .dps-table--tab1 thead th {
-    background: #f0f9ff;
-    color: #0369a1;
-    font-weight: 600;
+    background: var(--dps-color-primary-container);
+    color: var(--dps-color-primary-pressed);
+    font-weight: 500;
 }
 
 /* Aba 2: Operação - destaque para ações */
 .dps-table--tab2 thead th {
-    background: #fef3c7;
-    color: #92400e;
-    font-weight: 600;
+    background: var(--dps-color-warning-container);
+    color: var(--dps-color-on-warning-container);
+    font-weight: 500;
 }
 
 .dps-table--tab2 .dps-quick-actions {
@@ -2735,9 +2746,9 @@ tr.dps-row-updated {
 
 /* Aba 3: Detalhes - permite mais espaço para texto */
 .dps-table--tab3 thead th {
-    background: #f0fdf4;
-    color: #166534;
-    font-weight: 600;
+    background: var(--dps-color-success-container);
+    color: var(--dps-color-on-success-container);
+    font-weight: 500;
 }
 
 .dps-table--tab3 td {
@@ -2763,7 +2774,7 @@ tr.dps-row-updated {
 }
 
 .dps-notes-preview:hover {
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 /* Subtítulos das seções de atendimentos */
@@ -2771,8 +2782,8 @@ tr.dps-row-updated {
     margin: 1.5rem 0 0.75rem;
     padding: 0.5rem 0;
     font-size: 0.95rem;
-    font-weight: 600;
-    color: #374151;
+    font-weight: 500;
+    color: var(--dps-color-on-surface-variant);
     border-bottom: 1px solid var(--dps-border);
     display: flex;
     align-items: center;
@@ -2793,9 +2804,9 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.25rem;
     padding: 0.2rem 0.5rem;
-    border-radius: 4px;
+    border-radius: var(--dps-shape-extra-small);
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.02em;
     margin-left: 0.5rem;
@@ -2803,9 +2814,9 @@ tr.dps-row-updated {
 }
 
 .dps-pet-badge--aggressive {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    color: #dc2626;
-    border: 1px solid #fca5a5;
+    background: var(--dps-color-error-container);
+    color: var(--dps-color-error);
+    border: 1px solid var(--dps-color-error-container);
     animation: pulse-aggressive 2s ease-in-out infinite;
 }
 
@@ -2820,14 +2831,14 @@ tr.dps-row-updated {
 
 /* === Badge de Restrições de Produtos === */
 .dps-pet-badge--restrictions {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    color: #92400e;
-    border: 1px solid #fcd34d;
+    background: var(--dps-color-warning-container);
+    color: var(--dps-color-on-warning-container);
+    border: 1px solid var(--dps-color-warning-container);
     cursor: help;
 }
 
 .dps-pet-badge--restrictions:hover {
-    background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+    background: var(--dps-color-warning-container);
 }
 
 /* === Dropdown Elegante de Confirmação (Tab1) === */
@@ -2841,13 +2852,13 @@ tr.dps-row-updated {
     -moz-appearance: none;
     padding: 0.5rem 2rem 0.5rem 0.75rem;
     border: 2px solid var(--dps-border);
-    border-radius: 8px;
+    border-radius: var(--dps-shape-chip);
     background: var(--dps-surface);
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
     min-width: 180px;
-    transition: all 0.2s ease;
+    transition: all var(--dps-motion-hover);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
@@ -2860,25 +2871,26 @@ tr.dps-row-updated {
 .dps-confirmation-dropdown:focus {
     outline: none;
     border-color: var(--dps-accent);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 .dps-dropdown--confirmed {
-    background-color: #d1fae5;
-    border-color: #10b981;
-    color: #059669;
+    background-color: var(--dps-color-success-container);
+    border-color: var(--dps-color-success);
+    color: var(--dps-color-success);
 }
 
 .dps-dropdown--not-confirmed {
-    background-color: #f3f4f6;
-    border-color: #e5e7eb;
-    color: #6b7280;
+    background-color: var(--dps-color-surface-container);
+    border-color: var(--dps-color-surface-container-high);
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-dropdown--cancelled {
-    background-color: #fee2e2;
-    border-color: #ef4444;
-    color: #dc2626;
+    background-color: var(--dps-color-error-container);
+    border-color: var(--dps-color-error);
+    color: var(--dps-color-error);
 }
 
 /* === Dropdown Elegante de Status (Tab2) === */
@@ -2893,12 +2905,12 @@ tr.dps-row-updated {
     padding: 0.45rem 2rem 0.45rem 0.85rem;
     border: 1px solid var(--dps-border);
     border-radius: 10px;
-    background: #fff;
+    background: var(--dps-color-surface-container-lowest);
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
     min-width: 200px;
-    transition: all 0.2s ease;
+    transition: all var(--dps-motion-hover);
     box-shadow: inset 4px 0 0 var(--dps-border);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -2912,27 +2924,28 @@ tr.dps-row-updated {
 .dps-status-dropdown:focus {
     outline: none;
     border-color: var(--dps-accent);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 .dps-dropdown--pending {
     box-shadow: inset 4px 0 0 var(--dps-status-pending);
-    color: #374151;
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-dropdown--finished {
     box-shadow: inset 4px 0 0 var(--dps-status-finished);
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-dropdown--paid {
     box-shadow: inset 4px 0 0 var(--dps-status-paid);
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-dropdown--cancelled {
     box-shadow: inset 4px 0 0 var(--dps-status-cancelled);
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 /* === Badge de Status (para não-editores) === */
@@ -2943,29 +2956,29 @@ tr.dps-row-updated {
     padding: 0.4rem 0.75rem;
     border-radius: 10px;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 500;
     border: 1px solid var(--dps-border);
-    background: #fff;
+    background: var(--dps-color-surface-container-lowest);
 }
 
 .dps-status-badge--pending {
     box-shadow: inset 4px 0 0 var(--dps-status-pending);
-    color: #374151;
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-status-badge--finished {
     box-shadow: inset 4px 0 0 var(--dps-status-finished);
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-status-badge--paid {
     box-shadow: inset 4px 0 0 var(--dps-status-paid);
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-status-badge--cancelled {
     box-shadow: inset 4px 0 0 var(--dps-status-cancelled);
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 /* === Botão de Serviços Popup (Tab1) === */
@@ -2974,18 +2987,18 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.35rem;
     padding: 0.45rem 0.85rem;
-    background: #f9fafb;
+    background: var(--dps-color-surface-container-low);
     border: 1px solid var(--dps-border);
     border-radius: 10px;
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dps-motion-hover);
 }
 
 .dps-services-popup-btn:hover {
-    background: #eef2f7;
+    background: var(--dps-color-surface-container);
     border-color: var(--dps-accent);
 }
 
@@ -3005,19 +3018,19 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.35rem;
     padding: 0.5rem 1rem;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: var(--dps-color-success);
     border: none;
-    border-radius: 8px;
-    color: #fff;
+    border-radius: var(--dps-shape-chip);
+    color: var(--dps-color-on-success);
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dps-motion-hover);
     box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
 }
 
 .dps-payment-popup-btn:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    background: var(--dps-color-success);
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
 }
@@ -3033,19 +3046,19 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.25rem;
     padding: 0.35rem 0.65rem;
-    border-radius: 6px;
+    border-radius: var(--dps-shape-chip);
     font-size: 0.8rem;
     font-weight: 500;
 }
 
 .dps-payment-status--paid {
-    background-color: #d1fae5;
-    color: #059669;
+    background-color: var(--dps-color-success-container);
+    color: var(--dps-color-success);
 }
 
 .dps-payment-status--pending {
-    background-color: #f3f4f6;
-    color: #6b7280;
+    background-color: var(--dps-color-surface-container);
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-payment-status--cancelled {
@@ -3065,23 +3078,23 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.35rem;
     padding: 0.35rem 0.65rem;
-    border-radius: 6px;
+    border-radius: var(--dps-shape-chip);
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.02em;
 }
 
 .dps-taxidog-label--requested {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    color: #92400e;
-    border: 1px solid #f59e0b;
+    background: var(--dps-color-warning-container);
+    color: var(--dps-color-on-warning-container);
+    border: 1px solid var(--dps-color-warning);
 }
 
 .dps-taxidog-label--not-requested {
-    background-color: #f3f4f6;
-    color: #6b7280;
-    border: 1px solid #e5e7eb;
+    background-color: var(--dps-color-surface-container);
+    color: var(--dps-color-on-surface-variant);
+    border: 1px solid var(--dps-color-surface-container-high);
 }
 
 /* === Dropdown de TaxiDog (Tab3) === */
@@ -3094,23 +3107,23 @@ tr.dps-row-updated {
     -webkit-appearance: none;
     -moz-appearance: none;
     padding: 0.4rem 2rem 0.4rem 0.65rem;
-    border: 2px solid #f59e0b;
-    border-radius: 6px;
-    background: #fffbeb;
+    border: 2px solid var(--dps-color-warning);
+    border-radius: var(--dps-shape-chip);
+    background: var(--dps-color-warning-container);
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
     min-width: 180px;
-    color: #92400e;
-    transition: all 0.2s ease;
+    color: var(--dps-color-on-warning-container);
+    transition: all var(--dps-motion-hover);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f59e0b' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.5rem center;
 }
 
 .dps-taxidog-dropdown:hover {
-    border-color: #d97706;
-    background-color: #fef3c7;
+    border-color: var(--dps-color-warning);
+    background-color: var(--dps-color-warning-container);
 }
 
 .dps-taxidog-dropdown:focus {
@@ -3124,20 +3137,20 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.35rem;
     padding: 0.5rem 0.85rem;
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border: 2px solid #f59e0b;
-    border-radius: 8px;
-    color: #92400e;
+    background: var(--dps-color-warning-container);
+    border: 2px solid var(--dps-color-warning);
+    border-radius: var(--dps-shape-chip);
+    color: var(--dps-color-on-warning-container);
     font-size: 0.8rem;
-    font-weight: 700;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dps-motion-hover);
     margin-top: 0.35rem;
 }
 
 .dps-taxidog-request-btn:hover {
-    background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
-    border-color: #d97706;
+    background: var(--dps-color-warning-container);
+    border-color: var(--dps-color-warning);
     transform: translateY(-1px);
 }
 
@@ -3152,23 +3165,23 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.35rem;
     padding: 0.5rem 0.85rem;
-    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-    border: 2px solid #22c55e;
-    border-radius: 8px;
-    color: #166534;
+    background: var(--dps-color-success-container);
+    border: 2px solid var(--dps-color-success);
+    border-radius: var(--dps-shape-chip);
+    color: var(--dps-color-on-success-container);
     font-size: 0.8rem;
-    font-weight: 700;
+    font-weight: 500;
     text-decoration: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dps-motion-hover);
 }
 
 .dps-taxidog-map-btn:hover {
-    background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);
-    border-color: #16a34a;
+    background: var(--dps-color-success-container);
+    border-color: var(--dps-color-success);
     transform: translateY(-1px);
     text-decoration: none;
-    color: #166534;
+    color: var(--dps-color-on-success-container);
 }
 
 .dps-taxidog-map-btn:focus {
@@ -3179,12 +3192,12 @@ tr.dps-row-updated {
 /* === Modal de Popup de Pagamento === */
 .dps-payment-modal {
     /* CSS Variables para o modal (necessárias pois o modal é anexado ao body e não herda de .dps-agenda-wrapper) */
-    --dps-accent: #2563eb;
-    --dps-accent-strong: #1d4ed8;
-    --dps-surface: #ffffff;
-    --dps-background: #f8fafc;
-    --dps-border: #e2e8f0;
-    --dps-muted: #64748b;
+    --dps-accent: var(--dps-color-primary);
+    --dps-accent-strong: var(--dps-color-primary-pressed);
+    --dps-surface: var(--dps-color-surface-container-lowest);
+    --dps-background: var(--dps-color-surface);
+    --dps-border: var(--dps-color-outline-variant);
+    --dps-muted: var(--dps-color-on-surface-variant);
     
     position: fixed;
     top: 0;
@@ -3203,7 +3216,7 @@ tr.dps-row-updated {
 
 .dps-payment-modal-content {
     background: white;
-    border-radius: 12px;
+    border-radius: var(--dps-shape-card);
     width: 100%;
     max-width: 420px;
     overflow: hidden;
@@ -3227,13 +3240,13 @@ tr.dps-row-updated {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 1.25rem;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: var(--dps-color-success);
     color: white;
 }
 
 .dps-payment-modal-title {
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 500;
     margin: 0;
     display: flex;
     align-items: center;
@@ -3259,9 +3272,9 @@ tr.dps-row-updated {
 }
 
 .dps-payment-info {
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    border-radius: 8px;
+    background: var(--dps-color-success-container);
+    border: 1px solid var(--dps-color-success-container);
+    border-radius: var(--dps-shape-chip);
     padding: 1rem;
     margin-bottom: 1.25rem;
 }
@@ -3276,16 +3289,16 @@ tr.dps-row-updated {
 .dps-payment-info-item:last-child {
     margin-bottom: 0;
     padding-top: 0.5rem;
-    border-top: 1px dashed #bbf7d0;
-    font-weight: 700;
+    border-top: 1px dashed var(--dps-color-success-container);
+    font-weight: 500;
 }
 
 .dps-payment-info-label {
-    color: #6b7280;
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-payment-info-value {
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
     font-weight: 500;
 }
 
@@ -3301,29 +3314,29 @@ tr.dps-row-updated {
     justify-content: center;
     gap: 0.5rem;
     padding: 0.85rem 1rem;
-    border-radius: 8px;
+    border-radius: var(--dps-shape-chip);
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dps-motion-hover);
     text-decoration: none;
 }
 
 .dps-payment-action-btn--whatsapp {
-    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    background: var(--dps-color-success);
     border: none;
     color: white;
 }
 
 .dps-payment-action-btn--whatsapp:hover {
-    background: linear-gradient(135deg, #128c7e 0%, #075e54 100%);
+    background: var(--dps-color-success);
     transform: translateY(-1px);
 }
 
 .dps-payment-action-btn--copy {
     background: var(--dps-surface);
     border: 2px solid var(--dps-border);
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-payment-action-btn--copy:hover {
@@ -3332,20 +3345,20 @@ tr.dps-row-updated {
 }
 
 .dps-payment-action-btn--copy.copied {
-    background: #d1fae5;
-    border-color: #10b981;
-    color: #059669;
+    background: var(--dps-color-success-container);
+    border-color: var(--dps-color-success);
+    color: var(--dps-color-success);
 }
 
 /* === Modal de Popup de Serviços === */
 .dps-services-modal {
     /* CSS Variables para o modal (necessárias pois o modal é anexado ao body e não herda de .dps-agenda-wrapper) */
-    --dps-accent: #2563eb;
-    --dps-accent-strong: #1d4ed8;
-    --dps-surface: #ffffff;
-    --dps-background: #f8fafc;
-    --dps-border: #e2e8f0;
-    --dps-muted: #64748b;
+    --dps-accent: var(--dps-color-primary);
+    --dps-accent-strong: var(--dps-color-primary-pressed);
+    --dps-surface: var(--dps-color-surface-container-lowest);
+    --dps-background: var(--dps-color-surface);
+    --dps-border: var(--dps-color-outline-variant);
+    --dps-muted: var(--dps-color-on-surface-variant);
     
     position: fixed;
     top: 0;
@@ -3364,7 +3377,7 @@ tr.dps-row-updated {
 
 .dps-services-modal-content {
     background: white;
-    border-radius: 12px;
+    border-radius: var(--dps-shape-card);
     width: 100%;
     max-width: 480px;
     overflow: hidden;
@@ -3377,13 +3390,13 @@ tr.dps-row-updated {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 1.25rem;
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: var(--dps-color-primary);
     color: white;
 }
 
 .dps-services-modal-title {
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 500;
     margin: 0;
     display: flex;
     align-items: center;
@@ -3430,42 +3443,42 @@ tr.dps-row-updated {
 
 .dps-services-list-modal .service-name {
     font-weight: 500;
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-services-list-modal .service-price {
-    font-weight: 600;
+    font-weight: 500;
     color: var(--dps-accent);
 }
 
 /* Estilo especial para TaxiDog no modal de serviços */
 .dps-services-list-modal li.dps-service-taxidog {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border-radius: 6px;
+    background: var(--dps-color-warning-container);
+    border-radius: var(--dps-shape-chip);
     margin: 0.25rem -0.5rem;
     padding: 0.75rem 0.5rem;
 }
 
 .dps-services-list-modal li.dps-service-taxidog .service-name {
-    color: #92400e;
+    color: var(--dps-color-on-warning-container);
 }
 
 .dps-services-list-modal li.dps-service-taxidog .service-price {
-    color: #92400e;
+    color: var(--dps-color-on-warning-container);
 }
 
 .dps-services-notes {
     margin-top: 1rem;
     padding: 1rem;
-    background: #f8fafc;
+    background: var(--dps-color-surface);
     border: 1px solid var(--dps-border);
-    border-radius: 8px;
+    border-radius: var(--dps-shape-chip);
 }
 
 .dps-services-notes-title {
     font-size: 0.85rem;
-    font-weight: 600;
-    color: #6b7280;
+    font-weight: 500;
+    color: var(--dps-color-on-surface-variant);
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
@@ -3474,7 +3487,7 @@ tr.dps-row-updated {
 
 .dps-services-notes-content {
     font-size: 0.9rem;
-    color: #374151;
+    color: var(--dps-color-on-surface-variant);
     line-height: 1.5;
 }
 
@@ -3486,10 +3499,10 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.75rem;
     padding: 0.875rem;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-    border-radius: 8px;
+    background: var(--dps-color-primary-container);
+    border-radius: var(--dps-shape-chip);
     margin-bottom: 1rem;
-    border-left: 4px solid #3b82f6;
+    border-left: 4px solid var(--dps-color-primary);
 }
 
 .dps-services-pet-icon {
@@ -3504,14 +3517,14 @@ tr.dps-row-updated {
 }
 
 .dps-services-pet-name {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 1rem;
-    color: #1e40af;
+    color: var(--dps-color-primary-pressed);
 }
 
 .dps-services-pet-meta {
     font-size: 0.8rem;
-    color: #3b82f6;
+    color: var(--dps-color-primary);
 }
 
 /* Resumo rápido */
@@ -3519,8 +3532,8 @@ tr.dps-row-updated {
     display: flex;
     gap: 1rem;
     padding: 0.75rem;
-    background: #f9fafb;
-    border-radius: 8px;
+    background: var(--dps-color-surface-container-low);
+    border-radius: var(--dps-shape-chip);
     margin-bottom: 1rem;
     justify-content: center;
 }
@@ -3532,7 +3545,7 @@ tr.dps-row-updated {
     padding: 0.375rem 0.75rem;
     background: white;
     border-radius: 20px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-color-surface-container-high);
 }
 
 .dps-services-summary-icon {
@@ -3540,14 +3553,14 @@ tr.dps-row-updated {
 }
 
 .dps-services-summary-value {
-    font-weight: 700;
+    font-weight: 500;
     font-size: 0.95rem;
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-services-summary-label {
     font-size: 0.8rem;
-    color: #6b7280;
+    color: var(--dps-color-on-surface-variant);
 }
 
 /* Checklist de serviços */
@@ -3557,8 +3570,8 @@ tr.dps-row-updated {
 
 .dps-services-section-title {
     font-size: 0.8rem;
-    font-weight: 600;
-    color: #6b7280;
+    font-weight: 500;
+    color: var(--dps-color-on-surface-variant);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 0 0 0.75rem 0;
@@ -3567,8 +3580,8 @@ tr.dps-row-updated {
 /* Card de serviço individual */
 .dps-service-card {
     background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    border: 1px solid var(--dps-color-surface-container-high);
+    border-radius: var(--dps-shape-chip);
     padding: 0.875rem;
     margin-bottom: 0.5rem;
     transition: box-shadow 0.15s ease;
@@ -3593,8 +3606,8 @@ tr.dps-row-updated {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f3f4f6;
-    border-radius: 6px;
+    background: var(--dps-color-surface-container);
+    border-radius: var(--dps-shape-chip);
 }
 
 .dps-service-card-info {
@@ -3606,20 +3619,20 @@ tr.dps-row-updated {
 }
 
 .dps-service-card-name {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 0.95rem;
-    color: #0f172a;
+    color: var(--dps-color-on-surface);
 }
 
 .dps-service-card-meta {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-service-card-price {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 0.95rem;
-    color: #0ea5e9;
+    color: var(--dps-color-primary);
     flex-shrink: 0;
     white-space: nowrap;
 }
@@ -3630,9 +3643,9 @@ tr.dps-row-updated {
     gap: 0.375rem;
     margin-top: 0.625rem;
     padding-top: 0.625rem;
-    border-top: 1px dashed #e5e7eb;
+    border-top: 1px dashed var(--dps-color-surface-container-high);
     font-size: 0.8rem;
-    color: #4b5563;
+    color: var(--dps-color-on-surface-variant);
     line-height: 1.4;
 }
 
@@ -3643,36 +3656,36 @@ tr.dps-row-updated {
 
 /* Estilos por tipo de serviço */
 .dps-service-type-taxidog {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border-color: #fcd34d;
+    background: var(--dps-color-warning-container);
+    border-color: var(--dps-color-warning-container);
 }
 
 .dps-service-type-taxidog .dps-service-card-icon {
-    background: #fbbf24;
+    background: var(--dps-color-warning);
 }
 
 .dps-service-type-taxidog .dps-service-card-name {
-    color: #92400e;
+    color: var(--dps-color-on-warning-container);
 }
 
 .dps-service-type-taxidog .dps-service-card-price {
-    color: #b45309;
+    color: var(--dps-color-warning);
 }
 
 .dps-service-type-extra {
-    border-left: 3px solid #8b5cf6;
+    border-left: 3px solid var(--dps-color-tertiary);
 }
 
 .dps-service-type-extra .dps-service-card-icon {
-    background: #ede9fe;
+    background: var(--dps-color-tertiary-container);
 }
 
 .dps-service-type-pacote {
-    border-left: 3px solid #10b981;
+    border-left: 3px solid var(--dps-color-success);
 }
 
 .dps-service-type-pacote .dps-service-card-icon {
-    background: #d1fae5;
+    background: var(--dps-color-success-container);
 }
 
 /* Linha de total */
@@ -3681,19 +3694,19 @@ tr.dps-row-updated {
     justify-content: space-between;
     align-items: center;
     padding: 0.875rem;
-    background: #0f172a;
-    border-radius: 8px;
+    background: var(--dps-color-on-surface);
+    border-radius: var(--dps-shape-chip);
     margin-top: 0.75rem;
 }
 
 .dps-services-total-label {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 0.9rem;
-    color: #cbd5e1;
+    color: var(--dps-color-outline-variant);
 }
 
 .dps-services-total-value {
-    font-weight: 700;
+    font-weight: 500;
     font-size: 1.1rem;
     color: white;
 }
@@ -3705,7 +3718,7 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.5rem;
     padding: 2rem 1rem;
-    color: #6b7280;
+    color: var(--dps-color-on-surface-variant);
     text-align: center;
 }
 
@@ -3716,13 +3729,13 @@ tr.dps-row-updated {
 
 /* Observações destacadas */
 .dps-services-notes-highlight {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border: 1px solid #fcd34d;
-    border-left: 4px solid #f59e0b;
+    background: var(--dps-color-warning-container);
+    border: 1px solid var(--dps-color-warning-container);
+    border-left: 4px solid var(--dps-color-warning);
 }
 
 .dps-services-notes-highlight .dps-services-notes-title {
-    color: #92400e;
+    color: var(--dps-color-on-warning-container);
     font-size: 0.9rem;
     display: flex;
     align-items: center;
@@ -3734,7 +3747,7 @@ tr.dps-row-updated {
 }
 
 .dps-services-notes-highlight .dps-services-notes-content {
-    color: #78350f;
+    color: var(--dps-color-on-warning-container);
     font-size: 0.9rem;
 }
 
@@ -3742,20 +3755,20 @@ tr.dps-row-updated {
 .dps-summary-report {
     margin-top: 2rem;
     border: 1px solid var(--dps-border);
-    border-radius: 0.75rem;
+    border-radius: var(--dps-shape-card);
     background: var(--dps-surface);
 }
 
 .dps-summary-report > summary {
     padding: 0.85rem 1rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
     background: var(--dps-background);
-    border-radius: 0.75rem;
+    border-radius: var(--dps-shape-card);
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #374151;
+    color: var(--dps-color-on-surface-variant);
     list-style: none;
 }
 
@@ -3766,7 +3779,7 @@ tr.dps-row-updated {
 .dps-summary-report > summary::before {
     content: '▶';
     font-size: 0.7rem;
-    transition: transform 0.2s ease;
+    transition: transform var(--dps-motion-hover);
 }
 
 .dps-summary-report[open] > summary::before {
@@ -3775,7 +3788,7 @@ tr.dps-row-updated {
 
 .dps-summary-report[open] > summary {
     border-bottom: 1px solid var(--dps-border);
-    border-radius: 0.75rem 0.75rem 0 0;
+    border-radius: var(--dps-shape-card) 0.75rem 0 0;
 }
 
 .dps-summary-content {
@@ -3875,22 +3888,22 @@ tr.dps-row-updated {
 /* === Refinamentos do Header === */
 .dps-agenda-title h3 {
     font-size: 1.35rem;
-    font-weight: 700;
-    color: #0f172a;
+    font-weight: 500;
+    color: var(--dps-color-on-surface);
     letter-spacing: -0.02em;
 }
 
 .dps-agenda-header .dps-current-date {
     font-size: 1rem;
     font-weight: 500;
-    color: #475569;
+    color: var(--dps-color-on-surface-variant);
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 0.85rem;
     background: var(--dps-accent-soft);
-    border-radius: 8px;
-    border: 1px solid rgba(37, 99, 235, 0.15);
+    border-radius: var(--dps-shape-chip);
+    border: 1px solid rgba(11, 107, 203, 0.12);
 }
 
 .dps-agenda-header .dps-current-date strong {
@@ -3906,13 +3919,13 @@ tr.dps-row-updated {
     min-height: 2.25rem;
     padding: 0.5rem 0.85rem;
     border: 1px solid var(--dps-border);
-    border-radius: 8px;
+    border-radius: var(--dps-shape-chip);
     background: var(--dps-surface);
-    color: #475569;
-    font-weight: 600;
+    color: var(--dps-color-on-surface-variant);
+    font-weight: 500;
     font-size: 0.875rem;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: all var(--dps-motion-hover);
 }
 
 .dps-nav-btn:hover {
@@ -3959,7 +3972,7 @@ tr.dps-row-updated {
 
 .dps-nav-label {
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--dps-muted);
     margin-right: 0.25rem;
 }
@@ -3969,7 +3982,7 @@ tr.dps-row-updated {
     gap: 0.375rem;
     background: var(--dps-background);
     padding: 0.25rem;
-    border-radius: 8px;
+    border-radius: var(--dps-shape-chip);
 }
 
 .dps-view-btn {
@@ -3977,12 +3990,12 @@ tr.dps-row-updated {
     align-items: center;
     justify-content: center;
     padding: 0.5rem 1rem;
-    border-radius: 6px;
+    border-radius: var(--dps-shape-chip);
     font-size: 0.875rem;
-    font-weight: 600;
-    color: #475569;
+    font-weight: 500;
+    color: var(--dps-color-on-surface-variant);
     text-decoration: none;
-    transition: all 0.15s ease;
+    transition: all var(--dps-motion-press);
     white-space: nowrap;
 }
 
@@ -4018,8 +4031,8 @@ tr.dps-row-updated {
 
 .dps-agenda-tabs-title {
     font-size: 1.125rem;
-    font-weight: 700;
-    color: #0f172a;
+    font-weight: 500;
+    color: var(--dps-color-on-surface);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -4042,11 +4055,11 @@ tr.dps-row-updated {
     padding: 1.125rem 1rem;
     background: var(--dps-surface);
     border: 2px solid var(--dps-border);
-    border-radius: 12px;
-    font-weight: 600;
-    color: #64748b;
+    border-radius: var(--dps-shape-card);
+    font-weight: 500;
+    color: var(--dps-color-on-surface-variant);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dps-motion-hover);
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -4060,12 +4073,12 @@ tr.dps-row-updated {
     right: 0;
     height: 3px;
     background: transparent;
-    transition: background 0.2s ease;
+    transition: background var(--dps-motion-hover);
 }
 
 .dps-agenda-tab-button:hover {
     border-color: rgba(37, 99, 235, 0.4);
-    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    background: var(--dps-color-surface-container-low);
     color: var(--dps-accent);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
@@ -4073,13 +4086,13 @@ tr.dps-row-updated {
 
 .dps-agenda-tab-button--active {
     border-color: var(--dps-accent);
-    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+    background: var(--dps-color-primary-container);
     color: var(--dps-accent);
     box-shadow: 0 4px 16px rgba(37, 99, 235, 0.12);
 }
 
 .dps-agenda-tab-button--active::before {
-    background: linear-gradient(90deg, var(--dps-accent) 0%, #60a5fa 100%);
+    background: var(--dps-color-primary);
 }
 
 .dps-tab-icon {
@@ -4096,7 +4109,7 @@ tr.dps-row-updated {
 
 .dps-tab-label {
     font-size: 0.9375rem;
-    font-weight: 700;
+    font-weight: 500;
     color: inherit;
     letter-spacing: -0.01em;
 }
@@ -4104,12 +4117,12 @@ tr.dps-row-updated {
 .dps-tab-desc {
     font-size: 0.75rem;
     font-weight: 500;
-    color: #94a3b8;
+    color: var(--dps-color-outline);
     line-height: 1.3;
 }
 
 .dps-agenda-tab-button--active .dps-tab-desc {
-    color: #60a5fa;
+    color: var(--dps-color-primary);
 }
 
 /* === Tabelas Aprimoradas === */
@@ -4126,51 +4139,51 @@ tr.dps-row-updated {
     text-align: left;
     padding: 0.875rem 1rem;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #64748b;
-    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    color: var(--dps-color-on-surface-variant);
+    background: var(--dps-color-surface);
     border-bottom: 2px solid var(--dps-border);
 }
 
 .dps-agenda-wrapper table.dps-table tbody tr {
-    transition: background 0.15s ease, border-left-color 0.15s ease;
+    transition: background var(--dps-motion-press), border-left-color 0.15s ease;
     border-left: 4px solid transparent;
 }
 
 .dps-agenda-wrapper table.dps-table tbody tr:hover {
-    background: linear-gradient(90deg, #f8fafc 0%, transparent 100%);
+    background: linear-gradient(90deg, var(--dps-color-surface) 0%, transparent 100%);
 }
 
 .dps-agenda-wrapper table.dps-table tbody td {
     padding: 0.9rem 1rem;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--dps-color-surface);
     vertical-align: middle;
-    color: #1e293b;
+    color: var(--dps-color-on-surface);
     font-size: 0.9375rem;
     line-height: 1.45;
 }
 
 /* Estilos de status com melhor contraste */
 .dps-agenda-wrapper table.dps-table tr.status-pendente {
-    border-left-color: #f59e0b;
-    background: linear-gradient(90deg, #fffbeb 0%, transparent 30%);
+    border-left-color: var(--dps-color-warning);
+    background: linear-gradient(90deg, var(--dps-color-warning-container) 0%, transparent 30%);
 }
 
 .dps-agenda-wrapper table.dps-table tr.status-finalizado {
-    border-left-color: #0ea5e9;
-    background: linear-gradient(90deg, #f0f9ff 0%, transparent 30%);
+    border-left-color: var(--dps-color-primary);
+    background: linear-gradient(90deg, var(--dps-color-primary-container) 0%, transparent 30%);
 }
 
 .dps-agenda-wrapper table.dps-table tr.status-finalizado_pago {
-    border-left-color: #22c55e;
-    background: linear-gradient(90deg, #f0fdf4 0%, transparent 30%);
+    border-left-color: var(--dps-color-success);
+    background: linear-gradient(90deg, var(--dps-color-success-container) 0%, transparent 30%);
 }
 
 .dps-agenda-wrapper table.dps-table tr.status-cancelado {
-    border-left-color: #ef4444;
-    background: linear-gradient(90deg, #fef2f2 0%, transparent 30%);
+    border-left-color: var(--dps-color-error);
+    background: linear-gradient(90deg, var(--dps-color-error-container) 0%, transparent 30%);
     opacity: 0.8;
 }
 
@@ -4179,8 +4192,8 @@ tr.dps-row-updated {
     margin: 1.75rem 0 0.875rem;
     padding: 0.625rem 0;
     font-size: 0.9375rem;
-    font-weight: 700;
-    color: #1e293b;
+    font-weight: 500;
+    color: var(--dps-color-on-surface);
     border-bottom: 2px solid var(--dps-border);
     display: flex;
     align-items: center;
@@ -4198,7 +4211,7 @@ tr.dps-row-updated {
     width: 4px;
     height: 1.1em;
     background: var(--dps-accent);
-    border-radius: 2px;
+    border-radius: var(--dps-shape-extra-small);
     margin-right: 0.25rem;
 }
 
@@ -4209,10 +4222,10 @@ tr.dps-row-updated {
     max-width: min(100%, 28rem);
     text-align: center;
     line-height: 1.6;
-    color: #64748b;
-    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
-    border: 2px dashed #cbd5e1;
-    border-radius: 12px;
+    color: var(--dps-color-on-surface-variant);
+    background: var(--dps-color-surface-container-low);
+    border: 2px dashed var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-card);
     font-size: 0.9375rem;
 }
 
@@ -4370,7 +4383,7 @@ tr.dps-row-updated {
         justify-content: center;
         padding: 0.625rem 0.5rem;
         gap: 0.5rem;
-        border-radius: 8px;
+        border-radius: var(--dps-shape-chip);
     }
     
     .dps-agenda-tab-button::before {
@@ -4563,11 +4576,11 @@ tr.dps-row-updated {
 
 @keyframes rowUpdatePulse {
     0% {
-        background: #d1fae5;
+        background: var(--dps-color-success-container);
         transform: scale(1.002);
     }
     50% {
-        background: #ecfdf5;
+        background: var(--dps-color-success-container);
     }
     100% {
         background: transparent;
@@ -4638,25 +4651,25 @@ tr.dps-row-updated {
 .dps-notes-preview {
     display: inline-block;
     max-width: 180px;
-    color: #374151;
+    color: var(--dps-color-on-surface-variant);
     font-size: 0.875rem;
     line-height: 1.4;
     cursor: help;
 }
 
 .dps-notes-preview:hover {
-    color: #0ea5e9;
+    color: var(--dps-color-primary);
 }
 
 .dps-notes-text {
     display: inline-block;
-    color: #374151;
+    color: var(--dps-color-on-surface-variant);
     font-size: 0.875rem;
     line-height: 1.4;
 }
 
 .dps-notes-empty {
-    color: #9ca3af;
+    color: var(--dps-color-outline);
     font-size: 0.875rem;
 }
 
@@ -4669,15 +4682,15 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.75rem;
     padding: 1rem 1.25rem;
-    background: #fff;
-    border-radius: 0.5rem;
+    background: var(--dps-color-surface-container-lowest);
+    border-radius: var(--dps-shape-chip);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     z-index: 10000;
     max-width: 400px;
     transform: translateX(calc(100% + 20px));
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: transform var(--dps-motion-enter), opacity 0.3s ease;
     opacity: 0;
-    border-left: 4px solid #6b7280;
+    border-left: 4px solid var(--dps-color-on-surface-variant);
 }
 
 .dps-toast--visible {
@@ -4686,19 +4699,19 @@ tr.dps-row-updated {
 }
 
 .dps-toast--error {
-    border-left-color: #ef4444;
+    border-left-color: var(--dps-color-error);
 }
 
 .dps-toast--success {
-    border-left-color: #22c55e;
+    border-left-color: var(--dps-color-success);
 }
 
 .dps-toast--warning {
-    border-left-color: #f59e0b;
+    border-left-color: var(--dps-color-warning);
 }
 
 .dps-toast--info {
-    border-left-color: #0ea5e9;
+    border-left-color: var(--dps-color-primary);
 }
 
 .dps-toast-icon {
@@ -4710,7 +4723,7 @@ tr.dps-row-updated {
     flex: 1;
     font-size: 0.9375rem;
     line-height: 1.4;
-    color: #374151;
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-toast-close {
@@ -4718,14 +4731,14 @@ tr.dps-row-updated {
     background: none;
     border: none;
     font-size: 1.25rem;
-    color: #9ca3af;
+    color: var(--dps-color-outline);
     cursor: pointer;
     padding: 0;
     line-height: 1;
 }
 
 .dps-toast-close:hover {
-    color: #374151;
+    color: var(--dps-color-on-surface-variant);
 }
 
 @media (max-width: 480px) {
@@ -4747,24 +4760,24 @@ tr.dps-row-updated {
     display: inline-flex;
     align-items: center;
     padding: 2px 8px;
-    border-radius: 999px;
+    border-radius: var(--dps-shape-full);
     font-size: 11px;
-    font-weight: 600;
-    background: #f3f4f6;
-    color: #6b7280;
+    font-weight: 500;
+    background: var(--dps-color-surface-container);
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-consent-badge--ok {
-    background: #d1fae5;
-    color: #065f46;
+    background: var(--dps-color-success-container);
+    color: var(--dps-color-on-success-container);
 }
 
 .dps-consent-badge--missing {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--dps-color-warning-container);
+    color: var(--dps-color-on-warning-container);
 }
 
 .dps-consent-badge--danger {
-    background: #fee2e2;
-    color: #991b1b;
+    background: var(--dps-color-error-container);
+    color: var(--dps-color-on-error-container);
 }

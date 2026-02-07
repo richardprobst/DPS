@@ -397,11 +397,19 @@ class DPS_Agenda_Addon {
             return;
         }
 
+        // Design tokens M3 Expressive (devem ser carregados antes de qualquer CSS)
+        wp_enqueue_style(
+            'dps-design-tokens',
+            DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
+            [],
+            DPS_BASE_VERSION
+        );
+
         wp_enqueue_style(
             'dps-dashboard-css',
             plugin_dir_url( __FILE__ ) . 'assets/css/dashboard.css',
-            [],
-            '1.3.0'
+            [ 'dps-design-tokens' ],
+            '2.0.0'
         );
 
         // jQuery já está enfileirado no admin
@@ -930,16 +938,23 @@ class DPS_Agenda_Addon {
         
         // Agenda page: carrega CSS e scripts da agenda
         if ( $is_agenda_target_page || $has_agenda_shortcode ) {
+            // Design tokens M3 Expressive (devem ser carregados antes de qualquer CSS)
+            wp_enqueue_style(
+                'dps-design-tokens',
+                DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
+                [],
+                DPS_BASE_VERSION
+            );
             wp_enqueue_style(
                 'dps-base-style',
                 DPS_BASE_URL . 'assets/css/dps-base.css',
-                [],
+                [ 'dps-design-tokens' ],
                 DPS_BASE_VERSION
             );
             wp_enqueue_style(
                 'dps-form-validation',
                 DPS_BASE_URL . 'assets/css/dps-form-validation.css',
-                [],
+                [ 'dps-design-tokens' ],
                 DPS_BASE_VERSION
             );
             wp_enqueue_script(
@@ -963,12 +978,12 @@ class DPS_Agenda_Addon {
                 DPS_BASE_VERSION,
                 true
             );
-            // CSS da agenda (extraído do inline para arquivo dedicado)
+            // CSS da agenda com design tokens M3 Expressive
             wp_enqueue_style(
                 'dps-agenda-addon-css',
                 plugin_dir_url( __FILE__ ) . 'assets/css/agenda-addon.css',
-                [],
-                '1.1.0' 
+                [ 'dps-design-tokens' ],
+                '2.0.0' 
             );
             
             // Modal de serviços (precisa ser carregado antes do agenda-addon.js)
