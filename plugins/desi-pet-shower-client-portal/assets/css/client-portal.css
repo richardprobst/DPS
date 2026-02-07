@@ -60,7 +60,27 @@
 
 /* ========================================
    TELA DE ACESSO (Portal Access Screen)
+   M3 Expressive — Acolhedor, moderno, confiável
    ======================================== */
+
+/* Animação de entrada M3 Expressive para o card principal */
+@keyframes dps-access-card-enter {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Feedback de sucesso — pulse verde M3 */
+@keyframes dps-access-success-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(26, 122, 58, 0.3); }
+    70%  { box-shadow: 0 0 0 10px rgba(26, 122, 58, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(26, 122, 58, 0); }
+}
 
 .dps-client-portal-access-page {
     max-width: 480px;
@@ -75,15 +95,20 @@
 .dps-portal-access__card {
     background: var(--dps-white);
     border: 1px solid var(--dps-border-color);
-    border-radius: var(--dps-border-radius);
-    padding: 32px;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    border-radius: var(--dps-shape-extra-large);
+    padding: 40px 32px;
+    box-shadow: var(--dps-elevation-2);
+    animation: dps-access-card-enter
+               var(--dps-motion-duration-medium-2)
+               var(--dps-motion-easing-emphasized-decelerate)
+               both;
 }
 
 .dps-portal-access__logo {
-    font-size: 48px;
+    font-size: 56px;
     text-align: center;
     margin-bottom: 24px;
+    line-height: 1;
 }
 
 .dps-portal-access__title {
@@ -91,23 +116,23 @@
     font-weight: 600;
     color: var(--dps-gray-700);
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     line-height: 1.3;
 }
 
 .dps-portal-access__description {
-    font-size: 16px;
+    font-size: 15px;
     color: var(--dps-gray-500);
     line-height: 1.6;
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
 }
 
 .dps-portal-access__error {
     background-color: var(--dps-warning-bg);
     border: 1px solid var(--dps-warning);
     border-left: 4px solid var(--dps-warning);
-    border-radius: 4px;
+    border-radius: var(--dps-shape-small);
     padding: 16px;
     margin-bottom: 24px;
 }
@@ -128,37 +153,42 @@
     font-weight: 600;
     text-align: center;
     text-decoration: none;
-    padding: 14px 20px;
+    padding: 14px 24px;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--dps-shape-button);
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all var(--dps-motion-hover);
+    box-shadow: var(--dps-elevation-button);
 }
 
 .dps-portal-access__button:hover {
     background-color: var(--dps-primary-hover);
     color: #ffffff;
+    box-shadow: var(--dps-elevation-2);
 }
 
 .dps-portal-access__button:active {
     background-color: var(--dps-primary-active);
+    box-shadow: var(--dps-elevation-1);
 }
 
 .dps-portal-access__button--disabled {
     background-color: var(--dps-gray-200);
     color: var(--dps-gray-400);
     cursor: not-allowed;
+    box-shadow: none;
 }
 
 .dps-portal-access__button--disabled:hover {
     background-color: var(--dps-gray-200);
+    box-shadow: none;
 }
 
 .dps-portal-access__note {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--dps-gray-500);
     text-align: center;
-    margin-top: 16px;
+    margin-top: 20px;
     line-height: 1.5;
 }
 
@@ -166,21 +196,26 @@
     color: var(--dps-danger);
 }
 
-/* Feedback de solicitação de acesso (Fase 1.4) */
+/* Feedback de solicitação de acesso — M3 */
 .dps-portal-access__feedback {
     font-size: 14px;
     text-align: center;
     margin-top: 12px;
-    padding: 10px;
-    border-radius: var(--dps-border-radius);
+    padding: 12px 16px;
+    border-radius: var(--dps-shape-small);
     background-color: var(--dps-success-bg);
     color: var(--dps-success);
     line-height: 1.5;
+    animation: dps-access-card-enter
+               var(--dps-motion-duration-short-4)
+               var(--dps-motion-easing-emphasized-decelerate)
+               both;
 }
 
 .dps-portal-access__feedback--success {
     background-color: var(--dps-success-bg);
     color: var(--dps-success);
+    animation: dps-access-success-pulse 1.5s ease-out;
 }
 
 .dps-portal-access__feedback--error {
@@ -190,11 +225,11 @@
 
 /* Seção de email para solicitar acesso */
 .dps-portal-access__email-section {
-    margin-bottom: 24px;
+    margin-bottom: 28px;
 }
 
 .dps-portal-access__subtitle {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
     color: var(--dps-gray-700);
     text-align: center;
@@ -220,60 +255,84 @@
 
 .dps-portal-access__email-input {
     flex: 1;
-    padding: 12px 14px;
+    padding: 12px 16px;
     font-size: 16px;
     border: 1px solid var(--dps-border-color);
-    border-radius: 6px;
+    border-radius: var(--dps-shape-small);
     outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
+    background: var(--dps-white);
+    color: var(--dps-gray-700);
 }
 
 .dps-portal-access__email-input:focus {
     border-color: var(--dps-primary);
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+    box-shadow: 0 0 0 3px var(--dps-primary-light);
+}
+
+.dps-portal-access__email-input::placeholder {
+    color: var(--dps-gray-400);
 }
 
 .dps-portal-access__email-button {
-    padding: 12px 20px;
+    padding: 12px 24px;
     font-size: 14px;
     font-weight: 600;
     color: #ffffff;
     background-color: var(--dps-primary);
     border: none;
-    border-radius: 6px;
+    border-radius: var(--dps-shape-button);
     cursor: pointer;
     white-space: nowrap;
-    transition: background-color 0.2s ease;
+    transition: all var(--dps-motion-hover);
+    box-shadow: var(--dps-elevation-button);
 }
 
 .dps-portal-access__email-button:hover {
     background-color: var(--dps-primary-hover);
+    box-shadow: var(--dps-elevation-2);
 }
 
 .dps-portal-access__email-button:disabled {
     background-color: var(--dps-gray-300);
     cursor: not-allowed;
+    box-shadow: none;
 }
 
 /* Seção de WhatsApp */
 .dps-portal-access__whatsapp-section {
     padding-top: 16px;
-    transition: all 0.3s ease;
+    transition: all var(--dps-motion-enter);
 }
 
 .dps-portal-access__whatsapp-section--highlight {
     background-color: var(--dps-warning-bg);
-    border-radius: 8px;
+    border-radius: var(--dps-shape-medium);
     padding: 16px;
     margin-top: 16px;
+    animation: dps-access-card-enter
+               var(--dps-motion-duration-short-4)
+               var(--dps-motion-easing-emphasized-decelerate)
+               both;
 }
 
 .dps-portal-access__divider {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--dps-gray-400);
     text-align: center;
-    margin: 8px 0 16px;
+    margin: 12px 0 16px;
     position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dps-portal-access__divider::before,
+.dps-portal-access__divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--dps-border-color);
 }
 
 .dps-portal-access__whatsapp-description {
@@ -293,12 +352,27 @@
 
 /* Responsivo para formulário de email */
 @media (max-width: 480px) {
+    .dps-portal-access__card {
+        padding: 28px 20px;
+        border-radius: var(--dps-shape-large);
+    }
+
     .dps-portal-access__email-input-group {
         flex-direction: column;
     }
     
     .dps-portal-access__email-button {
         width: 100%;
+    }
+}
+
+/* Acessibilidade: respeitar preferência de redução de movimento */
+@media (prefers-reduced-motion: reduce) {
+    .dps-portal-access__card,
+    .dps-portal-access__feedback,
+    .dps-portal-access__feedback--success,
+    .dps-portal-access__whatsapp-section--highlight {
+        animation: none;
     }
 }
 
@@ -3571,7 +3645,7 @@ html {
     padding: 1rem;
     background: var(--dps-gray-50);
     border: 1px solid var(--dps-gray-200);
-    border-radius: var(--dps-border-radius);
+    border-radius: var(--dps-shape-small);
 }
 
 .dps-client-logins__field {
@@ -3688,7 +3762,7 @@ html {
     padding: 1.25rem;
     background: var(--dps-gray-50);
     border: 1px dashed var(--dps-gray-300);
-    border-radius: var(--dps-border-radius);
+    border-radius: var(--dps-shape-small);
     color: var(--dps-gray-600);
     text-align: center;
     font-weight: 500;
@@ -3698,7 +3772,7 @@ html {
     padding: 1.5rem;
     background: var(--dps-gray-50);
     border: 1px solid var(--dps-gray-200);
-    border-radius: var(--dps-border-radius);
+    border-radius: var(--dps-shape-small);
     color: var(--dps-gray-600);
     text-align: center;
 }
@@ -3711,7 +3785,7 @@ html {
     .dps-client-logins__table tr {
         display: block;
         border: 1px solid var(--dps-gray-200);
-        border-radius: var(--dps-border-radius);
+        border-radius: var(--dps-shape-small);
         padding: 0.75rem;
         margin-bottom: 0.75rem;
         background: var(--dps-white);
@@ -3741,10 +3815,6 @@ html {
     }
     
     /* Tela de acesso em mobile */
-    .dps-portal-access__card {
-        padding: 24px;
-    }
-    
     .dps-portal-access__title {
         font-size: 20px;
     }
@@ -3755,7 +3825,7 @@ html {
     
     .dps-portal-access__button {
         font-size: 15px;
-        padding: 12px 16px;
+        padding: 12px 20px;
     }
 }
 
@@ -3779,7 +3849,7 @@ html {
 .dps-toast {
     background: var(--dps-white);
     border-left: 4px solid var(--dps-primary);
-    border-radius: var(--dps-border-radius);
+    border-radius: var(--dps-shape-small);
     box-shadow: var(--dps-shadow-lg);
     padding: 16px 20px;
     display: flex;
@@ -3940,7 +4010,7 @@ html {
 .dps-skeleton--card {
     height: 120px;
     margin-bottom: 16px;
-    border-radius: var(--dps-border-radius);
+    border-radius: var(--dps-shape-small);
 }
 
 .dps-skeleton--table-row {
