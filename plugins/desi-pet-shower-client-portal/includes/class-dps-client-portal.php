@@ -732,7 +732,12 @@ final class DPS_Client_Portal {
                     $badge_text   = $badge_count > 999 ? number_format( $badge_count / 1000, 1, ',', '' ) . 'k' : number_format( $badge_count, 0, ',', '.' );
                 }
                 
-                echo '<span class="' . esc_attr( $badge_class ) . '" aria-label="' . esc_attr( sprintf( _n( '%d item', '%d itens', $badge_count, 'dps-client-portal' ), $badge_count ) ) . '">';
+                // aria-label sempre com valor completo para acessibilidade
+                $aria_label = ( 'fidelidade' === $tab_id )
+                    ? sprintf( __( '%s pontos de fidelidade', 'dps-client-portal' ), number_format( $badge_count, 0, ',', '.' ) )
+                    : sprintf( _n( '%d item', '%d itens', $badge_count, 'dps-client-portal' ), $badge_count );
+                
+                echo '<span class="' . esc_attr( $badge_class ) . '" aria-label="' . esc_attr( $aria_label ) . '">';
                 echo esc_html( $badge_text );
                 echo '</span>';
             }
