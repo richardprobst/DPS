@@ -58,6 +58,26 @@ class DPS_Loyalty_REST {
                 ],
             ]
         );
+
+        register_rest_route(
+            self::API_NAMESPACE,
+            '/campaign-settings',
+            [
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => [ __CLASS__, 'get_campaign_settings' ],
+                'permission_callback' => [ __CLASS__, 'can_access' ],
+            ]
+        );
+
+        register_rest_route(
+            self::API_NAMESPACE,
+            '/campaign-settings',
+            [
+                'methods'             => WP_REST_Server::CREATABLE,
+                'callback'            => [ __CLASS__, 'update_campaign_settings' ],
+                'permission_callback' => [ __CLASS__, 'can_access' ],
+            ]
+        );
     }
 
     /**
@@ -136,6 +156,50 @@ class DPS_Loyalty_REST {
                 'granted'      => $timeseries['granted'],
                 'redeemed'     => $timeseries['redeemed'],
                 'clients_by_tier' => DPS_Loyalty_API::get_tier_distribution(),
+            ]
+        );
+    }
+
+    /**
+     * Retorna o estado dos toggles de campanha.
+     *
+     * @since 2.0.0
+     */
+    public static function get_campaign_settings() {
+        return new WP_REST_Response(
+            [
+                'enable_campaign_referrals'  => DPS_Loyalty_Addon::is_campaign_enabled( 'referrals' ),
+                'enable_campaign_points'     => DPS_Loyalty_Addon::is_campaign_enabled( 'points' ),
+                'enable_campaign_promotions' => DPS_Loyalty_Addon::is_campaign_enabled( 'promotions' ),
+            ]
+        );
+    }
+
+    /**
+     * Atualiza os toggles de campanha via REST.
+     *
+     * @since 2.0.0
+     */
+    public static function update_campaign_settings( WP_REST_Request $request ) {
+        $settings = get_option( DPS_Loyalty_Addon::OPTION_KEY, [] );
+        $body     = $request->get_json_params();
+
+        $allowed_keys = [ 'enable_campaign_referrals', 'enable_campaign_points', 'enable_campaign_promotions' ];
+
+        foreach ( $allowed_keys as $key ) {
+            if ( isset( $body[ $key ] ) ) {
+                $settings[ $key ] = ! empty( $body[ $key ] ) ? 1 : 0;
+            }
+        }
+
+        update_option( DPS_Loyalty_Addon::OPTION_KEY, $settings );
+
+        return new WP_REST_Response(
+            [
+                'enable_campaign_referrals'  => DPS_Loyalty_Addon::is_campaign_enabled( 'referrals' ),
+                'enable_campaign_points'     => DPS_Loyalty_Addon::is_campaign_enabled( 'points' ),
+                'enable_campaign_promotions' => DPS_Loyalty_Addon::is_campaign_enabled( 'promotions' ),
+                'updated'                    => true,
             ]
         );
     }

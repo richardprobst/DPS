@@ -1,12 +1,221 @@
 /**
- * Estilos do Loyalty Add-on
+ * Estilos do Loyalty Add-on — M3 Expressive
  *
  * @package Desi_Pet_Shower_Loyalty
- * @since   1.1.0
+ * @since   2.0.0
  */
 
 /* ==========================================================================
-   Dashboard de Métricas
+   Semantic Token Mapping (M3 Expressive)
+   ========================================================================== */
+
+.dps-loyalty-wrap,
+.dps-loyalty-frontend-settings {
+    --dps-accent: var(--dps-color-primary, #0b6bcb);
+    --dps-accent-hover: var(--dps-color-primary-hover, #0960b8);
+    --dps-accent-pressed: var(--dps-color-primary-pressed, #0756a5);
+    --dps-accent-container: var(--dps-color-primary-container, #d6e6ff);
+    --dps-on-accent: var(--dps-color-on-primary, #ffffff);
+    --dps-on-accent-container: var(--dps-color-on-primary-container, #001b3d);
+    --dps-surface: var(--dps-color-surface-container-lowest, #ffffff);
+    --dps-surface-low: var(--dps-color-surface-container-low, #f2f3fa);
+    --dps-surface-container: var(--dps-color-surface-container, #ecedf4);
+    --dps-surface-high: var(--dps-color-surface-container-high, #e6e8ef);
+    --dps-text-primary: var(--dps-color-on-surface, #191c20);
+    --dps-text-secondary: var(--dps-color-on-surface-variant, #43474e);
+    --dps-border: var(--dps-color-outline-variant, #c3c6cf);
+    --dps-border-light: var(--dps-color-outline-variant, #c3c6cf);
+    --dps-success: var(--dps-color-success, #1a7a3a);
+    --dps-success-container: var(--dps-color-success-container, #b8f0c8);
+    --dps-warning: var(--dps-color-warning, #8b6914);
+    --dps-warning-container: var(--dps-color-warning-container, #ffdea3);
+    --dps-error: var(--dps-color-error, #ba1a1a);
+    --dps-error-container: var(--dps-color-error-container, #ffdad6);
+    --dps-info: var(--dps-color-primary, #0b6bcb);
+    --dps-info-container: var(--dps-color-primary-container, #d6e6ff);
+    --dps-radius: var(--dps-shape-corner-m, 12px);
+    --dps-radius-lg: var(--dps-shape-corner-l, 16px);
+    --dps-radius-pill: var(--dps-shape-corner-pill, 9999px);
+    --dps-shadow-sm: var(--dps-elevation-1, 0 1px 3px rgba(0,0,0,0.12));
+    --dps-shadow-md: var(--dps-elevation-2, 0 2px 6px rgba(0,0,0,0.12));
+    --dps-shadow-lg: var(--dps-elevation-3, 0 4px 12px rgba(0,0,0,0.12));
+    --dps-motion-fast: var(--dps-motion-duration-short, 150ms) var(--dps-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1));
+    --dps-motion-normal: var(--dps-motion-duration-medium, 300ms) var(--dps-motion-easing-standard, cubic-bezier(0.2, 0, 0, 1));
+}
+
+/* ==========================================================================
+   Campaign Toggle Cards (Configurações de Campanhas)
+   ========================================================================== */
+
+.dps-loyalty-campaigns-fieldset {
+    border: 1px solid var(--dps-border);
+    padding: 24px;
+    margin-bottom: 24px;
+    border-radius: var(--dps-radius-lg);
+    background: var(--dps-surface);
+}
+
+.dps-loyalty-campaigns-fieldset > legend {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--dps-text-primary);
+    padding: 0 8px;
+}
+
+.dps-campaign-toggles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.dps-campaign-toggle-card {
+    background: var(--dps-surface);
+    border: 1px solid var(--dps-border-light);
+    border-radius: var(--dps-radius-lg);
+    padding: 20px;
+    transition: box-shadow var(--dps-motion-fast), border-color var(--dps-motion-fast);
+}
+
+.dps-campaign-toggle-card:hover {
+    box-shadow: var(--dps-shadow-md);
+    border-color: var(--dps-accent);
+}
+
+.dps-campaign-toggle-card--featured {
+    border: 2px solid var(--dps-accent);
+    background: var(--dps-accent-container);
+    position: relative;
+}
+
+.dps-campaign-toggle-card--featured::before {
+    content: '★';
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    background: var(--dps-accent);
+    color: var(--dps-on-accent);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.dps-campaign-toggle-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.dps-campaign-toggle-icon {
+    font-size: 28px;
+    line-height: 1;
+}
+
+.dps-campaign-toggle-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dps-campaign-toggle-info strong {
+    font-size: 15px;
+    color: var(--dps-text-primary);
+}
+
+.dps-campaign-toggle-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    background: var(--dps-accent);
+    color: var(--dps-on-accent);
+    border-radius: var(--dps-radius-pill);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    width: fit-content;
+}
+
+.dps-campaign-toggle-desc {
+    font-size: 13px;
+    color: var(--dps-text-secondary);
+    margin: 0 0 12px;
+    line-height: 1.5;
+}
+
+/* Toggle Switch — M3 style */
+.dps-campaign-toggle-switch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.dps-campaign-toggle-switch input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.dps-toggle-slider {
+    position: relative;
+    width: 48px;
+    height: 28px;
+    background: var(--dps-surface-high);
+    border: 2px solid var(--dps-border);
+    border-radius: var(--dps-radius-pill);
+    transition: background var(--dps-motion-fast), border-color var(--dps-motion-fast);
+    flex-shrink: 0;
+}
+
+.dps-toggle-slider::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    background: var(--dps-text-secondary);
+    border-radius: 50%;
+    transition: transform var(--dps-motion-fast), background var(--dps-motion-fast);
+}
+
+.dps-campaign-toggle-switch input:checked + .dps-toggle-slider {
+    background: var(--dps-accent);
+    border-color: var(--dps-accent);
+}
+
+.dps-campaign-toggle-switch input:checked + .dps-toggle-slider::before {
+    transform: translateX(20px);
+    background: var(--dps-on-accent);
+}
+
+.dps-toggle-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dps-text-secondary);
+}
+
+/* Feedback toast */
+.dps-campaign-save-feedback {
+    margin-top: 12px;
+    padding: 10px 16px;
+    border-radius: var(--dps-radius);
+    background: var(--dps-success-container);
+    color: var(--dps-success);
+    font-size: 13px;
+    font-weight: 500;
+    transition: opacity var(--dps-motion-normal);
+}
+
+/* ==========================================================================
+   Dashboard de Métricas — M3
    ========================================================================== */
 
 .dps-loyalty-dashboard {
@@ -17,16 +226,17 @@
 }
 
 .dps-loyalty-card {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    background: var(--dps-surface);
+    border: 1px solid var(--dps-border-light);
+    border-radius: var(--dps-radius-lg);
     padding: 20px;
     text-align: center;
-    transition: box-shadow 0.2s ease;
+    transition: box-shadow var(--dps-motion-fast), transform var(--dps-motion-fast);
 }
 
 .dps-loyalty-card:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--dps-shadow-md);
+    transform: translateY(-2px);
 }
 
 .dps-loyalty-card-icon {
@@ -38,32 +248,32 @@
 .dps-loyalty-card-value {
     display: block;
     font-size: 28px;
-    font-weight: 600;
-    color: #374151;
+    font-weight: 700;
+    color: var(--dps-text-primary);
     line-height: 1.2;
 }
 
 .dps-loyalty-card-label {
     display: block;
     font-size: 14px;
-    color: #6b7280;
+    color: var(--dps-text-secondary);
     margin-top: 4px;
 }
 
 .dps-loyalty-card--success .dps-loyalty-card-value {
-    color: #10b981;
+    color: var(--dps-success);
 }
 
 .dps-loyalty-card--warning .dps-loyalty-card-value {
-    color: #f59e0b;
+    color: var(--dps-warning);
 }
 
 .dps-loyalty-card--danger .dps-loyalty-card-value {
-    color: #ef4444;
+    color: var(--dps-error);
 }
 
 .dps-loyalty-card--info .dps-loyalty-card-value {
-    color: #0ea5e9;
+    color: var(--dps-info);
 }
 
 .dps-loyalty-grid {
@@ -74,11 +284,11 @@
 }
 
 .dps-loyalty-panel {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    background: var(--dps-surface);
+    border: 1px solid var(--dps-border-light);
+    border-radius: var(--dps-radius-lg);
     padding: 16px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--dps-shadow-sm);
 }
 
 .dps-tier-legend {
@@ -92,7 +302,7 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 6px;
-    color: #4b5563;
+    color: var(--dps-text-secondary);
 }
 
 .dps-tier-dot {
@@ -107,10 +317,9 @@
 .dps-tier-ouro { background: #d97706; }
 
 /* ==========================================================================
-   Tabela de Indicações
+   Tabela de Indicações — M3
    ========================================================================== */
 
-/* Referrals header with title and export button */
 .dps-referrals-header {
     display: flex;
     justify-content: space-between;
@@ -125,7 +334,7 @@
 .dps-referrals-count {
     margin-left: 12px;
     font-size: 13px;
-    color: #6b7280;
+    color: var(--dps-text-secondary);
 }
 
 .dps-referrals-table-wrapper {
@@ -144,48 +353,48 @@
 .dps-referrals-table td {
     padding: 12px;
     text-align: left;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--dps-border-light);
 }
 
 .dps-referrals-table th {
-    background: #f9fafb;
+    background: var(--dps-surface-low);
     font-weight: 600;
-    color: #374151;
+    color: var(--dps-text-primary);
     white-space: nowrap;
 }
 
 .dps-referrals-table tbody tr:hover {
-    background: #f9fafb;
+    background: var(--dps-surface-low);
 }
 
 .dps-referrals-table code {
-    background: #f3f4f6;
+    background: var(--dps-surface-container);
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 13px;
 }
 
-/* Status badges */
+/* Status badges — M3 */
 .dps-status-badge {
     display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 4px 12px;
+    border-radius: var(--dps-radius-pill);
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .dps-status-pending {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--dps-warning-container);
+    color: var(--dps-warning);
 }
 
 .dps-status-rewarded {
-    background: #d1fae5;
-    color: #065f46;
+    background: var(--dps-success-container);
+    color: var(--dps-success);
 }
 
 /* ==========================================================================
-   Formulário de Configurações
+   Formulário de Configurações — M3
    ========================================================================== */
 
 .dps-loyalty-settings-form {
@@ -193,10 +402,10 @@
 }
 
 .dps-loyalty-settings-form fieldset {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-border-light);
     padding: 20px;
     margin-bottom: 20px;
-    border-radius: 4px;
+    border-radius: var(--dps-radius);
 }
 
 .dps-tier-table th,
@@ -211,8 +420,8 @@
 }
 
 .dps-tier-row .button.dps-remove-tier {
-    color: #ef4444;
-    border-color: #ef4444;
+    color: var(--dps-error);
+    border-color: var(--dps-error);
 }
 
 .dps-achievements-grid {
@@ -223,10 +432,15 @@
 }
 
 .dps-achievement-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    border: 1px solid var(--dps-border-light);
+    border-radius: var(--dps-radius);
     padding: 12px;
-    background: #fff;
+    background: var(--dps-surface);
+    transition: box-shadow var(--dps-motion-fast);
+}
+
+.dps-achievement-card:hover {
+    box-shadow: var(--dps-shadow-sm);
 }
 
 .dps-achievement-card h4 {
@@ -237,32 +451,33 @@
 .dps-achievement-card p {
     margin: 0;
     font-size: 13px;
-    color: #4b5563;
+    color: var(--dps-text-secondary);
 }
 
 .dps-achievement-card.is-locked {
     opacity: 0.6;
-    background: #f9fafb;
+    background: var(--dps-surface-low);
 }
 
 .dps-achievement-status {
     display: inline-block;
     margin-top: 6px;
-    padding: 4px 8px;
-    border-radius: 12px;
+    padding: 4px 10px;
+    border-radius: var(--dps-radius-pill);
     font-size: 12px;
-    background: #d1fae5;
-    color: #065f46;
+    font-weight: 600;
+    background: var(--dps-success-container);
+    color: var(--dps-success);
 }
 
 .dps-achievement-card.is-locked .dps-achievement-status {
-    background: #f3f4f6;
-    color: #6b7280;
+    background: var(--dps-surface-container);
+    color: var(--dps-text-secondary);
 }
 
 .dps-loyalty-settings-form legend {
-    font-weight: 600;
-    color: #374151;
+    font-weight: 700;
+    color: var(--dps-text-primary);
     padding: 0 8px;
 }
 
@@ -279,7 +494,7 @@
 }
 
 /* ==========================================================================
-   Barra de Progresso de Pontos
+   Barra de Progresso de Pontos — M3
    ========================================================================== */
 
 .dps-points-progress-wrapper {
@@ -288,18 +503,18 @@
 }
 
 .dps-points-progress {
-    background: #e5e7eb;
-    border-radius: 8px;
+    background: var(--dps-surface-high);
+    border-radius: var(--dps-radius-pill);
     height: 24px;
     overflow: hidden;
     position: relative;
 }
 
 .dps-points-progress-fill {
-    background: linear-gradient(90deg, #10b981, #059669);
+    background: var(--dps-accent);
     height: 100%;
-    transition: width 0.3s ease;
-    border-radius: 8px;
+    transition: width var(--dps-motion-normal);
+    border-radius: var(--dps-radius-pill);
 }
 
 .dps-points-progress-text {
@@ -309,11 +524,10 @@
     transform: translate(-50%, -50%);
     font-size: 12px;
     font-weight: 600;
-    color: #374151;
+    color: var(--dps-text-primary);
     white-space: nowrap;
 }
 
-/* Níveis de fidelidade */
 .dps-tier-progress {
     display: flex;
     align-items: center;
@@ -335,7 +549,7 @@
 .dps-tier-name {
     display: block;
     font-size: 12px;
-    color: #6b7280;
+    color: var(--dps-text-secondary);
     margin-top: 4px;
 }
 
@@ -344,35 +558,34 @@
 }
 
 /* ==========================================================================
-   Seção de Indicações no Portal
+   Seção de Indicações — M3
    ========================================================================== */
 
 .dps-portal-referral-section {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    background: var(--dps-surface-low);
+    border: 1px solid var(--dps-border-light);
+    border-radius: var(--dps-radius-lg);
     padding: 24px;
     margin: 24px 0;
 }
 
 .dps-portal-referral-section h3 {
     margin-top: 0;
-    color: #374151;
+    color: var(--dps-text-primary);
 }
 
-/* Admin Referral Section */
 .dps-referral-section {
     margin: 20px 0;
     padding: 16px;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    background: var(--dps-surface-low);
+    border: 1px solid var(--dps-border-light);
+    border-radius: var(--dps-radius-lg);
 }
 
 .dps-referral-code-box {
-    background: #fff;
-    border: 2px dashed #e5e7eb;
-    border-radius: 8px;
+    background: var(--dps-surface);
+    border: 2px dashed var(--dps-border);
+    border-radius: var(--dps-radius);
     padding: 16px;
     text-align: center;
     margin: 16px 0;
@@ -382,16 +595,16 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #f3f4f6;
+    background: var(--dps-surface-container);
     padding: 8px 16px;
-    border-radius: 4px;
+    border-radius: var(--dps-radius);
     margin-bottom: 12px;
 }
 
 .dps-referral-code code {
     font-size: 18px;
-    font-weight: 600;
-    color: #374151;
+    font-weight: 700;
+    color: var(--dps-text-primary);
     letter-spacing: 2px;
 }
 
@@ -402,7 +615,7 @@
     font-size: 16px;
     padding: 4px;
     opacity: 0.7;
-    transition: opacity 0.2s;
+    transition: opacity var(--dps-motion-fast);
 }
 
 .dps-referral-code button:hover {
@@ -416,13 +629,12 @@
 .dps-referral-link-box input[type="text"] {
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
+    border: 1px solid var(--dps-border-light);
+    border-radius: var(--dps-radius);
     font-size: 14px;
     margin-bottom: 8px;
 }
 
-/* Referral Actions Container */
 .dps-referral-actions {
     display: flex;
     gap: 8px;
@@ -437,11 +649,11 @@
     min-width: 200px;
     max-width: 400px;
     padding: 8px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
+    border: 1px solid var(--dps-border-light);
+    border-radius: var(--dps-radius);
     font-size: 13px;
-    background: #f9fafb;
-    color: #6b7280;
+    background: var(--dps-surface-low);
+    color: var(--dps-text-secondary);
 }
 
 .dps-btn-copy,
@@ -450,20 +662,22 @@
     align-items: center;
     gap: 4px;
     padding: 8px 16px;
-    border-radius: 4px;
+    border-radius: var(--dps-radius-pill);
     font-size: 14px;
+    font-weight: 600;
     text-decoration: none;
     cursor: pointer;
     border: none;
+    transition: background var(--dps-motion-fast), transform var(--dps-motion-fast);
 }
 
 .dps-btn-copy {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--dps-surface-container);
+    color: var(--dps-text-primary);
 }
 
 .dps-btn-copy:hover {
-    background: #e5e7eb;
+    background: var(--dps-surface-high);
 }
 
 .dps-btn-whatsapp {
@@ -474,9 +688,9 @@
 .dps-btn-whatsapp:hover {
     background: #1da851;
     color: #fff;
+    transform: translateY(-1px);
 }
 
-/* Estatísticas de indicação */
 .dps-referral-stats {
     display: flex;
     gap: 24px;
@@ -490,18 +704,18 @@
 .dps-referral-stat-value {
     display: block;
     font-size: 24px;
-    font-weight: 600;
-    color: #374151;
+    font-weight: 700;
+    color: var(--dps-text-primary);
 }
 
 .dps-referral-stat-label {
     display: block;
     font-size: 12px;
-    color: #6b7280;
+    color: var(--dps-text-secondary);
 }
 
 /* ==========================================================================
-   Filtros
+   Filtros — M3
    ========================================================================== */
 
 .dps-referrals-filters {
@@ -515,13 +729,13 @@
 .dps-referrals-filters select,
 .dps-referrals-filters input[type="text"] {
     padding: 8px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
+    border: 1px solid var(--dps-border-light);
+    border-radius: var(--dps-radius);
     font-size: 14px;
 }
 
 /* ==========================================================================
-   Histórico de Pontos
+   Histórico de Pontos — M3
    ========================================================================== */
 
 .dps-points-history {
@@ -535,7 +749,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px 0;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--dps-surface-container);
 }
 
 .dps-points-history-item:last-child {
@@ -549,21 +763,21 @@
 
 .dps-points-history-context {
     font-size: 14px;
-    color: #374151;
+    color: var(--dps-text-primary);
 }
 
 .dps-points-history-date {
     font-size: 12px;
-    color: #6b7280;
+    color: var(--dps-text-secondary);
 }
 
 .dps-points-history-value {
-    font-weight: 600;
+    font-weight: 700;
     font-size: 16px;
 }
 
 .dps-points-history-value.add {
-    color: #10b981;
+    color: var(--dps-success);
 }
 
 .dps-points-history-value.add::before {
@@ -571,7 +785,7 @@
 }
 
 .dps-points-history-value.redeem {
-    color: #ef4444;
+    color: var(--dps-error);
 }
 
 .dps-points-history-value.redeem::before {
@@ -579,7 +793,7 @@
 }
 
 /* ==========================================================================
-   Paginação
+   Paginação — M3
    ========================================================================== */
 
 .dps-pagination {
@@ -592,10 +806,11 @@
 .dps-pagination .button {
     min-width: 36px;
     text-align: center;
+    border-radius: var(--dps-radius-pill);
 }
 
 .dps-pagination-info {
-    color: #6b7280;
+    color: var(--dps-text-secondary);
     font-size: 14px;
 }
 
@@ -619,6 +834,10 @@
     .dps-referral-stats {
         justify-content: center;
     }
+
+    .dps-campaign-toggles {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 480px) {
@@ -637,7 +856,7 @@
 }
 
 /* ==========================================================================
-   Autocomplete de Busca de Clientes (Fase 1.2)
+   Autocomplete de Busca de Clientes — M3
    ========================================================================== */
 
 .dps-client-search-container {
@@ -655,7 +874,7 @@
     display: block;
     margin-bottom: 4px;
     font-weight: 600;
-    color: #374151;
+    color: var(--dps-text-primary);
 }
 
 .dps-autocomplete-wrapper {
@@ -668,16 +887,16 @@
 .dps-autocomplete-wrapper input[type="text"] {
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
+    border: 1px solid var(--dps-border-light);
+    border-radius: var(--dps-radius);
     font-size: 14px;
-    transition: border-color 0.2s;
+    transition: border-color var(--dps-motion-fast), box-shadow var(--dps-motion-fast);
 }
 
 .dps-autocomplete-wrapper input[type="text"]:focus {
     outline: none;
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+    border-color: var(--dps-accent);
+    box-shadow: 0 0 0 2px var(--dps-accent-container);
 }
 
 .dps-autocomplete-results {
@@ -686,11 +905,11 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    background: #fff;
-    border: 1px solid #e5e7eb;
+    background: var(--dps-surface);
+    border: 1px solid var(--dps-border-light);
     border-top: none;
-    border-radius: 0 0 4px 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 var(--dps-radius) var(--dps-radius);
+    box-shadow: var(--dps-shadow-lg);
     max-height: 300px;
     overflow-y: auto;
     display: none;
@@ -699,8 +918,8 @@
 .dps-autocomplete-item {
     padding: 10px 12px;
     cursor: pointer;
-    border-bottom: 1px solid #f3f4f6;
-    transition: background-color 0.15s;
+    border-bottom: 1px solid var(--dps-surface-container);
+    transition: background-color var(--dps-motion-fast);
 }
 
 .dps-autocomplete-item:last-child {
@@ -709,19 +928,19 @@
 
 .dps-autocomplete-item:hover,
 .dps-autocomplete-item.active {
-    background-color: #f0f9ff;
+    background-color: var(--dps-accent-container);
 }
 
 .dps-autocomplete-name {
     display: block;
     font-weight: 500;
-    color: #374151;
+    color: var(--dps-text-primary);
 }
 
 .dps-autocomplete-subtitle {
     display: block;
     font-size: 12px;
-    color: #6b7280;
+    color: var(--dps-text-secondary);
     margin-top: 2px;
 }
 
@@ -730,23 +949,23 @@
 .dps-autocomplete-error {
     padding: 12px;
     text-align: center;
-    color: #6b7280;
+    color: var(--dps-text-secondary);
     font-size: 13px;
 }
 
 .dps-autocomplete-error {
-    color: #ef4444;
+    color: var(--dps-error);
 }
 
 .dps-selected-client-info {
     margin-top: 8px;
     font-size: 13px;
-    color: #374151;
+    color: var(--dps-text-primary);
 }
 
 .dps-selected-client-info .button-link {
     margin-left: 8px;
-    color: #0ea5e9;
+    color: var(--dps-accent);
     text-decoration: none;
 }
 
@@ -755,10 +974,9 @@
 }
 
 /* ==========================================================================
-   Botões Modernos - Estilo Consistente
+   Botões — M3 Expressive (Pill Shape)
    ========================================================================== */
 
-/* Botão principal para ações do Loyalty */
 .dps-loyalty-btn-primary,
 #dps-section-fidelidade .button-primary {
     display: inline-flex;
@@ -766,34 +984,34 @@
     justify-content: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-    color: #ffffff;
+    background: var(--dps-accent);
+    color: var(--dps-on-accent);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--dps-radius-pill);
     font-size: 15px;
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+    transition: background var(--dps-motion-fast), box-shadow var(--dps-motion-fast), transform var(--dps-motion-fast);
+    box-shadow: var(--dps-shadow-sm);
     text-shadow: none;
 }
 
 .dps-loyalty-btn-primary:hover,
 #dps-section-fidelidade .button-primary:hover {
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+    background: var(--dps-accent-hover);
+    box-shadow: var(--dps-shadow-md);
     transform: translateY(-1px);
-    color: #ffffff;
+    color: var(--dps-on-accent);
 }
 
 .dps-loyalty-btn-primary:active,
 #dps-section-fidelidade .button-primary:active {
     transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
+    background: var(--dps-accent-pressed);
+    box-shadow: var(--dps-shadow-sm);
 }
 
-/* Botão secundário - Estilo Moderno Elegante */
 .dps-loyalty-btn-secondary,
 #dps-section-fidelidade .button-secondary {
     display: inline-flex;
@@ -801,34 +1019,33 @@
     justify-content: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    color: #475569;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
+    background: var(--dps-surface);
+    color: var(--dps-text-primary);
+    border: 1px solid var(--dps-border);
+    border-radius: var(--dps-radius-pill);
     font-size: 15px;
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: background var(--dps-motion-fast), border-color var(--dps-motion-fast), box-shadow var(--dps-motion-fast), transform var(--dps-motion-fast);
+    box-shadow: var(--dps-shadow-sm);
 }
 
 .dps-loyalty-btn-secondary:hover,
 #dps-section-fidelidade .button-secondary:hover {
-    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-    border-color: #94a3b8;
-    color: #334155;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    background: var(--dps-surface-container);
+    border-color: var(--dps-accent);
+    color: var(--dps-text-primary);
+    box-shadow: var(--dps-shadow-md);
     transform: translateY(-1px);
 }
 
 .dps-loyalty-btn-secondary:active,
 #dps-section-fidelidade .button-secondary:active {
     transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--dps-shadow-sm);
 }
 
-/* Container de ações */
 .dps-loyalty-actions {
     display: flex;
     flex-wrap: wrap;
@@ -836,7 +1053,6 @@
     margin-bottom: 24px;
 }
 
-/* Ícone dentro do botão */
 .dps-loyalty-btn-icon {
     display: inline-flex;
     align-items: center;
@@ -846,4 +1062,14 @@
     background: rgba(255, 255, 255, 0.2);
     border-radius: 6px;
     font-size: 14px;
+}
+
+/* ==========================================================================
+   Frontend Settings Description
+   ========================================================================== */
+
+.dps-settings-description {
+    font-size: 14px;
+    color: var(--dps-text-secondary);
+    margin-bottom: 16px;
 }
