@@ -169,7 +169,8 @@
 .dps-status-select:focus {
     outline: none;
     border-color: var(--dps-accent);
-    outline: 2px solid var(--dps-color-primary); outline-offset: 2px; box-shadow: none;
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 /* === Barra de contexto === */
@@ -792,7 +793,8 @@
 .dps-section--modal textarea:focus {
     outline: none;
     border-color: var(--dps-accent, var(--dps-color-primary));
-    outline: 2px solid var(--dps-color-primary); outline-offset: 2px; box-shadow: none;
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 /* Botão de submit no modal */
@@ -1743,7 +1745,8 @@
 .dps-reschedule-field input:focus {
     outline: none;
     border-color: var(--dps-accent);
-    outline: 2px solid var(--dps-color-primary); outline-offset: 2px; box-shadow: none;
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 .dps-reschedule-footer {
@@ -2868,7 +2871,8 @@ tr.dps-row-updated {
 .dps-confirmation-dropdown:focus {
     outline: none;
     border-color: var(--dps-accent);
-    outline: 2px solid var(--dps-color-primary); outline-offset: 2px; box-shadow: none;
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 .dps-dropdown--confirmed {
@@ -2920,7 +2924,8 @@ tr.dps-row-updated {
 .dps-status-dropdown:focus {
     outline: none;
     border-color: var(--dps-accent);
-    outline: 2px solid var(--dps-color-primary); outline-offset: 2px; box-shadow: none;
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 .dps-dropdown--pending {
