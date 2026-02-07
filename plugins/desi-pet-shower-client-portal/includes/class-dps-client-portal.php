@@ -779,7 +779,8 @@ final class DPS_Client_Portal {
             return;
         }
 
-        // Design tokens M3 Expressive (devem ser carregados antes de qualquer CSS)
+        // Design tokens M3 Expressive (devem ser carregados antes de qualquer CSS do portal)
+        $style_deps = [];
         if ( defined( 'DPS_BASE_URL' ) ) {
             wp_register_style(
                 'dps-design-tokens',
@@ -787,13 +788,14 @@ final class DPS_Client_Portal {
                 [],
                 defined( 'DPS_BASE_VERSION' ) ? DPS_BASE_VERSION : '2.0.0'
             );
+            $style_deps[] = 'dps-design-tokens';
         }
 
         $style_path = trailingslashit( DPS_CLIENT_PORTAL_ADDON_DIR ) . 'assets/css/client-portal.css';
         $style_url  = trailingslashit( DPS_CLIENT_PORTAL_ADDON_URL ) . 'assets/css/client-portal.css';
         $style_version = file_exists( $style_path ) ? filemtime( $style_path ) : '1.0.0';
 
-        wp_register_style( 'dps-client-portal', $style_url, [ 'dps-design-tokens' ], $style_version );
+        wp_register_style( 'dps-client-portal', $style_url, $style_deps, $style_version );
         
         $script_path = trailingslashit( DPS_CLIENT_PORTAL_ADDON_DIR ) . 'assets/js/client-portal.js';
         $script_url  = trailingslashit( DPS_CLIENT_PORTAL_ADDON_URL ) . 'assets/js/client-portal.js';
