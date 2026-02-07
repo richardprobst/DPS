@@ -1,0 +1,471 @@
+/**
+ * DPS Design Tokens — Material 3 Expressive
+ *
+ * Tokens de design baseados no Material 3 Expressive do Google,
+ * adaptados para o contexto WordPress do desi.pet by PRObst.
+ *
+ * Referência: https://m3.material.io/
+ *
+ * Versão: 2.0
+ * Última atualização: 07/02/2026
+ *
+ * COMO USAR:
+ *   1. Importe este arquivo ANTES de qualquer outro CSS do DPS.
+ *   2. Use as variáveis via var(--dps-*) em seus componentes.
+ *   3. Para temas escuros, sobrescreva com [data-dps-theme="dark"].
+ *   4. Nunca use valores hex literais — sempre referencie tokens.
+ */
+
+/* ==========================================================================
+   1. COLOR TOKENS — Sistema de Cores M3 Expressive
+   ========================================================================== */
+
+:root {
+
+    /* -----------------------------------------------------------------------
+       1.1 Primary — Ações principais, botões, links, FABs
+       ----------------------------------------------------------------------- */
+    --dps-color-primary:               #0b6bcb;
+    --dps-color-on-primary:            #ffffff;
+    --dps-color-primary-container:     #d4e4ff;
+    --dps-color-on-primary-container:  #001c3a;
+    --dps-color-primary-hover:         #0959a5;
+    --dps-color-primary-pressed:       #084a8a;
+
+    /* -----------------------------------------------------------------------
+       1.2 Secondary — Ações de suporte, chips, filtros
+       ----------------------------------------------------------------------- */
+    --dps-color-secondary:              #545f70;
+    --dps-color-on-secondary:           #ffffff;
+    --dps-color-secondary-container:    #d8e3f8;
+    --dps-color-on-secondary-container: #111c2b;
+
+    /* -----------------------------------------------------------------------
+       1.3 Tertiary — Destaques expressivos, badges, acentos criativos
+       ----------------------------------------------------------------------- */
+    --dps-color-tertiary:               #6d5e78;
+    --dps-color-on-tertiary:            #ffffff;
+    --dps-color-tertiary-container:     #f5d9ff;
+    --dps-color-on-tertiary-container:  #271432;
+
+    /* -----------------------------------------------------------------------
+       1.4 Error — Erros, alertas críticos, ações destrutivas
+       ----------------------------------------------------------------------- */
+    --dps-color-error:                  #ba1a1a;
+    --dps-color-on-error:               #ffffff;
+    --dps-color-error-container:        #ffdad6;
+    --dps-color-on-error-container:     #410002;
+
+    /* -----------------------------------------------------------------------
+       1.5 Success — Confirmações, ações concluídas
+       ----------------------------------------------------------------------- */
+    --dps-color-success:                #1a7a3a;
+    --dps-color-on-success:             #ffffff;
+    --dps-color-success-container:      #a8f5b5;
+    --dps-color-on-success-container:   #00210a;
+
+    /* -----------------------------------------------------------------------
+       1.6 Warning — Pendências, atenção necessária
+       ----------------------------------------------------------------------- */
+    --dps-color-warning:                #8b6914;
+    --dps-color-on-warning:             #ffffff;
+    --dps-color-warning-container:      #ffdea3;
+    --dps-color-on-warning-container:   #2c1f00;
+
+    /* -----------------------------------------------------------------------
+       1.7 Surface — Fundos, containers, elevação tonal
+       ----------------------------------------------------------------------- */
+    --dps-color-surface:                    #f8f9ff;
+    --dps-color-on-surface:                 #191c20;
+    --dps-color-on-surface-variant:         #43474e;
+    --dps-color-surface-container-lowest:   #ffffff;
+    --dps-color-surface-container-low:      #f2f3fa;
+    --dps-color-surface-container:          #ecedF4;
+    --dps-color-surface-container-high:     #e6e8ef;
+    --dps-color-surface-container-highest:  #e1e2e9;
+    --dps-color-surface-dim:                #d8dae0;
+    --dps-color-surface-bright:             #f8f9ff;
+
+    /* -----------------------------------------------------------------------
+       1.8 Outline — Bordas, divisores
+       ----------------------------------------------------------------------- */
+    --dps-color-outline:                #73777f;
+    --dps-color-outline-variant:        #c3c6cf;
+
+    /* -----------------------------------------------------------------------
+       1.9 Inverse — Snackbars, tooltips
+       ----------------------------------------------------------------------- */
+    --dps-color-inverse-surface:        #2e3036;
+    --dps-color-inverse-on-surface:     #eff0f7;
+    --dps-color-inverse-primary:        #a5c8ff;
+
+    /* -----------------------------------------------------------------------
+       1.10 Scrim e Shadow
+       ----------------------------------------------------------------------- */
+    --dps-color-scrim:                  #000000;
+    --dps-color-shadow:                 #000000;
+}
+
+/* ==========================================================================
+   2. TYPOGRAPHY TOKENS — Escala Tipográfica M3 Expressive
+   ========================================================================== */
+
+:root {
+
+    /* -----------------------------------------------------------------------
+       2.1 Font Families
+       ----------------------------------------------------------------------- */
+
+    /* Admin: fontes do sistema — máxima performance */
+    --dps-font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                       "Helvetica Neue", Arial, sans-serif;
+
+    /* Portal/Público: fontes com personalidade (Google Fonts) */
+    --dps-font-display: 'Outfit', var(--dps-font-system);
+    --dps-font-body:    'Source Sans 3', var(--dps-font-system);
+
+    /* Mono: código, dados tabulares */
+    --dps-font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+    /* -----------------------------------------------------------------------
+       2.2 Type Scale — 5 papéis × 3 tamanhos (Large, Medium, Small)
+       Valores adaptados do M3 para contexto web (px em vez de sp)
+       ----------------------------------------------------------------------- */
+
+    /* Display — Textos heróicos, landing pages */
+    --dps-typescale-display-large-size:      57px;
+    --dps-typescale-display-large-line:       64px;
+    --dps-typescale-display-large-tracking:  -0.25px;
+    --dps-typescale-display-large-weight:     400;
+
+    --dps-typescale-display-medium-size:      45px;
+    --dps-typescale-display-medium-line:       52px;
+    --dps-typescale-display-medium-tracking:   0px;
+    --dps-typescale-display-medium-weight:     400;
+
+    --dps-typescale-display-small-size:       36px;
+    --dps-typescale-display-small-line:        44px;
+    --dps-typescale-display-small-tracking:    0px;
+    --dps-typescale-display-small-weight:      400;
+
+    /* Headline — Títulos de seção, introduções */
+    --dps-typescale-headline-large-size:      32px;
+    --dps-typescale-headline-large-line:       40px;
+    --dps-typescale-headline-large-tracking:   0px;
+    --dps-typescale-headline-large-weight:     400;
+
+    --dps-typescale-headline-medium-size:      28px;
+    --dps-typescale-headline-medium-line:       36px;
+    --dps-typescale-headline-medium-tracking:   0px;
+    --dps-typescale-headline-medium-weight:     400;
+
+    --dps-typescale-headline-small-size:       24px;
+    --dps-typescale-headline-small-line:        32px;
+    --dps-typescale-headline-small-tracking:    0px;
+    --dps-typescale-headline-small-weight:      400;
+
+    /* Title — Títulos de card, cabeçalhos de lista */
+    --dps-typescale-title-large-size:          22px;
+    --dps-typescale-title-large-line:           28px;
+    --dps-typescale-title-large-tracking:       0px;
+    --dps-typescale-title-large-weight:         500;
+
+    --dps-typescale-title-medium-size:          16px;
+    --dps-typescale-title-medium-line:           24px;
+    --dps-typescale-title-medium-tracking:       0.15px;
+    --dps-typescale-title-medium-weight:         500;
+
+    --dps-typescale-title-small-size:            14px;
+    --dps-typescale-title-small-line:             20px;
+    --dps-typescale-title-small-tracking:         0.1px;
+    --dps-typescale-title-small-weight:           500;
+
+    /* Body — Parágrafos, descrições, conteúdo longo */
+    --dps-typescale-body-large-size:             16px;
+    --dps-typescale-body-large-line:              24px;
+    --dps-typescale-body-large-tracking:          0.5px;
+    --dps-typescale-body-large-weight:            400;
+
+    --dps-typescale-body-medium-size:             14px;
+    --dps-typescale-body-medium-line:              20px;
+    --dps-typescale-body-medium-tracking:          0.25px;
+    --dps-typescale-body-medium-weight:            400;
+
+    --dps-typescale-body-small-size:              12px;
+    --dps-typescale-body-small-line:               16px;
+    --dps-typescale-body-small-tracking:           0.4px;
+    --dps-typescale-body-small-weight:             400;
+
+    /* Label — Botões, chips, campos, captions */
+    --dps-typescale-label-large-size:             14px;
+    --dps-typescale-label-large-line:              20px;
+    --dps-typescale-label-large-tracking:          0.1px;
+    --dps-typescale-label-large-weight:            500;
+
+    --dps-typescale-label-medium-size:             12px;
+    --dps-typescale-label-medium-line:              16px;
+    --dps-typescale-label-medium-tracking:          0.5px;
+    --dps-typescale-label-medium-weight:            500;
+
+    --dps-typescale-label-small-size:              11px;
+    --dps-typescale-label-small-line:               16px;
+    --dps-typescale-label-small-tracking:           0.5px;
+    --dps-typescale-label-small-weight:             500;
+}
+
+/* ==========================================================================
+   3. SHAPE TOKENS — Sistema de Formas M3 Expressive
+   ========================================================================== */
+
+:root {
+
+    /* -----------------------------------------------------------------------
+       Escala de arredondamento (corner radius)
+       M3 Expressive: formas mais expressivas e orgânicas
+       ----------------------------------------------------------------------- */
+    --dps-shape-none:        0px;
+    --dps-shape-extra-small: 4px;
+    --dps-shape-small:       8px;
+    --dps-shape-medium:      12px;
+    --dps-shape-large:       16px;
+    --dps-shape-extra-large: 28px;
+    --dps-shape-full:        9999px;  /* Pill / totalmente arredondado */
+
+    /* Formas por componente */
+    --dps-shape-button:      var(--dps-shape-full);
+    --dps-shape-fab:         var(--dps-shape-large);
+    --dps-shape-card:        var(--dps-shape-medium);
+    --dps-shape-dialog:      var(--dps-shape-extra-large);
+    --dps-shape-input:       var(--dps-shape-extra-small);
+    --dps-shape-chip:        var(--dps-shape-small);
+    --dps-shape-badge:       var(--dps-shape-full);
+    --dps-shape-tooltip:     var(--dps-shape-extra-small);
+    --dps-shape-snackbar:    var(--dps-shape-extra-small);
+    --dps-shape-menu:        var(--dps-shape-extra-small);
+    --dps-shape-sheet:       var(--dps-shape-extra-large);
+    --dps-shape-surface:     var(--dps-shape-medium);
+}
+
+/* ==========================================================================
+   4. ELEVATION TOKENS — Sistema de Elevação Tonal M3
+   ========================================================================== */
+
+:root {
+    /* Sombras por nível de elevação (0–5) */
+    --dps-elevation-0: none;
+    --dps-elevation-1: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --dps-elevation-2: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+                       0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --dps-elevation-3: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                       0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --dps-elevation-4: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                       0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --dps-elevation-5: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                       0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+    /* Elevação por componente */
+    --dps-elevation-surface:   var(--dps-elevation-0);
+    --dps-elevation-card:      var(--dps-elevation-1);
+    --dps-elevation-button:    var(--dps-elevation-1);
+    --dps-elevation-fab:       var(--dps-elevation-3);
+    --dps-elevation-menu:      var(--dps-elevation-2);
+    --dps-elevation-dialog:    var(--dps-elevation-3);
+    --dps-elevation-tooltip:   var(--dps-elevation-2);
+    --dps-elevation-snackbar:  var(--dps-elevation-3);
+    --dps-elevation-nav-rail:  var(--dps-elevation-0);
+    --dps-elevation-app-bar:   var(--dps-elevation-0);
+}
+
+/* ==========================================================================
+   5. MOTION TOKENS — Sistema de Movimento M3 Expressive
+   ========================================================================== */
+
+:root {
+
+    /* -----------------------------------------------------------------------
+       5.1 Easing — Curvas com overshoot sutil (expressivas)
+       Baseadas nas spring curves do M3 Expressive
+       ----------------------------------------------------------------------- */
+
+    /* Expressive: com bounce sutil — para momentos importantes */
+    --dps-motion-easing-expressive-fast:     cubic-bezier(0.42, 1.67, 0.21, 0.90);
+    --dps-motion-easing-expressive-default:  cubic-bezier(0.38, 1.21, 0.22, 1.00);
+    --dps-motion-easing-expressive-slow:     cubic-bezier(0.39, 1.29, 0.35, 0.98);
+
+    /* Standard: sem bounce — para ações utilitárias */
+    --dps-motion-easing-standard:            cubic-bezier(0.2, 0.0, 0.0, 1.0);
+    --dps-motion-easing-standard-decelerate: cubic-bezier(0.0, 0.0, 0.0, 1.0);
+    --dps-motion-easing-standard-accelerate: cubic-bezier(0.3, 0.0, 1.0, 1.0);
+
+    /* Emphasis: entrada/saída de elementos */
+    --dps-motion-easing-emphasized:          cubic-bezier(0.2, 0.0, 0.0, 1.0);
+    --dps-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1.0);
+    --dps-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0.0, 0.8, 0.15);
+
+    /* -----------------------------------------------------------------------
+       5.2 Duration — Tempos por tipo de interação
+       ----------------------------------------------------------------------- */
+    --dps-motion-duration-short-1:  50ms;
+    --dps-motion-duration-short-2:  100ms;
+    --dps-motion-duration-short-3:  150ms;
+    --dps-motion-duration-short-4:  200ms;
+    --dps-motion-duration-medium-1: 250ms;
+    --dps-motion-duration-medium-2: 300ms;
+    --dps-motion-duration-medium-3: 350ms;
+    --dps-motion-duration-medium-4: 400ms;
+    --dps-motion-duration-long-1:   450ms;
+    --dps-motion-duration-long-2:   500ms;
+    --dps-motion-duration-long-3:   550ms;
+    --dps-motion-duration-long-4:   600ms;
+    --dps-motion-duration-extra-long: 800ms;
+
+    /* -----------------------------------------------------------------------
+       5.3 Atalhos de transição por uso comum
+       ----------------------------------------------------------------------- */
+    --dps-motion-hover:   var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
+    --dps-motion-press:   var(--dps-motion-duration-short-3) var(--dps-motion-easing-standard);
+    --dps-motion-enter:   var(--dps-motion-duration-medium-2) var(--dps-motion-easing-emphasized-decelerate);
+    --dps-motion-exit:    var(--dps-motion-duration-short-4) var(--dps-motion-easing-emphasized-accelerate);
+    --dps-motion-expand:  var(--dps-motion-duration-medium-3) var(--dps-motion-easing-expressive-default);
+    --dps-motion-morph:   var(--dps-motion-duration-medium-4) var(--dps-motion-easing-expressive-fast);
+}
+
+/* ==========================================================================
+   6. SPACING TOKENS — Escala de Espaçamento
+   ========================================================================== */
+
+:root {
+    --dps-space-0:    0px;
+    --dps-space-1:    4px;
+    --dps-space-2:    8px;
+    --dps-space-3:    12px;
+    --dps-space-4:    16px;
+    --dps-space-5:    20px;
+    --dps-space-6:    24px;
+    --dps-space-7:    28px;
+    --dps-space-8:    32px;
+    --dps-space-9:    36px;
+    --dps-space-10:   40px;
+    --dps-space-12:   48px;
+    --dps-space-14:   56px;
+    --dps-space-16:   64px;
+}
+
+/* ==========================================================================
+   7. STATE LAYER TOKENS — Opacidades de estado interativo
+   ========================================================================== */
+
+:root {
+    --dps-state-hover-opacity:    0.08;
+    --dps-state-focus-opacity:    0.10;
+    --dps-state-pressed-opacity:  0.10;
+    --dps-state-dragged-opacity:  0.16;
+    --dps-state-disabled-opacity: 0.38;
+    --dps-state-disabled-container-opacity: 0.12;
+}
+
+/* ==========================================================================
+   8. BREAKPOINTS (referência — usar em media queries)
+   ========================================================================== */
+
+/*
+   --dps-breakpoint-compact:  0px     (mobile)
+   --dps-breakpoint-medium:   600px   (tablet portrait)
+   --dps-breakpoint-expanded: 840px   (tablet landscape)
+   --dps-breakpoint-large:    1200px  (desktop)
+   --dps-breakpoint-xlarge:   1600px  (wide desktop)
+*/
+
+/* ==========================================================================
+   9. DARK THEME — Sobreposição para tema escuro
+   ========================================================================== */
+
+[data-dps-theme="dark"] {
+    --dps-color-primary:               #a5c8ff;
+    --dps-color-on-primary:            #003060;
+    --dps-color-primary-container:     #00468a;
+    --dps-color-on-primary-container:  #d4e4ff;
+    --dps-color-primary-hover:         #b8d4ff;
+    --dps-color-primary-pressed:       #c5dcff;
+
+    --dps-color-secondary:              #bcc7db;
+    --dps-color-on-secondary:           #263141;
+    --dps-color-secondary-container:    #3c4858;
+    --dps-color-on-secondary-container: #d8e3f8;
+
+    --dps-color-tertiary:               #d9bde5;
+    --dps-color-on-tertiary:            #3d2948;
+    --dps-color-tertiary-container:     #553f60;
+    --dps-color-on-tertiary-container:  #f5d9ff;
+
+    --dps-color-error:                  #ffb4ab;
+    --dps-color-on-error:               #690005;
+    --dps-color-error-container:        #93000a;
+    --dps-color-on-error-container:     #ffdad6;
+
+    --dps-color-success:                #8cd8a0;
+    --dps-color-on-success:             #003914;
+    --dps-color-success-container:      #005320;
+    --dps-color-on-success-container:   #a8f5b5;
+
+    --dps-color-warning:                #f0c04a;
+    --dps-color-on-warning:             #4a3800;
+    --dps-color-warning-container:      #6a5100;
+    --dps-color-on-warning-container:   #ffdea3;
+
+    --dps-color-surface:                    #111318;
+    --dps-color-on-surface:                 #e1e2e9;
+    --dps-color-on-surface-variant:         #c3c6cf;
+    --dps-color-surface-container-lowest:   #0c0e13;
+    --dps-color-surface-container-low:      #191c20;
+    --dps-color-surface-container:          #1d2024;
+    --dps-color-surface-container-high:     #282a2f;
+    --dps-color-surface-container-highest:  #333539;
+    --dps-color-surface-dim:                #111318;
+    --dps-color-surface-bright:             #37393e;
+
+    --dps-color-outline:                #8d9199;
+    --dps-color-outline-variant:        #43474e;
+
+    --dps-color-inverse-surface:        #e1e2e9;
+    --dps-color-inverse-on-surface:     #2e3036;
+    --dps-color-inverse-primary:        #0b6bcb;
+
+    --dps-color-scrim:                  #000000;
+    --dps-color-shadow:                 #000000;
+}
+
+/* ==========================================================================
+   10. REDUCED MOTION — Acessibilidade obrigatória
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ==========================================================================
+   11. COMPAT — Aliases para transição do sistema legado
+   Mapeia os tokens antigos (--dps-bg-*, --dps-accent, etc.)
+   para os novos tokens M3. Remover após migração completa.
+   ========================================================================== */
+
+:root {
+    /* Cores legadas → novos tokens */
+    --dps-bg-primary:       var(--dps-color-surface);
+    --dps-bg-white:         var(--dps-color-surface-container-lowest);
+    --dps-border:           var(--dps-color-outline-variant);
+    --dps-text-primary:     var(--dps-color-on-surface);
+    --dps-text-secondary:   var(--dps-color-on-surface-variant);
+    --dps-accent:           var(--dps-color-primary);
+    --dps-accent-hover:     var(--dps-color-primary-hover);
+    --dps-success:          var(--dps-color-success);
+    --dps-error:            var(--dps-color-error);
+    --dps-warning:          var(--dps-color-warning);
+}

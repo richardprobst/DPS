@@ -83,6 +83,18 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Design System Material 3 Expressive (Docs + Design Tokens v2.0)**
+
+- **Design tokens CSS** (`dps-design-tokens.css`): Arquivo centralizado com 200+ CSS custom properties implementando o sistema completo do Material 3 Expressive — cores (primary/secondary/tertiary/error/success/warning + surface containers), tipografia (escala M3: Display/Headline/Title/Body/Label), formas (escala de arredondamento: 0–4–8–12–16–28–pill), elevação tonal (6 níveis), motion (easing expressivo com springs + duração), espaçamento e state layers.
+- **Suporte a tema escuro** via `[data-dps-theme="dark"]` com paleta completa de cores invertidas.
+- **Aliases de compatibilidade** para migração gradual dos tokens legados (`--dps-bg-*`, `--dps-accent`, etc.) para os novos tokens M3.
+- **Demo interativo** (`visual-comparison.html`): Preview completo do design system com todos os componentes, toggle claro/escuro e animações expressivas.
+
+#### Changed (Alterado)
+
+- **`VISUAL_STYLE_GUIDE.md` v1.2 → v2.0**: Redesenhado integralmente como design system baseado no Material 3 Expressive — sistema de cores com papéis semânticos (color roles), escala tipográfica M3 (5 papéis × 3 tamanhos), sistema de formas expressivas (botões pill, cards 12px, diálogos 28px), elevação tonal, motion com springs, state layers, novos componentes (btn-filled/outlined/tonal/text, FAB, chips, badges, alertas M3), guia de migração do sistema legado.
+- **`FRONTEND_DESIGN_INSTRUCTIONS.md` v1.0 → v2.0**: Atualizado com metodologia M3 Expressive — dois perfis (Standard para admin, Expressive para portal), princípios de design expressivo, state layers, shape system, elevation tonal, motion com easing de springs, exemplos práticos adaptados ao contexto pet shop, checklist atualizado com tokens M3.
+
 **Front-end de Configurações do Sistema (Base v2.6.0)**
 
 - **CSS dedicado para configurações** (`dps-settings.css`): Folha de estilos exclusiva para a página de configurações com layout melhorado, barra de status, campo de busca, navegação por abas aprimorada, indicador de alterações não salvas e design responsivo completo.
