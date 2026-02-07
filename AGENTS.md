@@ -151,6 +151,7 @@ Todos os plugins/add-ons DEVEM declarar:
 - `require/require_once` organizados (sem envolver imports em `try/catch`).
 - Assets: prefira `wp_register_*` + `wp_enqueue_*` em pontos específicos; evite carregar no site inteiro.
 - Hooks/options/handles prefixados com `dps_`.
+- **Deprecated**: evitar funções/classes obsoletas de WP, PHP, JS e jQuery. Quando encontrar código deprecated, atualizar para a alternativa moderna recomendada. Referências úteis: [WordPress Developer Resources](https://developer.wordpress.org/reference/), guias de migração PHP e notas de release do jQuery.
 
 ---
 
@@ -189,7 +190,44 @@ Quando consultar:
 
 ---
 
+## Auditoria e análise de código
+
+### Escopo de análise
+- **Incluir**: código PHP, JS, CSS, templates e assets dos plugins em `plugins/`.
+- **Ignorar** (não analisar nem alterar): `vendor/`, `node_modules/`, `dist/`, `build/`, `coverage/`, arquivos minificados (`*.min.js`, `*.min.css`), caches e dependências externas.
+
+### Fluxo de auditoria (quando aplicável)
+Para tarefas de auditoria, revisão ampla ou refatoração significativa:
+1. **Inventário**: mapear entrypoints, includes, classes, hooks, shortcodes, REST/AJAX, admin pages e cron.
+2. **Relatório de achados** (antes de mudanças grandes):
+   - Categorias: Deprecated / Duplicado / Morto / Segurança / Performance / Manutenibilidade.
+   - Severidade: Alta / Média / Baixa.
+   - Evidência: `arquivo:linha` (ou trecho).
+   - Recomendação.
+3. **Correções em patches isolados**: mudanças pequenas, cada uma com justificativa clara.
+4. **Perguntar antes** nas situações listadas em **ASK BEFORE** (ver acima).
+
+### Heurísticas para detecção de problemas
+- **Código morto**: funções/classes sem referências, arquivos nunca incluídos, callbacks não registrados, hooks inexistentes. **Atenção**: verificar também chamadas dinâmicas (`call_user_func`, `do_action`/`apply_filters` com nomes de hook variáveis, instanciação via strings) antes de considerar código como morto.
+- **Duplicação**: mesmas validações/sanitizações repetidas, mesma lógica de montagem de arrays, mesmos patterns de `$wpdb`, mesmo HTML gerado em múltiplos pontos.
+- **Deprecated**: uso de funções/classes/parâmetros marcados como deprecated no WP, PHP ou jQuery/JS.
+
+### Políticas de mudança em auditorias
+- Não reformatar o projeto inteiro de uma vez.
+- Não "modernizar" tudo simultaneamente; preferir mudanças incrementais e seguras.
+- Não remover funcionalidades sem evidência clara de que são código morto. Verificar referências estáticas e dinâmicas (`add_action`/`add_filter` com variáveis, `$wp_filter`, autoloading, `require` condicional).
+
+---
+
 ## Liberdade x segurança
+
+### Priorização de mudanças
+Ao decidir o que corrigir ou melhorar, siga esta ordem de prioridade:
+1. **Segurança** (vulnerabilidades, falhas de validação)
+2. **Bugs** (comportamento incorreto)
+3. **Compatibilidade** (deprecated, breaking changes)
+4. **Performance** (queries lentas, assets desnecessários)
+5. **Limpeza** (código morto, duplicação, legibilidade)
 
 ### Autorizado (e incentivado) quando for seguro
 - ✅ Corrigir bugs encontrados no caminho **quando a correção for claramente segura** e não ampliar escopo sem necessidade.
@@ -231,9 +269,12 @@ Quando consultar:
 - Ambiente local: use o ambiente oficial do projeto (ex.: `docker compose up` ou `wp-env start` se disponível). Se não existir automação, descreva como validou manualmente.
 - Dependências: `composer install` e `npm ci` (quando houver build de assets).
 - Checks sugeridos:
-  - `php -l <arquivos alterados>`
-  - `phpcs` (se configurado)
-  - Testes automatizados disponíveis (`phpunit`, `npm test`, `npm run build`/`npm run lint` etc.)
+  - `php -l <arquivos alterados>` — lint básico de sintaxe PHP.
+  - `phpcs` — coding standards (se configurado via `phpcs.xml` ou `composer.json`).
+  - `phpstan analyse` ou `psalm` — análise estática de tipos (se configurado).
+  - `phpcpd` — detecção de código duplicado (se disponível).
+  - Testes automatizados disponíveis (`phpunit`, `npm test`, `npm run build`/`npm run lint` etc.).
+- Se ferramentas não estiverem configuradas no projeto, faça análise por leitura e sugira setup mínimo (sem instalar automaticamente, a menos que seja pedido).
 - Se algum comando não estiver disponível, registre no PR e descreva validação manual equivalente.
 
 ---
