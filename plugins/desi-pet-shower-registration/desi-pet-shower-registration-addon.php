@@ -527,6 +527,7 @@ class DPS_Registration_Addon {
             'post_type'      => 'dps_cliente',
             'posts_per_page' => 1,
             'fields'         => 'ids',
+            'no_found_rows'  => true,
             'meta_query'     => [
                 [
                     'key'   => 'client_phone',
@@ -2190,6 +2191,7 @@ class DPS_Registration_Addon {
             'post_type'      => 'dps_cliente',
             'posts_per_page' => 1,
             'fields'         => 'ids',
+            'no_found_rows'  => true,
             'meta_query'     => [
                 [
                     'key'   => 'dps_email_confirm_token',

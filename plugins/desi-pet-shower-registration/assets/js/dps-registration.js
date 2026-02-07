@@ -800,7 +800,7 @@
             
             var petTitle = document.createElement('h5');
             petTitle.className = 'dps-product-prefs-pet__title';
-            petTitle.innerHTML = speciesIcon + ' ' + (petName || 'Pet ' + (i + 1));
+            petTitle.textContent = speciesIcon + ' ' + (petName || 'Pet ' + (i + 1));
             petPrefsBox.appendChild(petTitle);
             
             // Campo: Preferência de Shampoo
