@@ -723,11 +723,19 @@ class DPS_Registration_Addon {
             );
         }
 
-        // CSS responsivo
+        // Design tokens M3 Expressive (devem ser carregados antes de qualquer CSS)
+        wp_enqueue_style(
+            'dps-design-tokens',
+            DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
+            [],
+            DPS_BASE_VERSION
+        );
+
+        // CSS responsivo (M3 Expressive)
         wp_enqueue_style(
             'dps-registration-addon',
             $addon_url . 'assets/css/registration-addon.css',
-            [],
+            [ 'dps-design-tokens' ],
             $version
         );
 
