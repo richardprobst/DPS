@@ -100,7 +100,7 @@ class DPS_Agenda_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            echo $content;
+            echo wp_kses_post( $content );
         }
     }
 
@@ -119,7 +119,7 @@ class DPS_Agenda_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            echo $content;
+            echo wp_kses_post( $content );
         }
     }
 

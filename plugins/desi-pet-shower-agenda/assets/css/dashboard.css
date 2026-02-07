@@ -440,6 +440,34 @@
     border: 1px solid var(--dps-color-outline-variant);
 }
 
+/* Heatmap Occupancy Level Classes */
+.dps-heatmap-cell-available {
+    background-color: var(--dps-color-success-container);
+    color: var(--dps-color-success);
+}
+
+.dps-heatmap-cell-busy {
+    background-color: var(--dps-color-warning-container);
+    color: var(--dps-color-warning);
+}
+
+.dps-heatmap-cell-full {
+    background-color: var(--dps-color-error-container);
+    color: var(--dps-color-error);
+}
+
+.dps-heatmap-legend-color--available {
+    background-color: var(--dps-color-success-container);
+}
+
+.dps-heatmap-legend-color--busy {
+    background-color: var(--dps-color-warning-container);
+}
+
+.dps-heatmap-legend-color--full {
+    background-color: var(--dps-color-error-container);
+}
+
 /* Responsividade para Heatmap */
 @media (max-width: 768px) {
     .dps-capacity-week-nav {
