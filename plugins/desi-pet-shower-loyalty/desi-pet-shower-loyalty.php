@@ -1009,11 +1009,6 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Renderiza a aba de configurações.
-     *
-     * @param float $brl_per_pt Valor atual de BRL por ponto.
-     */
-    /**
      * Verifica se uma campanha específica está ativa nas configurações.
      *
      * @since 2.0.0
@@ -1033,6 +1028,11 @@ class DPS_Loyalty_Addon {
         return ! empty( $settings[ $key ] );
     }
 
+    /**
+     * Renderiza a aba de configurações.
+     *
+     * @param float $brl_per_pt Valor atual de BRL por ponto.
+     */
     private function render_settings_tab( $brl_per_pt ) {
         $settings = get_option( self::OPTION_KEY, [] );
         $enable_referrals  = self::is_campaign_enabled( 'referrals' );
