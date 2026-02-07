@@ -152,7 +152,7 @@ class DPS_Booking_Addon {
         wp_enqueue_style(
             'dps-booking-addon',
             $addon_url . 'assets/css/booking-addon.css',
-            [ 'dps-base' ],
+            [ 'dps-base-style' ],
             $version
         );
     }
