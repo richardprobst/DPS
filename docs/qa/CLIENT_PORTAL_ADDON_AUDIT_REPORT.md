@@ -156,10 +156,17 @@
 - **Descrição:** CSS migrado de variáveis hardcoded em `:root` para tokens semânticos M3 mapeados no wrapper (`.dps-client-portal`, `.dps-client-portal-access-page`, `.dps-chat-widget`). 251 cores hex substituídas por referências a variáveis. `dps-design-tokens.css` adicionado como dependência no `wp_register_style()`.
 - **Status:** ✅ Corrigido na Fase 2
 
-### 4.2 Código legado no coordenador principal (Severidade: Baixa)
-- **Arquivo:** `class-dps-client-portal.php` (~5200 linhas)
-- **Descrição:** A classe `DPS_Client_Portal` ainda contém métodos legados que já foram refatorados para classes dedicadas (ex: `ajax_get_chat_messages`, `handle_portal_actions` com ~400 linhas de lógica inline). Os métodos legados permanecem como fallback, mas o código novo na `DPS_Portal_Actions_Handler` e `DPS_Portal_AJAX_Handler` é mais limpo.
-- **Recomendação:** Progressivamente delegar lógica para as classes refatoradas em fases futuras.
+### 4.2 Código legado no coordenador principal ✅
+- **Arquivo:** `class-dps-client-portal.php` (5448 → 2181 linhas, -60%)
+- **Descrição:** A classe `DPS_Client_Portal` foi refatorada de God Object (90 métodos) para coordenador fino (31 métodos). Mudanças realizadas:
+  - `handle_portal_actions()` delegado para `DPS_Portal_Actions_Handler` via switch/case limpo
+  - 3 novos métodos adicionados ao Actions Handler: `handle_update_client_preferences`, `handle_update_pet_preferences`, `handle_submit_internal_review`
+  - 3 métodos AJAX migrados para `DPS_Portal_AJAX_Handler`: `ajax_request_access_link_by_email`, `ajax_export_pet_history_pdf`, `get_access_link_email_html`
+  - 6 hooks admin duplicados removidos (já registrados por `DPS_Portal_Admin`)
+  - 11 chamadas `$this->render_*()` substituídas por `DPS_Portal_Renderer::get_instance()->render_*()`
+  - 3 chamadas de dados substituídas por `DPS_Portal_Data_Provider::get_instance()->*()`
+  - ~60 métodos duplicados/mortos removidos
+- **Status:** ✅ Corrigido na Fase 3
 
 ### 4.3 Inline CSS no admin com cores hardcoded ✅
 - **Arquivo:** `class-dps-client-portal.php:856-863`
@@ -176,8 +183,8 @@
 | Segurança (Média) | 1 | 1 | 0 |
 | Segurança (Baixa) | 1 | 1 | 0 |
 | Bugs (Média) | 1 | 1 | 0 |
+| Bugs (hooks duplicados admin) | 1 | 1 | 0 |
 | Compatibilidade (M3) | 2 | 2 | 0 |
-| Performance | 0 | 0 | 0 |
-| Limpeza | 1 | 0 | 1 |
+| Limpeza (refatoração) | 1 | 1 | 0 |
 
-**Conclusão:** O add-on Portal do Cliente está em bom estado geral. A arquitetura é sólida com padrão Repository, interfaces para DI, e separação de responsabilidades. Segurança é robusta com tokens seguros, rate limiting, validação de ownership, e sanitização consistente. Foram corrigidos 4 achados de segurança/bugs (Fase 1) e 2 itens de compatibilidade M3 (Fase 2: CSS migrado para tokens M3, inline admin CSS com tokens). Resta 1 item de limpeza (código legado no coordenador principal) para fases futuras.
+**Conclusão:** O add-on Portal do Cliente foi totalmente auditado e refatorado. A classe coordenadora foi reduzida em 60% (5448 → 2181 linhas) com delegação para classes especializadas. Segurança robusta mantida. Todos os achados foram corrigidos em 3 fases: Fase 1 (segurança/bugs), Fase 2 (M3 design tokens), Fase 3 (refatoração do coordenador).

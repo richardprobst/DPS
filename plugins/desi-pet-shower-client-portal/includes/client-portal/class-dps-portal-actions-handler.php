@@ -582,7 +582,7 @@ class DPS_Portal_Actions_Handler {
         }
 
         if ( ! post_type_exists( 'dps_groomer_review' ) ) {
-            return add_query_arg( 'portal_msg', 'review_submitted', $redirect_url );
+            return add_query_arg( 'portal_msg', 'review_error', $redirect_url );
         }
 
         $client_name = get_the_title( $client_id );

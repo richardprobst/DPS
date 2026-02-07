@@ -579,7 +579,7 @@ class DPS_Portal_AJAX_Handler {
      * Permite que clientes com email cadastrado solicitem o link de acesso
      * automaticamente. Para clientes sem email, orienta a usar WhatsApp.
      * 
-     * Rate limiting: 3 solicitações por hora por IP ou email
+     * Rate limiting: 3 solicitações por hora por IP e por email (ambos limites aplicados independentemente)
      * 
      * @since 2.4.3
      */
