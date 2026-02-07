@@ -149,23 +149,22 @@
 
 ---
 
-## 4. Itens Observados (Não Corrigidos)
+## 4. Itens Observados — Resolvidos na Fase 2
 
-### 4.1 CSS não migrado para M3 Design Tokens (Severidade: Baixa)
+### 4.1 CSS migrado para M3 Design Tokens ✅
 - **Arquivo:** `assets/css/client-portal.css`
-- **Descrição:** O CSS do portal ainda usa variáveis customizadas próprias (`:root` com `--dps-primary: #0ea5e9` etc.) em vez de referenciar os tokens M3 do design system central (`dps-design-tokens.css`). Outros add-ons (Registration, Agenda, Loyalty) já foram migrados para M3.
-- **Impacto:** Inconsistência visual com o restante do sistema; não é bug nem vulnerabilidade.
-- **Recomendação:** Migrar para M3 tokens em fase futura (Fase 2 da auditoria).
+- **Descrição:** CSS migrado de variáveis hardcoded em `:root` para tokens semânticos M3 mapeados no wrapper (`.dps-client-portal`, `.dps-client-portal-access-page`, `.dps-chat-widget`). 251 cores hex substituídas por referências a variáveis. `dps-design-tokens.css` adicionado como dependência no `wp_register_style()`.
+- **Status:** ✅ Corrigido na Fase 2
 
 ### 4.2 Código legado no coordenador principal (Severidade: Baixa)
 - **Arquivo:** `class-dps-client-portal.php` (~5200 linhas)
 - **Descrição:** A classe `DPS_Client_Portal` ainda contém métodos legados que já foram refatorados para classes dedicadas (ex: `ajax_get_chat_messages`, `handle_portal_actions` com ~400 linhas de lógica inline). Os métodos legados permanecem como fallback, mas o código novo na `DPS_Portal_Actions_Handler` e `DPS_Portal_AJAX_Handler` é mais limpo.
 - **Recomendação:** Progressivamente delegar lógica para as classes refatoradas em fases futuras.
 
-### 4.3 Inline CSS no admin com cores hardcoded (Severidade: Baixa)
-- **Arquivo:** `class-dps-client-portal.php:846-853`
-- **Descrição:** `enqueue_message_list_styles()` usa cores hex hardcoded para badges de status de mensagens no admin.
-- **Recomendação:** Migrar para tokens M3 quando o design system for estendido ao contexto admin.
+### 4.3 Inline CSS no admin com cores hardcoded ✅
+- **Arquivo:** `class-dps-client-portal.php:856-863`
+- **Descrição:** `enqueue_message_list_styles()` agora usa tokens M3 com fallbacks hex para compatibilidade (ex: `var(--dps-color-primary, #0b6bcb)`).
+- **Status:** ✅ Corrigido na Fase 2
 
 ---
 
@@ -177,8 +176,8 @@
 | Segurança (Média) | 1 | 1 | 0 |
 | Segurança (Baixa) | 1 | 1 | 0 |
 | Bugs (Média) | 1 | 1 | 0 |
-| Compatibilidade | 0 | 0 | 0 |
+| Compatibilidade (M3) | 2 | 2 | 0 |
 | Performance | 0 | 0 | 0 |
-| Limpeza | 3 | 0 | 3 |
+| Limpeza | 1 | 0 | 1 |
 
-**Conclusão:** O add-on Portal do Cliente está em bom estado geral. A arquitetura é sólida com padrão Repository, interfaces para DI, e separação de responsabilidades. Segurança é robusta com tokens seguros, rate limiting, validação de ownership, e sanitização consistente. Foram corrigidos 4 achados (3 de segurança, 1 bug) e identificados 3 itens de limpeza para fases futuras.
+**Conclusão:** O add-on Portal do Cliente está em bom estado geral. A arquitetura é sólida com padrão Repository, interfaces para DI, e separação de responsabilidades. Segurança é robusta com tokens seguros, rate limiting, validação de ownership, e sanitização consistente. Foram corrigidos 4 achados de segurança/bugs (Fase 1) e 2 itens de compatibilidade M3 (Fase 2: CSS migrado para tokens M3, inline admin CSS com tokens). Resta 1 item de limpeza (código legado no coordenador principal) para fases futuras.

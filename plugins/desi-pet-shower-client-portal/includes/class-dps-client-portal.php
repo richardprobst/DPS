@@ -779,11 +779,21 @@ final class DPS_Client_Portal {
             return;
         }
 
+        // Design tokens M3 Expressive (devem ser carregados antes de qualquer CSS)
+        if ( defined( 'DPS_BASE_URL' ) ) {
+            wp_register_style(
+                'dps-design-tokens',
+                DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
+                [],
+                defined( 'DPS_BASE_VERSION' ) ? DPS_BASE_VERSION : '2.0.0'
+            );
+        }
+
         $style_path = trailingslashit( DPS_CLIENT_PORTAL_ADDON_DIR ) . 'assets/css/client-portal.css';
         $style_url  = trailingslashit( DPS_CLIENT_PORTAL_ADDON_URL ) . 'assets/css/client-portal.css';
         $style_version = file_exists( $style_path ) ? filemtime( $style_path ) : '1.0.0';
 
-        wp_register_style( 'dps-client-portal', $style_url, [], $style_version );
+        wp_register_style( 'dps-client-portal', $style_url, [ 'dps-design-tokens' ], $style_version );
         
         $script_path = trailingslashit( DPS_CLIENT_PORTAL_ADDON_DIR ) . 'assets/js/client-portal.js';
         $script_url  = trailingslashit( DPS_CLIENT_PORTAL_ADDON_URL ) . 'assets/js/client-portal.js';
@@ -845,12 +855,12 @@ final class DPS_Client_Portal {
 
         $custom_css = '
             .dps-message-sender { font-weight: 500; }
-            .dps-message-sender--client { color: #0ea5e9; }
-            .dps-message-sender--admin { color: #10b981; }
+            .dps-message-sender--client { color: var(--dps-color-primary, #0b6bcb); }
+            .dps-message-sender--admin { color: var(--dps-color-success, #1a7a3a); }
             .dps-message-status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #fff; }
-            .dps-message-status--open { background-color: #f59e0b; }
-            .dps-message-status--answered { background-color: #0ea5e9; }
-            .dps-message-status--closed { background-color: #10b981; }
+            .dps-message-status--open { background-color: var(--dps-color-warning, #8b6914); }
+            .dps-message-status--answered { background-color: var(--dps-color-primary, #0b6bcb); }
+            .dps-message-status--closed { background-color: var(--dps-color-success, #1a7a3a); }
         ';
 
         wp_add_inline_style( 'wp-admin', $custom_css );
