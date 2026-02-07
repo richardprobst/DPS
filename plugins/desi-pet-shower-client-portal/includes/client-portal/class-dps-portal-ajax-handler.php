@@ -76,6 +76,14 @@ class DPS_Portal_AJAX_Handler {
         add_action( 'wp_ajax_nopriv_dps_loyalty_get_history', [ $this, 'ajax_get_loyalty_history' ] );
         add_action( 'wp_ajax_dps_loyalty_portal_redeem', [ $this, 'ajax_redeem_loyalty_points' ] );
         add_action( 'wp_ajax_nopriv_dps_loyalty_portal_redeem', [ $this, 'ajax_redeem_loyalty_points' ] );
+
+        // AJAX handler para auto-envio de link de acesso por email
+        add_action( 'wp_ajax_dps_request_access_link_by_email', [ $this, 'ajax_request_access_link_by_email' ] );
+        add_action( 'wp_ajax_nopriv_dps_request_access_link_by_email', [ $this, 'ajax_request_access_link_by_email' ] );
+
+        // AJAX handler para export PDF do histórico do pet
+        add_action( 'wp_ajax_dps_export_pet_history_pdf', [ $this, 'ajax_export_pet_history_pdf' ] );
+        add_action( 'wp_ajax_nopriv_dps_export_pet_history_pdf', [ $this, 'ajax_export_pet_history_pdf' ] );
     }
 
     /**
@@ -563,5 +571,284 @@ class DPS_Portal_AJAX_Handler {
             'message'    => $message,
             'request_id' => $request_id,
         ] );
+    }
+
+    /**
+     * AJAX handler para solicitação de link de acesso por email (auto-envio).
+     * 
+     * Permite que clientes com email cadastrado solicitem o link de acesso
+     * automaticamente. Para clientes sem email, orienta a usar WhatsApp.
+     * 
+     * Rate limiting: 3 solicitações por hora por IP e por email (ambos limites aplicados independentemente)
+     * 
+     * @since 2.4.3
+     */
+    public function ajax_request_access_link_by_email() {
+        // Verifica nonce para proteção CSRF
+        $nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+        if ( ! wp_verify_nonce( $nonce, 'dps_request_access_link' ) ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Sessão expirada. Por favor, recarregue a página e tente novamente.', 'dps-client-portal' ) 
+            ] );
+        }
+        
+        // Captura e valida email
+        $email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+        
+        if ( empty( $email ) || ! is_email( $email ) ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Por favor, informe um e-mail válido.', 'dps-client-portal' ) 
+            ] );
+        }
+        
+        // Rate limiting por IP (usa helper ou fallback)
+        $ip = class_exists( 'DPS_IP_Helper' )
+            ? DPS_IP_Helper::get_ip_with_proxy_support()
+            : ( isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '0.0.0.0' );
+
+        $rate_key_ip = 'dps_access_link_ip_' . md5( $ip );
+        $rate_key_email = 'dps_access_link_email_' . md5( $email );
+        
+        // Verifica rate limit por IP (3 solicitações por hora)
+        $ip_count = get_transient( $rate_key_ip );
+        if ( false === $ip_count ) {
+            $ip_count = 0;
+        }
+        
+        if ( $ip_count >= 3 ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Você já solicitou o link várias vezes. Aguarde alguns minutos antes de tentar novamente.', 'dps-client-portal' ) 
+            ] );
+        }
+        
+        // Verifica rate limit por email (3 solicitações por hora)
+        $email_count = get_transient( $rate_key_email );
+        if ( false === $email_count ) {
+            $email_count = 0;
+        }
+        
+        if ( $email_count >= 3 ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Você já solicitou o link várias vezes para este e-mail. Verifique sua caixa de entrada (e spam).', 'dps-client-portal' ) 
+            ] );
+        }
+        
+        // Busca cliente pelo email
+        $clients = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'     => 'client_email',
+                    'value'   => $email,
+                    'compare' => '=',
+                ],
+            ],
+        ] );
+        
+        // Incrementa contadores de rate limit antes de verificar resultado
+        // (evita brute force para descobrir emails cadastrados)
+        set_transient( $rate_key_ip, $ip_count + 1, HOUR_IN_SECONDS );
+        set_transient( $rate_key_email, $email_count + 1, HOUR_IN_SECONDS );
+        
+        if ( empty( $clients ) ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Não encontramos um cadastro com este e-mail. Por favor, entre em contato via WhatsApp para solicitar acesso.', 'dps-client-portal' ),
+                'show_whatsapp' => true
+            ] );
+        }
+        
+        $client_id = $clients[0];
+        $client_name = get_the_title( $client_id );
+        
+        // Gera token de acesso
+        $token_manager = DPS_Portal_Token_Manager::get_instance();
+        $token_plain   = $token_manager->generate_token( $client_id, 'login' );
+        
+        if ( false === $token_plain ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Não foi possível gerar o link de acesso. Por favor, tente novamente ou entre em contato via WhatsApp.', 'dps-client-portal' ),
+                'show_whatsapp' => true
+            ] );
+        }
+        
+        // Gera URL de acesso
+        $access_url = $token_manager->generate_access_url( $token_plain );
+        
+        // Monta email HTML moderno
+        $safe_client_name = wp_strip_all_tags( $client_name );
+        $subject = __( 'Seu link de acesso ao Portal do Cliente - desi.pet by PRObst', 'dps-client-portal' );
+        
+        $site_name = get_bloginfo( 'name' );
+        
+        // Template HTML do email
+        $body = $this->get_access_link_email_html( $safe_client_name, $access_url, $site_name );
+        
+        // Envia email
+        $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
+        
+        if ( class_exists( 'DPS_Communications_API' ) ) {
+            $comm_api = DPS_Communications_API::get_instance();
+            $sent     = $comm_api->send_email( 
+                $email, 
+                $subject, 
+                $body, 
+                [
+                    'type'      => 'portal_access_link',
+                    'client_id' => $client_id,
+                ]
+            );
+        } else {
+            $sent = wp_mail( $email, $subject, $body, $headers );
+        }
+        
+        // Registra em log
+        if ( function_exists( 'dps_log' ) ) {
+            dps_log( 'Portal access link sent via email', [
+                'client_id' => $client_id,
+                'email'     => $email,
+                'ip'        => $ip,
+                'sent'      => $sent,
+            ], 'info', 'client-portal' );
+        }
+        
+        if ( ! $sent ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Não foi possível enviar o e-mail. Por favor, tente novamente ou entre em contato via WhatsApp.', 'dps-client-portal' ),
+                'show_whatsapp' => true
+            ] );
+        }
+        
+        wp_send_json_success( [ 
+            'message' => __( 'Link enviado com sucesso! Verifique sua caixa de entrada (e a pasta de spam).', 'dps-client-portal' ) 
+        ] );
+    }
+
+    /**
+     * Gera o HTML do email de link de acesso ao portal.
+     *
+     * @since 2.4.4
+     * @param string $client_name Nome do cliente (já sanitizado).
+     * @param string $access_url  URL de acesso com token.
+     * @param string $site_name   Nome do site.
+     * @return string HTML do email.
+     */
+    private function get_access_link_email_html( $client_name, $access_url, $site_name ) {
+        $escaped_url = esc_url( $access_url );
+        $escaped_name = esc_html( $client_name );
+        $escaped_site = esc_html( $site_name );
+        
+        $current_year = wp_date( 'Y' );
+        $validity_text = esc_html__( 'Este link é válido por 30 minutos e pode ser usado apenas uma vez.', 'dps-client-portal' );
+        $access_button_text = esc_html__( 'Acessar Meu Portal', 'dps-client-portal' );
+        $security_note = esc_html__( 'Se você não solicitou este acesso, ignore este e-mail.', 'dps-client-portal' );
+        $greeting = sprintf( esc_html__( 'Olá, %s!', 'dps-client-portal' ), $escaped_name );
+        $intro_text = esc_html__( 'Você solicitou acesso ao Portal do Cliente. Clique no botão abaixo para acessar:', 'dps-client-portal' );
+        $alt_link_text = esc_html__( 'Se o botão não funcionar, copie e cole este link no navegador:', 'dps-client-portal' );
+        $footer_text = sprintf( esc_html__( 'Equipe %s', 'dps-client-portal' ), $escaped_site );
+        
+        return <<<HTML
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{$escaped_site}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="max-width: 600px; margin: 0 auto;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);">
+                    <tr>
+                        <td style="padding: 40px 40px 24px; text-align: center;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">🐾</div>
+                            <h1 style="margin: 0; font-size: 24px; font-weight: 600; color: #1f2937;">{$escaped_site}</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0 40px 32px;">
+                            <p style="margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #374151;">{$greeting}</p>
+                            <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; color: #6b7280;">{$intro_text}</p>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="100%">
+                                <tr>
+                                    <td style="text-align: center; padding: 8px 0 24px;">
+                                        <a href="{$escaped_url}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 16px 48px; border-radius: 12px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);">{$access_button_text}</a>
+                                    </td>
+                                </tr>
+                            </table>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                                <tr>
+                                    <td style="padding: 16px;">
+                                        <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 1.5;">
+                                            <strong>⏱️ Atenção:</strong> {$validity_text}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0 40px 32px;">
+                            <p style="margin: 0 0 8px; font-size: 13px; color: #9ca3af;">{$alt_link_text}</p>
+                            <p style="margin: 0; font-size: 12px; color: #0ea5e9; word-break: break-all;">
+                                <a href="{$escaped_url}" style="color: #0ea5e9; text-decoration: underline;">{$escaped_url}</a>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0 40px 32px;">
+                            <p style="margin: 0; font-size: 13px; color: #9ca3af; text-align: center;">
+                                🔒 {$security_note}
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 24px 40px; background: #f9fafb; border-radius: 0 0 16px 16px; text-align: center;">
+                            <p style="margin: 0; font-size: 14px; color: #6b7280;">{$footer_text}</p>
+                            <p style="margin: 8px 0 0; font-size: 12px; color: #9ca3af;">© {$current_year} {$escaped_site}</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+HTML;
+    }
+
+    /**
+     * AJAX handler para exportar histórico do pet em formato para impressão/PDF.
+     *
+     * @since 2.5.0
+     */
+    public function ajax_export_pet_history_pdf() {
+        // Verifica nonce usando helper (GET)
+        if ( ! DPS_Request_Validator::verify_admin_action( 'dps_portal_export_pdf', null, 'nonce', false ) ) {
+            wp_die( esc_html__( 'Erro de segurança. Por favor, recarregue a página e tente novamente.', 'dps-client-portal' ), 403 );
+        }
+
+        // Obtém IDs
+        $pet_id    = isset( $_GET['pet_id'] ) ? absint( $_GET['pet_id'] ) : 0;
+        $client_id = isset( $_GET['client_id'] ) ? absint( $_GET['client_id'] ) : 0;
+
+        if ( 0 === $pet_id || 0 === $client_id ) {
+            wp_die( esc_html__( 'Parâmetros inválidos.', 'dps-client-portal' ), 400 );
+        }
+
+        // Verifica se o pet pertence ao cliente (segurança)
+        $pet_client_id = get_post_meta( $pet_id, 'pet_client_id', true );
+        if ( absint( $pet_client_id ) !== $client_id ) {
+            wp_die( esc_html__( 'Acesso não autorizado.', 'dps-client-portal' ), 403 );
+        }
+
+        // Renderiza página de impressão
+        $renderer = DPS_Portal_Renderer::get_instance();
+        $renderer->render_pet_history_print_page( $pet_id, $client_id );
+        exit;
     }
 }

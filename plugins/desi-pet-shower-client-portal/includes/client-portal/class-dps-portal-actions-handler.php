@@ -494,4 +494,123 @@ class DPS_Portal_Actions_Handler {
         
         return false;
     }
+
+    /**
+     * Processa atualização de preferências do cliente.
+     *
+     * @since 3.1.0
+     * @param int $client_id ID do cliente.
+     * @return string URL de redirecionamento.
+     */
+    public function handle_update_client_preferences( $client_id ) {
+        $contact_pref = isset( $_POST['contact_preference'] ) ? sanitize_key( wp_unslash( $_POST['contact_preference'] ) ) : '';
+        $period_pref  = isset( $_POST['period_preference'] ) ? sanitize_key( wp_unslash( $_POST['period_preference'] ) ) : '';
+        
+        update_post_meta( $client_id, 'client_contact_preference', $contact_pref );
+        update_post_meta( $client_id, 'client_period_preference', $period_pref );
+        
+        do_action( 'dps_portal_after_update_preferences', $client_id, [
+            'contact_preference' => $contact_pref,
+            'period_preference'  => $period_pref,
+        ] );
+        
+        return add_query_arg( 'portal_msg', 'preferences_updated', wp_get_referer() ?: home_url() );
+    }
+
+    /**
+     * Processa atualização de preferências de um pet.
+     *
+     * @since 3.1.0
+     * @param int $client_id ID do cliente.
+     * @param int $pet_id    ID do pet.
+     * @return string URL de redirecionamento.
+     */
+    public function handle_update_pet_preferences( $client_id, $pet_id ) {
+        if ( ! dps_portal_assert_client_owns_resource( $client_id, $pet_id, 'pet' ) ) {
+            return add_query_arg( 'portal_msg', 'error', wp_get_referer() ?: home_url() );
+        }
+        
+        $behavior_notes = isset( $_POST['pet_behavior_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior_notes'] ) ) : '';
+        $grooming_pref  = isset( $_POST['pet_grooming_preference'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_grooming_preference'] ) ) : '';
+        $product_notes  = isset( $_POST['pet_product_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_product_notes'] ) ) : '';
+        
+        update_post_meta( $pet_id, 'pet_behavior_notes', $behavior_notes );
+        update_post_meta( $pet_id, 'pet_grooming_preference', $grooming_pref );
+        update_post_meta( $pet_id, 'pet_product_notes', $product_notes );
+        
+        do_action( 'dps_portal_after_update_pet_preferences', $pet_id, $client_id, [
+            'behavior_notes'      => $behavior_notes,
+            'grooming_preference' => $grooming_pref,
+            'product_notes'       => $product_notes,
+        ] );
+        
+        return add_query_arg( 'portal_msg', 'pet_preferences_updated', wp_get_referer() ?: home_url() );
+    }
+
+    /**
+     * Processa envio de avaliação interna.
+     *
+     * @since 3.1.0
+     * @param int $client_id ID do cliente.
+     * @return string URL de redirecionamento.
+     */
+    public function handle_submit_internal_review( $client_id ) {
+        $rating  = isset( $_POST['review_rating'] ) ? absint( wp_unslash( $_POST['review_rating'] ) ) : 0;
+        $comment = isset( $_POST['review_comment'] ) ? sanitize_textarea_field( wp_unslash( $_POST['review_comment'] ) ) : '';
+        $redirect_url = wp_get_referer() ?: home_url();
+
+        if ( $rating < 1 || $rating > 5 ) {
+            return add_query_arg( 'portal_msg', 'review_invalid', $redirect_url );
+        }
+
+        // Verifica se o cliente já avaliou
+        $existing = get_posts( [
+            'post_type'      => 'dps_groomer_review',
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+            'meta_query'     => [
+                [
+                    'key'   => '_dps_review_client_id',
+                    'value' => $client_id,
+                ],
+            ],
+            'fields' => 'ids',
+        ] );
+
+        if ( ! empty( $existing ) ) {
+            return add_query_arg( 'portal_msg', 'review_already', $redirect_url );
+        }
+
+        if ( ! post_type_exists( 'dps_groomer_review' ) ) {
+            return add_query_arg( 'portal_msg', 'review_error', $redirect_url );
+        }
+
+        $client_name = get_the_title( $client_id );
+        $review_title = sprintf(
+            __( 'Avaliação de %s', 'dps-client-portal' ),
+            $client_name
+        );
+
+        $review_id = wp_insert_post( [
+            'post_type'    => 'dps_groomer_review',
+            'post_status'  => 'publish',
+            'post_title'   => wp_strip_all_tags( $review_title ),
+            'post_content' => $comment,
+        ] );
+
+        if ( is_wp_error( $review_id ) || $review_id <= 0 ) {
+            return add_query_arg( 'portal_msg', 'review_error', $redirect_url );
+        }
+
+        update_post_meta( $review_id, '_dps_review_rating', $rating );
+        update_post_meta( $review_id, '_dps_review_name', $client_name );
+        update_post_meta( $review_id, '_dps_review_client_id', $client_id );
+        update_post_meta( $review_id, '_dps_review_source', 'portal' );
+
+        delete_transient( 'dps_satisfaction_rate' );
+
+        do_action( 'dps_portal_after_internal_review', $review_id, $client_id, $rating, $comment );
+
+        return add_query_arg( 'portal_msg', 'review_submitted', $redirect_url );
+    }
 }
