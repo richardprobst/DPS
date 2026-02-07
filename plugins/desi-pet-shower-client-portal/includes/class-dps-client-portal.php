@@ -644,6 +644,15 @@ final class DPS_Client_Portal {
         echo '</nav>';
         
         // Define tabs padrão (Fase 2.3)
+        // Busca pontos de fidelidade para badge
+        $loyalty_badge = 0;
+        if ( function_exists( 'dps_loyalty_get_points' ) ) {
+            $loyalty_points = dps_loyalty_get_points( $client_id );
+            if ( $loyalty_points > 0 ) {
+                $loyalty_badge = $loyalty_points;
+            }
+        }
+
         $default_tabs = [
             'inicio' => [
                 'icon'  => '🏠',
@@ -655,7 +664,7 @@ final class DPS_Client_Portal {
                 'icon'  => '🏆',
                 'label' => __( 'Fidelidade', 'dps-client-portal' ),
                 'active' => false,
-                'badge' => 0,
+                'badge' => $loyalty_badge,
             ],
             'avaliacoes' => [
                 'icon'  => '⭐',
@@ -714,8 +723,17 @@ final class DPS_Client_Portal {
             
             // Badge de notificação
             if ( $badge_count > 0 ) {
-                echo '<span class="dps-portal-tabs__badge" aria-label="' . esc_attr( sprintf( _n( '%d item', '%d itens', $badge_count, 'dps-client-portal' ), $badge_count ) ) . '">';
-                echo esc_html( $badge_count > 9 ? '9+' : $badge_count );
+                $badge_class = 'dps-portal-tabs__badge';
+                $badge_text  = $badge_count > 9 ? '9+' : (string) $badge_count;
+                
+                // Badge especial para fidelidade (pontos)
+                if ( 'fidelidade' === $tab_id ) {
+                    $badge_class .= ' dps-portal-tabs__badge--loyalty';
+                    $badge_text   = $badge_count > 999 ? number_format( $badge_count / 1000, 1, ',', '' ) . 'k' : number_format( $badge_count, 0, ',', '.' );
+                }
+                
+                echo '<span class="' . esc_attr( $badge_class ) . '" aria-label="' . esc_attr( sprintf( _n( '%d item', '%d itens', $badge_count, 'dps-client-portal' ), $badge_count ) ) . '">';
+                echo esc_html( $badge_text );
                 echo '</span>';
             }
             
@@ -990,13 +1008,13 @@ final class DPS_Client_Portal {
         echo '</div>';
         echo '</div>';
         
-        // Card: Pontos (se fidelidade ativo)
+        // Card: Pontos (se fidelidade ativo) — destaque especial para engajamento
         if ( function_exists( 'dps_loyalty_get_points' ) ) {
-            echo '<div class="dps-overview-card dps-overview-card--loyalty">';
-            echo '<div class="dps-overview-card__icon">⭐</div>';
+            echo '<div class="dps-overview-card dps-overview-card--loyalty" role="button" tabindex="0" data-tab="fidelidade" style="cursor:pointer" aria-label="' . esc_attr__( 'Ver programa de fidelidade', 'dps-client-portal' ) . '">';
+            echo '<div class="dps-overview-card__icon">🏆</div>';
             echo '<div class="dps-overview-card__content">';
             echo '<span class="dps-overview-card__value">' . esc_html( number_format( $points, 0, ',', '.' ) ) . '</span>';
-            echo '<span class="dps-overview-card__label">' . esc_html__( 'Pontos', 'dps-client-portal' ) . '</span>';
+            echo '<span class="dps-overview-card__label">' . esc_html__( 'Pontos de Fidelidade', 'dps-client-portal' ) . '</span>';
             echo '</div>';
             echo '</div>';
         }
@@ -1061,6 +1079,14 @@ final class DPS_Client_Portal {
             echo '</a>';
         }
         
+        // Botão: Indique e Ganhe (se fidelidade ativo)
+        if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
+            echo '<button type="button" class="dps-quick-action dps-quick-action--referral" data-tab="fidelidade">';
+            echo '<span class="dps-quick-action__icon">🎁</span>';
+            echo '<span class="dps-quick-action__text">' . esc_html__( 'Indique e Ganhe', 'dps-client-portal' ) . '</span>';
+            echo '</button>';
+        }
+
         // Botão: Meus Dados
         echo '<button type="button" class="dps-quick-action" data-tab="dados">';
         echo '<span class="dps-quick-action__icon">⚙️</span>';
