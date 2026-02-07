@@ -1,41 +1,64 @@
 /**
  * Estilos do Registration Add-on - DPS
+ * Material Design 3 Expressive
  * 
- * CSS responsivo para o formulário público de cadastro de clientes e pets.
- * Segue o padrão visual minimalista/clean do DPS com visual moderno e elegante.
- * 
+ * Este arquivo segue o sistema de design M3 Expressive do DPS:
+ * - Todas as cores via var(--dps-color-*) / var(--dps-*) tokens
+ * - Formas via var(--dps-shape-*) tokens
+ * - Elevação via var(--dps-elevation-*) tokens
+ * - Movimento via var(--dps-motion-*) tokens
+ * - Espaçamento via var(--dps-space-*) tokens
+ * - Tipografia via var(--dps-font-*) / var(--dps-typescale-*) tokens
+ *
+ * Perfil: Expressive (formulário público)
+ * - Spring-based motion com bounce
+ * - Stagger animations para cards
+ * - Elevated cards
+ * - Fontes expressivas (Outfit / Source Sans 3)
+ * - Botões pill-shaped
+ *
+ * Requer: dps-design-tokens.css carregado antes deste arquivo.
+ *
  * Breakpoints:
+ * - 1440px: Desktop extra grande
+ * - 1200px: Desktop grande
  * - 1024px: Tablet grande
  * - 768px: Tablet (prioridade)
  * - 640px: Mobile
  * - 480px: Mobile pequeno
- * 
+ * - 374px: Mobile muito pequeno
+ *
  * @package Desi_Pet_Shower_Registration
  * @since 1.1.0
  * @since 1.4.0 Melhorias visuais seguindo padrão da Agenda
+ * @version 2.0.0 Migração completa para Material 3 Expressive design tokens
  */
 
 /* ==========================================================================
-   CSS Variables - Design System
+   CSS Variables - Design System (M3 Expressive Tokens)
    ========================================================================== */
 
 .dps-registration-form {
-    --dps-accent: #0ea5e9;
-    --dps-accent-strong: #0284c7;
-    --dps-accent-soft: #eff6ff;
-    --dps-surface: #ffffff;
-    --dps-background: #f8fafc;
-    --dps-border: #e2e8f0;
-    --dps-border-light: #f1f5f9;
-    --dps-muted: #64748b;
-    --dps-text-primary: #0f172a;
-    --dps-text-secondary: #374151;
-    --dps-success: #10b981;
-    --dps-success-soft: #d1fae5;
-    --dps-warning: #f59e0b;
-    --dps-warning-soft: #fef3c7;
-    --dps-error: #ef4444;
-    --dps-error-soft: #fee2e2;
+    /* Tokens semânticos mapeados para M3 (via dps-design-tokens.css) */
+    --dps-accent: var(--dps-color-primary);
+    --dps-accent-strong: var(--dps-color-primary-pressed);
+    --dps-accent-hover: var(--dps-color-primary-hover);
+    --dps-accent-soft: var(--dps-color-primary-container);
+    --dps-accent-on: var(--dps-color-on-primary);
+    --dps-accent-on-container: var(--dps-color-on-primary-container);
+    --dps-surface: var(--dps-color-surface-container-lowest);
+    --dps-background: var(--dps-color-surface);
+    --dps-border: var(--dps-color-outline-variant);
+    --dps-border-light: var(--dps-color-surface-container-low);
+    --dps-muted: var(--dps-color-on-surface-variant);
+    --dps-text-primary: var(--dps-color-on-surface);
+    --dps-text-secondary: var(--dps-color-on-surface-variant);
+    --dps-success: var(--dps-color-success);
+    --dps-success-soft: var(--dps-color-success-container);
+    --dps-warning: var(--dps-color-warning);
+    --dps-warning-soft: var(--dps-color-warning-container);
+    --dps-error: var(--dps-color-error);
+    --dps-error-soft: var(--dps-color-error-container);
 }
 
 /* ==========================================================================
@@ -48,8 +71,10 @@
     padding: 32px;
     background: var(--dps-surface);
     border: 1px solid var(--dps-border);
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+    border-radius: var(--dps-shape-large);
+    box-shadow: var(--dps-elevation-1);
+    font-family: var(--dps-font-body);
+    color: var(--dps-text-primary);
 }
 
 .dps-registration-form * {
@@ -62,6 +87,7 @@
     border: none;
     font-size: 20px;
     font-weight: 700;
+    font-family: var(--dps-font-display);
     color: var(--dps-text-primary);
     letter-spacing: -0.02em;
     display: flex;
@@ -74,7 +100,7 @@
     display: inline-block;
     width: 4px;
     height: 24px;
-    background: linear-gradient(180deg, var(--dps-accent) 0%, var(--dps-accent-strong) 100%);
+    background: var(--dps-accent);
     border-radius: 2px;
 }
 
@@ -91,9 +117,9 @@
 .dps-progress {
     margin-bottom: 28px;
     padding: 20px 24px;
-    background: linear-gradient(135deg, var(--dps-accent-soft) 0%, #f0f9ff 100%);
-    border: 1px solid rgba(14, 165, 233, 0.15);
-    border-radius: 12px;
+    background: var(--dps-accent-soft);
+    border: 1px solid var(--dps-border);
+    border-radius: var(--dps-shape-medium);
 }
 
 .dps-progress-top {
@@ -119,30 +145,30 @@
     min-width: 42px;
     padding: 4px 12px;
     background: var(--dps-accent);
-    color: #ffffff;
+    color: var(--dps-accent-on);
     font-size: 13px;
     font-weight: 700;
-    border-radius: 20px;
-    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.25);
+    border-radius: var(--dps-shape-full);
+    box-shadow: var(--dps-elevation-1);
 }
 
 .dps-progress-bar {
     position: relative;
     width: 100%;
     height: 10px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 999px;
+    background: var(--dps-color-surface-container-lowest);
+    border-radius: var(--dps-shape-full);
     overflow: hidden;
-    border: 1px solid rgba(14, 165, 233, 0.1);
+    border: 1px solid var(--dps-border);
 }
 
 .dps-progress-bar span {
     display: block;
     height: 100%;
     width: calc(100% / 3); /* Initial width for step 1 of 3 - updated via JS */
-    background: linear-gradient(90deg, var(--dps-accent) 0%, var(--dps-accent-strong) 100%);
-    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 999px;
+    background: var(--dps-accent);
+    transition: width var(--dps-motion-expand);
+    border-radius: var(--dps-shape-full);
 }
 
 /* ==========================================================================
@@ -159,7 +185,7 @@
     display: none;
     opacity: 0;
     transform: translateY(10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity var(--dps-motion-enter), transform var(--dps-motion-enter);
 }
 
 .dps-step-active {
@@ -177,7 +203,7 @@
 }
 
 /* ==========================================================================
-   4. Navigation Buttons - Modern Style
+   4. Navigation Buttons - M3 Expressive Style
    ========================================================================== */
 
 .dps-button-next,
@@ -187,51 +213,52 @@
     justify-content: center;
     gap: 8px;
     padding: 14px 28px;
-    border-radius: 10px;
+    border-radius: var(--dps-shape-button);
     font-size: 15px;
     font-weight: 600;
+    font-family: var(--dps-font-body);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dps-motion-hover);
     text-decoration: none;
 }
 
 .dps-button-secondary {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    border: 1px solid var(--dps-border);
-    color: var(--dps-text-secondary);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    background: var(--dps-surface);
+    border: 1px solid var(--dps-color-outline);
+    color: var(--dps-accent);
+    box-shadow: none;
 }
 
 .dps-button-secondary:hover {
-    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-    border-color: #94a3b8;
-    color: var(--dps-text-primary);
+    background: var(--dps-accent-soft);
+    border-color: var(--dps-accent);
+    color: var(--dps-accent);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--dps-elevation-1);
 }
 
 .dps-button-secondary:active {
     transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    box-shadow: none;
 }
 
 .dps-button-next {
-    background: linear-gradient(135deg, var(--dps-accent) 0%, var(--dps-accent-strong) 100%);
+    background: var(--dps-accent);
     border: none;
-    color: #ffffff;
-    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    color: var(--dps-accent-on);
+    box-shadow: var(--dps-elevation-button);
 }
 
 .dps-button-next:hover {
-    background: linear-gradient(135deg, var(--dps-accent-strong) 0%, #0369a1 100%);
+    background: var(--dps-accent-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.4);
-    color: #ffffff;
+    box-shadow: var(--dps-elevation-2);
+    color: var(--dps-accent-on);
 }
 
 .dps-button-next:active {
     transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.25);
+    box-shadow: var(--dps-elevation-1);
 }
 
 /* ==========================================================================
@@ -260,7 +287,7 @@
 }
 
 /* ==========================================================================
-   6. Labels e Inputs - Clean Modern Style
+   6. Labels e Inputs - M3 Clean Style
    ========================================================================== */
 
 .dps-registration-form label {
@@ -268,6 +295,7 @@
     font-weight: 600;
     color: var(--dps-text-secondary);
     font-size: 14px;
+    font-family: var(--dps-font-body);
     margin-bottom: 8px;
     letter-spacing: -0.01em;
 }
@@ -283,19 +311,20 @@
     padding: 14px 14px;
     min-height: 48px;
     border: 1px solid var(--dps-border);
-    border-radius: 10px;
+    border-radius: var(--dps-shape-input);
     font-size: 15px;
+    font-family: var(--dps-font-body);
     color: var(--dps-text-primary);
     background: var(--dps-surface);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover), background var(--dps-motion-hover);
     box-sizing: border-box;
 }
 
 .dps-registration-form input:hover,
 .dps-registration-form select:hover,
 .dps-registration-form textarea:hover {
-    border-color: #cbd5e1;
-    background: #fafbfc;
+    border-color: var(--dps-color-outline);
+    background: var(--dps-color-surface-container-low);
 }
 
 .dps-registration-form input:focus,
@@ -303,13 +332,13 @@
 .dps-registration-form textarea:focus {
     outline: none;
     border-color: var(--dps-accent);
-    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--dps-accent) 10%, transparent);
     background: var(--dps-surface);
 }
 
 .dps-registration-form input::placeholder,
 .dps-registration-form textarea::placeholder {
-    color: #9ca3af;
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-registration-form textarea {
@@ -337,7 +366,7 @@
     outline: 2px solid var(--dps-accent);
     outline-offset: 2px;
     border-color: var(--dps-accent);
-    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--dps-accent) 15%, transparent);
 }
 
 /* ==========================================================================
@@ -361,8 +390,8 @@
     padding: 10px 14px;
     background: var(--dps-background);
     border: 1px solid var(--dps-border);
-    border-radius: 10px;
-    transition: all 0.2s ease;
+    border-radius: var(--dps-shape-small);
+    transition: all var(--dps-motion-hover);
 }
 
 .dps-registration-form label:has(input[type="checkbox"]):hover {
@@ -379,42 +408,59 @@
     padding: 10px 14px;
     background: var(--dps-background);
     border: 1px solid var(--dps-border);
-    border-radius: 10px;
-    transition: all 0.2s ease;
+    border-radius: var(--dps-shape-small);
+    transition: all var(--dps-motion-hover);
 }
 
 /* ==========================================================================
-   8. Pet Fieldset - Card Style
+   8. Pet Fieldset - M3 Elevated Card Style
    ========================================================================== */
 
 .dps-pet-fieldset {
     border: 1px solid var(--dps-border);
-    border-radius: 16px;
+    border-radius: var(--dps-shape-card);
     padding: 24px;
     margin-bottom: 20px;
-    background: linear-gradient(180deg, var(--dps-background) 0%, var(--dps-surface) 100%);
+    background: var(--dps-background);
     position: relative;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
+    box-shadow: var(--dps-elevation-card);
+    animation: dps-enter-from-below var(--dps-motion-enter) backwards;
+}
+
+.dps-pet-fieldset:nth-child(2) {
+    animation-delay: 60ms;
+}
+
+.dps-pet-fieldset:nth-child(3) {
+    animation-delay: 120ms;
+}
+
+.dps-pet-fieldset:nth-child(4) {
+    animation-delay: 180ms;
+}
+
+.dps-pet-fieldset:nth-child(5) {
+    animation-delay: 240ms;
 }
 
 .dps-pet-fieldset:hover {
-    border-color: #cbd5e1;
+    border-color: var(--dps-color-outline);
 }
 
 .dps-pet-fieldset:focus-within {
     border-color: var(--dps-accent);
-    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.08);
+    box-shadow: var(--dps-elevation-2), 0 0 0 4px color-mix(in srgb, var(--dps-accent) 8%, transparent);
 }
 
 .dps-pet-fieldset legend {
     font-weight: 700;
-    color: var(--dps-text-primary);
+    color: var(--dps-accent-on);
     padding: 8px 16px;
     font-size: 16px;
-    background: linear-gradient(135deg, var(--dps-accent) 0%, var(--dps-accent-strong) 100%);
-    color: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+    background: var(--dps-accent);
+    border-radius: var(--dps-shape-full);
+    box-shadow: var(--dps-elevation-1);
     margin-left: 8px;
 }
 
@@ -423,7 +469,7 @@
 }
 
 /* ==========================================================================
-   9. Buttons - Modern Gradient Style
+   9. Buttons - M3 Expressive Style
    ========================================================================== */
 
 .dps-registration-form .button {
@@ -434,30 +480,31 @@
     padding: 14px 28px;
     font-size: 15px;
     font-weight: 600;
-    border-radius: 10px;
+    font-family: var(--dps-font-body);
+    border-radius: var(--dps-shape-button);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--dps-motion-hover);
     text-decoration: none;
 }
 
 .dps-registration-form .button-primary {
-    background: linear-gradient(135deg, var(--dps-accent) 0%, var(--dps-accent-strong) 100%);
+    background: var(--dps-accent);
     border: none;
-    color: #ffffff;
-    box-shadow: 0 2px 10px rgba(14, 165, 233, 0.3);
+    color: var(--dps-accent-on);
+    box-shadow: var(--dps-elevation-button);
     text-shadow: none;
 }
 
 .dps-registration-form .button-primary:hover {
-    background: linear-gradient(135deg, var(--dps-accent-strong) 0%, #0369a1 100%);
-    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.4);
+    background: var(--dps-accent-hover);
+    box-shadow: var(--dps-elevation-2);
     transform: translateY(-2px);
-    color: #ffffff;
+    color: var(--dps-accent-on);
 }
 
 .dps-registration-form .button-primary:active {
     transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+    box-shadow: var(--dps-elevation-1);
 }
 
 /* Add Pet Button - Outline Style */
@@ -468,11 +515,11 @@
     padding: 14px 24px;
     background: var(--dps-surface);
     border: 1px dashed var(--dps-border);
-    border-radius: 12px;
+    border-radius: var(--dps-shape-medium);
     color: var(--dps-muted);
     font-weight: 600;
     font-size: 15px;
-    transition: all 0.2s ease;
+    transition: all var(--dps-motion-hover);
     cursor: pointer;
 }
 
@@ -496,14 +543,15 @@
     margin-top: 24px;
     padding: 0;
     border: 1px solid var(--dps-border);
-    border-radius: 16px;
+    border-radius: var(--dps-shape-surface);
     background: var(--dps-surface);
     overflow: hidden;
+    box-shadow: var(--dps-elevation-1);
 }
 
 .dps-summary-header {
     padding: 20px 24px;
-    background: linear-gradient(135deg, var(--dps-accent-soft) 0%, #f0f9ff 100%);
+    background: var(--dps-accent-soft);
     border-bottom: 1px solid var(--dps-border);
 }
 
@@ -545,6 +593,7 @@
     padding-bottom: 10px;
     font-size: 16px;
     font-weight: 700;
+    font-family: var(--dps-font-display);
     color: var(--dps-text-primary);
     border-bottom: 2px solid var(--dps-border);
 }
@@ -552,7 +601,7 @@
 .dps-summary-pet {
     border: 1px solid var(--dps-border);
     border-left: 4px solid var(--dps-accent);
-    border-radius: 10px;
+    border-radius: var(--dps-shape-small);
     padding: 16px 18px;
     background: var(--dps-background);
     margin-bottom: 12px;
@@ -602,7 +651,7 @@
     font-size: 14px;
     text-align: center;
     background: var(--dps-background);
-    border-radius: 8px;
+    border-radius: var(--dps-shape-small);
 }
 
 .dps-summary-confirm {
@@ -616,7 +665,7 @@
     background: var(--dps-background);
     border-top: 1px solid var(--dps-border);
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background var(--dps-motion-hover);
 }
 
 .dps-summary-confirm:hover {
@@ -628,17 +677,18 @@
    ========================================================================== */
 
 .dps-registration-form .dps-message-success {
-    background: linear-gradient(135deg, var(--dps-success-soft) 0%, #ecfdf5 100%);
+    background: var(--dps-success-soft);
     border: 2px solid var(--dps-success);
     border-left: 5px solid var(--dps-success);
-    color: #065f46;
+    color: var(--dps-color-on-success-container);
     padding: 18px 20px;
-    border-radius: 12px;
+    border-radius: var(--dps-shape-medium);
     margin-bottom: 24px;
     font-weight: 600;
     display: flex;
     align-items: center;
     gap: 12px;
+    animation: dps-success-pulse 400ms var(--dps-motion-easing-expressive-default);
 }
 
 .dps-registration-form .dps-message-success::before {
@@ -649,7 +699,7 @@
     width: 28px;
     height: 28px;
     background: var(--dps-success);
-    color: white;
+    color: var(--dps-color-on-success);
     border-radius: 50%;
     font-size: 16px;
     font-weight: 700;
@@ -657,12 +707,12 @@
 }
 
 .dps-registration-form .dps-message-error {
-    background: linear-gradient(135deg, var(--dps-error-soft) 0%, #fef2f2 100%);
+    background: var(--dps-error-soft);
     border: 2px solid var(--dps-error);
     border-left: 5px solid var(--dps-error);
-    color: #991b1b;
+    color: var(--dps-color-on-error-container);
     padding: 18px 20px;
-    border-radius: 12px;
+    border-radius: var(--dps-shape-medium);
     margin-bottom: 24px;
     font-weight: 600;
     display: flex;
@@ -678,7 +728,7 @@
     width: 28px;
     height: 28px;
     background: var(--dps-error);
-    color: white;
+    color: var(--dps-color-on-error);
     border-radius: 50%;
     font-size: 16px;
     font-weight: 700;
@@ -697,15 +747,15 @@
     width: 100%;
     height: 200px;
     border: 2px solid var(--dps-border);
-    border-radius: 12px;
+    border-radius: var(--dps-shape-medium);
     margin-top: 12px;
     overflow: hidden;
 }
 
 /* Sugestões do Google Places */
 .pac-container {
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-radius: var(--dps-shape-small);
+    box-shadow: var(--dps-elevation-3);
     border: 1px solid var(--dps-border);
     margin-top: 4px;
 }
@@ -788,7 +838,7 @@
     .dps-registration-form {
         max-width: 920px;
         padding: 56px 64px;
-        border-radius: 20px;
+        border-radius: var(--dps-shape-extra-large);
     }
     
     .dps-registration-form h4 {
@@ -820,12 +870,12 @@
     .dps-registration-form textarea {
         padding: 16px 18px;
         font-size: 16px;
-        border-radius: 12px;
+        border-radius: var(--dps-shape-medium);
     }
     
     .dps-progress {
         padding: 28px 32px;
-        border-radius: 16px;
+        border-radius: var(--dps-shape-large);
         margin-bottom: 32px;
     }
     
@@ -840,7 +890,7 @@
     
     .dps-pet-fieldset {
         padding: 32px;
-        border-radius: 20px;
+        border-radius: var(--dps-shape-extra-large);
         margin-bottom: 24px;
     }
     
@@ -854,7 +904,6 @@
     .dps-registration-form .button {
         padding: 16px 32px;
         font-size: 16px;
-        border-radius: 12px;
     }
     
     .dps-step-actions {
@@ -863,7 +912,7 @@
     }
     
     .dps-summary-box {
-        border-radius: 20px;
+        border-radius: var(--dps-shape-extra-large);
     }
     
     .dps-summary-header {
@@ -917,7 +966,7 @@
     .dps-registration-form {
         padding: 24px;
         margin: 0 16px;
-        border-radius: 12px;
+        border-radius: var(--dps-shape-medium);
     }
     
     .dps-progress {
@@ -967,12 +1016,12 @@
     .dps-registration-form {
         padding: 20px;
         margin: 0 12px;
-        border-radius: 12px;
+        border-radius: var(--dps-shape-medium);
     }
     
     .dps-progress {
         padding: 14px 16px;
-        border-radius: 10px;
+        border-radius: var(--dps-shape-small);
     }
     
     .dps-progress-top {
@@ -1001,7 +1050,7 @@
     
     .dps-pet-fieldset {
         padding: 18px;
-        border-radius: 12px;
+        border-radius: var(--dps-shape-medium);
     }
     
     .dps-pet-fieldset legend {
@@ -1032,7 +1081,7 @@
     }
     
     .dps-summary-box {
-        border-radius: 12px;
+        border-radius: var(--dps-shape-medium);
     }
     
     .dps-summary-header {
@@ -1053,7 +1102,7 @@
     .dps-registration-form {
         padding: 16px;
         margin: 0 8px;
-        border-radius: 10px;
+        border-radius: var(--dps-shape-small);
     }
     
     .dps-registration-form h4 {
@@ -1096,7 +1145,7 @@
     .dps-registration-form .dps-message-error {
         padding: 14px;
         font-size: 14px;
-        border-radius: 10px;
+        border-radius: var(--dps-shape-small);
     }
     
     .dps-registration-form .dps-message-success::before,
@@ -1124,7 +1173,7 @@
     .dps-registration-form {
         padding: 12px;
         margin: 0 4px;
-        border-radius: 8px;
+        border-radius: var(--dps-shape-small);
     }
     
     .dps-registration-form h4 {
@@ -1140,7 +1189,7 @@
     
     .dps-progress {
         padding: 10px 12px;
-        border-radius: 8px;
+        border-radius: var(--dps-shape-small);
     }
     
     .dps-progress-top {
@@ -1177,12 +1226,12 @@
         font-size: 16px;
         padding: 12px 10px;
         min-height: 44px;
-        border-radius: 8px;
+        border-radius: var(--dps-shape-small);
     }
     
     .dps-pet-fieldset {
         padding: 12px;
-        border-radius: 10px;
+        border-radius: var(--dps-shape-small);
     }
     
     .dps-pet-fieldset legend {
@@ -1195,13 +1244,12 @@
     .dps-button-secondary {
         padding: 12px 16px;
         font-size: 14px;
-        border-radius: 8px;
     }
     
     #dps-add-pet {
         padding: 12px 16px;
         font-size: 14px;
-        border-radius: 10px;
+        border-radius: var(--dps-shape-small);
     }
     
     .dps-step-actions {
@@ -1211,7 +1259,7 @@
     }
     
     .dps-summary-box {
-        border-radius: 10px;
+        border-radius: var(--dps-shape-small);
     }
     
     .dps-summary-header {
@@ -1302,19 +1350,21 @@
    16. Estados de Botões
    ========================================================================== */
 
-/* Botão desabilitado */
+/* Botão desabilitado - M3 opacity: 0.38 content, 0.12 container */
 .dps-registration-form .button:disabled,
 .dps-registration-form .button[disabled],
 .dps-button-next:disabled,
 .dps-button-secondary:disabled {
-    opacity: 0.5;
+    opacity: 0.38;
     cursor: not-allowed;
     pointer-events: none;
     transform: none !important;
 }
 
 .dps-registration-form .button-primary:disabled {
-    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+    background: color-mix(in srgb, var(--dps-color-on-surface) 12%, transparent);
+    color: color-mix(in srgb, var(--dps-color-on-surface) 38%, transparent);
+    opacity: 1;
     box-shadow: none;
 }
 
@@ -1335,8 +1385,8 @@
     width: 20px;
     height: 20px;
     margin: -10px 0 0 -10px;
-    border: 3px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
+    border: 3px solid color-mix(in srgb, var(--dps-accent-on) 30%, transparent);
+    border-top-color: var(--dps-accent-on);
     border-radius: 50%;
     animation: dps-spin 0.8s linear infinite;
 }
@@ -1356,11 +1406,11 @@
 .dps-js-error {
     padding: 14px 16px;
     margin-bottom: 10px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--dps-error-soft) 0%, #fef2f2 100%);
+    border-radius: var(--dps-shape-small);
+    background: var(--dps-error-soft);
     border: 2px solid var(--dps-error);
     border-left: 5px solid var(--dps-error);
-    color: #991b1b;
+    color: var(--dps-color-on-error-container);
     font-size: 14px;
     font-weight: 500;
     animation: dps-shake 0.4s ease;
@@ -1386,13 +1436,13 @@
 
 /* Banner informativo para administrador */
 .dps-admin-preview-banner {
-    background: linear-gradient(135deg, var(--dps-accent-soft) 0%, #f0f9ff 100%);
+    background: var(--dps-accent-soft);
     border-left: 5px solid var(--dps-accent);
     padding: 14px 20px;
     margin-bottom: 24px;
-    border-radius: 0 10px 10px 0;
+    border-radius: 0 var(--dps-shape-small) var(--dps-shape-small) 0;
     font-size: 14px;
-    color: #1e40af;
+    color: var(--dps-accent-on-container);
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -1416,10 +1466,10 @@
 
 /* Opções administrativas */
 .dps-admin-options {
-    background: linear-gradient(135deg, var(--dps-warning-soft) 0%, #fefce8 100%);
+    background: var(--dps-warning-soft);
     border-left: 5px solid var(--dps-warning);
     padding: 20px 24px;
-    border-radius: 0 10px 10px 0;
+    border-radius: 0 var(--dps-shape-small) var(--dps-shape-small) 0;
     margin-bottom: 24px;
 }
 
@@ -1430,7 +1480,7 @@
 
 .dps-admin-options label {
     font-weight: 500 !important;
-    color: #713f12;
+    color: var(--dps-color-on-warning-container);
 }
 
 /* Legenda de campos obrigatórios */
@@ -1440,14 +1490,14 @@
     margin: 0 0 20px 0;
     padding: 10px 14px;
     background: var(--dps-background);
-    border-radius: 8px;
+    border-radius: var(--dps-shape-small);
     display: inline-flex;
     align-items: center;
     gap: 6px;
 }
 
 /* ==========================================================================
-   19. Step Transitions - Smooth Animation
+   19. Step Transitions - Expressive Animation
    ========================================================================== */
 
 .dps-step {
@@ -1473,10 +1523,10 @@
 .dps-step-description {
     margin: 0 0 24px;
     padding: 18px 20px;
-    background: linear-gradient(135deg, var(--dps-accent-soft) 0%, #f0f9ff 100%);
-    border: 2px solid #bae6fd;
-    border-radius: 12px;
-    color: #0c4a6e;
+    background: var(--dps-accent-soft);
+    border: 2px solid var(--dps-border);
+    border-radius: var(--dps-shape-medium);
+    color: var(--dps-accent-on-container);
     font-size: 15px;
     line-height: 1.6;
     display: flex;
@@ -1499,20 +1549,22 @@
 
 .dps-product-prefs-pet {
     border: 2px solid var(--dps-border);
-    border-radius: 16px;
+    border-radius: var(--dps-shape-card);
     padding: 24px;
-    background: linear-gradient(180deg, var(--dps-background) 0%, var(--dps-surface) 100%);
-    transition: border-color 0.2s ease;
+    background: var(--dps-background);
+    transition: border-color var(--dps-motion-hover);
+    box-shadow: var(--dps-elevation-card);
 }
 
 .dps-product-prefs-pet:hover {
-    border-color: #cbd5e1;
+    border-color: var(--dps-color-outline);
 }
 
 .dps-product-prefs-pet__title {
     margin: 0 0 20px;
     font-size: 17px;
     font-weight: 700;
+    font-family: var(--dps-font-display);
     color: var(--dps-text-primary);
     padding-bottom: 14px;
     border-bottom: 2px solid var(--dps-border);
@@ -1543,16 +1595,16 @@
     padding: 12px 14px;
     font-size: 15px;
     border: 2px solid var(--dps-border);
-    border-radius: 10px;
+    border-radius: var(--dps-shape-input);
     background: var(--dps-surface);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
 }
 
 .dps-product-pref-field select:focus,
 .dps-product-pref-field textarea:focus {
     border-color: var(--dps-accent);
     outline: none;
-    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--dps-accent) 10%, transparent);
 }
 
 .dps-product-pref-field--full {
@@ -1565,8 +1617,8 @@
     color: var(--dps-muted);
     font-size: 15px;
     background: var(--dps-background);
-    border: 2px dashed #cbd5e1;
-    border-radius: 12px;
+    border: 2px dashed var(--dps-color-outline);
+    border-radius: var(--dps-shape-medium);
 }
 
 .dps-empty-message::before {
@@ -1608,7 +1660,7 @@
 }
 
 /* ==========================================================================
-   22. Visual Enhancements - Subtle Animations
+   22. Visual Enhancements - M3 Expressive Animations
    ========================================================================== */
 
 /* Feedback visual ao interagir com campos */
@@ -1621,7 +1673,7 @@
 .dps-registration-form input,
 .dps-registration-form select,
 .dps-registration-form textarea {
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover), background var(--dps-motion-hover);
 }
 
 /* Step indicator visual - Número do passo */
@@ -1632,12 +1684,46 @@
     width: 32px;
     height: 32px;
     background: var(--dps-accent);
-    color: #ffffff;
+    color: var(--dps-accent-on);
     border-radius: 50%;
     font-weight: 700;
     font-size: 14px;
     margin-right: 12px;
     flex-shrink: 0;
+}
+
+/* Card entry animation - Expressive spring-based */
+@keyframes dps-enter-from-below {
+    0% {
+        opacity: 0;
+        transform: translateY(24px) scale(0.97);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(-4px) scale(1.005);
+    }
+    80% {
+        transform: translateY(2px) scale(0.998);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Success message pulse - Expressive */
+@keyframes dps-success-pulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 /* ==========================================================================
@@ -1676,14 +1762,14 @@
     .dps-pet-fieldset,
     .dps-summary-box {
         page-break-inside: avoid;
-        border: 1px solid #999;
+        border: 1px solid var(--dps-color-outline);
         background: none;
     }
     
     .dps-registration-form input,
     .dps-registration-form select,
     .dps-registration-form textarea {
-        border: 1px solid #ccc;
+        border: 1px solid var(--dps-color-outline-variant);
         background: none;
     }
 }
@@ -1728,6 +1814,14 @@
     }
     
     .dps-js-error {
+        animation: none !important;
+    }
+    
+    .dps-pet-fieldset {
+        animation: none !important;
+    }
+    
+    .dps-registration-form .dps-message-success {
         animation: none !important;
     }
 }
