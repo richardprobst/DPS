@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Push Notifications Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Notificações push e relatórios por email para administradores e equipe. Receba alertas em tempo real e relatórios diários/semanais automáticos.
- * Version:           1.3.0
+ * Version:           1.4.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-push-addon
@@ -218,12 +218,24 @@ class DPS_Push_Addon {
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.3.0';
+        $version   = '1.4.0';
+
+        // Design tokens M3 Expressive (deve carregar antes de qualquer CSS do addon).
+        $css_deps = [];
+        if ( defined( 'DPS_BASE_URL' ) ) {
+            wp_register_style(
+                'dps-design-tokens',
+                DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
+                [],
+                defined( 'DPS_BASE_VERSION' ) ? DPS_BASE_VERSION : '2.0.0'
+            );
+            $css_deps[] = 'dps-design-tokens';
+        }
 
         wp_enqueue_style(
             'dps-push-addon',
             $addon_url . 'assets/css/push-addon.css',
-            [],
+            $css_deps,
             $version
         );
 
@@ -982,7 +994,7 @@ class DPS_Push_Addon {
                                 </label>
                             </fieldset>
 
-                            <p class="description" style="margin-top: 16px;">
+                            <p class="description dps-push-note">
                                 <?php echo esc_html__( 'Nota: Requer HTTPS e navegador compatível (Chrome, Firefox, Edge, Safari 16+). Ative em cada dispositivo que deseja receber notificações.', 'dps-push-addon' ); ?>
                             </p>
                         </div>
@@ -1008,6 +1020,8 @@ class DPS_Push_Addon {
                                     <input type="time" id="dps_push_agenda_time" name="dps_push_agenda_time" value="<?php echo esc_attr( $agenda_time ); ?>">
                                     <?php if ( $agenda_enabled && $next_agenda ) : ?>
                                         <span class="dps-schedule-badge dps-schedule-active">✓ <?php echo esc_html__( 'Próximo:', 'dps-push-addon' ); ?> <?php echo esc_html( date_i18n( 'd/m H:i', $next_agenda ) ); ?></span>
+                                    <?php elseif ( ! $agenda_enabled ) : ?>
+                                        <span class="dps-schedule-badge dps-schedule-inactive">⏸ <?php echo esc_html__( 'Desativado', 'dps-push-addon' ); ?></span>
                                     <?php endif; ?>
                                 </div>
 
@@ -1045,6 +1059,8 @@ class DPS_Push_Addon {
                                     <input type="time" id="dps_push_report_time" name="dps_push_report_time" value="<?php echo esc_attr( $report_time ); ?>">
                                     <?php if ( $report_enabled && $next_report ) : ?>
                                         <span class="dps-schedule-badge dps-schedule-active">✓ <?php echo esc_html__( 'Próximo:', 'dps-push-addon' ); ?> <?php echo esc_html( date_i18n( 'd/m H:i', $next_report ) ); ?></span>
+                                    <?php elseif ( ! $report_enabled ) : ?>
+                                        <span class="dps-schedule-badge dps-schedule-inactive">⏸ <?php echo esc_html__( 'Desativado', 'dps-push-addon' ); ?></span>
                                     <?php endif; ?>
                                 </div>
 
@@ -1091,12 +1107,14 @@ class DPS_Push_Addon {
                                     <input type="time" id="dps_push_weekly_time" name="dps_push_weekly_time" value="<?php echo esc_attr( $weekly_time ); ?>">
                                     <?php if ( $weekly_enabled && $next_weekly ) : ?>
                                         <span class="dps-schedule-badge dps-schedule-active">✓ <?php echo esc_html__( 'Próximo:', 'dps-push-addon' ); ?> <?php echo esc_html( date_i18n( 'd/m H:i', $next_weekly ) ); ?></span>
+                                    <?php elseif ( ! $weekly_enabled ) : ?>
+                                        <span class="dps-schedule-badge dps-schedule-inactive">⏸ <?php echo esc_html__( 'Desativado', 'dps-push-addon' ); ?></span>
                                     <?php endif; ?>
                                 </div>
 
                                 <div class="dps-push-field-row">
                                     <label for="dps_push_inactive_days"><?php echo esc_html__( 'Considerar inativo após:', 'dps-push-addon' ); ?></label>
-                                    <input type="number" id="dps_push_inactive_days" name="dps_push_inactive_days" value="<?php echo esc_attr( $inactive_days ); ?>" min="7" max="365" style="width: 80px;">
+                                    <input type="number" id="dps_push_inactive_days" name="dps_push_inactive_days" value="<?php echo esc_attr( $inactive_days ); ?>" min="7" max="365" class="dps-push-days-input">
                                     <span><?php echo esc_html__( 'dias sem atendimento', 'dps-push-addon' ); ?></span>
                                 </div>
 
@@ -1148,11 +1166,11 @@ class DPS_Push_Addon {
 
                 </div><!-- .dps-push-stacked -->
 
-                <p class="submit" style="margin-top: 24px;">
+                <p class="submit dps-push-submit-area">
                     <button type="submit" id="dps-push-save-btn" class="button button-primary button-hero">
                         💾 <?php echo esc_html__( 'Salvar Todas as Configurações', 'dps-push-addon' ); ?>
                     </button>
-                    <span id="dps-push-save-spinner" class="spinner" style="float: none; vertical-align: middle;"></span>
+                    <span id="dps-push-save-spinner" class="spinner dps-push-spinner"></span>
                 </p>
             </form>
 

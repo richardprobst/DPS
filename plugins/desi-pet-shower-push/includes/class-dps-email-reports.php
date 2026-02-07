@@ -420,44 +420,53 @@ class DPS_Email_Reports {
      * @return string HTML.
      */
     private function build_agenda_html( $appointments, $date ) {
-        $html = '<html><body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">';
-        $html .= '<h1 style="color: #374151;">📅 Agenda do Dia</h1>';
-        $html .= '<p style="color: #6b7280;">' . date_i18n( 'l, d \d\e F \d\e Y', strtotime( $date ) ) . '</p>';
+        $count = count( $appointments );
+        $html  = $this->get_email_header( '📅', __( 'Agenda do Dia', 'dps-push-addon' ), date_i18n( 'l, d \d\e F \d\e Y', strtotime( $date ) ) );
+
+        // Card de resumo
+        $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">';
+        $html .= '<tr><td style="background:#d4e4ff;border-radius:12px;padding:20px;text-align:center;">';
+        $html .= '<div style="font-size:32px;font-weight:700;color:#0b6bcb;">' . $count . '</div>';
+        $html .= '<div style="font-size:13px;color:#001c3a;margin-top:4px;">' . sprintf( _n( 'agendamento', 'agendamentos', $count, 'dps-push-addon' ), $count ) . '</div>';
+        $html .= '</td></tr></table>';
 
         if ( empty( $appointments ) ) {
-            $html .= '<p style="padding: 20px; background: #f3f4f6; border-radius: 8px;">Nenhum agendamento para hoje.</p>';
+            $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">';
+            $html .= '<tr><td style="padding:24px;background:#f2f3fa;border-radius:12px;text-align:center;color:#43474e;font-size:14px;">';
+            $html .= esc_html__( 'Nenhum agendamento para hoje. Aproveite para organizar a agenda!', 'dps-push-addon' );
+            $html .= '</td></tr></table>';
         } else {
-            $html .= '<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">';
-            $html .= '<tr style="background: #374151; color: white;">';
-            $html .= '<th style="padding: 10px; text-align: left;">Horário</th>';
-            $html .= '<th style="padding: 10px; text-align: left;">Pet</th>';
-            $html .= '<th style="padding: 10px; text-align: left;">Cliente</th>';
-            $html .= '<th style="padding: 10px; text-align: left;">Status</th>';
+            $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:12px;overflow:hidden;border:1px solid #c3c6cf;">';
+            $html .= '<tr style="background:#0b6bcb;">';
+            $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Horário', 'dps-push-addon' ) . '</th>';
+            $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Pet', 'dps-push-addon' ) . '</th>';
+            $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Cliente', 'dps-push-addon' ) . '</th>';
+            $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Status', 'dps-push-addon' ) . '</th>';
             $html .= '</tr>';
 
-            foreach ( $appointments as $appt ) {
-                $time = get_post_meta( $appt->ID, 'appointment_time', true );
-                $pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+            foreach ( $appointments as $i => $appt ) {
+                $time      = get_post_meta( $appt->ID, 'appointment_time', true );
+                $pet_id    = get_post_meta( $appt->ID, 'appointment_pet_id', true );
                 $client_id = get_post_meta( $appt->ID, 'appointment_client_id', true );
-                $status = get_post_meta( $appt->ID, 'appointment_status', true );
+                $status    = get_post_meta( $appt->ID, 'appointment_status', true );
 
-                $pet = get_post( $pet_id );
+                $pet    = get_post( $pet_id );
                 $client = get_post( $client_id );
 
-                $html .= '<tr style="border-bottom: 1px solid #e5e7eb;">';
-                $html .= '<td style="padding: 10px;">' . esc_html( $time ) . '</td>';
-                $html .= '<td style="padding: 10px;">' . esc_html( $pet ? $pet->post_title : '-' ) . '</td>';
-                $html .= '<td style="padding: 10px;">' . esc_html( $client ? $client->post_title : '-' ) . '</td>';
-                $html .= '<td style="padding: 10px;">' . esc_html( ucfirst( $status ?: 'pendente' ) ) . '</td>';
+                $bg = ( $i % 2 === 0 ) ? '#ffffff' : '#f2f3fa';
+
+                $html .= '<tr style="background:' . $bg . ';">';
+                $html .= '<td style="padding:12px 16px;font-size:14px;color:#191c20;font-weight:600;">' . esc_html( $time ) . '</td>';
+                $html .= '<td style="padding:12px 16px;font-size:14px;color:#191c20;">' . esc_html( $pet ? $pet->post_title : '-' ) . '</td>';
+                $html .= '<td style="padding:12px 16px;font-size:14px;color:#43474e;">' . esc_html( $client ? $client->post_title : '-' ) . '</td>';
+                $html .= '<td style="padding:12px 16px;">' . $this->get_status_badge( $status ?: 'pendente' ) . '</td>';
                 $html .= '</tr>';
             }
 
             $html .= '</table>';
         }
 
-        $html .= '<p style="margin-top: 30px; color: #6b7280; font-size: 12px;">Este email foi enviado automaticamente pelo desi.pet by PRObst.</p>';
-        $html .= '</body></html>';
-
+        $html .= $this->get_email_footer();
         return $html;
     }
 
@@ -507,49 +516,76 @@ class DPS_Email_Reports {
             }
         }
 
-        $html = '<html><body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">';
-        $html .= '<h1 style="color: #374151;">💰 Relatório Financeiro</h1>';
-        $html .= '<p style="color: #6b7280;">' . date_i18n( 'l, d \d\e F \d\e Y', strtotime( $date ) ) . '</p>';
+        $saldo = $total_receitas - $total_despesas;
 
-        // Cards de resumo
-        $html .= '<div style="display: flex; gap: 15px; margin: 20px 0;">';
-        $html .= '<div style="flex: 1; padding: 15px; background: #d1fae5; border-radius: 8px; text-align: center;">';
-        $html .= '<div style="font-size: 24px; color: #10b981; font-weight: bold;">' . DPS_Money_Helper::format_currency_from_decimal( $total_receitas ) . '</div>';
-        $html .= '<div style="color: #6b7280; font-size: 12px;">Receitas</div>';
-        $html .= '</div>';
-        $html .= '<div style="flex: 1; padding: 15px; background: #fee2e2; border-radius: 8px; text-align: center;">';
-        $html .= '<div style="font-size: 24px; color: #ef4444; font-weight: bold;">' . DPS_Money_Helper::format_currency_from_decimal( $total_despesas ) . '</div>';
-        $html .= '<div style="color: #6b7280; font-size: 12px;">Despesas</div>';
-        $html .= '</div>';
-        $html .= '</div>';
+        $html = $this->get_email_header( '💰', __( 'Relatório Financeiro', 'dps-push-addon' ), date_i18n( 'l, d \d\e F \d\e Y', strtotime( $date ) ) );
+
+        // Cards de resumo (3 colunas: receitas, despesas, saldo)
+        $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">';
+        $html .= '<tr>';
+
+        // Receitas
+        $html .= '<td width="33%" style="padding:0 6px 0 0;">';
+        $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">';
+        $html .= '<tr><td style="background:#a8f5b5;border-radius:12px;padding:16px;text-align:center;">';
+        $html .= '<div style="font-size:11px;color:#00210a;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">📈 ' . esc_html__( 'Receitas', 'dps-push-addon' ) . '</div>';
+        $html .= '<div style="font-size:20px;font-weight:700;color:#1a7a3a;">' . DPS_Money_Helper::format_currency_from_decimal( $total_receitas ) . '</div>';
+        $html .= '</td></tr></table></td>';
+
+        // Despesas
+        $html .= '<td width="33%" style="padding:0 3px;">';
+        $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">';
+        $html .= '<tr><td style="background:#ffdad6;border-radius:12px;padding:16px;text-align:center;">';
+        $html .= '<div style="font-size:11px;color:#410002;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">📉 ' . esc_html__( 'Despesas', 'dps-push-addon' ) . '</div>';
+        $html .= '<div style="font-size:20px;font-weight:700;color:#ba1a1a;">' . DPS_Money_Helper::format_currency_from_decimal( $total_despesas ) . '</div>';
+        $html .= '</td></tr></table></td>';
+
+        // Saldo
+        $saldo_bg    = $saldo >= 0 ? '#d4e4ff' : '#ffdea3';
+        $saldo_color = $saldo >= 0 ? '#0b6bcb' : '#8b6914';
+        $saldo_label_color = $saldo >= 0 ? '#001c3a' : '#2c1f00';
+        $html .= '<td width="33%" style="padding:0 0 0 6px;">';
+        $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">';
+        $html .= '<tr><td style="background:' . $saldo_bg . ';border-radius:12px;padding:16px;text-align:center;">';
+        $html .= '<div style="font-size:11px;color:' . $saldo_label_color . ';font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">💵 ' . esc_html__( 'Saldo', 'dps-push-addon' ) . '</div>';
+        $html .= '<div style="font-size:20px;font-weight:700;color:' . $saldo_color . ';">' . DPS_Money_Helper::format_currency_from_decimal( $saldo ) . '</div>';
+        $html .= '</td></tr></table></td>';
+
+        $html .= '</tr></table>';
 
         // Resumo de atendimentos
-        $html .= '<h2 style="color: #374151; margin-top: 30px;">📋 Atendimentos</h2>';
-        $html .= '<p>' . count( $appointments ) . ' atendimento(s) realizado(s)</p>';
+        $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">';
+        $html .= '<tr><td style="background:#f2f3fa;border-radius:12px;padding:16px;">';
+        $html .= '<span style="font-size:14px;color:#191c20;">📋 <strong>' . count( $appointments ) . '</strong> ' . esc_html__( 'atendimento(s) realizado(s) no dia', 'dps-push-addon' ) . '</span>';
+        $html .= '</td></tr></table>';
 
         // Lista de transações
         if ( ! empty( $transactions ) ) {
-            $html .= '<h2 style="color: #374151; margin-top: 30px;">📊 Transações</h2>';
-            $html .= '<table style="width: 100%; border-collapse: collapse;">';
-            $html .= '<tr style="background: #374151; color: white;">';
-            $html .= '<th style="padding: 8px; text-align: left;">Descrição</th>';
-            $html .= '<th style="padding: 8px; text-align: right;">Valor</th>';
+            $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">';
+            $html .= '<tr><td style="font-size:15px;font-weight:600;color:#191c20;padding-bottom:12px;">📊 ' . esc_html__( 'Transações', 'dps-push-addon' ) . '</td></tr></table>';
+
+            $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:12px;overflow:hidden;border:1px solid #c3c6cf;">';
+            $html .= '<tr style="background:#0b6bcb;">';
+            $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Descrição', 'dps-push-addon' ) . '</th>';
+            $html .= '<th style="padding:12px 16px;text-align:right;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Valor', 'dps-push-addon' ) . '</th>';
             $html .= '</tr>';
 
-            foreach ( $transactions as $trans ) {
-                $color = $trans->tipo === 'receita' ? '#10b981' : '#ef4444';
-                $html .= '<tr style="border-bottom: 1px solid #e5e7eb;">';
-                $html .= '<td style="padding: 8px;">' . esc_html( $trans->descricao ) . '</td>';
-                $html .= '<td style="padding: 8px; text-align: right; color: ' . $color . ';">' . DPS_Money_Helper::format_currency_from_decimal( (float) $trans->valor ) . '</td>';
+            foreach ( $transactions as $i => $trans ) {
+                $is_receita = $trans->tipo === 'receita';
+                $color = $is_receita ? '#1a7a3a' : '#ba1a1a';
+                $prefix = $is_receita ? '+' : '-';
+                $bg = ( $i % 2 === 0 ) ? '#ffffff' : '#f2f3fa';
+
+                $html .= '<tr style="background:' . $bg . ';">';
+                $html .= '<td style="padding:12px 16px;font-size:14px;color:#191c20;">' . esc_html( $trans->descricao ) . '</td>';
+                $html .= '<td style="padding:12px 16px;text-align:right;font-size:14px;font-weight:600;color:' . $color . ';">' . $prefix . ' ' . DPS_Money_Helper::format_currency_from_decimal( (float) $trans->valor ) . '</td>';
                 $html .= '</tr>';
             }
 
             $html .= '</table>';
         }
 
-        $html .= '<p style="margin-top: 30px; color: #6b7280; font-size: 12px;">Este email foi enviado automaticamente pelo desi.pet by PRObst.</p>';
-        $html .= '</body></html>';
-
+        $html .= $this->get_email_footer();
         return $html;
     }
 
@@ -591,27 +627,46 @@ class DPS_Email_Reports {
      * @return string HTML.
      */
     private function build_inactive_pets_html( $inactive_pets, $days ) {
-        $html = '<html><body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">';
-        $html .= '<h1 style="color: #374151;">🐾 Pets Inativos</h1>';
-        $html .= '<p style="color: #6b7280;">Pets sem atendimento há mais de ' . $days . ' dias</p>';
+        $count = count( $inactive_pets );
+        $html  = $this->get_email_header(
+            '🐾',
+            __( 'Pets Inativos', 'dps-push-addon' ),
+            sprintf( __( 'Pets sem atendimento há mais de %d dias', 'dps-push-addon' ), $days )
+        );
 
-        $html .= '<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">';
-        $html .= '<tr style="background: #374151; color: white;">';
-        $html .= '<th style="padding: 10px; text-align: left;">Pet</th>';
-        $html .= '<th style="padding: 10px; text-align: left;">Último Atendimento</th>';
+        // Card de alerta
+        $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">';
+        $html .= '<tr><td style="background:#ffdea3;border-radius:12px;padding:20px;text-align:center;">';
+        $html .= '<div style="font-size:32px;font-weight:700;color:#8b6914;">' . $count . '</div>';
+        $html .= '<div style="font-size:13px;color:#2c1f00;margin-top:4px;">' . sprintf( _n( 'pet inativo', 'pets inativos', $count, 'dps-push-addon' ), $count ) . '</div>';
+        $html .= '</td></tr></table>';
+
+        $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:12px;overflow:hidden;border:1px solid #c3c6cf;">';
+        $html .= '<tr style="background:#0b6bcb;">';
+        $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Pet', 'dps-push-addon' ) . '</th>';
+        $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Último Atendimento', 'dps-push-addon' ) . '</th>';
         $html .= '</tr>';
 
-        foreach ( $inactive_pets as $item ) {
-            $html .= '<tr style="border-bottom: 1px solid #e5e7eb;">';
-            $html .= '<td style="padding: 10px;">' . esc_html( $item['pet']->post_title ) . '</td>';
-            $html .= '<td style="padding: 10px;">' . ( $item['last_date'] ? date_i18n( 'd/m/Y', strtotime( $item['last_date'] ) ) : 'Nunca' ) . '</td>';
+        foreach ( $inactive_pets as $i => $item ) {
+            $bg = ( $i % 2 === 0 ) ? '#ffffff' : '#f2f3fa';
+            $last_date = $item['last_date'] ? date_i18n( 'd/m/Y', strtotime( $item['last_date'] ) ) : esc_html__( 'Nunca', 'dps-push-addon' );
+
+            $html .= '<tr style="background:' . $bg . ';">';
+            $html .= '<td style="padding:12px 16px;font-size:14px;color:#191c20;font-weight:500;">' . esc_html( $item['pet']->post_title ) . '</td>';
+            $html .= '<td style="padding:12px 16px;font-size:14px;color:#43474e;">' . $last_date . '</td>';
             $html .= '</tr>';
         }
 
         $html .= '</table>';
-        $html .= '<p style="margin-top: 30px; color: #6b7280; font-size: 12px;">Este email foi enviado automaticamente pelo desi.pet by PRObst.</p>';
-        $html .= '</body></html>';
 
+        // Dica de reengajamento
+        $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px;">';
+        $html .= '<tr><td style="background:#f2f3fa;border-radius:12px;padding:16px;font-size:13px;color:#43474e;">';
+        $html .= '💡 <strong>' . esc_html__( 'Dica:', 'dps-push-addon' ) . '</strong> ';
+        $html .= esc_html__( 'Considere enviar uma mensagem ou oferta especial para os tutores desses pets!', 'dps-push-addon' );
+        $html .= '</td></tr></table>';
+
+        $html .= $this->get_email_footer();
         return $html;
     }
 
@@ -637,6 +692,103 @@ class DPS_Email_Reports {
         }
 
         return $text;
+    }
+
+    /**
+     * Gera o cabeçalho padrão M3 do email.
+     *
+     * @since 1.4.0
+     * @param string $icon     Emoji do ícone.
+     * @param string $title    Título do relatório.
+     * @param string $subtitle Subtítulo (data/contexto).
+     * @return string HTML.
+     */
+    private function get_email_header( $icon, $title, $subtitle ) {
+        $site_name = get_bloginfo( 'name' );
+
+        $html  = '<!DOCTYPE html>';
+        $html .= '<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">';
+        $html .= '<title>' . esc_html( $title ) . '</title>';
+        $html .= '</head>';
+        $html .= '<body style="margin:0;padding:0;background:#f8f9ff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,\'Helvetica Neue\',Arial,sans-serif;">';
+
+        // Wrapper de centralização
+        $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9ff;">';
+        $html .= '<tr><td align="center" style="padding:32px 16px;">';
+
+        // Container principal (card)
+        $html .= '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #c3c6cf;">';
+
+        // Header com cor primária
+        $html .= '<tr><td style="background:#0b6bcb;padding:28px 32px;">';
+        $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">';
+        $html .= '<tr><td>';
+        $html .= '<div style="font-size:28px;margin-bottom:4px;">' . $icon . '</div>';
+        $html .= '<div style="font-size:22px;font-weight:700;color:#ffffff;margin-bottom:4px;">' . esc_html( $title ) . '</div>';
+        $html .= '<div style="font-size:14px;color:#d4e4ff;">' . esc_html( $subtitle ) . '</div>';
+        $html .= '</td>';
+        $html .= '<td style="text-align:right;vertical-align:top;">';
+        $html .= '<div style="font-size:12px;color:#d4e4ff;font-weight:500;">' . esc_html( $site_name ) . '</div>';
+        $html .= '</td></tr></table>';
+        $html .= '</td></tr>';
+
+        // Início da área de conteúdo
+        $html .= '<tr><td style="padding:28px 32px;">';
+
+        return $html;
+    }
+
+    /**
+     * Gera o rodapé padrão M3 do email.
+     *
+     * @since 1.4.0
+     * @return string HTML.
+     */
+    private function get_email_footer() {
+        $html  = '</td></tr>'; // Fecha a área de conteúdo
+
+        // Rodapé
+        $html .= '<tr><td style="background:#f2f3fa;padding:20px 32px;border-top:1px solid #c3c6cf;">';
+        $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">';
+        $html .= '<tr><td style="font-size:12px;color:#43474e;line-height:1.6;">';
+        $html .= esc_html__( 'Este email foi enviado automaticamente pelo', 'dps-push-addon' );
+        $html .= ' <strong style="color:#0b6bcb;">desi.pet by PRObst</strong>';
+        $html .= '</td>';
+        $html .= '<td style="text-align:right;font-size:11px;color:#73777f;">';
+        $html .= date_i18n( 'H:i' ) . ' &bull; ' . date_i18n( 'd/m/Y' );
+        $html .= '</td></tr></table>';
+        $html .= '</td></tr>';
+
+        $html .= '</table>'; // Fecha container principal
+
+        $html .= '</td></tr></table>'; // Fecha wrapper de centralização
+        $html .= '</body></html>';
+
+        return $html;
+    }
+
+    /**
+     * Gera badge de status inline para emails.
+     *
+     * @since 1.4.0
+     * @param string $status Status do agendamento.
+     * @return string HTML do badge.
+     */
+    private function get_status_badge( $status ) {
+        $colors = [
+            'pendente'   => [ 'bg' => '#ffdea3', 'text' => '#2c1f00' ],
+            'confirmado' => [ 'bg' => '#d4e4ff', 'text' => '#001c3a' ],
+            'finalizado' => [ 'bg' => '#a8f5b5', 'text' => '#00210a' ],
+            'pago'       => [ 'bg' => '#a8f5b5', 'text' => '#00210a' ],
+            'cancelado'  => [ 'bg' => '#ffdad6', 'text' => '#410002' ],
+        ];
+
+        $key = strtolower( $status );
+        $c   = $colors[ $key ] ?? [ 'bg' => '#ecedf4', 'text' => '#43474e' ];
+
+        return '<span style="display:inline-block;padding:4px 12px;border-radius:9999px;font-size:12px;font-weight:600;background:' . $c['bg'] . ';color:' . $c['text'] . ';">'
+            . esc_html( ucfirst( $status ) )
+            . '</span>';
     }
 
     /**
