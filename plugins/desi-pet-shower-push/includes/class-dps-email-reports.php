@@ -555,7 +555,7 @@ class DPS_Email_Reports {
 
         // Resumo de atendimentos
         $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">';
-        $html .= '<tr><td style="background:#f2f3fa;border-radius:12px;padding:16px;display:flex;align-items:center;">';
+        $html .= '<tr><td style="background:#f2f3fa;border-radius:12px;padding:16px;">';
         $html .= '<span style="font-size:14px;color:#191c20;">📋 <strong>' . count( $appointments ) . '</strong> ' . esc_html__( 'atendimento(s) realizado(s) no dia', 'dps-push-addon' ) . '</span>';
         $html .= '</td></tr></table>';
 
@@ -710,7 +710,7 @@ class DPS_Email_Reports {
         $html .= '<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">';
         $html .= '<title>' . esc_html( $title ) . '</title>';
         $html .= '</head>';
-        $html .= '<body style="margin:0;padding:0;background:#f8f9ff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,\'Helvetica Neue\',Arial,sans-serif;-webkit-font-smoothing:antialiased;">';
+        $html .= '<body style="margin:0;padding:0;background:#f8f9ff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,\'Helvetica Neue\',Arial,sans-serif;">';
 
         // Wrapper de centralização
         $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9ff;">';
