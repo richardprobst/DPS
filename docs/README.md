@@ -141,6 +141,16 @@ Análises e otimizações de performance.
 - `EXEMPLOS_PERFORMANCE_ADDONS.md` - Exemplos de otimização em add-ons
 - `PERFORMANCE_REVIEW_ADDONS.md` - Revisão de performance dos add-ons
 
+### 📁 /docs/qa
+
+Quality assurance e validação funcional de add-ons.
+
+**Arquivos:**
+- `AI_ADDON_FUNCTIONAL_QA.md` - QA funcional do AI Add-on
+- `CLIENT_PORTAL_FUNCTIONAL_VALIDATION.md` - Validação funcional do Portal do Cliente
+- `FUNCTIONAL_VERIFICATION_REPORT.md` - Relatório de verificação funcional geral
+- `GROOMERS_FUNCTIONAL_QA.md` - QA funcional do Groomers Add-on
+
 ### 📁 /docs/refactoring
 
 Análises e planos de refatoração de código.

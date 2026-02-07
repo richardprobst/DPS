@@ -14,6 +14,7 @@ DPS/
 │   ├── desi-pet-shower-agenda/          # Add-on de agenda
 │   ├── desi-pet-shower-ai/              # Add-on de IA
 │   ├── desi-pet-shower-backup/          # Add-on de backup
+│   ├── desi-pet-shower-booking/         # Add-on de agendamentos dedicado
 │   ├── desi-pet-shower-client-portal/   # Add-on portal do cliente
 │   ├── desi-pet-shower-communications/  # Add-on de comunicações
 │   ├── desi-pet-shower-finance/         # Add-on financeiro
@@ -55,10 +56,11 @@ O plugin base fornece a infraestrutura fundamental:
 
 **[Ver documentação do plugin base →](plugins/desi-pet-shower-base/README.md)**
 
-### Add-ons Oficiais (`/add-ons`)
+### Add-ons Oficiais (`/plugins`)
 
 Plugins complementares que estendem o sistema com funcionalidades específicas:
 - **Agenda** - Visualização e gerenciamento de agendamentos
+- **Booking** - Página dedicada de agendamentos para administradores
 - **Finance** - Gestão financeira e controle de transações
 - **Client Portal** - Portal do cliente (front-end)
 - **Communications** - SMS, e-mail e WhatsApp
@@ -66,7 +68,7 @@ Plugins complementares que estendem o sistema com funcionalidades específicas:
 - **Payment** - Integrações de pagamento
 - **Subscription** - Gerenciamento de assinaturas
 - **Stats** - Estatísticas e relatórios
-- E mais 6 add-ons adicionais
+- E mais 7 add-ons adicionais
 
 **[Ver documentação dos add-ons →](plugins/README.md)**
 
@@ -145,18 +147,18 @@ A pasta `/docs` contém análises detalhadas de UX, layout, refatoração e impl
 
 ## 🛠️ Tecnologias
 
-- **WordPress**: 6.0+
-- **PHP**: 7.4+
+- **WordPress**: 6.9+
+- **PHP**: 8.4+
 - **MySQL**: 5.7+ / MariaDB 10.2+
 - **JavaScript**: Vanilla JS e jQuery (fornecido pelo WordPress)
 - **CSS**: CSS3 com abordagem minimalista
 
 ## 📋 Requisitos do Sistema
 
-- WordPress 6.0 ou superior
-- PHP 7.4 ou superior
+- WordPress 6.9 ou superior
+- PHP 8.4 ou superior
 - MySQL 5.7+ ou MariaDB 10.2+
-- Recomendado: PHP 8.0+ para melhor performance
+- Recomendado: PHP 8.4+ para melhor performance
 
 ## 🔒 Segurança
 

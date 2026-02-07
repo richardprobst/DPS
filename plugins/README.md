@@ -15,6 +15,7 @@ plugins/
 ├── desi-pet-shower-agenda/              # Gerenciamento de agenda e agendamentos
 ├── desi-pet-shower-ai/                  # Assistente de IA
 ├── desi-pet-shower-backup/              # Sistema de backup e restauração
+├── desi-pet-shower-booking/             # Página dedicada de agendamentos
 ├── desi-pet-shower-client-portal/       # Portal do cliente (front-end)
 ├── desi-pet-shower-communications/      # Comunicações (SMS, e-mail, WhatsApp)
 ├── desi-pet-shower-finance/             # Gestão financeira e transações
