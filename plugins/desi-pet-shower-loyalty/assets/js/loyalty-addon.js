@@ -513,6 +513,73 @@
         DPSLoyalty.renderTimeseries();
         DPSLoyalty.renderTierChart();
         DPSLoyalty.initTierBuilder();
+        DPSLoyalty.initCampaignToggles();
+    };
+
+    /**
+     * Inicializa toggles de campanha (admin + frontend).
+     *
+     * Salva alterações via REST API quando o toggle muda.
+     *
+     * @since 2.0.0
+     */
+    DPSLoyalty.initCampaignToggles = function() {
+        var $toggles = $('[data-campaign]');
+        if (!$toggles.length) {
+            return;
+        }
+
+        var data = window.dpsLoyaltyData || {};
+        var restUrl = data.restUrl || '';
+        var restNonce = data.restNonce || '';
+        var i18n = data.i18n || {};
+
+        $toggles.on('change', function() {
+            var $input = $(this);
+            var key = $input.data('campaign');
+            var enabled = $input.is(':checked');
+            var $label = $input.closest('.dps-campaign-toggle-switch').find('.dps-toggle-label');
+            var $feedback = $input.closest('.dps-loyalty-frontend-settings, .dps-loyalty-campaigns-fieldset').find('.dps-campaign-save-feedback');
+
+            // Atualiza label imediatamente.
+            $label.text(enabled ? (i18n.active || 'Ativo') : (i18n.inactive || 'Inativo'));
+
+            // Se estamos no admin form (não frontend), não faz REST call.
+            if (!restUrl || !$input.closest('.dps-loyalty-frontend-settings').length) {
+                return;
+            }
+
+            var payload = {};
+            payload[key] = enabled ? 1 : 0;
+
+            $.ajax({
+                url: restUrl + 'campaign-settings',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', restNonce);
+                },
+                success: function() {
+                    if ($feedback.length) {
+                        $feedback.find('.dps-campaign-feedback-text').text(i18n.saved || 'Salvo!');
+                        $feedback.show().css('opacity', 1);
+                        setTimeout(function() {
+                            $feedback.fadeOut(400);
+                        }, 2000);
+                    }
+                },
+                error: function() {
+                    if ($feedback.length) {
+                        $feedback.find('.dps-campaign-feedback-text').text(i18n.saveError || 'Erro ao salvar.');
+                        $feedback.show().css('opacity', 1);
+                        setTimeout(function() {
+                            $feedback.fadeOut(400);
+                        }, 3000);
+                    }
+                }
+            });
+        });
     };
 
     // Inicializar quando documento estiver pronto

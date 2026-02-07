@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Campanhas & Fidelidade
  * Plugin URI:        https://www.probst.pro
  * Description:       Programa de fidelidade e campanhas promocionais. Fidelize seus clientes com pontos e benefícios exclusivos.
- * Version:           1.5.0
+ * Version:           2.0.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-loyalty-addon
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes do plugin
-define( 'DPS_LOYALTY_VERSION', '1.5.0' );
+define( 'DPS_LOYALTY_VERSION', '2.0.0' );
 define( 'DPS_LOYALTY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_LOYALTY_URL', plugin_dir_url( __FILE__ ) );
 
@@ -92,6 +92,9 @@ class DPS_Loyalty_Addon {
         // Enfileira assets
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_frontend_assets' ] );
+
+        // Registra aba de fidelidade no frontend de configurações.
+        add_action( 'dps_settings_register_tabs', [ $this, 'register_frontend_settings_tab' ] );
     }
 
     /**
@@ -125,10 +128,20 @@ class DPS_Loyalty_Addon {
             true
         );
 
+        // Enfileira design tokens do plugin base (M3 Expressive).
+        if ( defined( 'DPS_BASE_URL' ) && defined( 'DPS_BASE_VERSION' ) ) {
+            wp_enqueue_style(
+                'dps-design-tokens',
+                DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
+                [],
+                DPS_BASE_VERSION
+            );
+        }
+
         wp_enqueue_style(
             'dps-loyalty-addon',
             DPS_LOYALTY_URL . 'assets/css/loyalty-addon.css',
-            [],
+            [ 'dps-design-tokens' ],
             DPS_LOYALTY_VERSION
         );
 
@@ -144,10 +157,16 @@ class DPS_Loyalty_Addon {
         wp_localize_script( 'dps-loyalty-addon', 'dpsLoyaltyData', [
             'ajaxUrl' => admin_url( 'admin-ajax.php' ),
             'nonce'   => wp_create_nonce( 'dps_loyalty_clients_nonce' ),
+            'restUrl' => rest_url( 'dps-loyalty/v1/' ),
+            'restNonce' => wp_create_nonce( 'wp_rest' ),
             'i18n'    => [
                 'searchPlaceholder' => __( 'Digite para buscar cliente...', 'dps-loyalty-addon' ),
                 'noResults'         => __( 'Nenhum cliente encontrado.', 'dps-loyalty-addon' ),
                 'searching'         => __( 'Buscando...', 'dps-loyalty-addon' ),
+                'saved'             => __( 'Salvo!', 'dps-loyalty-addon' ),
+                'active'            => __( 'Ativo', 'dps-loyalty-addon' ),
+                'inactive'          => __( 'Inativo', 'dps-loyalty-addon' ),
+                'saveError'         => __( 'Erro ao salvar.', 'dps-loyalty-addon' ),
             ],
         ] );
     }
@@ -161,10 +180,20 @@ class DPS_Loyalty_Addon {
             return;
         }
 
+        // Enfileira design tokens do plugin base (M3 Expressive).
+        if ( defined( 'DPS_BASE_URL' ) && defined( 'DPS_BASE_VERSION' ) ) {
+            wp_enqueue_style(
+                'dps-design-tokens',
+                DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
+                [],
+                DPS_BASE_VERSION
+            );
+        }
+
         wp_enqueue_style(
             'dps-loyalty-addon',
             DPS_LOYALTY_URL . 'assets/css/loyalty-addon.css',
-            [],
+            [ 'dps-design-tokens' ],
             DPS_LOYALTY_VERSION
         );
 
@@ -482,18 +511,24 @@ class DPS_Loyalty_Addon {
                    class="nav-tab <?php echo $active_tab === 'dashboard' ? 'nav-tab-active' : ''; ?>">
                     <?php esc_html_e( 'Dashboard', 'dps-loyalty-addon' ); ?>
                 </a>
+                <?php if ( self::is_campaign_enabled( 'promotions' ) ) : ?>
                 <a href="<?php echo esc_url( add_query_arg( 'tab', 'reports', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>"
                    class="nav-tab <?php echo $active_tab === 'reports' ? 'nav-tab-active' : ''; ?>">
                     <?php esc_html_e( 'Relatórios', 'dps-loyalty-addon' ); ?>
                 </a>
+                <?php endif; ?>
+                <?php if ( self::is_campaign_enabled( 'points' ) ) : ?>
                 <a href="<?php echo esc_url( add_query_arg( 'tab', 'ranking', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>"
                    class="nav-tab <?php echo $active_tab === 'ranking' ? 'nav-tab-active' : ''; ?>">
                     <?php esc_html_e( 'Ranking', 'dps-loyalty-addon' ); ?>
                 </a>
+                <?php endif; ?>
+                <?php if ( self::is_campaign_enabled( 'referrals' ) ) : ?>
                 <a href="<?php echo esc_url( add_query_arg( 'tab', 'referrals', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>"
                    class="nav-tab <?php echo $active_tab === 'referrals' ? 'nav-tab-active' : ''; ?>">
                     <?php esc_html_e( 'Indicações', 'dps-loyalty-addon' ); ?>
                 </a>
+                <?php endif; ?>
                 <a href="<?php echo esc_url( add_query_arg( 'tab', 'settings', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>" 
                    class="nav-tab <?php echo $active_tab === 'settings' ? 'nav-tab-active' : ''; ?>">
                     <?php esc_html_e( 'Configurações', 'dps-loyalty-addon' ); ?>
@@ -508,13 +543,25 @@ class DPS_Loyalty_Addon {
                 <?php
                 switch ( $active_tab ) {
                     case 'referrals':
-                        $this->render_referrals_tab();
+                        if ( self::is_campaign_enabled( 'referrals' ) ) {
+                            $this->render_referrals_tab();
+                        } else {
+                            $this->render_dashboard_tab( $metrics );
+                        }
                         break;
                     case 'reports':
-                        $this->render_reports_tab();
+                        if ( self::is_campaign_enabled( 'promotions' ) ) {
+                            $this->render_reports_tab();
+                        } else {
+                            $this->render_dashboard_tab( $metrics );
+                        }
                         break;
                     case 'ranking':
-                        $this->render_ranking_tab();
+                        if ( self::is_campaign_enabled( 'points' ) ) {
+                            $this->render_ranking_tab();
+                        } else {
+                            $this->render_dashboard_tab( $metrics );
+                        }
                         break;
                     case 'settings':
                         $this->render_settings_tab( $brl_per_pt );
@@ -966,8 +1013,31 @@ class DPS_Loyalty_Addon {
      *
      * @param float $brl_per_pt Valor atual de BRL por ponto.
      */
+    /**
+     * Verifica se uma campanha específica está ativa nas configurações.
+     *
+     * @since 2.0.0
+     *
+     * @param string $campaign_key Chave da campanha (referrals, points, promotions).
+     * @return bool True se ativa.
+     */
+    public static function is_campaign_enabled( $campaign_key ) {
+        $settings = get_option( self::OPTION_KEY, [] );
+        $key = 'enable_campaign_' . $campaign_key;
+
+        // Padrão: todas ativas se não configurado ainda.
+        if ( ! isset( $settings[ $key ] ) ) {
+            return true;
+        }
+
+        return ! empty( $settings[ $key ] );
+    }
+
     private function render_settings_tab( $brl_per_pt ) {
         $settings = get_option( self::OPTION_KEY, [] );
+        $enable_referrals  = self::is_campaign_enabled( 'referrals' );
+        $enable_points     = self::is_campaign_enabled( 'points' );
+        $enable_promotions = self::is_campaign_enabled( 'promotions' );
         $referral_page_id = isset( $settings['referral_page_id'] ) ? (int) $settings['referral_page_id'] : 0;
         $portal_enabled   = ! empty( $settings['enable_portal_redemption'] );
         $portal_min_points = isset( $settings['portal_min_points_to_redeem'] ) ? absint( $settings['portal_min_points_to_redeem'] ) : 0;
@@ -994,6 +1064,60 @@ class DPS_Loyalty_Addon {
             settings_fields( 'dps_loyalty_settings_group' );
             do_settings_sections( 'dps_loyalty_settings_page' );
             ?>
+
+            <fieldset class="dps-loyalty-campaigns-fieldset">
+                <legend><?php esc_html_e( 'Campanhas Ativas', 'dps-loyalty-addon' ); ?></legend>
+                <p class="description"><?php esc_html_e( 'Ative ou desative cada tipo de campanha individualmente. As campanhas desativadas não serão processadas nem exibidas no sistema.', 'dps-loyalty-addon' ); ?></p>
+
+                <div class="dps-campaign-toggles">
+                    <div class="dps-campaign-toggle-card dps-campaign-toggle-card--featured">
+                        <div class="dps-campaign-toggle-header">
+                            <span class="dps-campaign-toggle-icon">🤝</span>
+                            <div class="dps-campaign-toggle-info">
+                                <strong><?php esc_html_e( 'Indique e Ganhe', 'dps-loyalty-addon' ); ?></strong>
+                                <span class="dps-campaign-toggle-badge"><?php esc_html_e( 'Recomendado', 'dps-loyalty-addon' ); ?></span>
+                            </div>
+                        </div>
+                        <p class="dps-campaign-toggle-desc"><?php esc_html_e( 'Seus clientes indicam amigos e ambos ganham recompensas. A campanha mais eficaz para aquisição orgânica de novos clientes.', 'dps-loyalty-addon' ); ?></p>
+                        <label class="dps-campaign-toggle-switch">
+                            <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_campaign_referrals]" value="1" <?php checked( $enable_referrals ); ?> />
+                            <span class="dps-toggle-slider"></span>
+                            <span class="dps-toggle-label"><?php echo esc_html( $enable_referrals ? __( 'Ativo', 'dps-loyalty-addon' ) : __( 'Inativo', 'dps-loyalty-addon' ) ); ?></span>
+                        </label>
+                    </div>
+
+                    <div class="dps-campaign-toggle-card">
+                        <div class="dps-campaign-toggle-header">
+                            <span class="dps-campaign-toggle-icon">⭐</span>
+                            <div class="dps-campaign-toggle-info">
+                                <strong><?php esc_html_e( 'Programa de Pontos', 'dps-loyalty-addon' ); ?></strong>
+                            </div>
+                        </div>
+                        <p class="dps-campaign-toggle-desc"><?php esc_html_e( 'Clientes acumulam pontos a cada atendimento pago. Inclui níveis de fidelidade, resgate e expiração de pontos.', 'dps-loyalty-addon' ); ?></p>
+                        <label class="dps-campaign-toggle-switch">
+                            <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_campaign_points]" value="1" <?php checked( $enable_points ); ?> />
+                            <span class="dps-toggle-slider"></span>
+                            <span class="dps-toggle-label"><?php echo esc_html( $enable_points ? __( 'Ativo', 'dps-loyalty-addon' ) : __( 'Inativo', 'dps-loyalty-addon' ) ); ?></span>
+                        </label>
+                    </div>
+
+                    <div class="dps-campaign-toggle-card">
+                        <div class="dps-campaign-toggle-header">
+                            <span class="dps-campaign-toggle-icon">🎯</span>
+                            <div class="dps-campaign-toggle-info">
+                                <strong><?php esc_html_e( 'Campanhas Promocionais', 'dps-loyalty-addon' ); ?></strong>
+                            </div>
+                        </div>
+                        <p class="dps-campaign-toggle-desc"><?php esc_html_e( 'Crie campanhas promocionais segmentadas com descontos, pontos em dobro e critérios de elegibilidade personalizados.', 'dps-loyalty-addon' ); ?></p>
+                        <label class="dps-campaign-toggle-switch">
+                            <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_campaign_promotions]" value="1" <?php checked( $enable_promotions ); ?> />
+                            <span class="dps-toggle-slider"></span>
+                            <span class="dps-toggle-label"><?php echo esc_html( $enable_promotions ? __( 'Ativo', 'dps-loyalty-addon' ) : __( 'Inativo', 'dps-loyalty-addon' ) ); ?></span>
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
+
             <fieldset>
                 <legend><?php esc_html_e( 'Programa de Pontos', 'dps-loyalty-addon' ); ?></legend>
                 <table class="form-table" role="presentation">
@@ -1239,6 +1363,94 @@ class DPS_Loyalty_Addon {
             </fieldset>
             <?php submit_button(); ?>
         </form>
+        <?php
+    }
+
+    /**
+     * Registra a aba de fidelidade no frontend de configurações.
+     *
+     * @since 2.0.0
+     */
+    public function register_frontend_settings_tab() {
+        if ( class_exists( 'DPS_Settings_Frontend' ) ) {
+            DPS_Settings_Frontend::register_tab(
+                'fidelidade',
+                __( 'Fidelidade', 'dps-loyalty-addon' ),
+                [ $this, 'render_frontend_settings_tab' ],
+                110
+            );
+        }
+    }
+
+    /**
+     * Renderiza a aba de configurações de campanhas no frontend.
+     *
+     * @since 2.0.0
+     */
+    public function render_frontend_settings_tab() {
+        $enable_referrals  = self::is_campaign_enabled( 'referrals' );
+        $enable_points     = self::is_campaign_enabled( 'points' );
+        $enable_promotions = self::is_campaign_enabled( 'promotions' );
+
+        // Nonce para proteção do formulário AJAX/REST.
+        $nonce = wp_create_nonce( 'wp_rest' );
+        ?>
+        <div class="dps-loyalty-frontend-settings" data-nonce="<?php echo esc_attr( $nonce ); ?>" data-rest-url="<?php echo esc_url( rest_url( 'dps-loyalty/v1/campaign-settings' ) ); ?>">
+            <h2><?php esc_html_e( 'Campanhas de Fidelidade', 'dps-loyalty-addon' ); ?></h2>
+            <p class="dps-settings-description"><?php esc_html_e( 'Ative ou desative cada tipo de campanha. As alterações são salvas automaticamente.', 'dps-loyalty-addon' ); ?></p>
+
+            <div class="dps-campaign-toggles">
+                <div class="dps-campaign-toggle-card dps-campaign-toggle-card--featured">
+                    <div class="dps-campaign-toggle-header">
+                        <span class="dps-campaign-toggle-icon">🤝</span>
+                        <div class="dps-campaign-toggle-info">
+                            <strong><?php esc_html_e( 'Indique e Ganhe', 'dps-loyalty-addon' ); ?></strong>
+                            <span class="dps-campaign-toggle-badge"><?php esc_html_e( 'Recomendado', 'dps-loyalty-addon' ); ?></span>
+                        </div>
+                    </div>
+                    <p class="dps-campaign-toggle-desc"><?php esc_html_e( 'Seus clientes indicam amigos e ambos ganham recompensas.', 'dps-loyalty-addon' ); ?></p>
+                    <label class="dps-campaign-toggle-switch">
+                        <input type="checkbox" data-campaign="enable_campaign_referrals" <?php checked( $enable_referrals ); ?> />
+                        <span class="dps-toggle-slider"></span>
+                        <span class="dps-toggle-label"><?php echo esc_html( $enable_referrals ? __( 'Ativo', 'dps-loyalty-addon' ) : __( 'Inativo', 'dps-loyalty-addon' ) ); ?></span>
+                    </label>
+                </div>
+
+                <div class="dps-campaign-toggle-card">
+                    <div class="dps-campaign-toggle-header">
+                        <span class="dps-campaign-toggle-icon">⭐</span>
+                        <div class="dps-campaign-toggle-info">
+                            <strong><?php esc_html_e( 'Programa de Pontos', 'dps-loyalty-addon' ); ?></strong>
+                        </div>
+                    </div>
+                    <p class="dps-campaign-toggle-desc"><?php esc_html_e( 'Acumule pontos a cada atendimento com níveis e resgates.', 'dps-loyalty-addon' ); ?></p>
+                    <label class="dps-campaign-toggle-switch">
+                        <input type="checkbox" data-campaign="enable_campaign_points" <?php checked( $enable_points ); ?> />
+                        <span class="dps-toggle-slider"></span>
+                        <span class="dps-toggle-label"><?php echo esc_html( $enable_points ? __( 'Ativo', 'dps-loyalty-addon' ) : __( 'Inativo', 'dps-loyalty-addon' ) ); ?></span>
+                    </label>
+                </div>
+
+                <div class="dps-campaign-toggle-card">
+                    <div class="dps-campaign-toggle-header">
+                        <span class="dps-campaign-toggle-icon">🎯</span>
+                        <div class="dps-campaign-toggle-info">
+                            <strong><?php esc_html_e( 'Campanhas Promocionais', 'dps-loyalty-addon' ); ?></strong>
+                        </div>
+                    </div>
+                    <p class="dps-campaign-toggle-desc"><?php esc_html_e( 'Campanhas segmentadas com descontos e pontos em dobro.', 'dps-loyalty-addon' ); ?></p>
+                    <label class="dps-campaign-toggle-switch">
+                        <input type="checkbox" data-campaign="enable_campaign_promotions" <?php checked( $enable_promotions ); ?> />
+                        <span class="dps-toggle-slider"></span>
+                        <span class="dps-toggle-label"><?php echo esc_html( $enable_promotions ? __( 'Ativo', 'dps-loyalty-addon' ) : __( 'Inativo', 'dps-loyalty-addon' ) ); ?></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="dps-campaign-save-feedback" style="display:none;">
+                <span class="dps-campaign-feedback-text"></span>
+            </div>
+        </div>
         <?php
     }
 
@@ -1510,6 +1722,12 @@ class DPS_Loyalty_Addon {
     }
 
     public function handle_campaign_audit() {
+        // Verifica se campanhas promocionais estão ativas.
+        if ( ! self::is_campaign_enabled( 'promotions' ) ) {
+            wp_safe_redirect( admin_url( 'admin.php?page=dps-loyalty' ) );
+            exit;
+        }
+
         // Usa helper para verificar nonce de formulário POST com capability
         if ( class_exists( 'DPS_Request_Validator' ) ) {
             if ( ! DPS_Request_Validator::verify_admin_form( 'dps_loyalty_run_audit', 'dps_loyalty_run_audit_nonce' ) ) {
@@ -1815,6 +2033,9 @@ class DPS_Loyalty_Addon {
 
     public function sanitize_settings( $input ) {
         $output                               = [];
+        $output['enable_campaign_referrals']  = ! empty( $input['enable_campaign_referrals'] ) ? 1 : 0;
+        $output['enable_campaign_points']     = ! empty( $input['enable_campaign_points'] ) ? 1 : 0;
+        $output['enable_campaign_promotions'] = ! empty( $input['enable_campaign_promotions'] ) ? 1 : 0;
         $output['brl_per_point']              = isset( $input['brl_per_point'] ) ? (float) $input['brl_per_point'] : 10.0;
         $output['referral_page_id']           = isset( $input['referral_page_id'] ) ? absint( $input['referral_page_id'] ) : 0;
         $output['referrals_enabled']          = ! empty( $input['referrals_enabled'] ) ? 1 : 0;
@@ -1893,6 +2114,11 @@ class DPS_Loyalty_Addon {
      * Expira pontos vencidos com base no número de meses configurado.
      */
     public function handle_points_expiration() {
+        // Verifica se a campanha de pontos está ativa.
+        if ( ! self::is_campaign_enabled( 'points' ) ) {
+            return;
+        }
+
         $settings = get_option( self::OPTION_KEY, [] );
         if ( empty( $settings['enable_points_expiration'] ) ) {
             return;
@@ -2253,6 +2479,11 @@ class DPS_Loyalty_Addon {
             return;
         }
 
+        // Verifica se a campanha de pontos está ativa.
+        if ( ! self::is_campaign_enabled( 'points' ) ) {
+            return;
+        }
+
         // Verifica se o post existe antes de chamar get_post_type para evitar erro de map_meta_cap
         $post = get_post( $object_id );
         if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
@@ -2416,6 +2647,11 @@ class DPS_Loyalty_Referrals {
     }
 
     public function render_registration_field() {
+        // Não exibe campo de indicação se a campanha está desativada.
+        if ( ! DPS_Loyalty_Addon::is_campaign_enabled( 'referrals' ) ) {
+            return;
+        }
+
         $referral_param = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref'] ) ) : '';
         ?>
         <p class="dps-referral-field">
@@ -2428,6 +2664,11 @@ class DPS_Loyalty_Referrals {
 
     public function maybe_register_referral( $referral_code, $new_client_id, $client_email, $client_phone ) {
         if ( ! $referral_code || ! $new_client_id ) {
+            return;
+        }
+
+        // Verifica se a campanha de indicações está ativa.
+        if ( ! DPS_Loyalty_Addon::is_campaign_enabled( 'referrals' ) ) {
             return;
         }
 
@@ -2456,6 +2697,11 @@ class DPS_Loyalty_Referrals {
     }
 
     public function handle_booking_paid( $appointment_id, $client_id, $amount_in_cents ) {
+        // Verifica se a campanha de indicações está ativa.
+        if ( ! DPS_Loyalty_Addon::is_campaign_enabled( 'referrals' ) ) {
+            return;
+        }
+
         $settings = dps_referrals_get_settings();
         if ( empty( $settings['referrals_enabled'] ) ) {
             return;
