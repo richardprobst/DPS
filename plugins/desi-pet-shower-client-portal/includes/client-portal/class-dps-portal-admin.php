@@ -167,6 +167,23 @@ class DPS_Portal_Admin {
     }
 
     /**
+     * Enfileira o script de administração de logins do portal e localiza dados AJAX.
+     *
+     * @since 2.5.1
+     */
+    private function enqueue_portal_admin_script() {
+        $script_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'assets/js/portal-admin.js';
+        $script_url  = DPS_CLIENT_PORTAL_ADDON_URL . 'assets/js/portal-admin.js';
+        $version     = file_exists( $script_path ) ? filemtime( $script_path ) : '1.0.0';
+
+        wp_enqueue_script( 'dps-portal-admin', $script_url, [ 'jquery' ], $version, true );
+
+        wp_localize_script( 'dps-portal-admin', 'dpsPortalAdmin', [
+            'nonce' => wp_create_nonce( 'dps_portal_admin_actions' ),
+        ] );
+    }
+
+    /**
      * Adiciona metabox com os detalhes da mensagem no admin.
      */
     public function add_message_meta_boxes() {
@@ -484,6 +501,9 @@ class DPS_Portal_Admin {
         if ( 'frontend' === $context ) {
             $base_url = add_query_arg( 'tab', 'logins', $base_url );
         }
+
+        // Enfileira script do admin de logins com nonce para AJAX
+        $this->enqueue_portal_admin_script();
 
         // Processa feedback
         $feedback_messages = $this->get_feedback_messages();
