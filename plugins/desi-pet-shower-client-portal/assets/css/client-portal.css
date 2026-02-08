@@ -82,10 +82,54 @@
     100% { box-shadow: 0 0 0 0 rgba(26, 122, 58, 0); }
 }
 
+/* Reset de escopo — isola de estilos globais do tema WordPress */
+.dps-client-portal-access-page,
+.dps-client-portal-access-page *,
+.dps-client-portal-access-page *::before,
+.dps-client-portal-access-page *::after {
+    box-sizing: border-box;
+}
+
 .dps-client-portal-access-page {
     max-width: 480px;
     margin: 40px auto;
     padding: 0 20px;
+    font-family: var(--dps-font-body);
+    color: var(--dps-gray-700);
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* Reset de elementos HTML dentro do escopo — previne override de tema */
+.dps-client-portal-access-page h1,
+.dps-client-portal-access-page h2,
+.dps-client-portal-access-page p {
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-family: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.dps-client-portal-access-page a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.dps-client-portal-access-page form {
+    margin: 0;
+    padding: 0;
+}
+
+.dps-client-portal-access-page input,
+.dps-client-portal-access-page input[type="email"],
+.dps-client-portal-access-page button {
+    font-family: inherit;
+    margin: 0;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 .dps-portal-access {
@@ -107,25 +151,26 @@
 .dps-portal-access__logo {
     font-size: 56px;
     text-align: center;
-    margin-bottom: 24px;
+    margin: 0 0 24px;
     line-height: 1;
 }
 
 .dps-portal-access__title {
-    font-size: 24px;
+    font-family: var(--dps-font-display);
+    font-size: var(--dps-typescale-headline-small-size);
     font-weight: 600;
     color: var(--dps-gray-700);
     text-align: center;
-    margin-bottom: 12px;
-    line-height: 1.3;
+    margin: 0 0 12px;
+    line-height: var(--dps-typescale-headline-small-line);
 }
 
 .dps-portal-access__description {
-    font-size: 15px;
+    font-size: var(--dps-typescale-body-large-size);
     color: var(--dps-gray-500);
-    line-height: 1.6;
+    line-height: var(--dps-typescale-body-large-line);
     text-align: center;
-    margin-bottom: 28px;
+    margin: 0 0 28px;
 }
 
 .dps-portal-access__error {
@@ -134,7 +179,7 @@
     border-left: 4px solid var(--dps-warning);
     border-radius: var(--dps-shape-small);
     padding: 16px;
-    margin-bottom: 24px;
+    margin: 0 0 24px;
 }
 
 .dps-portal-access__error p {
@@ -145,11 +190,13 @@
 }
 
 .dps-portal-access__button {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     background-color: var(--dps-primary);
     color: #ffffff;
-    font-size: 16px;
+    font-size: var(--dps-typescale-label-large-size);
     font-weight: 600;
     text-align: center;
     text-decoration: none;
@@ -157,6 +204,7 @@
     border: none;
     border-radius: var(--dps-shape-button);
     cursor: pointer;
+    line-height: 1.2;
     transition: all var(--dps-motion-hover);
     box-shadow: var(--dps-elevation-button);
 }
@@ -185,10 +233,10 @@
 }
 
 .dps-portal-access__note {
-    font-size: 13px;
+    font-size: var(--dps-typescale-body-small-size);
     color: var(--dps-gray-500);
     text-align: center;
-    margin-top: 20px;
+    margin: 20px 0 0;
     line-height: 1.5;
 }
 
@@ -198,9 +246,9 @@
 
 /* Feedback de solicitação de acesso — M3 */
 .dps-portal-access__feedback {
-    font-size: 14px;
+    font-size: var(--dps-typescale-body-medium-size);
     text-align: center;
-    margin-top: 12px;
+    margin: 12px 0 0;
     padding: 12px 16px;
     border-radius: var(--dps-shape-small);
     background-color: var(--dps-success-bg);
@@ -225,23 +273,25 @@
 
 /* Seção de email para solicitar acesso */
 .dps-portal-access__email-section {
-    margin-bottom: 28px;
+    margin: 0 0 28px;
 }
 
 .dps-portal-access__subtitle {
-    font-size: 17px;
+    font-family: var(--dps-font-display);
+    font-size: var(--dps-typescale-title-medium-size);
     font-weight: 600;
     color: var(--dps-gray-700);
     text-align: center;
-    margin-bottom: 8px;
+    margin: 0 0 8px;
+    line-height: var(--dps-typescale-title-medium-line);
 }
 
 .dps-portal-access__email-description {
-    font-size: 14px;
+    font-size: var(--dps-typescale-body-medium-size);
     color: var(--dps-gray-500);
     text-align: center;
-    margin-bottom: 16px;
-    line-height: 1.5;
+    margin: 0 0 16px;
+    line-height: var(--dps-typescale-body-medium-line);
 }
 
 .dps-portal-access__email-form {
@@ -251,18 +301,24 @@
 .dps-portal-access__email-input-group {
     display: flex;
     gap: 8px;
+    align-items: stretch;
+    width: 100%;
 }
 
 .dps-portal-access__email-input {
     flex: 1;
+    min-width: 0;
+    width: auto;
     padding: 12px 16px;
-    font-size: 16px;
+    font-size: var(--dps-typescale-body-large-size);
     border: 1px solid var(--dps-border-color);
     border-radius: var(--dps-shape-small);
     outline: none;
     transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
     background: var(--dps-white);
     color: var(--dps-gray-700);
+    line-height: 1.4;
+    height: auto;
 }
 
 .dps-portal-access__email-input:focus {
@@ -275,8 +331,12 @@
 }
 
 .dps-portal-access__email-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
     padding: 12px 24px;
-    font-size: 14px;
+    font-size: var(--dps-typescale-label-large-size);
     font-weight: 600;
     color: #ffffff;
     background-color: var(--dps-primary);
@@ -284,6 +344,7 @@
     border-radius: var(--dps-shape-button);
     cursor: pointer;
     white-space: nowrap;
+    line-height: 1.2;
     transition: all var(--dps-motion-hover);
     box-shadow: var(--dps-elevation-button);
 }
@@ -317,10 +378,11 @@
 }
 
 .dps-portal-access__divider {
-    font-size: 13px;
+    font-size: var(--dps-typescale-body-small-size);
     color: var(--dps-gray-400);
     text-align: center;
     margin: 12px 0 16px;
+    padding: 0;
     position: relative;
     display: flex;
     align-items: center;
@@ -336,10 +398,10 @@
 }
 
 .dps-portal-access__whatsapp-description {
-    font-size: 14px;
+    font-size: var(--dps-typescale-body-medium-size);
     color: var(--dps-gray-500);
     text-align: center;
-    margin-bottom: 12px;
+    margin: 0 0 12px;
 }
 
 .dps-portal-access__button--secondary {
