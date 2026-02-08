@@ -83,6 +83,11 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Booking Add-on v1.3.0 — Migração M3 e Melhorias de Segurança**
+
+- **Validação granular de edição de agendamentos**: Método `can_edit_appointment()` verifica se usuário pode editar agendamento específico (criador ou admin).
+- **Suporte a `prefers-reduced-motion`**: Animação de confirmação respeita preferência de acessibilidade do usuário.
+
 **Design System Material 3 Expressive (Docs + Design Tokens v2.0)**
 
 - **Design tokens CSS** (`dps-design-tokens.css`): Arquivo centralizado com 200+ CSS custom properties implementando o sistema completo do Material 3 Expressive — cores (primary/secondary/tertiary/error/success/warning + surface containers), tipografia (escala M3: Display/Headline/Title/Body/Label), formas (escala de arredondamento: 0–4–8–12–16–28–pill), elevação tonal (6 níveis), motion (easing expressivo com springs + duração), espaçamento e state layers.
@@ -91,6 +96,23 @@ Antes de criar uma nova versão oficial:
 - **Demo interativo** (`visual-comparison.html`): Preview completo do design system com todos os componentes, toggle claro/escuro e animações expressivas.
 
 #### Changed (Alterado)
+
+**Booking Add-on v1.3.0 — Migração M3 e Melhorias de Segurança**
+
+- **Migração completa para M3 Expressive tokens** (`booking-addon.css`):
+  - 37 cores hardcoded → tokens M3 (`--dps-color-*`)
+  - 5 border-radius → shape tokens (`--dps-shape-*`)
+  - 3 transições → motion tokens (`--dps-motion-*`)
+  - 3 sombras → elevation tokens (`--dps-elevation-*`)
+  - 24 valores tipográficos → escala M3 (`--dps-typescale-*`)
+  - Semantic mapping em `.dps-booking-wrapper` para customização local
+- **Enfileiramento condicional de design tokens**: Dependência de `dps-design-tokens.css` via check de `DPS_BASE_URL`.
+- **Otimização de performance** (batch queries):
+  - Fix N+1: owners de pets agora fetched em batch (redução de 100+ queries para 1)
+  - Prepared for future optimization of client pagination
+- **Melhorias de acessibilidade**:
+  - `aria-hidden="true"` adicionado a todos emojis decorativos
+  - Documentação phpcs para parâmetros GET read-only validados por capability
 
 - **`VISUAL_STYLE_GUIDE.md` v1.2 → v2.0**: Redesenhado integralmente como design system baseado no Material 3 Expressive — sistema de cores com papéis semânticos (color roles), escala tipográfica M3 (5 papéis × 3 tamanhos), sistema de formas expressivas (botões pill, cards 12px, diálogos 28px), elevação tonal, motion com springs, state layers, novos componentes (btn-filled/outlined/tonal/text, FAB, chips, badges, alertas M3), guia de migração do sistema legado.
 - **`FRONTEND_DESIGN_INSTRUCTIONS.md` v1.0 → v2.0**: Atualizado com metodologia M3 Expressive — dois perfis (Standard para admin, Expressive para portal), princípios de design expressivo, state layers, shape system, elevation tonal, motion com easing de springs, exemplos práticos adaptados ao contexto pet shop, checklist atualizado com tokens M3.
@@ -252,6 +274,20 @@ Antes de criar uma nova versão oficial:
 - **Link de cancelar edição melhorado**: Estilizado como botão secundário vermelho para melhor feedback visual.
 - **Acessibilidade em ícones**: Adicionados atributos `aria-label` e `role="img"` nos ícones de informação.
 - **Focus visible melhorado**: Estilos de foco visíveis consistentes para acessibilidade de navegação por teclado.
+
+#### Security (Segurança)
+
+**Booking Add-on v1.3.0**
+
+- **Validação de permissões reforçada**: Verificação de `can_access()` antes de renderizar seção de agendamentos.
+- **Proteção contra edição não autorizada**: Novos checks garantem que usuário só edita/duplica agendamentos próprios (exceto admins).
+- **Documentação de segurança**: Comentários phpcs explicam validação de parâmetros GET read-only.
+
+#### Refactoring (Interno)
+
+**Booking Add-on v1.3.0**
+
+- **Arquivo CSS backup**: Original mantido em `booking-addon.css.backup` para referência durante migração M3.
 
 #### Fixed (Corrigido)
 

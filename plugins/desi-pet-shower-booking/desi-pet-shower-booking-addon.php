@@ -434,7 +434,7 @@ class DPS_Booking_Addon {
         // Formulário
         echo '<div class="dps-surface dps-surface--info">';
         echo '<div class="dps-surface__title">';
-        echo '<span>📝</span>';
+        echo '<span aria-hidden="true">📝</span>';
         echo $edit_id ? esc_html__( 'Editar Agendamento', 'dps-booking-addon' ) : esc_html__( 'Novo Agendamento', 'dps-booking-addon' );
         echo '</div>';
 
@@ -998,7 +998,7 @@ class DPS_Booking_Addon {
         
         // Novo agendamento
         echo '<a href="' . esc_url( $this->get_booking_page_url() ) . '" class="dps-btn dps-btn--primary">';
-        echo '<span>➕</span> ' . esc_html__( 'Novo Agendamento', 'dps-booking-addon' );
+        echo '<span aria-hidden="true">➕</span> ' . esc_html__( 'Novo Agendamento', 'dps-booking-addon' );
         echo '</a>';
         
         // Ver cliente (se disponível painel de gestão)
@@ -1010,7 +1010,7 @@ class DPS_Booking_Addon {
                     'cliente' => $client_id,
                 ], $panel_url );
                 echo '<a href="' . esc_url( $client_url ) . '" class="dps-btn dps-btn--secondary">';
-                echo '<span>👤</span> ' . esc_html__( 'Ver Cliente', 'dps-booking-addon' );
+                echo '<span aria-hidden="true">👤</span> ' . esc_html__( 'Ver Cliente', 'dps-booking-addon' );
                 echo '</a>';
             }
         }
@@ -1021,7 +1021,7 @@ class DPS_Booking_Addon {
             if ( $panel_url ) {
                 $agenda_url = add_query_arg( 'dps_tab', 'agendas', $panel_url );
                 echo '<a href="' . esc_url( $agenda_url ) . '" class="dps-btn dps-btn--outline">';
-                echo '<span>📅</span> ' . esc_html__( 'Ver Agenda', 'dps-booking-addon' );
+                echo '<span aria-hidden="true">📅</span> ' . esc_html__( 'Ver Agenda', 'dps-booking-addon' );
                 echo '</a>';
             }
         }
