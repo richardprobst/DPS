@@ -255,6 +255,16 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Aviso de dependências Elementor não registradas (Base v1.1.2)**
+
+- **Sintoma**: Notice PHP "The script with the handle 'elementor-v2-editor-components' was enqueued with dependencies that are not registered" aparecia nos logs quando Elementor estava instalado.
+- **Causa raiz identificada**: A classe `DPS_Cache_Control` verifica metadados de page builders (Elementor, YooTheme) para detectar shortcodes DPS e desabilitar cache. A chamada `get_post_meta()` para `_elementor_data` disparava hooks internos do Elementor que tentavam carregar scripts do editor no frontend, causando o aviso de dependências não registradas.
+- **Solução implementada**:
+  - Adicionada verificação condicional antes de buscar metadados: `if ( defined( 'ELEMENTOR_VERSION' ) || class_exists( '\Elementor\Plugin' ) )`
+  - Metadados do Elementor só são carregados quando o plugin está realmente ativo, evitando disparar hooks desnecessários
+  - Mesmo padrão aplicado ao YooTheme para prevenção: `if ( class_exists( 'YOOtheme\Application' ) || function_exists( 'yootheme' ) )`
+- **Impacto**: Elimina notices no log sem afetar a funcionalidade de detecção de shortcodes em páginas construídas com page builders.
+
 **Página de Consentimento de Tosa não exibida (Base v1.2.3)**
 
 - **Causa raiz identificada**: O formulário de consentimento de tosa não era exibido porque a página com o shortcode `[dps_tosa_consent]` não existia. O sistema gerava um link para `/consentimento-tosa-maquina/` que resultava em erro 404.

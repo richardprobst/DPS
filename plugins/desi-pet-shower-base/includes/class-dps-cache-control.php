@@ -187,15 +187,21 @@ class DPS_Cache_Control {
 
         // Verifica em metadados de page builders populares
         // Elementor armazena dados em _elementor_data (formato JSON)
-        $elementor_data = get_post_meta( $post->ID, '_elementor_data', true );
-        if ( self::metadata_contains_shortcode( $elementor_data, $shortcode_patterns ) ) {
-            return true;
+        // Verifica somente se Elementor está ativo para evitar disparar hooks desnecessários
+        if ( defined( 'ELEMENTOR_VERSION' ) || class_exists( '\Elementor\Plugin' ) ) {
+            $elementor_data = get_post_meta( $post->ID, '_elementor_data', true );
+            if ( self::metadata_contains_shortcode( $elementor_data, $shortcode_patterns ) ) {
+                return true;
+            }
         }
 
         // YooTheme armazena dados em _yootheme_source (formato JSON)
-        $yootheme_source = get_post_meta( $post->ID, '_yootheme_source', true );
-        if ( self::metadata_contains_shortcode( $yootheme_source, $shortcode_patterns ) ) {
-            return true;
+        // Verifica somente se YooTheme está ativo para evitar disparar hooks desnecessários
+        if ( class_exists( 'YOOtheme\Application' ) || function_exists( 'yootheme' ) ) {
+            $yootheme_source = get_post_meta( $post->ID, '_yootheme_source', true );
+            if ( self::metadata_contains_shortcode( $yootheme_source, $shortcode_patterns ) ) {
+                return true;
+            }
         }
 
         return false;
