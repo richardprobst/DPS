@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Booking Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página dedicada de agendamentos para administradores. Mesma funcionalidade da aba Agendamentos do Painel de Gestão DPS.
- * Version:           1.2.1
+ * Version:           1.3.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-booking-addon
@@ -129,6 +129,7 @@ class DPS_Booking_Addon {
      * Enfileira CSS e JS do add-on.
      *
      * @since 1.0.0
+     * @since 1.3.0 Adicionada dependência condicional de dps-design-tokens.css (M3).
      */
     public function enqueue_assets() {
         // Carrega apenas na página de agendamento ou onde houver o shortcode
@@ -147,12 +148,24 @@ class DPS_Booking_Addon {
 
         // CSS adicional do add-on para ajustes de layout na página dedicada
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.2.1';
+        $version   = '1.3.0';
+
+        // Design tokens M3 Expressive (dependência condicional)
+        $deps = [ 'dps-base-style' ];
+        if ( defined( 'DPS_BASE_URL' ) && defined( 'DPS_BASE_VERSION' ) ) {
+            wp_enqueue_style(
+                'dps-design-tokens',
+                DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
+                [],
+                DPS_BASE_VERSION
+            );
+            $deps[] = 'dps-design-tokens';
+        }
 
         wp_enqueue_style(
             'dps-booking-addon',
             $addon_url . 'assets/css/booking-addon.css',
-            [ 'dps-base-style' ],
+            $deps,
             $version
         );
     }
@@ -168,6 +181,33 @@ class DPS_Booking_Addon {
             || current_user_can( 'dps_manage_clients' )
             || current_user_can( 'dps_manage_pets' )
             || current_user_can( 'dps_manage_appointments' );
+    }
+
+    /**
+     * Verifica se o usuário pode editar/duplicar um agendamento específico.
+     *
+     * @since 1.3.0
+     * @param int $appointment_id ID do agendamento.
+     * @return bool
+     */
+    private function can_edit_appointment( $appointment_id ) {
+        if ( ! $this->can_access() ) {
+            return false;
+        }
+
+        // Admins podem editar qualquer agendamento
+        if ( current_user_can( 'manage_options' ) ) {
+            return true;
+        }
+
+        // Verifica se o agendamento existe e é válido
+        $appointment = get_post( $appointment_id );
+        if ( ! $appointment || 'dps_agendamento' !== $appointment->post_type ) {
+            return false;
+        }
+
+        // Verifica se é o criador do agendamento
+        return (int) $appointment->post_author === get_current_user_id();
     }
 
     /**
@@ -277,29 +317,53 @@ class DPS_Booking_Addon {
      * Renderiza a seção de agendamentos replicando a funcionalidade do Painel de Gestão DPS.
      *
      * @since 1.1.0
+     * @since 1.3.0 Melhorada segurança na validação de parâmetros GET.
      * @return string HTML da seção de agendamentos.
      */
     private function render_appointments_section() {
+        // Verifica permissões de acesso antes de renderizar
+        if ( ! $this->can_access() ) {
+            return '<div class="dps-notice dps-notice--error"><p>' . 
+                   esc_html__( 'Você não tem permissão para acessar esta funcionalidade.', 'dps-booking-addon' ) . 
+                   '</p></div>';
+        }
+
         // Prepara dados necessários para o formulário
         $clients    = $this->get_clients();
         $pets_query = $this->get_pets();
         $pets       = $pets_query->posts;
         $pet_pages  = (int) max( 1, $pets_query->max_num_pages );
 
-        // Detecta edição de agendamento
+        // Detecta edição de agendamento com validação de segurança
         $edit_id = 0;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only GET params, validated by capability check above
         $dps_edit_param = isset( $_GET['dps_edit'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_edit'] ) ) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only GET params, validated by capability check above
         if ( 'appointment' === $dps_edit_param && isset( $_GET['id'] ) ) {
             $edit_id = absint( $_GET['id'] );
+            // Validação adicional: usuário pode editar este agendamento específico
+            if ( $edit_id && ! $this->can_edit_appointment( $edit_id ) ) {
+                return '<div class="dps-notice dps-notice--error"><p>' . 
+                       esc_html__( 'Você não tem permissão para editar este agendamento.', 'dps-booking-addon' ) . 
+                       '</p></div>';
+            }
         }
 
-        // Detecta duplicação de agendamento
+        // Detecta duplicação de agendamento com validação de segurança
         $duplicate_id = 0;
         $is_duplicate = false;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only GET params, validated by capability check above
         $dps_duplicate_param = isset( $_GET['dps_duplicate'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_duplicate'] ) ) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only GET params, validated by capability check above
         if ( 'appointment' === $dps_duplicate_param && isset( $_GET['id'] ) ) {
             $duplicate_id = absint( $_GET['id'] );
             $is_duplicate = true;
+            // Validação adicional: usuário pode duplicar este agendamento
+            if ( $duplicate_id && ! $this->can_edit_appointment( $duplicate_id ) ) {
+                return '<div class="dps-notice dps-notice--error"><p>' . 
+                       esc_html__( 'Você não tem permissão para duplicar este agendamento.', 'dps-booking-addon' ) . 
+                       '</p></div>';
+            }
         }
 
         // Carrega dados do agendamento em edição ou duplicação
@@ -333,8 +397,10 @@ class DPS_Booking_Addon {
             }
         }
 
-        // Cliente e pet pré-selecionados via URL
+        // Cliente e pet pré-selecionados via URL (validação de segurança)
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only GET params for pre-selection, validated by capability
         $pref_client = isset( $_GET['client_id'] ) ? absint( $_GET['client_id'] ) : 0;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only GET params for pre-selection, validated by capability
         $pref_pet    = isset( $_GET['pet_id'] ) ? absint( $_GET['pet_id'] ) : 0;
 
         // URLs - use safe URL building instead of raw REQUEST_URI
@@ -478,11 +544,29 @@ class DPS_Booking_Addon {
         echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="clear">' . esc_html__( 'Limpar seleção', 'dps-booking-addon' ) . '</button>';
         echo '</div>';
         
+        // Otimização: buscar todos os owners de uma vez para evitar N+1 query
+        $owner_ids = array_filter( array_map( function( $pet ) {
+            return (int) get_post_meta( $pet->ID, 'owner_id', true );
+        }, $pets ) );
+        
+        $owners_map = [];
+        if ( ! empty( $owner_ids ) ) {
+            $unique_owner_ids = array_unique( $owner_ids );
+            $owners_posts = get_posts( [
+                'post__in'       => $unique_owner_ids,
+                'post_type'      => 'dps_cliente',
+                'posts_per_page' => -1,
+                'fields'         => 'all',
+            ] );
+            foreach ( $owners_posts as $owner_post ) {
+                $owners_map[ $owner_post->ID ] = $owner_post->post_title;
+            }
+        }
+        
         echo '<div id="dps-appointment-pet-list" class="dps-pet-list" role="group" aria-labelledby="dps-pet-selector-label">';
         foreach ( $pets as $pet ) {
-            $owner_id   = get_post_meta( $pet->ID, 'owner_id', true );
-            $owner_post = $owner_id ? get_post( $owner_id ) : null;
-            $owner_name = $owner_post ? $owner_post->post_title : '';
+            $owner_id   = (int) get_post_meta( $pet->ID, 'owner_id', true );
+            $owner_name = isset( $owners_map[ $owner_id ] ) ? $owners_map[ $owner_id ] : '';
             $size       = get_post_meta( $pet->ID, 'pet_size', true );
             $breed      = get_post_meta( $pet->ID, 'pet_breed', true );
             $sel        = in_array( (string) $pet->ID, $sel_pets, true ) ? 'checked' : '';
