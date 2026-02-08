@@ -97,7 +97,7 @@ final class DPS_Portal_Admin_Actions {
         $type      = isset( $_GET['token_type'] ) ? sanitize_text_field( wp_unslash( $_GET['token_type'] ) ) : 'login';
 
         // Usa helper para verificar nonce dinâmico
-        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_generate_token_', $client_id, 'GET' ) ) {
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_generate_token_', $client_id, '_wpnonce', 'GET' ) ) {
             wp_die( esc_html__( 'Falha na verificação de segurança.', 'dps-client-portal' ) );
         }
 
@@ -153,7 +153,7 @@ final class DPS_Portal_Admin_Actions {
         $client_id = isset( $_GET['client_id'] ) ? absint( wp_unslash( $_GET['client_id'] ) ) : 0;
 
         // Usa helper para verificar nonce dinâmico
-        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_revoke_tokens_', $client_id, 'GET' ) ) {
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_revoke_tokens_', $client_id, '_wpnonce', 'GET' ) ) {
             wp_die( esc_html__( 'Falha na verificação de segurança.', 'dps-client-portal' ) );
         }
 
@@ -180,7 +180,7 @@ final class DPS_Portal_Admin_Actions {
         $client_id = isset( $_GET['client_id'] ) ? absint( wp_unslash( $_GET['client_id'] ) ) : 0;
 
         // Usa helper para verificar nonce dinâmico
-        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_whatsapp_link_', $client_id, 'GET' ) ) {
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_whatsapp_link_', $client_id, '_wpnonce', 'GET' ) ) {
             wp_die( esc_html__( 'Falha na verificação de segurança.', 'dps-client-portal' ) );
         }
 
