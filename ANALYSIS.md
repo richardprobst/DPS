@@ -928,15 +928,19 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 
 ---
 
-### Booking (`desi-pet-shower-booking_addon`)
+### Booking (`desi-pet-shower-booking`)
 
-**Diretório**: `plugins/desi-pet-shower-booking`
+**Diretório**: `plugins/desi-pet-shower-booking`  
+**Versão**: 1.3.0
 
 **Propósito e funcionalidades principais**:
 - Página dedicada de agendamentos para administradores
 - Mesma funcionalidade da aba Agendamentos do Painel de Gestão DPS, porém em página independente
 - Formulário completo com seleção de cliente, pets, serviços, data/hora, tipo de agendamento (avulso/assinatura) e status de pagamento
 - Tela de confirmação pós-agendamento com resumo e ações rápidas (WhatsApp, novo agendamento, voltar ao painel)
+- Design system migrado para Material 3 Expressive (v1.3.0)
+- Otimizações de performance (batch queries para owners de pets)
+- Validações granulares de segurança (verificação por agendamento específico)
 
 **Shortcodes expostos**:
 - `[dps_booking_form]`: renderiza formulário completo de agendamento
@@ -948,8 +952,35 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 
 **Hooks consumidos**:
 - `dps_base_after_save_appointment`: captura agendamento salvo para exibir tela de confirmação
+- `dps_base_appointment_fields`: permite injeção de campos customizados por add-ons
+- `dps_base_appointment_assignment_fields`: permite adicionar campos de atribuição
 
 **Hooks disparados**: Nenhum hook próprio
+
+**Capabilities verificadas**:
+- `manage_options` (admin total)
+- `dps_manage_clients` (gestão de clientes)
+- `dps_manage_pets` (gestão de pets)
+- `dps_manage_appointments` (gestão de agendamentos)
+
+**Assets (v1.3.0)**:
+- `booking-addon.css`: Estilos M3 Expressive com semantic mapping, 100% tokens M3
+- Dependência condicional de `dps-design-tokens.css` via check de `DPS_BASE_URL`
+- Assets do base plugin carregados via `DPS_Base_Plugin::enqueue_frontend_assets()`
+
+**Melhorias de segurança (v1.3.0)**:
+- Método `can_edit_appointment()`: valida se usuário pode editar agendamento específico
+- Verificação de `can_access()` antes de renderizar seção
+- Documentação phpcs para parâmetros GET read-only
+
+**Otimizações de performance (v1.3.0)**:
+- Batch fetch de owners de pets (redução de N+1 queries: 100+ → 1)
+- Preparado para futura paginação de clientes
+
+**Acessibilidade (v1.3.0)**:
+- `aria-hidden="true"` em todos emojis decorativos
+- Suporte a `prefers-reduced-motion` em animações
+- ARIA roles e labels conforme padrões do base plugin
 
 **Endpoints AJAX**: Nenhum
 
