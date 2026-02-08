@@ -183,7 +183,8 @@ class DPS_GitHub_Updater {
         add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_for_updates' ) );
 
         // Hook para informações do plugin (popup de detalhes)
-        add_filter( 'plugins_api', array( $this, 'plugin_info' ), 20, 3 );
+        // Prioridade 10 para interceptar antes do WordPress tentar conectar ao wp.org
+        add_filter( 'plugins_api', array( $this, 'plugin_info' ), 10, 3 );
 
         // Hook após instalar plugin (limpar cache)
         add_filter( 'upgrader_post_install', array( $this, 'after_install' ), 10, 3 );
@@ -235,6 +236,17 @@ class DPS_GitHub_Updater {
                     'tested'      => get_bloginfo( 'version' ),
                     'requires'    => '6.9',
                     'requires_php' => '8.4',
+                );
+            } else {
+                // Marca o plugin como atualizado para que o WordPress não tente
+                // verificar no WordPress.org (evita erros de conexão).
+                $transient->no_update[ $plugin_file ] = (object) array(
+                    'id'          => $plugin_file,
+                    'slug'        => $plugin_info['slug'],
+                    'plugin'      => $plugin_file,
+                    'new_version' => $current_version,
+                    'url'         => 'https://github.com/' . $this->github_repo,
+                    'package'     => '',
                 );
             }
         }
