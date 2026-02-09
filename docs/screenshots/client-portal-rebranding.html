@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DPS Client Portal — Rebranding M3 Expressive</title>
+    <link rel="stylesheet" href="../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css" />
+    <link rel="stylesheet" href="../../plugins/desi-pet-shower-client-portal/assets/css/client-portal.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background: var(--dps-color-surface);
+            color: var(--dps-color-on-surface);
+            font-family: var(--dps-font-system);
+        }
+        .demo-section {
+            max-width: 960px;
+            margin: 0 auto 60px;
+        }
+        .demo-section-title {
+            font-family: var(--dps-font-display);
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--dps-color-on-surface-variant);
+            margin: 0 0 20px;
+            padding: 10px 0;
+            border-bottom: 2px solid var(--dps-color-outline-variant);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== SECTION 1: Access Page ==================== -->
+    <div class="demo-section">
+        <p class="demo-section-title">Tela de Acesso — Solicitação de link (estado padrão)</p>
+        <div class="dps-client-portal-access-page">
+            <div class="dps-portal-access">
+                <div class="dps-portal-access__card">
+                    <div class="dps-portal-access__logo">🐾</div>
+                    <h1 class="dps-portal-access__title">Portal do Cliente – desi.pet by PRObst</h1>
+                    <p class="dps-portal-access__description">
+                        Acompanhe seus agendamentos, histórico, assinaturas e informações do seu pet em um só lugar.
+                        Para acessar o portal, peça à nossa equipe o seu link exclusivo.
+                    </p>
+
+                    <div class="dps-portal-access__email-section">
+                        <h2 class="dps-portal-access__subtitle">📧 Receba seu link por e-mail</h2>
+                        <p class="dps-portal-access__email-description">
+                            Se você tem e-mail cadastrado, digite abaixo para receber o link automaticamente:
+                        </p>
+                        <form class="dps-portal-access__email-form" onsubmit="return false;">
+                            <div class="dps-portal-access__email-input-group">
+                                <input type="email" class="dps-portal-access__email-input" placeholder="seu@email.com" />
+                                <button type="button" class="dps-portal-access__email-button">Enviar Link</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="dps-portal-access__whatsapp-section">
+                        <p class="dps-portal-access__divider">ou</p>
+                        <p class="dps-portal-access__whatsapp-description">
+                            Não tem e-mail cadastrado? Solicite via WhatsApp:
+                        </p>
+                        <a href="#" class="dps-portal-access__button dps-portal-access__button--secondary">
+                            📱 Solicitar via WhatsApp
+                        </a>
+                    </div>
+
+                    <p class="dps-portal-access__note">
+                        Já tem um link de acesso? Basta clicar nele novamente para entrar.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 2: Access Page with Error ==================== -->
+    <div class="demo-section">
+        <p class="demo-section-title">Tela de Acesso — Com erro de token expirado</p>
+        <div class="dps-client-portal-access-page">
+            <div class="dps-portal-access">
+                <div class="dps-portal-access__card">
+                    <div class="dps-portal-access__logo">🐾</div>
+                    <h1 class="dps-portal-access__title">Portal do Cliente – desi.pet by PRObst</h1>
+                    <p class="dps-portal-access__description">
+                        Acompanhe seus agendamentos, histórico, assinaturas e informações do seu pet em um só lugar.
+                    </p>
+
+                    <div class="dps-portal-access__error">
+                        <p>Esse link expirou. Peça um novo link de acesso à nossa equipe.</p>
+                    </div>
+
+                    <div class="dps-portal-access__email-section">
+                        <h2 class="dps-portal-access__subtitle">📧 Receba seu link por e-mail</h2>
+                        <p class="dps-portal-access__email-description">
+                            Se você tem e-mail cadastrado, digite abaixo para receber o link automaticamente:
+                        </p>
+                        <form class="dps-portal-access__email-form" onsubmit="return false;">
+                            <div class="dps-portal-access__email-input-group">
+                                <input type="email" class="dps-portal-access__email-input" placeholder="seu@email.com" />
+                                <button type="button" class="dps-portal-access__email-button">Enviar Link</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <p class="dps-portal-access__note">
+                        Já tem um link de acesso? Basta clicar nele novamente para entrar.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 3: Access Page with Feedback ==================== -->
+    <div class="demo-section">
+        <p class="demo-section-title">Tela de Acesso — Feedback de sucesso e erro</p>
+        <div class="dps-client-portal-access-page">
+            <div class="dps-portal-access">
+                <div class="dps-portal-access__card">
+                    <div class="dps-portal-access__logo">🐾</div>
+                    <h1 class="dps-portal-access__title">Portal do Cliente – desi.pet by PRObst</h1>
+
+                    <div class="dps-portal-access__email-section">
+                        <h2 class="dps-portal-access__subtitle">📧 Receba seu link por e-mail</h2>
+                        <form class="dps-portal-access__email-form" onsubmit="return false;">
+                            <div class="dps-portal-access__email-input-group">
+                                <input type="email" class="dps-portal-access__email-input" placeholder="seu@email.com" />
+                                <button type="button" class="dps-portal-access__email-button">Enviar Link</button>
+                            </div>
+                        </form>
+                        <div class="dps-portal-access__feedback dps-portal-access__feedback--success" style="display:block;">
+                            Link enviado com sucesso! Verifique sua caixa de entrada.
+                        </div>
+                    </div>
+
+                    <div class="dps-portal-access__email-section" style="margin-top: 24px;">
+                        <form class="dps-portal-access__email-form" onsubmit="return false;">
+                            <div class="dps-portal-access__email-input-group">
+                                <input type="email" class="dps-portal-access__email-input" placeholder="seu@email.com" value="desconhecido@email.com" />
+                                <button type="button" class="dps-portal-access__email-button">Enviar Link</button>
+                            </div>
+                        </form>
+                        <div class="dps-portal-access__feedback dps-portal-access__feedback--error" style="display:block;">
+                            E-mail não encontrado. Verifique se o e-mail está correto ou solicite via WhatsApp.
+                        </div>
+                    </div>
+
+                    <div class="dps-portal-access__whatsapp-section dps-portal-access__whatsapp-section--highlight">
+                        <p class="dps-portal-access__whatsapp-description">
+                            Não tem e-mail cadastrado? Solicite via WhatsApp:
+                        </p>
+                        <a href="#" class="dps-portal-access__button dps-portal-access__button--secondary">
+                            📱 Solicitar via WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 4: Portal Main Shell ==================== -->
+    <div class="demo-section">
+        <p class="demo-section-title">Portal Principal — Shell (header + tabs + container)</p>
+        <div class="dps-client-portal">
+            <!-- Breadcrumb -->
+            <div class="dps-portal-breadcrumb">
+                <span class="dps-portal-breadcrumb__item">Portal</span>
+                <span class="dps-portal-breadcrumb__separator">›</span>
+                <span class="dps-portal-breadcrumb__item dps-portal-breadcrumb__item--active">Início</span>
+                <a href="#" class="dps-portal-review-link">
+                    <span class="dps-portal-review-icon">⭐</span>
+                    <span class="dps-portal-review-text">Avaliar</span>
+                </a>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div>
+                <nav class="dps-portal-tabs" role="tablist">
+                    <div class="dps-portal-tabs__item">
+                        <button class="dps-portal-tabs__link is-active" role="tab" aria-selected="true">
+                            <span class="dps-portal-tabs__icon">🏠</span>
+                            <span class="dps-portal-tabs__text">Início</span>
+                        </button>
+                    </div>
+                    <div class="dps-portal-tabs__item">
+                        <button class="dps-portal-tabs__link" role="tab" aria-selected="false">
+                            <span class="dps-portal-tabs__icon">📅</span>
+                            <span class="dps-portal-tabs__text">Agendamentos</span>
+                            <span class="dps-portal-tabs__badge">2</span>
+                        </button>
+                    </div>
+                    <div class="dps-portal-tabs__item">
+                        <button class="dps-portal-tabs__link" role="tab" aria-selected="false">
+                            <span class="dps-portal-tabs__icon">🐕</span>
+                            <span class="dps-portal-tabs__text">Meus Pets</span>
+                        </button>
+                    </div>
+                    <div class="dps-portal-tabs__item">
+                        <button class="dps-portal-tabs__link" role="tab" aria-selected="false">
+                            <span class="dps-portal-tabs__icon">💰</span>
+                            <span class="dps-portal-tabs__text">Financeiro</span>
+                            <span class="dps-portal-tabs__badge">1</span>
+                        </button>
+                    </div>
+                    <div class="dps-portal-tabs__item">
+                        <button class="dps-portal-tabs__link" role="tab" aria-selected="false">
+                            <span class="dps-portal-tabs__icon">⭐</span>
+                            <span class="dps-portal-tabs__text">Fidelidade</span>
+                            <span class="dps-portal-tabs__badge dps-portal-tabs__badge--loyalty">85</span>
+                        </button>
+                    </div>
+                    <div class="dps-portal-tabs__item">
+                        <button class="dps-portal-tabs__link" role="tab" aria-selected="false">
+                            <span class="dps-portal-tabs__icon">👤</span>
+                            <span class="dps-portal-tabs__text">Meus Dados</span>
+                        </button>
+                    </div>
+                </nav>
+
+                <!-- Tab Content Container -->
+                <div class="dps-portal-tab-content">
+                    <div class="dps-portal-tab-panel is-active">
+                        <p style="color: var(--dps-color-on-surface-variant); font-size: var(--dps-typescale-body-medium-size);">
+                            [Conteúdo da aba — rebranding será aplicado separadamente por aba]
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 5: Portal Nav (Fallback) ==================== -->
+    <div class="demo-section">
+        <p class="demo-section-title">Navegação interna (fallback/scroll)</p>
+        <div class="dps-client-portal">
+            <nav class="dps-portal-nav">
+                <a href="#" class="dps-portal-nav__link">Agendamentos</a>
+                <a href="#" class="dps-portal-nav__link">Meus Pets</a>
+                <a href="#" class="dps-portal-nav__link">Financeiro</a>
+                <a href="#" class="dps-portal-nav__link">Fidelidade</a>
+                <a href="#" class="dps-portal-nav__link">Meus Dados</a>
+            </nav>
+        </div>
+    </div>
+
+</body>
+</html>
