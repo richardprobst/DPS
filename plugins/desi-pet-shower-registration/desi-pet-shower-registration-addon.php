@@ -2521,13 +2521,13 @@ class DPS_Registration_Addon {
         echo '<p><label>Facebook<br><input type="text" name="client_facebook" id="dps-client-facebook"></label></p>';
         echo '<p><label><input type="checkbox" name="client_photo_auth" value="1"> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do DESI PET SHOWER', 'dps-registration-addon' ) . '</label></p>';
         // Endereço completo com id específico para ativar autocomplete do Google
-        echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><textarea name="client_address" id="dps-client-address" rows="2"></textarea></label></p>';
-        echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral" id="dps-client-referral"></label></p>';
+        echo '<p class="dps-field-full"><label>' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><textarea name="client_address" id="dps-client-address" rows="2"></textarea></label></p>';
+        echo '<p class="dps-field-full"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral" id="dps-client-referral"></label></p>';
         echo '</div>';
 
         // F3.2: Opções administrativas para cadastro rápido
         if ( $is_admin ) {
-            echo '<div class="dps-admin-options" style="margin-top: 16px;">';
+            echo '<div class="dps-admin-options">';
             echo '<h5 class="dps-admin-options__title">' . esc_html__( '🔧 Opções Administrativas', 'dps-registration-addon' ) . '</h5>';
             echo '<p><label><input type="checkbox" name="dps_admin_skip_confirmation" value="1"> ' . esc_html__( 'Ativar cadastro imediatamente (pular confirmação de email)', 'dps-registration-addon' ) . '</label></p>';
             echo '<p><label><input type="checkbox" name="dps_admin_send_welcome" value="1" checked> ' . esc_html__( 'Enviar email de boas-vindas', 'dps-registration-addon' ) . '</label></p>';

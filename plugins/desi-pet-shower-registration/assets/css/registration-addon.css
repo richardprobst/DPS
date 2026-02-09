@@ -279,9 +279,7 @@
 
 /* Campos full-width */
 .dps-client-fields p.dps-field-full,
-.dps-pet-fieldset p.dps-field-full,
-.dps-client-fields p[style*="100%"],
-.dps-pet-fieldset p[style*="100%"] {
+.dps-pet-fieldset p.dps-field-full {
     grid-column: 1 / -1;
 }
 
@@ -1550,6 +1548,7 @@
     border-left: 3px solid var(--dps-warning);
     padding: var(--dps-space-5) var(--dps-space-6);
     border-radius: 0 var(--dps-shape-small) var(--dps-shape-small) 0;
+    margin-top: var(--dps-space-4);
     margin-bottom: var(--dps-space-6);
 }
 
