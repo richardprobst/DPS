@@ -157,7 +157,7 @@ Todos os plugins/add-ons DEVEM declarar:
 ---
 
 ## Boas práticas WordPress (arquitetura e APIs)
-- **Priorize APIs nativas** (Settings API, REST API, WP_Query, $wpdb com `prepare`) antes de soluções customizadas.
+- **Priorize APIs nativas** (Settings API, REST API, WP_Query, `$wpdb->prepare()`) antes de soluções customizadas.
 - **Hooks first**: prefira estender via `add_action`/`add_filter` em vez de alterar fluxo direto do núcleo/base.
 - **Enqueue correto**: registre e carregue scripts/estilos apenas nas telas necessárias, com dependências explícitas.
 - **I18n sempre que houver UI**: strings visíveis ao usuário devem usar funções de tradução.
@@ -171,12 +171,10 @@ O DPS adota padrão **minimalista/clean** no admin.
 - Mantenha hierarquia semântica (H1 único, H2 seções, H3 subseções).
 - Feedback consistente: use `DPS_Message_Helper` para sucesso/erro/aviso.
 - Responsividade básica quando necessário (480/768/1024).
-- **Obrigatório:** qualquer tarefa de **layout/design/frontend** (criar, recriar, corrigir ou ajustar UI) **DEVE** seguir as especificações de `docs/visual/`. Sempre consulte:
-  - `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` (metodologia, contextos de uso, checklist).
-  - `docs/visual/VISUAL_STYLE_GUIDE.md` (paleta, componentes, espaçamento).
+- **Obrigatório:** qualquer tarefa de **layout/design/frontend** (criar, recriar, corrigir ou ajustar UI) **DEVE** seguir as especificações de `docs/visual/` (ver referências abaixo).
 
-Outras referências úteis:
-- `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` — **instruções completas de design frontend** (metodologia, contextos, acessibilidade, performance)
+Referências de design e layout:
+- `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` — **instruções completas de design frontend** (metodologia, contextos de uso, acessibilidade, performance, checklist)
 - `docs/visual/VISUAL_STYLE_GUIDE.md` — paleta, componentes e espaçamento
 - `docs/layout/admin/ADMIN_LAYOUT_ANALYSIS.md`
 - `docs/implementation/UI_UX_IMPROVEMENTS_SUMMARY.md`
