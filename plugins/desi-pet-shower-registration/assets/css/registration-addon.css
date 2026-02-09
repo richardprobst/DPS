@@ -316,14 +316,14 @@
     box-sizing: border-box;
 }
 
-.dps-registration-form input:hover,
+.dps-registration-form input:not([type="checkbox"]):not([type="radio"]):hover,
 .dps-registration-form select:hover,
 .dps-registration-form textarea:hover {
     border-color: var(--dps-color-outline);
     background: var(--dps-color-surface-container-low);
 }
 
-.dps-registration-form input:focus,
+.dps-registration-form input:not([type="checkbox"]):not([type="radio"]):focus,
 .dps-registration-form select:focus,
 .dps-registration-form textarea:focus {
     outline: none;
@@ -355,7 +355,7 @@
 }
 
 /* Focus visible para melhor acessibilidade com teclado */
-.dps-registration-form input:focus-visible,
+.dps-registration-form input:not([type="checkbox"]):not([type="radio"]):focus-visible,
 .dps-registration-form select:focus-visible,
 .dps-registration-form textarea:focus-visible {
     outline: 2px solid var(--dps-accent);
@@ -365,46 +365,52 @@
 }
 
 /* ==========================================================================
-   7. Checkboxes - Modern Style
+   7. Checkboxes - M3 Elegant Inline Style
    ========================================================================== */
 
 .dps-registration-form input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    margin: 0 var(--dps-space-2) 0 0;
     vertical-align: middle;
     accent-color: var(--dps-accent);
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .dps-registration-form label:has(input[type="checkbox"]) {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    font-weight: 500;
+    font-weight: 400;
+    font-size: var(--dps-typescale-body-medium-size);
+    color: var(--dps-text-primary);
     cursor: pointer;
-    padding: 10px 14px;
-    background: var(--dps-background);
-    border: 1px solid var(--dps-border);
-    border-radius: var(--dps-shape-small);
-    transition: all var(--dps-motion-hover);
+    padding: var(--dps-space-1) 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    transition: color var(--dps-motion-hover);
 }
 
 .dps-registration-form label:has(input[type="checkbox"]):hover {
-    background: var(--dps-accent-soft);
-    border-color: var(--dps-accent);
+    color: var(--dps-accent);
+    background: none;
+    border-color: transparent;
 }
 
 /* Fallback para navegadores sem suporte a :has() */
 .dps-registration-form .dps-checkbox-label {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    font-weight: 500;
+    font-weight: 400;
+    font-size: var(--dps-typescale-body-medium-size);
+    color: var(--dps-text-primary);
     cursor: pointer;
-    padding: 10px 14px;
-    background: var(--dps-background);
-    border: 1px solid var(--dps-border);
-    border-radius: var(--dps-shape-small);
-    transition: all var(--dps-motion-hover);
+    padding: var(--dps-space-1) 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    transition: color var(--dps-motion-hover);
 }
 
 /* ==========================================================================
