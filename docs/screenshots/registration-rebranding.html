@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DPS Registration Form — Rebranding M3 Expressive</title>
+    <link rel="stylesheet" href="../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css" />
+    <link rel="stylesheet" href="../../plugins/desi-pet-shower-registration/assets/css/registration-addon.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background: var(--dps-color-surface);
+            color: var(--dps-color-on-surface);
+            font-family: var(--dps-font-system);
+        }
+        .demo-section {
+            max-width: 960px;
+            margin: 0 auto 60px;
+        }
+        .demo-section-title {
+            font-family: var(--dps-font-display);
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--dps-color-on-surface-variant);
+            margin: 0 0 20px;
+            padding: 10px 0;
+            border-bottom: 2px solid var(--dps-color-outline-variant);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== SECTION 1: Success State ==================== -->
+    <div class="demo-section">
+        <p class="demo-section-title">Estado de Sucesso — Cadastro realizado</p>
+        <div class="dps-registration-form">
+            <div class="dps-success-box dps-reg-success" role="status">
+                <h4 class="dps-reg-success__title">✓ Cadastro realizado com sucesso!</h4>
+                <p class="dps-reg-success__text">Seus dados foram recebidos. Você já pode agendar banho e tosa para seus pets!</p>
+                <p class="dps-reg-success__text"><strong>Próximo passo:</strong> Entre em contato conosco por WhatsApp ou telefone para agendar o primeiro atendimento.</p>
+                <p class="dps-reg-success__note">Se você informou um email, verifique sua caixa de entrada para confirmar o cadastro e receber novidades.</p>
+                <p class="dps-reg-success__cta">
+                    <a class="button button-primary dps-reg-success__cta-btn" href="#">Agendar meu primeiro atendimento</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 2: Email Confirmed ==================== -->
+    <div class="demo-section">
+        <p class="demo-section-title">Estado de Sucesso — Email confirmado</p>
+        <div class="dps-registration-form">
+            <div class="dps-success-box dps-reg-success" role="status">
+                <h4 class="dps-reg-success__title">✓ Email confirmado com sucesso!</h4>
+                <p class="dps-reg-success__text">Seu cadastro está ativo. Agora você pode agendar banho e tosa para seus pets e receber novidades por email.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 3: Step 1 — Client Data ==================== -->
+    <div class="demo-section">
+        <p class="demo-section-title">Passo 1 — Dados do Cliente</p>
+        <div class="dps-registration-form">
+
+            <div class="dps-progress" aria-live="polite">
+                <div class="dps-progress-top">
+                    <span id="dps-step-label">Passo 1 de 3</span>
+                    <span id="dps-step-counter">1/3</span>
+                </div>
+                <div class="dps-progress-bar" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1">
+                    <span id="dps-progress-bar-fill" style="width: 33.33%"></span>
+                </div>
+            </div>
+
+            <p class="dps-required-legend"><span class="dps-required">*</span> Campos obrigatórios</p>
+
+            <div class="dps-step dps-step-active" data-step="1">
+                <h4>Dados do Cliente</h4>
+                <div class="dps-client-fields">
+                    <p><label>Nome <span class="dps-required">*</span><br><input type="text" name="client_name" placeholder="Maria Silva"></label></p>
+                    <p><label>CPF<br><input type="text" name="client_cpf" placeholder="000.000.000-00"></label></p>
+                    <p><label>Telefone / WhatsApp <span class="dps-required">*</span><br><input type="tel" name="client_phone" placeholder="(11) 98765-4321"><span class="dps-field-hint">Formato: (DDD) número com 8 ou 9 dígitos</span></label></p>
+                    <p><label>Email<br><input type="email" name="client_email" placeholder="maria@email.com"></label></p>
+                    <p><label>Data de nascimento<br><input type="date" name="client_birth"></label></p>
+                    <p><label>Instagram<br><input type="text" name="client_instagram" placeholder="@usuario"></label></p>
+                    <p><label>Facebook<br><input type="text" name="client_facebook"></label></p>
+                    <p><label><input type="checkbox" name="client_photo_auth" value="1"> Autorizo publicação da foto do pet nas redes sociais do DESI PET SHOWER</label></p>
+                    <p style="flex:1 1 100%;"><label>Endereço completo<br><textarea name="client_address" rows="2"></textarea></label></p>
+                    <p style="flex:1 1 100%;"><label>Como nos conheceu?<br><input type="text" name="client_referral"></label></p>
+                </div>
+
+                <div class="dps-admin-options" style="margin-top: 16px;">
+                    <h5 class="dps-admin-options__title">🔧 Opções Administrativas</h5>
+                    <p><label><input type="checkbox" name="dps_admin_skip_confirmation" value="1"> Ativar cadastro imediatamente (pular confirmação de email)</label></p>
+                    <p><label><input type="checkbox" name="dps_admin_send_welcome" value="1" checked> Enviar email de boas-vindas</label></p>
+                </div>
+
+                <div class="dps-step-actions">
+                    <button type="button" class="button button-primary dps-button-next">Próximo</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 4: Step 2 — Pet Data ==================== -->
+    <div class="demo-section">
+        <p class="demo-section-title">Passo 2 — Dados dos Pets</p>
+        <div class="dps-registration-form">
+
+            <div class="dps-progress" aria-live="polite">
+                <div class="dps-progress-top">
+                    <span>Passo 2 de 3</span>
+                    <span id="dps-step-counter" style="background: var(--dps-accent); color: var(--dps-accent-on);">2/3</span>
+                </div>
+                <div class="dps-progress-bar" role="progressbar">
+                    <span style="width: 66.66%"></span>
+                </div>
+            </div>
+
+            <div class="dps-step dps-step-active" data-step="2">
+                <h4>Dados dos Pets</h4>
+                <div id="dps-pets-wrapper">
+                    <fieldset class="dps-pet-fieldset">
+                        <legend>Pet 1</legend>
+                        <p><label>Nome do Pet<br><input type="text" name="pet_name[]" placeholder="Luna"></label></p>
+                        <p><label>Cliente<br><input type="text" value="Maria Silva" readonly></label></p>
+                        <p><label>Espécie <span class="dps-required">*</span><br>
+                            <select name="pet_species[]">
+                                <option value="">Selecione...</option>
+                                <option value="cao" selected>Cachorro</option>
+                                <option value="gato">Gato</option>
+                                <option value="outro">Outro</option>
+                            </select>
+                        </label></p>
+                        <p><label>Raça<br><input type="text" name="pet_breed[]" placeholder="Golden Retriever"></label></p>
+                        <p><label>Porte <span class="dps-required">*</span><br>
+                            <select name="pet_size[]">
+                                <option value="">Selecione...</option>
+                                <option value="pequeno">Pequeno</option>
+                                <option value="medio">Médio</option>
+                                <option value="grande" selected>Grande</option>
+                            </select>
+                        </label></p>
+                        <p><label>Peso (kg)<br><input type="number" step="0.01" name="pet_weight[]" placeholder="25"></label></p>
+                        <p><label>Pelagem<br><input type="text" name="pet_coat[]" placeholder="Longa"></label></p>
+                        <p><label>Cor<br><input type="text" name="pet_color[]" placeholder="Dourado"></label></p>
+                        <p><label>Data de nascimento<br><input type="date" name="pet_birth[]"></label></p>
+                        <p><label>Sexo <span class="dps-required">*</span><br>
+                            <select name="pet_sex[]">
+                                <option value="">Selecione...</option>
+                                <option value="macho">Macho</option>
+                                <option value="femea" selected>Fêmea</option>
+                            </select>
+                        </label></p>
+                        <p><label>Algum cuidado especial ou restrição?<br><textarea name="pet_care[]" rows="2" placeholder="Ex: Alergia a perfumes fortes"></textarea></label></p>
+                        <p><label><input type="checkbox" name="pet_aggressive[0]" value="1"> Cão agressivo</label></p>
+                    </fieldset>
+                </div>
+                <p><button type="button" id="dps-add-pet" class="button">Adicionar outro pet</button></p>
+                <div class="dps-step-actions">
+                    <button type="button" class="button dps-button-secondary">Voltar</button>
+                    <button type="button" class="button button-primary dps-button-next">Próximo</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 5: Step 3 — Preferences & Summary ==================== -->
+    <div class="demo-section">
+        <p class="demo-section-title">Passo 3 — Preferências e Resumo</p>
+        <div class="dps-registration-form">
+
+            <div class="dps-progress" aria-live="polite">
+                <div class="dps-progress-top">
+                    <span>Passo 3 de 3</span>
+                    <span id="dps-step-counter" style="background: var(--dps-accent); color: var(--dps-accent-on);">3/3</span>
+                </div>
+                <div class="dps-progress-bar" role="progressbar">
+                    <span style="width: 100%"></span>
+                </div>
+            </div>
+
+            <div class="dps-step dps-step-active" data-step="3">
+                <h4>Preferências e Restrições de Produtos</h4>
+                <p class="dps-step-description">Informe preferências ou restrições de produtos para cada pet. Essas informações são muito importantes para garantir a segurança e bem-estar do seu pet durante o atendimento.</p>
+
+                <div id="dps-product-prefs-wrapper">
+                    <div class="dps-product-prefs-pet">
+                        <h5 class="dps-product-prefs-pet__title">🐾 Luna</h5>
+                        <div class="dps-product-pref-field">
+                            <label>Shampoo preferido
+                                <select>
+                                    <option value="">Sem preferência</option>
+                                    <option value="neutro" selected>Neutro/Hipoalergênico</option>
+                                    <option value="filhote">Para filhotes</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="dps-product-pref-field">
+                            <label>Condicionador
+                                <select>
+                                    <option value="">Sem preferência</option>
+                                    <option value="hidratante">Hidratante</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="dps-product-pref-field">
+                            <label>Perfume
+                                <select>
+                                    <option value="">Sem preferência</option>
+                                    <option value="sem">Sem perfume</option>
+                                    <option value="suave">Suave</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="dps-product-pref-field dps-product-pref-field--full">
+                            <label>Observações ou restrições
+                                <textarea rows="2" placeholder="Ex: Alergia ao ingrediente X, não usar produto Y...">Sensível a perfumes fortes. Usar apenas shampoo neutro.</textarea>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dps-summary-box" id="dps-summary-box">
+                    <div class="dps-summary-header">
+                        <h4>Resumo antes de enviar</h4>
+                        <p class="dps-summary-subtitle">Revise os dados do tutor e de todos os pets antes de confirmar.</p>
+                    </div>
+                    <div class="dps-summary-content">
+                        <div class="dps-summary-section">
+                            <h5>👤 Dados do Cliente</h5>
+                            <ul>
+                                <li><strong>Nome:</strong> Maria Silva</li>
+                                <li><strong>Telefone:</strong> (11) 98765-4321</li>
+                                <li><strong>Email:</strong> maria@email.com</li>
+                                <li><strong>Instagram:</strong> @mariasilva</li>
+                            </ul>
+                        </div>
+                        <div class="dps-summary-section">
+                            <h5>🐾 Pets</h5>
+                            <div class="dps-summary-pet">
+                                <h6>🐕 Luna</h6>
+                                <ul>
+                                    <li><strong>Espécie:</strong> Cachorro</li>
+                                    <li><strong>Raça:</strong> Golden Retriever</li>
+                                    <li><strong>Porte:</strong> Grande</li>
+                                    <li><strong>Sexo:</strong> Fêmea</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <label class="dps-summary-confirm"><input type="checkbox" checked> Confirmo que os dados estão corretos</label>
+                </div>
+
+                <div class="dps-step-actions">
+                    <button type="button" class="button dps-button-secondary">Voltar</button>
+                    <button type="submit" class="button button-primary">Enviar cadastro</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 6: Error State ==================== -->
+    <div class="demo-section">
+        <p class="demo-section-title">Mensagens de Feedback</p>
+        <div class="dps-registration-form">
+            <div class="dps-message-error">Ocorreu um erro ao processar o cadastro. Verifique os campos e tente novamente.</div>
+            <div class="dps-message-success">Seus dados foram salvos com sucesso!</div>
+            <div class="dps-reg-message dps-reg-message--error" role="alert">Telefone inválido. Verifique o formato e tente novamente.</div>
+            <div class="dps-reg-message dps-reg-message--success" role="alert">Cadastro confirmado via email!</div>
+        </div>
+    </div>
+
+</body>
+</html>
