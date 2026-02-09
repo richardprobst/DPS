@@ -416,8 +416,9 @@ class DPS_Base_Plugin {
 
         $enqueued = true;
 
-        // CSS
-        wp_enqueue_style( 'dps-base-style', DPS_BASE_URL . 'assets/css/dps-base.css', [], self::get_asset_version( 'assets/css/dps-base.css' ) );
+        // CSS — Design Tokens M3 Expressive (carregado antes de qualquer outro CSS do DPS)
+        wp_enqueue_style( 'dps-design-tokens', DPS_BASE_URL . 'assets/css/dps-design-tokens.css', [], self::get_asset_version( 'assets/css/dps-design-tokens.css' ) );
+        wp_enqueue_style( 'dps-base-style', DPS_BASE_URL . 'assets/css/dps-base.css', [ 'dps-design-tokens' ], self::get_asset_version( 'assets/css/dps-base.css' ) );
         wp_enqueue_style( 'dps-form-validation', DPS_BASE_URL . 'assets/css/dps-form-validation.css', [], self::get_asset_version( 'assets/css/dps-form-validation.css' ) );
         // JS
         wp_enqueue_script( 'dps-base-script', DPS_BASE_URL . 'assets/js/dps-base.js', [ 'jquery' ], self::get_asset_version( 'assets/js/dps-base.js' ), true );
