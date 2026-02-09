@@ -683,6 +683,48 @@ O M3 Expressive usa **botões pill** (totalmente arredondados) com cores sólida
 }
 ```
 
+### 8.4.1 Checkboxes — Estilo Elegante Inline
+
+Checkboxes devem ser **discretos e proporcionais**. Nunca devem parecer botões ou cards.
+O visual correto é um checkbox nativo com `accent-color` e label inline, sem borda, background ou padding excessivo.
+
+```css
+/* Checkbox M3 — inline elegante, sem card-like appearance */
+.dps-checkbox {
+    width: 18px;
+    height: 18px;
+    margin: 0 var(--dps-space-2) 0 0;
+    accent-color: var(--dps-color-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* Label de checkbox — inline-flex, sem borda/background */
+.dps-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 400;                                   /* Nunca 500+ para checkbox labels */
+    font-size: var(--dps-typescale-body-medium-size);    /* 14px */
+    color: var(--dps-color-on-surface);
+    cursor: pointer;
+    padding: var(--dps-space-1) 0;
+    background: none;                                   /* ❌ Nunca adicionar background */
+    border: none;                                       /* ❌ Nunca adicionar borda */
+}
+
+.dps-checkbox-label:hover {
+    color: var(--dps-color-primary);
+}
+```
+
+**Anti-patterns de checkbox:**
+- ❌ `padding: 10px 14px` + `border: 1px solid` + `background` em labels → cria aparência de botão/card
+- ❌ `font-weight: 500` ou `700` em checkbox labels → peso visual desproporcional
+- ❌ `input:hover` / `input:focus` genéricos sem excluir `[type="checkbox"]` → aplica estilos de input de texto
+- ✅ `accent-color` para colorir o checkbox com a cor primária
+- ✅ `inline-flex` com `align-items: center` para alinhamento elegante
+- ✅ Tamanho 18×18px — proporção elegante sem exagero
+
 ### 8.5 Tabelas
 
 ```css
