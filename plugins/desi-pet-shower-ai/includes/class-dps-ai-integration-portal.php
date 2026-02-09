@@ -104,8 +104,13 @@ class DPS_AI_Integration_Portal {
             $widget_classes .= ' dps-ai-assistant--floating dps-ai-assistant--' . $floating_position;
         }
 
-        // Estado inicial: inline mode começa expandido, floating mode começa fechado
-        $initial_expanded = 'floating' !== $widget_mode;
+        // Estado inicial: começa colapsado (discreto) em ambos os modos
+        $initial_expanded = false;
+
+        // Inline mode: adiciona classe colapsado por padrão
+        if ( 'floating' !== $widget_mode ) {
+            $widget_classes .= ' is-collapsed';
+        }
 
         ?>
         <section id="dps-ai-assistant" class="<?php echo esc_attr( $widget_classes ); ?>" data-client-id="<?php echo esc_attr( $client_id ); ?>" data-feedback="<?php echo esc_attr( $enable_feedback ? 'true' : 'false' ); ?>">
@@ -419,11 +424,11 @@ class DPS_AI_Integration_Portal {
             return;
         }
 
-        // CSS do widget
+        // CSS do widget (depende dos design tokens M3)
         wp_enqueue_style(
             'dps-ai-portal',
             DPS_AI_ADDON_URL . 'assets/css/dps-ai-portal.css',
-            [],
+            [ 'dps-design-tokens' ],
             DPS_AI_VERSION
         );
 
