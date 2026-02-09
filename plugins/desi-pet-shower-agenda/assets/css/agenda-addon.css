@@ -4781,3 +4781,215 @@ tr.dps-row-updated {
     background: var(--dps-color-error-container);
     color: var(--dps-color-on-error-container);
 }
+
+/* ========================================================
+   REBRANDING 2026: Identidade visual da Agenda
+   ======================================================== */
+.dps-agenda-wrapper {
+    --dps-surface: var(--dps-color-surface-container-lowest);
+    --dps-background: var(--dps-color-surface);
+    --dps-border: var(--dps-color-outline-variant);
+    --dps-muted: var(--dps-color-on-surface-variant);
+}
+
+.dps-agenda-header {
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+    box-shadow: var(--dps-elevation-0);
+    padding: var(--dps-space-5);
+}
+
+.dps-agenda-title h3 {
+    font-size: var(--dps-typescale-headline-small-size);
+    line-height: var(--dps-typescale-headline-small-line);
+    font-weight: var(--dps-typescale-headline-small-weight);
+}
+
+.dps-agenda-subtitle {
+    font-size: var(--dps-typescale-body-small-size);
+    color: var(--dps-color-on-surface-variant);
+}
+
+.dps-agenda-header .dps-current-date {
+    background: var(--dps-color-surface-container);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-chip);
+    font-size: var(--dps-typescale-label-medium-size);
+    color: var(--dps-color-on-surface);
+    padding: var(--dps-space-2) var(--dps-space-4);
+}
+
+.dps-agenda-controls-wrapper {
+    margin-bottom: var(--dps-space-6);
+}
+
+.dps-agenda-nav--primary {
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+    padding: var(--dps-space-4) var(--dps-space-5);
+}
+
+.dps-nav-btn {
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-chip);
+    color: var(--dps-color-on-surface-variant);
+}
+
+.dps-nav-btn:hover {
+    background: var(--dps-color-surface-container-low);
+    border-color: var(--dps-color-outline);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-nav-btn--today {
+    background: var(--dps-color-primary-container);
+    border-color: var(--dps-color-primary-container);
+    color: var(--dps-color-on-primary-container);
+}
+
+.dps-nav-btn--today:hover {
+    background: var(--dps-color-primary);
+    border-color: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+}
+
+.dps-view-buttons {
+    background: var(--dps-color-surface-container-low);
+    border-radius: var(--dps-shape-chip);
+}
+
+.dps-view-btn {
+    border-radius: var(--dps-shape-chip);
+    color: var(--dps-color-on-surface-variant);
+}
+
+.dps-view-btn:hover {
+    background: var(--dps-color-surface-container);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-view-btn--active {
+    background: var(--dps-color-primary-container);
+    color: var(--dps-color-on-primary-container);
+    box-shadow: var(--dps-elevation-0);
+}
+
+.dps-view-btn--active:hover {
+    background: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+}
+
+.dps-agenda-context-bar {
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+}
+
+.dps-agenda-summary {
+    background: var(--dps-color-surface-container-low);
+    border: 1px solid var(--dps-color-outline-variant);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-summary-item {
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-chip);
+}
+
+.dps-agenda-table-container {
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+    box-shadow: var(--dps-elevation-0);
+}
+
+.dps-agenda-wrapper table.dps-table thead th {
+    background: var(--dps-color-surface-container-low);
+    color: var(--dps-color-on-surface-variant);
+    border-bottom: 1px solid var(--dps-color-outline-variant);
+}
+
+.dps-agenda-wrapper table.dps-table tbody tr {
+    background: transparent;
+    border-left-width: 3px;
+}
+
+.dps-agenda-wrapper table.dps-table tbody tr:hover {
+    background: var(--dps-color-surface-container-low);
+}
+
+.dps-agenda-wrapper table.dps-table tr.status-pendente,
+.dps-agenda-wrapper table.dps-table tr.status-finalizado,
+.dps-agenda-wrapper table.dps-table tr.status-finalizado_pago,
+.dps-agenda-wrapper table.dps-table tr.status-cancelado {
+    background: transparent;
+}
+
+.dps-agenda-tabs-header {
+    border-bottom: 1px solid var(--dps-color-outline-variant);
+}
+
+.dps-agenda-tabs-nav {
+    gap: var(--dps-space-4);
+}
+
+.dps-agenda-tab-button {
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+    box-shadow: var(--dps-elevation-0);
+}
+
+.dps-agenda-tab-button:hover {
+    background: var(--dps-color-surface-container-low);
+    border-color: var(--dps-color-primary);
+    color: var(--dps-color-on-surface);
+    transform: none;
+    box-shadow: var(--dps-elevation-0);
+}
+
+.dps-agenda-tab-button--active {
+    background: var(--dps-color-primary-container);
+    border-color: var(--dps-color-primary);
+    color: var(--dps-color-on-primary-container);
+    box-shadow: var(--dps-elevation-1);
+}
+
+.dps-agenda-tab-button--active .dps-tab-desc {
+    color: var(--dps-color-on-primary-container);
+}
+
+.dps-agenda-empty {
+    background: var(--dps-color-surface-container-low);
+    border: 1px dashed var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+}
+
+.dps-modal-content,
+.dps-payment-modal-content,
+.dps-services-modal-content,
+.dps-reschedule-content {
+    background: var(--dps-color-surface-container-lowest);
+    border-radius: var(--dps-shape-medium);
+    box-shadow: var(--dps-elevation-3);
+}
+
+.dps-payment-modal-header,
+.dps-services-modal-header {
+    background: var(--dps-color-surface-container-high);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-payment-modal-close,
+.dps-services-modal-close {
+    color: var(--dps-color-on-surface-variant);
+}
+
+.dps-payment-modal-close:hover,
+.dps-services-modal-close:hover {
+    color: var(--dps-color-on-surface);
+}
