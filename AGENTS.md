@@ -157,7 +157,7 @@ Todos os plugins/add-ons DEVEM declarar:
 ---
 
 ## Boas práticas WordPress (arquitetura e APIs)
-- **Priorize APIs nativas** (Settings API, REST API, WP_Query, $wpdb com `prepare`) antes de soluções customizadas.
+- **Priorize APIs nativas** (Settings API, REST API, WP_Query, `$wpdb->prepare()`) antes de soluções customizadas.
 - **Hooks first**: prefira estender via `add_action`/`add_filter` em vez de alterar fluxo direto do núcleo/base.
 - **Enqueue correto**: registre e carregue scripts/estilos apenas nas telas necessárias, com dependências explícitas.
 - **I18n sempre que houver UI**: strings visíveis ao usuário devem usar funções de tradução.
