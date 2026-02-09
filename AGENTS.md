@@ -9,6 +9,7 @@ Este documento existe para **proteger o sistema** (segurança, compatibilidade, 
 - **Default = autonomia:** se algo não estiver em **MUST** ou **ASK BEFORE**, o agente pode escolher a melhor abordagem.
 - **Preferir pragmatismo:** entregue valor com o menor risco. Refatore quando fizer sentido, mas evite “refactors por esporte”.
 - **Quando houver trade-off:** escolha uma opção e deixe **2–3 linhas** registrando a alternativa e por que não foi usada.
+- **Contexto e aplicabilidade:** se uma diretriz não se aplica ao caso concreto, registre em 1–2 linhas o motivo.
 
 ## Como usar este documento (trilhas)
 
@@ -155,15 +156,26 @@ Todos os plugins/add-ons DEVEM declarar:
 
 ---
 
+## Boas práticas WordPress (arquitetura e APIs)
+- **Priorize APIs nativas** (Settings API, REST API, WP_Query, $wpdb com `prepare`) antes de soluções customizadas.
+- **Hooks first**: prefira estender via `add_action`/`add_filter` em vez de alterar fluxo direto do núcleo/base.
+- **Enqueue correto**: registre e carregue scripts/estilos apenas nas telas necessárias, com dependências explícitas.
+- **I18n sempre que houver UI**: strings visíveis ao usuário devem usar funções de tradução.
+- **Separação clara**: lógica de negócio em classes/helpers, UI em templates/partials, assets em `assets/`.
+
+---
+
 ## UI/UX (diretrizes mínimas)
 O DPS adota padrão **minimalista/clean** no admin.
 - Use cores com propósito (status/alertas/ação), evite decoração.
 - Mantenha hierarquia semântica (H1 único, H2 seções, H3 subseções).
 - Feedback consistente: use `DPS_Message_Helper` para sucesso/erro/aviso.
 - Responsividade básica quando necessário (480/768/1024).
-- **Antes de criar qualquer frontend**, consulte `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` para metodologia de design, contextos de uso e checklist de implementação.
+- **Obrigatório:** qualquer tarefa de **layout/design/frontend** (criar, recriar, corrigir ou ajustar UI) **DEVE** seguir as especificações de `docs/visual/`. Sempre consulte:
+  - `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` (metodologia, contextos de uso, checklist).
+  - `docs/visual/VISUAL_STYLE_GUIDE.md` (paleta, componentes, espaçamento).
 
-Referências completas:
+Outras referências úteis:
 - `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` — **instruções completas de design frontend** (metodologia, contextos, acessibilidade, performance)
 - `docs/visual/VISUAL_STYLE_GUIDE.md` — paleta, componentes e espaçamento
 - `docs/layout/admin/ADMIN_LAYOUT_ANALYSIS.md`
