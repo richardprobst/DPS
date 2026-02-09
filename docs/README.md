@@ -211,7 +211,7 @@ Documentação de segurança e auditoria.
 
 **Arquivos:**
 - `README.md` - Índice da pasta de screenshots
-- `PORTAL_CLIENTE_SCREENSHOTS.md` - **📸 Documentação visual completa do Portal do Cliente** com descrição de todos os componentes, layouts, funcionalidades e guia de visualização
+- `AGENDA_REBRANDING_SCREENSHOTS.md` - **📸 Registro visual do rebranding da Agenda** com capturas por viewport
 
 > Para visualizar o portal em ação, veja também: `docs/layout/client-portal/portal-cliente-demo.html`
 

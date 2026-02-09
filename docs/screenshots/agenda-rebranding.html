@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DPS Agenda — Rebranding</title>
+    <link rel="stylesheet" href="../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css" />
+    <link rel="stylesheet" href="../../plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css" />
+    <style>
+        body {
+            margin: 0;
+            background: var(--dps-color-surface);
+            color: var(--dps-color-on-surface);
+            font-family: var(--dps-font-system);
+        }
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--dps-space-6);
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="dps-agenda-wrapper">
+            <header class="dps-agenda-header">
+                <div class="dps-agenda-title">
+                    <h3>Agenda de Atendimentos</h3>
+                    <p class="dps-agenda-subtitle">Gestão diária de pets, serviços e equipe.</p>
+                </div>
+                <div class="dps-agenda-header-actions">
+                    <div class="dps-agenda-header-nav">
+                        <span class="dps-current-date">Hoje: <strong>07 Fev 2026</strong></span>
+                        <div class="dps-date-nav">
+                            <a class="dps-nav-btn dps-nav-btn--prev" href="#">‹</a>
+                            <a class="dps-nav-btn dps-nav-btn--today" href="#">Hoje</a>
+                            <a class="dps-nav-btn dps-nav-btn--next" href="#">›</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dps-agenda-controls-wrapper">
+                <div class="dps-agenda-nav--primary">
+                    <div class="dps-agenda-nav-group dps-agenda-nav-group--date">
+                        <span class="dps-nav-label">Visualização</span>
+                        <div class="dps-view-buttons">
+                            <a class="dps-view-btn dps-view-btn--active" href="#">Dia</a>
+                            <a class="dps-view-btn" href="#">Semana</a>
+                            <a class="dps-view-btn" href="#">Mês</a>
+                        </div>
+                    </div>
+                    <div class="dps-agenda-nav-group dps-agenda-nav-group--actions">
+                        <a class="dps-btn dps-btn--primary" href="#">+ Novo atendimento</a>
+                        <a class="dps-btn dps-btn--ghost" href="#">Exportar</a>
+                    </div>
+                </div>
+
+                <div class="dps-agenda-context-bar">
+                    <div class="dps-context-meta">
+                        <span class="dps-context-pill dps-context-pill--accent">Equipe: 4 profissionais</span>
+                        <span class="dps-context-pill">Agenda cheia</span>
+                    </div>
+                    <div class="dps-context-actions">
+                        <button class="dps-btn dps-btn--soft">Relatório</button>
+                    </div>
+                </div>
+            </div>
+
+            <section class="dps-agenda-summary">
+                <div class="dps-summary-item dps-summary-item--pending">
+                    <span class="dps-summary-icon">⏳</span>
+                    <span>Pendentes <strong>6</strong></span>
+                </div>
+                <div class="dps-summary-item dps-summary-item--done">
+                    <span class="dps-summary-icon">✅</span>
+                    <span>Concluídos <strong>8</strong></span>
+                </div>
+                <div class="dps-summary-item dps-summary-item--total">
+                    <span class="dps-summary-icon">🐾</span>
+                    <span>Total <strong>14</strong></span>
+                </div>
+            </section>
+
+            <div class="dps-agenda-tabs-wrapper">
+                <div class="dps-agenda-tabs-header">
+                    <h4 class="dps-agenda-tabs-title">Visões rápidas</h4>
+                </div>
+                <div class="dps-agenda-tabs-nav">
+                    <button class="dps-agenda-tab-button dps-agenda-tab-button--active" type="button">
+                        <span class="dps-tab-icon">📅</span>
+                        <span class="dps-tab-label">Visão rápida</span>
+                        <span class="dps-tab-desc">Resumo do dia</span>
+                    </button>
+                    <button class="dps-agenda-tab-button" type="button">
+                        <span class="dps-tab-icon">⚙️</span>
+                        <span class="dps-tab-label">Operação</span>
+                        <span class="dps-tab-desc">Ações rápidas</span>
+                    </button>
+                    <button class="dps-agenda-tab-button" type="button">
+                        <span class="dps-tab-icon">🔎</span>
+                        <span class="dps-tab-label">Detalhes</span>
+                        <span class="dps-tab-desc">Notas e serviços</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="dps-agenda-table-container">
+                <table class="dps-table">
+                    <thead>
+                        <tr>
+                            <th>Horário</th>
+                            <th>Pet</th>
+                            <th>Cliente</th>
+                            <th>Status</th>
+                            <th>Equipe</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="status-pendente">
+                            <td data-label="Horário">09:00</td>
+                            <td data-label="Pet">Luna</td>
+                            <td data-label="Cliente">Mariana Costa</td>
+                            <td data-label="Status">Pendente</td>
+                            <td data-label="Equipe">Ana</td>
+                        </tr>
+                        <tr class="status-finalizado">
+                            <td data-label="Horário">10:30</td>
+                            <td data-label="Pet">Rex</td>
+                            <td data-label="Cliente">Carlos Lima</td>
+                            <td data-label="Status">Finalizado</td>
+                            <td data-label="Equipe">Paulo</td>
+                        </tr>
+                        <tr class="status-finalizado_pago">
+                            <td data-label="Horário">12:00</td>
+                            <td data-label="Pet">Mel</td>
+                            <td data-label="Cliente">Luciana Rocha</td>
+                            <td data-label="Status">Pago</td>
+                            <td data-label="Equipe">Bianca</td>
+                        </tr>
+                        <tr class="status-cancelado">
+                            <td data-label="Horário">14:00</td>
+                            <td data-label="Pet">Thor</td>
+                            <td data-label="Cliente">João Silva</td>
+                            <td data-label="Status">Cancelado</td>
+                            <td data-label="Equipe">Equipe B</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
