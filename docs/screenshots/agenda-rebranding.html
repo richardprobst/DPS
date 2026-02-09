@@ -32,9 +32,9 @@
                     <div class="dps-agenda-header-nav">
                         <span class="dps-current-date">Hoje: <strong>07 Fev 2026</strong></span>
                         <div class="dps-date-nav">
-                            <a class="dps-nav-btn dps-nav-btn--prev" href="#">‹</a>
-                            <a class="dps-nav-btn dps-nav-btn--today" href="#">Hoje</a>
-                            <a class="dps-nav-btn dps-nav-btn--next" href="#">›</a>
+                            <button class="dps-nav-btn dps-nav-btn--prev" type="button" aria-label="Dia anterior">‹</button>
+                            <button class="dps-nav-btn dps-nav-btn--today" type="button" aria-label="Ir para hoje">Hoje</button>
+                            <button class="dps-nav-btn dps-nav-btn--next" type="button" aria-label="Próximo dia">›</button>
                         </div>
                     </div>
                 </div>
@@ -45,14 +45,14 @@
                     <div class="dps-agenda-nav-group dps-agenda-nav-group--date">
                         <span class="dps-nav-label">Visualização</span>
                         <div class="dps-view-buttons">
-                            <a class="dps-view-btn dps-view-btn--active" href="#">Dia</a>
-                            <a class="dps-view-btn" href="#">Semana</a>
-                            <a class="dps-view-btn" href="#">Mês</a>
+                            <button class="dps-view-btn dps-view-btn--active" type="button">Dia</button>
+                            <button class="dps-view-btn" type="button">Semana</button>
+                            <button class="dps-view-btn" type="button">Mês</button>
                         </div>
                     </div>
                     <div class="dps-agenda-nav-group dps-agenda-nav-group--actions">
-                        <a class="dps-btn dps-btn--primary" href="#">+ Novo atendimento</a>
-                        <a class="dps-btn dps-btn--ghost" href="#">Exportar</a>
+                        <button class="dps-btn dps-btn--primary" type="button">+ Novo atendimento</button>
+                        <button class="dps-btn dps-btn--ghost" type="button">Exportar</button>
                     </div>
                 </div>
 
@@ -69,15 +69,15 @@
 
             <section class="dps-agenda-summary">
                 <div class="dps-summary-item dps-summary-item--pending">
-                    <span class="dps-summary-icon">⏳</span>
+                    <span class="dps-summary-icon" aria-hidden="true">⏳</span>
                     <span>Pendentes <strong>6</strong></span>
                 </div>
                 <div class="dps-summary-item dps-summary-item--done">
-                    <span class="dps-summary-icon">✅</span>
+                    <span class="dps-summary-icon" aria-hidden="true">✅</span>
                     <span>Concluídos <strong>8</strong></span>
                 </div>
                 <div class="dps-summary-item dps-summary-item--total">
-                    <span class="dps-summary-icon">🐾</span>
+                    <span class="dps-summary-icon" aria-hidden="true">🐾</span>
                     <span>Total <strong>14</strong></span>
                 </div>
             </section>
@@ -88,17 +88,17 @@
                 </div>
                 <div class="dps-agenda-tabs-nav">
                     <button class="dps-agenda-tab-button dps-agenda-tab-button--active" type="button">
-                        <span class="dps-tab-icon">📅</span>
+                        <span class="dps-tab-icon" aria-hidden="true">📅</span>
                         <span class="dps-tab-label">Visão rápida</span>
                         <span class="dps-tab-desc">Resumo do dia</span>
                     </button>
                     <button class="dps-agenda-tab-button" type="button">
-                        <span class="dps-tab-icon">⚙️</span>
+                        <span class="dps-tab-icon" aria-hidden="true">⚙️</span>
                         <span class="dps-tab-label">Operação</span>
                         <span class="dps-tab-desc">Ações rápidas</span>
                     </button>
                     <button class="dps-agenda-tab-button" type="button">
-                        <span class="dps-tab-icon">🔎</span>
+                        <span class="dps-tab-icon" aria-hidden="true">🔎</span>
                         <span class="dps-tab-label">Detalhes</span>
                         <span class="dps-tab-desc">Notas e serviços</span>
                     </button>

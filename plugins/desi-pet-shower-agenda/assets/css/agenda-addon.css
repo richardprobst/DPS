@@ -4844,6 +4844,11 @@ tr.dps-row-updated {
     color: var(--dps-color-on-surface);
 }
 
+.dps-nav-btn:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
+}
+
 .dps-nav-btn--today {
     background: var(--dps-color-primary-container);
     border-color: var(--dps-color-primary-container);
@@ -4869,6 +4874,11 @@ tr.dps-row-updated {
 .dps-view-btn:hover {
     background: var(--dps-color-surface-container);
     color: var(--dps-color-on-surface);
+}
+
+.dps-view-btn:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 .dps-view-btn--active {
@@ -4915,7 +4925,7 @@ tr.dps-row-updated {
 
 .dps-agenda-wrapper table.dps-table tbody tr {
     background: transparent;
-    border-left-width: 3px;
+    border-left: 3px solid transparent;
 }
 
 .dps-agenda-wrapper table.dps-table tbody tr:hover {
@@ -4950,6 +4960,11 @@ tr.dps-row-updated {
     color: var(--dps-color-on-surface);
     transform: none;
     box-shadow: var(--dps-elevation-0);
+}
+
+.dps-agenda-tab-button:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 .dps-agenda-tab-button--active {
