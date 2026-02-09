@@ -213,8 +213,6 @@ Documentação de segurança e auditoria.
 - `README.md` - Índice da pasta de screenshots
 - `AGENDA_REBRANDING_SCREENSHOTS.md` - **📸 Registro visual do rebranding da Agenda** com capturas por viewport
 
-> Para visualizar o portal em ação, veja também: `docs/layout/client-portal/portal-cliente-demo.html`
-
 ### 📁 /docs/visual
 
 Guia de estilo visual (cores, tipografia, componentes) e instruções de design frontend.

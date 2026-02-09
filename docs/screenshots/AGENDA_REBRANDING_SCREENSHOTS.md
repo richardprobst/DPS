@@ -15,15 +15,12 @@
 
 ### Desktop — Visão geral
 ![Agenda rebranding desktop](assets/agenda-rebranding/agenda-desktop.png)
-> **Nota:** o arquivo no repositório é um placeholder textual para evitar incompatibilidade com binários. A captura real fica registrada nos artifacts do build.
 
 ### Tablet — Tabs e tabela
 ![Agenda rebranding tablet](assets/agenda-rebranding/agenda-tablet.png)
-> **Nota:** o arquivo no repositório é um placeholder textual para evitar incompatibilidade com binários. A captura real fica registrada nos artifacts do build.
 
 ### Mobile — Cartões responsivos
 ![Agenda rebranding mobile](assets/agenda-rebranding/agenda-mobile.png)
-> **Nota:** o arquivo no repositório é um placeholder textual para evitar incompatibilidade com binários. A captura real fica registrada nos artifacts do build.
 
 ## Observações
 - Capturas geradas a partir do arquivo de demo em `docs/screenshots/agenda-rebranding.html` com os estilos oficiais do add-on.
