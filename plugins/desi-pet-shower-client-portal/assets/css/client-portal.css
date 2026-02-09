@@ -92,8 +92,8 @@
 
 .dps-client-portal-access-page {
     max-width: 480px;
-    margin: 40px auto;
-    padding: 0 20px;
+    margin: var(--dps-space-10) auto;
+    padding: 0 var(--dps-space-5);
     font-family: var(--dps-font-body);
     color: var(--dps-gray-700);
     line-height: 1.5;
@@ -140,7 +140,7 @@
     background: var(--dps-white);
     border: 1px solid var(--dps-border-color);
     border-radius: var(--dps-shape-extra-large);
-    padding: 40px 32px;
+    padding: var(--dps-space-10) var(--dps-space-8);
     box-shadow: var(--dps-elevation-2);
     animation: dps-access-card-enter
                var(--dps-motion-duration-medium-2)
@@ -151,17 +151,17 @@
 .dps-portal-access__logo {
     font-size: 56px;
     text-align: center;
-    margin: 0 0 24px;
+    margin: 0 0 var(--dps-space-6);
     line-height: 1;
 }
 
 .dps-portal-access__title {
     font-family: var(--dps-font-display);
     font-size: var(--dps-typescale-headline-small-size);
-    font-weight: 600;
+    font-weight: var(--dps-typescale-headline-small-weight);
     color: var(--dps-gray-700);
     text-align: center;
-    margin: 0 0 12px;
+    margin: 0 0 var(--dps-space-3);
     line-height: var(--dps-typescale-headline-small-line);
 }
 
@@ -170,20 +170,19 @@
     color: var(--dps-gray-500);
     line-height: var(--dps-typescale-body-large-line);
     text-align: center;
-    margin: 0 0 28px;
+    margin: 0 0 var(--dps-space-7);
 }
 
 .dps-portal-access__error {
     background-color: var(--dps-warning-bg);
-    border: 1px solid var(--dps-warning);
-    border-left: 4px solid var(--dps-warning);
+    border-left: 3px solid var(--dps-warning);
     border-radius: var(--dps-shape-small);
-    padding: 16px;
-    margin: 0 0 24px;
+    padding: var(--dps-space-4);
+    margin: 0 0 var(--dps-space-6);
 }
 
 .dps-portal-access__error p {
-    font-size: 14px;
+    font-size: var(--dps-typescale-body-medium-size);
     color: var(--dps-warning-text);
     line-height: 1.5;
     margin: 0;
@@ -195,12 +194,12 @@
     justify-content: center;
     width: 100%;
     background-color: var(--dps-primary);
-    color: #ffffff;
+    color: var(--dps-color-on-primary);
     font-size: var(--dps-typescale-label-large-size);
-    font-weight: 600;
+    font-weight: var(--dps-typescale-label-large-weight);
     text-align: center;
     text-decoration: none;
-    padding: 12px 24px;
+    padding: var(--dps-space-3) var(--dps-space-6);
     border: none;
     border-radius: var(--dps-shape-button);
     cursor: pointer;
@@ -211,7 +210,7 @@
 
 .dps-portal-access__button:hover {
     background-color: var(--dps-primary-hover);
-    color: #ffffff;
+    color: var(--dps-color-on-primary);
     box-shadow: var(--dps-elevation-2);
 }
 
@@ -236,7 +235,7 @@
     font-size: var(--dps-typescale-body-small-size);
     color: var(--dps-gray-500);
     text-align: center;
-    margin: 20px 0 0;
+    margin: var(--dps-space-5) 0 0;
     line-height: 1.5;
 }
 
@@ -248,8 +247,8 @@
 .dps-portal-access__feedback {
     font-size: var(--dps-typescale-body-medium-size);
     text-align: center;
-    margin: 12px 0 0;
-    padding: 12px 16px;
+    margin: var(--dps-space-3) 0 0;
+    padding: var(--dps-space-3) var(--dps-space-4);
     border-radius: var(--dps-shape-small);
     background-color: var(--dps-success-bg);
     color: var(--dps-success);
@@ -273,16 +272,16 @@
 
 /* Seção de email para solicitar acesso */
 .dps-portal-access__email-section {
-    margin: 0 0 28px;
+    margin: 0 0 var(--dps-space-7);
 }
 
 .dps-portal-access__subtitle {
     font-family: var(--dps-font-display);
     font-size: var(--dps-typescale-title-medium-size);
-    font-weight: 600;
+    font-weight: var(--dps-typescale-title-medium-weight);
     color: var(--dps-gray-700);
     text-align: center;
-    margin: 0 0 8px;
+    margin: 0 0 var(--dps-space-2);
     line-height: var(--dps-typescale-title-medium-line);
 }
 
@@ -290,7 +289,7 @@
     font-size: var(--dps-typescale-body-medium-size);
     color: var(--dps-gray-500);
     text-align: center;
-    margin: 0 0 16px;
+    margin: 0 0 var(--dps-space-4);
     line-height: var(--dps-typescale-body-medium-line);
 }
 
@@ -301,14 +300,14 @@
 .dps-portal-access__email-input-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: var(--dps-space-3);
     width: 100%;
 }
 
 .dps-portal-access__email-input {
     width: 100%;
     min-width: 0;
-    padding: 14px 16px;
+    padding: 14px var(--dps-space-4);
     font-size: var(--dps-typescale-body-large-size);
     border: 1px solid var(--dps-border-color);
     border-radius: var(--dps-shape-small);
@@ -334,10 +333,10 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 12px 24px;
+    padding: var(--dps-space-3) var(--dps-space-6);
     font-size: var(--dps-typescale-label-large-size);
-    font-weight: 600;
-    color: #ffffff;
+    font-weight: var(--dps-typescale-label-large-weight);
+    color: var(--dps-color-on-primary);
     background-color: var(--dps-primary);
     border: none;
     border-radius: var(--dps-shape-button);
@@ -361,15 +360,15 @@
 
 /* Seção de WhatsApp */
 .dps-portal-access__whatsapp-section {
-    padding-top: 16px;
+    padding-top: var(--dps-space-4);
     transition: all var(--dps-motion-enter);
 }
 
 .dps-portal-access__whatsapp-section--highlight {
     background-color: var(--dps-warning-bg);
     border-radius: var(--dps-shape-medium);
-    padding: 16px;
-    margin-top: 16px;
+    padding: var(--dps-space-4);
+    margin-top: var(--dps-space-4);
     animation: dps-access-card-enter
                var(--dps-motion-duration-short-4)
                var(--dps-motion-easing-emphasized-decelerate)
@@ -380,12 +379,12 @@
     font-size: var(--dps-typescale-body-small-size);
     color: var(--dps-gray-400);
     text-align: center;
-    margin: 12px 0 16px;
+    margin: var(--dps-space-3) 0 var(--dps-space-4);
     padding: 0;
     position: relative;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--dps-space-3);
 }
 
 .dps-portal-access__divider::before,
@@ -400,7 +399,7 @@
     font-size: var(--dps-typescale-body-medium-size);
     color: var(--dps-gray-500);
     text-align: center;
-    margin: 0 0 12px;
+    margin: 0 0 var(--dps-space-3);
 }
 
 .dps-portal-access__button--secondary {
@@ -414,7 +413,7 @@
 /* Responsivo para formulário de email */
 @media (max-width: 480px) {
     .dps-portal-access__card {
-        padding: 28px 20px;
+        padding: var(--dps-space-7) var(--dps-space-5);
         border-radius: var(--dps-shape-large);
     }
 }
@@ -443,8 +442,8 @@
 /* Título principal H1 */
 .dps-portal-title {
     margin: 0 0 1.5rem 0;
-    font-size: 24px;
-    font-weight: 600;
+    font-size: var(--dps-typescale-headline-small-size);
+    font-weight: var(--dps-typescale-headline-small-weight);
     color: var(--dps-gray-700);
 }
 
@@ -456,10 +455,10 @@
 .dps-portal-breadcrumb {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 0;
-    margin-bottom: 16px;
-    font-size: 14px;
+    gap: var(--dps-space-2);
+    padding: var(--dps-space-3) 0;
+    margin-bottom: var(--dps-space-4);
+    font-size: var(--dps-typescale-body-medium-size);
     color: var(--dps-gray-600);
     flex-wrap: wrap;
 }
@@ -470,7 +469,7 @@
 
 .dps-portal-breadcrumb__item--active {
     color: var(--dps-gray-800);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .dps-portal-breadcrumb__separator {
@@ -483,13 +482,13 @@
     margin-left: auto;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
+    gap: var(--dps-space-2);
+    padding: var(--dps-space-2) var(--dps-space-3);
     background: var(--dps-gray-100);
     color: var(--dps-gray-600);
     border: 1px solid var(--dps-gray-200);
     border-radius: var(--dps-shape-large);
-    font-size: 13px;
+    font-size: var(--dps-typescale-label-small-size);
     font-weight: 500;
     text-decoration: none;
     transition: all var(--dps-motion-hover);
@@ -502,7 +501,7 @@
 }
 
 .dps-portal-review-icon {
-    font-size: 14px;
+    font-size: var(--dps-typescale-body-medium-size);
     line-height: 1;
 }
 
@@ -516,7 +515,7 @@
     }
     
     .dps-portal-review-link {
-        padding: 6px 10px;
+        padding: var(--dps-space-2) var(--dps-space-3);
     }
 }
 
@@ -548,15 +547,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 1rem 1.25rem;
+    gap: var(--dps-space-2);
+    padding: var(--dps-space-4) var(--dps-space-5);
     background: transparent;
     border: none;
     border-bottom: 3px solid transparent;
     color: var(--dps-gray-500);
     text-decoration: none;
     font-weight: 500;
-    font-size: 14px;
+    font-size: var(--dps-typescale-body-medium-size);
     cursor: pointer;
     transition: all var(--dps-motion-hover);
     white-space: nowrap;
@@ -572,11 +571,11 @@
     background: var(--dps-white);
     color: var(--dps-primary);
     border-bottom-color: var(--dps-primary);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .dps-portal-tabs__icon {
-    font-size: 18px;
+    font-size: var(--dps-typescale-title-medium-size);
     line-height: 1;
 }
 
@@ -591,14 +590,14 @@
     justify-content: center;
     min-width: 20px;
     height: 20px;
-    padding: 0 6px;
+    padding: 0 var(--dps-space-2);
     background: var(--dps-danger);
-    color: #fff;
+    color: var(--dps-color-on-primary);
     border-radius: var(--dps-shape-full);
-    font-size: 11px;
-    font-weight: 700;
+    font-size: var(--dps-typescale-label-small-size);
+    font-weight: 500;
     line-height: 1;
-    margin-left: 4px;
+    margin-left: var(--dps-space-1);
 }
 
 .dps-portal-tabs__link.is-active .dps-portal-tabs__badge {
@@ -609,7 +608,7 @@
 .dps-portal-tabs__badge--loyalty {
     background: var(--dps-warning);
     min-width: auto;
-    padding: 0 8px;
+    padding: 0 var(--dps-space-2);
 }
 
 .dps-portal-tabs__link.is-active .dps-portal-tabs__badge--loyalty {
@@ -622,7 +621,7 @@
     border: 1px solid var(--dps-border-color);
     border-top: none;
     border-radius: 0 0 var(--dps-shape-small) var(--dps-shape-small);
-    padding: 24px;
+    padding: var(--dps-space-6);
 }
 
 /* Painéis individuais */
@@ -665,7 +664,7 @@
 
 .dps-portal-nav__link:hover {
     background: var(--dps-primary);
-    color: #fff;
+    color: var(--dps-color-on-primary);
     border-color: var(--dps-primary);
 }
 
