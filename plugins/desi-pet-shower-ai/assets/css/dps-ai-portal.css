@@ -900,7 +900,9 @@
    ACESSIBILIDADE — Reduced motion
    ===================================================== */
 @media (prefers-reduced-motion: reduce) {
-    .dps-ai-assistant__status-dot {
+    .dps-ai-assistant__status-dot,
+    .dps-ai-assistant__loading-dots span,
+    .dps-ai-message {
         animation: none;
     }
 }
