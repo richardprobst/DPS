@@ -1,67 +1,231 @@
-name: PHPUnit Tests - AI Add-on
+name: CI - DPS (Plugins & Add-ons)
 
 on:
   push:
-    branches: [ main, develop, 'copilot/**' ]
+    branches: [ main, develop, 'copilot/**', 'feature/**', 'hotfix/**' ]
     paths:
-      - 'add-ons/desi-pet-shower-ai_addon/**'
-      - '.github/workflows/phpunit.yml'
+      - 'plugins/**'
+      - 'add-ons/**'
+      - 'tools/php/**'
+      - '.github/workflows/**'
+      - '**/composer.json'
+      - '**/composer.lock'
   pull_request:
     branches: [ main, develop ]
     paths:
-      - 'add-ons/desi-pet-shower-ai_addon/**'
-      - '.github/workflows/phpunit.yml'
+      - 'plugins/**'
+      - 'add-ons/**'
+      - 'tools/php/**'
+      - '.github/workflows/**'
+      - '**/composer.json'
+      - '**/composer.lock'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  phpunit:
-    name: PHPUnit Tests (PHP ${{ matrix.php-version }})
+  discover_php_packages:
+    name: Discover PHP packages (composer.json)
     runs-on: ubuntu-latest
-    
+    outputs:
+      packages: ${{ steps.matrix.outputs.packages }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build matrix
+        id: matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          roots=(plugins add-ons)
+          dirs=()
+
+          for r in "${roots[@]}"; do
+            if [ -d "$r" ]; then
+              while IFS= read -r f; do
+                dirs+=("$(dirname "$f")")
+              done < <(find "$r" -maxdepth 4 -name composer.json -type f -print 2>/dev/null || true)
+            fi
+          done
+
+          if [ "${#dirs[@]}" -eq 0 ]; then
+            echo "No composer.json found under plugins/ or add-ons/. Package checks will be skipped."
+            echo 'packages=[]' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          printf '%s\n' "${dirs[@]}" | sort -u > /tmp/packages.txt
+
+          python3 - <<'PY'
+          import json
+          pkgs = []
+          with open("/tmp/packages.txt", "r", encoding="utf-8") as f:
+            for line in f:
+              line = line.strip()
+              if line:
+                pkgs.append(line)
+          print("packages=" + json.dumps(pkgs))
+          PY | tee /tmp/out.txt
+
+          cat /tmp/out.txt >> "$GITHUB_OUTPUT"
+          echo "Discovered packages:"
+          cat /tmp/packages.txt
+
+  wp_plugin_headers:
+    name: Validate WP plugin headers (Requires)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enforce "Requires at least" and "Requires PHP"
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          REQUIRED_WP="6.9"
+          REQUIRED_PHP="8.4"
+
+          roots=(plugins add-ons)
+          files_found=0
+
+          for r in "${roots[@]}"; do
+            [ -d "$r" ] || continue
+            while IFS= read -r f; do
+              files_found=1
+              echo "Checking headers in: $f"
+
+              if ! grep -qE "^\s*Requires at least:\s*${REQUIRED_WP}\b" "$f"; then
+                echo "::error file=$f::Missing or wrong header: Requires at least: ${REQUIRED_WP}"
+                exit 1
+              fi
+
+              if ! grep -qE "^\s*Requires PHP:\s*${REQUIRED_PHP}\b" "$f"; then
+                echo "::error file=$f::Missing or wrong header: Requires PHP: ${REQUIRED_PHP}"
+                exit 1
+              fi
+            done < <(grep -RIl --exclude-dir=vendor --exclude-dir=node_modules -E "^\s*Plugin Name:" "$r" || true)
+          done
+
+          if [ "$files_found" -eq 0 ]; then
+            echo "No WordPress plugin headers found under plugins/ or add-ons/. Skipping."
+          fi
+
+  dev_tools:
+    name: Repo-wide static checks (PHPCS + PHPStan + Psalm)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP (8.4)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+          extensions: mbstring, intl, curl, dom, json, zip
+
+      - name: Cache DevTools vendor
+        uses: actions/cache@v4
+        with:
+          path: |
+            tools/php/vendor
+            ~/.composer/cache
+          key: ${{ runner.os }}-php-8.4-devtools-${{ hashFiles('tools/php/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-8.4-devtools-
+
+      - name: Install dev tools
+        working-directory: tools/php
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run DevTools CI
+        working-directory: tools/php
+        run: composer run --no-interaction ci
+
+  php_packages:
+    name: Package checks (PHP ${{ matrix.php }} · ${{ matrix.package }})
+    needs: [ discover_php_packages ]
+    if: needs.discover_php_packages.outputs.packages != '[]'
+    runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['8.0', '8.1', '8.2']
-    
+        php: [ '8.4' ]
+        package: ${{ fromJSON(needs.discover_php_packages.outputs.packages) }}
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-version }}
-          coverage: xdebug
+          php-version: ${{ matrix.php }}
           tools: composer:v2
-      
+          coverage: none
+          extensions: mbstring, intl, curl, dom, json, zip
+
       - name: Validate composer.json
-        run: composer validate --strict
-        working-directory: add-ons/desi-pet-shower-ai_addon
-      
-      - name: Cache Composer dependencies
+        working-directory: ${{ matrix.package }}
+        run: composer validate --strict --no-interaction
+
+      - name: Cache Composer vendor
         uses: actions/cache@v4
         with:
-          path: add-ons/desi-pet-shower-ai_addon/vendor
-          key: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-${{ hashFiles('add-ons/desi-pet-shower-ai_addon/composer.lock') }}
+          path: |
+            ${{ matrix.package }}/vendor
+            ~/.composer/cache
+          key: ${{ runner.os }}-php-${{ matrix.php }}-${{ matrix.package }}-composer-${{ hashFiles(format('{0}/composer.lock', matrix.package)) }}
           restore-keys: |
-            ${{ runner.os }}-php-${{ matrix.php-version }}-composer-
-      
+            ${{ runner.os }}-php-${{ matrix.php }}-${{ matrix.package }}-composer-
+            ${{ runner.os }}-php-${{ matrix.php }}-
+
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
-        working-directory: add-ons/desi-pet-shower-ai_addon
-      
-      - name: Run PHPUnit tests
-        run: composer test
-        working-directory: add-ons/desi-pet-shower-ai_addon
-      
-      - name: Generate coverage report
-        if: matrix.php-version == '8.1'
-        run: composer test:coverage
-        working-directory: add-ons/desi-pet-shower-ai_addon
-      
-      - name: Upload coverage to artifacts
-        if: matrix.php-version == '8.1'
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: add-ons/desi-pet-shower-ai_addon/coverage/
-          retention-days: 7
+        working-directory: ${{ matrix.package }}
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Composer audit (vulnerabilities)
+        working-directory: ${{ matrix.package }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f composer.lock ]; then
+            composer audit --no-interaction || true
+          else
+            echo "No composer.lock found; skipping composer audit."
+          fi
+
+      - name: PHP syntax check (php -l)
+        working-directory: ${{ matrix.package }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          find . -path ./vendor -prune -o -path ./node_modules -prune -o -name '*.php' -type f -print0 | xargs -0 -n 1 -P 4 php -l
+
+      - name: PHPUnit (if available)
+        working-directory: ${{ matrix.package }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if composer run -l 2>/dev/null | grep -qE '^[[:space:]]+test(\b|:)'; then
+            composer run --no-interaction test
+            exit 0
+          fi
+
+          if [ -x vendor/bin/phpunit ]; then
+            vendor/bin/phpunit
+            exit 0
+          fi
+
+          echo "No PHPUnit tests configured for this package. Skipping."

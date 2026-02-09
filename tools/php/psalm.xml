@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<psalm
+  errorLevel="5"
+  resolveFromConfigFile="true"
+  findUnusedBaselineEntry="true"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="vendor/vimeo/psalm/config.xsd"
+>
+  <projectFiles>
+    <directory name="../../plugins" />
+    <directory name="../../add-ons" />
+    <ignoreFiles>
+      <directory name="../../plugins/**/vendor" />
+      <directory name="../../add-ons/**/vendor" />
+      <directory name="../../**/node_modules" />
+      <directory name="../../**/assets" />
+      <directory name="../../**/build" />
+      <directory name="../../**/dist" />
+    </ignoreFiles>
+  </projectFiles>
+</psalm>
