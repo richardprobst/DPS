@@ -1,0 +1,48 @@
+name: I18n Check (POT generation)
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'plugins/**'
+      - 'add-ons/**'
+      - '**/*.php'
+      - '**/*.js'
+      - '.github/workflows/**'
+  push:
+    branches: [ main, develop, 'feature/**', 'hotfix/**' ]
+    paths:
+      - 'plugins/**'
+      - 'add-ons/**'
+      - '**/*.php'
+      - '**/*.js'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  i18n-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP (8.4)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Install WP-CLI
+        run: |
+          curl -L -o wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          php wp-cli.phar --info
+
+      - name: Generate POT (dry-run)
+        run: |
+          php wp-cli.phar i18n make-pot . /tmp/dps.pot \
+            --exclude=vendor,node_modules,dist,build,coverage \
+            --skip-audit
