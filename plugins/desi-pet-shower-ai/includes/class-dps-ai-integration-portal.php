@@ -181,7 +181,7 @@ class DPS_AI_Integration_Portal {
                                 <?php foreach ( $faq_suggestions as $faq ) : ?>
                                     <button type="button" class="dps-ai-assistant__suggestion-btn" data-question="<?php echo esc_attr( $faq ); ?>">
                                         <span class="dps-ai-assistant__suggestion-text"><?php echo esc_html( $faq ); ?></span>
-                                        <svg class="dps-ai-assistant__suggestion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <svg class="dps-ai-assistant__suggestion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                             <polyline points="9 18 15 12 9 6"></polyline>
                                         </svg>
                                     </button>
