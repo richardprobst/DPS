@@ -1999,7 +1999,7 @@
 /* === SEÇÃO DE ATRIBUIÇÃO === */
 .dps-assignment-fieldset {
     border-left-color: var(--dps-color-tertiary) !important;
-    background: linear-gradient(to right, var(--dps-color-tertiary-container) 0%, var(--dps-color-surface-container-lowest) 100%) !important;
+    background: var(--dps-color-tertiary-container) !important;
 }
 
 .dps-assignment-fieldset .dps-fieldset__legend {
