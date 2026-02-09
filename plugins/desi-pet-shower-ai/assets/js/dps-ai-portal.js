@@ -111,6 +111,14 @@
                 e.stopPropagation();
                 toggleWidget();
             });
+
+            // Acessibilidade: Enter/Space para toggle via header ou botão
+            $header.on('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleWidget();
+                }
+            });
         }
 
         function toggleWidget() {
@@ -119,13 +127,13 @@
             if (isCollapsed) {
                 // Expandir
                 widgetElement.removeClass('is-collapsed');
-                $content.slideDown(300, function() {
+                $content.slideDown(350, function() {
                     $question.focus();
                 });
                 $toggle.attr('aria-expanded', 'true');
             } else {
                 // Colapsar
-                $content.slideUp(300, function() {
+                $content.slideUp(350, function() {
                     widgetElement.addClass('is-collapsed');
                 });
                 $toggle.attr('aria-expanded', 'false');
