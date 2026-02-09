@@ -8,6 +8,8 @@ Este diretório centraliza registros visuais padronizados do sistema DPS.
   - [Rebranding da Agenda (2026)](AGENDA_REBRANDING_SCREENSHOTS.md)
 - **Cadastro**
   - [Rebranding do Formulário de Cadastro (2026)](REGISTRATION_REBRANDING_SCREENSHOTS.md)
+- **Portal do Cliente**
+  - [Rebranding do Portal do Cliente (2026)](CLIENT_PORTAL_REBRANDING_SCREENSHOTS.md)
 
 ## Padrão de registro
 
