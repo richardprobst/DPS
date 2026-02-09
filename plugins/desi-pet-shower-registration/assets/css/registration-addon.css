@@ -736,6 +736,95 @@
 }
 
 /* ==========================================================================
+   11.1. Registration Success Box - M3 Tokens
+   ========================================================================== */
+
+.dps-reg-success {
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    border-radius: var(--dps-shape-medium);
+    background: var(--dps-success-soft);
+    border: 2px solid var(--dps-success);
+    border-left: 5px solid var(--dps-success);
+    color: var(--dps-color-on-success-container);
+    animation: dps-success-pulse 400ms var(--dps-motion-easing-expressive-default);
+}
+
+.dps-reg-success__title {
+    margin: 0 0 12px 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    font-size: 18px !important;
+    font-weight: 700;
+    font-family: var(--dps-font-display);
+    color: var(--dps-color-on-success-container) !important;
+    display: block !important;
+}
+
+.dps-reg-success__title::before {
+    display: none !important;
+}
+
+.dps-reg-success__text {
+    margin: 0 0 8px 0;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--dps-color-on-success-container);
+}
+
+.dps-reg-success__note {
+    margin: 0;
+    font-size: 14px;
+    color: var(--dps-color-on-success-container);
+    opacity: 0.85;
+}
+
+.dps-reg-success__cta {
+    margin: 16px 0 0 0;
+}
+
+.dps-reg-success__cta-btn {
+    background: var(--dps-color-success) !important;
+    border-color: var(--dps-color-success) !important;
+    color: var(--dps-color-on-success) !important;
+    text-decoration: none !important;
+}
+
+.dps-reg-success__cta-btn:hover {
+    opacity: 0.9;
+    box-shadow: var(--dps-elevation-2) !important;
+}
+
+/* ==========================================================================
+   11.2. Fallback Registration Messages - M3 Tokens
+   ========================================================================== */
+
+.dps-reg-message {
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    border-radius: var(--dps-shape-small);
+    font-size: 15px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dps-reg-message--error {
+    background: var(--dps-error-soft);
+    border: 2px solid var(--dps-error);
+    border-left: 5px solid var(--dps-error);
+    color: var(--dps-color-on-error-container);
+}
+
+.dps-reg-message--success {
+    background: var(--dps-success-soft);
+    border: 2px solid var(--dps-success);
+    border-left: 5px solid var(--dps-success);
+    color: var(--dps-color-on-success-container);
+}
+
+/* ==========================================================================
    12. Container de Mapa
    ========================================================================== */
 
@@ -1480,6 +1569,13 @@
 
 .dps-admin-options label {
     font-weight: 500 !important;
+    color: var(--dps-color-on-warning-container);
+}
+
+.dps-admin-options__title {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
     color: var(--dps-color-on-warning-container);
 }
 

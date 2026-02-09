@@ -663,15 +663,14 @@ class DPS_Registration_Addon {
         $html = '';
         foreach ( $messages as $msg ) {
             $class = 'dps-reg-message';
-            $style = 'padding: 12px 16px; margin-bottom: 16px; border-radius: 4px; ';
             
             if ( $msg['type'] === 'error' ) {
-                $style .= 'background-color: #fef2f2; border: 1px solid #ef4444; color: #991b1b;';
+                $class .= ' dps-reg-message--error';
             } elseif ( $msg['type'] === 'success' ) {
-                $style .= 'background-color: #f0fdf4; border: 1px solid #22c55e; color: #166534;';
+                $class .= ' dps-reg-message--success';
             }
             
-            $html .= '<div class="' . esc_attr( $class ) . '" style="' . esc_attr( $style ) . '" role="alert">';
+            $html .= '<div class="' . esc_attr( $class ) . '" role="alert">';
             $html .= esc_html( $msg['text'] );
             $html .= '</div>';
         }
@@ -2453,16 +2452,16 @@ class DPS_Registration_Addon {
         
         // F2.3/F2.8: Mensagem de sucesso melhorada com próximo passo
         if ( $success ) {
-            echo '<div class="dps-success-box" style="padding: 16px 20px; margin-bottom: 20px; border-radius: 6px; background-color: #f0fdf4; border: 1px solid #22c55e; color: #166534;" role="status">';
-            echo '<h4 style="margin: 0 0 12px 0; color: #166534;">' . esc_html__( '✓ Cadastro realizado com sucesso!', 'dps-registration-addon' ) . '</h4>';
-            echo '<p style="margin: 0 0 8px 0;">' . esc_html__( 'Seus dados foram recebidos. Você já pode agendar banho e tosa para seus pets!', 'dps-registration-addon' ) . '</p>';
-            echo '<p style="margin: 0 0 8px 0;"><strong>' . esc_html__( 'Próximo passo:', 'dps-registration-addon' ) . '</strong> ';
+            echo '<div class="dps-success-box dps-reg-success" role="status">';
+            echo '<h4 class="dps-reg-success__title">' . esc_html__( '✓ Cadastro realizado com sucesso!', 'dps-registration-addon' ) . '</h4>';
+            echo '<p class="dps-reg-success__text">' . esc_html__( 'Seus dados foram recebidos. Você já pode agendar banho e tosa para seus pets!', 'dps-registration-addon' ) . '</p>';
+            echo '<p class="dps-reg-success__text"><strong>' . esc_html__( 'Próximo passo:', 'dps-registration-addon' ) . '</strong> ';
             echo esc_html__( 'Entre em contato conosco por WhatsApp ou telefone para agendar o primeiro atendimento.', 'dps-registration-addon' ) . '</p>';
-            echo '<p style="margin: 0; font-size: 0.9em; color: #15803d;">' . esc_html__( 'Se você informou um email, verifique sua caixa de entrada para confirmar o cadastro e receber novidades.', 'dps-registration-addon' ) . '</p>';
+            echo '<p class="dps-reg-success__note">' . esc_html__( 'Se você informou um email, verifique sua caixa de entrada para confirmar o cadastro e receber novidades.', 'dps-registration-addon' ) . '</p>';
             $agenda_url = $this->get_agenda_cta_url();
             if ( $agenda_url ) {
-                echo '<p style="margin: 12px 0 0 0;">';
-                echo '<a class="button button-primary" href="' . esc_url( $agenda_url ) . '" style="background:#16a34a; border-color:#16a34a; text-decoration:none;">' . esc_html__( 'Agendar meu primeiro atendimento', 'dps-registration-addon' ) . '</a>';
+                echo '<p class="dps-reg-success__cta">';
+                echo '<a class="button button-primary dps-reg-success__cta-btn" href="' . esc_url( $agenda_url ) . '">' . esc_html__( 'Agendar meu primeiro atendimento', 'dps-registration-addon' ) . '</a>';
                 echo '</p>';
             }
             echo '</div>';
@@ -2471,9 +2470,9 @@ class DPS_Registration_Addon {
             return ob_get_clean();
         }
         if ( isset( $_GET['dps_email_confirmed'] ) && '1' === $_GET['dps_email_confirmed'] ) {
-            echo '<div class="dps-success-box" style="padding: 16px 20px; margin-bottom: 20px; border-radius: 6px; background-color: #f0fdf4; border: 1px solid #22c55e; color: #166534;" role="status">';
-            echo '<h4 style="margin: 0 0 12px 0; color: #166534;">' . esc_html__( '✓ Email confirmado com sucesso!', 'dps-registration-addon' ) . '</h4>';
-            echo '<p style="margin: 0;">' . esc_html__( 'Seu cadastro está ativo. Agora você pode agendar banho e tosa para seus pets e receber novidades por email.', 'dps-registration-addon' ) . '</p>';
+            echo '<div class="dps-success-box dps-reg-success" role="status">';
+            echo '<h4 class="dps-reg-success__title">' . esc_html__( '✓ Email confirmado com sucesso!', 'dps-registration-addon' ) . '</h4>';
+            echo '<p class="dps-reg-success__text">' . esc_html__( 'Seu cadastro está ativo. Agora você pode agendar banho e tosa para seus pets e receber novidades por email.', 'dps-registration-addon' ) . '</p>';
             echo '</div>';
         }
         echo '<form method="post" id="dps-reg-form">';
@@ -2529,7 +2528,7 @@ class DPS_Registration_Addon {
         // F3.2: Opções administrativas para cadastro rápido
         if ( $is_admin ) {
             echo '<div class="dps-admin-options" style="margin-top: 16px;">';
-            echo '<h5 style="margin: 0 0 12px 0; font-size: 14px; color: #6b7280;">' . esc_html__( '🔧 Opções Administrativas', 'dps-registration-addon' ) . '</h5>';
+            echo '<h5 class="dps-admin-options__title">' . esc_html__( '🔧 Opções Administrativas', 'dps-registration-addon' ) . '</h5>';
             echo '<p><label><input type="checkbox" name="dps_admin_skip_confirmation" value="1"> ' . esc_html__( 'Ativar cadastro imediatamente (pular confirmação de email)', 'dps-registration-addon' ) . '</label></p>';
             echo '<p><label><input type="checkbox" name="dps_admin_send_welcome" value="1" checked> ' . esc_html__( 'Enviar email de boas-vindas', 'dps-registration-addon' ) . '</label></p>';
             echo '</div>';
@@ -2581,12 +2580,6 @@ class DPS_Registration_Addon {
         echo '</div>';
         echo '</div>';
         echo '</form>';
-        // CSS para melhorar a distribuição dos campos do formulário
-        echo '<style>';
-        echo '.dps-registration-form .dps-pet-fieldset, .dps-registration-form .dps-client-fields { display:flex; flex-wrap:wrap; gap:15px; }';
-        echo '.dps-registration-form .dps-pet-fieldset p, .dps-registration-form .dps-client-fields p { flex:1 1 calc(50% - 15px); margin:0; }';
-        echo '.dps-registration-form .dps-client-fields p[style*="100%"], .dps-registration-form .dps-client-fields textarea, .dps-registration-form .dps-pet-fieldset textarea { flex:1 1 100%; width:100%; }';
-        echo '</style>';
         
         // F2.5: Template de pet para JS externo (via elemento script type="text/template")
         echo '<script type="text/template" id="dps-pet-template">' . $placeholder_json . '</script>';
@@ -3253,7 +3246,7 @@ class DPS_Registration_Addon {
         $breed_options = $this->get_breed_options_for_species( '' );
         $datalist_id   = 'dps-breed-list-' . $i;
         ob_start();
-        echo '<fieldset class="dps-pet-fieldset" style="border:1px solid #ddd; padding:10px; margin-bottom:10px;">';
+        echo '<fieldset class="dps-pet-fieldset">';
         echo '<legend>' . sprintf( __( 'Pet %d', 'dps-registration-addon' ), $i ) . '</legend>';
         // Nome do pet
         echo '<p><label>' . esc_html__( 'Nome do Pet', 'dps-registration-addon' ) . '<br><input type="text" name="pet_name[]" class="dps-pet-name"></label></p>';
@@ -3311,7 +3304,7 @@ class DPS_Registration_Addon {
      */
     public function get_pet_fieldset_html_placeholder() {
         ob_start();
-        echo '<fieldset class="dps-pet-fieldset" style="border:1px solid #ddd; padding:10px; margin-bottom:10px;">';
+        echo '<fieldset class="dps-pet-fieldset">';
         echo '<legend>' . __( 'Pet __INDEX__', 'dps-registration-addon' ) . '</legend>';
         echo '<p><label>' . esc_html__( 'Nome do Pet', 'dps-registration-addon' ) . '<br><input type="text" name="pet_name[]" class="dps-pet-name"></label></p>';
         echo '<p><label>' . esc_html__( 'Cliente', 'dps-registration-addon' ) . '<br><input type="text" class="dps-owner-name" readonly></label></p>';
