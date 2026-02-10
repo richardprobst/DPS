@@ -38,6 +38,7 @@
         handleFileUploadPreview();
         handleSmoothScroll();
         handleToggleDetails(); // Phase 2: toggle for financial details
+        handleCollapsibleSections(); // Seções colapsáveis (ex: Pagamentos Pendentes)
         handlePortalMessages(); // Phase 2: feedback for actions
         handleLoyalty();
         initChatWidget();
@@ -787,6 +788,24 @@
                         target.style.display = 'none';
                         this.textContent = 'Ver Detalhes';
                     }
+                }
+            });
+        });
+    }
+
+    /**
+     * Gerencia seções colapsáveis (ex: Pagamentos Pendentes)
+     */
+    function handleCollapsibleSections() {
+        var collapsibleHeaders = document.querySelectorAll('.dps-collapsible__header');
+        
+        collapsibleHeaders.forEach(function(header) {
+            header.addEventListener('click', function(e) {
+                e.preventDefault();
+                var section = this.closest('.dps-collapsible');
+                if (section) {
+                    var isCollapsed = section.classList.toggle('is-collapsed');
+                    this.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
                 }
             });
         });

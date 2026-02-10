@@ -144,8 +144,8 @@ class DPS_AI_Integration_Portal {
                         </div>
                     </div>
                     <button id="dps-ai-toggle" class="dps-ai-assistant__toggle" aria-label="<?php esc_attr_e( 'Expandir/Recolher assistente', 'dps-ai' ); ?>" aria-expanded="<?php echo esc_attr( $initial_expanded ? 'true' : 'false' ); ?>">
-                        <svg class="dps-ai-assistant__toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="6 9 12 15 18 9"></polyline>
+                        <svg class="dps-ai-assistant__toggle-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
                         </svg>
                     </button>
                 </header>

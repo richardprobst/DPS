@@ -781,11 +781,6 @@ final class DPS_Client_Portal {
         // Sugestões contextuais
         DPS_Portal_Renderer::get_instance()->render_contextual_suggestions( $client_id );
         
-        // Indicações (se ativo)
-        if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
-            DPS_Portal_Renderer::get_instance()->render_referrals_summary( $client_id );
-        }
-        
         echo '</div>'; // .dps-inicio-stack
         
         do_action( 'dps_portal_after_inicio_content', $client_id ); // Fase 2.3
@@ -1149,6 +1144,40 @@ final class DPS_Client_Portal {
             $species  = get_post_meta( $pet->ID, 'pet_species', true );
             $breed    = get_post_meta( $pet->ID, 'pet_breed', true );
             
+            // Busca próximo agendamento do pet
+            $next_appointment = get_posts( [
+                'post_type'      => 'dps_agendamento',
+                'post_status'    => 'publish',
+                'posts_per_page' => 1,
+                'meta_query'     => [
+                    'relation' => 'AND',
+                    [
+                        'key'   => 'appointment_pet_id',
+                        'value' => $pet->ID,
+                    ],
+                    [
+                        'key'     => 'appointment_date',
+                        'value'   => current_time( 'Y-m-d' ),
+                        'compare' => '>=',
+                        'type'    => 'DATE',
+                    ],
+                    [
+                        'key'     => 'appointment_status',
+                        'value'   => [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ],
+                        'compare' => 'NOT IN',
+                    ],
+                ],
+                'orderby'  => 'meta_value',
+                'meta_key' => 'appointment_date',
+                'order'    => 'ASC',
+                'fields'   => 'ids',
+            ] );
+            
+            $next_date = '';
+            if ( ! empty( $next_appointment ) ) {
+                $next_date = get_post_meta( $next_appointment[0], 'appointment_date', true );
+            }
+            
             // Busca último atendimento do pet
             $last_appointment = get_posts( [
                 'post_type'      => 'dps_agendamento',
@@ -1211,20 +1240,30 @@ final class DPS_Client_Portal {
                 echo '</span>';
             }
             
-            if ( $last_date ) {
-                $days_ago = floor( ( time() - strtotime( $last_date ) ) / DAY_IN_SECONDS );
-                $date_text = sprintf(
+            // Próximo agendamento do pet
+            if ( $next_date ) {
+                echo '<span class="dps-pet-card__next-appointment">📅 ';
+                echo esc_html( sprintf(
                     /* translators: %s: formatted date */
-                    __( 'Último atendimento: %s', 'dps-client-portal' ),
-                    date_i18n( 'd/m', strtotime( $last_date ) )
-                );
+                    __( 'Próximo: %s', 'dps-client-portal' ),
+                    date_i18n( 'd/m', strtotime( $next_date ) )
+                ) );
+                echo '</span>';
+            } elseif ( $last_date ) {
+                $days_ago = floor( ( time() - strtotime( $last_date ) ) / DAY_IN_SECONDS );
                 if ( $days_ago <= 1 ) {
-                    $date_text = __( 'Último atendimento: Hoje', 'dps-client-portal' );
+                    $date_text = __( 'Último: Hoje', 'dps-client-portal' );
                 } elseif ( $days_ago <= 7 ) {
                     $date_text = sprintf(
                         /* translators: %d: number of days */
-                        _n( 'Último atendimento: %d dia atrás', 'Último atendimento: %d dias atrás', $days_ago, 'dps-client-portal' ),
+                        _n( 'Último: %d dia atrás', 'Último: %d dias atrás', $days_ago, 'dps-client-portal' ),
                         $days_ago
+                    );
+                } else {
+                    $date_text = sprintf(
+                        /* translators: %s: formatted date */
+                        __( 'Último: %s', 'dps-client-portal' ),
+                        date_i18n( 'd/m', strtotime( $last_date ) )
                     );
                 }
                 echo '<span class="dps-pet-card__last-service">' . esc_html( $date_text ) . '</span>';
@@ -1233,6 +1272,12 @@ final class DPS_Client_Portal {
             }
             
             echo '</div>'; // .dps-pet-card__info
+            
+            // Ações rápidas do pet
+            echo '<div class="dps-pet-card__actions">';
+            echo '<button type="button" class="dps-pet-card__action-btn" data-tab="historico-pets" title="' . esc_attr__( 'Ver histórico', 'dps-client-portal' ) . '">📋</button>';
+            echo '</div>';
+            
             echo '</div>'; // .dps-pet-card
         }
         
