@@ -1120,6 +1120,7 @@ html {
 
 .dps-appointment-card {
     display: flex;
+    align-items: flex-start;
     gap: var(--dps-space-4);
     padding: var(--dps-space-4);
     background: var(--dps-color-primary-container);
@@ -1162,22 +1163,23 @@ html {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: var(--dps-space-2);
+    gap: var(--dps-space-1);
     justify-content: center;
+    min-width: 0;
 }
 
 .dps-appointment-card__time,
 .dps-appointment-card__pet,
 .dps-appointment-card__services {
-    font-size: var(--dps-typescale-body-large-size, 16px);
+    font-size: var(--dps-typescale-body-medium-size, 14px);
     color: var(--dps-color-on-surface);
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 .dps-appointment-card__time {
     font-weight: var(--dps-typescale-label-large-weight, 500);
     color: var(--dps-color-on-surface);
-    font-size: var(--dps-typescale-body-large-size, 16px);
+    font-size: var(--dps-typescale-body-medium-size, 14px);
 }
 
 .dps-appointment-card__status {
@@ -1197,7 +1199,7 @@ html {
     display: inline-flex;
     align-items: center;
     gap: var(--dps-space-2);
-    margin-top: var(--dps-space-2);
+    margin-top: var(--dps-space-1);
     padding: var(--dps-space-2) var(--dps-space-4);
     background: var(--dps-color-primary);
     color: var(--dps-color-on-primary);
@@ -1207,6 +1209,7 @@ html {
     font-size: var(--dps-typescale-label-large-size, 14px);
     align-self: flex-start;
     transition: all var(--dps-motion-hover);
+    min-height: 36px;
 }
 
 .dps-appointment-card__action:hover {
@@ -5109,16 +5112,38 @@ html {
 .dps-appointment-actions {
     display: flex;
     gap: var(--dps-space-3);
-    margin-top: var(--dps-space-4);
-    padding-top: var(--dps-space-4);
+    margin-top: var(--dps-space-3);
+    padding-top: var(--dps-space-3);
     border-top: 1px solid var(--dps-color-outline-variant);
+    flex-wrap: wrap;
 }
 
 .dps-btn-reschedule,
 .dps-btn-cancel {
     flex: 1;
-    font-size: 14px;
-    padding: 10px 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dps-space-2);
+    min-height: 40px;
+    padding: var(--dps-space-2) var(--dps-space-4);
+    font-size: var(--dps-typescale-label-large-size, 14px);
+    font-weight: var(--dps-typescale-label-large-weight, 500);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-button);
+    background: var(--dps-color-surface-container-lowest);
+    color: var(--dps-color-on-surface);
+    cursor: pointer;
+    transition: all var(--dps-motion-hover);
+    box-sizing: border-box;
+    line-height: 1.2;
+}
+
+.dps-btn-reschedule:hover,
+.dps-btn-cancel:hover {
+    background: var(--dps-color-surface-container-low);
+    border-color: var(--dps-color-outline);
+    transform: translateY(-1px);
 }
 
 /* Cards de Solicitações */
@@ -5865,10 +5890,9 @@ html {
 }
 
 .dps-quick-actions {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: var(--dps-space-3);
-    justify-content: flex-start;
 }
 
 .dps-quick-action {
@@ -5876,9 +5900,9 @@ html {
     align-items: center;
     justify-content: center;
     gap: var(--dps-space-2);
-    padding: var(--dps-space-3) var(--dps-space-6);
-    min-height: 40px;
-    min-width: 64px;
+    padding: var(--dps-space-3) var(--dps-space-4);
+    min-height: 44px;
+    height: 44px;
     background: var(--dps-color-surface-container-lowest);
     border: 1px solid var(--dps-color-outline-variant);
     border-radius: var(--dps-shape-button);
@@ -5890,8 +5914,6 @@ html {
     transition: all var(--dps-motion-hover);
     white-space: nowrap;
     box-sizing: border-box;
-    flex: 1 1 auto;
-    max-width: 220px;
 }
 
 .dps-quick-action:hover {
@@ -5951,13 +5973,10 @@ html {
 /* Responsivo: 2 colunas em mobile pequeno */
 @media (max-width: 480px) {
     .dps-quick-actions {
-        display: grid;
         grid-template-columns: repeat(2, 1fr);
     }
     
     .dps-quick-action {
-        max-width: none;
-        justify-content: center;
         padding: var(--dps-space-3) var(--dps-space-2);
         font-size: var(--dps-typescale-body-small-size, 12px);
     }
@@ -6012,7 +6031,7 @@ html {
 
 .dps-pets-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--dps-space-3);
 }
 
@@ -6025,12 +6044,13 @@ html {
 .dps-pet-card {
     display: flex;
     align-items: center;
-    gap: var(--dps-space-3);
-    padding: var(--dps-space-3);
+    gap: var(--dps-space-4);
+    padding: var(--dps-space-4);
     background: var(--dps-color-surface-container-low);
     border: 1px solid var(--dps-color-surface-container);
     border-radius: var(--dps-shape-small);
     transition: all var(--dps-motion-hover);
+    min-height: 72px;
 }
 
 .dps-pet-card:hover {
@@ -6115,15 +6135,16 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     background: var(--dps-color-surface-container);
     border: 1px solid var(--dps-color-outline-variant);
     border-radius: var(--dps-shape-full);
     cursor: pointer;
-    font-size: var(--dps-typescale-body-small-size, 12px);
+    font-size: var(--dps-typescale-body-medium-size, 14px);
     transition: all var(--dps-motion-hover);
     padding: 0;
+    flex-shrink: 0;
 }
 
 .dps-pet-card__action-btn:hover {
