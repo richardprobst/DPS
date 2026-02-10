@@ -20,7 +20,10 @@
    ===================================================== */
 .dps-ai-assistant {
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     margin-bottom: var(--dps-space-6);
+    grid-column: 1 / -1;
 }
 
 .dps-ai-assistant__container {
@@ -152,6 +155,9 @@
     justify-content: center;
     position: relative;
     z-index: 1;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
 }
 
 .dps-ai-assistant__toggle:hover {

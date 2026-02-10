@@ -125,19 +125,24 @@ class DPS_Portal_Renderer {
     }
 
     /**
-     * Renderiza seção do próximo agendamento.
+     * Renderiza seção dos próximos agendamentos.
+     * Mostra todos os agendamentos futuros de todos os pets do cliente.
      *
      * @param int $client_id ID do cliente.
      */
     public function render_next_appointment( $client_id ) {
         echo '<section id="proximos" class="dps-portal-section dps-portal-next">';
-        echo '<h2>' . esc_html__( '📅 Seu Próximo Horário', 'dps-client-portal' ) . '</h2>';
+        echo '<h2>' . esc_html__( '📅 Próximos Agendamentos', 'dps-client-portal' ) . '</h2>';
         
-        // Usa repositório para buscar próximo agendamento
-        $next = $this->appointment_repository->get_next_appointment_for_client( $client_id );
+        // Busca todos os agendamentos futuros do cliente (todos os pets)
+        $upcoming = $this->appointment_repository->get_future_appointments_for_client( $client_id );
         
-        if ( $next ) {
-            $this->render_next_appointment_card( $next, $client_id );
+        if ( ! empty( $upcoming ) ) {
+            echo '<div class="dps-appointments-list">';
+            foreach ( $upcoming as $appointment ) {
+                $this->render_next_appointment_card( $appointment, $client_id );
+            }
+            echo '</div>';
         } else {
             $this->render_no_appointments_state();
         }
@@ -224,14 +229,23 @@ class DPS_Portal_Renderer {
         // Usa repositório para buscar pendências
         $pendings = $this->finance_repository->get_pending_transactions_for_client( $client_id );
         
-        echo '<section id="pendencias" class="dps-portal-section dps-portal-finances">';
-        echo '<h2>' . esc_html__( '💳 Pagamentos Pendentes', 'dps-client-portal' ) . '</h2>';
+        $has_pendings = ! empty( $pendings );
+        // Inicia colapsado quando há pendências (requisito: seção começa fechada)
+        $collapsed_class = $has_pendings ? ' is-collapsed' : '';
         
-        if ( $pendings ) {
+        echo '<section id="pendencias" class="dps-portal-section dps-portal-finances dps-collapsible' . esc_attr( $collapsed_class ) . '">';
+        echo '<button type="button" class="dps-collapsible__header" aria-expanded="' . ( $has_pendings ? 'false' : 'true' ) . '">';
+        echo '<h2>' . esc_html__( '💳 Pagamentos Pendentes', 'dps-client-portal' ) . '</h2>';
+        echo '<svg class="dps-collapsible__icon" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';
+        echo '</button>';
+        
+        echo '<div class="dps-collapsible__content">';
+        if ( $has_pendings ) {
             $this->render_financial_pending_list( $pendings );
         } else {
             $this->render_financial_clear_state();
         }
+        echo '</div>';
         echo '</section>';
     }
 
@@ -243,8 +257,10 @@ class DPS_Portal_Renderer {
     private function render_financial_pending_list( $pendings ) {
         // Calcula total de pendências
         $total = 0;
+        $trans_ids = [];
         foreach ( $pendings as $trans ) {
             $total += (float) $trans->valor;
+            $trans_ids[] = $trans->id;
         }
         
         // Card de resumo de pendências com destaque
@@ -257,14 +273,9 @@ class DPS_Portal_Renderer {
         ) ) . '</div>';
         echo '<div class="dps-financial-summary__amount">' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $total ) ) . '</div>';
         echo '</div>';
-        echo '<div class="dps-financial-summary__action">';
-        echo '<button class="button button-primary dps-btn-toggle-details" data-target="financial-details">';
-        echo esc_html__( 'Ver Detalhes', 'dps-client-portal' );
-        echo '</button>';
-        echo '</div>';
         echo '</div>';
         
-        // Tabela de detalhes (inicialmente oculta em mobile)
+        // Tabela de detalhes
         echo '<div id="financial-details" class="dps-financial-details">';
         echo '<table class="dps-table"><thead><tr>';
         echo '<th>' . esc_html__( 'Data', 'dps-client-portal' ) . '</th>';
@@ -276,6 +287,25 @@ class DPS_Portal_Renderer {
             $this->render_financial_pending_row( $trans );
         }
         echo '</tbody></table>';
+        
+        // Botão "Pagar Tudo" quando há mais de uma pendência
+        if ( count( $pendings ) > 1 ) {
+            echo '<div class="dps-financial-pay-all">';
+            echo '<form method="post">';
+            wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
+            echo '<input type="hidden" name="dps_client_portal_action" value="pay_all_transactions">';
+            foreach ( $trans_ids as $tid ) {
+                echo '<input type="hidden" name="trans_ids[]" value="' . esc_attr( $tid ) . '">';
+            }
+            echo '<div class="dps-financial-pay-all__summary">';
+            echo '<span class="dps-financial-pay-all__label">' . esc_html__( 'Total de todas as pendências:', 'dps-client-portal' ) . '</span>';
+            echo '<span class="dps-financial-pay-all__amount">' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $total ) ) . '</span>';
+            echo '</div>';
+            echo '<button type="submit" class="dps-btn-pay-all">' . esc_html__( 'Pagar Tudo', 'dps-client-portal' ) . '</button>';
+            echo '</form>';
+            echo '</div>';
+        }
+        
         echo '</div>'; // .dps-financial-details
     }
 

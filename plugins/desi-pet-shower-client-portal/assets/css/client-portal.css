@@ -1111,16 +1111,22 @@ html {
    CARD DE PRÓXIMO AGENDAMENTO
    Destaque visual para informação importante
    ================================================ */
+/* Lista de agendamentos futuros */
+.dps-appointments-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-space-3);
+}
+
 .dps-appointment-card {
     display: flex;
-    gap: var(--dps-space-5);
-    padding: var(--dps-space-5);
+    gap: var(--dps-space-4);
+    padding: var(--dps-space-4);
     background: var(--dps-color-primary-container);
     border: 1px solid var(--dps-color-outline-variant);
     border-left: 3px solid var(--dps-color-primary);
     border-radius: var(--dps-shape-card);
     box-shadow: var(--dps-elevation-1);
-    margin-bottom: var(--dps-space-6);
 }
 
 .dps-appointment-card__date {
@@ -1128,18 +1134,18 @@ html {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-width: 90px;
-    height: 90px;
-    padding: var(--dps-space-4);
+    min-width: 56px;
+    height: 56px;
+    padding: var(--dps-space-2);
     background: var(--dps-color-primary);
     color: var(--dps-color-on-primary);
-    border-radius: var(--dps-shape-card);
-    box-shadow: var(--dps-elevation-2);
+    border-radius: var(--dps-shape-small);
+    flex-shrink: 0;
 }
 
 .dps-appointment-card__day {
-    font-size: var(--dps-typescale-headline-large-size, 32px);
-    font-weight: var(--dps-typescale-headline-large-weight, 400);
+    font-size: var(--dps-typescale-title-large-size, 22px);
+    font-weight: var(--dps-typescale-title-large-weight, 500);
     line-height: 1;
 }
 
@@ -1974,6 +1980,91 @@ html {
 
 /* Detalhes financeiros (toggle) */
 .dps-financial-details {
+    margin-top: var(--dps-space-5);
+}
+
+/* Botão "Pagar Tudo" */
+.dps-financial-pay-all {
+    margin-top: var(--dps-space-5);
+    padding-top: var(--dps-space-5);
+    border-top: 1px solid var(--dps-color-outline-variant);
+}
+
+.dps-financial-pay-all__summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--dps-space-4);
+}
+
+.dps-financial-pay-all__label {
+    font-size: var(--dps-typescale-body-large-size, 16px);
+    font-weight: var(--dps-typescale-label-large-weight, 500);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-financial-pay-all__amount {
+    font-size: var(--dps-typescale-title-large-size, 22px);
+    font-weight: var(--dps-typescale-title-large-weight, 500);
+    color: var(--dps-color-warning);
+}
+
+.dps-btn-pay-all {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: var(--dps-space-3) var(--dps-space-6);
+    min-height: 40px;
+    background: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+    border: none;
+    border-radius: var(--dps-shape-button);
+    font-size: var(--dps-typescale-label-large-size, 14px);
+    font-weight: var(--dps-typescale-label-large-weight, 500);
+    cursor: pointer;
+    transition: all var(--dps-motion-hover);
+}
+
+.dps-btn-pay-all:hover {
+    background: var(--dps-color-primary-hover);
+    box-shadow: var(--dps-elevation-2);
+}
+
+/* Seção colapsável */
+.dps-collapsible .dps-collapsible__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+}
+
+.dps-collapsible .dps-collapsible__header h2 {
+    margin-bottom: 0;
+}
+
+.dps-collapsible__icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    color: var(--dps-color-on-surface-variant);
+    transition: transform var(--dps-motion-expand);
+}
+
+.dps-collapsible.is-collapsed .dps-collapsible__icon {
+    transform: rotate(-90deg);
+}
+
+.dps-collapsible.is-collapsed .dps-collapsible__content {
+    display: none;
+}
+
+.dps-collapsible .dps-collapsible__content {
     margin-top: var(--dps-space-5);
 }
 
@@ -5777,13 +5868,17 @@ html {
     display: flex;
     flex-wrap: wrap;
     gap: var(--dps-space-3);
+    justify-content: flex-start;
 }
 
 .dps-quick-action {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: var(--dps-space-2);
     padding: var(--dps-space-3) var(--dps-space-6);
+    min-height: 40px;
+    min-width: 64px;
     background: var(--dps-color-surface-container-lowest);
     border: 1px solid var(--dps-color-outline-variant);
     border-radius: var(--dps-shape-button);
@@ -5794,6 +5889,9 @@ html {
     cursor: pointer;
     transition: all var(--dps-motion-hover);
     white-space: nowrap;
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    max-width: 220px;
 }
 
 .dps-quick-action:hover {
@@ -5807,21 +5905,19 @@ html {
     transform: translateY(0);
 }
 
+/* Variante principal — destaque sutil, sem cor de fundo diferente */
 .dps-quick-action--primary {
+    border-color: var(--dps-color-primary);
+    color: var(--dps-color-primary);
+}
+
+.dps-quick-action--primary:hover {
     background: var(--dps-color-primary);
-    border-color: transparent;
     color: var(--dps-color-on-primary);
     box-shadow: var(--dps-elevation-2);
 }
 
-.dps-quick-action--primary:hover {
-    background: var(--dps-color-primary-hover);
-    color: var(--dps-color-on-primary);
-    box-shadow: var(--dps-elevation-3);
-}
-
 .dps-quick-action--chat {
-    background: var(--dps-color-surface-container-lowest);
     border-color: var(--dps-color-primary);
     color: var(--dps-color-primary);
 }
@@ -5831,17 +5927,16 @@ html {
     color: var(--dps-color-on-primary);
 }
 
-/* Botão "Indique e Ganhe" — destaque especial para engajamento */
+/* Botão "Indique e Ganhe" — mesmo padrão outlined */
 .dps-quick-action--referral {
-    background: var(--dps-color-warning-container);
-    border-color: var(--dps-color-warning);
-    color: var(--dps-color-on-warning-container);
+    border-color: var(--dps-color-outline-variant);
+    color: var(--dps-color-on-surface);
 }
 
 .dps-quick-action--referral:hover {
-    background: var(--dps-color-warning);
-    color: var(--dps-color-on-warning, #fff);
-    box-shadow: var(--dps-elevation-2);
+    background: var(--dps-color-surface-container-low);
+    border-color: var(--dps-color-outline);
+    box-shadow: var(--dps-elevation-1);
 }
 
 .dps-quick-action__icon {
@@ -5861,17 +5956,10 @@ html {
     }
     
     .dps-quick-action {
+        max-width: none;
         justify-content: center;
         padding: var(--dps-space-3) var(--dps-space-2);
         font-size: var(--dps-typescale-body-small-size, 12px);
-    }
-    
-    .dps-quick-action__text {
-        display: none;
-    }
-    
-    .dps-quick-action__icon {
-        font-size: var(--dps-typescale-title-large-size, 22px);
     }
 }
 
@@ -6010,6 +6098,39 @@ html {
     font-weight: var(--dps-typescale-label-medium-weight, 500);
 }
 
+.dps-pet-card__next-appointment {
+    display: block;
+    font-size: var(--dps-typescale-body-small-size, 12px);
+    color: var(--dps-color-primary);
+    font-weight: var(--dps-typescale-label-medium-weight, 500);
+}
+
+.dps-pet-card__actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.dps-pet-card__action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--dps-color-surface-container);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-full);
+    cursor: pointer;
+    font-size: var(--dps-typescale-body-small-size, 12px);
+    transition: all var(--dps-motion-hover);
+    padding: 0;
+}
+
+.dps-pet-card__action-btn:hover {
+    background: var(--dps-color-primary-container);
+    border-color: var(--dps-color-primary);
+}
+
 /* Screen reader only (acessibilidade) */
 .sr-only {
     position: absolute;
@@ -6055,25 +6176,21 @@ html {
     
     /* Appointment card responsivo */
     .dps-appointment-card {
-        flex-direction: column;
-        text-align: center;
-        gap: var(--dps-space-4);
+        flex-direction: row;
+        gap: var(--dps-space-3);
     }
     
     .dps-appointment-card__date {
-        width: 100%;
-        max-width: 200px;
-        margin: 0 auto;
-        height: auto;
-        padding: var(--dps-space-5);
+        min-width: 48px;
+        height: 48px;
     }
     
     .dps-appointment-card__details {
-        align-items: center;
+        align-items: flex-start;
     }
     
     .dps-appointment-card__actions {
-        justify-content: center;
+        justify-content: flex-start;
     }
     
     .dps-appointment-card__status {
