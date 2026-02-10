@@ -763,28 +763,30 @@ final class DPS_Client_Portal {
         // Novo: Ações rápidas
         $this->render_quick_actions( $client_id );
         
-        // Grid de conteúdo principal
-        echo '<div class="dps-inicio-grid">';
+        // Conteúdo principal — layout vertical empilhado (single-column)
+        echo '<div class="dps-inicio-stack">';
         
-        // Coluna esquerda: Próximo agendamento e Pets
-        echo '<div class="dps-inicio-col dps-inicio-col--primary">';
+        // Próximo agendamento (prioridade máxima)
         DPS_Portal_Renderer::get_instance()->render_next_appointment( $client_id );
-        $this->render_pets_summary( $client_id );
-        echo '</div>';
         
-        // Coluna direita: Pendências e Sugestões
-        echo '<div class="dps-inicio-col dps-inicio-col--secondary">';
+        // Pendências financeiras (ação necessária)
         DPS_Portal_Renderer::get_instance()->render_financial_pending( $client_id );
-        DPS_Portal_Renderer::get_instance()->render_recent_requests( $client_id ); // Fase 4: Solicitações recentes
-        DPS_Portal_Renderer::get_instance()->render_contextual_suggestions( $client_id ); // Fase 2: Sugestões baseadas em histórico
-        echo '</div>';
         
-        echo '</div>'; // .dps-inicio-grid
+        // Solicitações recentes
+        DPS_Portal_Renderer::get_instance()->render_recent_requests( $client_id );
         
-        // Indicações (se ativo) - ocupa largura total
+        // Pets do cliente
+        $this->render_pets_summary( $client_id );
+        
+        // Sugestões contextuais
+        DPS_Portal_Renderer::get_instance()->render_contextual_suggestions( $client_id );
+        
+        // Indicações (se ativo)
         if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
             DPS_Portal_Renderer::get_instance()->render_referrals_summary( $client_id );
         }
+        
+        echo '</div>'; // .dps-inicio-stack
         
         do_action( 'dps_portal_after_inicio_content', $client_id ); // Fase 2.3
         echo '</div>';
