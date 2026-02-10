@@ -48,7 +48,6 @@ Se existir um `AGENTS.md` mais específico em subdiretórios, **ele prevalece** 
 - **docs/**: documentação detalhada de UX, layout, refatoração e planos de implementação (veja `/docs/README.md` para índice completo).
 - **ANALYSIS.md**: visão arquitetural, fluxos de integração e contratos entre núcleo e extensões.
 - **CHANGELOG.md**: histórico de versões e lançamentos (atualizar a cada release).
-- **docs/refactoring/REFACTORING_ANALYSIS.md**: análise de problemas conhecidos e padrões recomendados.
 - **plugins/desi-pet-shower-base/includes/refactoring-examples.php**: exemplos práticos de uso correto das classes helper globais.
 
 > **Dica (monorepo):** quando necessário, crie `AGENTS.md` dentro de plugins para comandos/contratos locais. Mantenha o root como “constituição” e os específicos como “manual do módulo”.
@@ -166,8 +165,7 @@ Todos os plugins/add-ons DEVEM declarar:
 ---
 
 ## UI/UX (diretrizes mínimas)
-O DPS adota padrão **minimalista/clean** no admin.
-- Use cores com propósito (status/alertas/ação), evite decoração.
+- Use cores com propósito (status/alertas/ação).
 - Mantenha hierarquia semântica (H1 único, H2 seções, H3 subseções).
 - Feedback consistente: use `DPS_Message_Helper` para sucesso/erro/aviso.
 - Responsividade básica quando necessário (480/768/1024).
@@ -176,8 +174,6 @@ O DPS adota padrão **minimalista/clean** no admin.
 Referências de design e layout:
 - `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` — **instruções completas de design frontend** (metodologia, contextos de uso, acessibilidade, performance, checklist)
 - `docs/visual/VISUAL_STYLE_GUIDE.md` — paleta, componentes e espaçamento
-- `docs/layout/admin/ADMIN_LAYOUT_ANALYSIS.md`
-- `docs/implementation/UI_UX_IMPROVEMENTS_SUMMARY.md`
 
 ---
 
@@ -188,15 +184,6 @@ Referências de design e layout:
 - Documente dependências entre add-ons (ex.: Financeiro + Assinaturas) quando houver integração real.
 - Assets apenas em páginas relevantes; considere colisões com temas/plugins.
 - Menus/admin pages de add-ons devem ser submenus de `desi-pet-shower`.
-
----
-
-## Recursos para refatoração
-- `docs/refactoring/REFACTORING_ANALYSIS.md`: problemas conhecidos + candidatos prioritários + padrões sugeridos.
-- `plugins/desi-pet-shower-base/includes/refactoring-examples.php`: exemplos “antes/depois” com helpers e validação.
-
-Quando consultar:
-- Refatorações significativas, novas validações de formulários, manipulação de valores monetários/URLs/queries, revisão de PRs que introduzam novos helpers.
 
 ---
 
@@ -272,41 +259,6 @@ Ao decidir o que corrigir ou melhorar, siga esta ordem de prioridade:
 - Menor privilégio para capabilities.
 - Segredos apenas via constantes/variáveis de ambiente; nunca commitar tokens.
 - Correções de segurança: registrar em “Security (Segurança)” no `CHANGELOG.md`.
-
----
-
-## Setup & validação (quando aplicável)
-- Ambiente local: use o ambiente oficial do projeto (ex.: `docker compose up` ou `wp-env start` se disponível). Se não existir automação, descreva como validou manualmente.
-- Dependências: `composer install` e `npm ci` (quando houver build de assets).
-- Checks sugeridos:
-  - `php -l <arquivos alterados>` — lint básico de sintaxe PHP.
-  - `phpcs` — coding standards (se configurado via `phpcs.xml` ou `composer.json`).
-  - `phpstan analyse` ou `psalm` — análise estática de tipos (se configurado).
-  - `phpcpd` — detecção de código duplicado (se disponível).
-  - Testes automatizados disponíveis (`phpunit`, `npm test`, `npm run build`/`npm run lint` etc.).
-- Se ferramentas não estiverem configuradas no projeto, faça análise por leitura e sugira setup mínimo (sem instalar automaticamente, a menos que seja pedido).
-- Se algum comando não estiver disponível, registre no PR e descreva validação manual equivalente.
-
----
-
-## Definition of Done (por gatilho)
-
-### DoD — Segurança (se tocou input/output, forms, AJAX, REST)
-- [ ] Nonce + capability + sanitização/escape aplicados nos fluxos tocados
-- [ ] Sem segredos no código / logs
-
-### DoD — Banco & contratos (se tocou tabelas, migrações, hooks, integrações)
-- [ ] `dbDelta()` protegido por option de versão
-- [ ] Compatibilidade preservada (ou novo hook + depreciação documentada)
-- [ ] `ANALYSIS.md` atualizado quando houver mudança de contrato/fluxo
-
-### DoD — Admin/UI (se tocou menus, páginas, assets)
-- [ ] Menus/admin pages como submenus de `desi-pet-shower` (sem `parent=null` / sem menu topo)
-- [ ] Assets carregados apenas onde necessário
-- [ ] Feedback via `DPS_Message_Helper` (quando aplicável)
-
-### DoD — Release / user-facing
-- [ ] `CHANGELOG.md` atualizado (categorias corretas) quando a mudança chega ao usuário/integrador
 
 ---
 
