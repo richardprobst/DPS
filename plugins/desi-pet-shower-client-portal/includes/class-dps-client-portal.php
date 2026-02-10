@@ -1217,15 +1217,15 @@ final class DPS_Client_Portal {
             
             echo '<div class="dps-pet-card">';
             
-            // Foto do pet
-            echo '<div class="dps-pet-card__photo">';
+            // Foto do pet (só renderiza se houver foto)
             if ( $photo_id ) {
                 $photo_url = wp_get_attachment_image_url( $photo_id, 'thumbnail' );
                 if ( $photo_url ) {
+                    echo '<div class="dps-pet-card__photo">';
                     echo '<img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet->post_title ) . '" loading="lazy">';
+                    echo '</div>';
                 }
             }
-            echo '</div>';
             
             // Informações do pet
             echo '<div class="dps-pet-card__info">';

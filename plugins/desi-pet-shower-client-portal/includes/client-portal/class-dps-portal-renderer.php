@@ -166,6 +166,7 @@ class DPS_Portal_Renderer {
         
         // Card de destaque para próximo agendamento
         echo '<div class="dps-appointment-card">';
+        echo '<div class="dps-appointment-card__body">';
         echo '<div class="dps-appointment-card__date">';
         echo '<span class="dps-appointment-card__day">' . esc_html( date_i18n( 'd', strtotime( $date ) ) ) . '</span>';
         echo '<span class="dps-appointment-card__month">' . esc_html( date_i18n( 'M', strtotime( $date ) ) ) . '</span>';
@@ -181,19 +182,22 @@ class DPS_Portal_Renderer {
         if ( $status ) {
             echo '<div class="dps-appointment-card__status">' . esc_html( ucfirst( $status ) ) . '</div>';
         }
+        echo '</div>'; // .dps-appointment-card__details
+        echo '</div>'; // .dps-appointment-card__body
+        
+        // Rodapé do card com ações centralizadas
+        echo '<div class="dps-appointment-card__footer">';
         // Link para mapa
         $address = get_post_meta( $client_id, 'client_address', true );
         if ( $address ) {
             $query = urlencode( $address );
             $url   = 'https://www.google.com/maps/search/?api=1&query=' . $query;
-            echo '<a href="' . esc_url( $url ) . '" target="_blank" class="dps-appointment-card__action">📍 ' . esc_html__( 'Ver no mapa', 'dps-client-portal' ) . '</a>';
+            echo '<a href="' . esc_url( $url ) . '" target="_blank" class="dps-appointment-card__footer-btn">📍 ' . esc_html__( 'Mapa', 'dps-client-portal' ) . '</a>';
         }
-        
-        // Ações rápidas (Fase 4)
-        $this->render_appointment_quick_actions( $appointment, $client_id );
-        
-        echo '</div>';
-        echo '</div>';
+        echo '<button type="button" class="dps-appointment-card__footer-btn dps-btn-reschedule" data-appointment-id="' . esc_attr( $appointment->ID ) . '">📅 ' . esc_html__( 'Reagendar', 'dps-client-portal' ) . '</button>';
+        echo '<button type="button" class="dps-appointment-card__footer-btn dps-btn-cancel" data-appointment-id="' . esc_attr( $appointment->ID ) . '">❌ ' . esc_html__( 'Cancelar', 'dps-client-portal' ) . '</button>';
+        echo '</div>'; // .dps-appointment-card__footer
+        echo '</div>'; // .dps-appointment-card
     }
 
     /**
