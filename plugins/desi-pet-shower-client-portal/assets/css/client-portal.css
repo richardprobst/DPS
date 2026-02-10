@@ -1113,8 +1113,8 @@ html {
    ================================================ */
 /* Lista de agendamentos futuros */
 .dps-appointments-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: var(--dps-space-3);
 }
 
@@ -5890,8 +5890,8 @@ html {
 }
 
 .dps-quick-actions {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: var(--dps-space-3);
 }
 
@@ -5900,7 +5900,7 @@ html {
     align-items: center;
     justify-content: center;
     gap: var(--dps-space-2);
-    padding: var(--dps-space-3) var(--dps-space-4);
+    padding: var(--dps-space-3) var(--dps-space-6);
     min-height: 44px;
     height: 44px;
     background: var(--dps-color-surface-container-lowest);
@@ -5970,14 +5970,10 @@ html {
     line-height: 1.2;
 }
 
-/* Responsivo: 2 colunas em mobile pequeno */
+/* Responsivo: botões menores em mobile pequeno */
 @media (max-width: 480px) {
-    .dps-quick-actions {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
     .dps-quick-action {
-        padding: var(--dps-space-3) var(--dps-space-2);
+        padding: var(--dps-space-3) var(--dps-space-3);
         font-size: var(--dps-typescale-body-small-size, 12px);
     }
 }

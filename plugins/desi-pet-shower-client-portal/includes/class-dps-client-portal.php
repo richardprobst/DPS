@@ -1223,11 +1223,7 @@ final class DPS_Client_Portal {
                 $photo_url = wp_get_attachment_image_url( $photo_id, 'thumbnail' );
                 if ( $photo_url ) {
                     echo '<img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet->post_title ) . '" loading="lazy">';
-                } else {
-                    echo '<span class="dps-pet-card__placeholder">🐾</span>';
                 }
-            } else {
-                echo '<span class="dps-pet-card__placeholder">🐾</span>';
             }
             echo '</div>';
             

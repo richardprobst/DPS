@@ -1820,12 +1820,12 @@ class DPS_Portal_Renderer {
         echo '<div class="dps-appointment-actions">';
         
         // Botão de reagendar
-        echo '<button class="button button-secondary dps-btn-reschedule" data-appointment-id="' . esc_attr( $appointment->ID ) . '">';
+        echo '<button type="button" class="dps-btn-reschedule" data-appointment-id="' . esc_attr( $appointment->ID ) . '">';
         echo '📅 ' . esc_html__( 'Solicitar Reagendamento', 'dps-client-portal' );
         echo '</button>';
         
         // Botão de cancelar
-        echo '<button class="button button-secondary dps-btn-cancel" data-appointment-id="' . esc_attr( $appointment->ID ) . '">';
+        echo '<button type="button" class="dps-btn-cancel" data-appointment-id="' . esc_attr( $appointment->ID ) . '">';
         echo '❌ ' . esc_html__( 'Solicitar Cancelamento', 'dps-client-portal' );
         echo '</button>';
         
