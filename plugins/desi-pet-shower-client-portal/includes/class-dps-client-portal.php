@@ -1131,6 +1131,73 @@ final class DPS_Client_Portal {
         $pet_ids = wp_list_pluck( $pets, 'ID' );
         update_meta_cache( 'post', $pet_ids );
         
+        // Pre-fetch próximos agendamentos de todos os pets em uma única query
+        $today = current_time( 'Y-m-d' );
+        $all_future_appts = get_posts( [
+            'post_type'      => 'dps_agendamento',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'meta_query'     => [
+                'relation' => 'AND',
+                [
+                    'key'     => 'appointment_pet_id',
+                    'value'   => $pet_ids,
+                    'compare' => 'IN',
+                ],
+                [
+                    'key'     => 'appointment_date',
+                    'value'   => $today,
+                    'compare' => '>=',
+                    'type'    => 'DATE',
+                ],
+            ],
+            'orderby'  => 'meta_value',
+            'meta_key' => 'appointment_date',
+            'order'    => 'ASC',
+        ] );
+        
+        // Pre-fetch últimos agendamentos finalizados de todos os pets
+        $all_past_appts = get_posts( [
+            'post_type'      => 'dps_agendamento',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'meta_query'     => [
+                'relation' => 'AND',
+                [
+                    'key'     => 'appointment_pet_id',
+                    'value'   => $pet_ids,
+                    'compare' => 'IN',
+                ],
+                [
+                    'key'     => 'appointment_status',
+                    'value'   => [ 'finalizado', 'finalizado e pago', 'finalizado_pago' ],
+                    'compare' => 'IN',
+                ],
+            ],
+            'orderby'  => 'meta_value',
+            'meta_key' => 'appointment_date',
+            'order'    => 'DESC',
+        ] );
+        
+        // Indexar por pet_id para acesso rápido
+        $next_by_pet = [];
+        $cancelled = [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ];
+        foreach ( $all_future_appts as $appt ) {
+            $appt_pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+            $appt_status = get_post_meta( $appt->ID, 'appointment_status', true );
+            if ( ! isset( $next_by_pet[ $appt_pet_id ] ) && ! in_array( $appt_status, $cancelled, true ) ) {
+                $next_by_pet[ $appt_pet_id ] = get_post_meta( $appt->ID, 'appointment_date', true );
+            }
+        }
+        
+        $last_by_pet = [];
+        foreach ( $all_past_appts as $appt ) {
+            $appt_pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+            if ( ! isset( $last_by_pet[ $appt_pet_id ] ) ) {
+                $last_by_pet[ $appt_pet_id ] = get_post_meta( $appt->ID, 'appointment_date', true );
+            }
+        }
+        
         echo '<section class="dps-portal-section dps-portal-pets-summary">';
         echo '<div class="dps-section-header">';
         echo '<h2>🐾 ' . esc_html__( 'Meus Pets', 'dps-client-portal' ) . '</h2>';
@@ -1144,67 +1211,9 @@ final class DPS_Client_Portal {
             $species  = get_post_meta( $pet->ID, 'pet_species', true );
             $breed    = get_post_meta( $pet->ID, 'pet_breed', true );
             
-            // Busca próximo agendamento do pet
-            $next_appointment = get_posts( [
-                'post_type'      => 'dps_agendamento',
-                'post_status'    => 'publish',
-                'posts_per_page' => 1,
-                'meta_query'     => [
-                    'relation' => 'AND',
-                    [
-                        'key'   => 'appointment_pet_id',
-                        'value' => $pet->ID,
-                    ],
-                    [
-                        'key'     => 'appointment_date',
-                        'value'   => current_time( 'Y-m-d' ),
-                        'compare' => '>=',
-                        'type'    => 'DATE',
-                    ],
-                    [
-                        'key'     => 'appointment_status',
-                        'value'   => [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ],
-                        'compare' => 'NOT IN',
-                    ],
-                ],
-                'orderby'  => 'meta_value',
-                'meta_key' => 'appointment_date',
-                'order'    => 'ASC',
-                'fields'   => 'ids',
-            ] );
-            
-            $next_date = '';
-            if ( ! empty( $next_appointment ) ) {
-                $next_date = get_post_meta( $next_appointment[0], 'appointment_date', true );
-            }
-            
-            // Busca último atendimento do pet
-            $last_appointment = get_posts( [
-                'post_type'      => 'dps_agendamento',
-                'post_status'    => 'publish',
-                'posts_per_page' => 1,
-                'meta_query'     => [
-                    'relation' => 'AND',
-                    [
-                        'key'   => 'appointment_pet_id',
-                        'value' => $pet->ID,
-                    ],
-                    [
-                        'key'     => 'appointment_status',
-                        'value'   => [ 'finalizado', 'finalizado e pago', 'finalizado_pago' ],
-                        'compare' => 'IN',
-                    ],
-                ],
-                'orderby'  => 'meta_value',
-                'meta_key' => 'appointment_date',
-                'order'    => 'DESC',
-                'fields'   => 'ids',
-            ] );
-            
-            $last_date = '';
-            if ( ! empty( $last_appointment ) ) {
-                $last_date = get_post_meta( $last_appointment[0], 'appointment_date', true );
-            }
+            // Usa dados pré-carregados
+            $next_date = isset( $next_by_pet[ $pet->ID ] ) ? $next_by_pet[ $pet->ID ] : '';
+            $last_date = isset( $last_by_pet[ $pet->ID ] ) ? $last_by_pet[ $pet->ID ] : '';
             
             echo '<div class="dps-pet-card">';
             
@@ -1275,7 +1284,7 @@ final class DPS_Client_Portal {
             
             // Ações rápidas do pet
             echo '<div class="dps-pet-card__actions">';
-            echo '<button type="button" class="dps-pet-card__action-btn" data-tab="historico-pets" title="' . esc_attr__( 'Ver histórico', 'dps-client-portal' ) . '">📋</button>';
+            echo '<button type="button" class="dps-pet-card__action-btn" data-tab="historico-pets" aria-label="' . esc_attr__( 'Ver histórico', 'dps-client-portal' ) . '" title="' . esc_attr__( 'Ver histórico', 'dps-client-portal' ) . '"><span aria-hidden="true">📋</span></button>';
             echo '</div>';
             
             echo '</div>'; // .dps-pet-card

@@ -230,6 +230,7 @@ class DPS_Portal_Renderer {
         $pendings = $this->finance_repository->get_pending_transactions_for_client( $client_id );
         
         $has_pendings = ! empty( $pendings );
+        // Inicia colapsado quando há pendências (requisito: seção começa fechada)
         $collapsed_class = $has_pendings ? ' is-collapsed' : '';
         
         echo '<section id="pendencias" class="dps-portal-section dps-portal-finances dps-collapsible' . esc_attr( $collapsed_class ) . '">';
