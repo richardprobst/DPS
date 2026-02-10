@@ -68,7 +68,7 @@
         });
 
         // Botões de ação rápida que navegam para tabs
-        var tabButtons = document.querySelectorAll('.dps-quick-action[data-tab], .dps-link-button[data-tab]');
+        var tabButtons = document.querySelectorAll('.dps-quick-action[data-tab], .dps-link-button[data-tab], .dps-pet-card__action-btn[data-tab]');
         // Lista de tabs válidas para prevenir DOM-based XSS
         var validTabs = ['inicio', 'fidelidade', 'avaliacoes', 'mensagens', 'agendamentos', 'historico-pets', 'galeria', 'dados'];
         
