@@ -46,6 +46,13 @@ Para manter este arquivo mais enxuto, as diretrizes operacionais de engenharia (
 Use esse playbook quando a tarefa envolver implementação/refatoração de código no core ou add-ons.
 Ele complementa este AGENTS.md sem substituir as regras de **MUST** e **ASK BEFORE**.
 
+## Uso de agentes especializados (quando disponível)
+
+- Sempre que possível, priorize um **agente especializado/skill** para executar tarefas de implementação.
+- Para mudanças de **código** (backend, arquitetura, integrações), prefira agente focado em engenharia/código.
+- Para mudanças de **frontend/UI/UX/layout**, prefira agente focado em frontend/design e mantenha conformidade com `docs/visual/`.
+- Se não houver agente especializado disponível no ambiente atual, siga com a implementação padrão e registre em 1–2 linhas o motivo.
+
 ---
 
 ## Escopo
