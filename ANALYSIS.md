@@ -1551,29 +1551,41 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Consolidar experiências frontend (cadastro, agendamento, configurações) em add-on modular
 - Arquitetura com módulos independentes, feature flags e camada de compatibilidade
 - Rollout controlado: cada módulo pode ser habilitado/desabilitado individualmente
-- Fundação preparada (Fase 1); módulos serão implementados nas fases subsequentes
+- **[Fase 2]** Módulo Registration operacional em dual-run com o add-on legado
 
-**Shortcodes expostos**: Nenhum nesta fase (serão adicionados nas Fases 2-4 via camada de compatibilidade)
+**Shortcodes expostos**:
+- `dps_registration_form` — quando flag `registration` ativada, o módulo assume o shortcode (wrapper sobre o legado com surface M3)
 
 **CPTs, tabelas e opções**:
 - Option: `dps_frontend_feature_flags` — controle de rollout por módulo
 
-**Hooks consumidos**: Nenhum nesta fase
+**Hooks consumidos** (Fase 2 — módulo Registration):
+- `dps_registration_after_fields` (preservado — consumido pelo Loyalty)
+- `dps_registration_after_client_created` (preservado — consumido pelo Loyalty)
+- `dps_registration_spam_check` (preservado)
+- `dps_registration_agenda_url` (preservado)
 
-**Hooks disparados**: Nenhum nesta fase
+**Hooks disparados**: Nenhum novo nesta fase
 
 **Dependências**:
 - Depende do plugin base (DPS_Base_Plugin + design tokens CSS)
+- Módulo Registration depende de `DPS_Registration_Addon` (add-on legado) para dual-run
 
 **Arquitetura interna**:
 - `DPS_Frontend_Addon` — orquestrador com injeção de dependências
 - `DPS_Frontend_Module_Registry` — registro e boot de módulos
 - `DPS_Frontend_Feature_Flags` — controle de rollout persistido
-- `DPS_Frontend_Compatibility` — bridges para legado (stub na Fase 1)
+- `DPS_Frontend_Compatibility` — bridges para legado
 - `DPS_Frontend_Assets` — enqueue condicional M3 Expressive
 - `DPS_Frontend_Logger` — observabilidade via error_log
 - `DPS_Frontend_Request_Guard` — segurança centralizada (nonce, capability, sanitização)
-- Módulos (stubs): Registration (Fase 2), Booking (Fase 3), Settings (Fase 4)
+- `DPS_Frontend_Registration_Module` — dual-run: assume shortcode, delega lógica ao legado
+- Módulos (stubs): Booking (Fase 3), Settings (Fase 4)
+
+**Estratégia de compatibilidade (Fase 2)**:
+- Intervenção mínima: o legado continua processando formulário, emails, REST, AJAX, settings e cron
+- O módulo apenas assume o shortcode (envolve output na `.dps-frontend` surface) e adiciona CSS extra
+- Rollback: desabilitar flag `registration` restaura comportamento 100% legado
 
 **Introduzido em**: v1.0.0
 

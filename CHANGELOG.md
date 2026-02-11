@@ -97,6 +97,16 @@ Antes de criar uma nova versão oficial:
 - **Registrado no Addon Manager** do plugin base (categoria client, prioridade 72).
 - **Documentado no ANALYSIS.md** com arquitetura interna, contratos e roadmap.
 
+**Frontend Add-on v1.1.0 — Módulo Registration (Fase 2)**
+
+- **Módulo Registration operacional** em dual-run com add-on legado `desi-pet-shower-registration`.
+- **Estratégia de intervenção mínima**: assume shortcode `[dps_registration_form]`, delega toda a lógica (formulário, validação, emails, REST, AJAX) ao legado.
+- **Surface M3 wrapper**: output do formulário envolvido em `.dps-frontend` para aplicação de estilos M3 Expressive.
+- **CSS extra**: `frontend-addon.css` carregado condicionalmente sobre os assets do legado.
+- **Hooks preservados**: `dps_registration_after_fields`, `dps_registration_after_client_created`, `dps_registration_spam_check`, `dps_registration_agenda_url`.
+- **Rollback instantâneo**: desabilitar flag `registration` restaura comportamento 100% legado.
+- **Camada de compatibilidade**: bridge de shortcode ativo quando flag habilitada.
+
 **Booking Add-on v1.3.0 — Migração M3 e Melhorias de Segurança**
 
 - **Validação granular de edição de agendamentos**: Método `can_edit_appointment()` verifica se usuário pode editar agendamento específico (criador ou admin).

@@ -6,8 +6,12 @@
  * módulo está habilitado. Garante dependência de dps-design-tokens.css
  * para conformidade M3 Expressive.
  *
+ * Módulos que gerenciam seus próprios assets (como registration na Fase 2)
+ * enfileiram diretamente; este gerenciador cobre o enqueue genérico.
+ *
  * @package DPS_Frontend_Addon
  * @since   1.0.0
+ * @since   1.1.0 Fase 2 — módulos podem enfileirar assets próprios.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,7 +27,8 @@ final class DPS_Frontend_Assets {
     /**
      * Callback de wp_enqueue_scripts.
      *
-     * Só carrega quando há módulo ativo — enqueue verdadeiramente condicional.
+     * Carrega assets genéricos do add-on. Módulos com assets próprios
+     * (ex.: registration) enfileiram diretamente no seu boot.
      */
     public function enqueue(): void {
         if ( ! $this->flags->hasAnyEnabled() ) {

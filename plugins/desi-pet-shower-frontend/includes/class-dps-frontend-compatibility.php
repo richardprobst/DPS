@@ -5,11 +5,11 @@
  * Gerencia aliases de shortcode e bridges de hooks para manter
  * paridade com os add-ons legados durante a transição.
  *
- * Fase 1: esqueleto vazio — bridges serão adicionados nas fases 2-4
- * conforme cada módulo for migrado.
+ * Fase 2: bridge de shortcode para módulo de cadastro.
  *
  * @package DPS_Frontend_Addon
  * @since   1.0.0
+ * @since   1.1.0 Fase 2 — bridge de shortcode registration.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -30,8 +30,23 @@ final class DPS_Frontend_Compatibility {
      * quando o módulo correspondente está habilitado via feature flag.
      */
     public function registerBridges(): void {
-        // Fase 2: shortcode aliases para cadastro
+        $this->registerRegistrationBridges();
         // Fase 3: shortcode aliases para agendamento
         // Fase 4: bridges de hooks de configurações
+    }
+
+    /**
+     * Bridges do módulo de cadastro (Fase 2).
+     *
+     * Quando habilitado, loga uso do shortcode legado para telemetria.
+     * O shortcode em si é assumido pelo módulo Registration diretamente
+     * (remove_shortcode + add_shortcode no boot do módulo).
+     */
+    private function registerRegistrationBridges(): void {
+        if ( ! $this->flags->isEnabled( 'registration' ) ) {
+            return;
+        }
+
+        $this->logger->info( 'Bridge de compatibilidade do módulo Registration ativo.' );
     }
 }
