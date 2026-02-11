@@ -506,6 +506,7 @@
     outline: none;
     border-color: var(--dps-color-primary);
     border-width: 2px;
+    /* Compensate 1px increase (2px - 1px border) to maintain consistent element dimensions */
     padding: calc(var(--dps-space-4) - 1px);
     box-shadow: none;
 }
@@ -1425,7 +1426,7 @@
     .dps-form select,
     .dps-form textarea {
         padding: var(--dps-space-3);
-        font-size: 16px; /* Evita zoom no iOS */
+        font-size: 16px; /* iOS: prevents auto-zoom on input focus (Apple HIG requires ≥16px) */
         min-height: 44px;
     }
     
