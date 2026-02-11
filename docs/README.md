@@ -163,9 +163,10 @@ Análises e planos de refatoração de código.
 
 **Arquivos:**
 - `AGENT_ENGINEERING_PLAYBOOK.md` - Playbook complementar para agentes com princípios, arquitetura e DoD de implementação
-- `FRONTEND_ADDON_PHASED_ROADMAP.md` - Plano amplo e faseado para criação do add-on FRONTEND com compatibilidade, rollout e preparação para remoção futura de legado
-- `FRONTEND_DEPRECATION_POLICY.md` - **🆕** Política formal de depreciação (janela mínima, comunicação, critérios de aceite, procedimento)
-- `FRONTEND_REMOVAL_TARGETS.md` - **🆕** Lista de alvos de remoção com dependências, risco, esforço e plano de reversão
+- `FRONTEND_ADDON_PHASED_ROADMAP.md` - Plano amplo e faseado para criação do add-on FRONTEND com compatibilidade, rollout e preparação para remoção futura de legado (Fase 1-6 concluídas)
+- `FRONTEND_DEPRECATION_POLICY.md` - Política formal de depreciação (janela mínima, comunicação, critérios de aceite, procedimento)
+- `FRONTEND_REMOVAL_TARGETS.md` - Lista de alvos de remoção com dependências, risco, esforço e plano de reversão
+- `FRONTEND_NATIVE_IMPLEMENTATION_PLAN.md` - **🆕 FASE 7:** Plano completo para implementação nativa (from-scratch) com páginas 100% novas, substituindo estratégia dual-run por código nativo Material 3 Expressive
 
 ### 📁 /docs/review
 
