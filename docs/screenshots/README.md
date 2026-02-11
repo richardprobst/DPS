@@ -13,6 +13,15 @@ Este diretório centraliza registros visuais padronizados do sistema DPS.
 - **Capturas por data**
   - [2026-02-11 — Agenda, Cadastro e Agendamento](2026-02-11/SCREENSHOTS_2026-02-11.md)
 
+## Regras obrigatórias para novas mudanças visuais
+
+Para qualquer ajuste visual/layout/frontend no projeto:
+- criar um registro documental da mudança (objetivo, antes/depois, telas afetadas e arquivos alterados);
+- salvar os arquivos em subpasta por data no padrão `docs/screenshots/YYYY-MM-DD/`;
+- incluir prints **completos** (full page) das telas alteradas;
+- opcionalmente adicionar capturas por viewport, além da captura completa;
+- referenciar no PR/resposta final o caminho exato dos arquivos salvos.
+
 ## Padrão de registro
 
 Cada página de captura deve conter:
@@ -27,16 +36,40 @@ Cada página de captura deve conter:
 ```
 docs/screenshots/
 ├── README.md                           # Este índice
-├── <FEATURE>_SCREENSHOTS.md            # Documentação de cada registro
-├── <feature>-demo.html                 # Demo HTML para geração das capturas
-└── assets/
-    └── <feature>/
-        ├── <feature>-desktop.png       # Captura desktop (1440×900)
-        ├── <feature>-tablet.png        # Captura tablet (1024×768)
-        └── <feature>-mobile.png        # Captura mobile (375×812)
+├── YYYY-MM-DD/                         # Registros organizados por data
+│   ├── SCREENSHOTS_YYYY-MM-DD.md       # Documento do dia (contexto + antes/depois)
+│   ├── <tela>-desktop-fullpage.png     # Captura completa desktop
+│   ├── <tela>-tablet-fullpage.png      # Captura completa tablet (quando aplicável)
+│   └── <tela>-mobile-fullpage.png      # Captura completa mobile (quando aplicável)
+├── <FEATURE>_SCREENSHOTS.md            # Documentação temática consolidada (opcional)
+└── assets/                             # Arquivos legados ou comparativos por feature
 ```
 
 ### Convenções de nomenclatura
-- Screenshots em PNG com nomes descritivos: `<feature>-<viewport>.png`
+- Screenshots em PNG com nomes descritivos: `<tela>-<viewport>-fullpage.png` para capturas completas
 - Demos HTML referenciam CSS via caminhos relativos ao repositório
 - As imagens devem ser PNGs reais (não placeholders de texto)
+
+### Template recomendado para `SCREENSHOTS_YYYY-MM-DD.md`
+
+```md
+# Screenshots YYYY-MM-DD — <feature/tela>
+
+## Contexto
+- Objetivo da mudança:
+- Ambiente:
+- Referência de design M3 utilizada:
+
+## Antes/Depois
+- Resumo do antes:
+- Resumo do depois:
+- Arquivos de código alterados:
+
+## Capturas
+- `./<tela>-desktop-fullpage.png`
+- `./<tela>-tablet-fullpage.png` (se aplicável)
+- `./<tela>-mobile-fullpage.png` (se aplicável)
+
+## Observações
+- Limitações de ambiente (se houver)
+```
