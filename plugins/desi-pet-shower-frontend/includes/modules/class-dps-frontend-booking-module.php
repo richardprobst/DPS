@@ -83,6 +83,11 @@ final class DPS_Frontend_Booking_Module {
             return '';
         }
 
+        if ( ! method_exists( DPS_Booking_Addon::class, 'get_instance' ) ) {
+            $this->logger->error( 'Método get_instance não encontrado no legado Booking.' );
+            return '';
+        }
+
         $legacy = DPS_Booking_Addon::get_instance();
 
         if ( ! method_exists( $legacy, 'render_booking_form' ) ) {
