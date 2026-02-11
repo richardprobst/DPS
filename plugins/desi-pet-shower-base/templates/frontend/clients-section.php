@@ -124,12 +124,12 @@ $api_key          = isset( $api_key ) ? $api_key : '';
 
 				<div class="dps-actions dps-actions--inline">
 					<?php if ( ! empty( $registration_url ) ) : ?>
-						<a class="button button-primary" href="<?php echo esc_url( $registration_url ); ?>" target="_blank" rel="noopener noreferrer">
+						<a class="dps-submit-btn" href="<?php echo esc_url( $registration_url ); ?>" target="_blank" rel="noopener noreferrer">
 							<?php echo esc_html__( 'Cadastrar novo cliente', 'desi-pet-shower' ); ?>
 						</a>
 					<?php else : ?>
 						<?php if ( current_user_can( 'manage_options' ) ) : ?>
-							<a class="button button-secondary" href="<?php echo esc_url( admin_url( 'admin.php?page=dps-clients-settings' ) ); ?>">
+							<a class="dps-submit-btn" style="background: var(--dps-color-on-surface-variant);" href="<?php echo esc_url( admin_url( 'admin.php?page=dps-clients-settings' ) ); ?>">
 								<?php echo esc_html__( 'Configurar página de cadastro', 'desi-pet-shower' ); ?>
 							</a>
 						<?php endif; ?>

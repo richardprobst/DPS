@@ -2581,10 +2581,10 @@ class DPS_Base_Frontend {
         echo '<div class="dps-history-toolbar__header">';
         echo '<h3 class="dps-history-toolbar__title"><span class="dps-section-title__icon">📋</span>' . esc_html__( 'Tabela de Atendimentos Finalizados', 'desi-pet-shower' ) . '</h3>';
         echo '<div class="dps-history-toolbar__actions">';
-        echo '<button type="button" class="button button-secondary" id="dps-history-clear">';
+        echo '<button type="button" class="dps-submit-btn" style="background: var(--dps-color-on-surface-variant);" id="dps-history-clear">';
         echo '<span aria-hidden="true">🔄</span> ' . esc_html__( 'Limpar filtros', 'desi-pet-shower' );
         echo '</button>';
-        echo '<button type="button" class="button button-primary" id="dps-history-export">';
+        echo '<button type="button" class="dps-submit-btn" id="dps-history-export">';
         echo '<span aria-hidden="true">📥</span> ' . esc_html__( 'Exportar CSV', 'desi-pet-shower' );
         echo '</button>';
         echo '</div>';
@@ -2949,7 +2949,7 @@ class DPS_Base_Frontend {
         echo '<p><label>' . esc_html__( 'Senha da agenda pública', 'desi-pet-shower' ) . '<br><input type="password" name="agenda_password" value="' . esc_attr( $agenda_pass ) . '" required></label></p>';
         // Permite add‑ons adicionarem seus próprios campos de senha
         do_action( 'dps_base_password_fields' );
-        echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Salvar Senhas', 'desi-pet-shower' ) . '</button></p>';
+        echo '<p><button type="submit" class="dps-submit-btn">' . esc_html__( 'Salvar Senhas', 'desi-pet-shower' ) . '</button></p>';
         echo '</form>';
         echo '</div>';
         return ob_get_clean();
@@ -4185,11 +4185,11 @@ class DPS_Base_Frontend {
         echo '<div class="dps-login-wrapper">';
         echo '<h3>' . esc_html__( 'Acesso ao desi.pet by PRObst', 'desi-pet-shower' ) . '</h3>';
         if ( $error ) {
-            echo '<p class="dps-error" style="color:red;">' . esc_html( $error ) . '</p>';
+            echo '<p class="dps-error" style="color: var(--dps-color-error);">' . esc_html( $error ) . '</p>';
         }
         echo '<form method="post" class="dps-login-form">';
         echo '<p><label>' . esc_html__( 'Senha', 'desi-pet-shower' ) . '<br><input type="password" name="dps_admin_pass" required></label></p>';
-        echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Entrar', 'desi-pet-shower' ) . '</button></p>';
+        echo '<p><button type="submit" class="dps-submit-btn">' . esc_html__( 'Entrar', 'desi-pet-shower' ) . '</button></p>';
         echo '</form>';
         echo '</div>';
         return ob_get_clean();
@@ -4871,7 +4871,7 @@ class DPS_Base_Frontend {
         echo '</div>';
         
         echo '<div class="dps-notes-actions">';
-        echo '<button type="submit" class="button button-primary dps-save-notes-btn" data-client-id="' . esc_attr( $client_id ) . '">';
+        echo '<button type="submit" class="dps-submit-btn dps-save-notes-btn" data-client-id="' . esc_attr( $client_id ) . '">';
         echo esc_html__( 'Salvar Notas', 'desi-pet-shower' );
         echo '</button>';
         echo '<span class="dps-notes-status"></span>';
@@ -5047,8 +5047,8 @@ class DPS_Base_Frontend {
 
         // Ações
         echo '<div class="dps-pet-card__actions">';
-        echo '<a href="' . esc_url( $edit_url ) . '" class="button button-secondary">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a>';
-        echo '<a href="' . esc_url( $schedule_url ) . '" class="button button-primary">' . esc_html__( 'Agendar', 'desi-pet-shower' ) . '</a>';
+        echo '<a href="' . esc_url( $edit_url ) . '" class="dps-submit-btn" style="background: var(--dps-color-on-surface-variant);">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a>';
+        echo '<a href="' . esc_url( $schedule_url ) . '" class="dps-submit-btn">' . esc_html__( 'Agendar', 'desi-pet-shower' ) . '</a>';
         echo '</div>';
 
         echo '</div>';
