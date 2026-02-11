@@ -107,6 +107,16 @@ Antes de criar uma nova versão oficial:
 - **Rollback instantâneo**: desabilitar flag `registration` restaura comportamento 100% legado.
 - **Camada de compatibilidade**: bridge de shortcode ativo quando flag habilitada.
 
+**Frontend Add-on v1.2.0 — Módulo Booking (Fase 3)**
+
+- **Módulo Booking operacional** em dual-run com add-on legado `desi-pet-shower-booking`.
+- **Estratégia de intervenção mínima**: assume shortcode `[dps_booking_form]`, delega toda a lógica (formulário, confirmação, captura de appointment) ao legado.
+- **Surface M3 wrapper**: output do formulário envolvido em `.dps-frontend` para aplicação de estilos M3 Expressive.
+- **CSS extra**: `frontend-addon.css` carregado condicionalmente sobre os assets do legado.
+- **Hooks preservados**: `dps_base_after_save_appointment` (consumido por 7+ add-ons: stock, payment, groomers, calendar, communications, push, services), `dps_base_appointment_fields`, `dps_base_appointment_assignment_fields`.
+- **Rollback instantâneo**: desabilitar flag `booking` restaura comportamento 100% legado.
+- **Camada de compatibilidade**: bridge de shortcode ativo quando flag habilitada.
+
 **Booking Add-on v1.3.0 — Migração M3 e Melhorias de Segurança**
 
 - **Validação granular de edição de agendamentos**: Método `can_edit_appointment()` verifica se usuário pode editar agendamento específico (criador ou admin).

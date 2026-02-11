@@ -6,10 +6,12 @@
  * paridade com os add-ons legados durante a transição.
  *
  * Fase 2: bridge de shortcode para módulo de cadastro.
+ * Fase 3: bridge de shortcode para módulo de agendamento.
  *
  * @package DPS_Frontend_Addon
  * @since   1.0.0
  * @since   1.1.0 Fase 2 — bridge de shortcode registration.
+ * @since   1.2.0 Fase 3 — bridge de shortcode booking.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,7 +33,7 @@ final class DPS_Frontend_Compatibility {
      */
     public function registerBridges(): void {
         $this->registerRegistrationBridges();
-        // Fase 3: shortcode aliases para agendamento
+        $this->registerBookingBridges();
         // Fase 4: bridges de hooks de configurações
     }
 
@@ -48,5 +50,20 @@ final class DPS_Frontend_Compatibility {
         }
 
         $this->logger->info( 'Bridge de compatibilidade do módulo Registration ativo.' );
+    }
+
+    /**
+     * Bridges do módulo de agendamento (Fase 3).
+     *
+     * Quando habilitado, loga uso do shortcode legado para telemetria.
+     * O shortcode em si é assumido pelo módulo Booking diretamente
+     * (remove_shortcode + add_shortcode no boot do módulo).
+     */
+    private function registerBookingBridges(): void {
+        if ( ! $this->flags->isEnabled( 'booking' ) ) {
+            return;
+        }
+
+        $this->logger->info( 'Bridge de compatibilidade do módulo Booking ativo.' );
     }
 }
