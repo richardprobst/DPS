@@ -3,7 +3,7 @@
 ## Plugin base (`plugins/desi-pet-shower-base`)
 - O arquivo principal declara constantes globais, registra os *custom post types* de clientes, pets e agendamentos, carrega os ativos do frontend e expõe os *shortcodes* `[dps_base]` e `[dps_configuracoes]`, que servem como ponto de entrada para o painel e para a tela de configurações consumida pelos add-ons.
 - `includes/class-dps-cpt-helper.php` centraliza o registro de CPTs com rótulos e argumentos padrão; novos tipos devem instanciar `DPS_CPT_Helper` para herdar as opções comuns e apenas sobrescrever particularidades (ex.: capabilities customizadas ou suporte a editor).
-- **NOTA**: Os CPTs principais (`dps_cliente`, `dps_pet`, `dps_agendamento`) estão registrados com `show_ui => true` e `show_in_menu => false`, sendo exibidos pelo painel central e reutilizáveis pelos add-ons via abas. Para análise completa sobre a interface nativa do WordPress para estes CPTs, consulte `docs/admin/ADMIN_CPT_INTERFACE_ANALYSIS.md` e `docs/admin/ADMIN_CPT_INTERFACE_SUMMARY.md`.
+- **NOTA**: Os CPTs principais (`dps_cliente`, `dps_pet`, `dps_agendamento`) estão registrados com `show_ui => true` e `show_in_menu => false`, sendo exibidos pelo painel central e reutilizáveis pelos add-ons via abas. Para análise completa sobre a interface nativa do WordPress para estes CPTs, consulte `docs/analysis/BASE_PLUGIN_DEEP_ANALYSIS.md` e `docs/analysis/ADMIN_MENUS_MAPPING.md`.
 - A classe `DPS_Base_Frontend` concentra a lógica de interface: normaliza telefones para WhatsApp, agrega dados de agendamentos multi-pet para cobranças conjuntas, monta botões de cobrança, controla salvamento/exclusão de clientes, pets e atendimentos e renderiza as abas consumidas pelos add-ons via *hooks* (`dps_base_nav_tabs_after_pets`, `dps_base_nav_tabs_after_history`, etc.).
 - A classe `DPS_Settings_Frontend` gerencia a página de configurações (`[dps_configuracoes]`) com sistema moderno de registro de abas via `register_tab()`. Os hooks legados `dps_settings_nav_tabs` e `dps_settings_sections` foram depreciados em favor do sistema moderno que oferece melhor consistência visual. A página inclui assets dedicados (`dps-settings.css` e `dps-settings.js`) carregados automaticamente, com suporte a navegação client-side entre abas, busca em tempo real de configurações com destaque visual, barra de status contextual e detecção de alterações não salvas com aviso ao sair.
 - O fluxo de formulários usa `dps_nonce` para CSRF e delega ações específicas (`save_client`, `save_pet`, `save_appointment`, `update_appointment_status`) para métodos especializados, enquanto exclusões limpam também dados financeiros relacionados quando disponíveis. A classe principal é inicializada no hook `init` com prioridade 5, após o carregamento do text domain em prioridade 1.
@@ -355,6 +355,8 @@ echo $display['phone_formatted']; // "(11) 99988-7766"
 - Add-on de Push (notificações por email/WhatsApp)
 - Add-on de Communications (envio de comunicados)
 - Add-on de Finance (relatórios, cobranças)
+
+#### DPS_Message_Helper
 **Propósito**: Gerenciamento de mensagens de feedback visual (sucesso, erro, aviso) para operações administrativas.
 
 **Entrada/Saída**:
@@ -872,7 +874,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - Implementa `register_deactivation_hook` para limpar cron job `dps_agenda_send_reminders` ao desativar
 - **[v1.1.0]** Lógica de serviços movida para Services Add-on; Agenda delega cálculos para `DPS_Services_API`
 - **Documentação completa**: `docs/analysis/AGENDA_ADDON_ANALYSIS.md` (análise profunda de código, funcionalidades, layout e melhorias propostas)
-- **Documentação de layout**: `docs/layout/agenda/` (análise de UX, responsividade e acessibilidade)
+- **Documentação de layout**: `docs/analysis/AGENDA_ADDON_ANALYSIS.md` (seções de UX, responsividade e acessibilidade)
 
 ---
 
@@ -1239,8 +1241,8 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Menu administrativo registrado sob `desi-pet-shower` desde v2.1.0
 
 **Análise de Layout e UX**:
-- Consulte `docs/layout/client-portal/CLIENT_PORTAL_UX_ANALYSIS.md` para análise detalhada de usabilidade (800+ linhas)
-- Consulte `docs/layout/client-portal/CLIENT_PORTAL_SUMMARY.md` para resumo executivo das melhorias propostas
+- Consulte `docs/analysis/CLIENT_PORTAL_ADDON_DEEP_ANALYSIS.md` para análise detalhada de usabilidade e arquitetura do portal
+- Consulte `docs/screenshots/CLIENT_PORTAL_REBRANDING_SCREENSHOTS.md` para registro visual e resumo executivo das melhorias aplicadas
 - Principais achados: estrutura "all-in-one" sem navegação, responsividade precária em mobile, paleta de cores excessiva (15+ cores vs 8 recomendadas), feedback visual ausente
 - Melhorias prioritárias documentadas em 3 fases (26.5h totais): navegação interna, cards destacados, tabelas responsivas, feedback visual, redução de paleta, fieldsets em formulários
 
@@ -2281,8 +2283,8 @@ Nenhuma tabela própria. Todas as configurações são armazenadas como options 
 ### Compatibilidade
 
 **WordPress:**
-- Versão mínima: 6.0
-- PHP: 7.4+
+- Versão mínima: 6.9
+- PHP: 8.4+
 
 **DPS:**
 - Requer: Plugin base (`DPS_Base_Plugin`)
@@ -2302,7 +2304,7 @@ Para análise completa sobre a implementação de **Controle de Acesso ao Site**
 - Controle por role WordPress
 - Funcionalidades adicionais sugeridas (controle por CPT, horário, IP, logs)
 
-Consulte: `docs/analysis/WHITELABEL_ACCESS_CONTROL_ANALYSIS.md`
+Consulte a seção **White Label (`desi-pet-shower-whitelabel_addon`)** neste arquivo para o detalhamento funcional e recomendações
 
 ### Limitações Conhecidas
 
@@ -2839,7 +2841,7 @@ if ( null !== $result ) {
 ### Integração com Google Tarefas (Google Tasks API)
 
 **Status:** Proposta de análise (2026-01-19)  
-**Documentação:** `docs/analysis/GOOGLE_TASKS_INTEGRATION_ANALYSIS.md` (análise completa), `docs/analysis/GOOGLE_TASKS_INTEGRATION_SUMMARY.md` (resumo executivo)
+**Documentação:** proposta consolidada nesta seção do `ANALYSIS.md` (ainda sem documento dedicado em `docs/analysis/`)
 
 **Resumo:**
 A integração do sistema DPS com Google Tasks API permite sincronizar atividades do sistema (agendamentos, cobranças, mensagens) com listas de tarefas do Google, melhorando a organização e follow-up de atividades administrativas.
