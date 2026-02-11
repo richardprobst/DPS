@@ -193,15 +193,18 @@ final class DPS_Frontend_Settings_Module {
      * O nonce e a capability já foram verificados pelo DPS_Settings_Frontend::maybe_handle_save().
      */
     public function handleSave(): void {
+        // Checkboxes: presença na POST = habilitado, ausência = desabilitado.
+        // Apenas keys dos módulos conhecidos são aceitas (whitelist).
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified by DPS_Settings_Frontend::maybe_handle_save()
-        $submitted = isset( $_POST['dps_frontend_flags'] ) && is_array( $_POST['dps_frontend_flags'] )
-            ? array_map( 'sanitize_key', array_keys( $_POST['dps_frontend_flags'] ) )
+        $raw_flags = isset( $_POST['dps_frontend_flags'] ) && is_array( $_POST['dps_frontend_flags'] )
+            ? $_POST['dps_frontend_flags']
             : [];
 
         $known_modules = array_keys( $this->flags->all() );
 
         foreach ( $known_modules as $module ) {
-            if ( in_array( $module, $submitted, true ) ) {
+            $is_checked = isset( $raw_flags[ $module ] ) && '1' === sanitize_text_field( wp_unslash( $raw_flags[ $module ] ) );
+            if ( $is_checked ) {
                 $this->flags->enable( $module );
             } else {
                 $this->flags->disable( $module );
