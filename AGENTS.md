@@ -37,6 +37,17 @@ Na Trilha B:
 
 ---
 
+
+## Guia complementar de engenharia para agentes
+
+Para manter este arquivo mais enxuto, as diretrizes operacionais de engenharia (arquitetura de código, DoD e processo de execução) ficam centralizadas em:
+- `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`
+
+Use esse playbook quando a tarefa envolver implementação/refatoração de código no core ou add-ons.
+Ele complementa este AGENTS.md sem substituir as regras de **MUST** e **ASK BEFORE**.
+
+---
+
 ## Escopo
 Estas orientações cobrem todo o repositório desi.pet by PRObst, incluindo todos os plugins em `plugins/`.
 Se existir um `AGENTS.md` mais específico em subdiretórios, **ele prevalece** para arquivos dentro de seu escopo.
@@ -91,6 +102,28 @@ Toda documentação adicional deve ser organizada nas seguintes subpastas:
 4. Revisões de PRs: `docs/review/pr-XXX/` (XXX = número do PR)
 5. Demos HTML devem acompanhar a doc relacionada
 6. Mantenha `docs/README.md` atualizado ao adicionar novas pastas/categorias
+
+### Validação dos apontamentos (evitar links quebrados)
+Sempre que atualizar documentação estrutural (`AGENTS.md`, `docs/README.md`, índices e guias), valide se os caminhos citados existem no repositório atual.
+
+Comandos úteis:
+- `find docs -maxdepth 3 -type f | sort` (inventário rápido da documentação)
+- `rg -n "docs/" AGENTS.md docs/README.md docs/screenshots/README.md` (checagem de apontamentos)
+
+Se um caminho citado não existir mais, atualize o apontamento na mesma entrega.
+
+
+## Setup & validação
+
+Antes de finalizar qualquer tarefa, execute validações proporcionais ao impacto:
+- **Documentação apenas:** `git diff --check` + conferência dos caminhos citados.
+- **PHP alterado:** `php -l` nos arquivos modificados.
+- **Mudança funcional relevante:** validação local no WordPress dos fluxos afetados.
+- **Mudança visual/layout:** seguir `docs/visual/` (padrão M3) + registrar screenshots conforme `docs/screenshots/README.md`.
+
+Sempre registrar no fechamento os comandos executados e o status (passou/falhou/limitação de ambiente).
+
+---
 
 ## Versionamento e git-flow (leve e prático)
 - Utilize SemVer (MAJOR.MINOR.PATCH) para o plugin base e para cada add-on.
@@ -171,9 +204,26 @@ Todos os plugins/add-ons DEVEM declarar:
 - Responsividade básica quando necessário (480/768/1024).
 - **Obrigatório:** qualquer tarefa de **layout/design/frontend** (criar, recriar, corrigir ou ajustar UI) **DEVE** seguir as especificações de `docs/visual/` (ver referências abaixo).
 
-Referências de design e layout:
+Referências de design e layout (padrão visual **M3** do sistema):
 - `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` — **instruções completas de design frontend** (metodologia, contextos de uso, acessibilidade, performance, checklist)
 - `docs/visual/VISUAL_STYLE_GUIDE.md` — paleta, componentes e espaçamento
+
+**Regra de comunicação obrigatória:** sempre que uma tarefa envolver visual/layout/frontend (criação, ajuste, correção, refatoração ou revisão), o agente **deve indicar explicitamente** que seguiu `docs/visual/` como fonte de verdade do padrão M3.
+
+**Registro obrigatório para mudanças visuais:** qualquer alteração visual/layout/frontend deve ser documentada com:
+- descrição objetiva do que mudou (antes/depois, impacto e arquivos afetados);
+- capturas **completas** das telas alteradas para registro em `docs/screenshots/`;
+- organização dos registros em subpastas por data no formato `docs/screenshots/YYYY-MM-DD/`.
+
+Sempre orientar e confirmar no fechamento/PR onde os prints e o documento de registro foram salvos.
+
+### Fluxo obrigatório para mudanças visuais (M3)
+1. Consultar `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` antes de implementar.
+2. Implementar a mudança mantendo coerência com o padrão M3.
+3. Gerar capturas completas das telas alteradas.
+4. Salvar artefatos em `docs/screenshots/YYYY-MM-DD/`.
+5. Criar/atualizar o documento do dia (`SCREENSHOTS_YYYY-MM-DD.md`) com contexto, antes/depois e lista dos arquivos.
+6. Citar no fechamento/PR os caminhos dos registros e prints salvos.
 
 ---
 

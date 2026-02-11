@@ -156,6 +156,7 @@ Quality assurance e validação funcional de add-ons.
 Análises e planos de refatoração de código.
 
 **Arquivos:**
+- `AGENT_ENGINEERING_PLAYBOOK.md` - Playbook complementar para agentes com princípios, arquitetura e DoD de implementação
 - `CLIENTS_SECTION_BEFORE_AFTER.md` - Comparação antes/depois da seção de clientes
 - `DELIVERY_PHASE1.md` - Entrega da fase 1
 - `FINAL_SUMMARY.md` - Resumo final de refatoração
@@ -209,8 +210,13 @@ Documentação de segurança e auditoria.
 
 **🆕 Documentação visual e capturas de tela do sistema.**
 
+**Padrão obrigatório para mudanças visuais:**
+- registrar documentação da alteração (contexto, antes/depois, telas impactadas e arquivos alterados);
+- salvar as capturas em subpastas por data: `docs/screenshots/YYYY-MM-DD/`;
+- incluir capturas **completas** das telas modificadas para histórico e auditoria visual.
+
 **Arquivos:**
-- `README.md` - Índice da pasta de screenshots
+- `README.md` - Índice + processo obrigatório de registro visual por data
 - `AGENDA_REBRANDING_SCREENSHOTS.md` - **📸 Registro visual do rebranding da Agenda** com capturas por viewport
 
 ### 📁 /docs/visual
@@ -247,6 +253,7 @@ Os seguintes documentos permanecem na raiz do repositório como **documentos cen
 10. **Para padrões visuais**: veja `/docs/visual/VISUAL_STYLE_GUIDE.md`
 11. **Para criar/modificar frontends**: veja `/docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`
 12. **Para página de configurações front-end**: veja `docs/settings/FRONTEND_SETTINGS_IMPLEMENTATION_PLAN.md`
+13. **Para registrar mudanças visuais**: siga `docs/screenshots/README.md` e salve em `docs/screenshots/YYYY-MM-DD/`
 
 ## Navegação Rápida
 
