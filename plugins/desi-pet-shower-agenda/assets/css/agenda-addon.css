@@ -142,7 +142,7 @@
 .dps-agenda-nav-group + .dps-agenda-nav-group::before {
     content: '|';
     color: var(--dps-border);
-    font-weight: 300;
+    font-weight: 400;
     margin: 0 0.25rem;
 }
 
@@ -293,7 +293,7 @@
 }
 
 .dps-btn--ghost:hover {
-    background: rgba(11, 107, 203, 0.08);
+    background: color-mix(in srgb, var(--dps-color-primary) 8%, transparent);
     border-color: var(--dps-color-outline);
     color: var(--dps-color-primary);
 }
@@ -335,7 +335,7 @@
     margin: 1rem 0 1.5rem;
     padding: 1rem 1.25rem;
     background: var(--dps-color-primary-container);
-    border: 1px solid rgba(11, 107, 203, 0.12);
+    border: 1px solid color-mix(in srgb, var(--dps-color-primary) 12%, transparent);
     border-radius: var(--dps-shape-card);
     color: var(--dps-color-on-surface);
 }
@@ -405,7 +405,7 @@
 }
 
 .dps-agenda-table-container::-webkit-scrollbar-thumb {
-    background: rgba(15, 23, 42, 0.2);
+    background: color-mix(in srgb, var(--dps-color-on-surface) 20%, transparent);
     border-radius: var(--dps-shape-full);
 }
 
@@ -526,7 +526,7 @@
     right: 0;
     bottom: 0;
     left: 0;
-    background: rgba(0, 0, 0, 0.32);
+    background: color-mix(in srgb, var(--dps-color-on-surface) 32%, transparent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -535,7 +535,7 @@
 }
 
 .dps-modal-content {
-    background: white;
+    background: var(--dps-color-surface-container-lowest);
     padding: 1.5rem;
     border-radius: var(--dps-shape-card);
     max-width: 500px;
@@ -641,7 +641,7 @@
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    background: rgba(0, 0, 0, 0.32);
+    background: color-mix(in srgb, var(--dps-color-on-surface) 32%, transparent);
     z-index: 12000;
 }
 
@@ -1669,12 +1669,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.32);
+    background: color-mix(in srgb, var(--dps-color-on-surface) 32%, transparent);
     padding: 1rem;
 }
 
 .dps-reschedule-content {
-    background: white;
+    background: var(--dps-color-surface-container-lowest);
     border-radius: var(--dps-shape-card);
     width: 100%;
     max-width: 400px;
@@ -1781,7 +1781,7 @@
 .dps-reschedule-btn--save {
     background: var(--dps-accent);
     border: 1px solid var(--dps-accent);
-    color: white;
+    color: var(--dps-color-on-primary);
 }
 
 .dps-reschedule-btn--save:hover {
@@ -1802,7 +1802,7 @@
     font-size: 0.8rem;
     color: var(--dps-accent);
     text-decoration: none;
-    border-radius: 0.35rem;
+    border-radius: var(--dps-shape-extra-small);
     transition: background var(--dps-motion-hover);
 }
 
@@ -1819,7 +1819,7 @@
     font-size: 0.75rem;
     color: var(--dps-muted);
     background: var(--dps-background);
-    border-radius: 0.35rem;
+    border-radius: var(--dps-shape-extra-small);
     cursor: pointer;
 }
 
@@ -2026,7 +2026,7 @@ tr.dps-row-updated {
 
 .dps-nav-btn--today {
     background: var(--dps-accent);
-    color: white;
+    color: var(--dps-color-on-error);
     border-color: var(--dps-accent);
 }
 
@@ -2067,7 +2067,7 @@ tr.dps-row-updated {
 }
 
 .dps-view-btn:hover:not(.dps-view-btn--active) {
-    background: rgba(15, 23, 42, 0.05);
+    background: color-mix(in srgb, var(--dps-color-on-surface) 5%, transparent);
 }
 
 .dps-view-btn--active {
@@ -2345,7 +2345,7 @@ tr.dps-row-updated {
     border: 1px solid var(--dps-color-outline-variant);
     padding: 8px 12px;
     border-radius: var(--dps-shape-extra-small);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: var(--dps-elevation-1);
     z-index: 1000;
     min-width: 200px;
     margin-top: 5px;
@@ -2606,7 +2606,7 @@ tr.dps-row-updated {
     border-color: var(--dps-accent);
     background: var(--dps-accent-soft);
     color: var(--dps-accent);
-    box-shadow: 0 2px 8px rgba(11, 107, 203, 0.12);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--dps-color-primary) 12%, transparent);
 }
 
 .dps-agenda-tab-button:focus {
@@ -2688,7 +2688,7 @@ tr.dps-row-updated {
     
     .dps-agenda-tab-button--active {
         border-left: 4px solid var(--dps-accent);
-        border-radius: 0 0.75rem 0.75rem 0;
+        border-radius: 0 var(--dps-shape-medium) var(--dps-shape-medium) 0;
     }
 }
 
@@ -2822,10 +2822,10 @@ tr.dps-row-updated {
 
 @keyframes pulse-aggressive {
     0%, 100% {
-        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.2);
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--dps-color-error) 20%, transparent);
     }
     50% {
-        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--dps-color-error) 0%, transparent);
     }
 }
 
@@ -2904,7 +2904,7 @@ tr.dps-row-updated {
     -moz-appearance: none;
     padding: 0.45rem 2rem 0.45rem 0.85rem;
     border: 1px solid var(--dps-border);
-    border-radius: 10px;
+    border-radius: var(--dps-shape-medium);
     background: var(--dps-color-surface-container-lowest);
     font-size: 0.9rem;
     font-weight: 500;
@@ -2954,7 +2954,7 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.25rem;
     padding: 0.4rem 0.75rem;
-    border-radius: 10px;
+    border-radius: var(--dps-shape-medium);
     font-size: 0.85rem;
     font-weight: 500;
     border: 1px solid var(--dps-border);
@@ -2989,7 +2989,7 @@ tr.dps-row-updated {
     padding: 0.45rem 0.85rem;
     background: var(--dps-color-surface-container-low);
     border: 1px solid var(--dps-border);
-    border-radius: 10px;
+    border-radius: var(--dps-shape-medium);
     color: var(--dps-color-on-surface);
     font-size: 0.85rem;
     font-weight: 500;
@@ -3004,7 +3004,7 @@ tr.dps-row-updated {
 
 .dps-services-popup-btn:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-primary) 20%, transparent);
 }
 
 .dps-no-services {
@@ -3026,18 +3026,18 @@ tr.dps-row-updated {
     font-weight: 500;
     cursor: pointer;
     transition: all var(--dps-motion-hover);
-    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+    box-shadow: 0 2px 4px color-mix(in srgb, var(--dps-color-success) 20%, transparent);
 }
 
 .dps-payment-popup-btn:hover {
     background: var(--dps-color-success);
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 8px color-mix(in srgb, var(--dps-color-success) 30%, transparent);
 }
 
 .dps-payment-popup-btn:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-success) 30%, transparent);
 }
 
 /* === Status de Pagamento (Tab2) === */
@@ -3128,7 +3128,7 @@ tr.dps-row-updated {
 
 .dps-taxidog-dropdown:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-warning) 20%, transparent);
 }
 
 /* === Botão de Solicitar TaxiDog (Tab3) === */
@@ -3156,7 +3156,7 @@ tr.dps-row-updated {
 
 .dps-taxidog-request-btn:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-warning) 30%, transparent);
 }
 
 /* === Botão de Mapa TaxiDog (Tab3) === */
@@ -3186,7 +3186,7 @@ tr.dps-row-updated {
 
 .dps-taxidog-map-btn:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-success) 30%, transparent);
 }
 
 /* === Modal de Popup de Pagamento === */
@@ -3208,19 +3208,19 @@ tr.dps-row-updated {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(15, 23, 42, 0.6);
+    background: color-mix(in srgb, var(--dps-color-on-surface) 60%, transparent);
     padding: 1rem;
     -webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
 }
 
 .dps-payment-modal-content {
-    background: white;
+    background: var(--dps-color-surface-container-lowest);
     border-radius: var(--dps-shape-card);
     width: 100%;
     max-width: 420px;
     overflow: hidden;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--dps-elevation-3);
     animation: modalSlideIn 0.2s ease-out;
 }
 
@@ -3241,7 +3241,7 @@ tr.dps-row-updated {
     align-items: center;
     padding: 1rem 1.25rem;
     background: var(--dps-color-success);
-    color: white;
+    color: var(--dps-color-on-success);
 }
 
 .dps-payment-modal-title {
@@ -3257,14 +3257,14 @@ tr.dps-row-updated {
     background: transparent;
     border: none;
     font-size: 1.5rem;
-    color: rgba(255, 255, 255, 0.8);
+    color: color-mix(in srgb, var(--dps-color-on-success) 80%, transparent);
     cursor: pointer;
     line-height: 1;
     padding: 0;
 }
 
 .dps-payment-modal-close:hover {
-    color: white;
+    color: var(--dps-color-on-success);
 }
 
 .dps-payment-modal-body {
@@ -3325,7 +3325,7 @@ tr.dps-row-updated {
 .dps-payment-action-btn--whatsapp {
     background: var(--dps-color-success);
     border: none;
-    color: white;
+    color: var(--dps-color-on-primary);
 }
 
 .dps-payment-action-btn--whatsapp:hover {
@@ -3369,19 +3369,19 @@ tr.dps-row-updated {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(15, 23, 42, 0.6);
+    background: color-mix(in srgb, var(--dps-color-on-surface) 60%, transparent);
     padding: 1rem;
     -webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
 }
 
 .dps-services-modal-content {
-    background: white;
+    background: var(--dps-color-surface-container-lowest);
     border-radius: var(--dps-shape-card);
     width: 100%;
     max-width: 480px;
     overflow: hidden;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--dps-elevation-3);
     animation: modalSlideIn 0.2s ease-out;
 }
 
@@ -3391,7 +3391,7 @@ tr.dps-row-updated {
     align-items: center;
     padding: 1rem 1.25rem;
     background: var(--dps-color-primary);
-    color: white;
+    color: var(--dps-color-on-primary);
 }
 
 .dps-services-modal-title {
@@ -3407,14 +3407,14 @@ tr.dps-row-updated {
     background: transparent;
     border: none;
     font-size: 1.5rem;
-    color: rgba(255, 255, 255, 0.8);
+    color: color-mix(in srgb, var(--dps-color-on-primary) 80%, transparent);
     cursor: pointer;
     line-height: 1;
     padding: 0;
 }
 
 .dps-services-modal-close:hover {
-    color: white;
+    color: var(--dps-color-on-primary);
 }
 
 .dps-services-modal-body {
@@ -3543,8 +3543,8 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.375rem;
     padding: 0.375rem 0.75rem;
-    background: white;
-    border-radius: 20px;
+    background: var(--dps-color-surface-container-lowest);
+    border-radius: var(--dps-shape-full);
     border: 1px solid var(--dps-color-surface-container-high);
 }
 
@@ -3579,7 +3579,7 @@ tr.dps-row-updated {
 
 /* Card de serviço individual */
 .dps-service-card {
-    background: white;
+    background: var(--dps-color-surface-container-lowest);
     border: 1px solid var(--dps-color-surface-container-high);
     border-radius: var(--dps-shape-chip);
     padding: 0.875rem;
@@ -3588,7 +3588,7 @@ tr.dps-row-updated {
 }
 
 .dps-service-card:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--dps-elevation-1);
 }
 
 .dps-service-card-header {
@@ -3708,7 +3708,7 @@ tr.dps-row-updated {
 .dps-services-total-value {
     font-weight: 500;
     font-size: 1.1rem;
-    color: white;
+    color: var(--dps-color-on-primary);
 }
 
 /* Estado vazio */
@@ -3903,7 +3903,7 @@ tr.dps-row-updated {
     padding: 0.5rem 0.85rem;
     background: var(--dps-accent-soft);
     border-radius: var(--dps-shape-chip);
-    border: 1px solid rgba(11, 107, 203, 0.12);
+    border: 1px solid color-mix(in srgb, var(--dps-color-primary) 12%, transparent);
 }
 
 .dps-agenda-header .dps-current-date strong {
@@ -3943,13 +3943,13 @@ tr.dps-row-updated {
 .dps-nav-btn--today {
     background: var(--dps-accent);
     border-color: var(--dps-accent);
-    color: white;
+    color: var(--dps-color-on-primary);
 }
 
 .dps-nav-btn--today:hover {
     background: var(--dps-accent-strong);
     border-color: var(--dps-accent-strong);
-    color: white;
+    color: var(--dps-color-on-primary);
 }
 
 /* === Controles de Visualização Refinados === */
@@ -3961,7 +3961,7 @@ tr.dps-row-updated {
     padding: 0.75rem 1rem;
     background: var(--dps-surface);
     border: 1px solid var(--dps-border);
-    border-radius: 10px;
+    border-radius: var(--dps-shape-medium);
 }
 
 .dps-agenda-nav-group--views {
@@ -4006,13 +4006,13 @@ tr.dps-row-updated {
 
 .dps-view-btn--active {
     background: var(--dps-accent);
-    color: white;
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+    color: var(--dps-color-on-primary);
+    box-shadow: 0 2px 6px color-mix(in srgb, var(--dps-color-primary) 25%, transparent);
 }
 
 .dps-view-btn--active:hover {
     background: var(--dps-accent-strong);
-    color: white;
+    color: var(--dps-color-on-primary);
 }
 
 /* === Abas Aprimoradas === */
@@ -4077,18 +4077,18 @@ tr.dps-row-updated {
 }
 
 .dps-agenda-tab-button:hover {
-    border-color: rgba(37, 99, 235, 0.4);
+    border-color: color-mix(in srgb, var(--dps-color-primary) 40%, transparent);
     background: var(--dps-color-surface-container-low);
     color: var(--dps-accent);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    box-shadow: var(--dps-elevation-2);
 }
 
 .dps-agenda-tab-button--active {
     border-color: var(--dps-accent);
     background: var(--dps-color-primary-container);
     color: var(--dps-accent);
-    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.12);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--dps-color-primary) 12%, transparent);
 }
 
 .dps-agenda-tab-button--active::before {
@@ -4129,10 +4129,10 @@ tr.dps-row-updated {
 .dps-agenda-table-container {
     overflow-x: auto;
     margin-bottom: 1.25rem;
-    border-radius: 10px;
+    border-radius: var(--dps-shape-medium);
     background: var(--dps-surface);
     border: 1px solid var(--dps-border);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+    box-shadow: var(--dps-elevation-1);
 }
 
 .dps-agenda-wrapper table.dps-table thead th {
@@ -4450,7 +4450,7 @@ tr.dps-row-updated {
         justify-content: flex-start;
         padding: 0.875rem 1rem;
         gap: 0.75rem;
-        border-radius: 10px;
+        border-radius: var(--dps-shape-medium);
     }
     
     .dps-agenda-tab-button::before {
@@ -4478,8 +4478,8 @@ tr.dps-row-updated {
     /* Cards de tabela aprimorados */
     .dps-agenda-wrapper table.dps-table tr {
         padding: 1rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+        border-radius: var(--dps-shape-medium);
+        box-shadow: var(--dps-elevation-1);
     }
     
     .dps-agenda-wrapper table.dps-table tr.status-pendente,
@@ -4603,7 +4603,7 @@ tr.dps-row-updated {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--dps-color-surface-container-lowest) 50%, transparent) 50%, transparent 100%);
     animation: shimmer 1.5s infinite;
 }
 
@@ -4684,7 +4684,7 @@ tr.dps-row-updated {
     padding: 1rem 1.25rem;
     background: var(--dps-color-surface-container-lowest);
     border-radius: var(--dps-shape-chip);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--dps-elevation-3);
     z-index: 10000;
     max-width: 400px;
     transform: translateX(calc(100% + 20px));

@@ -644,7 +644,6 @@ class DPS_Base_Frontend {
             'save_pet'                  => 'dps_nonce_pets',
             'save_appointment'          => 'dps_nonce_agendamentos',
             'update_appointment_status' => 'dps_nonce_agendamentos_status',
-            'save_passwords'            => 'dps_nonce_passwords',
         ];
         
         $nonce_field = isset( $nonce_map[ $action ] ) ? $nonce_map[ $action ] : 'dps_nonce';
@@ -698,7 +697,6 @@ class DPS_Base_Frontend {
             'save_pet'                  => 'pets',
             'save_appointment'          => 'agendas',
             'update_appointment_status' => 'agendas',
-            'save_passwords'            => 'senhas',
         ];
 
         DPS_Message_Helper::add_error( __( 'Não foi possível validar sua sessão. Atualize a página e tente novamente.', 'desi-pet-shower' ) );
@@ -2581,10 +2579,10 @@ class DPS_Base_Frontend {
         echo '<div class="dps-history-toolbar__header">';
         echo '<h3 class="dps-history-toolbar__title"><span class="dps-section-title__icon">📋</span>' . esc_html__( 'Tabela de Atendimentos Finalizados', 'desi-pet-shower' ) . '</h3>';
         echo '<div class="dps-history-toolbar__actions">';
-        echo '<button type="button" class="button button-secondary" id="dps-history-clear">';
+        echo '<button type="button" class="dps-submit-btn dps-submit-btn--secondary" id="dps-history-clear">';
         echo '<span aria-hidden="true">🔄</span> ' . esc_html__( 'Limpar filtros', 'desi-pet-shower' );
         echo '</button>';
-        echo '<button type="button" class="button button-primary" id="dps-history-export">';
+        echo '<button type="button" class="dps-submit-btn" id="dps-history-export">';
         echo '<span aria-hidden="true">📥</span> ' . esc_html__( 'Exportar CSV', 'desi-pet-shower' );
         echo '</button>';
         echo '</div>';
@@ -2925,34 +2923,6 @@ class DPS_Base_Frontend {
         $html .= '<noscript><button type="submit" class="button button-secondary button-small">' . esc_html__( 'Atualizar', 'desi-pet-shower' ) . '</button></noscript>';
         $html .= '</form>';
         return $html;
-    }
-
-    /**
-     * Seção de senhas: permite que o administrador altere as senhas de acesso do
-     * plugin base e dos add‑ons (como agenda). As senhas são armazenadas em
-     * opções do WordPress. Esta seção é exibida apenas para usuários
-     * autenticados.
-     */
-    private static function section_passwords() {
-        // Obtém valores atuais das senhas
-        $base_pass   = get_option( 'dps_base_password', 'DPS2025' );
-        $agenda_pass = get_option( 'dps_agenda_password', 'agendaDPS' );
-        ob_start();
-        echo '<div class="dps-section" id="dps-section-senhas">';
-        echo '<h3>' . esc_html__( 'Configuração de Senhas', 'desi-pet-shower' ) . '</h3>';
-        echo '<form method="post" class="dps-form">';
-        echo '<input type="hidden" name="dps_action" value="save_passwords">';
-        wp_nonce_field( 'dps_action', 'dps_nonce_passwords' );
-        // Senha do plugin base (admin)
-        echo '<p><label>' . esc_html__( 'Senha do painel principal', 'desi-pet-shower' ) . '<br><input type="password" name="base_password" value="' . esc_attr( $base_pass ) . '" required></label></p>';
-        // Senha da agenda
-        echo '<p><label>' . esc_html__( 'Senha da agenda pública', 'desi-pet-shower' ) . '<br><input type="password" name="agenda_password" value="' . esc_attr( $agenda_pass ) . '" required></label></p>';
-        // Permite add‑ons adicionarem seus próprios campos de senha
-        do_action( 'dps_base_password_fields' );
-        echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Salvar Senhas', 'desi-pet-shower' ) . '</button></p>';
-        echo '</form>';
-        echo '</div>';
-        return ob_get_clean();
     }
 
     /**
@@ -4114,88 +4084,6 @@ class DPS_Base_Frontend {
     }
 
     /**
-     * Salva as senhas do plugin base, agenda e outros add‑ons.
-     *
-     * Este método atualiza opções do WordPress com as novas senhas fornecidas.
-     * Espera os campos 'base_password', 'agenda_password' e possivelmente outros
-     * via $_POST. É executado somente por usuários autenticados (já verificado
-     * em handle_request).
-     */
-    private static function save_passwords() {
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
-        }
-
-        $base_pass     = isset( $_POST['base_password'] ) ? sanitize_text_field( wp_unslash( $_POST['base_password'] ) ) : '';
-        $agenda_pass   = isset( $_POST['agenda_password'] ) ? sanitize_text_field( wp_unslash( $_POST['agenda_password'] ) ) : '';
-        $redirect_url  = self::get_redirect_url( 'senhas' );
-        $provided_base = '' !== $base_pass;
-        $provided_agenda = '' !== $agenda_pass;
-
-        if ( ! $provided_base && ! $provided_agenda ) {
-            DPS_Message_Helper::add_error( __( 'Informe pelo menos uma senha para salvar.', 'desi-pet-shower' ) );
-            wp_safe_redirect( $redirect_url );
-            exit;
-        }
-
-        $errors   = [];
-        $min_size = 4;
-
-        if ( $provided_base && strlen( $base_pass ) < $min_size ) {
-            $errors[] = sprintf( __( 'A senha do painel principal deve ter pelo menos %d caracteres.', 'desi-pet-shower' ), $min_size );
-        }
-
-        if ( $provided_agenda && strlen( $agenda_pass ) < $min_size ) {
-            $errors[] = sprintf( __( 'A senha da agenda pública deve ter pelo menos %d caracteres.', 'desi-pet-shower' ), $min_size );
-        }
-
-        if ( ! empty( $errors ) ) {
-            foreach ( $errors as $error ) {
-                DPS_Message_Helper::add_error( $error );
-            }
-            wp_safe_redirect( $redirect_url );
-            exit;
-        }
-
-        if ( $provided_base ) {
-            update_option( 'dps_base_password', $base_pass );
-        }
-        if ( $provided_agenda ) {
-            update_option( 'dps_agenda_password', $agenda_pass );
-        }
-
-        do_action( 'dps_base_save_passwords', wp_unslash( $_POST ) );
-        DPS_Message_Helper::add_success( __( 'Senhas salvas com sucesso.', 'desi-pet-shower' ) );
-        wp_safe_redirect( $redirect_url );
-        exit;
-    }
-
-    /**
-     * Exibe o formulário de acesso ao painel.
-     *
-     * Este formulário solicita apenas a senha de administração. Ao ser informada
-     * corretamente, o usuário recebe permissão total de gerenciamento. Não há
-     * opção de visitante: todos os acessos utilizam a mesma senha definida.
-     *
-     * @param string $error Mensagem de erro opcional
-     * @return string HTML do formulário
-     */
-    private static function render_login_form( $error = '' ) {
-        ob_start();
-        echo '<div class="dps-login-wrapper">';
-        echo '<h3>' . esc_html__( 'Acesso ao desi.pet by PRObst', 'desi-pet-shower' ) . '</h3>';
-        if ( $error ) {
-            echo '<p class="dps-error" style="color:red;">' . esc_html( $error ) . '</p>';
-        }
-        echo '<form method="post" class="dps-login-form">';
-        echo '<p><label>' . esc_html__( 'Senha', 'desi-pet-shower' ) . '<br><input type="password" name="dps_admin_pass" required></label></p>';
-        echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Entrar', 'desi-pet-shower' ) . '</button></p>';
-        echo '</form>';
-        echo '</div>';
-        return ob_get_clean();
-    }
-
-    /**
      * Exibe a página de detalhes de um cliente com layout melhorado e ações de gerenciamento.
      *
      * Esta página mostra:
@@ -4871,7 +4759,7 @@ class DPS_Base_Frontend {
         echo '</div>';
         
         echo '<div class="dps-notes-actions">';
-        echo '<button type="submit" class="button button-primary dps-save-notes-btn" data-client-id="' . esc_attr( $client_id ) . '">';
+        echo '<button type="submit" class="dps-submit-btn dps-save-notes-btn" data-client-id="' . esc_attr( $client_id ) . '">';
         echo esc_html__( 'Salvar Notas', 'desi-pet-shower' );
         echo '</button>';
         echo '<span class="dps-notes-status"></span>';
@@ -5047,8 +4935,8 @@ class DPS_Base_Frontend {
 
         // Ações
         echo '<div class="dps-pet-card__actions">';
-        echo '<a href="' . esc_url( $edit_url ) . '" class="button button-secondary">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a>';
-        echo '<a href="' . esc_url( $schedule_url ) . '" class="button button-primary">' . esc_html__( 'Agendar', 'desi-pet-shower' ) . '</a>';
+        echo '<a href="' . esc_url( $edit_url ) . '" class="dps-submit-btn dps-submit-btn--secondary">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a>';
+        echo '<a href="' . esc_url( $schedule_url ) . '" class="dps-submit-btn">' . esc_html__( 'Agendar', 'desi-pet-shower' ) . '</a>';
         echo '</div>';
 
         echo '</div>';

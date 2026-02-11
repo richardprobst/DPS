@@ -744,8 +744,6 @@ class DPS_Settings_Frontend {
      * @return void
      */
     public static function render_tab_seguranca() {
-        $base_password   = get_option( 'dps_base_password', '' );
-        $agenda_password = get_option( 'dps_agenda_password', '' );
         ?>
         <form method="post" action="" class="dps-settings-form">
             <?php self::nonce_field(); ?>
@@ -754,40 +752,26 @@ class DPS_Settings_Frontend {
             <div class="dps-surface dps-surface--warning">
                 <h3 class="dps-surface__title">
                     <span class="dashicons dashicons-shield"></span>
-                    <?php esc_html_e( 'Senhas de Acesso', 'desi-pet-shower' ); ?>
+                    <?php esc_html_e( 'Controle de Acesso', 'desi-pet-shower' ); ?>
                 </h3>
                 <p class="dps-surface__description">
-                    <?php esc_html_e( 'Senhas utilizadas para controlar acesso ao painel de gestão e à agenda.', 'desi-pet-shower' ); ?>
+                    <?php esc_html_e( 'O acesso ao painel de gestão e à agenda é controlado exclusivamente pelas permissões de usuário do WordPress.', 'desi-pet-shower' ); ?>
                 </p>
 
                 <div class="dps-notice dps-notice--info" style="margin-bottom: 20px;">
                     <span class="dashicons dashicons-info"></span>
-                    <?php esc_html_e( 'Estas senhas são usadas para autenticação simples em páginas protegidas. Para segurança avançada, utilize o controle de acesso nativo do WordPress.', 'desi-pet-shower' ); ?>
+                    <?php esc_html_e( 'Apenas usuários logados como administrador (manage_options) ou com capabilities DPS específicas podem acessar o painel e a agenda. Gerencie os acessos via Usuários no painel do WordPress.', 'desi-pet-shower' ); ?>
                 </div>
-
-                <fieldset class="dps-fieldset">
-                    <legend><?php esc_html_e( 'Controle de Acesso', 'desi-pet-shower' ); ?></legend>
-                    
-                    <div class="dps-form-row">
-                        <label for="dps_base_password"><?php esc_html_e( 'Senha do Painel Base', 'desi-pet-shower' ); ?></label>
-                        <input type="password" id="dps_base_password" name="dps_base_password" value="<?php echo esc_attr( $base_password ); ?>" class="regular-text" autocomplete="new-password" />
-                        <p class="description"><?php esc_html_e( 'Senha para acessar o painel de gestão principal.', 'desi-pet-shower' ); ?></p>
-                    </div>
-
-                    <div class="dps-form-row">
-                        <label for="dps_agenda_password"><?php esc_html_e( 'Senha da Agenda', 'desi-pet-shower' ); ?></label>
-                        <input type="password" id="dps_agenda_password" name="dps_agenda_password" value="<?php echo esc_attr( $agenda_password ); ?>" class="regular-text" autocomplete="new-password" />
-                        <p class="description"><?php esc_html_e( 'Senha para acessar a página de agenda.', 'desi-pet-shower' ); ?></p>
-                    </div>
-                </fieldset>
             </div>
 
-            <div class="dps-form-actions">
-                <button type="submit" class="button button-primary button-large">
-                    <span class="dashicons dashicons-saved" style="margin-top: 3px;"></span>
-                    <?php esc_html_e( 'Salvar Configurações', 'desi-pet-shower' ); ?>
-                </button>
-            </div>
+            <?php
+            /**
+             * Permite add-ons adicionarem configurações de segurança extras.
+             *
+             * @since 3.0.0
+             */
+            do_action( 'dps_settings_seguranca_fields' );
+            ?>
         </form>
         <?php
     }
@@ -840,24 +824,14 @@ class DPS_Settings_Frontend {
      * @return void
      */
     private static function handle_save_seguranca() {
-        $fields = [
-            'dps_base_password'   => 'sanitize_text_field',
-            'dps_agenda_password' => 'sanitize_text_field',
-        ];
+        /**
+         * Permite add-ons processarem configurações de segurança extras.
+         *
+         * @since 3.0.0
+         */
+        do_action( 'dps_settings_save_seguranca' );
 
-        foreach ( $fields as $option => $sanitize ) {
-            if ( isset( $_POST[ $option ] ) ) {
-                $value     = wp_unslash( $_POST[ $option ] );
-                $sanitized = call_user_func( $sanitize, $value );
-                
-                // Só atualiza se não estiver vazio (permite manter senha atual)
-                if ( ! empty( $sanitized ) ) {
-                    update_option( $option, $sanitized );
-                }
-            }
-        }
-
-        // Log de auditoria (sem expor as senhas)
+        // Log de auditoria
         DPS_Logger::log(
             sprintf(
                 /* translators: %d: User ID who modified settings */

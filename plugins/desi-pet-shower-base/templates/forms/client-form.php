@@ -151,7 +151,7 @@ $btn_text     = $edit_id ? esc_html__( 'Atualizar Cliente', 'desi-pet-shower' ) 
 
 	<!-- Submit button -->
 	<p>
-		<button type="submit" class="button button-primary dps-submit-btn"><?php echo $btn_text; ?></button>
+		<button type="submit" class="dps-submit-btn"><?php echo $btn_text; ?></button>
 	</p>
 </form>
 

@@ -461,26 +461,43 @@
 }
 
 .dps-form p {
-    margin-bottom: 10px;
+    margin-bottom: var(--dps-space-4);
 }
 .dps-form input[type="text"],
 .dps-form input[type="email"],
+.dps-form input[type="tel"],
 .dps-form input[type="date"],
 .dps-form input[type="time"],
 .dps-form input[type="number"],
 .dps-form select,
 .dps-form textarea {
     width: 100%;
-    padding: 10px 12px;
+    padding: var(--dps-space-4);
+    min-height: 48px;
     box-sizing: border-box;
-    border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-small);
-    font-size: 0.95rem;
+    border: 1px solid var(--dps-color-outline);
+    border-radius: var(--dps-shape-input);
+    font-size: var(--dps-typescale-body-large-size);
+    line-height: var(--dps-typescale-body-large-line);
+    color: var(--dps-color-on-surface);
+    background: var(--dps-color-surface-container-lowest);
     transition: border-color var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard), box-shadow var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
+}
+
+.dps-form input[type="text"]:hover,
+.dps-form input[type="email"]:hover,
+.dps-form input[type="tel"]:hover,
+.dps-form input[type="date"]:hover,
+.dps-form input[type="time"]:hover,
+.dps-form input[type="number"]:hover,
+.dps-form select:hover,
+.dps-form textarea:hover {
+    border-color: var(--dps-color-on-surface);
 }
 
 .dps-form input[type="text"]:focus,
 .dps-form input[type="email"]:focus,
+.dps-form input[type="tel"]:focus,
 .dps-form input[type="date"]:focus,
 .dps-form input[type="time"]:focus,
 .dps-form input[type="number"]:focus,
@@ -488,7 +505,15 @@
 .dps-form textarea:focus {
     outline: none;
     border-color: var(--dps-color-primary);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-primary) 15%, transparent);
+    border-width: 2px;
+    /* Compensate 1px increase (2px - 1px border) to maintain consistent element dimensions */
+    padding: calc(var(--dps-space-4) - 1px);
+    box-shadow: none;
+}
+
+.dps-form input::placeholder,
+.dps-form textarea::placeholder {
+    color: var(--dps-color-on-surface-variant);
 }
 
 /* Largura máxima para campos específicos - evita inputs muito largos em telas grandes */
@@ -1387,20 +1412,22 @@
     
     /* Ajustes para fieldsets */
     .dps-fieldset {
-        padding: 16px;
-        margin-bottom: 16px;
+        padding: var(--dps-space-4);
+        margin-bottom: var(--dps-space-4);
     }
     
     /* Reduzir padding em inputs e selects para mobile */
     .dps-form input[type="text"],
     .dps-form input[type="email"],
+    .dps-form input[type="tel"],
     .dps-form input[type="date"],
     .dps-form input[type="time"],
     .dps-form input[type="number"],
     .dps-form select,
     .dps-form textarea {
-        padding: 8px;
-        font-size: 16px;
+        padding: var(--dps-space-3);
+        font-size: 16px; /* iOS: prevents auto-zoom on input focus (Apple HIG requires ≥16px) */
+        min-height: 44px;
     }
     
     /* Inputs de valor em mobile */
@@ -1475,8 +1502,8 @@
 /* Grid responsivo para formulários */
 .dps-form-row {
     display: grid;
-    gap: 16px;
-    margin-bottom: 12px;
+    gap: var(--dps-space-4);
+    margin-bottom: var(--dps-space-4);
 }
 
 .dps-form-row--2col {
@@ -1498,26 +1525,28 @@
 
 /* === FORMULÁRIO DE AGENDAMENTO - LAYOUT MELHORADO === */
 
-/* Fieldsets padronizados com visual mais limpo */
+/* Fieldsets padronizados — M3 field-group pattern */
 .dps-fieldset {
     border: none;
-    border-left: 4px solid var(--dps-color-primary);
-    padding: 20px 24px;
-    margin-bottom: 24px;
-    border-radius: 0 var(--dps-shape-small) var(--dps-shape-small) 0;
+    border-left: 3px solid var(--dps-color-primary);
+    padding: var(--dps-space-5) var(--dps-space-6);
+    margin: 0 0 var(--dps-space-6);
+    border-radius: 0 var(--dps-shape-medium) var(--dps-shape-medium) 0;
     background: var(--dps-color-surface-container-low);
-    box-shadow: var(--dps-elevation-1);
 }
 
 .dps-fieldset__legend {
-    font-weight: 500;
-    color: var(--dps-color-primary-pressed);
+    font-weight: var(--dps-typescale-title-medium-weight);
+    color: var(--dps-color-on-surface);
     padding: 0;
-    font-size: 1.1rem;
+    margin: 0 0 var(--dps-space-4);
+    float: none;
+    width: 100%;
+    font-size: var(--dps-typescale-title-medium-size);
+    line-height: var(--dps-typescale-title-medium-line);
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
+    gap: var(--dps-space-2);
 }
 
 /* Ícones para cada seção do formulário */
@@ -1525,50 +1554,72 @@
     font-size: 1.1em;
 }
 
-/* Seção 1: Tipo de Agendamento */
-.dps-fieldset:nth-of-type(1) {
-    border-left-color: var(--dps-color-tertiary);
-    background: var(--dps-color-surface-container-low);
+/* Descrição do fieldset */
+.dps-fieldset__description {
+    font-size: var(--dps-typescale-body-medium-size);
+    line-height: var(--dps-typescale-body-medium-line);
+    color: var(--dps-color-on-surface-variant);
+    margin: 0 0 var(--dps-space-4);
 }
 
-.dps-fieldset:nth-of-type(1) .dps-fieldset__legend {
+/* Labels de formulário — M3 Label Large */
+.dps-form label {
+    display: block;
+    font-size: var(--dps-typescale-label-large-size);
+    font-weight: var(--dps-typescale-label-large-weight);
+    line-height: var(--dps-typescale-label-large-line);
+    color: var(--dps-color-on-surface-variant);
+    margin-bottom: var(--dps-space-2);
+}
+
+.dps-form label.dps-checkbox-label {
+    display: inline-flex;
+    font-weight: 400;
+    color: var(--dps-color-on-surface);
+    margin-bottom: 0;
+}
+
+/* ---- Appointment form section colorization (scoped to .dps-surface context) ---- */
+
+/* Seção 1: Tipo de Agendamento */
+.dps-surface .dps-fieldset:nth-of-type(1) {
+    border-left-color: var(--dps-color-tertiary);
+}
+
+.dps-surface .dps-fieldset:nth-of-type(1) .dps-fieldset__legend {
     color: var(--dps-color-on-tertiary-container);
 }
 
 /* Seção 2: Cliente e Pet(s) */
-.dps-fieldset:nth-of-type(2) {
+.dps-surface .dps-fieldset:nth-of-type(2) {
     border-left-color: var(--dps-color-primary);
-    background: var(--dps-color-surface-container-low);
 }
 
-.dps-fieldset:nth-of-type(2) .dps-fieldset__legend {
+.dps-surface .dps-fieldset:nth-of-type(2) .dps-fieldset__legend {
     color: var(--dps-color-primary-pressed);
 }
 
 /* Seção 3: Data e Horário */
-.dps-fieldset:nth-of-type(3) {
+.dps-surface .dps-fieldset:nth-of-type(3) {
     border-left-color: var(--dps-color-warning);
-    background: var(--dps-color-surface-container-low);
 }
 
-.dps-fieldset:nth-of-type(3) .dps-fieldset__legend {
+.dps-surface .dps-fieldset:nth-of-type(3) .dps-fieldset__legend {
     color: var(--dps-color-on-warning-container);
 }
 
 /* Seção 4: Serviços e Extras */
-.dps-fieldset:nth-of-type(4) {
+.dps-surface .dps-fieldset:nth-of-type(4) {
     border-left-color: var(--dps-color-success);
-    background: var(--dps-color-surface-container-low);
 }
 
-.dps-fieldset:nth-of-type(4) .dps-fieldset__legend {
+.dps-surface .dps-fieldset:nth-of-type(4) .dps-fieldset__legend {
     color: var(--dps-color-on-success-container);
 }
 
 /* Seção 5: Pagamento (agendamentos passados) */
 #dps-past-payment-wrapper {
     border-left-color: var(--dps-color-error);
-    background: var(--dps-color-surface-container-low);
 }
 
 #dps-past-payment-wrapper .dps-fieldset__legend {
@@ -1576,12 +1627,11 @@
 }
 
 /* Seção 6: Observações */
-.dps-fieldset:last-of-type {
+.dps-surface .dps-fieldset:last-of-type {
     border-left-color: var(--dps-color-on-surface-variant);
-    background: var(--dps-color-surface-container-low);
 }
 
-.dps-fieldset:last-of-type .dps-fieldset__legend {
+.dps-surface .dps-fieldset:last-of-type .dps-fieldset__legend {
     color: var(--dps-color-on-surface);
 }
 
@@ -1591,26 +1641,41 @@
     font-weight: 500;
 }
 
-/* Checkbox melhorado */
+/* Checkbox melhorado — M3: inline-flex, 18px, accent-color, weight 400 */
 .dps-checkbox-label {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dps-space-2);
     cursor: pointer;
+    font-weight: 400;
+    font-size: var(--dps-typescale-body-medium-size);
+    color: var(--dps-color-on-surface);
+    padding: var(--dps-space-1) 0;
+    background: none;
+    border: none;
+    transition: color var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
+}
+
+.dps-checkbox-label:hover {
+    color: var(--dps-color-primary);
 }
 
 .dps-checkbox-label input[type="checkbox"] {
-    margin-top: 2px;
-    width: auto;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--dps-color-primary);
+    cursor: pointer;
+    flex-shrink: 0;
 }
 
 .dps-checkbox-text {
     flex: 1;
 }
 
-/* Upload de arquivo estilizado */
+/* Upload de arquivo estilizado — M3 card-like container */
 .dps-file-upload {
-    margin-bottom: 12px;
+    margin-bottom: var(--dps-space-4);
 }
 
 .dps-file-upload__input {
@@ -1625,18 +1690,24 @@
 }
 
 .dps-file-upload__label {
-    display: inline-block;
-    padding: 10px 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dps-space-2);
+    padding: var(--dps-space-3) var(--dps-space-5);
     background: var(--dps-color-surface-container-low);
     border: 2px dashed var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-extra-small);
+    border-radius: var(--dps-shape-medium);
     cursor: pointer;
     transition: all var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
+    font-size: var(--dps-typescale-label-large-size);
+    font-weight: var(--dps-typescale-label-large-weight);
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-file-upload__label:hover {
     border-color: var(--dps-color-primary);
     background: var(--dps-color-primary-container);
+    color: var(--dps-color-on-primary-container);
 }
 
 .dps-file-upload__text {
@@ -1644,33 +1715,73 @@
 }
 
 .dps-file-upload__preview {
-    margin-top: 12px;
+    margin-top: var(--dps-space-3);
     max-width: 200px;
 }
 
 .dps-file-upload__preview img {
     max-width: 100%;
     height: auto;
-    border-radius: var(--dps-shape-extra-small);
+    border-radius: var(--dps-shape-medium);
     border: 1px solid var(--dps-color-outline-variant);
 }
 
-/* Botão de submit */
+/* Botão de submit — M3 filled button (pill) */
 .dps-submit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dps-space-2);
     min-width: 160px;
-    font-weight: 500;
+    min-height: 40px;
+    padding: var(--dps-space-3) var(--dps-space-6);
+    background: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+    border: none;
+    border-radius: var(--dps-shape-button);
+    font-size: var(--dps-typescale-label-large-size);
+    font-weight: var(--dps-typescale-label-large-weight);
+    cursor: pointer;
+    box-shadow: var(--dps-elevation-button);
+    transition: all var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
+    text-shadow: none;
+}
+
+.dps-submit-btn:hover {
+    background: var(--dps-color-primary-hover);
+    box-shadow: var(--dps-elevation-2);
+    transform: translateY(-1px);
+    color: var(--dps-color-on-primary);
+}
+
+.dps-submit-btn:active {
+    background: var(--dps-color-primary-pressed);
+    transform: translateY(0);
+    box-shadow: var(--dps-elevation-1);
 }
 
 .dps-submit-btn:disabled {
-    opacity: 0.6;
+    opacity: var(--dps-state-disabled-opacity);
     cursor: not-allowed;
+    pointer-events: none;
+    transform: none;
+}
+
+/* Variante secundária — M3 outlined/tonal */
+.dps-submit-btn--secondary {
+    background: var(--dps-color-surface-container-high);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-submit-btn--secondary:hover {
+    background: var(--dps-color-surface-container-highest);
 }
 
 /* Dicas de preenchimento de campos */
 .dps-field-hint {
-    font-size: 12px;
+    font-size: var(--dps-typescale-body-small-size);
     color: var(--dps-color-on-surface-variant);
-    margin-top: 4px;
+    margin-top: var(--dps-space-1);
     margin-bottom: 0;
 }
 
@@ -4712,60 +4823,64 @@
 }
 
 /* Fieldset dentro de configurações */
-.dps-fieldset {
+.dps-settings-section .dps-fieldset {
     margin: 0 0 24px 0;
     padding: 20px;
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-small);
+    border-left: 3px solid var(--dps-color-primary);
+    border-radius: 0 var(--dps-shape-medium) var(--dps-shape-medium) 0;
     background: var(--dps-color-surface-container-low);
 }
 
-.dps-fieldset legend {
-    padding: 0 12px;
-    font-size: 14px;
-    font-weight: 500;
+.dps-settings-section .dps-fieldset legend {
+    padding: 0;
+    font-size: var(--dps-typescale-title-medium-size);
+    font-weight: var(--dps-typescale-title-medium-weight);
     color: var(--dps-color-on-surface);
-    background: var(--dps-color-surface-container-low);
+    background: transparent;
+    float: none;
+    width: 100%;
+    margin-bottom: var(--dps-space-4);
 }
 
-/* Linhas de formulário */
-.dps-form-row {
+/* Linhas de formulário — Settings context */
+.dps-settings-section .dps-form-row {
     margin-bottom: 20px;
 }
 
-.dps-form-row:last-child {
+.dps-settings-section .dps-form-row:last-child {
     margin-bottom: 0;
 }
 
-.dps-form-row label {
+.dps-settings-section .dps-form-row label {
     display: block;
-    margin-bottom: 6px;
-    font-size: 14px;
-    font-weight: 500;
+    margin-bottom: var(--dps-space-2);
+    font-size: var(--dps-typescale-label-large-size);
+    font-weight: var(--dps-typescale-label-large-weight);
     color: var(--dps-color-on-surface);
 }
 
-.dps-form-row input[type="text"],
-.dps-form-row input[type="password"],
-.dps-form-row input[type="email"],
-.dps-form-row input[type="url"],
-.dps-form-row input[type="number"],
-.dps-form-row select,
-.dps-form-row textarea {
+.dps-settings-section .dps-form-row input[type="text"],
+.dps-settings-section .dps-form-row input[type="password"],
+.dps-settings-section .dps-form-row input[type="email"],
+.dps-settings-section .dps-form-row input[type="url"],
+.dps-settings-section .dps-form-row input[type="number"],
+.dps-settings-section .dps-form-row select,
+.dps-settings-section .dps-form-row textarea {
     width: 100%;
     max-width: 400px;
-    padding: 10px 14px;
-    border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-small);
-    font-size: 14px;
+    padding: var(--dps-space-3) var(--dps-space-4);
+    border: 1px solid var(--dps-color-outline);
+    border-radius: var(--dps-shape-input);
+    font-size: var(--dps-typescale-body-medium-size);
     color: var(--dps-color-on-surface);
     background: var(--dps-color-surface-container-lowest);
     transition: border-color var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard), box-shadow var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
 }
 
-.dps-form-row input:focus,
-.dps-form-row select:focus,
-.dps-form-row textarea:focus {
+.dps-settings-section .dps-form-row input:focus,
+.dps-settings-section .dps-form-row select:focus,
+.dps-settings-section .dps-form-row textarea:focus {
     outline: none;
     border-color: var(--dps-color-primary);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-primary) 10%, transparent);
@@ -4874,29 +4989,29 @@
         padding: 16px;
     }
     
-    .dps-fieldset {
+    .dps-settings-section .dps-fieldset {
         padding: 16px;
     }
     
-    .dps-form-row input[type="text"],
-    .dps-form-row input[type="password"],
-    .dps-form-row input[type="email"],
-    .dps-form-row select {
+    .dps-settings-section .dps-form-row input[type="text"],
+    .dps-settings-section .dps-form-row input[type="password"],
+    .dps-settings-section .dps-form-row input[type="email"],
+    .dps-settings-section .dps-form-row select {
         max-width: 100%;
     }
 }
 
-/* Checkbox label para configurações */
-.dps-checkbox-label {
+/* Checkbox label para configurações — scoped */
+.dps-settings-section .dps-checkbox-label {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 500;
+    gap: var(--dps-space-2);
+    font-weight: 400;
     color: var(--dps-color-on-surface);
     cursor: pointer;
 }
 
-.dps-checkbox-label input[type="checkbox"] {
+.dps-settings-section .dps-checkbox-label input[type="checkbox"] {
     width: 18px;
     height: 18px;
     accent-color: var(--dps-color-primary);
@@ -4904,9 +5019,9 @@
 }
 
 /* Color picker melhorado */
-.dps-form-row input[type="color"] {
+.dps-settings-section .dps-form-row input[type="color"] {
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-small);
+    border-radius: var(--dps-shape-input);
     cursor: pointer;
     transition: border-color var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
 }
