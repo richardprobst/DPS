@@ -2461,7 +2461,7 @@ class DPS_Registration_Addon {
             $agenda_url = $this->get_agenda_cta_url();
             if ( $agenda_url ) {
                 echo '<p class="dps-reg-success__cta">';
-                echo '<a class="button button-primary dps-reg-success__cta-btn" href="' . esc_url( $agenda_url ) . '">' . esc_html__( 'Agendar meu primeiro atendimento', 'dps-registration-addon' ) . '</a>';
+                echo '<a class="dps-button-next dps-reg-success__cta-btn" href="' . esc_url( $agenda_url ) . '">' . esc_html__( 'Agendar meu primeiro atendimento', 'dps-registration-addon' ) . '</a>';
                 echo '</p>';
             }
             echo '</div>';
@@ -2534,7 +2534,7 @@ class DPS_Registration_Addon {
             echo '</div>';
         }
         echo '<div class="dps-step-actions">';
-        echo '<button type="button" id="dps-next-step" class="button button-primary dps-button-next">' . esc_html__( 'Próximo', 'dps-registration-addon' ) . '</button>';
+        echo '<button type="button" id="dps-next-step" class="dps-button-next">' . esc_html__( 'Próximo', 'dps-registration-addon' ) . '</button>';
         echo '</div>';
         echo '</div>';
 
@@ -2545,10 +2545,10 @@ class DPS_Registration_Addon {
         echo $first_pet_html;
         echo '</div>';
         // Botão para adicionar outro pet
-        echo '<p><button type="button" id="dps-add-pet" class="button">' . esc_html__( 'Adicionar outro pet', 'dps-registration-addon' ) . '</button></p>';
+        echo '<p><button type="button" id="dps-add-pet">' . esc_html__( 'Adicionar outro pet', 'dps-registration-addon' ) . '</button></p>';
         echo '<div class="dps-step-actions">';
-        echo '<button type="button" id="dps-back-step" class="button dps-button-secondary">' . esc_html__( 'Voltar', 'dps-registration-addon' ) . '</button>';
-        echo '<button type="button" id="dps-next-step-2" class="button button-primary dps-button-next">' . esc_html__( 'Próximo', 'dps-registration-addon' ) . '</button>';
+        echo '<button type="button" id="dps-back-step" class="dps-button-secondary">' . esc_html__( 'Voltar', 'dps-registration-addon' ) . '</button>';
+        echo '<button type="button" id="dps-next-step-2" class="dps-button-next">' . esc_html__( 'Próximo', 'dps-registration-addon' ) . '</button>';
         echo '</div>';
         echo '</div>';
 
@@ -2574,8 +2574,8 @@ class DPS_Registration_Addon {
         echo '<input type="hidden" name="client_lng" id="dps-client-lng" value="">';
         do_action( 'dps_registration_after_fields' );
         echo '<div class="dps-step-actions">';
-        echo '<button type="button" id="dps-back-step-2" class="button dps-button-secondary">' . esc_html__( 'Voltar', 'dps-registration-addon' ) . '</button>';
-        echo '<button type="submit" class="button button-primary" disabled>' . esc_html__( 'Enviar cadastro', 'dps-registration-addon' ) . '</button>';
+        echo '<button type="button" id="dps-back-step-2" class="dps-button-secondary">' . esc_html__( 'Voltar', 'dps-registration-addon' ) . '</button>';
+        echo '<button type="submit" class="dps-button-next" disabled>' . esc_html__( 'Enviar cadastro', 'dps-registration-addon' ) . '</button>';
         echo '</div>';
         echo '</div>';
         echo '</div>';

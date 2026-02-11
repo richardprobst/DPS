@@ -89,7 +89,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 24px;
+    padding: var(--dps-space-3) var(--dps-space-6);
     background: var(--dps-color-primary);
     color: var(--dps-color-on-primary);
     font-size: var(--dps-typescale-label-large-size);
@@ -97,11 +97,14 @@
     line-height: var(--dps-typescale-label-large-line);
     text-decoration: none;
     border: none;
-    border-radius: var(--dps-shape-small);
+    border-radius: var(--dps-shape-button);
+    min-height: 40px;
     cursor: pointer;
     transition: background-color var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard),
                 transform var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard),
                 box-shadow var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
+    box-shadow: var(--dps-elevation-button);
+    text-shadow: none;
 }
 
 .dps-booking-access-denied .button:hover {
@@ -295,13 +298,14 @@
 .dps-confirmation-actions .dps-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    font-size: var(--dps-typescale-body-medium-size);
+    gap: var(--dps-space-2);
+    padding: var(--dps-space-3) var(--dps-space-5);
+    font-size: var(--dps-typescale-label-large-size);
     font-weight: var(--dps-typescale-label-large-weight);
-    line-height: var(--dps-typescale-body-medium-line);
+    line-height: var(--dps-typescale-label-large-line);
     text-decoration: none;
-    border-radius: var(--dps-shape-small);
+    border-radius: var(--dps-shape-button);
+    min-height: 40px;
     cursor: pointer;
     transition: background-color var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard),
                 transform var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard),
@@ -341,7 +345,7 @@
 .dps-confirmation-actions .dps-btn--outline {
     background: transparent;
     color: var(--dps-color-primary);
-    border: 2px solid var(--dps-color-primary);
+    border: 1px solid var(--dps-color-outline);
 }
 
 .dps-confirmation-actions .dps-btn--outline:hover {

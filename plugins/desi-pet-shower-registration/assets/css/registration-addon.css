@@ -786,6 +786,7 @@
     border-color: var(--dps-color-success) !important;
     color: var(--dps-color-on-success) !important;
     text-decoration: none !important;
+    border-radius: var(--dps-shape-button) !important;
 }
 
 .dps-reg-success__cta-btn:hover {
