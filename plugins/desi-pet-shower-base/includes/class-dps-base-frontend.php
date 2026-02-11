@@ -2581,7 +2581,7 @@ class DPS_Base_Frontend {
         echo '<div class="dps-history-toolbar__header">';
         echo '<h3 class="dps-history-toolbar__title"><span class="dps-section-title__icon">📋</span>' . esc_html__( 'Tabela de Atendimentos Finalizados', 'desi-pet-shower' ) . '</h3>';
         echo '<div class="dps-history-toolbar__actions">';
-        echo '<button type="button" class="dps-submit-btn" style="background: var(--dps-color-on-surface-variant);" id="dps-history-clear">';
+        echo '<button type="button" class="dps-submit-btn dps-submit-btn--secondary" id="dps-history-clear">';
         echo '<span aria-hidden="true">🔄</span> ' . esc_html__( 'Limpar filtros', 'desi-pet-shower' );
         echo '</button>';
         echo '<button type="button" class="dps-submit-btn" id="dps-history-export">';
@@ -5047,7 +5047,7 @@ class DPS_Base_Frontend {
 
         // Ações
         echo '<div class="dps-pet-card__actions">';
-        echo '<a href="' . esc_url( $edit_url ) . '" class="dps-submit-btn" style="background: var(--dps-color-on-surface-variant);">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a>';
+        echo '<a href="' . esc_url( $edit_url ) . '" class="dps-submit-btn dps-submit-btn--secondary">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a>';
         echo '<a href="' . esc_url( $schedule_url ) . '" class="dps-submit-btn">' . esc_html__( 'Agendar', 'desi-pet-shower' ) . '</a>';
         echo '</div>';
 

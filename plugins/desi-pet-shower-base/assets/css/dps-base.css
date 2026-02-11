@@ -1767,6 +1767,16 @@
     transform: none;
 }
 
+/* Variante secundária — M3 outlined/tonal */
+.dps-submit-btn--secondary {
+    background: var(--dps-color-surface-container-high);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-submit-btn--secondary:hover {
+    background: var(--dps-color-surface-container-highest);
+}
+
 /* Dicas de preenchimento de campos */
 .dps-field-hint {
     font-size: var(--dps-typescale-body-small-size);

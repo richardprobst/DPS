@@ -129,7 +129,7 @@ $api_key          = isset( $api_key ) ? $api_key : '';
 						</a>
 					<?php else : ?>
 						<?php if ( current_user_can( 'manage_options' ) ) : ?>
-							<a class="dps-submit-btn" style="background: var(--dps-color-on-surface-variant);" href="<?php echo esc_url( admin_url( 'admin.php?page=dps-clients-settings' ) ); ?>">
+							<a class="dps-submit-btn dps-submit-btn--secondary" href="<?php echo esc_url( admin_url( 'admin.php?page=dps-clients-settings' ) ); ?>">
 								<?php echo esc_html__( 'Configurar página de cadastro', 'desi-pet-shower' ); ?>
 							</a>
 						<?php endif; ?>
