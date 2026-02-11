@@ -1543,6 +1543,87 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 ---
 
+### Frontend (`desi-pet-shower-frontend`)
+
+**Diretório**: `plugins/desi-pet-shower-frontend`
+
+**Propósito e funcionalidades principais**:
+- Consolidar experiências frontend (cadastro, agendamento, configurações) em add-on modular
+- Arquitetura com módulos independentes, feature flags e camada de compatibilidade
+- Rollout controlado: cada módulo pode ser habilitado/desabilitado individualmente
+- **[Fase 2]** Módulo Registration operacional em dual-run com o add-on legado
+- **[Fase 3]** Módulo Booking operacional em dual-run com o add-on legado
+- **[Fase 4]** Módulo Settings integrado ao sistema de abas de configurações
+
+**Shortcodes expostos**:
+- `dps_registration_form` — quando flag `registration` ativada, o módulo assume o shortcode (wrapper sobre o legado com surface M3)
+- `dps_booking_form` — quando flag `booking` ativada, o módulo assume o shortcode (wrapper sobre o legado com surface M3)
+
+**CPTs, tabelas e opções**:
+- Option: `dps_frontend_feature_flags` — controle de rollout por módulo
+
+**Hooks consumidos** (Fase 2 — módulo Registration):
+- `dps_registration_after_fields` (preservado — consumido pelo Loyalty)
+- `dps_registration_after_client_created` (preservado — consumido pelo Loyalty)
+- `dps_registration_spam_check` (preservado)
+- `dps_registration_agenda_url` (preservado)
+
+**Hooks consumidos** (Fase 3 — módulo Booking):
+- `dps_base_after_save_appointment` (preservado — consumido por stock, payment, groomers, calendar, communications, push, services e booking)
+- `dps_base_appointment_fields` (preservado)
+- `dps_base_appointment_assignment_fields` (preservado)
+
+**Hooks consumidos** (Fase 4 — módulo Settings):
+- `dps_settings_register_tabs` — registra aba "Frontend" via `DPS_Settings_Frontend::register_tab()`
+- `dps_settings_save_save_frontend` — processa salvamento das feature flags
+
+**Hooks disparados**: Nenhum novo nesta fase
+
+**Dependências**:
+- Depende do plugin base (DPS_Base_Plugin + design tokens CSS)
+- Módulo Registration depende de `DPS_Registration_Addon` (add-on legado) para dual-run
+- Módulo Booking depende de `DPS_Booking_Addon` (add-on legado) para dual-run
+- Módulo Settings depende de `DPS_Settings_Frontend` (sistema de abas do base)
+
+**Arquitetura interna**:
+- `DPS_Frontend_Addon` — orquestrador com injeção de dependências
+- `DPS_Frontend_Module_Registry` — registro e boot de módulos
+- `DPS_Frontend_Feature_Flags` — controle de rollout persistido
+- `DPS_Frontend_Compatibility` — bridges para legado
+- `DPS_Frontend_Assets` — enqueue condicional M3 Expressive
+- `DPS_Frontend_Logger` — observabilidade via error_log
+- `DPS_Frontend_Request_Guard` — segurança centralizada (nonce, capability, sanitização)
+- `DPS_Frontend_Registration_Module` — dual-run: assume shortcode, delega lógica ao legado
+- `DPS_Frontend_Booking_Module` — dual-run: assume shortcode, delega lógica ao legado
+- `DPS_Frontend_Settings_Module` — registra aba de configurações com controles de feature flags
+
+**Estratégia de compatibilidade (Fases 2–4)**:
+- Intervenção mínima: o legado continua processando formulário, emails, REST, AJAX, settings e cron
+- Módulos de shortcode assumem o shortcode (envolve output na `.dps-frontend` surface) e adicionam CSS extra
+- Módulo de settings registra aba via API moderna `register_tab()` sem alterar abas existentes
+- Rollback: desabilitar flag do módulo restaura comportamento 100% legado
+
+**Introduzido em**: v1.0.0
+
+**Documentação operacional (Fase 5)**:
+- `docs/implementation/FRONTEND_ROLLOUT_GUIDE.md` — guia de ativação por ambiente
+- `docs/implementation/FRONTEND_RUNBOOK.md` — diagnóstico e rollback de incidentes
+- `docs/qa/FRONTEND_COMPATIBILITY_MATRIX.md` — matriz de compatibilidade com todos os add-ons
+- `docs/qa/FRONTEND_REMOVAL_READINESS.md` — checklist de prontidão para remoção futura
+
+**Documentação de governança (Fase 6)**:
+- `docs/refactoring/FRONTEND_DEPRECATION_POLICY.md` — política de depreciação (janela mínima 180 dias, processo de comunicação, critérios de aceite)
+- `docs/refactoring/FRONTEND_REMOVAL_TARGETS.md` — lista de alvos com risco, dependências e esforço (booking 🟢 baixo; registration 🟡 médio)
+- Telemetria de uso: contadores por módulo via `dps_frontend_usage_counters`, exibidos na aba Settings
+
+**Observações**:
+- PHP 8.4 moderno: constructor promotion, readonly properties, typed properties, return types
+- Sem singletons: objetos montados por composição no bootstrap
+- Assets carregados somente quando ao menos um módulo está habilitado (feature flag)
+- Roadmap completo em `docs/refactoring/FRONTEND_ADDON_PHASED_ROADMAP.md`
+
+---
+
 ### Serviços (`desi-pet-shower-services_addon`)
 
 **Diretório**: `plugins/desi-pet-shower-services`

@@ -225,6 +225,17 @@ class DPS_Addon_Manager {
                 'category'     => 'client',
                 'icon'         => '🎁',
             ],
+            'frontend' => [
+                'slug'         => 'frontend',
+                'name'         => __( 'Frontend', 'desi-pet-shower' ),
+                'description'  => __( 'Consolida experiências frontend (cadastro, agendamento, configurações) em add-on modular.', 'desi-pet-shower' ),
+                'file'         => 'desi-pet-shower-frontend/desi-pet-shower-frontend-addon.php',
+                'class'        => 'DPS_Frontend_Addon',
+                'dependencies' => [],
+                'priority'     => 72,
+                'category'     => 'client',
+                'icon'         => '🖥️',
+            ],
 
             // Categoria: Avançado
             'ai' => [

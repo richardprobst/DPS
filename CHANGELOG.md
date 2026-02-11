@@ -83,6 +83,64 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Frontend Add-on v1.0.0 — Fundação (Fase 1)**
+
+- **Novo add-on `desi-pet-shower-frontend`**: esqueleto modular para consolidação de experiências frontend (cadastro, agendamento, configurações).
+- **Arquitetura moderna PHP 8.4**: constructor promotion, readonly properties, typed properties, return types. Sem singletons — composição via construtor.
+- **Module Registry**: registro e boot de módulos independentes controlados por feature flags.
+- **Feature Flags**: controle de rollout por módulo via option `dps_frontend_feature_flags`. Todos desabilitados na Fase 1.
+- **Camada de compatibilidade**: preparada para bridges de shortcodes e hooks legados (Fases 2-4).
+- **Assets M3 Expressive**: CSS sem hex literais (100% via design tokens), JS vanilla com IIFE. Enqueue condicional.
+- **Observabilidade**: logger estruturado com níveis INFO/WARNING/ERROR (ativo apenas em WP_DEBUG).
+- **Request Guard**: segurança centralizada para nonce, capability e sanitização.
+- **Módulos stub**: Registration (Fase 2), Booking (Fase 3), Settings (Fase 4).
+- **Registrado no Addon Manager** do plugin base (categoria client, prioridade 72).
+- **Documentado no ANALYSIS.md** com arquitetura interna, contratos e roadmap.
+
+**Frontend Add-on v1.1.0 — Módulo Registration (Fase 2)**
+
+- **Módulo Registration operacional** em dual-run com add-on legado `desi-pet-shower-registration`.
+- **Estratégia de intervenção mínima**: assume shortcode `[dps_registration_form]`, delega toda a lógica (formulário, validação, emails, REST, AJAX) ao legado.
+- **Surface M3 wrapper**: output do formulário envolvido em `.dps-frontend` para aplicação de estilos M3 Expressive.
+- **CSS extra**: `frontend-addon.css` carregado condicionalmente sobre os assets do legado.
+- **Hooks preservados**: `dps_registration_after_fields`, `dps_registration_after_client_created`, `dps_registration_spam_check`, `dps_registration_agenda_url`.
+- **Rollback instantâneo**: desabilitar flag `registration` restaura comportamento 100% legado.
+- **Camada de compatibilidade**: bridge de shortcode ativo quando flag habilitada.
+
+**Frontend Add-on v1.2.0 — Módulo Booking (Fase 3)**
+
+- **Módulo Booking operacional** em dual-run com add-on legado `desi-pet-shower-booking`.
+- **Estratégia de intervenção mínima**: assume shortcode `[dps_booking_form]`, delega toda a lógica (formulário, confirmação, captura de appointment) ao legado.
+- **Surface M3 wrapper**: output do formulário envolvido em `.dps-frontend` para aplicação de estilos M3 Expressive.
+- **CSS extra**: `frontend-addon.css` carregado condicionalmente sobre os assets do legado.
+- **Hooks preservados**: `dps_base_after_save_appointment` (consumido por 7+ add-ons: stock, payment, groomers, calendar, communications, push, services), `dps_base_appointment_fields`, `dps_base_appointment_assignment_fields`.
+- **Rollback instantâneo**: desabilitar flag `booking` restaura comportamento 100% legado.
+- **Camada de compatibilidade**: bridge de shortcode ativo quando flag habilitada.
+
+**Frontend Add-on v1.3.0 — Módulo Settings (Fase 4)**
+
+- **Módulo Settings operacional** integrado ao sistema de abas de `DPS_Settings_Frontend`.
+- **Aba "Frontend"** registrada via API moderna `register_tab()` com prioridade 110.
+- **Controles de feature flags**: interface administrativa para habilitar/desabilitar módulos individualmente (Registration, Booking, Settings).
+- **Salvamento seguro**: handler via hook `dps_settings_save_save_frontend`, nonce e capability verificados pelo sistema base.
+- **Informações do add-on**: versão e contagem de módulos ativos exibidos na aba.
+- **Hooks consumidos**: `dps_settings_register_tabs`, `dps_settings_save_save_frontend`.
+- **Rollback instantâneo**: desabilitar flag `settings` remove a aba sem impacto em outras configurações.
+- **Camada de compatibilidade**: bridge de hooks ativo quando flag habilitada.
+
+**Frontend Add-on v1.4.0 — Consolidação e Documentação (Fase 5)**
+
+- **Guia operacional de rollout** (`docs/implementation/FRONTEND_ROLLOUT_GUIDE.md`): passos de ativação por ambiente (dev, homolog, prod), ordem recomendada, verificação pós-ativação.
+- **Runbook de incidentes** (`docs/implementation/FRONTEND_RUNBOOK.md`): classificação de severidade, diagnóstico rápido, procedimentos de rollback por módulo, cenários de incidente específicos.
+- **Matriz de compatibilidade** (`docs/qa/FRONTEND_COMPATIBILITY_MATRIX.md`): status de integração com 18 add-ons, contratos de shortcodes/hooks/options verificados, impacto de desativação por módulo.
+- **Checklist de remoção futura** (`docs/qa/FRONTEND_REMOVAL_READINESS.md`): critérios objetivos por módulo, riscos e mitigação, procedimento de remoção segura (nenhuma remoção nesta etapa).
+
+**Frontend Add-on v1.5.0 — Governança de Depreciação (Fase 6)**
+
+- **Política de depreciação** (`docs/refactoring/FRONTEND_DEPRECATION_POLICY.md`): janela mínima de 180 dias (90 dual-run + 60 aviso + 30 observação), processo de comunicação formal, critérios de aceite técnicos e de governança, procedimento de depreciação em 5 etapas.
+- **Lista de alvos de remoção** (`docs/refactoring/FRONTEND_REMOVAL_TARGETS.md`): inventário completo com dependências por grep (registration: 5 refs no base + 2 hooks no Loyalty; booking: 0 refs externas), risco por alvo, esforço estimado, plano de reversão, ordem de prioridade recomendada.
+- **Telemetria de uso**: método `DPS_Frontend_Logger::track()` com contadores por módulo persistidos em `dps_frontend_usage_counters`. Cada renderização de shortcode via módulo frontend é contabilizada. Contadores exibidos na aba Settings para apoiar decisões de depreciação.
+
 **Booking Add-on v1.3.0 — Migração M3 e Melhorias de Segurança**
 
 - **Validação granular de edição de agendamentos**: Método `can_edit_appointment()` verifica se usuário pode editar agendamento específico (criador ou admin).

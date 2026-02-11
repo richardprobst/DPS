@@ -1,0 +1,73 @@
+/**
+ * Frontend Add-on — M3 Expressive
+ *
+ * Base CSS para o add-on. Todas as cores, formas, tipografia e elevação
+ * vêm dos design tokens (var(--dps-*)). Zero hex literais, zero rgba().
+ *
+ * Dependência: dps-design-tokens.css (fornecido pelo plugin base)
+ *
+ * @since 1.0.0
+ */
+
+/* === Layout base do add-on === */
+
+.dps-frontend {
+    font-family: var(--dps-font-body, var(--dps-font-system));
+    font-size: var(--dps-typescale-body-medium-size);
+    line-height: var(--dps-typescale-body-medium-line);
+    font-weight: 400;
+    color: var(--dps-color-on-surface);
+}
+
+/* === Surface container === */
+
+.dps-frontend__surface {
+    background: var(--dps-color-surface-container-low);
+    border-radius: var(--dps-shape-medium);
+    padding: var(--dps-space-6);
+}
+
+/* === Títulos === */
+
+.dps-frontend__title {
+    font-family: var(--dps-font-display, var(--dps-font-system));
+    font-size: var(--dps-typescale-headline-small-size);
+    line-height: var(--dps-typescale-headline-small-line);
+    font-weight: 400;
+    color: var(--dps-color-on-surface);
+    margin: 0 0 var(--dps-space-4);
+}
+
+/* === Feedback (sucesso/erro/aviso) === */
+
+.dps-frontend__feedback {
+    border-radius: var(--dps-shape-small);
+    padding: var(--dps-space-3) var(--dps-space-4);
+    font-size: var(--dps-typescale-body-medium-size);
+    font-weight: 500;
+}
+
+.dps-frontend__feedback--success {
+    background: var(--dps-color-success-container);
+    color: var(--dps-color-on-success-container);
+}
+
+.dps-frontend__feedback--error {
+    background: var(--dps-color-error-container);
+    color: var(--dps-color-on-error-container);
+}
+
+.dps-frontend__feedback--warning {
+    background: var(--dps-color-warning-container);
+    color: var(--dps-color-on-warning-container);
+}
+
+/* === Reduced motion === */
+
+@media (prefers-reduced-motion: reduce) {
+    .dps-frontend,
+    .dps-frontend * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
