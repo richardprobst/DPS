@@ -6,6 +6,8 @@ Este diretório contém a documentação detalhada de UX, layout, refatoração 
 
 > **🌟 [GUIA_SISTEMA_DPS.md](GUIA_SISTEMA_DPS.md)** - Guia completo de apresentação, instalação, configuração e uso do sistema. Documento principal para usuários e administradores.
 
+> **🚀 [FRONTEND_ADDON_GUIA_USUARIO.md](FRONTEND_ADDON_GUIA_USUARIO.md)** - **🆕** Guia completo do Frontend Add-on. Instalação, configuração, shortcodes, criação de páginas e personalização visual. Documento essencial para usar o novo add-on modular de experiências frontend (cadastro, agendamento, configurações).
+
 > **🔧 [FUNCTIONS_REFERENCE.md](FUNCTIONS_REFERENCE.md)** - Referência completa de TODAS as funções e métodos do DPS. Guia definitivo para desenvolvedores trabalhando com o sistema (8.233 linhas, 385+ funções/métodos documentados, cobrindo plugin base + 16 add-ons).
 
 O guia inclui:
