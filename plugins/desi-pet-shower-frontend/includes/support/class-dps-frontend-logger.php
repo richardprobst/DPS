@@ -22,6 +22,18 @@ final class DPS_Frontend_Logger {
     private const PREFIX     = '[DPS Frontend]';
     private const USAGE_KEY  = 'dps_frontend_usage_counters';
 
+    /**
+     * Contadores pendentes no request atual (flush no shutdown).
+     *
+     * @var array<string, int>
+     */
+    private array $pendingCounts = [];
+
+    /**
+     * Se o hook de shutdown já foi registrado.
+     */
+    private bool $shutdownRegistered = false;
+
     public function info( string $message ): void {
         $this->write( 'INFO', $message );
     }
@@ -37,24 +49,45 @@ final class DPS_Frontend_Logger {
     /**
      * Registra uso de um módulo para telemetria.
      *
-     * Incrementa um contador persistido por módulo. Usado pelos módulos
-     * para rastrear quantas vezes cada shortcode é renderizado via
-     * frontend add-on (vs. legado). Os contadores alimentam decisões
-     * de depreciação documentadas em FRONTEND_DEPRECATION_POLICY.md.
+     * Acumula incrementos no request atual e persiste uma única vez
+     * no shutdown do WordPress, evitando overhead de DB por render.
      *
      * @since 1.5.0
      *
      * @param string $module Nome do módulo (ex.: 'registration', 'booking').
      */
     public function track( string $module ): void {
+        $this->pendingCounts[ $module ] = ( $this->pendingCounts[ $module ] ?? 0 ) + 1;
+
+        if ( ! $this->shutdownRegistered ) {
+            add_action( 'shutdown', [ $this, 'flushCounters' ] );
+            $this->shutdownRegistered = true;
+        }
+    }
+
+    /**
+     * Persiste contadores acumulados no DB (chamado no shutdown).
+     *
+     * @since 1.5.0
+     * @internal
+     */
+    public function flushCounters(): void {
+        if ( [] === $this->pendingCounts ) {
+            return;
+        }
+
         $counters = get_option( self::USAGE_KEY, [] );
 
         if ( ! is_array( $counters ) ) {
             $counters = [];
         }
 
-        $counters[ $module ] = ( $counters[ $module ] ?? 0 ) + 1;
+        foreach ( $this->pendingCounts as $module => $increment ) {
+            $counters[ $module ] = ( $counters[ $module ] ?? 0 ) + $increment;
+        }
+
         update_option( self::USAGE_KEY, $counters, false );
+        $this->pendingCounts = [];
     }
 
     /**
