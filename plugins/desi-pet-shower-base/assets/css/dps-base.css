@@ -1526,10 +1526,10 @@
 
 /* Fieldsets padronizados — M3 field-group pattern */
 .dps-fieldset {
-    border: 1px solid var(--dps-color-outline-variant);
+    border: none;
     border-left: 3px solid var(--dps-color-primary);
     padding: var(--dps-space-5) var(--dps-space-6);
-    margin-bottom: var(--dps-space-6);
+    margin: 0 0 var(--dps-space-6);
     border-radius: 0 var(--dps-shape-medium) var(--dps-shape-medium) 0;
     background: var(--dps-color-surface-container-low);
 }
@@ -1538,12 +1538,14 @@
     font-weight: var(--dps-typescale-title-medium-weight);
     color: var(--dps-color-on-surface);
     padding: 0;
+    margin: 0 0 var(--dps-space-4);
+    float: none;
+    width: 100%;
     font-size: var(--dps-typescale-title-medium-size);
     line-height: var(--dps-typescale-title-medium-line);
     display: flex;
     align-items: center;
     gap: var(--dps-space-2);
-    margin-bottom: var(--dps-space-3);
 }
 
 /* Ícones para cada seção do formulário */
@@ -1569,50 +1571,54 @@
     margin-bottom: var(--dps-space-2);
 }
 
-/* Seção 1: Tipo de Agendamento */
-.dps-fieldset:nth-of-type(1) {
-    border-left-color: var(--dps-color-tertiary);
-    background: var(--dps-color-surface-container-low);
+.dps-form label.dps-checkbox-label {
+    display: inline-flex;
+    font-weight: 400;
+    color: var(--dps-color-on-surface);
+    margin-bottom: 0;
 }
 
-.dps-fieldset:nth-of-type(1) .dps-fieldset__legend {
+/* ---- Appointment form section colorization (scoped to .dps-surface context) ---- */
+
+/* Seção 1: Tipo de Agendamento */
+.dps-surface .dps-fieldset:nth-of-type(1) {
+    border-left-color: var(--dps-color-tertiary);
+}
+
+.dps-surface .dps-fieldset:nth-of-type(1) .dps-fieldset__legend {
     color: var(--dps-color-on-tertiary-container);
 }
 
 /* Seção 2: Cliente e Pet(s) */
-.dps-fieldset:nth-of-type(2) {
+.dps-surface .dps-fieldset:nth-of-type(2) {
     border-left-color: var(--dps-color-primary);
-    background: var(--dps-color-surface-container-low);
 }
 
-.dps-fieldset:nth-of-type(2) .dps-fieldset__legend {
+.dps-surface .dps-fieldset:nth-of-type(2) .dps-fieldset__legend {
     color: var(--dps-color-primary-pressed);
 }
 
 /* Seção 3: Data e Horário */
-.dps-fieldset:nth-of-type(3) {
+.dps-surface .dps-fieldset:nth-of-type(3) {
     border-left-color: var(--dps-color-warning);
-    background: var(--dps-color-surface-container-low);
 }
 
-.dps-fieldset:nth-of-type(3) .dps-fieldset__legend {
+.dps-surface .dps-fieldset:nth-of-type(3) .dps-fieldset__legend {
     color: var(--dps-color-on-warning-container);
 }
 
 /* Seção 4: Serviços e Extras */
-.dps-fieldset:nth-of-type(4) {
+.dps-surface .dps-fieldset:nth-of-type(4) {
     border-left-color: var(--dps-color-success);
-    background: var(--dps-color-surface-container-low);
 }
 
-.dps-fieldset:nth-of-type(4) .dps-fieldset__legend {
+.dps-surface .dps-fieldset:nth-of-type(4) .dps-fieldset__legend {
     color: var(--dps-color-on-success-container);
 }
 
 /* Seção 5: Pagamento (agendamentos passados) */
 #dps-past-payment-wrapper {
     border-left-color: var(--dps-color-error);
-    background: var(--dps-color-surface-container-low);
 }
 
 #dps-past-payment-wrapper .dps-fieldset__legend {
@@ -1620,12 +1626,11 @@
 }
 
 /* Seção 6: Observações */
-.dps-fieldset:last-of-type {
+.dps-surface .dps-fieldset:last-of-type {
     border-left-color: var(--dps-color-on-surface-variant);
-    background: var(--dps-color-surface-container-low);
 }
 
-.dps-fieldset:last-of-type .dps-fieldset__legend {
+.dps-surface .dps-fieldset:last-of-type .dps-fieldset__legend {
     color: var(--dps-color-on-surface);
 }
 
@@ -4807,60 +4812,64 @@
 }
 
 /* Fieldset dentro de configurações */
-.dps-fieldset {
+.dps-settings-section .dps-fieldset {
     margin: 0 0 24px 0;
     padding: 20px;
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-small);
+    border-left: 3px solid var(--dps-color-primary);
+    border-radius: 0 var(--dps-shape-medium) var(--dps-shape-medium) 0;
     background: var(--dps-color-surface-container-low);
 }
 
-.dps-fieldset legend {
-    padding: 0 12px;
-    font-size: 14px;
-    font-weight: 500;
+.dps-settings-section .dps-fieldset legend {
+    padding: 0;
+    font-size: var(--dps-typescale-title-medium-size);
+    font-weight: var(--dps-typescale-title-medium-weight);
     color: var(--dps-color-on-surface);
-    background: var(--dps-color-surface-container-low);
+    background: transparent;
+    float: none;
+    width: 100%;
+    margin-bottom: var(--dps-space-4);
 }
 
-/* Linhas de formulário */
-.dps-form-row {
+/* Linhas de formulário — Settings context */
+.dps-settings-section .dps-form-row {
     margin-bottom: 20px;
 }
 
-.dps-form-row:last-child {
+.dps-settings-section .dps-form-row:last-child {
     margin-bottom: 0;
 }
 
-.dps-form-row label {
+.dps-settings-section .dps-form-row label {
     display: block;
-    margin-bottom: 6px;
-    font-size: 14px;
-    font-weight: 500;
+    margin-bottom: var(--dps-space-2);
+    font-size: var(--dps-typescale-label-large-size);
+    font-weight: var(--dps-typescale-label-large-weight);
     color: var(--dps-color-on-surface);
 }
 
-.dps-form-row input[type="text"],
-.dps-form-row input[type="password"],
-.dps-form-row input[type="email"],
-.dps-form-row input[type="url"],
-.dps-form-row input[type="number"],
-.dps-form-row select,
-.dps-form-row textarea {
+.dps-settings-section .dps-form-row input[type="text"],
+.dps-settings-section .dps-form-row input[type="password"],
+.dps-settings-section .dps-form-row input[type="email"],
+.dps-settings-section .dps-form-row input[type="url"],
+.dps-settings-section .dps-form-row input[type="number"],
+.dps-settings-section .dps-form-row select,
+.dps-settings-section .dps-form-row textarea {
     width: 100%;
     max-width: 400px;
-    padding: 10px 14px;
-    border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-small);
-    font-size: 14px;
+    padding: var(--dps-space-3) var(--dps-space-4);
+    border: 1px solid var(--dps-color-outline);
+    border-radius: var(--dps-shape-input);
+    font-size: var(--dps-typescale-body-medium-size);
     color: var(--dps-color-on-surface);
     background: var(--dps-color-surface-container-lowest);
     transition: border-color var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard), box-shadow var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
 }
 
-.dps-form-row input:focus,
-.dps-form-row select:focus,
-.dps-form-row textarea:focus {
+.dps-settings-section .dps-form-row input:focus,
+.dps-settings-section .dps-form-row select:focus,
+.dps-settings-section .dps-form-row textarea:focus {
     outline: none;
     border-color: var(--dps-color-primary);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-primary) 10%, transparent);
@@ -4969,29 +4978,29 @@
         padding: 16px;
     }
     
-    .dps-fieldset {
+    .dps-settings-section .dps-fieldset {
         padding: 16px;
     }
     
-    .dps-form-row input[type="text"],
-    .dps-form-row input[type="password"],
-    .dps-form-row input[type="email"],
-    .dps-form-row select {
+    .dps-settings-section .dps-form-row input[type="text"],
+    .dps-settings-section .dps-form-row input[type="password"],
+    .dps-settings-section .dps-form-row input[type="email"],
+    .dps-settings-section .dps-form-row select {
         max-width: 100%;
     }
 }
 
-/* Checkbox label para configurações */
-.dps-checkbox-label {
+/* Checkbox label para configurações — scoped */
+.dps-settings-section .dps-checkbox-label {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 500;
+    gap: var(--dps-space-2);
+    font-weight: 400;
     color: var(--dps-color-on-surface);
     cursor: pointer;
 }
 
-.dps-checkbox-label input[type="checkbox"] {
+.dps-settings-section .dps-checkbox-label input[type="checkbox"] {
     width: 18px;
     height: 18px;
     accent-color: var(--dps-color-primary);
@@ -4999,9 +5008,9 @@
 }
 
 /* Color picker melhorado */
-.dps-form-row input[type="color"] {
+.dps-settings-section .dps-form-row input[type="color"] {
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-small);
+    border-radius: var(--dps-shape-input);
     cursor: pointer;
     transition: border-color var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
 }
