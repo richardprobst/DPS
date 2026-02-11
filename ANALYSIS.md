@@ -1543,6 +1543,48 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 ---
 
+### Frontend (`desi-pet-shower-frontend`)
+
+**Diretório**: `plugins/desi-pet-shower-frontend`
+
+**Propósito e funcionalidades principais**:
+- Consolidar experiências frontend (cadastro, agendamento, configurações) em add-on modular
+- Arquitetura com módulos independentes, feature flags e camada de compatibilidade
+- Rollout controlado: cada módulo pode ser habilitado/desabilitado individualmente
+- Fundação preparada (Fase 1); módulos serão implementados nas fases subsequentes
+
+**Shortcodes expostos**: Nenhum nesta fase (serão adicionados nas Fases 2-4 via camada de compatibilidade)
+
+**CPTs, tabelas e opções**:
+- Option: `dps_frontend_feature_flags` — controle de rollout por módulo
+
+**Hooks consumidos**: Nenhum nesta fase
+
+**Hooks disparados**: Nenhum nesta fase
+
+**Dependências**:
+- Depende do plugin base (DPS_Base_Plugin + design tokens CSS)
+
+**Arquitetura interna**:
+- `DPS_Frontend_Addon` — orquestrador com injeção de dependências
+- `DPS_Frontend_Module_Registry` — registro e boot de módulos
+- `DPS_Frontend_Feature_Flags` — controle de rollout persistido
+- `DPS_Frontend_Compatibility` — bridges para legado (stub na Fase 1)
+- `DPS_Frontend_Assets` — enqueue condicional M3 Expressive
+- `DPS_Frontend_Logger` — observabilidade via error_log
+- `DPS_Frontend_Request_Guard` — segurança centralizada (nonce, capability, sanitização)
+- Módulos (stubs): Registration (Fase 2), Booking (Fase 3), Settings (Fase 4)
+
+**Introduzido em**: v1.0.0
+
+**Observações**:
+- PHP 8.4 moderno: constructor promotion, readonly properties, typed properties, return types
+- Sem singletons: objetos montados por composição no bootstrap
+- Assets carregados somente quando ao menos um módulo está habilitado (feature flag)
+- Roadmap completo em `docs/refactoring/FRONTEND_ADDON_PHASED_ROADMAP.md`
+
+---
+
 ### Serviços (`desi-pet-shower-services_addon`)
 
 **Diretório**: `plugins/desi-pet-shower-services`

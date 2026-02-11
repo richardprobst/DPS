@@ -83,6 +83,20 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Frontend Add-on v1.0.0 — Fundação (Fase 1)**
+
+- **Novo add-on `desi-pet-shower-frontend`**: esqueleto modular para consolidação de experiências frontend (cadastro, agendamento, configurações).
+- **Arquitetura moderna PHP 8.4**: constructor promotion, readonly properties, typed properties, return types. Sem singletons — composição via construtor.
+- **Module Registry**: registro e boot de módulos independentes controlados por feature flags.
+- **Feature Flags**: controle de rollout por módulo via option `dps_frontend_feature_flags`. Todos desabilitados na Fase 1.
+- **Camada de compatibilidade**: preparada para bridges de shortcodes e hooks legados (Fases 2-4).
+- **Assets M3 Expressive**: CSS sem hex literais (100% via design tokens), JS vanilla com IIFE. Enqueue condicional.
+- **Observabilidade**: logger estruturado com níveis INFO/WARNING/ERROR (ativo apenas em WP_DEBUG).
+- **Request Guard**: segurança centralizada para nonce, capability e sanitização.
+- **Módulos stub**: Registration (Fase 2), Booking (Fase 3), Settings (Fase 4).
+- **Registrado no Addon Manager** do plugin base (categoria client, prioridade 72).
+- **Documentado no ANALYSIS.md** com arquitetura interna, contratos e roadmap.
+
 **Booking Add-on v1.3.0 — Migração M3 e Melhorias de Segurança**
 
 - **Validação granular de edição de agendamentos**: Método `can_edit_appointment()` verifica se usuário pode editar agendamento específico (criador ou admin).
