@@ -29,6 +29,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class DPS_Frontend_Registration_Module {
 
     /**
+     * Option key da página de cadastro (legado).
+     */
+    private const PAGE_OPTION = 'dps_registration_page_id';
+
+    /**
      * Indica se o legado está disponível.
      */
     private bool $legacyAvailable = false;
@@ -79,7 +84,13 @@ final class DPS_Frontend_Registration_Module {
         }
 
         $legacy = DPS_Registration_Addon::get_instance();
-        $html   = $legacy->render_registration_form();
+
+        if ( ! method_exists( $legacy, 'render_registration_form' ) ) {
+            $this->logger->error( 'Método render_registration_form não encontrado no legado.' );
+            return '';
+        }
+
+        $html = $legacy->render_registration_form();
 
         $this->logger->info( 'Shortcode dps_registration_form renderizado via módulo Frontend.' );
 
@@ -112,9 +123,9 @@ final class DPS_Frontend_Registration_Module {
      * Determina se o CSS deve ser carregado na página atual.
      */
     private function shouldEnqueue(): bool {
-        $page_id = get_option( 'dps_registration_page_id' );
+        $page_id = get_option( self::PAGE_OPTION );
         $post    = get_post();
-        $content = $post ? (string) $post->post_content : '';
+        $content = $post instanceof \WP_Post ? $post->post_content : '';
 
         return is_page( $page_id ) || has_shortcode( $content, 'dps_registration_form' );
     }
