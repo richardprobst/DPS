@@ -54,9 +54,9 @@ final class DPS_Frontend_Request_Guard {
     /**
      * Aborta com erro 403 e loga o motivo.
      */
-    public static function abort( string $reason = '' ): never {
-        if ( '' !== $reason ) {
-            ( new DPS_Frontend_Logger() )->warning( "Requisição bloqueada: {$reason}" );
+    public static function abort( string $reason = '', ?DPS_Frontend_Logger $logger = null ): never {
+        if ( '' !== $reason && null !== $logger ) {
+            $logger->warning( "Requisição bloqueada: {$reason}" );
         }
 
         wp_die(
