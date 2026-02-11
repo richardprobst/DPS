@@ -162,6 +162,7 @@ Análises e planos de refatoração de código.
 - `FINAL_SUMMARY.md` - Resumo final de refatoração
 - `FINANCE_AGENDA_REORGANIZATION_DIAGNOSTIC.md` - Diagnóstico de reorganização Finance ⇄ Agenda
 - `FRONTEND_CLASS_REFACTORING_PLAN.md` - Plano de refatoração da classe frontend
+- `FRONTEND_ADDON_PHASED_ROADMAP.md` - Plano amplo e faseado para criação do add-on FRONTEND com compatibilidade, rollout e preparação para remoção futura de legado
 - `PHASE1_COMPLETE.md` - Fase 1 completa
 - `PHASE1_SUMMARY.md` - Resumo da fase 1
 - `PHASE1_TEMPLATE_SEPARATION.md` - Separação de templates
