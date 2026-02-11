@@ -1605,6 +1605,12 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 **Introduzido em**: v1.0.0
 
+**Documentação operacional (Fase 5)**:
+- `docs/implementation/FRONTEND_ROLLOUT_GUIDE.md` — guia de ativação por ambiente
+- `docs/implementation/FRONTEND_RUNBOOK.md` — diagnóstico e rollback de incidentes
+- `docs/qa/FRONTEND_COMPATIBILITY_MATRIX.md` — matriz de compatibilidade com todos os add-ons
+- `docs/qa/FRONTEND_REMOVAL_READINESS.md` — checklist de prontidão para remoção futura
+
 **Observações**:
 - PHP 8.4 moderno: constructor promotion, readonly properties, typed properties, return types
 - Sem singletons: objetos montados por composição no bootstrap

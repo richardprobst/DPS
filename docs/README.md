@@ -96,6 +96,8 @@ Resumos de implementação de features.
 - `SERVICES_AGENDA_INTEGRATION_SUMMARY.md` - Integração Services ⇄ Agenda
 - `UI_UX_IMPROVEMENTS_SUMMARY.md` - Resumo de melhorias de UI/UX
 - `WHATSAPP_IMPLEMENTATION_SUMMARY.md` - Implementação de integração WhatsApp
+- `FRONTEND_ROLLOUT_GUIDE.md` - **🆕** Guia operacional de rollout do Frontend Add-on (ativação por ambiente, verificação, monitoramento)
+- `FRONTEND_RUNBOOK.md` - **🆕** Runbook de incidentes do Frontend Add-on (diagnóstico, rollback, cenários)
 
 ### 📁 /docs/improvements
 
@@ -150,6 +152,8 @@ Quality assurance e validação funcional de add-ons.
 - `CLIENT_PORTAL_FUNCTIONAL_VALIDATION.md` - Validação funcional do Portal do Cliente
 - `FUNCTIONAL_VERIFICATION_REPORT.md` - Relatório de verificação funcional geral
 - `GROOMERS_FUNCTIONAL_QA.md` - QA funcional do Groomers Add-on
+- `FRONTEND_COMPATIBILITY_MATRIX.md` - **🆕** Matriz de compatibilidade do Frontend Add-on com todos os 18 add-ons
+- `FRONTEND_REMOVAL_READINESS.md` - **🆕** Checklist de prontidão para remoção futura de legado
 
 ### 📁 /docs/refactoring
 

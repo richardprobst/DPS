@@ -128,6 +128,13 @@ Antes de criar uma nova versão oficial:
 - **Rollback instantâneo**: desabilitar flag `settings` remove a aba sem impacto em outras configurações.
 - **Camada de compatibilidade**: bridge de hooks ativo quando flag habilitada.
 
+**Frontend Add-on v1.4.0 — Consolidação e Documentação (Fase 5)**
+
+- **Guia operacional de rollout** (`docs/implementation/FRONTEND_ROLLOUT_GUIDE.md`): passos de ativação por ambiente (dev, homolog, prod), ordem recomendada, verificação pós-ativação.
+- **Runbook de incidentes** (`docs/implementation/FRONTEND_RUNBOOK.md`): classificação de severidade, diagnóstico rápido, procedimentos de rollback por módulo, cenários de incidente específicos.
+- **Matriz de compatibilidade** (`docs/qa/FRONTEND_COMPATIBILITY_MATRIX.md`): status de integração com 18 add-ons, contratos de shortcodes/hooks/options verificados, impacto de desativação por módulo.
+- **Checklist de remoção futura** (`docs/qa/FRONTEND_REMOVAL_READINESS.md`): critérios objetivos por módulo, riscos e mitigação, procedimento de remoção segura (nenhuma remoção nesta etapa).
+
 **Booking Add-on v1.3.0 — Migração M3 e Melhorias de Segurança**
 
 - **Validação granular de edição de agendamentos**: Método `can_edit_appointment()` verifica se usuário pode editar agendamento específico (criador ou admin).
