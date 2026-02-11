@@ -2,12 +2,22 @@
 
 ## 1) Contexto e objetivo
 
-Este documento define um plano **amplo, incremental e seguro** para criar o novo add-on `desi-pet-shower-frontend`, consolidando experiências hoje distribuídas entre plugin base e add-ons de cadastro/agendamento.
+Este documento define um plano **amplo, incremental e seguro** para criar o novo add-on `desi-pet-shower-frontend`, consolidando experiências frontend hoje distribuídas entre plugin base e add-ons de cadastro (`desi-pet-shower-registration`) e agendamento (`desi-pet-shower-booking`).
 
 A decisão deste plano é:
 - **não remover código legado nesta etapa inicial**;
 - construir o novo add-on com **compatibilidade retroativa**;
 - preparar, desde já, a trilha de evidências para remoção futura sem risco.
+
+### Documentos relacionados
+
+| Documento | Propósito |
+|-----------|-----------|
+| `AGENT_ENGINEERING_PLAYBOOK.md` | Princípios de engenharia, DoD e processo de implementação |
+| `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` | Instruções de design frontend M3 Expressive |
+| `docs/visual/VISUAL_STYLE_GUIDE.md` | Tokens, paleta, tipografia e componentes CSS |
+| `ANALYSIS.md` | Arquitetura, hooks e contratos do sistema |
+| `AGENTS.md` | Regras globais (MUST / ASK BEFORE / PREFER) |
 
 ## 2) Resultado esperado ao final do programa
 
@@ -81,7 +91,7 @@ Criar matriz de contratos em formato tabular contendo, no mínimo:
 
 ## 6) Arquitetura-alvo do add-on FRONTEND
 
-## 6.1 Estrutura recomendada
+### 6.1 Estrutura recomendada
 
 ```text
 plugins/desi-pet-shower-frontend/
@@ -103,13 +113,61 @@ plugins/desi-pet-shower-frontend/
 └── assets/
 ```
 
-### 6.2 Responsabilidades macro
+### 6.2 Cabeçalho do plugin (padrão do projeto)
+
+```php
+/**
+ * Plugin Name: desi.pet by PRObst – Frontend Add-on
+ * Plugin URI:  https://www.probst.pro
+ * Description: Consolida experiências frontend (cadastro, agendamento, configurações) em add-on modular.
+ * Version:     1.0.0
+ * Author:      PRObst
+ * Text Domain: dps-frontend-addon
+ * Domain Path: /languages
+ * Requires at least: 6.9
+ * Requires PHP: 8.4
+ * Update URI: https://github.com/richardprobst/DPS
+ * License:     GPL-2.0+
+ */
+```
+
+### 6.3 Responsabilidades macro
 - `Addon`: bootstrap, i18n, ciclo de vida.
 - `Registry`: habilita/desabilita módulos e conecta hooks.
 - `Compatibility`: camada de aliases/wrappers para legado.
 - `Feature Flags`: controle de rollout por módulo/fluxo.
 - `Modules/*`: regra de negócio e renderização por domínio.
 - `Support/*`: segurança, assets, logging e utilitários.
+
+### 6.4 Arquitetura de assets e padrão visual M3
+
+O add-on FRONTEND é intrinsecamente visual e **deve** seguir o padrão **Material 3 Expressive** do projeto desde a Fase 1. Referências obrigatórias:
+
+- `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` — metodologia, contextos de uso, checklist
+- `docs/visual/VISUAL_STYLE_GUIDE.md` — tokens, paleta, componentes CSS
+
+#### Estrutura de assets recomendada
+
+```text
+assets/
+├── css/
+│   └── frontend-addon.css      /* Estilos do add-on — sem hex literais, via var(--dps-*) */
+└── js/
+    └── frontend-addon.js       /* Vanilla JS, IIFE, 'use strict' */
+```
+
+#### Requisitos M3 para o add-on
+
+1. **Importar `dps-design-tokens.css`** como dependência (já fornecido pelo plugin base).
+2. **Cores exclusivamente via tokens** — `var(--dps-color-*)`, sem hex/rgba literais.
+3. **Formas via tokens** — `var(--dps-shape-*)`, sem `border-radius` literal.
+4. **Tipografia** — escala M3 (`var(--dps-typescale-*)`), pesos 400 e 500 apenas.
+5. **Botões pill** — classe `.dps-submit-btn` (M3 pill button) para ações primárias.
+6. **Enqueue condicional** — assets carregados apenas nas páginas onde o add-on atua.
+7. **`prefers-reduced-motion`** — respeitado automaticamente via tokens globais.
+8. **Perfil por contexto** — Standard (admin) vs. Expressive (portal/público).
+
+> Consultar o checklist completo em `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`, seção 14.
 
 ---
 
@@ -154,13 +212,16 @@ plugins/desi-pet-shower-frontend/
 **Objetivo:** criar esqueleto do add-on sem impacto funcional visível.
 
 ### Entregas
-- Plugin principal com bootstrap e textdomain.
+- Plugin principal com bootstrap e textdomain (cabeçalho conforme seção 6.2).
 - Registry modular e feature flags.
 - Infra de logging/diagnóstico.
 - Camada de compatibilidade vazia preparada.
+- Estrutura de assets com dependência de `dps-design-tokens.css` (padrão M3).
+- Documentação da seção FRONTEND no `ANALYSIS.md`.
 
 ### Critério de saída
 - Add-on ativa sem erro e sem interferir no fluxo atual.
+- Assets M3 carregam condicionalmente sem conflito.
 
 ---
 
@@ -219,9 +280,11 @@ plugins/desi-pet-shower-frontend/
 - Matriz final de compatibilidade (base + add-ons).
 - Runbook de incidentes/rollback.
 - Checklist de prontidão para remoção futura de legado.
+- Registro visual completo de todas as telas em `docs/screenshots/`.
 
 ### Critério de saída
 - FRONTEND apto para padrão de uso recomendado.
+- Conformidade visual M3 verificada em todos os módulos.
 
 ---
 
@@ -241,39 +304,58 @@ plugins/desi-pet-shower-frontend/
 
 ## 9) Critérios de aceite por módulo (DoD)
 
-Cada módulo migrado só pode avançar se cumprir:
+Cada módulo migrado só pode avançar se cumprir os critérios abaixo, alinhados com o `AGENT_ENGINEERING_PLAYBOOK.md`:
 
 1. **Paridade funcional**
    - Mesmo comportamento para entradas válidas/inválidas e mensagens de feedback.
 
 2. **Segurança**
    - Nonce, capability, sanitização e escape equivalentes ou superiores ao legado.
+   - `$wpdb->prepare()` em toda query SQL.
 
 3. **Compatibilidade**
    - Shortcodes/hooks legados ainda funcionam durante transição.
 
-4. **Observabilidade**
+4. **Conformidade visual M3**
+   - Templates e assets seguem `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`.
+   - Cores, formas, tipografia e motion via design tokens (`var(--dps-*)`).
+   - Mudanças visuais documentadas com prints em `docs/screenshots/YYYY-MM-DD/`.
+
+5. **Qualidade de código**
+   - Passa em `php -l` e PHPCS (WordPress standards).
+   - Funções pequenas (SRP), early returns, nomes descritivos.
+   - Regra de negócio fora de callbacks de hooks/shortcodes.
+
+6. **Observabilidade**
    - Logs de erro/uso disponíveis para monitorar adoção e anomalias.
 
-5. **Rollback testado**
+7. **Rollback testado**
    - Retorno ao legado por flag sem perda operacional.
 
 ---
 
 ## 10) Estratégia de testes e validação
 
-## 10.1 Testes mínimos por fase
+### 10.1 Testes mínimos por fase
 - `php -l` em todos os arquivos PHP alterados.
 - Verificação de diffs (`git diff --check`).
 - Validação funcional manual dos fluxos impactados em WP local/homolog.
 
-## 10.2 Suite de regressão funcional recomendada
+### 10.2 Validação visual M3 (obrigatória para fases com UI)
+- Conformidade com `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` (checklist seção 14).
+- Testar em viewports: 375px, 600px, 840px, 1200px.
+- Contraste WCAG AA verificado (sistema de pareamento M3).
+- Focus visible e navegação por teclado funcional.
+- Touch targets ≥ 48×48px em mobile.
+- Capturas das telas salvas em `docs/screenshots/YYYY-MM-DD/`.
+
+### 10.3 Suite de regressão funcional recomendada
 - Cadastro: envio com sucesso, validação de campos, erros esperados.
 - Agendamento: seleção de serviço/horário, persistência e feedback.
 - Configurações: abertura de abas, salvamento por ação, feedback de sucesso/erro.
 - Compatibilidade: páginas existentes com shortcodes legados.
 
-## 10.3 Evidências obrigatórias
+### 10.4 Evidências obrigatórias
 - Registro dos comandos executados e resultado.
 - Checklist de fluxos validada por módulo.
 - Logs de execução para incidentes e fallback.
@@ -313,6 +395,7 @@ Essas métricas devem alimentar o comitê de decisão de descontinuação do leg
 | Divergência de comportamento entre legado e novo | Média | Alto | Dual-run + checklist de paridade |
 | Acoplamento oculto entre add-ons | Alta | Médio/Alto | Inventário detalhado + rollout faseado |
 | Regressão em segurança | Baixa/Média | Alto | Guard central de request + revisão de segurança |
+| Inconsistência visual M3 entre módulos | Média | Médio | Design tokens obrigatórios + checklist M3 por fase |
 | Dificuldade de remover legado no futuro | Média | Médio | Telemetria + critérios objetivos de depreciação |
 
 ---
@@ -333,7 +416,10 @@ Para garantir remoção futura sem interferência, manter os artefatos abaixo at
 4. **QA e aceitação**
    - Registrar em `docs/qa/` os resultados de regressão por módulo.
 
-5. **Depreciação futura**
+5. **Registro visual**
+   - Capturas de telas alteradas em `docs/screenshots/YYYY-MM-DD/`, conforme `docs/screenshots/README.md`.
+
+6. **Depreciação futura**
    - Manter checklist de “pronto para remover” com evidências.
 
 ---
@@ -352,18 +438,20 @@ Para garantir remoção futura sem interferência, manter os artefatos abaixo at
 
 ## 16) Checklists operacionais
 
-## 16.1 Checklist de entrada de fase
+### 16.1 Checklist de entrada de fase
 - [ ] Contratos do módulo mapeados
 - [ ] Riscos registrados
 - [ ] Plano de rollback definido
 - [ ] Critérios de aceite aprovados
 
-## 16.2 Checklist de saída de fase
+### 16.2 Checklist de saída de fase
 - [ ] Paridade funcional validada
 - [ ] Segurança validada
 - [ ] Compatibilidade legada preservada
+- [ ] Conformidade visual M3 verificada (para fases com UI)
 - [ ] Logs/métricas coletados
 - [ ] Documentação atualizada
+- [ ] Capturas visuais registradas em `docs/screenshots/` (para fases com UI)
 
 ---
 

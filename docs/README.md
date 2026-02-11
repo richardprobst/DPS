@@ -157,23 +157,7 @@ Análises e planos de refatoração de código.
 
 **Arquivos:**
 - `AGENT_ENGINEERING_PLAYBOOK.md` - Playbook complementar para agentes com princípios, arquitetura e DoD de implementação
-- `CLIENTS_SECTION_BEFORE_AFTER.md` - Comparação antes/depois da seção de clientes
-- `DELIVERY_PHASE1.md` - Entrega da fase 1
-- `FINAL_SUMMARY.md` - Resumo final de refatoração
-- `FINANCE_AGENDA_REORGANIZATION_DIAGNOSTIC.md` - Diagnóstico de reorganização Finance ⇄ Agenda
-- `FRONTEND_CLASS_REFACTORING_PLAN.md` - Plano de refatoração da classe frontend
 - `FRONTEND_ADDON_PHASED_ROADMAP.md` - Plano amplo e faseado para criação do add-on FRONTEND com compatibilidade, rollout e preparação para remoção futura de legado
-- `PHASE1_COMPLETE.md` - Fase 1 completa
-- `PHASE1_SUMMARY.md` - Resumo da fase 1
-- `PHASE1_TEMPLATE_SEPARATION.md` - Separação de templates
-- `README_REFACTORING.md` - README de refatoração
-- `REFACTORING_ANALYSIS.md` - Análise detalhada de problemas de código
-- `REFACTORING_EXECUTIVE_SUMMARY.md` - Resumo executivo
-- `REFACTORING_SUMMARY.md` - Resumo das refatorações
-- `REFACTORING_VERIFICATION_REPORT.md` - Relatório de verificação
-- `REORGANIZATION_SUMMARY.md` - Resumo de reorganização arquitetural
-- `RESULTADO_FINAL_LIMPEZA_AGENDA.md` - Resultado final da limpeza da Agenda
-- `VISUAL_DIAGRAM.md` - Diagrama visual da refatoração
 
 ### 📁 /docs/review
 
@@ -227,7 +211,7 @@ Guia de estilo visual (cores, tipografia, componentes) e instruções de design 
 **Arquivos:**
 - `FRONTEND_DESIGN_INSTRUCTIONS.md` - **🆕 Instruções completas de design frontend** (metodologia, contextos de uso, tipografia, motion, acessibilidade, performance, checklists)
 - `VISUAL_STYLE_GUIDE.md` - Guia oficial de estilo visual minimalista
-- `visual-comparison.html` - Comparação visual de componentes
+- `registro-rebranding.md` - Registro do rebranding visual do sistema
 
 ## Documentos Centrais na Raiz do Repositório
 
