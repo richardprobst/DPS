@@ -135,6 +135,12 @@ Antes de criar uma nova versão oficial:
 - **Matriz de compatibilidade** (`docs/qa/FRONTEND_COMPATIBILITY_MATRIX.md`): status de integração com 18 add-ons, contratos de shortcodes/hooks/options verificados, impacto de desativação por módulo.
 - **Checklist de remoção futura** (`docs/qa/FRONTEND_REMOVAL_READINESS.md`): critérios objetivos por módulo, riscos e mitigação, procedimento de remoção segura (nenhuma remoção nesta etapa).
 
+**Frontend Add-on v1.5.0 — Governança de Depreciação (Fase 6)**
+
+- **Política de depreciação** (`docs/refactoring/FRONTEND_DEPRECATION_POLICY.md`): janela mínima de 180 dias (90 dual-run + 60 aviso + 30 observação), processo de comunicação formal, critérios de aceite técnicos e de governança, procedimento de depreciação em 5 etapas.
+- **Lista de alvos de remoção** (`docs/refactoring/FRONTEND_REMOVAL_TARGETS.md`): inventário completo com dependências por grep (registration: 5 refs no base + 2 hooks no Loyalty; booking: 0 refs externas), risco por alvo, esforço estimado, plano de reversão, ordem de prioridade recomendada.
+- **Telemetria de uso**: método `DPS_Frontend_Logger::track()` com contadores por módulo persistidos em `dps_frontend_usage_counters`. Cada renderização de shortcode via módulo frontend é contabilizada. Contadores exibidos na aba Settings para apoiar decisões de depreciação.
+
 **Booking Add-on v1.3.0 — Migração M3 e Melhorias de Segurança**
 
 - **Validação granular de edição de agendamentos**: Método `can_edit_appointment()` verifica se usuário pode editar agendamento específico (criador ou admin).

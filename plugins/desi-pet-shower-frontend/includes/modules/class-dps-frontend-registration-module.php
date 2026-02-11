@@ -93,6 +93,7 @@ final class DPS_Frontend_Registration_Module {
         $html = $legacy->render_registration_form();
 
         $this->logger->info( 'Shortcode dps_registration_form renderizado via módulo Frontend.' );
+        $this->logger->track( 'registration' );
 
         return '<div class="dps-frontend">' . $html . '</div>';
     }

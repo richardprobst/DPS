@@ -162,6 +162,8 @@ Análises e planos de refatoração de código.
 **Arquivos:**
 - `AGENT_ENGINEERING_PLAYBOOK.md` - Playbook complementar para agentes com princípios, arquitetura e DoD de implementação
 - `FRONTEND_ADDON_PHASED_ROADMAP.md` - Plano amplo e faseado para criação do add-on FRONTEND com compatibilidade, rollout e preparação para remoção futura de legado
+- `FRONTEND_DEPRECATION_POLICY.md` - **🆕** Política formal de depreciação (janela mínima, comunicação, critérios de aceite, procedimento)
+- `FRONTEND_REMOVAL_TARGETS.md` - **🆕** Lista de alvos de remoção com dependências, risco, esforço e plano de reversão
 
 ### 📁 /docs/review
 

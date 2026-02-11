@@ -1611,6 +1611,11 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - `docs/qa/FRONTEND_COMPATIBILITY_MATRIX.md` — matriz de compatibilidade com todos os add-ons
 - `docs/qa/FRONTEND_REMOVAL_READINESS.md` — checklist de prontidão para remoção futura
 
+**Documentação de governança (Fase 6)**:
+- `docs/refactoring/FRONTEND_DEPRECATION_POLICY.md` — política de depreciação (janela mínima 180 dias, processo de comunicação, critérios de aceite)
+- `docs/refactoring/FRONTEND_REMOVAL_TARGETS.md` — lista de alvos com risco, dependências e esforço (booking 🟢 baixo; registration 🟡 médio)
+- Telemetria de uso: contadores por módulo via `dps_frontend_usage_counters`, exibidos na aba Settings
+
 **Observações**:
 - PHP 8.4 moderno: constructor promotion, readonly properties, typed properties, return types
 - Sem singletons: objetos montados por composição no bootstrap

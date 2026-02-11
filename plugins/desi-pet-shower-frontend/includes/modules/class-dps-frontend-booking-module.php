@@ -98,6 +98,7 @@ final class DPS_Frontend_Booking_Module {
         $html = $legacy->render_booking_form();
 
         $this->logger->info( 'Shortcode dps_booking_form renderizado via módulo Frontend.' );
+        $this->logger->track( 'booking' );
 
         return '<div class="dps-frontend">' . $html . '</div>';
     }

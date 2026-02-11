@@ -1,6 +1,6 @@
 # Checklist de Prontidão para Remoção Futura — Frontend Add-on
 
-> **Versão**: 1.3.0 (Fase 5)
+> **Versão**: 1.5.0 (Fase 6)
 > **Última atualização**: 2026-02-11
 > **Status**: ⏳ Em preparação (nenhuma remoção nesta etapa)
 
@@ -45,7 +45,7 @@ Este documento define **critérios objetivos** para que a remoção futura dos a
 | # | Critério | Status | Evidência |
 |---|----------|--------|-----------|
 | 1 | Fase 5 completa (consolidação e documentação) | ✅ Completo | Este documento |
-| 2 | Fase 6 completa (política de depreciação) | ⬜ Pendente | `FRONTEND_DEPRECATION_POLICY.md` |
+| 2 | Fase 6 completa (política de depreciação) | ✅ Completo | `docs/refactoring/FRONTEND_DEPRECATION_POLICY.md` |
 | 3 | Guia de rollout documentado e testado | ✅ Completo | `docs/implementation/FRONTEND_ROLLOUT_GUIDE.md` |
 | 4 | Runbook de incidentes documentado | ✅ Completo | `docs/implementation/FRONTEND_RUNBOOK.md` |
 | 5 | Matriz de compatibilidade validada | ✅ Completo | `docs/qa/FRONTEND_COMPATIBILITY_MATRIX.md` |

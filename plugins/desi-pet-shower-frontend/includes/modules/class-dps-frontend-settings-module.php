@@ -21,6 +21,7 @@
  * @package DPS_Frontend_Addon
  * @since   1.0.0
  * @since   1.3.0 Fase 4 — módulo operacional com aba de configurações.
+ * @since   1.5.0 Fase 6 — telemetria de uso exibida na aba.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -178,6 +179,32 @@ final class DPS_Frontend_Settings_Module {
                             <code><?php echo esc_html( (string) count( $all_flags ) ); ?></code>
                         </td>
                     </tr>
+                </tbody>
+            </table>
+
+            <h3><?php esc_html_e( 'Telemetria de Uso', 'dps-frontend-addon' ); ?></h3>
+            <p class="description">
+                <?php esc_html_e( 'Contadores de renderização de shortcodes via módulo frontend. Usados para decisões de depreciação futura.', 'dps-frontend-addon' ); ?>
+            </p>
+            <table class="form-table" role="presentation">
+                <tbody>
+                    <?php
+                    $counters = $this->logger->getUsageCounters();
+                    $telemetry_modules = [
+                        'registration' => __( 'Cadastro', 'dps-frontend-addon' ),
+                        'booking'      => __( 'Agendamento', 'dps-frontend-addon' ),
+                    ];
+                    foreach ( $telemetry_modules as $t_slug => $t_label ) :
+                        $count = $counters[ $t_slug ] ?? 0;
+                    ?>
+                    <tr>
+                        <th scope="row"><?php echo esc_html( $t_label ); ?></th>
+                        <td>
+                            <code><?php echo esc_html( number_format_i18n( $count ) ); ?></code>
+                            <?php esc_html_e( 'renderizações via módulo frontend', 'dps-frontend-addon' ); ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
 
