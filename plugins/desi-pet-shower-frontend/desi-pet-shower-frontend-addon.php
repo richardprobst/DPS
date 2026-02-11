@@ -96,7 +96,7 @@ add_action( 'init', static function (): void {
     $registry = new DPS_Frontend_Module_Registry( $flags, $logger );
     $registry->add( 'registration', new DPS_Frontend_Registration_Module( $logger ) );
     $registry->add( 'booking',      new DPS_Frontend_Booking_Module( $logger ) );
-    $registry->add( 'settings',     new DPS_Frontend_Settings_Module( $logger ) );
+    $registry->add( 'settings',     new DPS_Frontend_Settings_Module( $logger, $flags ) );
 
     $compatibility = new DPS_Frontend_Compatibility( $flags, $logger );
 

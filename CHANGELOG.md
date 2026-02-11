@@ -117,6 +117,17 @@ Antes de criar uma nova versão oficial:
 - **Rollback instantâneo**: desabilitar flag `booking` restaura comportamento 100% legado.
 - **Camada de compatibilidade**: bridge de shortcode ativo quando flag habilitada.
 
+**Frontend Add-on v1.3.0 — Módulo Settings (Fase 4)**
+
+- **Módulo Settings operacional** integrado ao sistema de abas de `DPS_Settings_Frontend`.
+- **Aba "Frontend"** registrada via API moderna `register_tab()` com prioridade 110.
+- **Controles de feature flags**: interface administrativa para habilitar/desabilitar módulos individualmente (Registration, Booking, Settings).
+- **Salvamento seguro**: handler via hook `dps_settings_save_save_frontend`, nonce e capability verificados pelo sistema base.
+- **Informações do add-on**: versão e contagem de módulos ativos exibidos na aba.
+- **Hooks consumidos**: `dps_settings_register_tabs`, `dps_settings_save_save_frontend`.
+- **Rollback instantâneo**: desabilitar flag `settings` remove a aba sem impacto em outras configurações.
+- **Camada de compatibilidade**: bridge de hooks ativo quando flag habilitada.
+
 **Booking Add-on v1.3.0 — Migração M3 e Melhorias de Segurança**
 
 - **Validação granular de edição de agendamentos**: Método `can_edit_appointment()` verifica se usuário pode editar agendamento específico (criador ou admin).

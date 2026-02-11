@@ -1553,6 +1553,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Rollout controlado: cada módulo pode ser habilitado/desabilitado individualmente
 - **[Fase 2]** Módulo Registration operacional em dual-run com o add-on legado
 - **[Fase 3]** Módulo Booking operacional em dual-run com o add-on legado
+- **[Fase 4]** Módulo Settings integrado ao sistema de abas de configurações
 
 **Shortcodes expostos**:
 - `dps_registration_form` — quando flag `registration` ativada, o módulo assume o shortcode (wrapper sobre o legado com surface M3)
@@ -1572,12 +1573,17 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - `dps_base_appointment_fields` (preservado)
 - `dps_base_appointment_assignment_fields` (preservado)
 
+**Hooks consumidos** (Fase 4 — módulo Settings):
+- `dps_settings_register_tabs` — registra aba "Frontend" via `DPS_Settings_Frontend::register_tab()`
+- `dps_settings_save_save_frontend` — processa salvamento das feature flags
+
 **Hooks disparados**: Nenhum novo nesta fase
 
 **Dependências**:
 - Depende do plugin base (DPS_Base_Plugin + design tokens CSS)
 - Módulo Registration depende de `DPS_Registration_Addon` (add-on legado) para dual-run
 - Módulo Booking depende de `DPS_Booking_Addon` (add-on legado) para dual-run
+- Módulo Settings depende de `DPS_Settings_Frontend` (sistema de abas do base)
 
 **Arquitetura interna**:
 - `DPS_Frontend_Addon` — orquestrador com injeção de dependências
@@ -1589,11 +1595,12 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - `DPS_Frontend_Request_Guard` — segurança centralizada (nonce, capability, sanitização)
 - `DPS_Frontend_Registration_Module` — dual-run: assume shortcode, delega lógica ao legado
 - `DPS_Frontend_Booking_Module` — dual-run: assume shortcode, delega lógica ao legado
-- Módulo (stub): Settings (Fase 4)
+- `DPS_Frontend_Settings_Module` — registra aba de configurações com controles de feature flags
 
-**Estratégia de compatibilidade (Fases 2–3)**:
+**Estratégia de compatibilidade (Fases 2–4)**:
 - Intervenção mínima: o legado continua processando formulário, emails, REST, AJAX, settings e cron
-- O módulo apenas assume o shortcode (envolve output na `.dps-frontend` surface) e adiciona CSS extra
+- Módulos de shortcode assumem o shortcode (envolve output na `.dps-frontend` surface) e adicionam CSS extra
+- Módulo de settings registra aba via API moderna `register_tab()` sem alterar abas existentes
 - Rollback: desabilitar flag do módulo restaura comportamento 100% legado
 
 **Introduzido em**: v1.0.0

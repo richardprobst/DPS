@@ -7,11 +7,13 @@
  *
  * Fase 2: bridge de shortcode para módulo de cadastro.
  * Fase 3: bridge de shortcode para módulo de agendamento.
+ * Fase 4: bridge de hooks para módulo de configurações.
  *
  * @package DPS_Frontend_Addon
  * @since   1.0.0
  * @since   1.1.0 Fase 2 — bridge de shortcode registration.
  * @since   1.2.0 Fase 3 — bridge de shortcode booking.
+ * @since   1.3.0 Fase 4 — bridge de hooks settings.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -34,7 +36,7 @@ final class DPS_Frontend_Compatibility {
     public function registerBridges(): void {
         $this->registerRegistrationBridges();
         $this->registerBookingBridges();
-        // Fase 4: bridges de hooks de configurações
+        $this->registerSettingsBridges();
     }
 
     /**
@@ -65,5 +67,19 @@ final class DPS_Frontend_Compatibility {
         }
 
         $this->logger->info( 'Bridge de compatibilidade do módulo Booking ativo.' );
+    }
+
+    /**
+     * Bridges do módulo de configurações (Fase 4).
+     *
+     * Quando habilitado, loga integração com sistema de abas.
+     * A aba é registrada pelo módulo Settings via dps_settings_register_tabs.
+     */
+    private function registerSettingsBridges(): void {
+        if ( ! $this->flags->isEnabled( 'settings' ) ) {
+            return;
+        }
+
+        $this->logger->info( 'Bridge de compatibilidade do módulo Settings ativo.' );
     }
 }
