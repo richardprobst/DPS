@@ -64,6 +64,10 @@ require_once __DIR__ . '/includes/class-dps-agenda-dashboard-service.php';
 // FASE 4: Carrega helper para Capacidade/Lotação
 require_once __DIR__ . '/includes/class-dps-agenda-capacity-helper.php';
 
+// Checklist Operacional e Check-in/Check-out
+require_once __DIR__ . '/includes/class-dps-agenda-checklist-service.php';
+require_once __DIR__ . '/includes/class-dps-agenda-checkin-service.php';
+
 // Hub centralizado de Agenda (Fase 2 - Reorganização de Menus)
 require_once __DIR__ . '/includes/class-dps-agenda-hub.php';
 
@@ -298,6 +302,14 @@ class DPS_Agenda_Addon {
         add_action( 'wp_ajax_dps_quick_reschedule', [ $this, 'quick_reschedule_ajax' ] );
         add_action( 'wp_ajax_dps_get_appointment_history', [ $this, 'get_appointment_history_ajax' ] );
         add_action( 'wp_ajax_dps_get_admin_kpis', [ $this, 'get_admin_kpis_ajax' ] );
+
+        // Checklist Operacional: AJAX para atualizar etapas e registrar retrabalho
+        add_action( 'wp_ajax_dps_checklist_update', [ $this, 'checklist_update_ajax' ] );
+        add_action( 'wp_ajax_dps_checklist_rework', [ $this, 'checklist_rework_ajax' ] );
+
+        // Check-in / Check-out: AJAX para registrar entrada e saída
+        add_action( 'wp_ajax_dps_appointment_checkin', [ $this, 'appointment_checkin_ajax' ] );
+        add_action( 'wp_ajax_dps_appointment_checkout', [ $this, 'appointment_checkout_ajax' ] );
 
         // FASE 5: Registra alterações de status no histórico
         add_action( 'dps_appointment_status_changed', [ $this, 'log_status_change' ], 10, 4 );
@@ -985,6 +997,14 @@ class DPS_Agenda_Addon {
                 [ 'dps-design-tokens' ],
                 '2.0.0' 
             );
+
+            // CSS do Checklist Operacional e Check-in/Check-out
+            wp_enqueue_style(
+                'dps-checklist-checkin-css',
+                plugin_dir_url( __FILE__ ) . 'assets/css/checklist-checkin.css',
+                [ 'dps-design-tokens' ],
+                '1.0.0'
+            );
             
             // Modal de serviços (precisa ser carregado antes do agenda-addon.js)
             wp_enqueue_script( 
@@ -1003,6 +1023,35 @@ class DPS_Agenda_Addon {
                 '1.4.0', 
                 true 
             );
+
+            // Script do Checklist Operacional e Check-in/Check-out
+            wp_enqueue_script(
+                'dps-checklist-checkin',
+                plugin_dir_url( __FILE__ ) . 'assets/js/checklist-checkin.js',
+                [ 'jquery' ],
+                '1.0.0',
+                true
+            );
+
+            wp_localize_script( 'dps-checklist-checkin', 'DPS_Checklist_Checkin', [
+                'ajax'            => admin_url( 'admin-ajax.php' ),
+                'nonce_checklist' => wp_create_nonce( 'dps_checklist' ),
+                'nonce_checkin'   => wp_create_nonce( 'dps_checkin' ),
+                'messages'        => [
+                    'markDone'         => __( 'Concluir', 'dps-agenda-addon' ),
+                    'undo'             => __( 'Desfazer', 'dps-agenda-addon' ),
+                    'rework'           => __( 'Refazer', 'dps-agenda-addon' ),
+                    'skip'             => __( 'Pular', 'dps-agenda-addon' ),
+                    'reworkTitle'      => __( 'Registrar retrabalho', 'dps-agenda-addon' ),
+                    'reworkPlaceholder'=> __( 'Motivo do retrabalho (ex.: secagem insuficiente)...', 'dps-agenda-addon' ),
+                    'confirmRework'    => __( 'Confirmar retrabalho', 'dps-agenda-addon' ),
+                    'cancel'           => __( 'Cancelar', 'dps-agenda-addon' ),
+                    'saving'           => __( 'Salvando...', 'dps-agenda-addon' ),
+                    'error'            => __( 'Erro ao salvar. Tente novamente.', 'dps-agenda-addon' ),
+                    'checkin'          => __( 'Check-in', 'dps-agenda-addon' ),
+                    'checkout'         => __( 'Check-out', 'dps-agenda-addon' ),
+                ],
+            ] );
             
             wp_localize_script( 'dps-appointment-form', 'dpsAppointmentData', [
                 'ajaxurl' => admin_url( 'admin-ajax.php' ),
@@ -4318,6 +4367,454 @@ class DPS_Agenda_Addon {
         }
 
         return home_url();
+    }
+
+    /* ===========================
+       CHECKLIST OPERACIONAL — AJAX
+       =========================== */
+
+    /**
+     * AJAX: Atualiza o status de uma etapa do checklist.
+     *
+     * Espera POST: appointment_id, step_key, status (done|pending|skipped).
+     *
+     * @since 1.2.0
+     */
+    public function checklist_update_ajax() {
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+        }
+
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checklist' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
+
+        $appointment_id = isset( $_POST['appointment_id'] ) ? absint( $_POST['appointment_id'] ) : 0;
+        $step_key       = isset( $_POST['step_key'] ) ? sanitize_key( $_POST['step_key'] ) : '';
+        $status         = isset( $_POST['status'] ) ? sanitize_text_field( $_POST['status'] ) : '';
+
+        if ( ! $appointment_id || ! $step_key || ! $status ) {
+            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+        }
+
+        $updated = DPS_Agenda_Checklist_Service::update_step( $appointment_id, $step_key, $status );
+
+        if ( ! $updated ) {
+            wp_send_json_error( [ 'message' => __( 'Não foi possível atualizar o checklist.', 'dps-agenda-addon' ) ] );
+        }
+
+        wp_send_json_success( [
+            'message'      => __( 'Checklist atualizado.', 'dps-agenda-addon' ),
+            'progress'     => DPS_Agenda_Checklist_Service::get_progress( $appointment_id ),
+            'rework_count' => DPS_Agenda_Checklist_Service::count_reworks( $appointment_id ),
+        ] );
+    }
+
+    /**
+     * AJAX: Registra retrabalho em uma etapa do checklist.
+     *
+     * Espera POST: appointment_id, step_key, reason (opcional).
+     *
+     * @since 1.2.0
+     */
+    public function checklist_rework_ajax() {
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+        }
+
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checklist' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
+
+        $appointment_id = isset( $_POST['appointment_id'] ) ? absint( $_POST['appointment_id'] ) : 0;
+        $step_key       = isset( $_POST['step_key'] ) ? sanitize_key( $_POST['step_key'] ) : '';
+        $reason         = isset( $_POST['reason'] ) ? sanitize_textarea_field( $_POST['reason'] ) : '';
+
+        if ( ! $appointment_id || ! $step_key ) {
+            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+        }
+
+        $registered = DPS_Agenda_Checklist_Service::register_rework( $appointment_id, $step_key, $reason );
+
+        if ( ! $registered ) {
+            wp_send_json_error( [ 'message' => __( 'Não foi possível registrar o retrabalho.', 'dps-agenda-addon' ) ] );
+        }
+
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::info(
+                sprintf(
+                    'Agendamento #%d: Retrabalho registrado na etapa "%s" — %s',
+                    $appointment_id,
+                    $step_key,
+                    $reason ?: '(sem motivo)'
+                ),
+                [
+                    'appointment_id' => $appointment_id,
+                    'step_key'       => $step_key,
+                    'reason'         => $reason,
+                    'user_id'        => get_current_user_id(),
+                ],
+                'agenda'
+            );
+        }
+
+        wp_send_json_success( [
+            'message'      => __( 'Retrabalho registrado.', 'dps-agenda-addon' ),
+            'progress'     => DPS_Agenda_Checklist_Service::get_progress( $appointment_id ),
+            'rework_count' => DPS_Agenda_Checklist_Service::count_reworks( $appointment_id ),
+        ] );
+    }
+
+    /* ===========================
+       CHECK-IN / CHECK-OUT — AJAX
+       =========================== */
+
+    /**
+     * AJAX: Registra check-in de um agendamento.
+     *
+     * Espera POST: appointment_id, observations, safety_items[slug][checked/notes].
+     *
+     * @since 1.2.0
+     */
+    public function appointment_checkin_ajax() {
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+        }
+
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checkin' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
+
+        $appointment_id = isset( $_POST['appointment_id'] ) ? absint( $_POST['appointment_id'] ) : 0;
+        $observations   = isset( $_POST['observations'] ) ? sanitize_textarea_field( $_POST['observations'] ) : '';
+        $safety_items   = isset( $_POST['safety_items'] ) && is_array( $_POST['safety_items'] ) ? $_POST['safety_items'] : [];
+
+        if ( ! $appointment_id ) {
+            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+        }
+
+        $saved = DPS_Agenda_Checkin_Service::checkin( $appointment_id, $observations, $safety_items );
+
+        if ( ! $saved ) {
+            wp_send_json_error( [ 'message' => __( 'Não foi possível registrar o check-in.', 'dps-agenda-addon' ) ] );
+        }
+
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::info(
+                sprintf( 'Agendamento #%d: Check-in registrado', $appointment_id ),
+                [
+                    'appointment_id' => $appointment_id,
+                    'user_id'        => get_current_user_id(),
+                ],
+                'agenda'
+            );
+        }
+
+        wp_send_json_success( $this->build_checkin_response( $appointment_id ) );
+    }
+
+    /**
+     * AJAX: Registra check-out de um agendamento.
+     *
+     * Espera POST: appointment_id, observations, safety_items[slug][checked/notes].
+     *
+     * @since 1.2.0
+     */
+    public function appointment_checkout_ajax() {
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+        }
+
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checkin' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
+
+        $appointment_id = isset( $_POST['appointment_id'] ) ? absint( $_POST['appointment_id'] ) : 0;
+        $observations   = isset( $_POST['observations'] ) ? sanitize_textarea_field( $_POST['observations'] ) : '';
+        $safety_items   = isset( $_POST['safety_items'] ) && is_array( $_POST['safety_items'] ) ? $_POST['safety_items'] : [];
+
+        if ( ! $appointment_id ) {
+            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+        }
+
+        if ( ! DPS_Agenda_Checkin_Service::has_checkin( $appointment_id ) ) {
+            wp_send_json_error( [ 'message' => __( 'É necessário fazer o check-in antes do check-out.', 'dps-agenda-addon' ) ] );
+        }
+
+        $saved = DPS_Agenda_Checkin_Service::checkout( $appointment_id, $observations, $safety_items );
+
+        if ( ! $saved ) {
+            wp_send_json_error( [ 'message' => __( 'Não foi possível registrar o check-out.', 'dps-agenda-addon' ) ] );
+        }
+
+        if ( class_exists( 'DPS_Logger' ) ) {
+            $duration = DPS_Agenda_Checkin_Service::get_duration_minutes( $appointment_id );
+            DPS_Logger::info(
+                sprintf(
+                    'Agendamento #%d: Check-out registrado (duração: %s min)',
+                    $appointment_id,
+                    $duration !== false ? $duration : '?'
+                ),
+                [
+                    'appointment_id' => $appointment_id,
+                    'duration'       => $duration,
+                    'user_id'        => get_current_user_id(),
+                ],
+                'agenda'
+            );
+        }
+
+        wp_send_json_success( $this->build_checkin_response( $appointment_id ) );
+    }
+
+    /**
+     * Monta a resposta padrão do painel de check-in/check-out.
+     *
+     * @since 1.2.0
+     * @param int $appointment_id ID do agendamento.
+     * @return array Dados formatados para o JS.
+     */
+    private function build_checkin_response( $appointment_id ) {
+        $checkin  = DPS_Agenda_Checkin_Service::get_checkin( $appointment_id );
+        $checkout = DPS_Agenda_Checkin_Service::get_checkout( $appointment_id );
+        $duration = DPS_Agenda_Checkin_Service::get_duration_minutes( $appointment_id );
+
+        $response = [
+            'has_checkin'    => (bool) $checkin,
+            'has_checkout'   => (bool) $checkout,
+            'checkin_time'   => $checkin ? date_i18n( 'H:i', strtotime( $checkin['time'] ) ) : '',
+            'checkout_time'  => $checkout ? date_i18n( 'H:i', strtotime( $checkout['time'] ) ) : '',
+            'duration'       => false !== $duration
+                ? sprintf( __( '%d min', 'dps-agenda-addon' ), $duration )
+                : '',
+            'safety_summary' => [],
+        ];
+
+        $summary = DPS_Agenda_Checkin_Service::get_safety_summary( $appointment_id );
+        foreach ( $summary as $item ) {
+            $response['safety_summary'][] = [
+                'label'    => $item['label'],
+                'icon'     => $item['icon'],
+                'severity' => $item['severity'],
+            ];
+        }
+
+        return $response;
+    }
+
+    /* ===========================
+       RENDER HELPERS — Checklist & Check-in/Check-out
+       =========================== */
+
+    /**
+     * Renderiza o painel do Checklist Operacional para um agendamento.
+     *
+     * Pode ser chamado em templates de cartão de agendamento na agenda.
+     *
+     * @since 1.2.0
+     * @param int $appointment_id ID do agendamento.
+     * @return string HTML do painel.
+     */
+    public static function render_checklist_panel( $appointment_id ) {
+        $appointment_id = absint( $appointment_id );
+        if ( ! $appointment_id || ! current_user_can( 'manage_options' ) ) {
+            return '';
+        }
+
+        $checklist = DPS_Agenda_Checklist_Service::get( $appointment_id );
+        $steps     = DPS_Agenda_Checklist_Service::get_default_steps();
+        $progress  = DPS_Agenda_Checklist_Service::get_progress( $appointment_id );
+
+        ob_start();
+        ?>
+        <div class="dps-checklist-panel" data-appointment="<?php echo esc_attr( $appointment_id ); ?>">
+            <h4>📋 <?php esc_html_e( 'Checklist Operacional', 'dps-agenda-addon' ); ?></h4>
+
+            <div class="dps-checklist-progress">
+                <div class="dps-checklist-progress-bar">
+                    <div class="dps-checklist-progress-fill" style="width: <?php echo esc_attr( $progress ); ?>%"></div>
+                </div>
+                <span class="dps-checklist-progress-text"><?php echo esc_html( $progress ); ?>%</span>
+            </div>
+
+            <ul class="dps-checklist-steps">
+            <?php foreach ( $steps as $key => $step ) :
+                $item   = isset( $checklist[ $key ] ) ? $checklist[ $key ] : [ 'status' => 'pending', 'rework' => [] ];
+                $status = isset( $item['status'] ) ? $item['status'] : 'pending';
+                $rework_count = ! empty( $item['rework'] ) ? count( $item['rework'] ) : 0;
+            ?>
+                <li class="dps-checklist-step" data-step="<?php echo esc_attr( $key ); ?>" data-status="<?php echo esc_attr( $status ); ?>">
+                    <span class="dps-checklist-step-icon"><?php echo esc_html( $step['icon'] ); ?></span>
+                    <span class="dps-checklist-step-label"><?php echo esc_html( $step['label'] ); ?></span>
+
+                    <?php if ( $rework_count > 0 ) : ?>
+                        <span class="dps-checklist-rework-badge">🔄 <?php echo esc_html( $rework_count ); ?></span>
+                    <?php endif; ?>
+
+                    <span class="dps-checklist-step-actions">
+                        <?php if ( 'pending' === $status ) : ?>
+                            <button class="dps-checklist-btn dps-checklist-btn--done" type="button">✓ <?php esc_html_e( 'Concluir', 'dps-agenda-addon' ); ?></button>
+                            <button class="dps-checklist-btn dps-checklist-btn--skip" type="button"><?php esc_html_e( 'Pular', 'dps-agenda-addon' ); ?></button>
+                        <?php elseif ( 'done' === $status ) : ?>
+                            <button class="dps-checklist-btn dps-checklist-btn--undo" type="button">↩ <?php esc_html_e( 'Desfazer', 'dps-agenda-addon' ); ?></button>
+                            <button class="dps-checklist-btn dps-checklist-btn--rework" type="button">🔄 <?php esc_html_e( 'Refazer', 'dps-agenda-addon' ); ?></button>
+                        <?php elseif ( 'skipped' === $status ) : ?>
+                            <button class="dps-checklist-btn dps-checklist-btn--undo" type="button">↩ <?php esc_html_e( 'Desfazer', 'dps-agenda-addon' ); ?></button>
+                        <?php endif; ?>
+                    </span>
+                </li>
+            <?php endforeach; ?>
+            </ul>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Renderiza o painel de Check-in / Check-out para um agendamento.
+     *
+     * Pode ser chamado em templates de cartão de agendamento na agenda.
+     *
+     * @since 1.2.0
+     * @param int $appointment_id ID do agendamento.
+     * @return string HTML do painel.
+     */
+    public static function render_checkin_panel( $appointment_id ) {
+        $appointment_id = absint( $appointment_id );
+        if ( ! $appointment_id || ! current_user_can( 'manage_options' ) ) {
+            return '';
+        }
+
+        $checkin      = DPS_Agenda_Checkin_Service::get_checkin( $appointment_id );
+        $checkout     = DPS_Agenda_Checkin_Service::get_checkout( $appointment_id );
+        $duration     = DPS_Agenda_Checkin_Service::get_duration_minutes( $appointment_id );
+        $safety_items = DPS_Agenda_Checkin_Service::get_safety_items();
+        $summary      = DPS_Agenda_Checkin_Service::get_safety_summary( $appointment_id );
+
+        ob_start();
+        ?>
+        <div class="dps-checkin-panel" data-appointment="<?php echo esc_attr( $appointment_id ); ?>">
+            <h4>🏥 <?php esc_html_e( 'Check-in / Check-out', 'dps-agenda-addon' ); ?></h4>
+
+            <div class="dps-checkin-status">
+                <?php if ( $checkin ) : ?>
+                    <span class="dps-checkin-status-badge dps-checkin-status-badge--in">
+                        📥 Check-in: <?php echo esc_html( date_i18n( 'H:i', strtotime( $checkin['time'] ) ) ); ?>
+                    </span>
+                <?php endif; ?>
+
+                <?php if ( $checkout ) : ?>
+                    <span class="dps-checkin-status-badge dps-checkin-status-badge--out">
+                        📤 Check-out: <?php echo esc_html( date_i18n( 'H:i', strtotime( $checkout['time'] ) ) ); ?>
+                    </span>
+                <?php endif; ?>
+
+                <?php if ( false !== $duration ) : ?>
+                    <span class="dps-checkin-status-badge dps-checkin-status-badge--duration">
+                        ⏱️ <?php printf( esc_html__( '%d min', 'dps-agenda-addon' ), $duration ); ?>
+                    </span>
+                <?php endif; ?>
+
+                <?php if ( ! $checkin && ! $checkout ) : ?>
+                    <span class="dps-checkin-status-badge dps-checkin-status-badge--pending">
+                        <?php esc_html_e( 'Aguardando check-in', 'dps-agenda-addon' ); ?>
+                    </span>
+                <?php endif; ?>
+            </div>
+
+            <?php if ( ! empty( $summary ) ) : ?>
+                <div class="dps-safety-summary">
+                    <?php foreach ( $summary as $item ) : ?>
+                        <span class="dps-safety-tag dps-safety-tag--<?php echo esc_attr( $item['severity'] ); ?>">
+                            <?php echo esc_html( $item['icon'] . ' ' . $item['label'] ); ?>
+                        </span>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ( ! $checkin || ! $checkout ) : ?>
+                <div class="dps-safety-items">
+                    <?php foreach ( $safety_items as $slug => $item ) : ?>
+                        <div class="dps-safety-item" data-slug="<?php echo esc_attr( $slug ); ?>" data-severity="<?php echo esc_attr( $item['severity'] ); ?>">
+                            <span class="dps-safety-item-icon"><?php echo esc_html( $item['icon'] ); ?></span>
+                            <div class="dps-safety-item-content">
+                                <label class="dps-safety-item-label">
+                                    <input type="checkbox" name="safety_<?php echo esc_attr( $slug ); ?>" value="1">
+                                    <?php echo esc_html( $item['label'] ); ?>
+                                </label>
+                                <textarea class="dps-safety-item-notes" rows="1" placeholder="<?php esc_attr_e( 'Detalhes...', 'dps-agenda-addon' ); ?>"></textarea>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="dps-checkin-observations">
+                    <label><?php esc_html_e( 'Observações gerais', 'dps-agenda-addon' ); ?></label>
+                    <textarea placeholder="<?php esc_attr_e( 'Ex.: pet chegou agitado, tutor pediu corte mais curto...', 'dps-agenda-addon' ); ?>"></textarea>
+                </div>
+            <?php endif; ?>
+
+            <div class="dps-checkin-actions">
+                <?php if ( ! $checkin ) : ?>
+                    <button type="button" class="dps-checkin-btn dps-checkin-btn--checkin">📥 <?php esc_html_e( 'Check-in', 'dps-agenda-addon' ); ?></button>
+                <?php elseif ( ! $checkout ) : ?>
+                    <button type="button" class="dps-checkin-btn dps-checkin-btn--checkout">📤 <?php esc_html_e( 'Check-out', 'dps-agenda-addon' ); ?></button>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Renderiza indicadores compactos de checklist e check-in para uso em cards.
+     *
+     * @since 1.2.0
+     * @param int $appointment_id ID do agendamento.
+     * @return string HTML dos indicadores compactos.
+     */
+    public static function render_compact_indicators( $appointment_id ) {
+        $appointment_id = absint( $appointment_id );
+        if ( ! $appointment_id ) {
+            return '';
+        }
+
+        $progress     = DPS_Agenda_Checklist_Service::get_progress( $appointment_id );
+        $rework_count = DPS_Agenda_Checklist_Service::count_reworks( $appointment_id );
+        $has_checkin  = DPS_Agenda_Checkin_Service::has_checkin( $appointment_id );
+        $has_checkout = DPS_Agenda_Checkin_Service::has_checkout( $appointment_id );
+        $summary      = DPS_Agenda_Checkin_Service::get_safety_summary( $appointment_id );
+
+        ob_start();
+        ?>
+        <span class="dps-checklist-compact" title="<?php esc_attr_e( 'Checklist Operacional', 'dps-agenda-addon' ); ?>">
+            📋 <?php echo esc_html( $progress ); ?>%
+            <?php if ( $rework_count > 0 ) : ?>
+                <span class="dps-checklist-rework-badge">🔄 <?php echo esc_html( $rework_count ); ?></span>
+            <?php endif; ?>
+        </span>
+
+        <span class="dps-checkin-compact" title="<?php esc_attr_e( 'Check-in / Check-out', 'dps-agenda-addon' ); ?>">
+            <?php if ( $has_checkout ) : ?>
+                ✅
+            <?php elseif ( $has_checkin ) : ?>
+                📥
+            <?php else : ?>
+                ⬜
+            <?php endif; ?>
+        </span>
+
+        <?php foreach ( $summary as $item ) : ?>
+            <span class="dps-safety-tag dps-safety-tag--<?php echo esc_attr( $item['severity'] ); ?>" title="<?php echo esc_attr( $item['label'] ); ?>">
+                <?php echo esc_html( $item['icon'] ); ?>
+            </span>
+        <?php endforeach; ?>
+        <?php
+        return ob_get_clean();
     }
 
 

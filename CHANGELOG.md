@@ -83,6 +83,18 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Agenda Add-on v1.2.0 — Checklist Operacional e Check-in/Check-out**
+
+- **Checklist Operacional**: painel interativo com etapas de banho e tosa (pré-banho, banho, secagem, tosa/corte, orelhas/unhas, acabamento). Cada etapa pode ser marcada como concluída, pulada ou revertida. Barra de progresso em tempo real.
+- **Retrabalho (rework)**: registro de retrabalho por etapa com motivo e timestamp. Badge visual indica quantas vezes uma etapa precisou ser refeita.
+- **Check-in / Check-out**: registro rápido de entrada e saída do pet com cálculo automático de duração (em minutos).
+- **Itens de segurança**: 7 itens pré-definidos (pulgas, carrapatos, feridinhas, alergia, otite, nós, comportamento) com nível de severidade e campo de notas por item. Filtrável via `dps_checkin_safety_items`.
+- **Observações rápidas**: campo de texto livre para observações no check-in e check-out.
+- **AJAX endpoints**: `dps_checklist_update`, `dps_checklist_rework`, `dps_appointment_checkin`, `dps_appointment_checkout` — todos com nonce + capability check.
+- **Hooks de extensão**: `dps_checklist_default_steps`, `dps_checklist_rework_registered`, `dps_checkin_safety_items`, `dps_appointment_checked_in`, `dps_appointment_checked_out`.
+- **Render helpers**: `render_checklist_panel()`, `render_checkin_panel()`, `render_compact_indicators()` — prontos para integração em templates de cards de agendamento.
+- **Design M3**: CSS com design tokens, responsivo, com modal de retrabalho e grid de itens de segurança.
+
 **Frontend Add-on v1.0.0 — Fundação (Fase 1)**
 
 - **Novo add-on `desi-pet-shower-frontend`**: esqueleto modular para consolidação de experiências frontend (cadastro, agendamento, configurações).
