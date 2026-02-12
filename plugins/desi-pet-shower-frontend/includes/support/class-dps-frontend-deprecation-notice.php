@@ -89,19 +89,25 @@ final class DPS_Frontend_Deprecation_Notice {
             </p>
             <p>
                 <?php
-                printf(
-                    /* translators: %s: list of v1 modules */
-                    esc_html__( 'Os módulos %s utilizam o modo dual-run (v1) que será descontinuado em versão futura. Recomendamos migrar para os módulos nativos V2, que oferecem melhor desempenho, independência do legado e design M3 Expressive completo.', 'dps-frontend-addon' ),
-                    '<strong>' . esc_html( $modules_list ) . '</strong>'
+                echo wp_kses(
+                    sprintf(
+                        /* translators: %s: list of v1 modules */
+                        __( 'Os módulos %s utilizam o modo dual-run (v1) que será descontinuado em versão futura. Recomendamos migrar para os módulos nativos V2, que oferecem melhor desempenho, independência do legado e design M3 Expressive completo.', 'dps-frontend-addon' ),
+                        '<strong>' . esc_html( $modules_list ) . '</strong>'
+                    ),
+                    [ 'strong' => [] ]
                 );
                 ?>
             </p>
             <p>
                 <?php
-                printf(
-                    /* translators: %s: file path */
-                    esc_html__( 'Consulte o guia de migração em %s para instruções detalhadas.', 'dps-frontend-addon' ),
-                    '<code>docs/implementation/FRONTEND_V2_MIGRATION_GUIDE.md</code>'
+                echo wp_kses(
+                    sprintf(
+                        /* translators: %s: file path */
+                        __( 'Consulte o guia de migração em %s para instruções detalhadas.', 'dps-frontend-addon' ),
+                        '<code>docs/implementation/FRONTEND_V2_MIGRATION_GUIDE.md</code>'
+                    ),
+                    [ 'code' => [] ]
                 );
                 ?>
             </p>
@@ -132,7 +138,7 @@ final class DPS_Frontend_Deprecation_Notice {
         check_ajax_referer( self::NONCE_ACTION );
 
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( 'Permission denied', 403 );
+            wp_send_json_error( [ 'message' => 'Permission denied' ], 403 );
         }
 
         $user_id = get_current_user_id();
