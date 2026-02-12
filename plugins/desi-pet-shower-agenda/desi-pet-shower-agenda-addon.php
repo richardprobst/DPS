@@ -4586,8 +4586,8 @@ class DPS_Agenda_Addon {
         $response = [
             'has_checkin'    => (bool) $checkin,
             'has_checkout'   => (bool) $checkout,
-            'checkin_time'   => $checkin ? date_i18n( 'H:i', strtotime( $checkin['time'] ) ) : '',
-            'checkout_time'  => $checkout ? date_i18n( 'H:i', strtotime( $checkout['time'] ) ) : '',
+            'checkin_time'   => $checkin ? mysql2date( 'H:i', $checkin['time'] ) : '',
+            'checkout_time'  => $checkout ? mysql2date( 'H:i', $checkout['time'] ) : '',
             'duration'       => false !== $duration
                 ? sprintf( __( '%d min', 'dps-agenda-addon' ), $duration )
                 : '',
@@ -4703,13 +4703,13 @@ class DPS_Agenda_Addon {
             <div class="dps-checkin-status">
                 <?php if ( $checkin ) : ?>
                     <span class="dps-checkin-status-badge dps-checkin-status-badge--in">
-                        📥 Check-in: <?php echo esc_html( date_i18n( 'H:i', strtotime( $checkin['time'] ) ) ); ?>
+                        📥 Check-in: <?php echo esc_html( mysql2date( 'H:i', $checkin['time'] ) ); ?>
                     </span>
                 <?php endif; ?>
 
                 <?php if ( $checkout ) : ?>
                     <span class="dps-checkin-status-badge dps-checkin-status-badge--out">
-                        📤 Check-out: <?php echo esc_html( date_i18n( 'H:i', strtotime( $checkout['time'] ) ) ); ?>
+                        📤 Check-out: <?php echo esc_html( mysql2date( 'H:i', $checkout['time'] ) ); ?>
                     </span>
                 <?php endif; ?>
 

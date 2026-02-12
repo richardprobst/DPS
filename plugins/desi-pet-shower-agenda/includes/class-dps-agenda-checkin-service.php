@@ -231,8 +231,14 @@ class DPS_Agenda_Checkin_Service {
             return false;
         }
 
-        $diff = absint( $checkout['timestamp'] ) - absint( $checkin['timestamp'] );
-        return max( 0, (int) round( $diff / 60 ) );
+        $in_ts  = intval( $checkin['timestamp'] );
+        $out_ts = intval( $checkout['timestamp'] );
+
+        if ( $out_ts <= $in_ts ) {
+            return 0;
+        }
+
+        return (int) round( ( $out_ts - $in_ts ) / 60 );
     }
 
     /**

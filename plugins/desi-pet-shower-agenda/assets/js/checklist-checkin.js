@@ -156,9 +156,9 @@
         $('.dps-rework-modal-overlay').remove();
 
         var html =
-            '<div class="dps-rework-modal-overlay">' +
+            '<div class="dps-rework-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dps-rework-title">' +
                 '<div class="dps-rework-modal">' +
-                    '<h4>🔄 ' + cfg.messages.reworkTitle + ': ' + stepLabel + '</h4>' +
+                    '<h4 id="dps-rework-title">🔄 ' + cfg.messages.reworkTitle + ': ' + stepLabel + '</h4>' +
                     '<textarea id="dps-rework-reason" placeholder="' + cfg.messages.reworkPlaceholder + '"></textarea>' +
                     '<div class="dps-rework-modal-actions">' +
                         '<button class="dps-checklist-btn dps-checklist-btn--undo dps-rework-cancel" type="button">' + cfg.messages.cancel + '</button>' +
@@ -175,6 +175,7 @@
         // Cancelar
         $('.dps-rework-cancel').on('click', function () {
             $('.dps-rework-modal-overlay').remove();
+            $(document).off('keydown.dpsRework');
         });
 
         // Fechar com Escape
