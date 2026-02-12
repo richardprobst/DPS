@@ -43,7 +43,7 @@ final class DPS_Breed_Provider {
     }
 
     /**
-     * Retorna raças para uma espécie específica (populares primeiro, depois todas).
+     * Retorna raças para uma espécie específica (populares primeiro, depois restantes).
      *
      * @param string $species Espécie: 'cao' ou 'gato'.
      * @return string[] Lista de raças com populares no topo.
@@ -55,10 +55,10 @@ final class DPS_Breed_Provider {
             return [];
         }
 
-        return array_unique( array_merge(
-            $dataset[ $species ]['popular'],
-            $dataset[ $species ]['all']
-        ) );
+        $popular   = $dataset[ $species ]['popular'];
+        $remaining = array_diff( $dataset[ $species ]['all'], $popular );
+
+        return array_merge( $popular, $remaining );
     }
 
     /**

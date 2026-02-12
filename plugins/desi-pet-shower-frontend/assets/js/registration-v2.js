@@ -363,7 +363,7 @@
      */
     function initRecaptcha( form ) {
         var siteKey = form.getAttribute( 'data-recaptcha-site-key' );
-        if ( ! siteKey || 'undefined' === typeof grecaptcha ) {
+        if ( ! siteKey || typeof grecaptcha === 'undefined' ) {
             return;
         }
 
