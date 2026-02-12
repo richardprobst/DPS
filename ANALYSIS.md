@@ -1554,21 +1554,28 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - **[Fase 2]** Módulo Registration operacional em dual-run com o add-on legado
 - **[Fase 3]** Módulo Booking operacional em dual-run com o add-on legado
 - **[Fase 4]** Módulo Settings integrado ao sistema de abas de configurações
+- **[Fase 7.1]** Preparação: abstracts, template engine, hook bridges, componentes M3, flags v2
+- **[Fase 7.2]** Registration V2: formulário nativo 100% independente do legado (cadastro + pets + reCAPTCHA + email confirmation)
+- **[Fase 7.3]** Booking V2: wizard nativo 5-step 100% independente do legado (cliente → pets → serviços → data/hora → confirmação + extras TaxiDog/Tosa)
 
 **Shortcodes expostos**:
 - `dps_registration_form` — quando flag `registration` ativada, o módulo assume o shortcode (wrapper sobre o legado com surface M3)
 - `dps_booking_form` — quando flag `booking` ativada, o módulo assume o shortcode (wrapper sobre o legado com surface M3)
+- `dps_registration_v2` — quando flag `registration_v2` ativada, formulário nativo M3 (100% independente do legado)
+- `dps_booking_v2` — quando flag `booking_v2` ativada, wizard nativo M3 de 5 steps (100% independente do legado)
 
 **CPTs, tabelas e opções**:
-- Option: `dps_frontend_feature_flags` — controle de rollout por módulo
+- Option: `dps_frontend_feature_flags` — controle de rollout por módulo (flags: `registration`, `booking`, `settings`, `registration_v2`, `booking_v2`)
+- Option: `dps_frontend_usage_counters` — contadores de telemetria por módulo
+- Transient: `dps_booking_confirmation_{user_id}` — confirmação de agendamento v2 (TTL 5min)
 
-**Hooks consumidos** (Fase 2 — módulo Registration):
+**Hooks consumidos** (Fase 2 — módulo Registration v1 dual-run):
 - `dps_registration_after_fields` (preservado — consumido pelo Loyalty)
 - `dps_registration_after_client_created` (preservado — consumido pelo Loyalty)
 - `dps_registration_spam_check` (preservado)
 - `dps_registration_agenda_url` (preservado)
 
-**Hooks consumidos** (Fase 3 — módulo Booking):
+**Hooks consumidos** (Fase 3 — módulo Booking v1 dual-run):
 - `dps_base_after_save_appointment` (preservado — consumido por stock, payment, groomers, calendar, communications, push, services e booking)
 - `dps_base_appointment_fields` (preservado)
 - `dps_base_appointment_assignment_fields` (preservado)
@@ -1577,12 +1584,37 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - `dps_settings_register_tabs` — registra aba "Frontend" via `DPS_Settings_Frontend::register_tab()`
 - `dps_settings_save_save_frontend` — processa salvamento das feature flags
 
-**Hooks disparados**: Nenhum novo nesta fase
+**Hooks disparados** (Fase 7 — módulos nativos V2):
+- `dps_registration_v2_before_render` — antes de renderizar formulário de cadastro v2
+- `dps_registration_v2_after_render` — após renderizar formulário de cadastro v2
+- `dps_registration_v2_client_created` — após criar cliente via v2 (bridge: dispara hooks legados do Loyalty primeiro)
+- `dps_registration_v2_pet_created` — após criar pet via v2
+- `dps_registration_spam_check` — filtro anti-spam (reusa hook legado via bridge)
+- `dps_booking_v2_before_render` — antes de renderizar wizard de booking v2
+- `dps_booking_v2_step_render` — ao renderizar step do wizard
+- `dps_booking_v2_step_validate` — filtro de validação por step
+- `dps_booking_v2_before_process` — antes de criar agendamento v2
+- `dps_booking_v2_after_process` — após processar agendamento v2
+- `dps_booking_v2_appointment_created` — após criar agendamento v2
+
+**Hooks de bridge** (Fase 7 — CRÍTICO: legado PRIMEIRO, v2 DEPOIS):
+- `dps_base_after_save_appointment` — 8 consumidores: Stock, Payment, Groomers, Calendar, Communications, Push, Services, Booking
+- `dps_base_appointment_fields` — Services: injeção de campos
+- `dps_base_appointment_assignment_fields` — Groomers: campos de atribuição
+- `dps_registration_after_client_created` — Loyalty: código de indicação
+
+**AJAX endpoints** (Fase 7.3 — Booking V2):
+- `wp_ajax_dps_booking_search_client` — busca cliente por telefone (nonce + capability)
+- `wp_ajax_dps_booking_get_pets` — lista pets do cliente com paginação (nonce + capability)
+- `wp_ajax_dps_booking_get_services` — serviços ativos com preços por porte (nonce + capability)
+- `wp_ajax_dps_booking_get_slots` — horários livres 08:00-18:00/30min (nonce + capability)
+- `wp_ajax_dps_booking_validate_step` — validação server-side por step (nonce + capability)
 
 **Dependências**:
 - Depende do plugin base (DPS_Base_Plugin + design tokens CSS)
-- Módulo Registration depende de `DPS_Registration_Addon` (add-on legado) para dual-run
-- Módulo Booking depende de `DPS_Booking_Addon` (add-on legado) para dual-run
+- Módulo Registration v1 depende de `DPS_Registration_Addon` (add-on legado) para dual-run
+- Módulo Booking v1 depende de `DPS_Booking_Addon` (add-on legado) para dual-run
+- Módulos V2 nativos (Registration V2, Booking V2) são 100% independentes dos add-ons legados
 - Módulo Settings depende de `DPS_Settings_Frontend` (sistema de abas do base)
 
 **Arquitetura interna**:
@@ -1591,11 +1623,34 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - `DPS_Frontend_Feature_Flags` — controle de rollout persistido
 - `DPS_Frontend_Compatibility` — bridges para legado
 - `DPS_Frontend_Assets` — enqueue condicional M3 Expressive
-- `DPS_Frontend_Logger` — observabilidade via error_log
+- `DPS_Frontend_Logger` — observabilidade via error_log + telemetria batch
 - `DPS_Frontend_Request_Guard` — segurança centralizada (nonce, capability, sanitização)
-- `DPS_Frontend_Registration_Module` — dual-run: assume shortcode, delega lógica ao legado
-- `DPS_Frontend_Booking_Module` — dual-run: assume shortcode, delega lógica ao legado
+- `DPS_Template_Engine` — renderização com suporte a override via tema (dps-templates/)
+- `DPS_Frontend_Registration_Module` — v1 dual-run: assume shortcode, delega lógica ao legado
+- `DPS_Frontend_Booking_Module` — v1 dual-run: assume shortcode, delega lógica ao legado
 - `DPS_Frontend_Settings_Module` — registra aba de configurações com controles de feature flags
+- `DPS_Frontend_Registration_V2_Module` — v2 nativo: shortcode `[dps_registration_v2]`, handler, services
+- `DPS_Frontend_Booking_V2_Module` — v2 nativo: shortcode `[dps_booking_v2]`, handler, services, AJAX
+- `DPS_Registration_Hook_Bridge` — compatibilidade v1/v2 Registration (legado primeiro, v2 depois)
+- `DPS_Booking_Hook_Bridge` — compatibilidade v1/v2 Booking (legado primeiro, v2 depois)
+
+**Classes de negócio — Registration V2** (Fase 7.2):
+- `DPS_Registration_Handler` — pipeline: reCAPTCHA → anti-spam → validação → duplicata → criar cliente → hooks Loyalty → criar pets → email confirmação
+- `DPS_Form_Validator` — validação de formulário (nome, email, telefone, CPF, pets)
+- `DPS_Cpf_Validator` — validação CPF mod-11
+- `DPS_Client_Service` — CRUD para `dps_cliente` (13+ metas)
+- `DPS_Pet_Service` — CRUD para `dps_pet`
+- `DPS_Breed_Provider` — dataset de raças por espécie (cão: 44, gato: 20)
+- `DPS_Duplicate_Detector` — detecção por telefone com override admin
+- `DPS_Recaptcha_Service` — verificação reCAPTCHA v3
+- `DPS_Email_Confirmation_Service` — token UUID 48h + envio
+
+**Classes de negócio — Booking V2** (Fase 7.3):
+- `DPS_Booking_Handler` — pipeline: validação → extras → criar appointment → confirmação transient → hook bridge (8 add-ons)
+- `DPS_Booking_Validator` — validação multi-step (5 steps) + extras (TaxiDog/Tosa)
+- `DPS_Appointment_Service` — CRUD para `dps_agendamento` (16+ metas, conflitos, busca por cliente)
+- `DPS_Booking_Confirmation_Service` — transient de confirmação (5min TTL)
+- `DPS_Booking_Ajax` — 5 endpoints AJAX (busca cliente, pets, serviços, slots, validação)
 
 **Estratégia de compatibilidade (Fases 2–4)**:
 - Intervenção mínima: o legado continua processando formulário, emails, REST, AJAX, settings e cron
@@ -1603,7 +1658,13 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Módulo de settings registra aba via API moderna `register_tab()` sem alterar abas existentes
 - Rollback: desabilitar flag do módulo restaura comportamento 100% legado
 
-**Introduzido em**: v1.0.0
+**Coexistência v1/v2** (Fase 7):
+- Shortcodes v1 (`[dps_registration_form]`, `[dps_booking_form]`) e v2 (`[dps_registration_v2]`, `[dps_booking_v2]`) podem estar ativos simultaneamente
+- Feature flags independentes: `registration` (v1), `registration_v2` (v2), `booking` (v1), `booking_v2` (v2)
+- Hook bridge garante compatibilidade: hooks legados disparam PRIMEIRO, hooks v2 DEPOIS
+- Rollback instantâneo via toggle de flag — sem perda de dados
+
+**Introduzido em**: v1.0.0 (Fases 1–6), v2.0.0 (Fase 7.1), v2.1.0 (Fase 7.2), v2.2.0 (Fase 7.3), v2.3.0 (Fase 7.4), v2.4.0 (Fase 7.5)
 
 **Documentação operacional (Fase 5)**:
 - `docs/implementation/FRONTEND_ROLLOUT_GUIDE.md` — guia de ativação por ambiente
@@ -1615,6 +1676,13 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - `docs/refactoring/FRONTEND_DEPRECATION_POLICY.md` — política de depreciação (janela mínima 180 dias, processo de comunicação, critérios de aceite)
 - `docs/refactoring/FRONTEND_REMOVAL_TARGETS.md` — lista de alvos com risco, dependências e esforço (booking 🟢 baixo; registration 🟡 médio)
 - Telemetria de uso: contadores por módulo via `dps_frontend_usage_counters`, exibidos na aba Settings
+
+**Documentação de implementação nativa (Fase 7)**:
+- `docs/refactoring/FRONTEND_NATIVE_IMPLEMENTATION_PLAN.md` — plano completo com inventário legado, hook bridge, templates, estratégia de migração
+
+**Documentação de coexistência e migração (Fase 7.4)**:
+- `docs/implementation/FRONTEND_V2_MIGRATION_GUIDE.md` — guia passo a passo de migração v1→v2 (7 etapas, comparação de features, checklist, rollback, troubleshooting, WP-CLI)
+- Seção "Status de Coexistência v1/v2" na aba Settings com indicadores visuais por módulo
 
 **Observações**:
 - PHP 8.4 moderno: constructor promotion, readonly properties, typed properties, return types

@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>desi.pet — Frontend V2 Preview (Registration + Booking)</title>
+    <link rel="stylesheet" href="../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css">
+    <link rel="stylesheet" href="../../plugins/desi-pet-shower-frontend/assets/css/registration-v2.css">
+    <link rel="stylesheet" href="../../plugins/desi-pet-shower-frontend/assets/css/booking-v2.css">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Roboto, -apple-system, system-ui, sans-serif;
+            margin: 0;
+            background: var(--dps-color-surface, #fffbfe);
+            color: var(--dps-color-on-surface, #1c1b1f);
+        }
+        .preview-container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .preview-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: var(--dps-color-primary-container, #eaddff);
+            border-radius: 28px;
+        }
+        .preview-header h1 {
+            font-size: 2rem;
+            font-weight: 400;
+            color: var(--dps-color-on-primary-container, #21005d);
+            margin: 0 0 0.5rem;
+        }
+        .preview-header p {
+            font-size: 1rem;
+            color: var(--dps-color-on-primary-container, #21005d);
+            opacity: 0.8;
+            margin: 0;
+        }
+        .section-divider {
+            text-align: center;
+            margin: 3rem 0;
+            padding: 1rem;
+            background: var(--dps-color-surface-container, #f3edf7);
+            border-radius: 16px;
+        }
+        .section-divider h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--dps-color-primary, #6750a4);
+            margin: 0;
+        }
+        .section-divider p {
+            font-size: 0.875rem;
+            color: var(--dps-color-on-surface-variant, #49454f);
+            margin: 0.5rem 0 0;
+        }
+        /* Form field styles for preview */
+        .dps-v2-field { margin-bottom: 1rem; }
+        .dps-v2-field__label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--dps-color-on-surface-variant, #49454f);
+            margin-bottom: 0.375rem;
+        }
+        .dps-v2-field__input,
+        .dps-v2-field__select,
+        .dps-v2-field__textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid var(--dps-color-outline, #79747e);
+            border-radius: var(--dps-radius-xs, 4px);
+            font-size: 1rem;
+            background: transparent;
+            color: var(--dps-color-on-surface, #1c1b1f);
+            transition: border-color 0.2s;
+        }
+        .dps-v2-field__input:focus,
+        .dps-v2-field__select:focus {
+            outline: none;
+            border-color: var(--dps-color-primary, #6750a4);
+            border-width: 2px;
+            padding: calc(0.875rem - 1px) calc(1rem - 1px);
+        }
+        .dps-v2-field__helper {
+            font-size: 0.75rem;
+            color: var(--dps-color-on-surface-variant, #49454f);
+            margin-top: 0.25rem;
+        }
+        .dps-v2-field--required .dps-v2-field__label::after {
+            content: ' *';
+            color: var(--dps-color-error, #b3261e);
+        }
+        /* Grid layout */
+        .dps-v2-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .dps-v2-form-grid--full {
+            grid-column: 1 / -1;
+        }
+        /* Button styles */
+        .dps-v2-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 100px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.01em;
+        }
+        .dps-v2-button--primary {
+            background: var(--dps-color-primary, #6750a4);
+            color: var(--dps-color-on-primary, #ffffff);
+        }
+        .dps-v2-button--primary:hover {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+        .dps-v2-button--secondary {
+            background: transparent;
+            color: var(--dps-color-primary, #6750a4);
+            border: 1px solid var(--dps-color-outline, #79747e);
+        }
+        /* Pet entry card */
+        .dps-v2-pet-entry {
+            background: var(--dps-color-surface-container-low, #f7f2fa);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .dps-v2-pet-entry__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .dps-v2-pet-entry__title {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--dps-color-on-surface, #1c1b1f);
+        }
+        .dps-v2-pet-entry__remove {
+            background: none;
+            border: none;
+            color: var(--dps-color-error, #b3261e);
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        /* Form actions */
+        .dps-v2-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--dps-color-outline-variant, #cac4d0);
+        }
+        /* Checkbox styles */
+        .dps-v2-field__checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        .dps-v2-field__checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--dps-color-primary, #6750a4);
+        }
+        /* Section header */
+        .dps-v2-section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .dps-v2-section-header__icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--dps-color-primary-container, #eaddff);
+            border-radius: 12px;
+            font-size: 1.25rem;
+        }
+        /* Booking specific - selectable cards */
+        .dps-v2-selectable-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--dps-color-surface-container-low, #f7f2fa);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .dps-v2-selectable-card:hover {
+            background: var(--dps-color-surface-container, #f3edf7);
+        }
+        .dps-v2-selectable-card--selected {
+            border-color: var(--dps-color-primary, #6750a4);
+            background: var(--dps-color-primary-container, #eaddff);
+        }
+        .dps-v2-selectable-card__info {
+            flex: 1;
+        }
+        .dps-v2-selectable-card__name {
+            font-weight: 500;
+            color: var(--dps-color-on-surface, #1c1b1f);
+        }
+        .dps-v2-selectable-card__detail {
+            font-size: 0.75rem;
+            color: var(--dps-color-on-surface-variant, #49454f);
+        }
+        .dps-v2-selectable-card__price {
+            font-weight: 600;
+            color: var(--dps-color-primary, #6750a4);
+        }
+        /* Booking cards grid */
+        .dps-v2-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        /* Running total */
+        .dps-v2-running-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            background: var(--dps-color-tertiary-container, #ffd8e4);
+            border-radius: 16px;
+            margin-top: 1rem;
+        }
+        .dps-v2-running-total__label {
+            font-weight: 500;
+        }
+        .dps-v2-running-total__value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dps-color-on-tertiary-container, #31111d);
+        }
+        /* Time slots */
+        .dps-v2-time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 0.5rem;
+        }
+        .dps-v2-time-slot {
+            padding: 0.625rem 0.75rem;
+            text-align: center;
+            border: 1px solid var(--dps-color-outline-variant, #cac4d0);
+            border-radius: 100px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+        }
+        .dps-v2-time-slot:hover {
+            background: var(--dps-color-surface-container, #f3edf7);
+        }
+        .dps-v2-time-slot--selected {
+            background: var(--dps-color-primary, #6750a4);
+            color: var(--dps-color-on-primary, #fff);
+            border-color: var(--dps-color-primary, #6750a4);
+        }
+        /* Extras card */
+        .dps-v2-extras-card {
+            background: var(--dps-color-surface-container-low, #f7f2fa);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .dps-v2-extras-card__header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        /* Success state */
+        .dps-v2-success {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        .dps-v2-success__icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: var(--dps-color-primary-container, #eaddff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+        /* Login required */
+        .dps-v2-login-required {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: var(--dps-color-surface-container, #f3edf7);
+            border-radius: 28px;
+            max-width: 480px;
+            margin: 2rem auto;
+        }
+        .dps-v2-login-required__icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        /* Appointment type selector */
+        .dps-v2-type-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .dps-v2-type-selector__option {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            border: 2px solid var(--dps-color-outline-variant, #cac4d0);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            background: transparent;
+            transition: all 0.2s;
+        }
+        .dps-v2-type-selector__option--active {
+            border-color: var(--dps-color-primary, #6750a4);
+            background: var(--dps-color-primary-container, #eaddff);
+            color: var(--dps-color-on-primary-container, #21005d);
+        }
+        /* Summary (confirmation step) */
+        .dps-v2-summary {
+            background: var(--dps-color-surface-container-low, #f7f2fa);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        .dps-v2-summary__section {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--dps-color-outline-variant, #cac4d0);
+        }
+        .dps-v2-summary__section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .dps-v2-summary__label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--dps-color-on-surface-variant, #49454f);
+            margin-bottom: 0.375rem;
+        }
+        .dps-v2-summary__value {
+            font-size: 1rem;
+            color: var(--dps-color-on-surface, #1c1b1f);
+        }
+        /* Navigation */
+        .dps-v2-booking__nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--dps-color-outline-variant, #cac4d0);
+        }
+        /* Search */
+        .dps-v2-search {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .dps-v2-search__input {
+            flex: 1;
+            padding: 0.875rem 1rem;
+            border: 1px solid var(--dps-color-outline, #79747e);
+            border-radius: var(--dps-radius-xs, 4px);
+            font-size: 1rem;
+        }
+        .dps-v2-search__button {
+            padding: 0.875rem 1.25rem;
+            background: var(--dps-color-primary, #6750a4);
+            color: #fff;
+            border: none;
+            border-radius: 100px;
+            cursor: pointer;
+        }
+        /* Alert */
+        .dps-v2-alert {
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+        .dps-v2-alert--info {
+            background: var(--dps-color-primary-container, #eaddff);
+            color: var(--dps-color-on-primary-container, #21005d);
+        }
+        /* Admin deprecation notice preview */
+        .admin-notice-preview {
+            background: #fff;
+            border: 1px solid #c3c4c7;
+            border-left: 4px solid #dba617;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 2px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .admin-notice-preview strong { color: #1d2327; }
+        .admin-notice-preview code { background: #f0f0f1; padding: 2px 6px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<div class="preview-container">
+
+    <div class="preview-header">
+        <h1>🐾 desi.pet Frontend V2 — Preview</h1>
+        <p>Material 3 Expressive · Módulos Nativos · Fase 7 Completa</p>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- REGISTRATION V2 -->
+    <!-- ================================================================ -->
+    <div class="section-divider">
+        <h2>📋 Cadastro V2 — [dps_registration_v2]</h2>
+        <p>Formulário nativo M3 de cadastro de clientes e pets</p>
+    </div>
+
+    <div class="dps-v2-registration" data-theme="light">
+        <div class="dps-v2-registration__header">
+            <h2 class="dps-v2-typescale-headline-large">Cadastre-se</h2>
+            <p class="dps-v2-typescale-body-large dps-v2-color-on-surface-variant">
+                Preencha os dados abaixo para criar sua conta
+            </p>
+        </div>
+
+        <form class="dps-v2-registration__form" novalidate onsubmit="return false">
+            <!-- Client Data Section -->
+            <div class="dps-v2-section-header">
+                <div class="dps-v2-section-header__icon">👤</div>
+                <div>
+                    <h3 class="dps-v2-typescale-headline-medium" style="margin:0">Dados Pessoais</h3>
+                </div>
+            </div>
+
+            <div class="dps-v2-form-grid">
+                <div class="dps-v2-field dps-v2-field--required dps-v2-form-grid--full">
+                    <label class="dps-v2-field__label" for="reg-name">Nome completo</label>
+                    <input type="text" id="reg-name" class="dps-v2-field__input" placeholder="Digite seu nome completo" value="Maria Silva Santos">
+                </div>
+                <div class="dps-v2-field dps-v2-field--required">
+                    <label class="dps-v2-field__label" for="reg-email">E-mail</label>
+                    <input type="email" id="reg-email" class="dps-v2-field__input" placeholder="seu@email.com" value="maria@email.com">
+                </div>
+                <div class="dps-v2-field dps-v2-field--required">
+                    <label class="dps-v2-field__label" for="reg-phone">Telefone</label>
+                    <input type="tel" id="reg-phone" class="dps-v2-field__input" placeholder="(XX) XXXXX-XXXX" value="(41) 99123-4567">
+                </div>
+                <div class="dps-v2-field dps-v2-field--required">
+                    <label class="dps-v2-field__label" for="reg-cpf">CPF</label>
+                    <input type="text" id="reg-cpf" class="dps-v2-field__input" placeholder="XXX.XXX.XXX-XX" value="123.456.789-09">
+                </div>
+                <div class="dps-v2-field">
+                    <label class="dps-v2-field__label" for="reg-address">Endereço</label>
+                    <input type="text" id="reg-address" class="dps-v2-field__input" placeholder="Rua, número, bairro" value="Rua das Flores, 123 - Centro">
+                </div>
+            </div>
+
+            <!-- Pet Data Section -->
+            <div class="dps-v2-section-header" style="margin-top: 1.5rem;">
+                <div class="dps-v2-section-header__icon">🐕</div>
+                <div>
+                    <h3 class="dps-v2-typescale-headline-medium" style="margin:0">Pets</h3>
+                </div>
+            </div>
+
+            <div class="dps-v2-pet-entry">
+                <div class="dps-v2-pet-entry__header">
+                    <span class="dps-v2-pet-entry__title">Pet 1</span>
+                    <button type="button" class="dps-v2-pet-entry__remove">✕ Remover</button>
+                </div>
+                <div class="dps-v2-form-grid">
+                    <div class="dps-v2-field dps-v2-field--required">
+                        <label class="dps-v2-field__label">Nome do Pet</label>
+                        <input type="text" class="dps-v2-field__input" value="Luna">
+                    </div>
+                    <div class="dps-v2-field dps-v2-field--required">
+                        <label class="dps-v2-field__label">Espécie</label>
+                        <select class="dps-v2-field__select">
+                            <option>Cão</option>
+                            <option>Gato</option>
+                        </select>
+                    </div>
+                    <div class="dps-v2-field">
+                        <label class="dps-v2-field__label">Raça</label>
+                        <input type="text" class="dps-v2-field__input" value="Golden Retriever" list="breeds">
+                    </div>
+                    <div class="dps-v2-field">
+                        <label class="dps-v2-field__label">Porte</label>
+                        <select class="dps-v2-field__select">
+                            <option>Pequeno</option>
+                            <option>Médio</option>
+                            <option selected>Grande</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <button type="button" class="dps-v2-button dps-v2-button--secondary">+ Adicionar outro pet</button>
+            </div>
+
+            <!-- Marketing opt-in -->
+            <div class="dps-v2-field dps-v2-field--checkbox">
+                <label class="dps-v2-field__checkbox-label">
+                    <input type="checkbox" class="dps-v2-field__checkbox" checked>
+                    <span class="dps-v2-field__checkbox-text">Desejo receber novidades e promoções</span>
+                </label>
+            </div>
+
+            <!-- Submit -->
+            <div class="dps-v2-form-actions">
+                <button type="submit" class="dps-v2-button dps-v2-button--primary">
+                    Cadastrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Registration Success -->
+    <div class="section-divider" style="margin-top: 3rem;">
+        <h2>✅ Cadastro V2 — Tela de Sucesso</h2>
+        <p>Exibida após cadastro bem-sucedido</p>
+    </div>
+
+    <div class="dps-v2-registration" data-theme="light">
+        <div class="dps-v2-success">
+            <div class="dps-v2-success__icon">✅</div>
+            <h2 class="dps-v2-typescale-headline-large">Cadastro Realizado!</h2>
+            <p class="dps-v2-typescale-body-large" style="color: var(--dps-color-on-surface-variant, #49454f);">
+                Seu cadastro foi criado com sucesso. Verifique seu e-mail para confirmar a conta.
+            </p>
+            <div style="margin-top: 1.5rem;">
+                <a href="#" class="dps-v2-button dps-v2-button--primary">Agendar Serviço</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- BOOKING V2 -->
+    <!-- ================================================================ -->
+    <div class="section-divider" style="margin-top: 3rem;">
+        <h2>📅 Agendamento V2 — [dps_booking_v2]</h2>
+        <p>Wizard nativo M3 de agendamento de serviços (5 steps)</p>
+    </div>
+
+    <!-- Step 1: Client Selection -->
+    <div class="dps-v2-booking" data-theme="light" data-step="1">
+        <div class="dps-v2-booking__header">
+            <h2 class="dps-v2-typescale-headline-large">Agendar Serviço</h2>
+        </div>
+
+        <nav class="dps-v2-booking__progress">
+            <ol class="dps-v2-wizard-steps">
+                <li class="dps-v2-wizard-steps__item dps-v2-wizard-steps__item--active" aria-current="step">
+                    <span class="dps-v2-wizard-steps__number">1</span>
+                    <span class="dps-v2-wizard-steps__label">Cliente</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item">
+                    <span class="dps-v2-wizard-steps__number">2</span>
+                    <span class="dps-v2-wizard-steps__label">Pet</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item">
+                    <span class="dps-v2-wizard-steps__number">3</span>
+                    <span class="dps-v2-wizard-steps__label">Serviço</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item">
+                    <span class="dps-v2-wizard-steps__number">4</span>
+                    <span class="dps-v2-wizard-steps__label">Data/Hora</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item">
+                    <span class="dps-v2-wizard-steps__number">5</span>
+                    <span class="dps-v2-wizard-steps__label">Confirmação</span>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="dps-v2-section-header">
+            <div class="dps-v2-section-header__icon">🔍</div>
+            <div>
+                <h3 class="dps-v2-typescale-headline-medium" style="margin:0">Buscar Cliente</h3>
+            </div>
+        </div>
+
+        <div class="dps-v2-search">
+            <input type="tel" class="dps-v2-search__input" placeholder="Telefone do cliente (ex: 41991234567)" value="(41) 99123-4567">
+            <button type="button" class="dps-v2-search__button">Buscar</button>
+        </div>
+
+        <div class="dps-v2-cards-grid">
+            <div class="dps-v2-selectable-card dps-v2-selectable-card--selected">
+                <div class="dps-v2-selectable-card__info">
+                    <div class="dps-v2-selectable-card__name">Maria Silva Santos</div>
+                    <div class="dps-v2-selectable-card__detail">(41) 99123-4567 · maria@email.com</div>
+                </div>
+                <span>✓</span>
+            </div>
+        </div>
+
+        <div class="dps-v2-booking__nav">
+            <div></div>
+            <button type="button" class="dps-v2-button dps-v2-button--primary">Próximo →</button>
+        </div>
+    </div>
+
+    <!-- Step 3: Service Selection -->
+    <div class="section-divider" style="margin-top: 2rem;">
+        <h2>📅 Booking V2 — Step 3: Serviços</h2>
+        <p>Seleção de serviços com preços por porte</p>
+    </div>
+
+    <div class="dps-v2-booking" data-theme="light" data-step="3">
+        <nav class="dps-v2-booking__progress">
+            <ol class="dps-v2-wizard-steps">
+                <li class="dps-v2-wizard-steps__item dps-v2-wizard-steps__item--completed">
+                    <span class="dps-v2-wizard-steps__number">✓</span>
+                    <span class="dps-v2-wizard-steps__label">Cliente</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item dps-v2-wizard-steps__item--completed">
+                    <span class="dps-v2-wizard-steps__number">✓</span>
+                    <span class="dps-v2-wizard-steps__label">Pet</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item dps-v2-wizard-steps__item--active" aria-current="step">
+                    <span class="dps-v2-wizard-steps__number">3</span>
+                    <span class="dps-v2-wizard-steps__label">Serviço</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item">
+                    <span class="dps-v2-wizard-steps__number">4</span>
+                    <span class="dps-v2-wizard-steps__label">Data/Hora</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item">
+                    <span class="dps-v2-wizard-steps__number">5</span>
+                    <span class="dps-v2-wizard-steps__label">Confirmação</span>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="dps-v2-section-header">
+            <div class="dps-v2-section-header__icon">✂️</div>
+            <div>
+                <h3 class="dps-v2-typescale-headline-medium" style="margin:0">Selecione os Serviços</h3>
+            </div>
+        </div>
+
+        <div class="dps-v2-cards-grid">
+            <div class="dps-v2-selectable-card dps-v2-selectable-card--selected">
+                <div class="dps-v2-selectable-card__info">
+                    <div class="dps-v2-selectable-card__name">Banho Completo</div>
+                    <div class="dps-v2-selectable-card__detail">Inclui shampoo, condicionador e secagem</div>
+                </div>
+                <span class="dps-v2-selectable-card__price">R$ 65,00</span>
+            </div>
+            <div class="dps-v2-selectable-card dps-v2-selectable-card--selected">
+                <div class="dps-v2-selectable-card__info">
+                    <div class="dps-v2-selectable-card__name">Tosa Higiênica</div>
+                    <div class="dps-v2-selectable-card__detail">Tosa de patas, barriga e rosto</div>
+                </div>
+                <span class="dps-v2-selectable-card__price">R$ 35,00</span>
+            </div>
+            <div class="dps-v2-selectable-card">
+                <div class="dps-v2-selectable-card__info">
+                    <div class="dps-v2-selectable-card__name">Hidratação</div>
+                    <div class="dps-v2-selectable-card__detail">Tratamento profundo para pelagem</div>
+                </div>
+                <span class="dps-v2-selectable-card__price">R$ 45,00</span>
+            </div>
+            <div class="dps-v2-selectable-card">
+                <div class="dps-v2-selectable-card__info">
+                    <div class="dps-v2-selectable-card__name">Corte de Unhas</div>
+                    <div class="dps-v2-selectable-card__detail">Corte seguro e profissional</div>
+                </div>
+                <span class="dps-v2-selectable-card__price">R$ 20,00</span>
+            </div>
+        </div>
+
+        <div class="dps-v2-running-total">
+            <span class="dps-v2-running-total__label">Total parcial:</span>
+            <span class="dps-v2-running-total__value">R$ 100,00</span>
+        </div>
+
+        <div class="dps-v2-booking__nav">
+            <button type="button" class="dps-v2-button dps-v2-button--secondary">← Anterior</button>
+            <button type="button" class="dps-v2-button dps-v2-button--primary">Próximo →</button>
+        </div>
+    </div>
+
+    <!-- Step 4: Date/Time -->
+    <div class="section-divider" style="margin-top: 2rem;">
+        <h2>📅 Booking V2 — Step 4: Data/Hora</h2>
+        <p>Seleção de data, horário e tipo de agendamento</p>
+    </div>
+
+    <div class="dps-v2-booking" data-theme="light" data-step="4">
+        <nav class="dps-v2-booking__progress">
+            <ol class="dps-v2-wizard-steps">
+                <li class="dps-v2-wizard-steps__item dps-v2-wizard-steps__item--completed">
+                    <span class="dps-v2-wizard-steps__number">✓</span>
+                    <span class="dps-v2-wizard-steps__label">Cliente</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item dps-v2-wizard-steps__item--completed">
+                    <span class="dps-v2-wizard-steps__number">✓</span>
+                    <span class="dps-v2-wizard-steps__label">Pet</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item dps-v2-wizard-steps__item--completed">
+                    <span class="dps-v2-wizard-steps__number">✓</span>
+                    <span class="dps-v2-wizard-steps__label">Serviço</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item dps-v2-wizard-steps__item--active" aria-current="step">
+                    <span class="dps-v2-wizard-steps__number">4</span>
+                    <span class="dps-v2-wizard-steps__label">Data/Hora</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item">
+                    <span class="dps-v2-wizard-steps__number">5</span>
+                    <span class="dps-v2-wizard-steps__label">Confirmação</span>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="dps-v2-type-selector">
+            <div class="dps-v2-type-selector__option dps-v2-type-selector__option--active">Avulso</div>
+            <div class="dps-v2-type-selector__option">Assinatura</div>
+            <div class="dps-v2-type-selector__option">Retroativo</div>
+        </div>
+
+        <div class="dps-v2-form-grid">
+            <div class="dps-v2-field dps-v2-field--required">
+                <label class="dps-v2-field__label">Data</label>
+                <input type="date" class="dps-v2-field__input" value="2026-02-15">
+            </div>
+            <div class="dps-v2-field">
+                <label class="dps-v2-field__label">Observações</label>
+                <input type="text" class="dps-v2-field__input" placeholder="Notas adicionais...">
+            </div>
+        </div>
+
+        <div class="dps-v2-field dps-v2-field--required" style="margin-top: 0.5rem;">
+            <label class="dps-v2-field__label">Horário disponível</label>
+        </div>
+
+        <div class="dps-v2-time-slots">
+            <div class="dps-v2-time-slot">08:00</div>
+            <div class="dps-v2-time-slot">08:30</div>
+            <div class="dps-v2-time-slot">09:00</div>
+            <div class="dps-v2-time-slot dps-v2-time-slot--selected">09:30</div>
+            <div class="dps-v2-time-slot">10:00</div>
+            <div class="dps-v2-time-slot">10:30</div>
+            <div class="dps-v2-time-slot">11:00</div>
+            <div class="dps-v2-time-slot">11:30</div>
+            <div class="dps-v2-time-slot">13:00</div>
+            <div class="dps-v2-time-slot">13:30</div>
+            <div class="dps-v2-time-slot">14:00</div>
+            <div class="dps-v2-time-slot">14:30</div>
+        </div>
+
+        <div class="dps-v2-booking__nav">
+            <button type="button" class="dps-v2-button dps-v2-button--secondary">← Anterior</button>
+            <button type="button" class="dps-v2-button dps-v2-button--primary">Próximo →</button>
+        </div>
+    </div>
+
+    <!-- Step 5: Confirmation -->
+    <div class="section-divider" style="margin-top: 2rem;">
+        <h2>📅 Booking V2 — Step 5: Confirmação</h2>
+        <p>Resumo completo antes de confirmar o agendamento</p>
+    </div>
+
+    <div class="dps-v2-booking" data-theme="light" data-step="5">
+        <nav class="dps-v2-booking__progress">
+            <ol class="dps-v2-wizard-steps">
+                <li class="dps-v2-wizard-steps__item dps-v2-wizard-steps__item--completed">
+                    <span class="dps-v2-wizard-steps__number">✓</span>
+                    <span class="dps-v2-wizard-steps__label">Cliente</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item dps-v2-wizard-steps__item--completed">
+                    <span class="dps-v2-wizard-steps__number">✓</span>
+                    <span class="dps-v2-wizard-steps__label">Pet</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item dps-v2-wizard-steps__item--completed">
+                    <span class="dps-v2-wizard-steps__number">✓</span>
+                    <span class="dps-v2-wizard-steps__label">Serviço</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item dps-v2-wizard-steps__item--completed">
+                    <span class="dps-v2-wizard-steps__number">✓</span>
+                    <span class="dps-v2-wizard-steps__label">Data/Hora</span>
+                </li>
+                <li class="dps-v2-wizard-steps__item dps-v2-wizard-steps__item--active" aria-current="step">
+                    <span class="dps-v2-wizard-steps__number">5</span>
+                    <span class="dps-v2-wizard-steps__label">Confirmação</span>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="dps-v2-section-header">
+            <div class="dps-v2-section-header__icon">📋</div>
+            <div>
+                <h3 class="dps-v2-typescale-headline-medium" style="margin:0">Resumo do Agendamento</h3>
+            </div>
+        </div>
+
+        <div class="dps-v2-summary">
+            <div class="dps-v2-summary__section">
+                <div class="dps-v2-summary__label">Cliente</div>
+                <div class="dps-v2-summary__value">Maria Silva Santos — (41) 99123-4567</div>
+            </div>
+            <div class="dps-v2-summary__section">
+                <div class="dps-v2-summary__label">Pet</div>
+                <div class="dps-v2-summary__value">Luna — Golden Retriever (Grande)</div>
+            </div>
+            <div class="dps-v2-summary__section">
+                <div class="dps-v2-summary__label">Serviços</div>
+                <div class="dps-v2-summary__value">Banho Completo (R$ 65,00) · Tosa Higiênica (R$ 35,00)</div>
+            </div>
+            <div class="dps-v2-summary__section">
+                <div class="dps-v2-summary__label">Data/Hora</div>
+                <div class="dps-v2-summary__value">15/02/2026 às 09:30 — Tipo: Avulso</div>
+            </div>
+            <div class="dps-v2-summary__section">
+                <div class="dps-v2-summary__label">Extras</div>
+                <div class="dps-v2-summary__value">TaxiDog: R$ 15,00</div>
+            </div>
+            <div class="dps-v2-summary__section">
+                <div class="dps-v2-summary__label">Total</div>
+                <div class="dps-v2-summary__value" style="font-size: 1.25rem; font-weight: 600; color: var(--dps-color-primary, #6750a4);">R$ 115,00</div>
+            </div>
+        </div>
+
+        <div class="dps-v2-booking__nav">
+            <button type="button" class="dps-v2-button dps-v2-button--secondary">← Anterior</button>
+            <button type="button" class="dps-v2-button dps-v2-button--primary">✓ Confirmar Agendamento</button>
+        </div>
+    </div>
+
+    <!-- Booking Success -->
+    <div class="section-divider" style="margin-top: 2rem;">
+        <h2>✅ Booking V2 — Tela de Sucesso</h2>
+        <p>Exibida após agendamento confirmado</p>
+    </div>
+
+    <div class="dps-v2-booking" data-theme="light">
+        <div class="dps-v2-success">
+            <div class="dps-v2-success__icon">🎉</div>
+            <h2 class="dps-v2-typescale-headline-large">Agendamento Confirmado!</h2>
+            <p class="dps-v2-typescale-body-large" style="color: var(--dps-color-on-surface-variant, #49454f);">
+                O agendamento #4523 foi criado com sucesso para 15/02/2026 às 09:30.
+            </p>
+            <div style="margin-top: 1.5rem;">
+                <a href="#" class="dps-v2-button dps-v2-button--primary">Ver Agendamento</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Required -->
+    <div class="section-divider" style="margin-top: 2rem;">
+        <h2>🔒 Booking V2 — Login Obrigatório</h2>
+        <p>Exibida quando usuário não está logado</p>
+    </div>
+
+    <div class="dps-v2-login-required">
+        <div class="dps-v2-login-required__icon">🔒</div>
+        <h2 class="dps-v2-typescale-headline-medium" style="margin: 0 0 0.5rem">Acesso Restrito</h2>
+        <p class="dps-v2-typescale-body-large" style="color: var(--dps-color-on-surface-variant, #49454f); margin: 0 0 1.5rem;">
+            Faça login para acessar o sistema de agendamento.
+        </p>
+        <a href="#" class="dps-v2-button dps-v2-button--primary">Fazer Login</a>
+    </div>
+
+    <!-- Admin Deprecation Notice Preview -->
+    <div class="section-divider" style="margin-top: 3rem;">
+        <h2>⚠️ Aviso Admin — Depreciação V1</h2>
+        <p>Banner exibido no painel WordPress quando módulos v1 estão ativos</p>
+    </div>
+
+    <div class="admin-notice-preview">
+        <p><strong>desi.pet Frontend — Aviso de Migração</strong></p>
+        <p>Os módulos <strong>Cadastro (v1), Agendamento (v1)</strong> utilizam o modo dual-run (v1) que será descontinuado em versão futura. Recomendamos migrar para os módulos nativos V2, que oferecem melhor desempenho, independência do legado e design M3 Expressive completo.</p>
+        <p>Consulte o guia de migração em <code>docs/implementation/FRONTEND_V2_MIGRATION_GUIDE.md</code> para instruções detalhadas.</p>
+    </div>
+
+    <!-- Settings Preview -->
+    <div class="section-divider" style="margin-top: 2rem;">
+        <h2>⚙️ Settings — Status de Coexistência</h2>
+        <p>Seção na aba Frontend do painel de configurações</p>
+    </div>
+
+    <div style="background: #fff; padding: 2rem; border-radius: 8px; border: 1px solid #c3c4c7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <h3 style="margin: 0 0 0.5rem; font-size: 1.15rem;">Status de Coexistência v1 / v2</h3>
+        <p style="color: #646970; font-size: 0.8125rem; margin: 0 0 1rem;">Os módulos v1 (dual-run) e v2 (nativo) podem coexistir. Recomenda-se migrar gradualmente para v2.</p>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #f0f0f1;">
+                <th style="text-align: left; padding: 0.75rem 0; font-weight: 600; font-size: 0.875rem; width: 200px;">Cadastro</th>
+                <td style="padding: 0.75rem 0;">
+                    <span style="color: #b26a00; font-weight: 500;">⚡ Coexistência (v1 + v2 ativos)</span>
+                </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f0f0f1;">
+                <th style="text-align: left; padding: 0.75rem 0; font-weight: 600; font-size: 0.875rem;">Agendamento</th>
+                <td style="padding: 0.75rem 0;">
+                    <span style="color: #1e7e34; font-weight: 500;">✅ Somente v2 (nativo) — migração concluída</span>
+                </td>
+            </tr>
+            <tr>
+                <th style="text-align: left; padding: 0.75rem 0; font-weight: 600; font-size: 0.875rem;">Guia de Migração</th>
+                <td style="padding: 0.75rem 0; color: #646970; font-size: 0.8125rem;">
+                    Consulte o guia completo em <code style="background: #f0f0f1; padding: 2px 6px; border-radius: 3px;">docs/implementation/FRONTEND_V2_MIGRATION_GUIDE.md</code> para migrar de v1 para v2.
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="text-align: center; padding: 3rem 0 2rem; color: var(--dps-color-on-surface-variant, #49454f); font-size: 0.875rem;">
+        <p>desi.pet by PRObst — Frontend Add-on v2.4.0 — Fase 7 Completa</p>
+        <p><a href="https://www.probst.pro" style="color: var(--dps-color-primary, #6750a4);">www.probst.pro</a></p>
+    </div>
+
+</div>
+
+</body>
+</html>

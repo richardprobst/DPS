@@ -74,6 +74,7 @@ add_action( 'init', static function (): void {
     require_once $dir . 'support/class-dps-frontend-logger.php';
     require_once $dir . 'support/class-dps-frontend-request-guard.php';
     require_once $dir . 'support/class-dps-frontend-assets.php';
+    require_once $dir . 'support/class-dps-frontend-deprecation-notice.php';
 
     // Infraestrutura
     require_once $dir . 'class-dps-frontend-feature-flags.php';
@@ -95,6 +96,9 @@ add_action( 'init', static function (): void {
     require_once $dir . 'validators/class-dps-cpf-validator.php';
     require_once $dir . 'validators/class-dps-form-validator.php';
 
+    // Validators (Fase 7.3)
+    require_once $dir . 'validators/class-dps-booking-validator.php';
+
     // Services (Fase 7.2)
     require_once $dir . 'services/class-dps-client-service.php';
     require_once $dir . 'services/class-dps-pet-service.php';
@@ -103,8 +107,18 @@ add_action( 'init', static function (): void {
     require_once $dir . 'services/class-dps-recaptcha-service.php';
     require_once $dir . 'services/class-dps-email-confirmation-service.php';
 
+    // Services (Fase 7.3)
+    require_once $dir . 'services/class-dps-appointment-service.php';
+    require_once $dir . 'services/class-dps-booking-confirmation-service.php';
+
     // Handlers (Fase 7.2)
     require_once $dir . 'handlers/class-dps-registration-handler.php';
+
+    // Handlers (Fase 7.3)
+    require_once $dir . 'handlers/class-dps-booking-handler.php';
+
+    // AJAX (Fase 7.3)
+    require_once $dir . 'ajax/class-dps-booking-ajax.php';
 
     // Módulos (v1 dual-run)
     require_once $dir . 'modules/class-dps-frontend-registration-module.php';
@@ -149,21 +163,52 @@ add_action( 'init', static function (): void {
         $logger
     );
 
+    // Services (Fase 7.3)
+    $appointmentService    = new DPS_Appointment_Service();
+    $confirmationService   = new DPS_Booking_Confirmation_Service( $logger );
+    $bookingValidator      = new DPS_Booking_Validator( $appointmentService );
+
+    // Handler (Fase 7.3)
+    $bookingHandler = new DPS_Booking_Handler(
+        $bookingValidator,
+        $appointmentService,
+        $confirmationService,
+        $bookingBridge,
+        $logger
+    );
+
+    // AJAX (Fase 7.3)
+    $bookingAjax = new DPS_Booking_Ajax(
+        $appointmentService,
+        $bookingValidator,
+        $bookingBridge,
+        $logger
+    );
+    $bookingAjax->register();
+
     // Módulos V2 com dependências injetadas
     $registrationV2 = new DPS_Frontend_Registration_V2_Module( $logger, $templateEngine, $registrationBridge );
     $registrationV2->setHandler( $registrationHandler );
     $registrationV2->setBreedProvider( $breedProvider );
     $registrationV2->setRecaptchaService( $recaptchaService );
 
+    $bookingV2 = new DPS_Frontend_Booking_V2_Module( $logger, $templateEngine, $bookingBridge );
+    $bookingV2->setHandler( $bookingHandler );
+    $bookingV2->setConfirmationService( $confirmationService );
+
     $registry = new DPS_Frontend_Module_Registry( $flags, $logger );
     $registry->add( 'registration',    new DPS_Frontend_Registration_Module( $logger ) );
     $registry->add( 'booking',         new DPS_Frontend_Booking_Module( $logger ) );
     $registry->add( 'settings',        new DPS_Frontend_Settings_Module( $logger, $flags ) );
     $registry->add( 'registration_v2', $registrationV2 );
-    $registry->add( 'booking_v2',      new DPS_Frontend_Booking_V2_Module( $logger, $templateEngine, $bookingBridge ) );
+    $registry->add( 'booking_v2',      $bookingV2 );
 
     $compatibility = new DPS_Frontend_Compatibility( $flags, $logger );
 
     $addon = new DPS_Frontend_Addon( $registry, $assets, $compatibility, $logger );
     $addon->boot();
+
+    // Aviso de depreciação do v1 (Fase 7.5)
+    $deprecationNotice = new DPS_Frontend_Deprecation_Notice( $flags, $logger );
+    $deprecationNotice->boot();
 }, 5 );

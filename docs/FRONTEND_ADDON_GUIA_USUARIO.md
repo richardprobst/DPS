@@ -1,7 +1,7 @@
 # Guia do Usuário: Frontend Add-on (desi.pet by PRObst)
 
 > **Versão**: 1.0.0  
-> **Última atualização**: 2026-02-11  
+> **Última atualização**: 2026-02-12  
 > **Autor**: PRObst  
 > **Site**: [www.probst.pro](https://www.probst.pro)
 
@@ -89,6 +89,8 @@ Após ativar o plugin, você verá:
 
 O Frontend Add-on é composto por **3 módulos independentes**, cada um controlado por uma feature flag. Você pode ativar ou desativar cada módulo conforme sua necessidade.
 
+Além disso, os **módulos nativos V2** (Fase 7) oferecem formulários 100% independentes dos add-ons legados, com implementação Material 3 Expressive nativa.
+
 ### 📋 Módulo Registration (Cadastro)
 
 **Status:** Operacional (Fase 2)  
@@ -139,6 +141,57 @@ O Frontend Add-on é composto por **3 módulos independentes**, cada um controla
 - Para gerenciar visualmente as feature flags dos módulos
 - Para verificar status de ativação e versões
 - Para administradores que preferem interface gráfica ao WP-CLI
+
+### 📋 Módulo Registration V2 (Cadastro Nativo)
+
+**Status:** Operacional (Fase 7.2)  
+**Feature Flag:** `registration_v2`  
+**Shortcode:** `[dps_registration_v2]`
+
+**O que faz:**
+- Formulário de cadastro 100% nativo M3 Expressive — não depende do add-on legado
+- Validação completa: nome, email, telefone, CPF (mod-11), pets
+- Detecção de duplicatas por telefone com override para admin
+- reCAPTCHA v3 integrado (quando habilitado)
+- Email de confirmação com token 48h
+- Integração Loyalty via Hook Bridge (código de indicação)
+- Anti-spam filter configurável
+
+**Quando usar:**
+- Para substituir o formulário legado de cadastro por implementação nativa moderna
+- Quando deseja independência total do `DPS_Registration_Addon`
+- Para sites novos que não precisam de compatibilidade retroativa
+
+> **Nota:** Pode coexistir com o módulo Registration v1 — ambos podem estar ativos em páginas diferentes.
+
+### 📅 Módulo Booking V2 (Agendamento Nativo)
+
+**Status:** Operacional (Fase 7.3)  
+**Feature Flag:** `booking_v2`  
+**Shortcode:** `[dps_booking_v2]`
+
+**O que faz:**
+- Wizard de agendamento nativo M3 com 5 steps:
+  1. **Busca e seleção de cliente** (AJAX por telefone)
+  2. **Seleção de pets** (múltiplos, com paginação)
+  3. **Seleção de serviços** (com preços por porte e total acumulado)
+  4. **Data e horário** (slots de 30min com verificação de conflitos)
+  5. **Confirmação** (resumo completo + submit)
+- 3 tipos de agendamento: avulso (simple), recorrente (subscription), retroativo (past)
+- Extras condicionais: TaxiDog (checkbox + preço) e Tosa (subscription only + preço + frequência)
+- Login obrigatório com redirecionamento automático
+- 5 endpoints AJAX com nonce + capability check
+- Hook bridge CRÍTICO: dispara `dps_base_after_save_appointment` para 8 add-ons consumidores
+- Confirmação via transient (5min TTL)
+- 100% independente do `DPS_Booking_Addon`
+- JavaScript vanilla (zero jQuery)
+
+**Quando usar:**
+- Para substituir o formulário legado de agendamento por implementação nativa moderna
+- Quando deseja independência total do `DPS_Booking_Addon`
+- Para sites novos que não precisam de compatibilidade retroativa
+
+> **Nota:** Pode coexistir com o módulo Booking v1 — ambos podem estar ativos em páginas diferentes.
 
 ---
 
@@ -256,7 +309,10 @@ Para minimizar riscos, siga esta ordem de ativação:
 
 ## Shortcodes
 
-O Frontend Add-on trabalha com shortcodes existentes, aplicando uma camada moderna de estilos e funcionalidades. Abaixo, a lista completa de shortcodes utilizados e como aplicá-los.
+O Frontend Add-on trabalha com shortcodes existentes (v1, em dual-run com legado) e novos shortcodes nativos (v2, independentes). Abaixo, a lista completa de shortcodes utilizados e como aplicá-los.
+
+> **v1 (dual-run):** `[dps_registration_form]` e `[dps_booking_form]` — envolvem o legado com surface M3  
+> **v2 (nativo):** `[dps_registration_v2]` e `[dps_booking_v2]` — implementação 100% independente
 
 ### 🔖 `[dps_registration_form]`
 
@@ -340,6 +396,118 @@ add_action( 'dps_base_appointment_fields', 'minha_funcao', 10, 1 );
 
 // Modificar campos de atribuição (tosadores, etc.)
 add_action( 'dps_base_appointment_assignment_fields', 'minha_funcao', 10, 1 );
+```
+
+---
+
+### 🔖 `[dps_registration_v2]`
+
+**Descrição:** Formulário nativo de cadastro Material 3 Expressive. **100% independente do add-on legado** — não requer `DPS_Registration_Addon`.
+
+**Módulo requerido:** Registration V2 (`registration_v2` flag habilitada)
+
+**Parâmetros:**
+| Atributo | Descrição | Padrão |
+|----------|-----------|--------|
+| `redirect_url` | URL pós-cadastro | Página de agendamento |
+| `show_pets` | Exibir seção de pets | `true` |
+| `show_marketing` | Exibir opt-in marketing | `true` |
+| `theme` | Tema visual: `light` ou `dark` | `light` |
+| `compact` | Modo compacto | `false` |
+
+**Exemplos de uso:**
+```
+[dps_registration_v2]
+[dps_registration_v2 redirect_url="/agendar" theme="dark"]
+[dps_registration_v2 show_pets="false" compact="true"]
+```
+
+**Output:**
+- Formulário nativo com validação client + server (nome, email, telefone, CPF)
+- Detecção de duplicatas por telefone
+- Repeater de pets com dataset de raças por espécie
+- reCAPTCHA v3 (quando habilitado)
+- Email de confirmação 48h
+- Integração Loyalty preservada via Hook Bridge
+
+**Onde usar:**
+- Página pública de cadastro (substitui `[dps_registration_form]`)
+- Sites novos sem add-on legado instalado
+
+**Hooks disponíveis para extensão:**
+```php
+// Antes de renderizar o formulário V2
+add_action( 'dps_registration_v2_before_render', 'minha_funcao', 10, 1 );
+
+// Após criar cliente via V2 (hook bridge dispara legado do Loyalty primeiro)
+add_action( 'dps_registration_v2_client_created', 'minha_funcao', 10, 3 );
+
+// Após criar pet via V2
+add_action( 'dps_registration_v2_pet_created', 'minha_funcao', 10, 3 );
+```
+
+---
+
+### 🔖 `[dps_booking_v2]`
+
+**Descrição:** Wizard nativo de agendamento Material 3 Expressive com 5 steps. **100% independente do add-on legado** — não requer `DPS_Booking_Addon`.
+
+**Módulo requerido:** Booking V2 (`booking_v2` flag habilitada)  
+**Requisito:** Usuário logado com capability `manage_options`, `dps_manage_clients`, `dps_manage_pets` ou `dps_manage_appointments`
+
+**Parâmetros:**
+| Atributo | Descrição | Padrão |
+|----------|-----------|--------|
+| `appointment_type` | Tipo: `simple`, `subscription` ou `past` | `simple` |
+| `client_id` | ID do cliente pré-selecionado | (vazio) |
+| `service_id` | ID do serviço pré-selecionado | (vazio) |
+| `start_step` | Step inicial do wizard (1-5) | `1` |
+| `show_progress` | Exibir barra de progresso | `true` |
+| `theme` | Tema visual: `light` ou `dark` | `light` |
+| `compact` | Modo compacto | `false` |
+| `edit_id` | ID de agendamento para edição | (vazio) |
+
+**Exemplos de uso:**
+```
+[dps_booking_v2]
+[dps_booking_v2 appointment_type="subscription"]
+[dps_booking_v2 client_id="123" start_step="2"]
+[dps_booking_v2 theme="dark" compact="true"]
+```
+
+**Output:**
+- Wizard 5 steps com barra de progresso e navegação
+- Step 1: Busca de cliente por telefone (AJAX)
+- Step 2: Seleção de pets (múltiplos, com paginação)
+- Step 3: Seleção de serviços com preços por porte
+- Step 4: Data/hora com slots e verificação de conflitos
+- Step 5: Extras (TaxiDog, Tosa para subscription) + Confirmação final
+- Tela de sucesso pós-criação
+
+**Onde usar:**
+- Página administrativa de agendamento (substitui `[dps_booking_form]`)
+- Portal do cliente (área autenticada)
+
+**Hooks disponíveis para extensão:**
+```php
+// Antes de renderizar o wizard V2
+add_action( 'dps_booking_v2_before_render', 'minha_funcao', 10, 1 );
+
+// Ao renderizar step do wizard
+add_action( 'dps_booking_v2_step_render', 'minha_funcao', 10, 2 );
+
+// Filtro de validação por step
+add_filter( 'dps_booking_v2_step_validate', 'minha_funcao', 10, 3 );
+
+// Antes de criar agendamento
+add_action( 'dps_booking_v2_before_process', 'minha_funcao', 10, 1 );
+
+// Após criar agendamento V2
+add_action( 'dps_booking_v2_appointment_created', 'minha_funcao', 10, 2 );
+
+// CRÍTICO: Hook bridge para 8 add-ons (disparado automaticamente)
+// Stock, Payment, Groomers, Calendar, Communications, Push, Services, Booking
+add_action( 'dps_base_after_save_appointment', 'minha_funcao', 10, 2 );
 ```
 
 ---
@@ -1000,7 +1168,7 @@ Não há dependência entre módulos.
 
 ### 9. Roadmap futuro do Frontend Add-on
 
-**Resposta:** O add-on seguiu um plano em **6 fases**:
+**Resposta:** O add-on seguiu um plano em **6 fases** + a **Fase 7** de implementação nativa:
 
 - ✅ **Fase 1:** Fundação (arquitetura, feature flags, assets) — Concluída
 - ✅ **Fase 2:** Módulo Registration (dual-run) — Concluída
@@ -1008,29 +1176,57 @@ Não há dependência entre módulos.
 - ✅ **Fase 4:** Módulo Settings (aba admin) — Concluída
 - ✅ **Fase 5:** Consolidação e documentação — Concluída
 - ✅ **Fase 6:** Governança de depreciação — Concluída
+- ✅ **Fase 7.1:** Preparação V2 (abstracts, template engine, hook bridges, componentes M3) — Concluída
+- ✅ **Fase 7.2:** Registration V2 nativo (formulário independente) — Concluída
+- ✅ **Fase 7.3:** Booking V2 nativo (wizard 5-step independente) — Concluída
+- ✅ **Fase 7.4:** Coexistência e migração (toggle admin, documentação, telemetria) — Concluída
+- ✅ **Fase 7.5:** Depreciação do dual-run (aviso admin implementado) — Código concluído
 
-**Próximos passos (futuro):**
+**Status atual:** Todo o código das Fases 1–7 está implementado. A remoção efetiva dos módulos v1 (parte final da Fase 7.5) aguarda pré-requisitos de produção:
+- 90+ dias de V2 em produção estável
+- 80%+ dos sites migraram para V2
+- Zero bugs críticos em V2
+- Telemetria confirma uso < 5% de V1
+
+**Próximos passos:**
+- Ativar módulos V2 em produção e monitorar telemetria
 - Observação de telemetria de uso (180 dias mínimo)
-- Decisão sobre depreciação de add-ons legados
-- Possível migração completa da lógica para Frontend Add-on
+- Decisão sobre remoção dos add-ons legados (conforme FRONTEND_DEPRECATION_POLICY.md)
 - Novos módulos (portal do cliente, relatórios, etc.)
 
-Consulte `docs/refactoring/FRONTEND_ADDON_PHASED_ROADMAP.md` para detalhes.
+Consulte `docs/refactoring/FRONTEND_NATIVE_IMPLEMENTATION_PLAN.md` para detalhes da Fase 7.
 
 ---
 
-### 10. Onde encontrar mais documentação?
+### 10. O que é o aviso de depreciação no admin?
+
+**Resposta:** Quando módulos v1 (Cadastro v1 ou Agendamento v1) estão ativos, um banner amarelo aparece no painel administrativo do WordPress com o título **"desi.pet Frontend — Aviso de Migração"**.
+
+Este aviso:
+- Informa que o modo dual-run (v1) será descontinuado em versão futura
+- Recomenda migrar para os módulos nativos V2
+- Inclui link para o guia de migração
+- Pode ser dispensado (clique no "X") — volta após 30 dias
+- Só aparece para administradores (`manage_options`)
+
+**Para remover o aviso permanentemente:** desabilite os módulos v1 e use apenas os módulos v2 (`registration_v2` e `booking_v2`).
+
+---
+
+### 11. Onde encontrar mais documentação?
 
 **Resposta:** Documentação completa disponível:
 
 | Documento | Propósito |
 |-----------|-----------|
 | `docs/GUIA_SISTEMA_DPS.md` | Guia geral do sistema completo |
+| `docs/implementation/FRONTEND_V2_MIGRATION_GUIDE.md` | Guia de migração v1 → v2 |
 | `docs/implementation/FRONTEND_ROLLOUT_GUIDE.md` | Guia de rollout por ambiente |
 | `docs/implementation/FRONTEND_RUNBOOK.md` | Runbook de incidentes e rollback |
 | `docs/qa/FRONTEND_COMPATIBILITY_MATRIX.md` | Compatibilidade com outros add-ons |
 | `docs/qa/FRONTEND_REMOVAL_READINESS.md` | Checklist de remoção futura |
 | `docs/refactoring/FRONTEND_ADDON_PHASED_ROADMAP.md` | Roadmap completo das 6 fases |
+| `docs/refactoring/FRONTEND_NATIVE_IMPLEMENTATION_PLAN.md` | Plano da Fase 7 (implementação nativa V2) |
 | `docs/refactoring/FRONTEND_DEPRECATION_POLICY.md` | Política de depreciação |
 | `docs/visual/VISUAL_STYLE_GUIDE.md` | Guia de estilos visuais M3 |
 | `ANALYSIS.md` | Arquitetura e contratos internos |
@@ -1054,6 +1250,6 @@ Frontend Add-on é parte do **desi.pet by PRObst** e é licenciado sob GPL-2.0+.
 
 ---
 
-**Última atualização:** 2026-02-11  
+**Última atualização:** 2026-02-12  
 **Versão do documento:** 1.0.0  
 **Versão do add-on:** 1.5.0 (todas as 6 fases concluídas)

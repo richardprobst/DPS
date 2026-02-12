@@ -192,6 +192,8 @@ final class DPS_Frontend_Settings_Module {
                 </tbody>
             </table>
 
+            <?php $this->renderCoexistenceStatus( $all_flags ); ?>
+
             <h3><?php esc_html_e( 'Telemetria de Uso', 'dps-frontend-addon' ); ?></h3>
             <p class="description">
                 <?php esc_html_e( 'Contadores de renderização de shortcodes via módulo frontend. Usados para decisões de depreciação futura.', 'dps-frontend-addon' ); ?>
@@ -257,5 +259,78 @@ final class DPS_Frontend_Settings_Module {
                 __( 'Configurações do Frontend atualizadas com sucesso.', 'dps-frontend-addon' )
             );
         }
+    }
+
+    /**
+     * Renderiza indicadores de coexistência v1/v2 e link para guia de migração.
+     *
+     * Exibe estado atual (v1 only, v2 only, coexistência, ou nenhum)
+     * para Registration e Booking, com recomendação de migração.
+     *
+     * @since 2.3.0
+     *
+     * @param array<string, bool> $flags Feature flags ativas.
+     */
+    private function renderCoexistenceStatus( array $flags ): void {
+        $pairs = [
+            [
+                'label' => __( 'Cadastro', 'dps-frontend-addon' ),
+                'v1'    => ! empty( $flags['registration'] ),
+                'v2'    => ! empty( $flags['registration_v2'] ),
+            ],
+            [
+                'label' => __( 'Agendamento', 'dps-frontend-addon' ),
+                'v1'    => ! empty( $flags['booking'] ),
+                'v2'    => ! empty( $flags['booking_v2'] ),
+            ],
+        ];
+        ?>
+        <h3><?php esc_html_e( 'Status de Coexistência v1 / v2', 'dps-frontend-addon' ); ?></h3>
+        <p class="description">
+            <?php esc_html_e( 'Os módulos v1 (dual-run) e v2 (nativo) podem coexistir. Recomenda-se migrar gradualmente para v2.', 'dps-frontend-addon' ); ?>
+        </p>
+        <table class="form-table" role="presentation">
+            <tbody>
+                <?php foreach ( $pairs as $pair ) :
+                    if ( $pair['v1'] && $pair['v2'] ) {
+                        $status = '⚡ ' . __( 'Coexistência (v1 + v2 ativos)', 'dps-frontend-addon' );
+                        $style  = 'color: #b26a00;';
+                    } elseif ( $pair['v2'] ) {
+                        $status = '✅ ' . __( 'Somente v2 (nativo) — migração concluída', 'dps-frontend-addon' );
+                        $style  = 'color: #1e7e34;';
+                    } elseif ( $pair['v1'] ) {
+                        $status = '📦 ' . __( 'Somente v1 (dual-run) — considere migrar para v2', 'dps-frontend-addon' );
+                        $style  = 'color: #49454f;';
+                    } else {
+                        $status = '⏸️ ' . __( 'Nenhum ativo', 'dps-frontend-addon' );
+                        $style  = 'color: #938f99;';
+                    }
+                ?>
+                <tr>
+                    <th scope="row"><?php echo esc_html( $pair['label'] ); ?></th>
+                    <td>
+                        <span style="<?php echo esc_attr( $style ); ?>; font-weight: 500;">
+                            <?php echo esc_html( $status ); ?>
+                        </span>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'Guia de Migração', 'dps-frontend-addon' ); ?></th>
+                    <td>
+                        <p class="description">
+                            <?php
+                            printf(
+                                /* translators: %s: file path */
+                                esc_html__( 'Consulte o guia completo em %s para migrar de v1 para v2.', 'dps-frontend-addon' ),
+                                '<code>docs/implementation/FRONTEND_V2_MIGRATION_GUIDE.md</code>'
+                            );
+                            ?>
+                        </p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <?php
     }
 }

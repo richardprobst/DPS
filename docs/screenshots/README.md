@@ -12,6 +12,7 @@ Este diretório centraliza registros visuais padronizados do sistema DPS.
   - [Rebranding do Portal do Cliente (2026)](CLIENT_PORTAL_REBRANDING_SCREENSHOTS.md)
 - **Capturas por data**
   - [2026-02-11 — Agenda, Cadastro e Agendamento](2026-02-11/SCREENSHOTS_2026-02-11.md)
+  - [2026-02-12 — Frontend V2 Completo (Registration V2 + Booking V2 Wizard + Admin)](2026-02-12/SCREENSHOTS_2026-02-12.md)
 
 ## Regras obrigatórias para novas mudanças visuais
 

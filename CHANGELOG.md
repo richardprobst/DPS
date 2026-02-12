@@ -196,6 +196,82 @@ Antes de criar uma nova versão oficial:
 - **CSS expandido** (`registration-v2.css`): grid layout para campos, pet entry cards, repeater actions, success state, compact mode, responsive.
 - **Bootstrap atualizado**: carrega validators, services, handler com DI completa.
 
+**Frontend Add-on v2.2.0 — Fase 7.3 Booking V2 (Implementação Nativa)**
+
+- **Services**:
+  - `DPS_Appointment_Service`: CRUD completo para post type `dps_agendamento`. Cria agendamentos com 16+ metas padronizadas (client, pets, services, pricing, extras). Verificação de conflitos por data/hora. Busca por cliente. Versionamento via `_dps_appointment_version`.
+  - `DPS_Booking_Confirmation_Service`: confirmação via transient (`dps_booking_confirmation_{user_id}`, TTL 5min). Store, retrieve, clear, isConfirmed.
+- **Validators**:
+  - `DPS_Booking_Validator`: validação multi-step (5 steps) — cliente (ID obrigatório), pets (array não vazio), serviços (array não vazio), data/hora (formato, passado, conflitos), confirmação. Validação de extras (TaxiDog preço ≥ 0, Tosa preço ≥ 0 e ocorrência > 0 quando habilitada). Tipo `past` permite datas passadas.
+- **Handler**:
+  - `DPS_Booking_Handler`: pipeline completo — beforeProcess → validação → extras → buildMeta → criação appointment → confirmação transient → hook CRÍTICO `dps_base_after_save_appointment` (8 add-ons: Stock, Payment, Groomers, Calendar, Communications, Push, Services, Booking) → afterProcess. 100% independente do legado.
+- **AJAX Endpoints** (`DPS_Booking_Ajax`):
+  - `dps_booking_search_client`: busca clientes por telefone (LIKE com dígitos normalizados). Retorna id, name, phone, email.
+  - `dps_booking_get_pets`: lista pets do cliente com paginação. Retorna id, name, species, breed, size.
+  - `dps_booking_get_services`: serviços ativos com preços por porte (base, small, medium, large, category).
+  - `dps_booking_get_slots`: horários disponíveis (08:00-18:00, 30min) com verificação de conflitos.
+  - `dps_booking_validate_step`: validação server-side por step com sanitização contextual.
+  - Todos com nonce + capability check (`manage_options` OU `dps_manage_clients` OU `dps_manage_pets` OU `dps_manage_appointments`).
+- **Templates nativos M3 (Wizard 5 steps)**:
+  - `form-main.php`: expandido com renderização dinâmica de steps via template engine, suporte a success state.
+  - `step-client-selection.php`: Step 1 — busca de cliente por telefone via AJAX, cards selecionáveis, hidden input client_id.
+  - `step-pet-selection.php`: Step 2 — multi-select de pets com checkboxes, paginação "Carregar mais".
+  - `step-service-selection.php`: Step 3 — seleção de serviços com preços R$, total acumulado.
+  - `step-datetime-selection.php`: Step 4 — date picker, time slots via AJAX, seletor de tipo (simple/subscription/past), notas.
+  - `step-extras.php`: Step 5a — TaxiDog (checkbox + preço), Tosa (subscription only, checkbox + preço + frequência).
+  - `step-confirmation.php`: Step 5b — resumo read-only com hidden inputs para submissão.
+  - `form-success.php`: tela de confirmação com dados do agendamento e CTA.
+- **Module atualizado**:
+  - `DPS_Frontend_Booking_V2_Module`: processa POST via handler, sanitiza dados (client, pets, services, datetime, extras), capability check, setters para DI tardia de handler/confirmationService.
+- **JavaScript nativo expandido** (`booking-v2.js`):
+  - Wizard state machine com navegação entre steps (next/prev)
+  - Atualização dinâmica de barra de progresso e URL (?step=X via pushState)
+  - AJAX via Fetch API para busca de clientes, pets, serviços e horários
+  - Debounce na busca de telefone (300ms)
+  - Running total dinâmico na seleção de serviços
+  - Toggle de extras (TaxiDog/Tosa) com visibilidade condicional
+  - Builder de resumo para confirmação
+  - XSS mitigation via escapeHtml()
+  - Zero jQuery
+- **CSS expandido** (`booking-v2.css`): step containers, search UI, selectable cards grid, time slot grid, extras cards, summary sections, running total bar, appointment type selector, loading states, navigation actions, compact mode, responsive, dark theme, `prefers-reduced-motion`.
+- **Bootstrap atualizado**: carrega validators, services, handler, AJAX com DI completa. `wp_localize_script` para ajaxUrl e nonce.
+
+**Frontend Add-on v2.3.0 — Fase 7.4 Coexistência e Migração**
+
+- **Guia de Migração** (`docs/implementation/FRONTEND_V2_MIGRATION_GUIDE.md`):
+  - Guia passo a passo completo em 7 etapas para migrar de v1 (dual-run) para v2 (nativo)
+  - Comparação detalhada de features v1 vs v2 para Registration e Booking
+  - Checklist de compatibilidade com 12 itens de verificação
+  - Plano de rollback instantâneo (swap de flags, zero perda de dados)
+  - Troubleshooting para problemas comuns de migração
+  - Configuração via WP-CLI para automação de migração
+- **Status de Coexistência v1/v2** (Settings Admin UI):
+  - Seção "Status de Coexistência v1 / v2" na aba Frontend do painel de configurações
+  - Indicador visual por módulo (Cadastro/Agendamento): 4 estados distintos com cores e ícones
+    - ✅ Somente v2 — migração concluída (verde)
+    - ⚡ Coexistência — v1 + v2 ativos (âmbar)
+    - 📦 Somente v1 — considere migrar (neutro)
+    - ⏸️ Nenhum ativo (muted)
+  - Link direto para guia de migração
+- **Telemetria v2** (já implementada):
+  - Contadores por módulo (v1 e v2) via `DPS_Frontend_Logger::track()`
+  - Exibidos na aba Settings com comparação v1 vs v2
+  - Decisões de depreciação futura baseadas nos contadores
+
+**Frontend Add-on v2.4.0 — Fase 7.5 Depreciação do Dual-Run**
+
+- **Aviso de depreciação admin** (`DPS_Frontend_Deprecation_Notice`):
+  - Banner administrativo exibido quando módulos v1 (registration e/ou booking) estão ativos
+  - Aviso dismissível por usuário (transient 30 dias)
+  - Dismiss via AJAX com nonce + capability check (`manage_options`)
+  - Mensagem inclui lista dos módulos v1 ativos e link para guia de migração
+  - Só exibe para administradores (capability `manage_options`)
+- **Documentação visual completa** (`docs/screenshots/2026-02-12/`):
+  - 7 screenshots PNG: Registration V2, Booking V2 (steps 3 e 5), sucesso, login obrigatório, aviso depreciação, status coexistência
+  - Preview HTML interativo com todas as telas V2
+  - Documento de registro `SCREENSHOTS_2026-02-12.md` com contexto, antes/depois e lista de arquivos
+- **Bootstrap atualizado**: carrega `DPS_Frontend_Deprecation_Notice` e inicializa após boot do add-on
+
 **Booking Add-on v1.3.0 — Migração M3 e Melhorias de Segurança**
 
 - **Validação granular de edição de agendamentos**: Método `can_edit_appointment()` verifica se usuário pode editar agendamento específico (criador ou admin).
