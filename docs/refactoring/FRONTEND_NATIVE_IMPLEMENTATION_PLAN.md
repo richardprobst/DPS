@@ -618,13 +618,13 @@ class DPS_Booking_Hook_Bridge {
 - **Importante:** flags v1 e v2 são independentes — ambas podem estar ativas ao mesmo tempo (coexistência)
 
 ✅ **Critérios de Aceite:**
-- [ ] Estrutura de diretórios criada (incluindo `bridges/`)
-- [ ] Classes base implementadas
-- [ ] Template engine funcional
-- [ ] 5+ componentes reutilizáveis prontos
-- [ ] Feature flags novas criadas
-- [ ] Hook Bridge base implementada e testada
-- [ ] Zero quebra de funcionalidade existente
+- [x] Estrutura de diretórios criada (incluindo `bridges/`)
+- [x] Classes base implementadas
+- [x] Template engine funcional
+- [x] 5+ componentes reutilizáveis prontos
+- [x] Feature flags novas criadas
+- [x] Hook Bridge base implementada e testada
+- [x] Zero quebra de funcionalidade existente
 
 ### Fase 7.2 — Registration V2 (Sprint 3-5)
 
@@ -1735,9 +1735,9 @@ Este plano estabelece as bases para que o Frontend Add-on atinja seu **potencial
 ---
 
 **Versão:** 1.1.0  
-**Status:** 📋 Aguardando Aprovação  
-**Próximo Milestone:** Fase 7.1 — Preparação (Sprint 1-2)  
-**Data prevista início:** A definir após aprovação  
+**Status:** 🚀 Fase 7.1 Concluída  
+**Próximo Milestone:** Fase 7.2 — Registration V2 (Sprint 3-5)  
+**Data prevista início:** A definir  
 **Revisão:** v1.1.0 — Refinamento com inventário completo de funcionalidades legadas, hook bridge detalhada, estratégia de coexistência, testes e helpers (2026-02-12)
 
 ---
