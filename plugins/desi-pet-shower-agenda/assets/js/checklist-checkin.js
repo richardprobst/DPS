@@ -16,6 +16,17 @@
 
     var cfg = DPS_Checklist_Checkin;
 
+    // Simple HTML-escaping helper to prevent XSS when inserting text into HTML strings.
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/\//g, '&#x2F;');
+    }
+
     /* ===========================
        CHECKLIST
        =========================== */
@@ -155,14 +166,21 @@
         // Remove modal existente
         $('.dps-rework-modal-overlay').remove();
 
+        // Escape dynamic text to avoid interpreting it as HTML.
+        var safeStepLabel = escapeHtml(stepLabel);
+        var safeReworkTitle = escapeHtml(cfg.messages.reworkTitle);
+        var safeReworkPlaceholder = escapeHtml(cfg.messages.reworkPlaceholder);
+        var safeCancel = escapeHtml(cfg.messages.cancel);
+        var safeConfirmRework = escapeHtml(cfg.messages.confirmRework);
+
         var html =
             '<div class="dps-rework-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dps-rework-title">' +
                 '<div class="dps-rework-modal">' +
-                    '<h4 id="dps-rework-title">🔄 ' + cfg.messages.reworkTitle + ': ' + stepLabel + '</h4>' +
-                    '<textarea id="dps-rework-reason" placeholder="' + cfg.messages.reworkPlaceholder + '"></textarea>' +
+                    '<h4 id="dps-rework-title">🔄 ' + safeReworkTitle + ': ' + safeStepLabel + '</h4>' +
+                    '<textarea id="dps-rework-reason" placeholder="' + safeReworkPlaceholder + '"></textarea>' +
                     '<div class="dps-rework-modal-actions">' +
-                        '<button class="dps-checklist-btn dps-checklist-btn--undo dps-rework-cancel" type="button">' + cfg.messages.cancel + '</button>' +
-                        '<button class="dps-checklist-btn dps-checklist-btn--rework dps-rework-confirm" type="button">' + cfg.messages.confirmRework + '</button>' +
+                        '<button class="dps-checklist-btn dps-checklist-btn--undo dps-rework-cancel" type="button">' + safeCancel + '</button>' +
+                        '<button class="dps-checklist-btn dps-checklist-btn--rework dps-rework-confirm" type="button">' + safeConfirmRework + '</button>' +
                     '</div>' +
                 '</div>' +
             '</div>';
