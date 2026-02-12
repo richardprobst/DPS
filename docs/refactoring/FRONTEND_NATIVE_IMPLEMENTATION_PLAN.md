@@ -1,6 +1,6 @@
 # Plano de Implementação Nativa — Frontend Add-on (Fase 7)
 
-> **Versão**: 1.2.0  
+> **Versão**: 1.3.0  
 > **Data**: 2026-02-12  
 > **Autor**: PRObst  
 > **Site**: [www.probst.pro](https://www.probst.pro)
@@ -853,12 +853,12 @@ class DPS_Booking_Hook_Bridge {
    - Link para guia de migração
 
 ✅ **Critérios de Aceite:**
-- [ ] v1 e v2 podem coexistir
-- [ ] Documentação de migração completa
+- [x] v1 e v2 podem coexistir
+- [x] Documentação de migração completa
 - [ ] Script de validação funcional
-- [ ] Telemetria v2 implementada
-- [ ] Admin UI para toggle v1/v2
-- [ ] Guia de troubleshooting
+- [x] Telemetria v2 implementada
+- [x] Admin UI para toggle v1/v2
+- [x] Guia de troubleshooting
 
 ### Fase 7.5 — Depreciação do Dual-Run (Sprint 13-18+)
 
@@ -1733,11 +1733,11 @@ Este plano estabelece as bases para que o Frontend Add-on atinja seu **potencial
 
 ---
 
-**Versão:** 1.2.0  
-**Status:** 🚀 Fase 7.3 Concluída  
-**Próximo Milestone:** Fase 7.4 — Coexistência e Migração (Sprint 11-12)  
-**Data prevista início:** A definir  
-**Revisão:** v1.2.0 — Fase 7.3 implementada: Booking V2 com wizard 5-step, 5 AJAX endpoints, handler, services, validator, 9 templates M3, CSS/JS nativos (2026-02-12)
+**Versão:** 1.3.0  
+**Status:** 🚀 Fase 7.4 Concluída  
+**Próximo Milestone:** Fase 7.5 — Depreciação do Dual-Run (Sprint 13-18+)  
+**Data prevista início:** Após 90+ dias de V2 em produção estável  
+**Revisão:** v1.3.0 — Fase 7.4 implementada: guia de migração, status de coexistência no admin, telemetria v2, toggle v1/v2 (2026-02-12)
 
 ---
 

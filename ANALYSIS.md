@@ -1664,7 +1664,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Hook bridge garante compatibilidade: hooks legados disparam PRIMEIRO, hooks v2 DEPOIS
 - Rollback instantâneo via toggle de flag — sem perda de dados
 
-**Introduzido em**: v1.0.0 (Fases 1–6), v2.0.0 (Fase 7.1), v2.1.0 (Fase 7.2), v2.2.0 (Fase 7.3)
+**Introduzido em**: v1.0.0 (Fases 1–6), v2.0.0 (Fase 7.1), v2.1.0 (Fase 7.2), v2.2.0 (Fase 7.3), v2.3.0 (Fase 7.4)
 
 **Documentação operacional (Fase 5)**:
 - `docs/implementation/FRONTEND_ROLLOUT_GUIDE.md` — guia de ativação por ambiente
@@ -1679,6 +1679,10 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 **Documentação de implementação nativa (Fase 7)**:
 - `docs/refactoring/FRONTEND_NATIVE_IMPLEMENTATION_PLAN.md` — plano completo com inventário legado, hook bridge, templates, estratégia de migração
+
+**Documentação de coexistência e migração (Fase 7.4)**:
+- `docs/implementation/FRONTEND_V2_MIGRATION_GUIDE.md` — guia passo a passo de migração v1→v2 (7 etapas, comparação de features, checklist, rollback, troubleshooting, WP-CLI)
+- Seção "Status de Coexistência v1/v2" na aba Settings com indicadores visuais por módulo
 
 **Observações**:
 - PHP 8.4 moderno: constructor promotion, readonly properties, typed properties, return types

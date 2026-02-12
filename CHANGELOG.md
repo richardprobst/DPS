@@ -236,6 +236,28 @@ Antes de criar uma nova versão oficial:
 - **CSS expandido** (`booking-v2.css`): step containers, search UI, selectable cards grid, time slot grid, extras cards, summary sections, running total bar, appointment type selector, loading states, navigation actions, compact mode, responsive, dark theme, `prefers-reduced-motion`.
 - **Bootstrap atualizado**: carrega validators, services, handler, AJAX com DI completa. `wp_localize_script` para ajaxUrl e nonce.
 
+**Frontend Add-on v2.3.0 — Fase 7.4 Coexistência e Migração**
+
+- **Guia de Migração** (`docs/implementation/FRONTEND_V2_MIGRATION_GUIDE.md`):
+  - Guia passo a passo completo em 7 etapas para migrar de v1 (dual-run) para v2 (nativo)
+  - Comparação detalhada de features v1 vs v2 para Registration e Booking
+  - Checklist de compatibilidade com 12 itens de verificação
+  - Plano de rollback instantâneo (swap de flags, zero perda de dados)
+  - Troubleshooting para problemas comuns de migração
+  - Configuração via WP-CLI para automação de migração
+- **Status de Coexistência v1/v2** (Settings Admin UI):
+  - Seção "Status de Coexistência v1 / v2" na aba Frontend do painel de configurações
+  - Indicador visual por módulo (Cadastro/Agendamento): 4 estados distintos com cores e ícones
+    - ✅ Somente v2 — migração concluída (verde)
+    - ⚡ Coexistência — v1 + v2 ativos (âmbar)
+    - 📦 Somente v1 — considere migrar (neutro)
+    - ⏸️ Nenhum ativo (muted)
+  - Link direto para guia de migração
+- **Telemetria v2** (já implementada):
+  - Contadores por módulo (v1 e v2) via `DPS_Frontend_Logger::track()`
+  - Exibidos na aba Settings com comparação v1 vs v2
+  - Decisões de depreciação futura baseadas nos contadores
+
 **Booking Add-on v1.3.0 — Migração M3 e Melhorias de Segurança**
 
 - **Validação granular de edição de agendamentos**: Método `can_edit_appointment()` verifica se usuário pode editar agendamento específico (criador ou admin).
