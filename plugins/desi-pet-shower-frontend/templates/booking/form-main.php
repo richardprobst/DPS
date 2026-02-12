@@ -3,26 +3,38 @@
  * Template: Booking V2 — Form Main (Wizard Container)
  *
  * Wrapper principal do wizard nativo de agendamento M3 Expressive.
- * Será expandido nas próximas subfases (7.3) com steps completos.
+ * Renderiza os steps do wizard baseado no estado atual.
  *
  * @package DPS_Frontend_Addon
  * @since   2.0.0
  *
- * @var array<string, string> $atts             Atributos do shortcode.
- * @var string                $theme            Tema: light|dark.
- * @var bool                  $show_progress    Se exibe barra de progresso.
- * @var bool                  $compact          Modo compacto.
- * @var string                $appointment_type Tipo: simple|subscription|past.
- * @var int                   $current_step     Step atual (1-5).
- * @var int                   $total_steps      Total de steps.
- * @var string[]              $errors           Erros de validação.
- * @var array<string, mixed>  $data             Dados do wizard.
- * @var string                $nonce_field      Campo nonce HTML.
+ * @var DPS_Template_Engine    $engine           Template engine para sub-renders.
+ * @var array<string, string>  $atts             Atributos do shortcode.
+ * @var string                 $theme            Tema: light|dark.
+ * @var bool                   $show_progress    Se exibe barra de progresso.
+ * @var bool                   $compact          Modo compacto.
+ * @var string                 $appointment_type Tipo: simple|subscription|past.
+ * @var int                    $current_step     Step atual (1-5).
+ * @var int                    $total_steps      Total de steps.
+ * @var string[]               $errors           Erros de validação.
+ * @var array<string, mixed>   $data             Dados do wizard.
+ * @var string                 $nonce_field      Campo nonce HTML.
+ * @var bool                   $success          Se o agendamento foi bem-sucedido.
+ * @var int                    $appointment_id   ID do agendamento criado (quando success).
+ * @var array<string, mixed>   $appointment_data Dados do agendamento criado (quando success).
+ * @var array<string, mixed>   $summary          Resumo para step de confirmação.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+$success          = $success ?? false;
+$engine           = $engine ?? null;
+$appointment_id   = $appointment_id ?? 0;
+$appointment_data = $appointment_data ?? [];
+$summary          = $summary ?? [];
+$data             = $data ?? [];
 
 $stepLabels = [
     1 => __( 'Cliente', 'dps-frontend-addon' ),
@@ -33,7 +45,19 @@ $stepLabels = [
 ];
 ?>
 
-<div class="dps-v2-booking" data-theme="<?php echo esc_attr( $theme ?? 'light' ); ?>" data-step="<?php echo esc_attr( (string) $current_step ); ?>">
+<?php if ( $success ) : ?>
+    <?php
+    if ( $engine ) {
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Template engine renders escaped content
+        echo $engine->render( 'booking/form-success.php', [
+            'appointment_id'   => $appointment_id,
+            'appointment_data' => $appointment_data,
+        ] );
+    }
+    ?>
+<?php else : ?>
+
+<div class="dps-v2-booking <?php echo ! empty( $compact ) ? 'dps-v2-booking--compact' : ''; ?>" data-theme="<?php echo esc_attr( $theme ?? 'light' ); ?>" data-step="<?php echo esc_attr( (string) $current_step ); ?>">
 
     <!-- Header -->
     <div class="dps-v2-booking__header">
@@ -72,7 +96,7 @@ $stepLabels = [
         </div>
     <?php endif; ?>
 
-    <!-- Wizard Form (placeholder — será expandido na Fase 7.3) -->
+    <!-- Wizard Form -->
     <form
         method="post"
         action=""
@@ -86,10 +110,99 @@ $stepLabels = [
         <input type="hidden" name="dps_booking_step" value="<?php echo esc_attr( (string) $current_step ); ?>" />
         <input type="hidden" name="dps_appointment_type" value="<?php echo esc_attr( $appointment_type ); ?>" />
 
-        <p class="dps-v2-typescale-body-medium dps-v2-color-on-surface-variant">
-            <?php esc_html_e( 'Wizard nativo V2 em construção. Ative a flag booking_v2 para testar.', 'dps-frontend-addon' ); ?>
-        </p>
+        <div class="dps-v2-booking__steps">
+
+            <?php // Step 1: Client Selection ?>
+            <div class="dps-v2-booking__step" data-step="1" <?php echo 1 !== $current_step ? 'style="display: none;"' : ''; ?>>
+                <?php
+                if ( $engine ) {
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                    echo $engine->render( 'booking/step-client-selection.php', [
+                        'client_id'   => $data['client_id'] ?? 0,
+                        'client_data' => $data['client_data'] ?? [],
+                        'errors'      => 1 === $current_step ? $errors : [],
+                    ] );
+                }
+                ?>
+            </div>
+
+            <?php // Step 2: Pet Selection ?>
+            <div class="dps-v2-booking__step" data-step="2" <?php echo 2 !== $current_step ? 'style="display: none;"' : ''; ?>>
+                <?php
+                if ( $engine ) {
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                    echo $engine->render( 'booking/step-pet-selection.php', [
+                        'pet_ids'   => $data['pet_ids'] ?? [],
+                        'client_id' => $data['client_id'] ?? 0,
+                        'errors'    => 2 === $current_step ? $errors : [],
+                    ] );
+                }
+                ?>
+            </div>
+
+            <?php // Step 3: Service Selection ?>
+            <div class="dps-v2-booking__step" data-step="3" <?php echo 3 !== $current_step ? 'style="display: none;"' : ''; ?>>
+                <?php
+                if ( $engine ) {
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                    echo $engine->render( 'booking/step-service-selection.php', [
+                        'service_ids' => $data['service_ids'] ?? [],
+                        'errors'      => 3 === $current_step ? $errors : [],
+                    ] );
+                }
+                ?>
+            </div>
+
+            <?php // Step 4: Date/Time Selection ?>
+            <div class="dps-v2-booking__step" data-step="4" <?php echo 4 !== $current_step ? 'style="display: none;"' : ''; ?>>
+                <?php
+                if ( $engine ) {
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                    echo $engine->render( 'booking/step-datetime-selection.php', [
+                        'appointment_date' => $data['appointment_date'] ?? '',
+                        'appointment_time' => $data['appointment_time'] ?? '',
+                        'appointment_type' => $appointment_type,
+                        'errors'           => 4 === $current_step ? $errors : [],
+                    ] );
+                }
+                ?>
+            </div>
+
+            <?php // Step 5a: Extras (TaxiDog + Tosa) ?>
+            <div class="dps-v2-booking__step" data-step="5a" <?php echo 5 !== $current_step ? 'style="display: none;"' : ''; ?>>
+                <?php
+                if ( $engine ) {
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                    echo $engine->render( 'booking/step-extras.php', [
+                        'appointment_type'            => $appointment_type,
+                        'appointment_taxidog'         => $data['appointment_taxidog'] ?? false,
+                        'appointment_taxidog_price'   => $data['appointment_taxidog_price'] ?? '0',
+                        'appointment_tosa'            => $data['appointment_tosa'] ?? false,
+                        'appointment_tosa_price'      => $data['appointment_tosa_price'] ?? '30',
+                        'appointment_tosa_occurrence' => $data['appointment_tosa_occurrence'] ?? 1,
+                        'errors'                      => 5 === $current_step ? $errors : [],
+                    ] );
+                }
+                ?>
+            </div>
+
+            <?php // Step 5b: Confirmation ?>
+            <div class="dps-v2-booking__step" data-step="5b" <?php echo 5 !== $current_step ? 'style="display: none;"' : ''; ?>>
+                <?php
+                if ( $engine ) {
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                    echo $engine->render( 'booking/step-confirmation.php', [
+                        'summary' => $summary,
+                        'errors'  => 5 === $current_step ? $errors : [],
+                    ] );
+                }
+                ?>
+            </div>
+
+        </div>
 
     </form>
 
 </div>
+
+<?php endif; ?>
