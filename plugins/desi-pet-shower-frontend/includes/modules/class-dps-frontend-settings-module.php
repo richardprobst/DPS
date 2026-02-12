@@ -267,7 +267,7 @@ final class DPS_Frontend_Settings_Module {
      * Exibe estado atual (v1 only, v2 only, coexistência, ou nenhum)
      * para Registration e Booking, com recomendação de migração.
      *
-     * @since 2.2.0
+     * @since 2.3.0
      *
      * @param array<string, bool> $flags Feature flags ativas.
      */
