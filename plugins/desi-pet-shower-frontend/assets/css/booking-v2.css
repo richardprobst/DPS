@@ -144,3 +144,594 @@
         animation-duration: 1.5s !important;
     }
 }
+
+/* === Step Containers === */
+.dps-v2-booking__step {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-v2-spacing-md);
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+.dps-v2-booking__step[hidden] {
+    display: none;
+}
+
+.dps-v2-booking__step--entering {
+    opacity: 0;
+}
+
+.dps-v2-booking__step-title {
+    font-size: var(--dps-typescale-title-large-size, 1.375rem);
+    font-weight: 400;
+    color: var(--dps-color-on-surface, #1c1b1f);
+    margin: 0 0 var(--dps-v2-spacing-sm);
+}
+
+/* === Search (Client Selection — Step 1) === */
+.dps-v2-search {
+    display: flex;
+    flex-direction: row;
+    gap: var(--dps-v2-spacing-sm);
+    align-items: stretch;
+}
+
+.dps-v2-search__input {
+    flex: 1;
+    padding: var(--dps-v2-spacing-sm) var(--dps-v2-spacing-md);
+    border: 1px solid var(--dps-color-outline, #79747e);
+    border-radius: var(--dps-v2-radius);
+    background: var(--dps-color-surface, #fffbfe);
+    color: var(--dps-color-on-surface, #1c1b1f);
+    font-size: var(--dps-typescale-body-large-size, 1rem);
+    line-height: var(--dps-typescale-body-large-line-height, 1.5rem);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+
+.dps-v2-search__input:focus {
+    outline: none;
+    border-color: var(--dps-color-primary, #6750a4);
+    box-shadow: 0 0 0 1px var(--dps-color-primary, #6750a4);
+}
+
+.dps-v2-search__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dps-v2-spacing-sm);
+    padding: var(--dps-v2-spacing-sm) var(--dps-v2-spacing-lg);
+    border: none;
+    border-radius: var(--dps-radius-full, 100px);
+    background: var(--dps-color-primary, #6750a4);
+    color: var(--dps-color-on-primary, #ffffff);
+    font-size: var(--dps-typescale-label-large-size, 0.875rem);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    min-height: 40px;
+    white-space: nowrap;
+}
+
+.dps-v2-search__button:hover {
+    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.dps-v2-search__button:disabled {
+    background: var(--dps-color-on-surface, #1c1b1f);
+    opacity: 0.12;
+    color: var(--dps-color-on-surface, #1c1b1f);
+    cursor: not-allowed;
+}
+
+.dps-v2-search-results {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--dps-v2-spacing-sm);
+    margin-top: var(--dps-v2-spacing-md);
+}
+
+.dps-v2-client-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-v2-spacing-xs);
+    padding: var(--dps-v2-spacing-md);
+    border: 1px solid var(--dps-color-outline-variant, #cac4d0);
+    border-radius: var(--dps-v2-radius);
+    background: var(--dps-color-surface, #fffbfe);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.dps-v2-client-card:hover {
+    border-color: var(--dps-color-primary, #6750a4);
+}
+
+.dps-v2-client-card--selected {
+    border-color: var(--dps-color-primary, #6750a4);
+    border-width: 2px;
+    background: color-mix(in srgb, var(--dps-color-primary, #6750a4) 8%, var(--dps-color-surface, #fffbfe));
+}
+
+.dps-v2-client-card__name {
+    font-size: var(--dps-typescale-body-large-size, 1rem);
+    font-weight: 500;
+    color: var(--dps-color-on-surface, #1c1b1f);
+}
+
+.dps-v2-client-card__phone {
+    font-size: var(--dps-typescale-body-medium-size, 0.875rem);
+    color: var(--dps-color-on-surface-variant, #49454f);
+}
+
+.dps-v2-client-card__email {
+    font-size: var(--dps-typescale-body-medium-size, 0.875rem);
+    color: var(--dps-color-on-surface-variant, #49454f);
+}
+
+/* === Selectable Cards (Pets Step 2 & Services Step 3) === */
+.dps-v2-selectable-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--dps-v2-spacing-md);
+}
+
+.dps-v2-selectable-card {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--dps-v2-spacing-sm);
+    padding: var(--dps-v2-spacing-md);
+    border: 1px solid var(--dps-color-outline-variant, #cac4d0);
+    border-radius: var(--dps-v2-radius);
+    background: var(--dps-color-surface, #fffbfe);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.dps-v2-selectable-card:hover {
+    border-color: var(--dps-color-primary, #6750a4);
+}
+
+.dps-v2-selectable-card--selected {
+    border-color: var(--dps-color-primary, #6750a4);
+    border-width: 2px;
+    background: color-mix(in srgb, var(--dps-color-primary, #6750a4) 8%, var(--dps-color-surface, #fffbfe));
+}
+
+.dps-v2-selectable-card__checkbox {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.dps-v2-selectable-card__indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border: 2px solid var(--dps-color-outline, #79747e);
+    border-radius: 4px;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.dps-v2-selectable-card--selected .dps-v2-selectable-card__indicator {
+    background: var(--dps-color-primary, #6750a4);
+    border-color: var(--dps-color-primary, #6750a4);
+}
+
+.dps-v2-selectable-card--selected .dps-v2-selectable-card__indicator::after {
+    content: '✓';
+    color: var(--dps-color-on-primary, #ffffff);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.dps-v2-selectable-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-v2-spacing-xs);
+    flex: 1;
+}
+
+.dps-v2-selectable-card__name {
+    font-size: var(--dps-typescale-body-large-size, 1rem);
+    font-weight: 500;
+    color: var(--dps-color-on-surface, #1c1b1f);
+}
+
+.dps-v2-selectable-card__details {
+    font-size: var(--dps-typescale-body-medium-size, 0.875rem);
+    color: var(--dps-color-on-surface-variant, #49454f);
+}
+
+.dps-v2-selectable-card__price {
+    font-size: var(--dps-typescale-body-large-size, 1rem);
+    font-weight: 600;
+    color: var(--dps-color-primary, #6750a4);
+    white-space: nowrap;
+}
+
+/* === Time Slots (DateTime — Step 4) === */
+.dps-v2-slot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: var(--dps-v2-spacing-sm);
+}
+
+.dps-v2-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--dps-v2-spacing-sm);
+    border-radius: var(--dps-v2-radius);
+    font-size: var(--dps-typescale-body-medium-size, 0.875rem);
+    font-weight: 500;
+    text-align: center;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    min-height: 40px;
+}
+
+.dps-v2-slot input[type="radio"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.dps-v2-slot--available {
+    border: 1px solid var(--dps-color-outline-variant, #cac4d0);
+    background: var(--dps-color-surface, #fffbfe);
+    color: var(--dps-color-on-surface, #1c1b1f);
+    cursor: pointer;
+}
+
+.dps-v2-slot--available:hover {
+    border-color: var(--dps-color-primary, #6750a4);
+    background: color-mix(in srgb, var(--dps-color-primary, #6750a4) 8%, var(--dps-color-surface, #fffbfe));
+}
+
+.dps-v2-slot--unavailable {
+    border: 1px solid var(--dps-color-outline-variant, #cac4d0);
+    background: var(--dps-color-surface-variant, #e7e0ec);
+    color: var(--dps-color-on-surface-variant, #49454f);
+    opacity: 0.5;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+.dps-v2-slot--selected {
+    background: var(--dps-color-primary, #6750a4);
+    color: var(--dps-color-on-primary, #ffffff);
+    border-color: var(--dps-color-primary, #6750a4);
+}
+
+/* === Extras (TaxiDog + Tosa) === */
+.dps-v2-extras {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-v2-spacing-md);
+}
+
+.dps-v2-extra-card {
+    border: 1px solid var(--dps-color-outline-variant, #cac4d0);
+    border-radius: var(--dps-v2-radius);
+    background: var(--dps-color-surface, #fffbfe);
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+}
+
+.dps-v2-extra-card__header {
+    display: flex;
+    align-items: center;
+    gap: var(--dps-v2-spacing-sm);
+    padding: var(--dps-v2-spacing-md);
+}
+
+.dps-v2-extra-card__header label {
+    font-size: var(--dps-typescale-body-large-size, 1rem);
+    font-weight: 500;
+    color: var(--dps-color-on-surface, #1c1b1f);
+    cursor: pointer;
+    flex: 1;
+}
+
+.dps-v2-extra-card__badge {
+    font-size: var(--dps-typescale-label-small-size, 0.6875rem);
+    font-weight: 500;
+    padding: 2px var(--dps-v2-spacing-sm);
+    border-radius: var(--dps-radius-full, 100px);
+    background: var(--dps-color-secondary-container, #e8def8);
+    color: var(--dps-color-on-secondary-container, #1d192b);
+}
+
+.dps-v2-extra-card__body {
+    display: none;
+    padding: 0 var(--dps-v2-spacing-md) var(--dps-v2-spacing-md);
+    flex-direction: column;
+    gap: var(--dps-v2-spacing-sm);
+}
+
+.dps-v2-extra-card__body--visible {
+    display: flex;
+}
+
+.dps-v2-extra-card--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* === Summary / Confirmation (Step 5) === */
+.dps-v2-summary {
+    border: 1px solid var(--dps-color-outline-variant, #cac4d0);
+    border-radius: var(--dps-v2-radius);
+    background: var(--dps-color-surface, #fffbfe);
+    overflow: hidden;
+}
+
+.dps-v2-summary__section {
+    padding: var(--dps-v2-spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-v2-spacing-sm);
+}
+
+.dps-v2-summary__section-title {
+    font-size: var(--dps-typescale-label-large-size, 0.875rem);
+    font-weight: 500;
+    color: var(--dps-color-primary, #6750a4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.dps-v2-summary__row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--dps-v2-spacing-sm);
+}
+
+.dps-v2-summary__label {
+    font-size: var(--dps-typescale-body-medium-size, 0.875rem);
+    color: var(--dps-color-on-surface-variant, #49454f);
+}
+
+.dps-v2-summary__value {
+    font-size: var(--dps-typescale-body-medium-size, 0.875rem);
+    font-weight: 500;
+    color: var(--dps-color-on-surface, #1c1b1f);
+    text-align: right;
+}
+
+.dps-v2-summary__divider {
+    height: 1px;
+    background: var(--dps-color-outline-variant, #cac4d0);
+    border: none;
+    margin: 0;
+}
+
+.dps-v2-summary__total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: var(--dps-v2-spacing-md);
+    font-size: var(--dps-typescale-headline-medium-size, 1.75rem);
+    font-weight: 700;
+    color: var(--dps-color-on-surface, #1c1b1f);
+}
+
+/* === Success State === */
+.dps-v2-booking--success {
+    max-width: 480px;
+    text-align: center;
+}
+
+.dps-v2-booking__success-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--dps-color-primary, #6750a4);
+    color: var(--dps-color-on-primary, #ffffff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 auto var(--dps-v2-spacing-md);
+}
+
+/* === Navigation Actions === */
+.dps-v2-booking__actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--dps-v2-spacing-md);
+    margin-top: var(--dps-v2-spacing-lg);
+}
+
+.dps-v2-booking__actions--end {
+    justify-content: flex-end;
+}
+
+/* === Loading States === */
+.dps-v2-booking__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--dps-v2-spacing-xl);
+}
+
+.dps-v2-load-more {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--dps-v2-spacing-md);
+}
+
+.dps-v2-load-more__button {
+    background: none;
+    border: none;
+    color: var(--dps-color-primary, #6750a4);
+    font-size: var(--dps-typescale-label-large-size, 0.875rem);
+    font-weight: 500;
+    cursor: pointer;
+    padding: var(--dps-v2-spacing-sm) var(--dps-v2-spacing-md);
+    border-radius: var(--dps-radius-sm, 4px);
+    transition: background-color 0.2s ease;
+}
+
+.dps-v2-load-more__button:hover {
+    background: color-mix(in srgb, var(--dps-color-primary, #6750a4) 8%, transparent);
+}
+
+/* === Appointment Type Selector === */
+.dps-v2-type-selector {
+    display: flex;
+    flex-direction: row;
+    gap: var(--dps-v2-spacing-sm);
+    flex-wrap: wrap;
+}
+
+.dps-v2-type-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-v2-spacing-xs);
+    padding: var(--dps-v2-spacing-md);
+    border: 1px solid var(--dps-color-outline-variant, #cac4d0);
+    border-radius: var(--dps-v2-radius);
+    background: var(--dps-color-surface, #fffbfe);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    flex: 1;
+    min-width: 140px;
+    text-align: center;
+}
+
+.dps-v2-type-card:hover {
+    border-color: var(--dps-color-primary, #6750a4);
+}
+
+.dps-v2-type-card--selected {
+    background: var(--dps-color-primary, #6750a4);
+    border-color: var(--dps-color-primary, #6750a4);
+    color: var(--dps-color-on-primary, #ffffff);
+}
+
+.dps-v2-type-card input[type="radio"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.dps-v2-type-card__label {
+    font-size: var(--dps-typescale-body-large-size, 1rem);
+    font-weight: 500;
+}
+
+.dps-v2-type-card__description {
+    font-size: var(--dps-typescale-body-medium-size, 0.875rem);
+    opacity: 0.8;
+}
+
+.dps-v2-type-card--selected .dps-v2-type-card__label,
+.dps-v2-type-card--selected .dps-v2-type-card__description {
+    color: var(--dps-color-on-primary, #ffffff);
+}
+
+/* === Running Total === */
+.dps-v2-running-total {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--dps-v2-spacing-md) var(--dps-v2-spacing-lg);
+    background: var(--dps-color-surface, #fffbfe);
+    border-top: 1px solid var(--dps-color-outline-variant, #cac4d0);
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+}
+
+.dps-v2-running-total__label {
+    font-size: var(--dps-typescale-body-large-size, 1rem);
+    color: var(--dps-color-on-surface-variant, #49454f);
+}
+
+.dps-v2-running-total__value {
+    font-size: var(--dps-typescale-headline-medium-size, 1.75rem);
+    font-weight: 700;
+    color: var(--dps-color-primary, #6750a4);
+}
+
+/* === Booking Responsive — Extended === */
+@media (max-width: 768px) {
+    .dps-v2-search {
+        flex-direction: column;
+    }
+
+    .dps-v2-selectable-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-v2-slot-grid {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    }
+
+    .dps-v2-type-selector {
+        flex-direction: column;
+    }
+
+    .dps-v2-booking__actions {
+        flex-direction: column-reverse;
+        gap: var(--dps-v2-spacing-sm);
+    }
+
+    .dps-v2-booking__actions .dps-v2-button {
+        width: 100%;
+    }
+
+    .dps-v2-summary__row {
+        flex-direction: column;
+        gap: var(--dps-v2-spacing-xs);
+    }
+
+    .dps-v2-summary__value {
+        text-align: left;
+    }
+
+    .dps-v2-running-total {
+        padding: var(--dps-v2-spacing-sm) var(--dps-v2-spacing-md);
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-v2-selectable-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-v2-slot-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
