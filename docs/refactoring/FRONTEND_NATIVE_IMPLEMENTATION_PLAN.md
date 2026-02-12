@@ -164,7 +164,7 @@ O add-on `desi-pet-shower-registration` (v1.3.0) possui funcionalidades que vão
 | R8 | **Dataset de raças** | `get_breed_dataset()` — raças organizadas por espécie (cão/gato), com "populares" priorizadas. Usado em datalist | P1 — Importante |
 | R9 | **Google Maps Autocomplete** | Places API para endereço com campos ocultos de coordenadas. Requer `dps_google_api_key` | P2 — Desejável |
 | R10 | **Admin quick-registration (F3.2)** | Cadastro rápido pelo painel admin com checkbox `dps_admin_skip_confirmation` | P2 — Desejável |
-| R11 | **REST API** | Endpoint via `register_rest_route()` com API key + rate limiting. Path protegido | P2 — Desejável |
+| R11 | **REST API** | Endpoint via `register_rest_route()` com autenticação por API key (`dps_registration_api_key`), rate limiting por IP (max requests/min configurável), e validação server-side completa. Path: `dps/v1/register`. Segue padrão WP REST (nonce OU API key) | P2 — Desejável |
 | R12 | **Anti-spam** | Hook `dps_registration_spam_check` (filter) para validações adicionais | P1 — Importante |
 | R13 | **Marketing opt-in** | Checkbox de consentimento para comunicações | P1 — Importante |
 
@@ -197,7 +197,7 @@ O add-on `desi-pet-shower-booking` (v1.3.0) possui funcionalidades especializada
 | B6 | **Calendário de disponibilidade** | Seleção de data/hora com validação de conflitos | P0 — Obrigatório |
 | B7 | **TaxiDog** | Checkbox "Solicitar TaxiDog?" + campo de preço. Metas: `appointment_taxidog`, `appointment_taxidog_price` | P1 — Importante |
 | B8 | **Tosa (extras)** | Para assinaturas: checkbox tosa + preço (default R$30) + dropdown ocorrência. Metas: `appointment_tosa`, `appointment_tosa_price`, `appointment_tosa_occurrence` | P1 — Importante |
-| B9 | **Confirmação via transient** | `dps_booking_confirmation_{user_id}` com TTL 5min. Dados: appointment_id, type, timestamp | P0 — Obrigatório |
+| B9 | **Confirmação via transient** | `dps_booking_confirmation_{user_id}` com TTL 5min. Dados: appointment_id, type, timestamp. Nota: transients são server-side (DB/object cache), não expostos ao cliente. Padrão mantido do legado por compatibilidade — user_id vem de `get_current_user_id()` (autenticado) | P0 — Obrigatório |
 | B10 | **Controle de permissões** | `manage_options`, `dps_manage_clients`, `dps_manage_pets`, `dps_manage_appointments`. Login obrigatório | P0 — Obrigatório |
 | B11 | **Login check** | Redireciona para login se `!is_user_logged_in()` | P0 — Obrigatório |
 | B12 | **Cache control** | `DPS_Cache_Control::force_no_cache()` para desabilitar cache em páginas de booking | P0 — Obrigatório |
@@ -504,14 +504,7 @@ class DPS_Registration_Hook_Bridge {
         string $phone,
         string $referral_code = ''
     ): void {
-        // 1. Hook NOVO v2 (para novos consumidores)
-        do_action( 'dps_registration_v2_client_created', $client_id, [
-            'email'         => $email,
-            'phone'         => $phone,
-            'referral_code' => $referral_code,
-        ] );
-        
-        // 2. Hook LEGADO (para Loyalty e outros add-ons existentes)
+        // 1. Hook LEGADO primeiro (para Loyalty e outros add-ons existentes)
         // Assinatura IDÊNTICA ao legado: ($referral_code, $client_id, $email, $phone)
         do_action(
             'dps_registration_after_client_created',
@@ -520,6 +513,13 @@ class DPS_Registration_Hook_Bridge {
             $email,
             $phone
         );
+        
+        // 2. Hook NOVO v2 (para novos consumidores futuros)
+        do_action( 'dps_registration_v2_client_created', $client_id, [
+            'email'         => $email,
+            'phone'         => $phone,
+            'referral_code' => $referral_code,
+        ] );
     }
     
     /**
@@ -554,14 +554,14 @@ class DPS_Booking_Hook_Bridge {
         int $appointment_id,
         array $meta
     ): void {
-        // 1. Hook NOVO v2
-        do_action( 'dps_booking_v2_appointment_created', $appointment_id, $meta );
-        
-        // 2. Hook LEGADO CRÍTICO (8 consumidores)
+        // 1. Hook LEGADO CRÍTICO primeiro (8 consumidores existentes)
         // Assinatura IDÊNTICA: ($appointment_id, $meta)
         // Consumidores: Stock, Payment, Groomers, Calendar,
         //               Communications, Push, Services, Booking
         do_action( 'dps_base_after_save_appointment', $appointment_id, $meta );
+        
+        // 2. Hook NOVO v2 (para extensões futuras)
+        do_action( 'dps_booking_v2_appointment_created', $appointment_id, $meta );
     }
     
     /**
@@ -585,10 +585,10 @@ class DPS_Booking_Hook_Bridge {
 
 ### Regras da Hook Bridge
 
-1. **Ordem de disparo:** Hook v2 PRIMEIRO, hook legado DEPOIS (permite que v2 consumers atuem antes)
+1. **Ordem de disparo:** Hook legado PRIMEIRO, hook v2 DEPOIS. Justificativa: os add-ons existentes (Loyalty, Stock, Payment, etc.) já consomem os hooks legados — se disparamos o legado antes, garantimos que o comportamento atual é preservado sem regressões. Hooks v2 disparam depois para extensões futuras que possam querer atuar sobre o resultado já processado. Esta ordem é intencional e NÃO deve ser invertida sem análise de impacto
 2. **Assinatura idêntica:** Os hooks legados DEVEM receber exatamente os mesmos argumentos/tipos do legado
 3. **Sem condicionais:** A bridge SEMPRE dispara ambos os hooks — não importa se há consumidores ou não
-4. **Testes obrigatórios:** Cada hook bridge deve ter teste que valida disparo de ambos os hooks
+4. **Testes obrigatórios:** Cada hook bridge deve ter teste que valida disparo de ambos os hooks na ordem correta
 5. **Monitoramento:** Logger deve registrar cada disparo de hook bridge para telemetria
 
 ---
