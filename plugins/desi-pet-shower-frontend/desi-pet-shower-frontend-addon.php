@@ -74,6 +74,7 @@ add_action( 'init', static function (): void {
     require_once $dir . 'support/class-dps-frontend-logger.php';
     require_once $dir . 'support/class-dps-frontend-request-guard.php';
     require_once $dir . 'support/class-dps-frontend-assets.php';
+    require_once $dir . 'support/class-dps-frontend-deprecation-notice.php';
 
     // Infraestrutura
     require_once $dir . 'class-dps-frontend-feature-flags.php';
@@ -206,4 +207,8 @@ add_action( 'init', static function (): void {
 
     $addon = new DPS_Frontend_Addon( $registry, $assets, $compatibility, $logger );
     $addon->boot();
+
+    // Aviso de depreciação do v1 (Fase 7.5)
+    $deprecationNotice = new DPS_Frontend_Deprecation_Notice( $flags, $logger );
+    $deprecationNotice->boot();
 }, 5 );

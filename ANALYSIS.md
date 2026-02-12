@@ -1664,7 +1664,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Hook bridge garante compatibilidade: hooks legados disparam PRIMEIRO, hooks v2 DEPOIS
 - Rollback instantâneo via toggle de flag — sem perda de dados
 
-**Introduzido em**: v1.0.0 (Fases 1–6), v2.0.0 (Fase 7.1), v2.1.0 (Fase 7.2), v2.2.0 (Fase 7.3), v2.3.0 (Fase 7.4)
+**Introduzido em**: v1.0.0 (Fases 1–6), v2.0.0 (Fase 7.1), v2.1.0 (Fase 7.2), v2.2.0 (Fase 7.3), v2.3.0 (Fase 7.4), v2.4.0 (Fase 7.5)
 
 **Documentação operacional (Fase 5)**:
 - `docs/implementation/FRONTEND_ROLLOUT_GUIDE.md` — guia de ativação por ambiente

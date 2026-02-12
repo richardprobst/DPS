@@ -258,6 +258,20 @@ Antes de criar uma nova versão oficial:
   - Exibidos na aba Settings com comparação v1 vs v2
   - Decisões de depreciação futura baseadas nos contadores
 
+**Frontend Add-on v2.4.0 — Fase 7.5 Depreciação do Dual-Run**
+
+- **Aviso de depreciação admin** (`DPS_Frontend_Deprecation_Notice`):
+  - Banner administrativo exibido quando módulos v1 (registration e/ou booking) estão ativos
+  - Aviso dismissível por usuário (transient 30 dias)
+  - Dismiss via AJAX com nonce + capability check (`manage_options`)
+  - Mensagem inclui lista dos módulos v1 ativos e link para guia de migração
+  - Só exibe para administradores (capability `manage_options`)
+- **Documentação visual completa** (`docs/screenshots/2026-02-12/`):
+  - 7 screenshots PNG: Registration V2, Booking V2 (steps 3 e 5), sucesso, login obrigatório, aviso depreciação, status coexistência
+  - Preview HTML interativo com todas as telas V2
+  - Documento de registro `SCREENSHOTS_2026-02-12.md` com contexto, antes/depois e lista de arquivos
+- **Bootstrap atualizado**: carrega `DPS_Frontend_Deprecation_Notice` e inicializa após boot do add-on
+
 **Booking Add-on v1.3.0 — Migração M3 e Melhorias de Segurança**
 
 - **Validação granular de edição de agendamentos**: Método `can_edit_appointment()` verifica se usuário pode editar agendamento específico (criador ou admin).

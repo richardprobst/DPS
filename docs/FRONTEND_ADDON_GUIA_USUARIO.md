@@ -1,7 +1,7 @@
 # Guia do Usuário: Frontend Add-on (desi.pet by PRObst)
 
 > **Versão**: 1.0.0  
-> **Última atualização**: 2026-02-11  
+> **Última atualização**: 2026-02-12  
 > **Autor**: PRObst  
 > **Site**: [www.probst.pro](https://www.probst.pro)
 
@@ -1179,26 +1179,48 @@ Não há dependência entre módulos.
 - ✅ **Fase 7.1:** Preparação V2 (abstracts, template engine, hook bridges, componentes M3) — Concluída
 - ✅ **Fase 7.2:** Registration V2 nativo (formulário independente) — Concluída
 - ✅ **Fase 7.3:** Booking V2 nativo (wizard 5-step independente) — Concluída
-- ⏳ **Fase 7.4:** Coexistência e migração (toggle admin, documentação, telemetria)
-- ⏳ **Fase 7.5:** Depreciação do dual-run (após 180 dias de observação)
+- ✅ **Fase 7.4:** Coexistência e migração (toggle admin, documentação, telemetria) — Concluída
+- ✅ **Fase 7.5:** Depreciação do dual-run (aviso admin implementado) — Código concluído
+
+**Status atual:** Todo o código das Fases 1–7 está implementado. A remoção efetiva dos módulos v1 (parte final da Fase 7.5) aguarda pré-requisitos de produção:
+- 90+ dias de V2 em produção estável
+- 80%+ dos sites migraram para V2
+- Zero bugs críticos em V2
+- Telemetria confirma uso < 5% de V1
 
 **Próximos passos:**
-- Fase 7.4: Toggle admin v1/v2, documentação de migração, telemetria comparativa
+- Ativar módulos V2 em produção e monitorar telemetria
 - Observação de telemetria de uso (180 dias mínimo)
-- Decisão sobre depreciação de add-ons legados
+- Decisão sobre remoção dos add-ons legados (conforme FRONTEND_DEPRECATION_POLICY.md)
 - Novos módulos (portal do cliente, relatórios, etc.)
 
 Consulte `docs/refactoring/FRONTEND_NATIVE_IMPLEMENTATION_PLAN.md` para detalhes da Fase 7.
 
 ---
 
-### 10. Onde encontrar mais documentação?
+### 10. O que é o aviso de depreciação no admin?
+
+**Resposta:** Quando módulos v1 (Cadastro v1 ou Agendamento v1) estão ativos, um banner amarelo aparece no painel administrativo do WordPress com o título **"desi.pet Frontend — Aviso de Migração"**.
+
+Este aviso:
+- Informa que o modo dual-run (v1) será descontinuado em versão futura
+- Recomenda migrar para os módulos nativos V2
+- Inclui link para o guia de migração
+- Pode ser dispensado (clique no "X") — volta após 30 dias
+- Só aparece para administradores (`manage_options`)
+
+**Para remover o aviso permanentemente:** desabilite os módulos v1 e use apenas os módulos v2 (`registration_v2` e `booking_v2`).
+
+---
+
+### 11. Onde encontrar mais documentação?
 
 **Resposta:** Documentação completa disponível:
 
 | Documento | Propósito |
 |-----------|-----------|
 | `docs/GUIA_SISTEMA_DPS.md` | Guia geral do sistema completo |
+| `docs/implementation/FRONTEND_V2_MIGRATION_GUIDE.md` | Guia de migração v1 → v2 |
 | `docs/implementation/FRONTEND_ROLLOUT_GUIDE.md` | Guia de rollout por ambiente |
 | `docs/implementation/FRONTEND_RUNBOOK.md` | Runbook de incidentes e rollback |
 | `docs/qa/FRONTEND_COMPATIBILITY_MATRIX.md` | Compatibilidade com outros add-ons |
