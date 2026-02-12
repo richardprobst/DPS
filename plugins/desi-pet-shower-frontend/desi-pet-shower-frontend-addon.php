@@ -91,6 +91,21 @@ add_action( 'init', static function (): void {
     require_once $dir . 'bridges/class-dps-registration-hook-bridge.php';
     require_once $dir . 'bridges/class-dps-booking-hook-bridge.php';
 
+    // Validators (Fase 7.2)
+    require_once $dir . 'validators/class-dps-cpf-validator.php';
+    require_once $dir . 'validators/class-dps-form-validator.php';
+
+    // Services (Fase 7.2)
+    require_once $dir . 'services/class-dps-client-service.php';
+    require_once $dir . 'services/class-dps-pet-service.php';
+    require_once $dir . 'services/class-dps-breed-provider.php';
+    require_once $dir . 'services/class-dps-duplicate-detector.php';
+    require_once $dir . 'services/class-dps-recaptcha-service.php';
+    require_once $dir . 'services/class-dps-email-confirmation-service.php';
+
+    // Handlers (Fase 7.2)
+    require_once $dir . 'handlers/class-dps-registration-handler.php';
+
     // Módulos (v1 dual-run)
     require_once $dir . 'modules/class-dps-frontend-registration-module.php';
     require_once $dir . 'modules/class-dps-frontend-booking-module.php';
@@ -108,15 +123,43 @@ add_action( 'init', static function (): void {
     $flags  = new DPS_Frontend_Feature_Flags();
     $assets = new DPS_Frontend_Assets( $flags );
 
-    $templateEngine    = new DPS_Template_Engine( DPS_FRONTEND_DIR );
+    $templateEngine     = new DPS_Template_Engine( DPS_FRONTEND_DIR );
     $registrationBridge = new DPS_Registration_Hook_Bridge( $logger );
     $bookingBridge      = new DPS_Booking_Hook_Bridge( $logger );
+
+    // Services (Fase 7.2)
+    $cpfValidator       = new DPS_Cpf_Validator();
+    $formValidator      = new DPS_Form_Validator( $cpfValidator );
+    $clientService      = new DPS_Client_Service();
+    $petService         = new DPS_Pet_Service();
+    $breedProvider      = new DPS_Breed_Provider();
+    $duplicateDetector  = new DPS_Duplicate_Detector();
+    $recaptchaService   = new DPS_Recaptcha_Service();
+    $emailService       = new DPS_Email_Confirmation_Service();
+
+    // Handler (Fase 7.2)
+    $registrationHandler = new DPS_Registration_Handler(
+        $formValidator,
+        $clientService,
+        $petService,
+        $duplicateDetector,
+        $recaptchaService,
+        $emailService,
+        $registrationBridge,
+        $logger
+    );
+
+    // Módulos V2 com dependências injetadas
+    $registrationV2 = new DPS_Frontend_Registration_V2_Module( $logger, $templateEngine, $registrationBridge );
+    $registrationV2->setHandler( $registrationHandler );
+    $registrationV2->setBreedProvider( $breedProvider );
+    $registrationV2->setRecaptchaService( $recaptchaService );
 
     $registry = new DPS_Frontend_Module_Registry( $flags, $logger );
     $registry->add( 'registration',    new DPS_Frontend_Registration_Module( $logger ) );
     $registry->add( 'booking',         new DPS_Frontend_Booking_Module( $logger ) );
     $registry->add( 'settings',        new DPS_Frontend_Settings_Module( $logger, $flags ) );
-    $registry->add( 'registration_v2', new DPS_Frontend_Registration_V2_Module( $logger, $templateEngine, $registrationBridge ) );
+    $registry->add( 'registration_v2', $registrationV2 );
     $registry->add( 'booking_v2',      new DPS_Frontend_Booking_V2_Module( $logger, $templateEngine, $bookingBridge ) );
 
     $compatibility = new DPS_Frontend_Compatibility( $flags, $logger );

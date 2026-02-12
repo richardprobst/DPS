@@ -353,3 +353,111 @@
         transition: none;
     }
 }
+
+/* === Registration Sections === */
+.dps-v2-registration__section {
+    border: none;
+    padding: 0;
+    margin: 0 0 var(--dps-v2-spacing-lg);
+}
+
+.dps-v2-registration__section legend {
+    font-size: var(--dps-typescale-title-large-size, 1.375rem);
+    font-weight: 400;
+    color: var(--dps-color-on-surface, #1c1b1f);
+    padding: 0;
+    margin: 0 0 var(--dps-v2-spacing-md);
+}
+
+.dps-v2-registration__fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--dps-v2-spacing-md);
+}
+
+.dps-v2-field--full-width {
+    grid-column: 1 / -1;
+}
+
+/* === Pet Repeater === */
+.dps-v2-registration__pet-repeater {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-v2-spacing-lg);
+}
+
+.dps-v2-pet-entry {
+    border: 1px solid var(--dps-color-outline-variant, #cac4d0);
+    border-radius: var(--dps-v2-radius);
+    padding: var(--dps-v2-spacing-md);
+}
+
+.dps-v2-pet-entry__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--dps-v2-spacing-md);
+}
+
+.dps-v2-registration__pet-actions {
+    margin-top: var(--dps-v2-spacing-md);
+}
+
+.dps-v2-button--text {
+    background: none;
+    border: none;
+    color: var(--dps-color-error, #b3261e);
+    cursor: pointer;
+    font-size: var(--dps-typescale-label-large-size, 0.875rem);
+    font-weight: 500;
+    padding: var(--dps-v2-spacing-xs) var(--dps-v2-spacing-sm);
+    border-radius: var(--dps-radius-sm, 4px);
+}
+
+.dps-v2-button--text:hover {
+    background: color-mix(in srgb, var(--dps-color-error, #b3261e) 8%, transparent);
+}
+
+/* === Success State === */
+.dps-v2-registration--success {
+    max-width: 480px;
+}
+
+.dps-v2-registration__success-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--dps-color-primary, #6750a4);
+    color: var(--dps-color-on-primary, #ffffff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 auto var(--dps-v2-spacing-md);
+}
+
+/* === Compact Mode === */
+.dps-v2-registration--compact {
+    padding: var(--dps-v2-spacing-md);
+}
+
+.dps-v2-registration--compact .dps-v2-registration__fields {
+    grid-template-columns: 1fr;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+    .dps-v2-registration {
+        padding: var(--dps-v2-spacing-md);
+    }
+
+    .dps-v2-registration__fields {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* === Honeypot (must be visually hidden) === */
+[aria-hidden="true"][style*="display:none"] {
+    display: none !important;
+}

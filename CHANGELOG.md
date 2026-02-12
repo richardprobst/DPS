@@ -162,6 +162,40 @@ Antes de criar uma nova versão oficial:
 - **Aba Settings atualizada**: exibe flags v2 (Fase 7) com labels e descrições distintas. Telemetria v2 separada.
 - **Estrutura de diretórios completa**: handlers/, services/, validators/, ajax/, bridges/, abstracts/, templates/registration/, templates/booking/, templates/components/, templates/emails/.
 
+**Frontend Add-on v2.1.0 — Fase 7.2 Registration V2 (Implementação Nativa)**
+
+- **Validators**:
+  - `DPS_Cpf_Validator`: validação CPF mod-11 com normalização, rejeição de sequências repetidas. Compatível com legado.
+  - `DPS_Form_Validator`: validação completa do formulário (nome, email, telefone, CPF, pets). Usa `DPS_Cpf_Validator` internamente.
+- **Services**:
+  - `DPS_Client_Service`: CRUD para post type `dps_cliente`. Cria clientes com 13+ metas padronizadas. Normalização de telefone com fallback para `DPS_Phone_Helper`.
+  - `DPS_Pet_Service`: CRUD para post type `dps_pet`. Vincula pets a clientes via meta `owner_id`.
+  - `DPS_Breed_Provider`: dataset de raças por espécie (cão: 44 raças, gato: 20 raças). Populares priorizadas. Cache em memória. Output JSON para datalist.
+  - `DPS_Duplicate_Detector`: detecção de duplicatas APENAS por telefone (conforme legado v1.3.0). Admin override suportado.
+  - `DPS_Recaptcha_Service`: verificação reCAPTCHA v3 server-side. Score threshold configurável. Lê options do legado.
+  - `DPS_Email_Confirmation_Service`: token UUID 48h com `wp_generate_uuid4()`. Envio via `DPS_Communications_API` ou `wp_mail()`. Confirmação + limpeza de tokens.
+- **Handler**:
+  - `DPS_Registration_Handler`: processamento completo — reCAPTCHA → anti-spam → validação → duplicata → criação cliente → hooks (Loyalty) → criação pets → email confirmação. 100% independente do legado.
+- **Templates nativos M3**:
+  - `form-main.php`: expandido com seções, honeypot, reCAPTCHA, marketing opt-in, hook bridge `dps_registration_after_fields`.
+  - `form-client-data.php`: nome, email, telefone, CPF (com mask), endereço (com coords ocultas). Sticky form com erros por campo.
+  - `form-pet-data.php`: repeater JavaScript para múltiplos pets. Nome, espécie, raça (datalist dinâmico), porte, observações.
+  - `form-success.php`: confirmação com CTA para agendamento.
+  - `form-duplicate-warning.php`: aviso de duplicata com checkbox de override (admin).
+  - `form-error.php`: exibição de erros (lista ou parágrafo).
+- **Module atualizado**:
+  - `DPS_Frontend_Registration_V2_Module`: processa POST submissions via handler, renderiza breed data, reCAPTCHA v3, booking URL. Setters para DI tardia de handler/breed/recaptcha.
+- **JavaScript nativo expandido** (`registration-v2.js`):
+  - Pet repeater (add/remove/reindex)
+  - Breed datalist dinâmico (espécie → raças)
+  - Phone mask `(XX) XXXXX-XXXX`
+  - CPF mask `XXX.XXX.XXX-XX`
+  - Client-side validation com scroll para primeiro erro
+  - reCAPTCHA v3 execute antes do submit
+  - Submit loader + alerts dismissíveis
+- **CSS expandido** (`registration-v2.css`): grid layout para campos, pet entry cards, repeater actions, success state, compact mode, responsive.
+- **Bootstrap atualizado**: carrega validators, services, handler com DI completa.
+
 **Booking Add-on v1.3.0 — Migração M3 e Melhorias de Segurança**
 
 - **Validação granular de edição de agendamentos**: Método `can_edit_appointment()` verifica se usuário pode editar agendamento específico (criador ou admin).
