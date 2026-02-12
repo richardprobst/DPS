@@ -1,0 +1,146 @@
+/**
+ * Booking V2 — Styles (M3 Expressive)
+ *
+ * Estilos nativos para o wizard de agendamento V2.
+ * Utiliza design tokens do DPS base.
+ * Namespaced com .dps-v2-* para evitar conflitos com v1.
+ *
+ * @package DPS_Frontend_Addon
+ * @since   2.0.0
+ */
+
+/* === Booking Container === */
+.dps-v2-booking {
+    --dps-v2-spacing-xs: var(--dps-spacing-xs, 0.25rem);
+    --dps-v2-spacing-sm: var(--dps-spacing-sm, 0.5rem);
+    --dps-v2-spacing-md: var(--dps-spacing-md, 1rem);
+    --dps-v2-spacing-lg: var(--dps-spacing-lg, 1.5rem);
+    --dps-v2-spacing-xl: var(--dps-spacing-xl, 2rem);
+    --dps-v2-radius: var(--dps-radius-md, 12px);
+
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--dps-v2-spacing-xl);
+}
+
+.dps-v2-booking__header {
+    margin-bottom: var(--dps-v2-spacing-lg);
+}
+
+.dps-v2-booking__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-v2-spacing-md);
+}
+
+/* === Wizard Steps (Progress) === */
+.dps-v2-wizard-steps {
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--dps-v2-spacing-xl);
+    counter-reset: step;
+}
+
+.dps-v2-wizard-steps__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--dps-v2-spacing-xs);
+    flex: 1;
+    position: relative;
+}
+
+.dps-v2-wizard-steps__item::after {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: var(--dps-color-outline-variant, #cac4d0);
+}
+
+.dps-v2-wizard-steps__item:last-child::after {
+    display: none;
+}
+
+.dps-v2-wizard-steps__item--completed::after {
+    background: var(--dps-color-primary, #6750a4);
+}
+
+.dps-v2-wizard-steps__number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--dps-color-surface-variant, #e7e0ec);
+    color: var(--dps-color-on-surface-variant, #49454f);
+    font-size: var(--dps-typescale-label-medium-size, 0.75rem);
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+.dps-v2-wizard-steps__item--active .dps-v2-wizard-steps__number {
+    background: var(--dps-color-primary, #6750a4);
+    color: var(--dps-color-on-primary, #ffffff);
+}
+
+.dps-v2-wizard-steps__item--completed .dps-v2-wizard-steps__number {
+    background: var(--dps-color-primary, #6750a4);
+    color: var(--dps-color-on-primary, #ffffff);
+}
+
+.dps-v2-wizard-steps__label {
+    font-size: var(--dps-typescale-label-small-size, 0.6875rem);
+    color: var(--dps-color-on-surface-variant, #49454f);
+    text-align: center;
+}
+
+.dps-v2-wizard-steps__item--active .dps-v2-wizard-steps__label {
+    color: var(--dps-color-primary, #6750a4);
+    font-weight: 500;
+}
+
+/* === Login Required === */
+.dps-v2-booking--login-required {
+    max-width: 480px;
+}
+
+/* === Dark Theme === */
+[data-theme="dark"] .dps-v2-booking,
+.dps-v2-booking[data-theme="dark"] {
+    --dps-color-surface: var(--dps-color-surface-dark, #1c1b1f);
+    --dps-color-on-surface: var(--dps-color-on-surface-dark, #e6e1e5);
+    --dps-color-on-surface-variant: var(--dps-color-on-surface-variant-dark, #cac4d0);
+    --dps-color-outline: var(--dps-color-outline-dark, #938f99);
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+    .dps-v2-booking {
+        padding: var(--dps-v2-spacing-md);
+    }
+
+    .dps-v2-wizard-steps__label {
+        display: none;
+    }
+
+    .dps-v2-wizard-steps__number {
+        width: 24px;
+        height: 24px;
+        font-size: 0.625rem;
+    }
+}
+
+/* === Reduced Motion === */
+@media (prefers-reduced-motion: reduce) {
+    .dps-v2-booking * {
+        transition: none !important;
+        animation-duration: 1.5s !important;
+    }
+}

@@ -100,12 +100,12 @@ final class DPS_Frontend_Settings_Module {
 
         $modules = [
             'registration' => [
-                'label'       => __( 'Cadastro', 'dps-frontend-addon' ),
+                'label'       => __( 'Cadastro (v1)', 'dps-frontend-addon' ),
                 'description' => __( 'Assume shortcode [dps_registration_form] com wrapper M3 sobre o add-on legado.', 'dps-frontend-addon' ),
                 'phase'       => __( 'Fase 2', 'dps-frontend-addon' ),
             ],
             'booking' => [
-                'label'       => __( 'Agendamento', 'dps-frontend-addon' ),
+                'label'       => __( 'Agendamento (v1)', 'dps-frontend-addon' ),
                 'description' => __( 'Assume shortcode [dps_booking_form] com wrapper M3 sobre o add-on legado.', 'dps-frontend-addon' ),
                 'phase'       => __( 'Fase 3', 'dps-frontend-addon' ),
             ],
@@ -113,6 +113,16 @@ final class DPS_Frontend_Settings_Module {
                 'label'       => __( 'Configurações', 'dps-frontend-addon' ),
                 'description' => __( 'Registra aba de configurações do Frontend no painel administrativo.', 'dps-frontend-addon' ),
                 'phase'       => __( 'Fase 4', 'dps-frontend-addon' ),
+            ],
+            'registration_v2' => [
+                'label'       => __( 'Cadastro (v2 Nativo)', 'dps-frontend-addon' ),
+                'description' => __( 'Shortcode [dps_registration_v2] — formulário nativo M3 Expressive, independente do legado.', 'dps-frontend-addon' ),
+                'phase'       => __( 'Fase 7', 'dps-frontend-addon' ),
+            ],
+            'booking_v2' => [
+                'label'       => __( 'Agendamento (v2 Nativo)', 'dps-frontend-addon' ),
+                'description' => __( 'Shortcode [dps_booking_v2] — wizard nativo M3 Expressive, independente do legado.', 'dps-frontend-addon' ),
+                'phase'       => __( 'Fase 7', 'dps-frontend-addon' ),
             ],
         ];
         ?>
@@ -191,8 +201,10 @@ final class DPS_Frontend_Settings_Module {
                     <?php
                     $counters = $this->logger->getUsageCounters();
                     $telemetry_modules = [
-                        'registration' => __( 'Cadastro', 'dps-frontend-addon' ),
-                        'booking'      => __( 'Agendamento', 'dps-frontend-addon' ),
+                        'registration'    => __( 'Cadastro (v1)', 'dps-frontend-addon' ),
+                        'booking'         => __( 'Agendamento (v1)', 'dps-frontend-addon' ),
+                        'registration_v2' => __( 'Cadastro (v2)', 'dps-frontend-addon' ),
+                        'booking_v2'      => __( 'Agendamento (v2)', 'dps-frontend-addon' ),
                     ];
                     foreach ( $telemetry_modules as $t_slug => $t_label ) :
                         $count = $counters[ $t_slug ] ?? 0;
