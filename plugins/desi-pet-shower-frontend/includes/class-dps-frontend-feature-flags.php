@@ -20,9 +20,11 @@ final class DPS_Frontend_Feature_Flags {
     private const OPTION_KEY = 'dps_frontend_feature_flags';
 
     private const DEFAULTS = [
-        'registration' => false,
-        'booking'      => false,
-        'settings'     => false,
+        'registration'    => false,
+        'booking'         => false,
+        'settings'        => false,
+        'registration_v2' => false,
+        'booking_v2'      => false,
     ];
 
     /** @var array<string, bool> */
