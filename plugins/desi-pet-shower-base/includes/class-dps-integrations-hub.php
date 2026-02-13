@@ -150,6 +150,12 @@ class DPS_Integrations_Hub {
     public function render_push_tab() {
         if ( class_exists( 'DPS_Push_Addon' ) && method_exists( 'DPS_Push_Addon', 'get_instance' ) ) {
             $addon = DPS_Push_Addon::get_instance();
+            if ( ! method_exists( $addon, 'render_admin_page' ) ) {
+                echo '<div class="notice notice-warning"><p>';
+                esc_html_e( 'O add-on de Notificações Push precisa ser atualizado para a versão mais recente.', 'desi-pet-shower' );
+                echo '</p></div>';
+                return;
+            }
             ob_start();
             $addon->render_admin_page();
             $content = ob_get_clean();
