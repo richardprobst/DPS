@@ -25,8 +25,9 @@ Notificações push nativas do navegador e relatórios automáticos por email/Te
 
 ## Requisitos
 
-- WordPress 6.0+
-- PHP 7.4+
+- WordPress 6.9+
+- PHP 8.4+
+- OpenSSL com suporte a curvas EC P-256
 - HTTPS (obrigatório para Web Push)
 - Navegador compatível:
   - Chrome 50+
@@ -36,7 +37,7 @@ Notificações push nativas do navegador e relatórios automáticos por email/Te
 
 ## Instalação
 
-1. Faça upload da pasta `desi-pet-shower-push_addon` para `/wp-content/plugins/`
+1. Faça upload da pasta `desi-pet-shower-push` para `/wp-content/plugins/`
 2. Ative o plugin no WordPress
 3. Acesse **desi.pet by PRObst > Notificações**
 4. Clique em "Ativar Notificações" e permita no navegador
@@ -59,8 +60,21 @@ Notificações push nativas do navegador e relatórios automáticos por email/Te
         ▼                                               ▼
 ┌─────────────────┐                            ┌─────────────────┐
 │  DPS_Push_API   │                            │  Service Worker │
-│  send_to_user() │                            │   (push-sw.js)  │
+│  (RFC 8291)     │                            │   (push-sw.js)  │
 └─────────────────┘                            └─────────────────┘
+```
+
+### Estrutura de Classes (v2.0.0)
+
+```
+desi-pet-shower-push-addon.php      → Bootstrap + AJAX handlers (DPS_Push_Addon)
+includes/
+├── class-dps-push-api.php          → Web Push API com criptografia RFC 8291
+├── class-dps-push-admin.php        → Página admin e assets (DPS_Push_Admin)
+├── class-dps-push-settings.php     → Salvar/validar configurações (DPS_Push_Settings)
+├── class-dps-push-notifications.php → Handlers de eventos (DPS_Push_Notifications)
+├── class-dps-push-telegram.php     → Integração Telegram (DPS_Push_Telegram)
+└── class-dps-email-reports.php     → Relatórios por email (DPS_Email_Reports)
 ```
 
 ### Fluxo de Notificação
@@ -134,6 +148,23 @@ add_filter( 'dps_push_payload', function( $payload, $event_type ) {
 2. Verifique se OpenSSL está disponível no PHP
 
 ## Changelog
+
+### v2.0.0 (2026-02-13)
+
+**Reescrita completa do add-on — Arquitetura modular + Web Push funcional**
+
+- **Web Push com criptografia RFC 8291**: Payload agora é criptografado com ECDH + HKDF + AES-128-GCM (aes128gcm content encoding), permitindo que notificações push funcionem corretamente com todos os serviços de push (FCM, Mozilla, Apple, Windows).
+- **Arquitetura modular**: Classe monolítica (1200 linhas) dividida em 6 classes com responsabilidades claras:
+  - `DPS_Push_API` — Web Push API com criptografia e VAPID
+  - `DPS_Push_Admin` — Página admin e gestão de assets
+  - `DPS_Push_Settings` — Validação e salvamento de configurações
+  - `DPS_Push_Notifications` — Handlers de eventos de agendamento
+  - `DPS_Push_Telegram` — Serviço de integração com Telegram
+  - `DPS_Email_Reports` — Relatórios por email (mantido, com Telegram desacoplado)
+- **VAPID JWT robusto**: Removido fallback inseguro de geração de chaves aleatórias; agora requer OpenSSL P-256 funcional.
+- **Limpeza de subscriptions**: Diferenciação entre subscriptions expiradas (404/410 → removidas) e outros erros (mantidas para retry).
+- **Telegram desacoplado**: Integração Telegram extraída para classe própria, eliminando acoplamento com DPS_Email_Reports.
+- **Construtor privado**: Singleton agora com construtor privado conforme padrão correto.
 
 ### v1.3.0 (2026-01-03)
 

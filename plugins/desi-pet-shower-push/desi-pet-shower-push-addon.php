@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Push Notifications Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Notificações push e relatórios por email para administradores e equipe. Receba alertas em tempo real e relatórios diários/semanais automáticos.
- * Version:           1.4.0
+ * Version:           2.0.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-push-addon
@@ -47,10 +47,12 @@ function dps_push_load_textdomain() {
 }
 add_action( 'init', 'dps_push_load_textdomain', 1 );
 
-// Carrega a API de Push Notifications
+// Carrega classes do add-on.
 require_once __DIR__ . '/includes/class-dps-push-api.php';
-
-// Carrega a classe de Relatórios por Email
+require_once __DIR__ . '/includes/class-dps-push-telegram.php';
+require_once __DIR__ . '/includes/class-dps-push-notifications.php';
+require_once __DIR__ . '/includes/class-dps-push-settings.php';
+require_once __DIR__ . '/includes/class-dps-push-admin.php';
 require_once __DIR__ . '/includes/class-dps-email-reports.php';
 
 /**
@@ -63,12 +65,12 @@ function dps_push_activate_plugin() {
     $vapid_keys = get_option( 'dps_push_vapid_keys' );
     if ( ! $vapid_keys || empty( $vapid_keys['public'] ) || empty( $vapid_keys['private'] ) ) {
         $keys = DPS_Push_API::generate_vapid_keys();
-        update_option( 'dps_push_vapid_keys', $keys );
+        if ( $keys ) {
+            update_option( 'dps_push_vapid_keys', $keys );
+        }
     }
 
-    // O singleton DPS_Email_Reports é normalmente instanciado em `init`, mas durante
-    // a ativação do plugin o hook `init` ainda não foi executado. Forçamos a criação
-    // da instância aqui para garantir que os crons sejam agendados corretamente.
+    // Agendar crons de relatórios.
     $instance = DPS_Email_Reports::get_instance();
     if ( method_exists( $instance, 'activate' ) ) {
         $instance->activate();
@@ -92,20 +94,25 @@ register_deactivation_hook( __FILE__, 'dps_push_deactivate_plugin' );
 /**
  * Classe principal do Push Notifications Add-on.
  *
- * Implementa Web Push API nativo do navegador para envio de notificações
- * push para administradores e equipe do petshop.
+ * Orquestra as dependências e conecta os módulos do add-on
+ * (admin, settings, notifications, telegram, email reports).
  *
  * @since 1.0.0
+ * @since 2.0.0 Refatorado para arquitetura modular.
  */
 class DPS_Push_Addon {
 
     /**
-     * Chave da option para configurações.
+     * Chave da option para configurações de notificação.
+     *
+     * @var string
      */
     const OPTION_KEY = 'dps_push_settings';
 
     /**
      * Chave da option para chaves VAPID.
+     *
+     * @var string
      */
     const VAPID_KEY = 'dps_push_vapid_keys';
 
@@ -115,6 +122,34 @@ class DPS_Push_Addon {
      * @var DPS_Push_Addon|null
      */
     private static $instance = null;
+
+    /**
+     * Módulo admin.
+     *
+     * @var DPS_Push_Admin
+     */
+    private $admin;
+
+    /**
+     * Módulo de configurações.
+     *
+     * @var DPS_Push_Settings
+     */
+    private $settings;
+
+    /**
+     * Módulo de notificações.
+     *
+     * @var DPS_Push_Notifications
+     */
+    private $notifications;
+
+    /**
+     * Módulo Telegram.
+     *
+     * @var DPS_Push_Telegram
+     */
+    private $telegram;
 
     /**
      * Recupera a instância única.
@@ -128,39 +163,47 @@ class DPS_Push_Addon {
         return self::$instance;
     }
 
+    /** Impede clonagem do singleton. */
+    private function __clone() {}
+
+    /** Impede desserialização do singleton. */
+    public function __wakeup() {
+        throw new \RuntimeException( 'Não é possível desserializar singleton.' );
+    }
+
     /**
-     * Construtor.
+     * Construtor — inicializa módulos e registra hooks.
      */
-    public function __construct() {
-        // Menu admin
-        add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
-        add_action( 'admin_init', [ $this, 'maybe_handle_save' ] );
+    private function __construct() {
+        $this->admin         = new DPS_Push_Admin();
+        $this->settings      = new DPS_Push_Settings();
+        $this->notifications = new DPS_Push_Notifications();
+        $this->telegram      = new DPS_Push_Telegram();
 
-        // Assets
-        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-        add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_frontend_assets' ] );
+        // Admin menu e assets.
+        add_action( 'admin_menu', [ $this->admin, 'register_admin_menu' ], 20 );
+        add_action( 'admin_enqueue_scripts', [ $this->admin, 'enqueue_admin_assets' ] );
+        add_action( 'wp_enqueue_scripts', [ $this->admin, 'enqueue_frontend_assets' ] );
 
-        // AJAX handlers
+        // Configurações (save).
+        add_action( 'admin_init', [ $this->settings, 'maybe_handle_save' ] );
+
+        // Notificações push (hooks de eventos).
+        $this->notifications->register_hooks();
+
+        // AJAX handlers.
         add_action( 'wp_ajax_dps_push_subscribe', [ $this, 'subscribe_ajax' ] );
         add_action( 'wp_ajax_dps_push_unsubscribe', [ $this, 'unsubscribe_ajax' ] );
         add_action( 'wp_ajax_dps_push_test', [ $this, 'test_push_ajax' ] );
         add_action( 'wp_ajax_dps_push_test_report', [ $this, 'test_report_ajax' ] );
         add_action( 'wp_ajax_dps_push_test_telegram', [ $this, 'test_telegram_ajax' ] );
 
-        // Hooks para enviar notificações
-        add_action( 'dps_base_after_save_appointment', [ $this, 'notify_new_appointment' ], 20, 2 );
-        add_action( 'dps_appointment_status_changed', [ $this, 'notify_status_change' ], 20, 4 );
-        add_action( 'dps_appointment_rescheduled', [ $this, 'notify_rescheduled' ], 20, 5 );
-
-        // Fallback: Gerar chaves VAPID se não existirem (caso ativação não tenha sido executada).
+        // Fallback: gerar chaves VAPID se não existirem.
         add_action( 'admin_init', [ $this, 'maybe_generate_vapid_keys' ] );
     }
 
     /**
      * Gera chaves VAPID se não existirem (fallback).
-     *
-     * Este método garante que as chaves sejam geradas mesmo que o hook
-     * de ativação não tenha sido executado corretamente.
      *
      * @since 1.3.1
      */
@@ -170,131 +213,20 @@ class DPS_Push_Addon {
             return;
         }
 
-        // Gerar chaves VAPID usando curva P-256
         $keys = DPS_Push_API::generate_vapid_keys();
-        
-        update_option( self::VAPID_KEY, $keys );
+        if ( $keys ) {
+            update_option( self::VAPID_KEY, $keys );
+        }
     }
 
-    /**
-     * Registra submenu admin para Push Notifications.
-     * 
-     * Registra submenu sob o menu principal "desi.pet by PRObst".
-     *
-     * @since 1.0.0
-     * @since 1.2.0 Menu agora visível sob "desi.pet by PRObst" (antes estava oculto).
-     */
-    public function register_admin_menu() {
-        add_submenu_page(
-            'desi-pet-shower', // Menu pai: desi.pet by PRObst.
-            __( 'Notificações', 'dps-push-addon' ),
-            __( 'Notificações', 'dps-push-addon' ),
-            'manage_options',
-            'dps-push-notifications',
-            [ $this, 'render_admin_page' ]
-        );
-    }
-
-    /**
-     * Enfileira assets do admin.
-     *
-     * @since 1.0.0
-     * @since 1.2.0 Melhorado para carregar apenas nas páginas relevantes.
-     *
-     * @param string $hook Hook da página atual.
-     */
-    public function enqueue_admin_assets( $hook ) {
-        // Cast para string para compatibilidade com PHP 8.4+
-        $hook = (string) $hook;
-
-        // Carrega apenas na página de configurações do Push ou outras páginas DPS relevantes.
-        $is_push_page = ( strpos( $hook, 'dps-push-notifications' ) !== false );
-        $is_dps_page  = ( strpos( $hook, 'desi-pet-shower' ) !== false || strpos( $hook, 'dps-' ) !== false );
-
-        // Carrega CSS/JS apenas na página de configurações do Push.
-        // Se precisar em outras páginas, carregar apenas o botão de inscrição (minimalista).
-        if ( ! $is_push_page && ! $is_dps_page ) {
-            return;
-        }
-
-        $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.4.0';
-
-        // Design tokens M3 Expressive (deve carregar antes de qualquer CSS do addon).
-        $css_deps = [];
-        if ( defined( 'DPS_BASE_URL' ) ) {
-            wp_register_style(
-                'dps-design-tokens',
-                DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
-                [],
-                defined( 'DPS_BASE_VERSION' ) ? DPS_BASE_VERSION : '2.0.0'
-            );
-            $css_deps[] = 'dps-design-tokens';
-        }
-
-        wp_enqueue_style(
-            'dps-push-addon',
-            $addon_url . 'assets/css/push-addon.css',
-            $css_deps,
-            $version
-        );
-
-        wp_enqueue_script(
-            'dps-push-addon',
-            $addon_url . 'assets/js/push-addon.js',
-            [ 'jquery' ],
-            $version,
-            true
-        );
-
-        $vapid_keys = get_option( self::VAPID_KEY, [] );
-
-        wp_localize_script( 'dps-push-addon', 'DPS_Push', [
-            'ajax_url'        => admin_url( 'admin-ajax.php' ),
-            'nonce_subscribe' => wp_create_nonce( 'dps_push_subscribe' ),
-            'nonce_test'      => wp_create_nonce( 'dps_push_test' ),
-            'vapid_public'    => $vapid_keys['public'] ?? '',
-            'sw_url'          => $addon_url . 'assets/js/push-sw.js',
-            'messages'        => [
-                'subscribing'       => __( 'Ativando notificações...', 'dps-push-addon' ),
-                'subscribed'        => __( 'Notificações ativadas!', 'dps-push-addon' ),
-                'unsubscribed'      => __( 'Notificações desativadas.', 'dps-push-addon' ),
-                'error'             => __( 'Erro ao ativar notificações.', 'dps-push-addon' ),
-                'not_supported'     => __( 'Seu navegador não suporta notificações push.', 'dps-push-addon' ),
-                'permission_denied' => __( 'Permissão negada. Habilite nas configurações do navegador.', 'dps-push-addon' ),
-                'test_sent'         => __( 'Notificação de teste enviada!', 'dps-push-addon' ),
-                'saving'            => __( 'Salvando...', 'dps-push-addon' ),
-                'save_settings'     => __( 'Salvar Configurações', 'dps-push-addon' ),
-                'sending'           => __( 'Enviando...', 'dps-push-addon' ),
-                'testing'           => __( 'Testando...', 'dps-push-addon' ),
-                'invalid_email'     => __( 'Email inválido: ', 'dps-push-addon' ),
-                'invalid_token'     => __( 'Formato de token inválido. Exemplo: 123456789:ABCdefGHIjklMNOpqrSTUvwxYZ', 'dps-push-addon' ),
-            ],
-        ] );
-    }
-
-    /**
-     * Enfileira assets no frontend (para página de agenda).
-     *
-     * @since 1.0.0
-     */
-    public function enqueue_frontend_assets() {
-        // Verificar se está na página de agenda.
-        global $post;
-        if ( ! $post || ! has_shortcode( (string) $post->post_content, 'dps_agenda_page' ) ) {
-            return;
-        }
-
-        // Somente para usuários logados com permissão.
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            return;
-        }
-
-        $this->enqueue_admin_assets( 'dps-agenda' );
-    }
+    // ------------------------------------------------------------------
+    // AJAX Handlers
+    // ------------------------------------------------------------------
 
     /**
      * AJAX: Inscrever para notificações push.
+     *
+     * @since 1.0.0
      */
     public function subscribe_ajax() {
         check_ajax_referer( 'dps_push_subscribe', 'nonce' );
@@ -303,16 +235,14 @@ class DPS_Push_Addon {
             wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-push-addon' ) ] );
         }
 
-        // Validar e sanitizar dados de inscrição.
         $subscription_raw = isset( $_POST['subscription'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription'] ) ) : '';
-        
+
         if ( empty( $subscription_raw ) ) {
             wp_send_json_error( [ 'message' => __( 'Dados de inscrição ausentes.', 'dps-push-addon' ) ] );
         }
 
         $subscription = json_decode( stripslashes( $subscription_raw ), true );
 
-        // Verificar erro de JSON decode.
         if ( json_last_error() !== JSON_ERROR_NONE ) {
             wp_send_json_error( [ 'message' => __( 'Dados de inscrição com formato inválido.', 'dps-push-addon' ) ] );
         }
@@ -321,7 +251,6 @@ class DPS_Push_Addon {
             wp_send_json_error( [ 'message' => __( 'Dados de inscrição inválidos.', 'dps-push-addon' ) ] );
         }
 
-        // Validar que endpoint é uma URL válida de serviço push.
         $endpoint = esc_url_raw( $subscription['endpoint'] );
         if ( empty( $endpoint ) ) {
             wp_send_json_error( [ 'message' => __( 'Endpoint inválido.', 'dps-push-addon' ) ] );
@@ -335,7 +264,7 @@ class DPS_Push_Addon {
             'web.push.apple.com',
         ];
 
-        $parsed_url = wp_parse_url( $endpoint );
+        $parsed_url    = wp_parse_url( $endpoint );
         $is_valid_host = false;
         foreach ( $allowed_hosts as $host ) {
             if ( isset( $parsed_url['host'] ) && ( $parsed_url['host'] === $host || str_ends_with( $parsed_url['host'], '.' . $host ) ) ) {
@@ -349,17 +278,15 @@ class DPS_Push_Addon {
         }
 
         $user_id = get_current_user_id();
-        
-        // Armazenar inscrição do usuário
+
         $subscriptions = get_user_meta( $user_id, '_dps_push_subscriptions', true );
         if ( ! is_array( $subscriptions ) ) {
             $subscriptions = [];
         }
 
-        // Evitar duplicatas baseado no endpoint
         $endpoint_hash = md5( $endpoint );
-        
-        // Sanitizar keys (p256dh e auth são base64url encoded)
+
+        // Sanitizar keys (p256dh e auth são base64url encoded).
         $keys = [];
         if ( isset( $subscription['keys'] ) && is_array( $subscription['keys'] ) ) {
             if ( isset( $subscription['keys']['p256dh'] ) ) {
@@ -379,7 +306,6 @@ class DPS_Push_Addon {
 
         update_user_meta( $user_id, '_dps_push_subscriptions', $subscriptions );
 
-        // Log (sem expor dados sensíveis).
         if ( class_exists( 'DPS_Logger' ) ) {
             DPS_Logger::info(
                 sprintf( 'Usuário #%d inscrito para notificações push', $user_id ),
@@ -393,6 +319,8 @@ class DPS_Push_Addon {
 
     /**
      * AJAX: Cancelar inscrição de notificações push.
+     *
+     * @since 1.0.0
      */
     public function unsubscribe_ajax() {
         check_ajax_referer( 'dps_push_subscribe', 'nonce' );
@@ -402,20 +330,19 @@ class DPS_Push_Addon {
         }
 
         $endpoint = isset( $_POST['endpoint'] ) ? esc_url_raw( wp_unslash( $_POST['endpoint'] ) ) : '';
-        
+
         if ( empty( $endpoint ) ) {
             wp_send_json_error( [ 'message' => __( 'Endpoint inválido.', 'dps-push-addon' ) ] );
         }
 
-        $user_id = get_current_user_id();
+        $user_id       = get_current_user_id();
         $subscriptions = get_user_meta( $user_id, '_dps_push_subscriptions', true );
-        
+
         if ( is_array( $subscriptions ) ) {
             $endpoint_hash = md5( $endpoint );
             unset( $subscriptions[ $endpoint_hash ] );
             update_user_meta( $user_id, '_dps_push_subscriptions', $subscriptions );
 
-            // Log
             if ( class_exists( 'DPS_Logger' ) ) {
                 DPS_Logger::info(
                     sprintf( 'Usuário #%d cancelou inscrição push', $user_id ),
@@ -430,6 +357,8 @@ class DPS_Push_Addon {
 
     /**
      * AJAX: Enviar notificação de teste.
+     *
+     * @since 1.0.0
      */
     public function test_push_ajax() {
         check_ajax_referer( 'dps_push_test', 'nonce' );
@@ -439,23 +368,22 @@ class DPS_Push_Addon {
         }
 
         $user_id = get_current_user_id();
-        
+
         $result = DPS_Push_API::send_to_user( $user_id, [
             'title' => __( '🔔 Teste de Notificação', 'dps-push-addon' ),
             'body'  => __( 'As notificações push estão funcionando corretamente!', 'dps-push-addon' ),
-            'icon'  => plugin_dir_url( __FILE__ ) . 'assets/images/icon-192.png',
             'tag'   => 'dps-test-' . time(),
         ] );
 
         if ( $result['success'] > 0 ) {
-            wp_send_json_success( [ 
-                'message' => sprintf( 
+            wp_send_json_success( [
+                'message' => sprintf(
                     __( 'Notificação enviada para %d dispositivo(s).', 'dps-push-addon' ),
                     $result['success']
                 ),
             ] );
         } else {
-            wp_send_json_error( [ 
+            wp_send_json_error( [
                 'message' => __( 'Nenhum dispositivo inscrito ou erro ao enviar.', 'dps-push-addon' ),
             ] );
         }
@@ -481,14 +409,14 @@ class DPS_Push_Addon {
         }
 
         $email_reports = DPS_Email_Reports::get_instance();
-        $result = $email_reports->send_test( $type );
+        $result        = $email_reports->send_test( $type );
 
         if ( $result ) {
-            wp_send_json_success( [ 
+            wp_send_json_success( [
                 'message' => __( 'Relatório de teste enviado com sucesso!', 'dps-push-addon' ),
             ] );
         } else {
-            wp_send_json_error( [ 
+            wp_send_json_error( [
                 'message' => __( 'Erro ao enviar relatório de teste.', 'dps-push-addon' ),
             ] );
         }
@@ -506,676 +434,13 @@ class DPS_Push_Addon {
             wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-push-addon' ) ] );
         }
 
-        $token   = get_option( 'dps_push_telegram_token', '' );
-        $chat_id = get_option( 'dps_push_telegram_chat', '' );
+        $result = $this->telegram->test_connection();
 
-        if ( empty( $token ) || empty( $chat_id ) ) {
-            wp_send_json_error( [ 
-                'message' => __( 'Configure o Token do Bot e o Chat ID antes de testar.', 'dps-push-addon' ),
-            ] );
-        }
-
-        // Validar formato do token (formato: 123456789:ABCdefGHI...).
-        if ( ! preg_match( '/^\d{8,12}:[A-Za-z0-9_-]{30,50}$/', $token ) ) {
-            wp_send_json_error( [ 
-                'message' => __( 'Formato de token inválido. Verifique o token do bot.', 'dps-push-addon' ),
-            ] );
-        }
-
-        // Validar chat_id (número ou número negativo para grupos).
-        if ( ! preg_match( '/^-?\d+$/', $chat_id ) ) {
-            wp_send_json_error( [ 
-                'message' => __( 'Chat ID deve ser um número válido.', 'dps-push-addon' ),
-            ] );
-        }
-
-        // Construir URL segura usando apenas o host fixo da API Telegram.
-        $url = 'https://api.telegram.org/bot' . urlencode( $token ) . '/sendMessage';
-
-        $test_message = sprintf(
-            /* translators: %s: blog name */
-            __( '🔔 Teste de conexão do desi.pet by PRObst (%s). Conexão funcionando!', 'dps-push-addon' ),
-            get_bloginfo( 'name' )
-        );
-
-        $response = wp_remote_post( $url, [
-            'body'    => [
-                'chat_id'    => $chat_id,
-                'text'       => $test_message,
-                'parse_mode' => 'HTML',
-            ],
-            'timeout' => 30,
-        ] );
-
-        if ( is_wp_error( $response ) ) {
-            wp_send_json_error( [ 
-                'message' => sprintf( 
-                    /* translators: %s: error message */
-                    __( 'Erro de conexão: %s', 'dps-push-addon' ),
-                    $response->get_error_message()
-                ),
-            ] );
-        }
-
-        $body = wp_remote_retrieve_body( $response );
-        $data = json_decode( $body, true );
-
-        if ( isset( $data['ok'] ) && $data['ok'] ) {
-            wp_send_json_success( [ 
-                'message' => __( 'Conexão com Telegram funcionando! Mensagem de teste enviada.', 'dps-push-addon' ),
-            ] );
+        if ( $result['success'] ) {
+            wp_send_json_success( [ 'message' => $result['message'] ] );
         } else {
-            $error_desc = isset( $data['description'] ) ? sanitize_text_field( $data['description'] ) : __( 'Erro desconhecido.', 'dps-push-addon' );
-            wp_send_json_error( [ 
-                'message' => sprintf( 
-                    /* translators: %s: error description */
-                    __( 'Erro do Telegram: %s', 'dps-push-addon' ),
-                    $error_desc
-                ),
-            ] );
+            wp_send_json_error( [ 'message' => $result['message'] ] );
         }
-    }
-
-    /**
-     * Notifica sobre novo agendamento.
-     *
-     * @param int    $appt_id ID do agendamento.
-     * @param string $mode    Modo do agendamento.
-     */
-    public function notify_new_appointment( $appt_id, $mode ) {
-        $settings = get_option( self::OPTION_KEY, [] );
-        
-        if ( empty( $settings['notify_new_appointment'] ) ) {
-            return;
-        }
-
-        $client_id = get_post_meta( $appt_id, 'appointment_client_id', true );
-        $pet_id    = get_post_meta( $appt_id, 'appointment_pet_id', true );
-        $date      = get_post_meta( $appt_id, 'appointment_date', true );
-        $time      = get_post_meta( $appt_id, 'appointment_time', true );
-
-        $client = get_post( $client_id );
-        $pet    = get_post( $pet_id );
-
-        $title = __( '📅 Novo Agendamento!', 'dps-push-addon' );
-        $body  = sprintf(
-            __( '%s (%s) - %s às %s', 'dps-push-addon' ),
-            $pet ? $pet->post_title : __( 'Pet', 'dps-push-addon' ),
-            $client ? $client->post_title : __( 'Cliente', 'dps-push-addon' ),
-            date_i18n( 'd/m/Y', strtotime( $date ) ),
-            $time
-        );
-
-        DPS_Push_API::send_to_all_admins( [
-            'title' => $title,
-            'body'  => $body,
-            'icon'  => plugin_dir_url( __FILE__ ) . 'assets/images/icon-192.png',
-            'tag'   => 'dps-new-appointment-' . $appt_id,
-            'data'  => [
-                'type'    => 'new_appointment',
-                'appt_id' => $appt_id,
-                'url'     => admin_url( 'admin.php?page=desi-pet-shower' ),
-            ],
-        ] );
-    }
-
-    /**
-     * Notifica sobre mudança de status.
-     *
-     * @param int    $appt_id    ID do agendamento.
-     * @param string $old_status Status anterior.
-     * @param string $new_status Novo status.
-     * @param int    $user_id    ID do usuário que alterou.
-     */
-    public function notify_status_change( $appt_id, $old_status, $new_status, $user_id ) {
-        $settings = get_option( self::OPTION_KEY, [] );
-        
-        if ( empty( $settings['notify_status_change'] ) ) {
-            return;
-        }
-
-        // Não notificar se o próprio usuário fez a alteração
-        $current_user_id = get_current_user_id();
-        if ( $user_id === $current_user_id ) {
-            return;
-        }
-
-        $status_labels = [
-            'pendente'        => __( 'Pendente', 'dps-push-addon' ),
-            'finalizado'      => __( 'Finalizado', 'dps-push-addon' ),
-            'finalizado_pago' => __( 'Finalizado e Pago', 'dps-push-addon' ),
-            'cancelado'       => __( 'Cancelado', 'dps-push-addon' ),
-        ];
-
-        $pet_id = get_post_meta( $appt_id, 'appointment_pet_id', true );
-        $pet    = get_post( $pet_id );
-        $user   = get_userdata( $user_id );
-
-        $title = __( '🔄 Status Alterado', 'dps-push-addon' );
-        $body  = sprintf(
-            __( '%s: %s → %s (por %s)', 'dps-push-addon' ),
-            $pet ? $pet->post_title : '#' . $appt_id,
-            $status_labels[ $old_status ] ?? $old_status,
-            $status_labels[ $new_status ] ?? $new_status,
-            $user ? $user->display_name : __( 'Sistema', 'dps-push-addon' )
-        );
-
-        // Enviar para todos os admins exceto quem alterou
-        DPS_Push_API::send_to_all_admins( [
-            'title' => $title,
-            'body'  => $body,
-            'icon'  => plugin_dir_url( __FILE__ ) . 'assets/images/icon-192.png',
-            'tag'   => 'dps-status-change-' . $appt_id,
-            'data'  => [
-                'type'    => 'status_change',
-                'appt_id' => $appt_id,
-            ],
-        ], [ $user_id ] );
-    }
-
-    /**
-     * Notifica sobre reagendamento.
-     *
-     * @param int    $appt_id  ID do agendamento.
-     * @param string $new_date Nova data.
-     * @param string $new_time Novo horário.
-     * @param string $old_date Data anterior.
-     * @param string $old_time Horário anterior.
-     */
-    public function notify_rescheduled( $appt_id, $new_date, $new_time, $old_date, $old_time ) {
-        $settings = get_option( self::OPTION_KEY, [] );
-        
-        if ( empty( $settings['notify_rescheduled'] ) ) {
-            return;
-        }
-
-        $pet_id = get_post_meta( $appt_id, 'appointment_pet_id', true );
-        $pet    = get_post( $pet_id );
-
-        $title = __( '📅 Agendamento Reagendado', 'dps-push-addon' );
-        $body  = sprintf(
-            __( '%s: %s %s → %s %s', 'dps-push-addon' ),
-            $pet ? $pet->post_title : '#' . $appt_id,
-            date_i18n( 'd/m', strtotime( $old_date ) ),
-            $old_time,
-            date_i18n( 'd/m', strtotime( $new_date ) ),
-            $new_time
-        );
-
-        DPS_Push_API::send_to_all_admins( [
-            'title' => $title,
-            'body'  => $body,
-            'icon'  => plugin_dir_url( __FILE__ ) . 'assets/images/icon-192.png',
-            'tag'   => 'dps-rescheduled-' . $appt_id,
-            'data'  => [
-                'type'    => 'rescheduled',
-                'appt_id' => $appt_id,
-            ],
-        ], [ get_current_user_id() ] );
-    }
-
-    /**
-     * Processa salvamento de configurações.
-     */
-    public function maybe_handle_save() {
-        // Usa campo hidden para identificar o formulário (mais confiável que botão submit)
-        if ( ! isset( $_POST['dps_push_action'] ) || 'save_settings' !== $_POST['dps_push_action'] ) {
-            return;
-        }
-
-        // Verifica nonce usando nome de campo específico
-        $nonce = isset( $_POST['dps_push_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_nonce'] ) ) : '';
-        if ( ! wp_verify_nonce( $nonce, 'dps_push_settings' ) ) {
-            // Usa transient para persistir mensagem de erro entre redirects
-            set_transient( 'dps_push_settings_error', __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-push-addon' ), 30 );
-            $this->redirect_after_save( false );
-            return;
-        }
-
-        // Verifica permissão e dá feedback adequado
-        if ( ! current_user_can( 'manage_options' ) ) {
-            set_transient( 'dps_push_settings_error', __( 'Você não tem permissão para alterar estas configurações.', 'dps-push-addon' ), 30 );
-            $this->redirect_after_save( false );
-            return;
-        }
-
-        $settings = [
-            'notify_new_appointment' => ! empty( $_POST['notify_new_appointment'] ),
-            'notify_status_change'   => ! empty( $_POST['notify_status_change'] ),
-            'notify_rescheduled'     => ! empty( $_POST['notify_rescheduled'] ),
-        ];
-
-        update_option( self::OPTION_KEY, $settings );
-
-        // Salva configurações de relatórios por email.
-        $emails_agenda_raw = isset( $_POST['dps_push_emails_agenda'] ) ? sanitize_textarea_field( wp_unslash( $_POST['dps_push_emails_agenda'] ) ) : '';
-        $emails_report_raw = isset( $_POST['dps_push_emails_report'] ) ? sanitize_textarea_field( wp_unslash( $_POST['dps_push_emails_report'] ) ) : '';
-        
-        // Valida emails (lista separada por vírgula).
-        $emails_agenda = $this->validate_email_list( $emails_agenda_raw );
-        $emails_report = $this->validate_email_list( $emails_report_raw );
-        
-        // Valida horários (formato HH:MM).
-        $agenda_time = $this->validate_time( isset( $_POST['dps_push_agenda_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_agenda_time'] ) ) : '08:00' );
-        $report_time = $this->validate_time( isset( $_POST['dps_push_report_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_report_time'] ) ) : '19:00' );
-        $weekly_time = $this->validate_time( isset( $_POST['dps_push_weekly_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_weekly_time'] ) ) : '08:00' );
-        
-        // Valida dia da semana (whitelist).
-        $allowed_days = [ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday' ];
-        $weekly_day_raw = isset( $_POST['dps_push_weekly_day'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_weekly_day'] ) ) : 'monday';
-        $weekly_day = in_array( $weekly_day_raw, $allowed_days, true ) ? $weekly_day_raw : 'monday';
-        
-        $inactive_days = isset( $_POST['dps_push_inactive_days'] ) ? absint( $_POST['dps_push_inactive_days'] ) : 30;
-        // Validar intervalo (mínimo 7, máximo 365 dias).
-        if ( $inactive_days < 7 ) {
-            $inactive_days = 7;
-        } elseif ( $inactive_days > 365 ) {
-            $inactive_days = 365;
-        }
-        $telegram_token = isset( $_POST['dps_push_telegram_token'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_telegram_token'] ) ) : '';
-        $telegram_chat  = isset( $_POST['dps_push_telegram_chat'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_telegram_chat'] ) ) : '';
-
-        update_option( 'dps_push_emails_agenda', $emails_agenda );
-        update_option( 'dps_push_emails_report', $emails_report );
-        update_option( 'dps_push_agenda_time', $agenda_time );
-        update_option( 'dps_push_report_time', $report_time );
-        update_option( 'dps_push_weekly_day', $weekly_day );
-        update_option( 'dps_push_weekly_time', $weekly_time );
-        update_option( 'dps_push_inactive_days', $inactive_days );
-        update_option( 'dps_push_telegram_token', $telegram_token );
-        update_option( 'dps_push_telegram_chat', $telegram_chat );
-
-        update_option( 'dps_push_agenda_enabled', ! empty( $_POST['dps_push_agenda_enabled'] ) );
-        update_option( 'dps_push_report_enabled', ! empty( $_POST['dps_push_report_enabled'] ) );
-        update_option( 'dps_push_weekly_enabled', ! empty( $_POST['dps_push_weekly_enabled'] ) );
-
-        // Forçar reagendamento de todos os crons para garantir que os novos horários sejam aplicados.
-        // Isso é necessário porque os hooks update_option_* podem não ser disparados
-        // se o valor não mudou, ou podem haver problemas de cache.
-        $email_reports = DPS_Email_Reports::get_instance();
-        $email_reports->reschedule_all_crons();
-
-        // Redirect com sucesso
-        $this->redirect_after_save( true );
-    }
-
-    /**
-     * Redireciona após salvar configurações.
-     *
-     * Usa referer ou constrói URL baseada na página atual.
-     * Suporta redirecionamento tanto da página própria quanto do Hub de Integrações.
-     *
-     * @since 1.3.1
-     * @param bool $success Se o salvamento foi bem sucedido.
-     */
-    private function redirect_after_save( $success = true ) {
-        // Determinar URL de redirecionamento
-        $referer = wp_get_referer();
-        
-        if ( $referer ) {
-            // Remove parâmetros antigos de status
-            $redirect_url = remove_query_arg( [ 'updated', 'error' ], $referer );
-        } else {
-            // Fallback: detectar se estamos no Hub de Integrações ou na página própria
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para redirecionamento
-            $page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
-            
-            if ( 'dps-integrations-hub' === $page ) {
-                $redirect_url = admin_url( 'admin.php?page=dps-integrations-hub&tab=push' );
-            } else {
-                $redirect_url = admin_url( 'admin.php?page=dps-push-notifications' );
-            }
-        }
-        
-        // Adicionar parâmetro de status
-        if ( $success ) {
-            $redirect_url = add_query_arg( 'updated', '1', $redirect_url );
-        } else {
-            $redirect_url = add_query_arg( 'error', '1', $redirect_url );
-        }
-        
-        wp_safe_redirect( $redirect_url );
-        exit;
-    }
-
-    /**
-     * Valida e filtra lista de emails separados por vírgula.
-     *
-     * @param string $input Lista de emails.
-     * @return string Lista de emails válidos.
-     */
-    private function validate_email_list( $input ) {
-        if ( empty( $input ) ) {
-            return '';
-        }
-        $emails = array_map( 'trim', explode( ',', $input ) );
-        $valid_emails = array_filter( $emails, 'is_email' );
-        return implode( ', ', $valid_emails );
-    }
-
-    /**
-     * Valida horário no formato HH:MM.
-     *
-     * @param string $time Horário.
-     * @return string Horário válido ou padrão.
-     */
-    private function validate_time( $time ) {
-        if ( preg_match( '/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $time ) ) {
-            return $time;
-        }
-        return '08:00';
-    }
-
-    /**
-     * Renderiza página de configurações.
-     */
-    public function render_admin_page() {
-        $settings = get_option( self::OPTION_KEY, [] );
-        $vapid_keys = get_option( self::VAPID_KEY, [] );
-        $user_id = get_current_user_id();
-        $subscriptions = get_user_meta( $user_id, '_dps_push_subscriptions', true );
-        $sub_count = is_array( $subscriptions ) ? count( $subscriptions ) : 0;
-
-        // Configurações de relatórios por email.
-        $emails_agenda   = get_option( 'dps_push_emails_agenda', get_option( 'admin_email' ) );
-        $emails_report   = get_option( 'dps_push_emails_report', get_option( 'admin_email' ) );
-        $agenda_time     = get_option( 'dps_push_agenda_time', '08:00' );
-        $report_time     = get_option( 'dps_push_report_time', '19:00' );
-        $weekly_day      = get_option( 'dps_push_weekly_day', 'monday' );
-        $weekly_time     = get_option( 'dps_push_weekly_time', '08:00' );
-        $inactive_days   = get_option( 'dps_push_inactive_days', 30 );
-        $telegram_token  = get_option( 'dps_push_telegram_token', '' );
-        $telegram_chat   = get_option( 'dps_push_telegram_chat', '' );
-        $agenda_enabled  = get_option( 'dps_push_agenda_enabled', true );
-        $report_enabled  = get_option( 'dps_push_report_enabled', true );
-        $weekly_enabled  = get_option( 'dps_push_weekly_enabled', true );
-
-        // Próximos envios agendados.
-        $next_agenda = wp_next_scheduled( 'dps_send_agenda_notification' );
-        $next_report = wp_next_scheduled( 'dps_send_daily_report' );
-        $next_weekly = wp_next_scheduled( 'dps_send_weekly_inactive_report' );
-
-        // Status do Telegram.
-        $telegram_configured = ! empty( $telegram_token ) && ! empty( $telegram_chat );
-
-        // Formatar emails para exibição no campo (converter array para string se necessário).
-        $emails_agenda_display = is_array( $emails_agenda ) ? implode( ', ', $emails_agenda ) : $emails_agenda;
-        $emails_report_display = is_array( $emails_report ) ? implode( ', ', $emails_report ) : $emails_report;
-
-        // Verificar status de salvamento via query string
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para exibir mensagem
-        $is_updated = isset( $_GET['updated'] ) && '1' === $_GET['updated'];
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para exibir mensagem
-        $has_error = isset( $_GET['error'] ) && '1' === $_GET['error'];
-        
-        // Verificar mensagem de erro em transient
-        $error_message = get_transient( 'dps_push_settings_error' );
-        if ( $error_message ) {
-            delete_transient( 'dps_push_settings_error' );
-        }
-
-        ?>
-        <div class="wrap dps-push-settings">
-            <h1 class="dps-section-title">
-                <span class="dps-section-title__icon">🔔</span>
-                <?php echo esc_html__( 'Notificações e Relatórios', 'dps-push-addon' ); ?>
-            </h1>
-            <p class="dps-section-header__subtitle"><?php echo esc_html__( 'Configure notificações push do navegador, relatórios automáticos por email e integração com Telegram.', 'dps-push-addon' ); ?></p>
-
-            <?php if ( $is_updated ) : ?>
-                <div class="notice notice-success is-dismissible">
-                    <p><?php echo esc_html__( 'Configurações salvas com sucesso.', 'dps-push-addon' ); ?></p>
-                </div>
-            <?php endif; ?>
-
-            <?php if ( $has_error && $error_message ) : ?>
-                <div class="notice notice-error is-dismissible">
-                    <p><?php echo esc_html( $error_message ); ?></p>
-                </div>
-            <?php endif; ?>
-
-            <?php settings_errors( 'dps_push' ); ?>
-
-            <form method="post" id="dps-push-settings-form">
-                <input type="hidden" name="dps_push_action" value="save_settings" />
-                <?php wp_nonce_field( 'dps_push_settings', 'dps_push_nonce' ); ?>
-
-                <div class="dps-push-stacked">
-
-                    <!-- Card: Notificações Push do Navegador -->
-                    <div class="dps-surface dps-surface--info">
-                        <div class="dps-surface__title">
-                            <span>🖥️</span>
-                            <?php echo esc_html__( 'Notificações Push do Navegador', 'dps-push-addon' ); ?>
-                        </div>
-                        <p class="dps-surface__description"><?php echo esc_html__( 'Receba alertas em tempo real diretamente no seu navegador, mesmo quando estiver em outra aba ou com o navegador minimizado.', 'dps-push-addon' ); ?></p>
-
-                        <div class="dps-push-browser-section">
-                            <div class="dps-push-status-row">
-                                <div id="dps-push-status-indicator" class="dps-push-indicator dps-push-checking">
-                                    <span class="dps-push-dot"></span>
-                                    <span class="dps-push-status-text"><?php echo esc_html__( 'Verificando...', 'dps-push-addon' ); ?></span>
-                                </div>
-                                <span class="dps-push-devices">
-                                    <?php 
-                                    printf( 
-                                        esc_html__( '(%d dispositivo(s) inscrito(s))', 'dps-push-addon' ), 
-                                        $sub_count 
-                                    ); 
-                                    ?>
-                                </span>
-                            </div>
-
-                            <div class="dps-push-actions">
-                                <button type="button" id="dps-push-subscribe" class="button button-primary">
-                                    <?php echo esc_html__( 'Ativar Notificações neste Dispositivo', 'dps-push-addon' ); ?>
-                                </button>
-                                <button type="button" id="dps-push-test" class="button" style="display: none;">
-                                    <?php echo esc_html__( 'Enviar Notificação de Teste', 'dps-push-addon' ); ?>
-                                </button>
-                            </div>
-
-                            <fieldset class="dps-push-events-fieldset">
-                                <legend><?php echo esc_html__( 'Eventos que disparam notificações push:', 'dps-push-addon' ); ?></legend>
-                                <label>
-                                    <input type="checkbox" name="notify_new_appointment" value="1" 
-                                           <?php checked( ! empty( $settings['notify_new_appointment'] ) ); ?>>
-                                    <?php echo esc_html__( 'Novo agendamento criado', 'dps-push-addon' ); ?>
-                                </label>
-                                <label>
-                                    <input type="checkbox" name="notify_status_change" value="1"
-                                           <?php checked( ! empty( $settings['notify_status_change'] ) ); ?>>
-                                    <?php echo esc_html__( 'Alteração de status do agendamento', 'dps-push-addon' ); ?>
-                                </label>
-                                <label>
-                                    <input type="checkbox" name="notify_rescheduled" value="1"
-                                           <?php checked( ! empty( $settings['notify_rescheduled'] ) ); ?>>
-                                    <?php echo esc_html__( 'Agendamento reagendado', 'dps-push-addon' ); ?>
-                                </label>
-                            </fieldset>
-
-                            <p class="description dps-push-note">
-                                <?php echo esc_html__( 'Nota: Requer HTTPS e navegador compatível (Chrome, Firefox, Edge, Safari 16+). Ative em cada dispositivo que deseja receber notificações.', 'dps-push-addon' ); ?>
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Card: Relatório da Manhã (Agenda do Dia) -->
-                    <div class="dps-surface dps-surface--neutral">
-                        <div class="dps-surface__title">
-                            <span>☀️</span>
-                            <?php echo esc_html__( 'Relatório da Manhã – Agenda do Dia', 'dps-push-addon' ); ?>
-                        </div>
-                        <p class="dps-surface__description"><?php echo esc_html__( 'Receba no início do dia um resumo com todos os agendamentos programados, incluindo horários, pets e serviços.', 'dps-push-addon' ); ?></p>
-
-                        <div class="dps-push-report-config">
-                            <label class="dps-push-toggle-label">
-                                <input type="checkbox" name="dps_push_agenda_enabled" value="1" <?php checked( $agenda_enabled ); ?>>
-                                <strong><?php echo esc_html__( 'Ativar relatório da manhã', 'dps-push-addon' ); ?></strong>
-                            </label>
-
-                            <div class="dps-push-report-fields">
-                                <div class="dps-push-field-row">
-                                    <label for="dps_push_agenda_time"><?php echo esc_html__( 'Horário de envio:', 'dps-push-addon' ); ?></label>
-                                    <input type="time" id="dps_push_agenda_time" name="dps_push_agenda_time" value="<?php echo esc_attr( $agenda_time ); ?>">
-                                    <?php if ( $agenda_enabled && $next_agenda ) : ?>
-                                        <span class="dps-schedule-badge dps-schedule-active">✓ <?php echo esc_html__( 'Próximo:', 'dps-push-addon' ); ?> <?php echo esc_html( date_i18n( 'd/m H:i', $next_agenda ) ); ?></span>
-                                    <?php elseif ( ! $agenda_enabled ) : ?>
-                                        <span class="dps-schedule-badge dps-schedule-inactive">⏸ <?php echo esc_html__( 'Desativado', 'dps-push-addon' ); ?></span>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="dps-push-field-row">
-                                    <label for="dps_push_emails_agenda"><?php echo esc_html__( 'Destinatários:', 'dps-push-addon' ); ?></label>
-                                    <input type="text" id="dps_push_emails_agenda" name="dps_push_emails_agenda" class="regular-text" placeholder="email1@exemplo.com, email2@exemplo.com" value="<?php echo esc_attr( $emails_agenda_display ); ?>">
-                                    <p class="description"><?php echo esc_html__( 'Separe múltiplos emails por vírgula. Deixe em branco para usar o email do administrador.', 'dps-push-addon' ); ?></p>
-                                </div>
-
-                                <button type="button" class="button dps-test-report-btn" data-type="agenda">
-                                    📤 <?php echo esc_html__( 'Enviar Teste Agora', 'dps-push-addon' ); ?>
-                                </button>
-                                <span class="dps-test-result" data-type="agenda"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card: Relatório do Final do Dia (Financeiro) -->
-                    <div class="dps-surface dps-surface--neutral">
-                        <div class="dps-surface__title">
-                            <span>🌙</span>
-                            <?php echo esc_html__( 'Relatório do Final do Dia – Resumo Financeiro', 'dps-push-addon' ); ?>
-                        </div>
-                        <p class="dps-surface__description"><?php echo esc_html__( 'Receba no final do expediente um balanço com receitas, despesas e atendimentos realizados no dia.', 'dps-push-addon' ); ?></p>
-
-                        <div class="dps-push-report-config">
-                            <label class="dps-push-toggle-label">
-                                <input type="checkbox" name="dps_push_report_enabled" value="1" <?php checked( $report_enabled ); ?>>
-                                <strong><?php echo esc_html__( 'Ativar relatório do final do dia', 'dps-push-addon' ); ?></strong>
-                            </label>
-
-                            <div class="dps-push-report-fields">
-                                <div class="dps-push-field-row">
-                                    <label for="dps_push_report_time"><?php echo esc_html__( 'Horário de envio:', 'dps-push-addon' ); ?></label>
-                                    <input type="time" id="dps_push_report_time" name="dps_push_report_time" value="<?php echo esc_attr( $report_time ); ?>">
-                                    <?php if ( $report_enabled && $next_report ) : ?>
-                                        <span class="dps-schedule-badge dps-schedule-active">✓ <?php echo esc_html__( 'Próximo:', 'dps-push-addon' ); ?> <?php echo esc_html( date_i18n( 'd/m H:i', $next_report ) ); ?></span>
-                                    <?php elseif ( ! $report_enabled ) : ?>
-                                        <span class="dps-schedule-badge dps-schedule-inactive">⏸ <?php echo esc_html__( 'Desativado', 'dps-push-addon' ); ?></span>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="dps-push-field-row">
-                                    <label for="dps_push_emails_report"><?php echo esc_html__( 'Destinatários:', 'dps-push-addon' ); ?></label>
-                                    <input type="text" id="dps_push_emails_report" name="dps_push_emails_report" class="regular-text" placeholder="email1@exemplo.com, email2@exemplo.com" value="<?php echo esc_attr( $emails_report_display ); ?>">
-                                    <p class="description"><?php echo esc_html__( 'Separe múltiplos emails por vírgula. Deixe em branco para usar o email do administrador.', 'dps-push-addon' ); ?></p>
-                                </div>
-
-                                <button type="button" class="button dps-test-report-btn" data-type="report">
-                                    📤 <?php echo esc_html__( 'Enviar Teste Agora', 'dps-push-addon' ); ?>
-                                </button>
-                                <span class="dps-test-result" data-type="report"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card: Relatório Semanal (Pets Inativos) -->
-                    <div class="dps-surface dps-surface--neutral">
-                        <div class="dps-surface__title">
-                            <span>🐾</span>
-                            <?php echo esc_html__( 'Relatório Semanal – Pets Inativos', 'dps-push-addon' ); ?>
-                        </div>
-                        <p class="dps-surface__description"><?php echo esc_html__( 'Receba semanalmente uma lista de pets que não foram atendidos há muito tempo, ideal para ações de reengajamento.', 'dps-push-addon' ); ?></p>
-
-                        <div class="dps-push-report-config">
-                            <label class="dps-push-toggle-label">
-                                <input type="checkbox" name="dps_push_weekly_enabled" value="1" <?php checked( $weekly_enabled ); ?>>
-                                <strong><?php echo esc_html__( 'Ativar relatório semanal', 'dps-push-addon' ); ?></strong>
-                            </label>
-
-                            <div class="dps-push-report-fields">
-                                <div class="dps-push-field-row">
-                                    <label for="dps_push_weekly_day"><?php echo esc_html__( 'Dia da semana:', 'dps-push-addon' ); ?></label>
-                                    <select id="dps_push_weekly_day" name="dps_push_weekly_day">
-                                        <option value="monday" <?php selected( $weekly_day, 'monday' ); ?>><?php echo esc_html__( 'Segunda-feira', 'dps-push-addon' ); ?></option>
-                                        <option value="tuesday" <?php selected( $weekly_day, 'tuesday' ); ?>><?php echo esc_html__( 'Terça-feira', 'dps-push-addon' ); ?></option>
-                                        <option value="wednesday" <?php selected( $weekly_day, 'wednesday' ); ?>><?php echo esc_html__( 'Quarta-feira', 'dps-push-addon' ); ?></option>
-                                        <option value="thursday" <?php selected( $weekly_day, 'thursday' ); ?>><?php echo esc_html__( 'Quinta-feira', 'dps-push-addon' ); ?></option>
-                                        <option value="friday" <?php selected( $weekly_day, 'friday' ); ?>><?php echo esc_html__( 'Sexta-feira', 'dps-push-addon' ); ?></option>
-                                        <option value="saturday" <?php selected( $weekly_day, 'saturday' ); ?>><?php echo esc_html__( 'Sábado', 'dps-push-addon' ); ?></option>
-                                        <option value="sunday" <?php selected( $weekly_day, 'sunday' ); ?>><?php echo esc_html__( 'Domingo', 'dps-push-addon' ); ?></option>
-                                    </select>
-                                    <input type="time" id="dps_push_weekly_time" name="dps_push_weekly_time" value="<?php echo esc_attr( $weekly_time ); ?>">
-                                    <?php if ( $weekly_enabled && $next_weekly ) : ?>
-                                        <span class="dps-schedule-badge dps-schedule-active">✓ <?php echo esc_html__( 'Próximo:', 'dps-push-addon' ); ?> <?php echo esc_html( date_i18n( 'd/m H:i', $next_weekly ) ); ?></span>
-                                    <?php elseif ( ! $weekly_enabled ) : ?>
-                                        <span class="dps-schedule-badge dps-schedule-inactive">⏸ <?php echo esc_html__( 'Desativado', 'dps-push-addon' ); ?></span>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="dps-push-field-row">
-                                    <label for="dps_push_inactive_days"><?php echo esc_html__( 'Considerar inativo após:', 'dps-push-addon' ); ?></label>
-                                    <input type="number" id="dps_push_inactive_days" name="dps_push_inactive_days" value="<?php echo esc_attr( $inactive_days ); ?>" min="7" max="365" class="dps-push-days-input">
-                                    <span><?php echo esc_html__( 'dias sem atendimento', 'dps-push-addon' ); ?></span>
-                                </div>
-
-                                <button type="button" class="button dps-test-report-btn" data-type="weekly">
-                                    📤 <?php echo esc_html__( 'Enviar Teste Agora', 'dps-push-addon' ); ?>
-                                </button>
-                                <span class="dps-test-result" data-type="weekly"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card: Integração Telegram -->
-                    <div class="dps-surface dps-surface--info">
-                        <div class="dps-surface__title">
-                            <span>📱</span>
-                            <?php echo esc_html__( 'Integração com Telegram', 'dps-push-addon' ); ?>
-                        </div>
-                        <p class="dps-surface__description"><?php echo esc_html__( 'Receba os relatórios também via Telegram. Configure um bot e informe o Chat ID para envio automático.', 'dps-push-addon' ); ?></p>
-
-                        <div class="dps-push-telegram-config">
-                            <div class="dps-push-field-row">
-                                <label for="dps_push_telegram_token"><?php echo esc_html__( 'Token do Bot:', 'dps-push-addon' ); ?></label>
-                                <div class="dps-telegram-token-wrapper">
-                                    <input type="password" id="dps_push_telegram_token" name="dps_push_telegram_token" value="<?php echo esc_attr( $telegram_token ); ?>" class="regular-text" placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ" autocomplete="off">
-                                    <button type="button" id="dps-toggle-token" class="button" aria-label="<?php echo esc_attr__( 'Mostrar/ocultar token', 'dps-push-addon' ); ?>">👁️</button>
-                                </div>
-                                <p class="description"><?php echo esc_html__( 'Crie um bot via @BotFather no Telegram para obter o token.', 'dps-push-addon' ); ?></p>
-                            </div>
-
-                            <div class="dps-push-field-row">
-                                <label for="dps_push_telegram_chat"><?php echo esc_html__( 'Chat ID:', 'dps-push-addon' ); ?></label>
-                                <input type="text" id="dps_push_telegram_chat" name="dps_push_telegram_chat" value="<?php echo esc_attr( $telegram_chat ); ?>" class="regular-text" placeholder="-1001234567890">
-                                <p class="description"><?php echo esc_html__( 'ID do chat ou grupo. Use @userinfobot para descobrir o seu.', 'dps-push-addon' ); ?></p>
-                            </div>
-
-                            <div class="dps-push-telegram-status">
-                                <?php if ( $telegram_configured ) : ?>
-                                    <span class="dps-status-badge dps-status-badge--success">✓ <?php echo esc_html__( 'Configurado', 'dps-push-addon' ); ?></span>
-                                <?php else : ?>
-                                    <span class="dps-status-badge dps-status-badge--pending"><?php echo esc_html__( 'Não configurado', 'dps-push-addon' ); ?></span>
-                                <?php endif; ?>
-                                <button type="button" id="dps-test-telegram" class="button">
-                                    🔗 <?php echo esc_html__( 'Testar Conexão', 'dps-push-addon' ); ?>
-                                </button>
-                                <span id="dps-telegram-result" class="dps-test-result"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div><!-- .dps-push-stacked -->
-
-                <p class="submit dps-push-submit-area">
-                    <button type="submit" id="dps-push-save-btn" class="button button-primary button-hero">
-                        💾 <?php echo esc_html__( 'Salvar Todas as Configurações', 'dps-push-addon' ); ?>
-                    </button>
-                    <span id="dps-push-save-spinner" class="spinner dps-push-spinner"></span>
-                </p>
-            </form>
-
-        </div>
-        <?php
     }
 }
 
