@@ -48,8 +48,11 @@ class DPS_Email_Reports {
         add_action( 'dps_send_daily_report', [ $this, 'send_daily_report' ] );
         add_action( 'dps_send_weekly_inactive_report', [ $this, 'send_weekly_inactive_report' ] );
 
-        // Hook para Telegram
-        add_action( 'dps_send_push_notification', [ $this, 'send_to_telegram' ], 10, 2 );
+        // Hook para Telegram (delegado para DPS_Push_Telegram).
+        if ( class_exists( 'DPS_Push_Telegram' ) ) {
+            $telegram = new DPS_Push_Telegram();
+            add_action( 'dps_send_push_notification', [ $telegram, 'send' ], 10, 2 );
+        }
 
         // Reagendar crons após salvar configurações de horário.
         add_action( 'update_option_dps_push_agenda_time', [ $this, 'reschedule_agenda_cron' ] );
@@ -807,59 +810,6 @@ class DPS_Email_Reports {
         foreach ( $recipients as $email ) {
             if ( is_email( $email ) ) {
                 wp_mail( $email, $subject, $html, $headers );
-            }
-        }
-    }
-
-    /**
-     * Envia mensagem para o Telegram.
-     *
-     * @param string $message Mensagem.
-     * @param string $context Contexto (agenda, report, weekly).
-     */
-    public function send_to_telegram( $message, $context = '' ) {
-        $token   = get_option( 'dps_push_telegram_token' );
-        $chat_id = get_option( 'dps_push_telegram_chat' );
-
-        if ( empty( $token ) || empty( $chat_id ) ) {
-            return;
-        }
-
-        // Validar formato do token (formato: 123456789:ABCdefGHI...).
-        if ( ! preg_match( '/^\d{8,12}:[A-Za-z0-9_-]{30,50}$/', $token ) ) {
-            $this->log( 'error', 'Token do Telegram com formato inválido', [ 'context' => $context ] );
-            return;
-        }
-
-        // Validar chat_id (número ou número negativo para grupos).
-        if ( ! preg_match( '/^-?\d+$/', $chat_id ) ) {
-            $this->log( 'error', 'Chat ID do Telegram com formato inválido', [ 'context' => $context ] );
-            return;
-        }
-
-        // Construir URL segura.
-        $url = 'https://api.telegram.org/bot' . urlencode( $token ) . '/sendMessage';
-
-        $response = wp_remote_post( $url, [
-            'body' => [
-                'chat_id'    => $chat_id,
-                'text'       => $message,
-                'parse_mode' => 'Markdown',
-            ],
-            'timeout' => 30,
-        ] );
-
-        if ( is_wp_error( $response ) ) {
-            $this->log( 'error', 'Erro ao enviar para Telegram: ' . $response->get_error_message(), [ 'context' => $context ] );
-        } else {
-            $body = wp_remote_retrieve_body( $response );
-            $data = json_decode( $body, true );
-            
-            if ( isset( $data['ok'] ) && $data['ok'] ) {
-                $this->log( 'info', 'Mensagem enviada para Telegram', [ 'context' => $context ] );
-            } else {
-                $error_desc = isset( $data['description'] ) ? sanitize_text_field( $data['description'] ) : 'Erro desconhecido';
-                $this->log( 'error', 'Telegram retornou erro: ' . $error_desc, [ 'context' => $context ] );
             }
         }
     }
