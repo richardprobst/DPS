@@ -848,14 +848,30 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - Cria páginas automaticamente: "Agenda DPS"
 - Options: `dps_agenda_page_id`
 
+**Meta keys de agendamento** (post meta de `dps_agendamento`):
+- `_dps_checklist`: checklist operacional com status por etapa (pré-banho, banho, secagem, tosa, orelhas/unhas, acabamento) e histórico de retrabalho
+- `_dps_checkin`: dados de check-in (horário, observações, itens de segurança com severidade)
+- `_dps_checkout`: dados de check-out (horário, observações, itens de segurança)
+
 **Hooks consumidos**:
 - Nenhum hook específico do núcleo (opera diretamente sobre CPTs)
 
 **Hooks disparados**:
 - `dps_agenda_send_reminders`: cron job diário para envio de lembretes
+- `dps_checklist_rework_registered( $appointment_id, $step_key, $reason )`: quando uma etapa do checklist precisa de retrabalho
+- `dps_appointment_checked_in( $appointment_id, $data )`: após check-in registrado
+- `dps_appointment_checked_out( $appointment_id, $data )`: após check-out registrado
+
+**Filtros**:
+- `dps_checklist_default_steps`: permite add-ons adicionarem etapas ao checklist operacional (ex.: hidratação, ozônio)
+- `dps_checkin_safety_items`: permite add-ons adicionarem itens de segurança ao check-in/check-out
 
 **Endpoints AJAX**:
 - `dps_update_status`: atualiza status de agendamento
+- `dps_checklist_update`: atualiza status de uma etapa do checklist (nonce: `dps_checklist`)
+- `dps_checklist_rework`: registra retrabalho em uma etapa do checklist (nonce: `dps_checklist`)
+- `dps_appointment_checkin`: registra check-in com observações e itens de segurança (nonce: `dps_checkin`)
+- `dps_appointment_checkout`: registra check-out com observações e itens de segurança (nonce: `dps_checkin`)
 - `dps_get_services_details`: **[Deprecated v1.1.0]** mantido por compatibilidade, delega para `DPS_Services_API::get_services_details()`
 
 **Dependências**:
@@ -868,7 +884,13 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 
 **Assets**:
 - `assets/js/agenda-addon.js`: interações AJAX e feedback visual
+- `assets/js/checklist-checkin.js`: interações do checklist operacional e check-in/check-out
+- `assets/css/checklist-checkin.css`: estilos M3 para checklist e check-in/check-out
 - **[Deprecated]** `agenda-addon.js` e `agenda.js` na raiz (devem ser removidos)
+
+**Classes de serviço**:
+- `DPS_Agenda_Checklist_Service`: CRUD de checklist operacional com etapas, progresso e retrabalho
+- `DPS_Agenda_Checkin_Service`: check-in/check-out com itens de segurança e cálculo de duração
 
 **Observações**:
 - Implementa `register_deactivation_hook` para limpar cron job `dps_agenda_send_reminders` ao desativar

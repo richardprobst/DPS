@@ -1,0 +1,464 @@
+/**
+ * Estilos para Checklist Operacional e Check-in / Check-out.
+ *
+ * Usa design tokens M3 Expressive definidos em dps-design-tokens.css.
+ *
+ * @package DPS_Agenda_Addon
+ * @since   1.2.0
+ */
+
+/* ===========================
+   CHECKLIST OPERACIONAL
+   =========================== */
+
+.dps-checklist-panel {
+    background: var(--md-sys-color-surface, #fff);
+    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 12px;
+}
+
+.dps-checklist-panel h4 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface, #1d1b20);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-checklist-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.dps-checklist-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--md-sys-color-surface-variant, #e7e0ec);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.dps-checklist-progress-fill {
+    height: 100%;
+    background: var(--md-sys-color-primary, #6750a4);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.dps-checklist-progress-text {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant, #49454f);
+    min-width: 36px;
+    text-align: right;
+}
+
+.dps-checklist-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dps-checklist-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    transition: background 0.15s;
+}
+
+.dps-checklist-step:hover {
+    background: var(--md-sys-color-surface-variant, #e7e0ec);
+}
+
+.dps-checklist-step-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    width: 28px;
+    text-align: center;
+}
+
+.dps-checklist-step-label {
+    flex: 1;
+    font-size: 13px;
+    color: var(--md-sys-color-on-surface, #1d1b20);
+}
+
+.dps-checklist-step[data-status="done"] .dps-checklist-step-label {
+    text-decoration: line-through;
+    color: var(--md-sys-color-on-surface-variant, #49454f);
+}
+
+.dps-checklist-step[data-status="skipped"] .dps-checklist-step-label {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+.dps-checklist-step-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.dps-checklist-btn {
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: opacity 0.15s, background 0.15s;
+    line-height: 1.4;
+}
+
+.dps-checklist-btn:hover {
+    opacity: 0.85;
+}
+
+.dps-checklist-btn--done {
+    background: var(--md-sys-color-primary, #6750a4);
+    color: var(--md-sys-color-on-primary, #fff);
+}
+
+.dps-checklist-btn--undo {
+    background: var(--md-sys-color-surface-variant, #e7e0ec);
+    color: var(--md-sys-color-on-surface-variant, #49454f);
+}
+
+.dps-checklist-btn--rework {
+    background: var(--md-sys-color-error-container, #f9dedc);
+    color: var(--md-sys-color-on-error-container, #410e0b);
+}
+
+.dps-checklist-btn--skip {
+    background: var(--md-sys-color-surface-variant, #e7e0ec);
+    color: var(--md-sys-color-on-surface-variant, #49454f);
+    font-size: 10px;
+}
+
+/* Rework badge */
+.dps-checklist-rework-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: var(--md-sys-color-error-container, #f9dedc);
+    color: var(--md-sys-color-on-error-container, #410e0b);
+    border-radius: 10px;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* Rework modal */
+.dps-rework-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dps-rework-modal {
+    background: var(--md-sys-color-surface, #fff);
+    border-radius: 16px;
+    padding: 24px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.dps-rework-modal h4 {
+    margin: 0 0 12px;
+    font-size: 16px;
+}
+
+.dps-rework-modal textarea {
+    width: 100%;
+    min-height: 80px;
+    border: 1px solid var(--md-sys-color-outline, #79747e);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 13px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.dps-rework-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* ===========================
+   CHECK-IN / CHECK-OUT
+   =========================== */
+
+.dps-checkin-panel {
+    background: var(--md-sys-color-surface, #fff);
+    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 12px;
+}
+
+.dps-checkin-panel h4 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface, #1d1b20);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-checkin-status {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.dps-checkin-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.dps-checkin-status-badge--pending {
+    background: var(--md-sys-color-surface-variant, #e7e0ec);
+    color: var(--md-sys-color-on-surface-variant, #49454f);
+}
+
+.dps-checkin-status-badge--in {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.dps-checkin-status-badge--out {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.dps-checkin-status-badge--duration {
+    background: var(--md-sys-color-tertiary-container, #ffd8e4);
+    color: var(--md-sys-color-on-tertiary-container, #31111d);
+}
+
+/* Safety items grid */
+.dps-safety-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.dps-safety-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
+    border-radius: 8px;
+    transition: border-color 0.15s, background 0.15s;
+    cursor: pointer;
+}
+
+.dps-safety-item:hover {
+    background: var(--md-sys-color-surface-variant, #e7e0ec);
+}
+
+.dps-safety-item--checked {
+    border-color: var(--md-sys-color-error, #b3261e);
+    background: var(--md-sys-color-error-container, #f9dedc);
+}
+
+.dps-safety-item--checked[data-severity="info"] {
+    border-color: var(--md-sys-color-outline, #79747e);
+    background: var(--md-sys-color-surface-variant, #e7e0ec);
+}
+
+.dps-safety-item--checked[data-severity="warning"] {
+    border-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.dps-safety-item-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.dps-safety-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.dps-safety-item-label {
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dps-safety-item-label input[type="checkbox"] {
+    margin: 0;
+}
+
+.dps-safety-item-notes {
+    width: 100%;
+    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 11px;
+    margin-top: 4px;
+    resize: none;
+    display: none;
+    box-sizing: border-box;
+}
+
+.dps-safety-item--checked .dps-safety-item-notes {
+    display: block;
+}
+
+/* Observations field */
+.dps-checkin-observations {
+    margin: 12px 0;
+}
+
+.dps-checkin-observations label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant, #49454f);
+    margin-bottom: 4px;
+}
+
+.dps-checkin-observations textarea {
+    width: 100%;
+    min-height: 60px;
+    border: 1px solid var(--md-sys-color-outline, #79747e);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+/* Action buttons */
+.dps-checkin-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.dps-checkin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+}
+
+.dps-checkin-btn:hover {
+    opacity: 0.9;
+}
+
+.dps-checkin-btn:active {
+    transform: scale(0.97);
+}
+
+.dps-checkin-btn--checkin {
+    background: #16a34a;
+    color: #fff;
+}
+
+.dps-checkin-btn--checkout {
+    background: #2563eb;
+    color: #fff;
+}
+
+.dps-checkin-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Safety summary (read-only, after check-in) */
+.dps-safety-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+}
+
+.dps-safety-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.dps-safety-tag--alert {
+    background: var(--md-sys-color-error-container, #f9dedc);
+    color: var(--md-sys-color-on-error-container, #410e0b);
+}
+
+.dps-safety-tag--warning {
+    background: #fffbeb;
+    color: #92400e;
+}
+
+.dps-safety-tag--info {
+    background: var(--md-sys-color-surface-variant, #e7e0ec);
+    color: var(--md-sys-color-on-surface-variant, #49454f);
+}
+
+/* Compact view for appointment cards */
+.dps-checkin-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+}
+
+.dps-checklist-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .dps-safety-items {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-checkin-actions {
+        flex-direction: column;
+    }
+
+    .dps-checkin-btn {
+        justify-content: center;
+    }
+}

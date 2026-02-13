@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>desi.pet — Checklist Operacional &amp; Check-in/Check-out Preview</title>
+    <link rel="stylesheet" href="../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css">
+    <link rel="stylesheet" href="../../plugins/desi-pet-shower-agenda/assets/css/checklist-checkin.css">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Roboto, -apple-system, system-ui, sans-serif;
+            margin: 0;
+            background: #f5f5f5;
+            color: #1d1b20;
+        }
+        .preview-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .preview-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #eaddff;
+            border-radius: 16px;
+        }
+        .preview-header h1 {
+            font-size: 1.75rem;
+            font-weight: 500;
+            color: #21005d;
+            margin: 0 0 0.5rem;
+        }
+        .preview-header p {
+            font-size: 0.875rem;
+            color: #21005d;
+            opacity: 0.8;
+            margin: 0;
+        }
+        .section-divider {
+            text-align: center;
+            margin: 2.5rem 0 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #f3edf7;
+            border-radius: 12px;
+        }
+        .section-divider h2 {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #6750a4;
+            margin: 0;
+        }
+        .section-divider p {
+            font-size: 0.8rem;
+            color: #49454f;
+            margin: 0.25rem 0 0;
+        }
+        .scenario-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #79747e;
+            margin: 1.5rem 0 0.5rem;
+            padding-left: 4px;
+        }
+        /* Appointment card simulation */
+        .appt-card {
+            background: #fff;
+            border: 1px solid #c4c7c5;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .appt-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e7e0ec;
+        }
+        .appt-card-header h3 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1d1b20;
+        }
+        .appt-card-header .appt-time {
+            font-size: 13px;
+            color: #49454f;
+        }
+        .appt-card-meta {
+            font-size: 12px;
+            color: #49454f;
+            margin-bottom: 8px;
+        }
+        /* Compact indicators row */
+        .compact-indicators-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            border-top: 1px solid #e7e0ec;
+            margin-top: 8px;
+        }
+        /* Rework modal static preview */
+        .rework-modal-static {
+            position: relative;
+            margin: 1.5rem 0;
+        }
+        .rework-modal-static .dps-rework-modal-overlay {
+            position: relative;
+            inset: auto;
+            border-radius: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-container">
+        <!-- Header -->
+        <div class="preview-header">
+            <h1>📋 Checklist Operacional &amp; 🏥 Check-in / Check-out</h1>
+            <p>Agenda Add-on v1.2.0 — Preview estático dos novos componentes M3</p>
+        </div>
+
+        <!-- ===========================
+             SEÇÃO 1: CHECKLIST OPERACIONAL
+             =========================== -->
+        <div class="section-divider">
+            <h2>📋 Checklist Operacional</h2>
+            <p>Painel interativo com etapas do banho e tosa, barra de progresso e retrabalho</p>
+        </div>
+
+        <!-- Cenário 1A: Checklist vazio (0%) -->
+        <p class="scenario-label">Cenário 1: Checklist inicial — 0% concluído</p>
+        <div class="dps-checklist-panel" data-appointment="101">
+            <h4>📋 Checklist Operacional</h4>
+            <div class="dps-checklist-progress">
+                <div class="dps-checklist-progress-bar">
+                    <div class="dps-checklist-progress-fill" style="width: 0%"></div>
+                </div>
+                <span class="dps-checklist-progress-text">0%</span>
+            </div>
+            <ul class="dps-checklist-steps">
+                <li class="dps-checklist-step" data-step="pre_bath" data-status="pending">
+                    <span class="dps-checklist-step-icon">🧹</span>
+                    <span class="dps-checklist-step-label">Pré-banho (desembaraçar / escovação)</span>
+                    <span class="dps-checklist-step-actions">
+                        <button class="dps-checklist-btn dps-checklist-btn--done" type="button">✓ Concluir</button>
+                        <button class="dps-checklist-btn dps-checklist-btn--skip" type="button">Pular</button>
+                    </span>
+                </li>
+                <li class="dps-checklist-step" data-step="bath" data-status="pending">
+                    <span class="dps-checklist-step-icon">🛁</span>
+                    <span class="dps-checklist-step-label">Banho</span>
+                    <span class="dps-checklist-step-actions">
+                        <button class="dps-checklist-btn dps-checklist-btn--done" type="button">✓ Concluir</button>
+                        <button class="dps-checklist-btn dps-checklist-btn--skip" type="button">Pular</button>
+                    </span>
+                </li>
+                <li class="dps-checklist-step" data-step="drying" data-status="pending">
+                    <span class="dps-checklist-step-icon">💨</span>
+                    <span class="dps-checklist-step-label">Secagem</span>
+                    <span class="dps-checklist-step-actions">
+                        <button class="dps-checklist-btn dps-checklist-btn--done" type="button">✓ Concluir</button>
+                        <button class="dps-checklist-btn dps-checklist-btn--skip" type="button">Pular</button>
+                    </span>
+                </li>
+                <li class="dps-checklist-step" data-step="cutting" data-status="pending">
+                    <span class="dps-checklist-step-icon">✂️</span>
+                    <span class="dps-checklist-step-label">Tosa / Corte</span>
+                    <span class="dps-checklist-step-actions">
+                        <button class="dps-checklist-btn dps-checklist-btn--done" type="button">✓ Concluir</button>
+                        <button class="dps-checklist-btn dps-checklist-btn--skip" type="button">Pular</button>
+                    </span>
+                </li>
+                <li class="dps-checklist-step" data-step="ears_nails" data-status="pending">
+                    <span class="dps-checklist-step-icon">👂</span>
+                    <span class="dps-checklist-step-label">Orelhas / Unhas</span>
+                    <span class="dps-checklist-step-actions">
+                        <button class="dps-checklist-btn dps-checklist-btn--done" type="button">✓ Concluir</button>
+                        <button class="dps-checklist-btn dps-checklist-btn--skip" type="button">Pular</button>
+                    </span>
+                </li>
+                <li class="dps-checklist-step" data-step="finishing" data-status="pending">
+                    <span class="dps-checklist-step-icon">🎀</span>
+                    <span class="dps-checklist-step-label">Acabamento (perfume / laço)</span>
+                    <span class="dps-checklist-step-actions">
+                        <button class="dps-checklist-btn dps-checklist-btn--done" type="button">✓ Concluir</button>
+                        <button class="dps-checklist-btn dps-checklist-btn--skip" type="button">Pular</button>
+                    </span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Cenário 1B: Checklist em progresso (67%) com retrabalho -->
+        <p class="scenario-label">Cenário 2: Em progresso — 67% concluído, 1 retrabalho registrado</p>
+        <div class="dps-checklist-panel" data-appointment="102">
+            <h4>📋 Checklist Operacional</h4>
+            <div class="dps-checklist-progress">
+                <div class="dps-checklist-progress-bar">
+                    <div class="dps-checklist-progress-fill" style="width: 67%"></div>
+                </div>
+                <span class="dps-checklist-progress-text">67%</span>
+            </div>
+            <ul class="dps-checklist-steps">
+                <li class="dps-checklist-step" data-step="pre_bath" data-status="done">
+                    <span class="dps-checklist-step-icon">🧹</span>
+                    <span class="dps-checklist-step-label">Pré-banho (desembaraçar / escovação)</span>
+                    <span class="dps-checklist-step-actions">
+                        <button class="dps-checklist-btn dps-checklist-btn--undo" type="button">↩ Desfazer</button>
+                        <button class="dps-checklist-btn dps-checklist-btn--rework" type="button">🔄 Refazer</button>
+                    </span>
+                </li>
+                <li class="dps-checklist-step" data-step="bath" data-status="done">
+                    <span class="dps-checklist-step-icon">🛁</span>
+                    <span class="dps-checklist-step-label">Banho</span>
+                    <span class="dps-checklist-step-actions">
+                        <button class="dps-checklist-btn dps-checklist-btn--undo" type="button">↩ Desfazer</button>
+                        <button class="dps-checklist-btn dps-checklist-btn--rework" type="button">🔄 Refazer</button>
+                    </span>
+                </li>
+                <li class="dps-checklist-step" data-step="drying" data-status="pending">
+                    <span class="dps-checklist-step-icon">💨</span>
+                    <span class="dps-checklist-step-label">Secagem</span>
+                    <span class="dps-checklist-rework-badge">🔄 1</span>
+                    <span class="dps-checklist-step-actions">
+                        <button class="dps-checklist-btn dps-checklist-btn--done" type="button">✓ Concluir</button>
+                        <button class="dps-checklist-btn dps-checklist-btn--skip" type="button">Pular</button>
+                    </span>
+                </li>
+                <li class="dps-checklist-step" data-step="cutting" data-status="done">
+                    <span class="dps-checklist-step-icon">✂️</span>
+                    <span class="dps-checklist-step-label">Tosa / Corte</span>
+                    <span class="dps-checklist-step-actions">
+                        <button class="dps-checklist-btn dps-checklist-btn--undo" type="button">↩ Desfazer</button>
+                        <button class="dps-checklist-btn dps-checklist-btn--rework" type="button">🔄 Refazer</button>
+                    </span>
+                </li>
+                <li class="dps-checklist-step" data-step="ears_nails" data-status="skipped">
+                    <span class="dps-checklist-step-icon">👂</span>
+                    <span class="dps-checklist-step-label">Orelhas / Unhas</span>
+                    <span class="dps-checklist-step-actions">
+                        <button class="dps-checklist-btn dps-checklist-btn--undo" type="button">↩ Desfazer</button>
+                    </span>
+                </li>
+                <li class="dps-checklist-step" data-step="finishing" data-status="pending">
+                    <span class="dps-checklist-step-icon">🎀</span>
+                    <span class="dps-checklist-step-label">Acabamento (perfume / laço)</span>
+                    <span class="dps-checklist-step-actions">
+                        <button class="dps-checklist-btn dps-checklist-btn--done" type="button">✓ Concluir</button>
+                        <button class="dps-checklist-btn dps-checklist-btn--skip" type="button">Pular</button>
+                    </span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Cenário 1C: Modal de Retrabalho -->
+        <p class="scenario-label">Cenário 3: Modal de retrabalho (ex.: secagem insuficiente)</p>
+        <div class="rework-modal-static">
+            <div class="dps-rework-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="rework-title-preview">
+                <div class="dps-rework-modal">
+                    <h4 id="rework-title-preview">🔄 Registrar retrabalho: Secagem</h4>
+                    <textarea placeholder="Motivo do retrabalho (ex.: secagem insuficiente)...">Pelo ainda úmido nas patas traseiras, precisou secar novamente</textarea>
+                    <div class="dps-rework-modal-actions">
+                        <button class="dps-checklist-btn dps-checklist-btn--undo" type="button">Cancelar</button>
+                        <button class="dps-checklist-btn dps-checklist-btn--rework" type="button">Confirmar retrabalho</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===========================
+             SEÇÃO 2: CHECK-IN / CHECK-OUT
+             =========================== -->
+        <div class="section-divider">
+            <h2>🏥 Check-in / Check-out</h2>
+            <p>Registro rápido de entrada e saída com itens de segurança e observações</p>
+        </div>
+
+        <!-- Cenário 2A: Aguardando check-in -->
+        <p class="scenario-label">Cenário 4: Aguardando check-in — formulário com itens de segurança</p>
+        <div class="dps-checkin-panel" data-appointment="201">
+            <h4>🏥 Check-in / Check-out</h4>
+            <div class="dps-checkin-status">
+                <span class="dps-checkin-status-badge dps-checkin-status-badge--pending">
+                    Aguardando check-in
+                </span>
+            </div>
+            <div class="dps-safety-items">
+                <div class="dps-safety-item" data-slug="pulgas" data-severity="warning">
+                    <span class="dps-safety-item-icon">🪲</span>
+                    <div class="dps-safety-item-content">
+                        <label class="dps-safety-item-label">
+                            <input type="checkbox" value="1">
+                            Pulgas
+                        </label>
+                        <textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..."></textarea>
+                    </div>
+                </div>
+                <div class="dps-safety-item" data-slug="carrapatos" data-severity="warning">
+                    <span class="dps-safety-item-icon">🕷️</span>
+                    <div class="dps-safety-item-content">
+                        <label class="dps-safety-item-label">
+                            <input type="checkbox" value="1">
+                            Carrapatos
+                        </label>
+                        <textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..."></textarea>
+                    </div>
+                </div>
+                <div class="dps-safety-item dps-safety-item--checked" data-slug="feridinhas" data-severity="alert">
+                    <span class="dps-safety-item-icon">🩹</span>
+                    <div class="dps-safety-item-content">
+                        <label class="dps-safety-item-label">
+                            <input type="checkbox" value="1" checked>
+                            Feridinhas / Lesões
+                        </label>
+                        <textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..." style="display:block">Ferida leve na pata dianteira direita</textarea>
+                    </div>
+                </div>
+                <div class="dps-safety-item dps-safety-item--checked" data-slug="alergia" data-severity="alert">
+                    <span class="dps-safety-item-icon">⚠️</span>
+                    <div class="dps-safety-item-content">
+                        <label class="dps-safety-item-label">
+                            <input type="checkbox" value="1" checked>
+                            Alergia / Irritação na pele
+                        </label>
+                        <textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..." style="display:block">Coceira intensa no abdômen, tutor relatou</textarea>
+                    </div>
+                </div>
+                <div class="dps-safety-item" data-slug="otite" data-severity="alert">
+                    <span class="dps-safety-item-icon">👂</span>
+                    <div class="dps-safety-item-content">
+                        <label class="dps-safety-item-label">
+                            <input type="checkbox" value="1">
+                            Otite / Orelha inflamada
+                        </label>
+                        <textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..."></textarea>
+                    </div>
+                </div>
+                <div class="dps-safety-item dps-safety-item--checked" data-slug="nos" data-severity="info">
+                    <span class="dps-safety-item-icon">🧶</span>
+                    <div class="dps-safety-item-content">
+                        <label class="dps-safety-item-label">
+                            <input type="checkbox" value="1" checked>
+                            Nós / Pelagem embaraçada
+                        </label>
+                        <textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..." style="display:block">Muitos nós na região do peito</textarea>
+                    </div>
+                </div>
+                <div class="dps-safety-item" data-slug="comportamento" data-severity="warning">
+                    <span class="dps-safety-item-icon">😤</span>
+                    <div class="dps-safety-item-content">
+                        <label class="dps-safety-item-label">
+                            <input type="checkbox" value="1">
+                            Comportamento agressivo / ansioso
+                        </label>
+                        <textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="dps-checkin-observations">
+                <label>Observações gerais</label>
+                <textarea placeholder="Ex.: pet chegou agitado, tutor pediu corte mais curto...">Pet chegou com coleira anti-pulgas nova. Tutor pediu atenção especial às unhas.</textarea>
+            </div>
+            <div class="dps-checkin-actions">
+                <button type="button" class="dps-checkin-btn dps-checkin-btn--checkin">📥 Check-in</button>
+            </div>
+        </div>
+
+        <!-- Cenário 2B: Check-in feito, aguardando check-out -->
+        <p class="scenario-label">Cenário 5: Check-in realizado — aguardando check-out</p>
+        <div class="dps-checkin-panel" data-appointment="202">
+            <h4>🏥 Check-in / Check-out</h4>
+            <div class="dps-checkin-status">
+                <span class="dps-checkin-status-badge dps-checkin-status-badge--in">
+                    📥 Check-in: 09:30
+                </span>
+            </div>
+            <div class="dps-safety-summary">
+                <span class="dps-safety-tag dps-safety-tag--alert">🩹 Feridinhas / Lesões</span>
+                <span class="dps-safety-tag dps-safety-tag--alert">⚠️ Alergia / Irritação na pele</span>
+                <span class="dps-safety-tag dps-safety-tag--info">🧶 Nós / Pelagem embaraçada</span>
+            </div>
+            <div class="dps-safety-items">
+                <div class="dps-safety-item" data-slug="pulgas" data-severity="warning">
+                    <span class="dps-safety-item-icon">🪲</span>
+                    <div class="dps-safety-item-content">
+                        <label class="dps-safety-item-label">
+                            <input type="checkbox" value="1">
+                            Pulgas
+                        </label>
+                        <textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..."></textarea>
+                    </div>
+                </div>
+                <div class="dps-safety-item" data-slug="carrapatos" data-severity="warning">
+                    <span class="dps-safety-item-icon">🕷️</span>
+                    <div class="dps-safety-item-content">
+                        <label class="dps-safety-item-label">
+                            <input type="checkbox" value="1">
+                            Carrapatos
+                        </label>
+                        <textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..."></textarea>
+                    </div>
+                </div>
+                <div class="dps-safety-item" data-slug="feridinhas" data-severity="alert">
+                    <span class="dps-safety-item-icon">🩹</span>
+                    <div class="dps-safety-item-content">
+                        <label class="dps-safety-item-label">
+                            <input type="checkbox" value="1">
+                            Feridinhas / Lesões
+                        </label>
+                        <textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..."></textarea>
+                    </div>
+                </div>
+                <div class="dps-safety-item" data-slug="alergia" data-severity="alert">
+                    <span class="dps-safety-item-icon">⚠️</span>
+                    <div class="dps-safety-item-content">
+                        <label class="dps-safety-item-label">
+                            <input type="checkbox" value="1">
+                            Alergia / Irritação na pele
+                        </label>
+                        <textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..."></textarea>
+                    </div>
+                </div>
+                <div class="dps-safety-item" data-slug="otite" data-severity="alert">
+                    <span class="dps-safety-item-icon">👂</span>
+                    <div class="dps-safety-item-content">
+                        <label class="dps-safety-item-label">
+                            <input type="checkbox" value="1">
+                            Otite / Orelha inflamada
+                        </label>
+                        <textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..."></textarea>
+                    </div>
+                </div>
+                <div class="dps-safety-item" data-slug="nos" data-severity="info">
+                    <span class="dps-safety-item-icon">🧶</span>
+                    <div class="dps-safety-item-content">
+                        <label class="dps-safety-item-label">
+                            <input type="checkbox" value="1">
+                            Nós / Pelagem embaraçada
+                        </label>
+                        <textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..."></textarea>
+                    </div>
+                </div>
+                <div class="dps-safety-item" data-slug="comportamento" data-severity="warning">
+                    <span class="dps-safety-item-icon">😤</span>
+                    <div class="dps-safety-item-content">
+                        <label class="dps-safety-item-label">
+                            <input type="checkbox" value="1">
+                            Comportamento agressivo / ansioso
+                        </label>
+                        <textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="dps-checkin-observations">
+                <label>Observações gerais</label>
+                <textarea placeholder="Ex.: pet chegou agitado, tutor pediu corte mais curto..."></textarea>
+            </div>
+            <div class="dps-checkin-actions">
+                <button type="button" class="dps-checkin-btn dps-checkin-btn--checkout">📤 Check-out</button>
+            </div>
+        </div>
+
+        <!-- Cenário 2C: Check-in + Check-out completo -->
+        <p class="scenario-label">Cenário 6: Ciclo completo — check-in + check-out com duração</p>
+        <div class="dps-checkin-panel" data-appointment="203">
+            <h4>🏥 Check-in / Check-out</h4>
+            <div class="dps-checkin-status">
+                <span class="dps-checkin-status-badge dps-checkin-status-badge--in">
+                    📥 Check-in: 09:30
+                </span>
+                <span class="dps-checkin-status-badge dps-checkin-status-badge--out">
+                    📤 Check-out: 11:15
+                </span>
+                <span class="dps-checkin-status-badge dps-checkin-status-badge--duration">
+                    ⏱️ 105 min
+                </span>
+            </div>
+            <div class="dps-safety-summary">
+                <span class="dps-safety-tag dps-safety-tag--alert">🩹 Feridinhas / Lesões</span>
+                <span class="dps-safety-tag dps-safety-tag--alert">⚠️ Alergia / Irritação na pele</span>
+                <span class="dps-safety-tag dps-safety-tag--info">🧶 Nós / Pelagem embaraçada</span>
+            </div>
+        </div>
+
+        <!-- ===========================
+             SEÇÃO 3: INDICADORES COMPACTOS
+             =========================== -->
+        <div class="section-divider">
+            <h2>🗂️ Indicadores Compactos (Cards de Agendamento)</h2>
+            <p>Visualização resumida para cards da agenda — checklist, check-in/out e alertas de segurança</p>
+        </div>
+
+        <!-- Card 1: Em andamento -->
+        <p class="scenario-label">Cenário 7: Card com checklist 67%, check-in feito, alertas de segurança</p>
+        <div class="appt-card">
+            <div class="appt-card-header">
+                <h3>🐕 Rex — Banho e Tosa</h3>
+                <span class="appt-time">09:30</span>
+            </div>
+            <div class="appt-card-meta">
+                Tutor: Maria Silva &bull; Golden Retriever &bull; Grande
+            </div>
+            <div class="compact-indicators-row">
+                <span class="dps-checklist-compact" title="Checklist Operacional">
+                    📋 67%
+                    <span class="dps-checklist-rework-badge">🔄 1</span>
+                </span>
+                <span class="dps-checkin-compact" title="Check-in / Check-out">
+                    📥
+                </span>
+                <span class="dps-safety-tag dps-safety-tag--alert" title="Feridinhas / Lesões">🩹</span>
+                <span class="dps-safety-tag dps-safety-tag--alert" title="Alergia / Irritação na pele">⚠️</span>
+                <span class="dps-safety-tag dps-safety-tag--info" title="Nós / Pelagem embaraçada">🧶</span>
+            </div>
+        </div>
+
+        <!-- Card 2: Completo -->
+        <p class="scenario-label">Cenário 8: Card completo — checklist 100%, check-out feito</p>
+        <div class="appt-card">
+            <div class="appt-card-header">
+                <h3>🐩 Luna — Banho Simples</h3>
+                <span class="appt-time">10:00</span>
+            </div>
+            <div class="appt-card-meta">
+                Tutor: João Santos &bull; Poodle &bull; Médio
+            </div>
+            <div class="compact-indicators-row">
+                <span class="dps-checklist-compact" title="Checklist Operacional">
+                    📋 100%
+                </span>
+                <span class="dps-checkin-compact" title="Check-in / Check-out">
+                    ✅
+                </span>
+            </div>
+        </div>
+
+        <!-- Card 3: Aguardando -->
+        <p class="scenario-label">Cenário 9: Card aguardando — checklist 0%, sem check-in</p>
+        <div class="appt-card">
+            <div class="appt-card-header">
+                <h3>🐱 Mimi — Banho Felino</h3>
+                <span class="appt-time">14:00</span>
+            </div>
+            <div class="appt-card-meta">
+                Tutor: Ana Costa &bull; Persa &bull; Pequeno
+            </div>
+            <div class="compact-indicators-row">
+                <span class="dps-checklist-compact" title="Checklist Operacional">
+                    📋 0%
+                </span>
+                <span class="dps-checkin-compact" title="Check-in / Check-out">
+                    ⬜
+                </span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 3rem; padding: 1rem; color: #79747e; font-size: 0.75rem;">
+            <p>desi.pet by PRObst — Agenda Add-on v1.2.0 — Preview estático</p>
+            <p>CSS: checklist-checkin.css + dps-design-tokens.css (M3 Expressive)</p>
+        </div>
+    </div>
+</body>
+</html>
