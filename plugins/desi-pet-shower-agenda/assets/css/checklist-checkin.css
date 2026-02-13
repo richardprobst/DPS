@@ -500,6 +500,8 @@
 @media (max-width: 768px) {
     .dps-detail-panels {
         grid-template-columns: 1fr;
+        padding: 12px;
+        gap: 12px;
     }
 }
 
@@ -515,11 +517,5 @@
 
     .dps-checkin-btn {
         justify-content: center;
-    }
-
-    .dps-detail-panels {
-        grid-template-columns: 1fr;
-        padding: 12px;
-        gap: 12px;
     }
 }

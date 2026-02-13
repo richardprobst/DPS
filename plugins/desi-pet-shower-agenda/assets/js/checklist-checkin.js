@@ -413,7 +413,9 @@
                 $detailRow.slideUp(200);
                 $btn.attr('aria-expanded', 'false');
             } else {
-                $detailRow.slideDown(200).css('display', 'table-row');
+                $detailRow.slideDown(200, function () {
+                    $(this).css('display', 'table-row');
+                });
                 $btn.attr('aria-expanded', 'true');
             }
         }
