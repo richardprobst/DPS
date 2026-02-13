@@ -1169,13 +1169,35 @@ trait DPS_Agenda_Renderer {
             echo '<span class="dps-payment-status dps-payment-status--pending">⏳ ' . esc_html__( 'Aguardando', 'dps-agenda-addon' ) . '</span>';
         }
         echo '</td>';
-        
+
+        // Coluna Checklist / Check-in (indicadores compactos + botão expandir)
+        echo '<td data-label="' . esc_attr__( 'Checklist / Check-in', 'dps-agenda-addon' ) . '">';
+        echo '<div class="dps-operational-indicators">';
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado por render_compact_indicators
+        echo DPS_Agenda_Addon::render_compact_indicators( $appt->ID );
+        echo '<button type="button" class="dps-expand-panels-btn" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Expandir checklist e check-in', 'dps-agenda-addon' ) . '" aria-expanded="false">▼</button>';
+        echo '</div>';
+        echo '</td>';
+
         // Coluna de Ações (reagendar)
         echo '<td data-label="' . esc_attr__( 'Ações', 'dps-agenda-addon' ) . '">';
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado pelo helper
         echo $this->render_reschedule_button( $appt->ID, $date, $time );
         echo '</td>';
         
+        echo '</tr>';
+
+        // Linha expansível com painéis de Checklist e Check-in
+        $total_cols = 7; // Horário + Pet + Tutor + Status + Pagamento + Checklist/Check-in + Ações
+        echo '<tr class="dps-detail-row" data-appt-id="' . esc_attr( $appt->ID ) . '" style="display: none;">';
+        echo '<td colspan="' . esc_attr( $total_cols ) . '">';
+        echo '<div class="dps-detail-panels">';
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado por render_checklist_panel
+        echo DPS_Agenda_Addon::render_checklist_panel( $appt->ID );
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado por render_checkin_panel
+        echo DPS_Agenda_Addon::render_checkin_panel( $appt->ID );
+        echo '</div>';
+        echo '</td>';
         echo '</tr>';
         
         return ob_get_clean();

@@ -448,6 +448,61 @@
     font-size: 11px;
 }
 
+/* Operational indicators wrapper in Tab 2 */
+.dps-operational-indicators {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Expand/collapse button for detail panels */
+.dps-expand-panels-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
+    border-radius: 6px;
+    background: var(--md-sys-color-surface-variant, #e7e0ec);
+    color: var(--md-sys-color-on-surface-variant, #49454f);
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.2s;
+    flex-shrink: 0;
+    padding: 0;
+    line-height: 1;
+}
+
+.dps-expand-panels-btn:hover {
+    background: var(--md-sys-color-primary-container, #eaddff);
+}
+
+.dps-expand-panels-btn[aria-expanded="true"] {
+    transform: rotate(180deg);
+    background: var(--md-sys-color-primary-container, #eaddff);
+}
+
+/* Detail row with full panels */
+.dps-detail-row td {
+    padding: 0 !important;
+    background: var(--md-sys-color-surface-variant, #f5f0fa);
+}
+
+.dps-detail-panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 16px;
+}
+
+@media (max-width: 768px) {
+    .dps-detail-panels {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .dps-safety-items {
@@ -460,5 +515,11 @@
 
     .dps-checkin-btn {
         justify-content: center;
+    }
+
+    .dps-detail-panels {
+        grid-template-columns: 1fr;
+        padding: 12px;
+        gap: 12px;
     }
 }
