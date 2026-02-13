@@ -638,7 +638,7 @@ class DPS_Push_API {
      * @return string Dados decodificados.
      */
     private static function base64url_decode( $data ) {
-        // Base64url → base64: restore standard alphabet and add '=' padding to nearest 4-byte boundary.
+        // Outer modulo handles the case where strlen % 4 === 0 (would yield 4 '=' without it).
         $padding = str_repeat( '=', ( 4 - strlen( $data ) % 4 ) % 4 );
         return base64_decode( strtr( $data, '-_', '+/' ) . $padding );
     }

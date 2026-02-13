@@ -163,6 +163,14 @@ class DPS_Push_Addon {
         return self::$instance;
     }
 
+    /** Impede clonagem do singleton. */
+    private function __clone() {}
+
+    /** Impede desserialização do singleton. */
+    public function __wakeup() {
+        throw new \RuntimeException( 'Não é possível desserializar singleton.' );
+    }
+
     /**
      * Construtor — inicializa módulos e registra hooks.
      */

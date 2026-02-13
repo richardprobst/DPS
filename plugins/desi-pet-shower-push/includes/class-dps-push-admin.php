@@ -53,7 +53,7 @@ class DPS_Push_Admin {
             return;
         }
 
-        $addon_url = plugin_dir_url( dirname( __FILE__ ) );
+        $addon_url = plugin_dir_url( dirname( __DIR__ ) . '/desi-pet-shower-push-addon.php' );
         $version   = '2.0.0';
 
         // Design tokens M3 Expressive.
