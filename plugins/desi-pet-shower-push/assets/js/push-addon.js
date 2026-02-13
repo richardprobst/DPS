@@ -196,6 +196,9 @@
 
         /**
          * Verifica status atual das notificações.
+         *
+         * Usa getRegistrations() em vez de navigator.serviceWorker.ready
+         * para encontrar o SW de push independentemente do scope da página atual.
          */
         checkStatus: function() {
             var self = this;
@@ -225,9 +228,20 @@
                 return;
             }
 
-            // Verificar inscrição existente
-            navigator.serviceWorker.ready.then(function(registration) {
-                return registration.pushManager.getSubscription();
+            // Verificar inscrição existente via getRegistrations (funciona fora do scope do SW)
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                var pushReg = null;
+                for (var i = 0; i < registrations.length; i++) {
+                    var active = registrations[i].active;
+                    if (active && active.scriptURL.indexOf('push-sw.js') !== -1) {
+                        pushReg = registrations[i];
+                        break;
+                    }
+                }
+                if (!pushReg) {
+                    return null;
+                }
+                return pushReg.pushManager.getSubscription();
             }).then(function(subscription) {
                 if (subscription) {
                     $indicator
@@ -257,6 +271,9 @@
 
         /**
          * Inscreve para notificações push.
+         *
+         * Aguarda o Service Worker ficar ativo antes de chamar pushManager.subscribe(),
+         * pois a subscription requer um SW no estado 'activated'.
          */
         subscribe: function(e) {
             e.preventDefault();
@@ -268,12 +285,21 @@
                 return;
             }
 
+            // Validar chave VAPID antes de tentar inscrição
+            if (!DPS_Push.vapid_public) {
+                alert(DPS_Push.messages.error + ' Chaves VAPID não configuradas.');
+                return;
+            }
+
             $btn.prop('disabled', true).text(DPS_Push.messages.subscribing);
 
             // Registrar Service Worker (usa scope padrão do diretório do SW)
             navigator.serviceWorker.register(DPS_Push.sw_url)
                 .then(function(registration) {
                     console.log('Service Worker registrado:', registration);
+                    return self.waitForActive(registration);
+                })
+                .then(function(registration) {
                     return registration.pushManager.subscribe({
                         userVisibleOnly: true,
                         applicationServerKey: self.urlBase64ToUint8Array(DPS_Push.vapid_public)
@@ -428,6 +454,39 @@
                 $result.addClass('error').text('✗ ' + DPS_Push.messages.error);
             }).always(function() {
                 $btn.prop('disabled', false).html(originalText);
+            });
+        },
+
+        /**
+         * Aguarda o Service Worker de uma registration ficar ativo.
+         *
+         * @param {ServiceWorkerRegistration} registration
+         * @return {Promise<ServiceWorkerRegistration>}
+         */
+        waitForActive: function(registration) {
+            return new Promise(function(resolve, reject) {
+                if (registration.active) {
+                    resolve(registration);
+                    return;
+                }
+
+                var sw = registration.installing || registration.waiting;
+                if (!sw) {
+                    reject(new Error('Service worker não encontrado na registration.'));
+                    return;
+                }
+
+                function onStateChange() {
+                    if (sw.state === 'activated') {
+                        sw.removeEventListener('statechange', onStateChange);
+                        resolve(registration);
+                    } else if (sw.state === 'redundant') {
+                        sw.removeEventListener('statechange', onStateChange);
+                        reject(new Error('Service worker se tornou redundante.'));
+                    }
+                }
+
+                sw.addEventListener('statechange', onStateChange);
             });
         },
 
