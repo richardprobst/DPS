@@ -219,6 +219,17 @@ class DPS_Push_Addon {
         }
     }
 
+    /**
+     * Renderiza a página de administração do Push.
+     *
+     * Proxy para o módulo admin (DPS_Push_Admin).
+     *
+     * @since 2.0.1
+     */
+    public function render_admin_page() {
+        $this->admin->render_admin_page();
+    }
+
     // ------------------------------------------------------------------
     // AJAX Handlers
     // ------------------------------------------------------------------
