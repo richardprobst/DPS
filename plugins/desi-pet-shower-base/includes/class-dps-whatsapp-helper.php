@@ -267,4 +267,102 @@ class DPS_WhatsApp_Helper {
             $amount
         );
     }
+
+    /**
+     * Gera mensagem padrão para relatório de Check-in/Check-out ao cliente.
+     *
+     * Monta uma mensagem com as informações identificadas durante o
+     * check-in e/ou check-out do pet (itens de segurança marcados,
+     * observações e duração do atendimento).
+     *
+     * NOTA DE SEGURANÇA: Os parâmetros vêm de post meta (banco de dados)
+     * e são usados em texto URL-encoded para WhatsApp. Não são HTML.
+     *
+     * @since 1.3.0
+     * @param array $report_data {
+     *     Dados do relatório de check-in/check-out.
+     *
+     *     @type string $client_name       Nome do cliente/tutor.
+     *     @type string $pet_name          Nome do pet.
+     *     @type string $checkin_time      Hora do check-in (H:i).
+     *     @type string $checkout_time     Hora do check-out (H:i).
+     *     @type string $duration          Duração formatada (ex.: "45 min").
+     *     @type array  $safety_summary    Itens de segurança marcados (icon, label, notes).
+     *     @type string $observations_in   Observações do check-in.
+     *     @type string $observations_out  Observações do check-out.
+     * }
+     * @return string Mensagem formatada pronta para WhatsApp.
+     */
+    public static function get_checkin_report_message( $report_data ) {
+        $client_name    = isset( $report_data['client_name'] ) ? $report_data['client_name'] : '';
+        $pet_name       = isset( $report_data['pet_name'] ) ? $report_data['pet_name'] : '';
+        $checkin_time   = isset( $report_data['checkin_time'] ) ? $report_data['checkin_time'] : '';
+        $checkout_time  = isset( $report_data['checkout_time'] ) ? $report_data['checkout_time'] : '';
+        $duration       = isset( $report_data['duration'] ) ? $report_data['duration'] : '';
+        $safety_summary = isset( $report_data['safety_summary'] ) ? $report_data['safety_summary'] : [];
+        $obs_in         = isset( $report_data['observations_in'] ) ? $report_data['observations_in'] : '';
+        $obs_out        = isset( $report_data['observations_out'] ) ? $report_data['observations_out'] : '';
+
+        $lines = [];
+
+        // Saudação
+        $lines[] = sprintf(
+            __( 'Olá %s! Segue o relatório do atendimento do(a) *%s*:', 'desi-pet-shower' ),
+            $client_name,
+            $pet_name
+        );
+        $lines[] = '';
+
+        // Horários
+        if ( $checkin_time ) {
+            $lines[] = '📥 ' . sprintf( __( 'Check-in: %s', 'desi-pet-shower' ), $checkin_time );
+        }
+        if ( $checkout_time ) {
+            $lines[] = '📤 ' . sprintf( __( 'Check-out: %s', 'desi-pet-shower' ), $checkout_time );
+        }
+        if ( $duration ) {
+            $lines[] = '⏱️ ' . sprintf( __( 'Duração: %s', 'desi-pet-shower' ), $duration );
+        }
+
+        // Itens de segurança identificados
+        if ( ! empty( $safety_summary ) ) {
+            $lines[] = '';
+            $lines[] = '⚠️ ' . __( 'Itens identificados durante o atendimento:', 'desi-pet-shower' );
+            foreach ( $safety_summary as $item ) {
+                $icon  = isset( $item['icon'] ) ? $item['icon'] : '';
+                $label = isset( $item['label'] ) ? $item['label'] : '';
+                $notes = isset( $item['notes'] ) ? trim( $item['notes'] ) : '';
+
+                $line = $icon . ' ' . $label;
+                if ( $notes ) {
+                    $line .= ' — ' . $notes;
+                }
+                $lines[] = '  • ' . $line;
+            }
+        }
+
+        // Observações
+        $has_obs = false;
+        if ( $obs_in ) {
+            if ( ! $has_obs ) {
+                $lines[] = '';
+                $lines[] = '📝 ' . __( 'Observações:', 'desi-pet-shower' );
+                $has_obs = true;
+            }
+            $lines[] = $obs_in;
+        }
+        if ( $obs_out ) {
+            if ( ! $has_obs ) {
+                $lines[] = '';
+                $lines[] = '📝 ' . __( 'Observações:', 'desi-pet-shower' );
+            }
+            $lines[] = $obs_out;
+        }
+
+        // Rodapé
+        $lines[] = '';
+        $lines[] = __( 'Qualquer dúvida, estamos à disposição! 🐾', 'desi-pet-shower' );
+
+        return implode( "\n", $lines );
+    }
 }

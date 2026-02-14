@@ -1051,6 +1051,7 @@ class DPS_Agenda_Addon {
                     'error'            => __( 'Erro ao salvar. Tente novamente.', 'dps-agenda-addon' ),
                     'checkin'          => __( 'Check-in', 'dps-agenda-addon' ),
                     'checkout'         => __( 'Check-out', 'dps-agenda-addon' ),
+                    'sendWhatsApp'     => __( 'Enviar relatório via WhatsApp', 'dps-agenda-addon' ),
                 ],
             ] );
             
@@ -1186,6 +1187,24 @@ class DPS_Agenda_Addon {
         // Charges/notes page: pode precisar de estilos extras
         if ( $is_charges_target_page || $has_charges_shortcode ) {
             // carregue CSS para tabelas se necessário; podemos reutilizar estilos de dps-table se o tema os define.
+        }
+
+        // Base page (histórico, página do cliente): carrega CSS dos resumos operacionais
+        $has_base_shortcode   = $current_post ? has_shortcode( $current_content, 'dps_base' ) : false;
+        $has_portal_shortcode = $current_post ? has_shortcode( $current_content, 'dps_client_portal' ) : false;
+        if ( $has_base_shortcode || $has_portal_shortcode ) {
+            wp_enqueue_style(
+                'dps-design-tokens',
+                DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
+                [],
+                DPS_BASE_VERSION
+            );
+            wp_enqueue_style(
+                'dps-checklist-checkin-css',
+                plugin_dir_url( __FILE__ ) . 'assets/css/checklist-checkin.css',
+                [ 'dps-design-tokens' ],
+                '1.0.0'
+            );
         }
     }
 
@@ -1771,6 +1790,7 @@ class DPS_Agenda_Addon {
             echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>TaxiDog</th>';
             echo '<th>' . esc_html__( 'Observações', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Operacional', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {
@@ -4627,6 +4647,7 @@ class DPS_Agenda_Addon {
                 ? sprintf( __( '%d min', 'dps-agenda-addon' ), $duration )
                 : '',
             'safety_summary' => [],
+            'whatsapp_url'   => '',
         ];
 
         $summary = DPS_Agenda_Checkin_Service::get_safety_summary( $appointment_id );
@@ -4638,7 +4659,66 @@ class DPS_Agenda_Addon {
             ];
         }
 
+        // Gera link WhatsApp se houver check-in e helpers disponíveis.
+        if ( $checkin && class_exists( 'DPS_WhatsApp_Helper' ) ) {
+            $response['whatsapp_url'] = $this->build_checkin_whatsapp_url( $appointment_id );
+        }
+
         return $response;
+    }
+
+    /**
+     * Monta a URL do WhatsApp com mensagem de relatório do check-in/check-out.
+     *
+     * @since 1.3.0
+     * @param int $appointment_id ID do agendamento.
+     * @return string URL do WhatsApp ou string vazia se telefone indisponível.
+     */
+    private function build_checkin_whatsapp_url( $appointment_id ) {
+        $client_id = get_post_meta( $appointment_id, 'appointment_client_id', true );
+        $pet_id    = get_post_meta( $appointment_id, 'appointment_pet_id', true );
+
+        $client_post = $client_id ? get_post( $client_id ) : null;
+        $pet_post    = $pet_id ? get_post( $pet_id ) : null;
+
+        $client_phone = $client_post ? get_post_meta( $client_post->ID, 'client_phone', true ) : '';
+        if ( empty( $client_phone ) ) {
+            return '';
+        }
+
+        $client_name = $client_post ? $client_post->post_title : '';
+        $pet_name    = $pet_post ? $pet_post->post_title : '';
+
+        $checkin  = DPS_Agenda_Checkin_Service::get_checkin( $appointment_id );
+        $checkout = DPS_Agenda_Checkin_Service::get_checkout( $appointment_id );
+        $duration = DPS_Agenda_Checkin_Service::get_duration_minutes( $appointment_id );
+
+        $report_data = [
+            'client_name'    => $client_name,
+            'pet_name'       => $pet_name,
+            'checkin_time'   => $checkin ? mysql2date( 'H:i', $checkin['time'] ) : '',
+            'checkout_time'  => $checkout ? mysql2date( 'H:i', $checkout['time'] ) : '',
+            'duration'       => false !== $duration
+                ? sprintf( __( '%d min', 'dps-agenda-addon' ), $duration )
+                : '',
+            'safety_summary' => [],
+            'observations_in'  => $checkin && ! empty( $checkin['observations'] ) ? $checkin['observations'] : '',
+            'observations_out' => $checkout && ! empty( $checkout['observations'] ) ? $checkout['observations'] : '',
+        ];
+
+        // Monta safety_summary com notas para a mensagem.
+        $summary = DPS_Agenda_Checkin_Service::get_safety_summary( $appointment_id );
+        foreach ( $summary as $item ) {
+            $report_data['safety_summary'][] = [
+                'icon'  => $item['icon'],
+                'label' => $item['label'],
+                'notes' => isset( $item['notes'] ) ? $item['notes'] : '',
+            ];
+        }
+
+        $message = DPS_WhatsApp_Helper::get_checkin_report_message( $report_data );
+
+        return DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $message );
     }
 
     /* ===========================
@@ -4800,6 +4880,125 @@ class DPS_Agenda_Addon {
                     <button type="button" class="dps-checkin-btn dps-checkin-btn--checkout">📤 <?php esc_html_e( 'Check-out', 'dps-agenda-addon' ); ?></button>
                 <?php endif; ?>
             </div>
+
+            <?php
+            // Botão WhatsApp — exibido quando há check-in registrado.
+            if ( $checkin ) :
+                $instance   = self::get_instance();
+                $wa_url     = $instance->build_checkin_whatsapp_url( $appointment_id );
+                $has_wa_url = ! empty( $wa_url );
+            ?>
+                <div class="dps-checkin-whatsapp<?php echo $has_wa_url ? '' : ' dps-checkin-whatsapp--hidden'; ?>">
+                    <a href="<?php echo $has_wa_url ? esc_url( $wa_url ) : '#'; ?>"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="dps-checkin-btn dps-checkin-btn--whatsapp">
+                        📱 <?php esc_html_e( 'Enviar relatório via WhatsApp', 'dps-agenda-addon' ); ?>
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Renderiza resumo compacto de Checklist e Check-in/Check-out para uso em históricos.
+     *
+     * Exibe informações somente-leitura sobre o progresso do checklist operacional,
+     * horários de check-in/check-out, duração e itens de segurança identificados.
+     * Projetado para ser chamado de qualquer view de histórico (aba histórico,
+     * página do cliente, portal do cliente, timeline).
+     *
+     * @since 1.3.0
+     * @param int  $appointment_id ID do agendamento.
+     * @param bool $is_public      Se true, omite informações sensíveis (ex.: portal do cliente).
+     * @return string HTML do resumo ou string vazia se não houver dados.
+     */
+    public static function render_checkin_checklist_summary( $appointment_id, $is_public = false ) {
+        $appointment_id = absint( $appointment_id );
+        if ( ! $appointment_id ) {
+            return '';
+        }
+
+        // Verifica se as service classes estão disponíveis.
+        if ( ! class_exists( 'DPS_Agenda_Checklist_Service' ) || ! class_exists( 'DPS_Agenda_Checkin_Service' ) ) {
+            return '';
+        }
+
+        $progress     = DPS_Agenda_Checklist_Service::get_progress( $appointment_id );
+        $rework_count = DPS_Agenda_Checklist_Service::count_reworks( $appointment_id );
+        $checkin      = DPS_Agenda_Checkin_Service::get_checkin( $appointment_id );
+        $checkout     = DPS_Agenda_Checkin_Service::get_checkout( $appointment_id );
+        $duration     = DPS_Agenda_Checkin_Service::get_duration_minutes( $appointment_id );
+        $summary      = DPS_Agenda_Checkin_Service::get_safety_summary( $appointment_id );
+
+        // Se não há dados relevantes, retorna vazio.
+        $has_checklist = $progress > 0;
+        $has_checkin   = (bool) $checkin;
+        if ( ! $has_checklist && ! $has_checkin ) {
+            return '';
+        }
+
+        ob_start();
+        ?>
+        <div class="dps-history-ops-summary">
+            <?php if ( ! $is_public && $has_checklist ) : ?>
+                <div class="dps-history-ops-row">
+                    <span class="dps-history-ops-label">📋 <?php esc_html_e( 'Checklist', 'dps-agenda-addon' ); ?></span>
+                    <span class="dps-history-ops-value <?php echo 100 === $progress ? 'dps-history-ops-value--complete' : ''; ?>">
+                        <?php echo esc_html( $progress ); ?>%
+                    </span>
+                    <?php if ( $rework_count > 0 ) : ?>
+                        <span class="dps-history-ops-badge dps-history-ops-badge--rework">🔄 <?php echo esc_html( $rework_count ); ?></span>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ( $has_checkin ) : ?>
+                <div class="dps-history-ops-row">
+                    <span class="dps-history-ops-label">📥 <?php esc_html_e( 'Check-in', 'dps-agenda-addon' ); ?></span>
+                    <span class="dps-history-ops-value"><?php echo esc_html( mysql2date( 'H:i', $checkin['time'] ) ); ?></span>
+                </div>
+            <?php endif; ?>
+
+            <?php if ( $checkout ) : ?>
+                <div class="dps-history-ops-row">
+                    <span class="dps-history-ops-label">📤 <?php esc_html_e( 'Check-out', 'dps-agenda-addon' ); ?></span>
+                    <span class="dps-history-ops-value"><?php echo esc_html( mysql2date( 'H:i', $checkout['time'] ) ); ?></span>
+                </div>
+            <?php endif; ?>
+
+            <?php if ( false !== $duration ) : ?>
+                <div class="dps-history-ops-row">
+                    <span class="dps-history-ops-label">⏱️ <?php esc_html_e( 'Duração', 'dps-agenda-addon' ); ?></span>
+                    <span class="dps-history-ops-value"><?php printf( esc_html__( '%d min', 'dps-agenda-addon' ), $duration ); ?></span>
+                </div>
+            <?php endif; ?>
+
+            <?php if ( ! empty( $summary ) ) : ?>
+                <div class="dps-history-ops-safety">
+                    <?php foreach ( $summary as $item ) : ?>
+                        <span class="dps-safety-tag dps-safety-tag--<?php echo esc_attr( $item['severity'] ); ?>" title="<?php echo esc_attr( $item['notes'] ); ?>">
+                            <?php echo esc_html( $item['icon'] . ' ' . $item['label'] ); ?>
+                        </span>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ( $has_checkin && ! empty( $checkin['observations'] ) ) : ?>
+                <div class="dps-history-ops-obs">
+                    <span class="dps-history-ops-label">📝</span>
+                    <span class="dps-history-ops-obs-text"><?php echo esc_html( $checkin['observations'] ); ?></span>
+                </div>
+            <?php endif; ?>
+
+            <?php if ( $checkout && ! empty( $checkout['observations'] ) ) : ?>
+                <div class="dps-history-ops-obs">
+                    <span class="dps-history-ops-label">📝</span>
+                    <span class="dps-history-ops-obs-text"><?php echo esc_html( $checkout['observations'] ); ?></span>
+                </div>
+            <?php endif; ?>
         </div>
         <?php
         return ob_get_clean();

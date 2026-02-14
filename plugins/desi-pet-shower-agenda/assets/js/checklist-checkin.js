@@ -334,15 +334,15 @@
         var statusHtml = '';
 
         if (data.checkin_time) {
-            statusHtml += '<span class="dps-checkin-status-badge dps-checkin-status-badge--in">📥 Check-in: ' + data.checkin_time + '</span>';
+            statusHtml += '<span class="dps-checkin-status-badge dps-checkin-status-badge--in">📥 Check-in: ' + escapeHtml(data.checkin_time) + '</span>';
         }
 
         if (data.checkout_time) {
-            statusHtml += '<span class="dps-checkin-status-badge dps-checkin-status-badge--out">📤 Check-out: ' + data.checkout_time + '</span>';
+            statusHtml += '<span class="dps-checkin-status-badge dps-checkin-status-badge--out">📤 Check-out: ' + escapeHtml(data.checkout_time) + '</span>';
         }
 
         if (data.duration) {
-            statusHtml += '<span class="dps-checkin-status-badge dps-checkin-status-badge--duration">⏱️ ' + data.duration + '</span>';
+            statusHtml += '<span class="dps-checkin-status-badge dps-checkin-status-badge--duration">⏱️ ' + escapeHtml(data.duration) + '</span>';
         }
 
         $panel.find('.dps-checkin-status').html(statusHtml);
@@ -352,16 +352,16 @@
         $actions.empty();
 
         if (!data.has_checkin) {
-            $actions.append('<button type="button" class="dps-checkin-btn dps-checkin-btn--checkin">📥 ' + cfg.messages.checkin + '</button>');
+            $actions.append('<button type="button" class="dps-checkin-btn dps-checkin-btn--checkin">📥 ' + escapeHtml(cfg.messages.checkin) + '</button>');
         } else if (!data.has_checkout) {
-            $actions.append('<button type="button" class="dps-checkin-btn dps-checkin-btn--checkout">📤 ' + cfg.messages.checkout + '</button>');
+            $actions.append('<button type="button" class="dps-checkin-btn dps-checkin-btn--checkout">📤 ' + escapeHtml(cfg.messages.checkout) + '</button>');
         }
 
         // Mostra resumo de safety items se check-in foi feito
         if (data.safety_summary && data.safety_summary.length > 0) {
             var summaryHtml = '<div class="dps-safety-summary">';
             $.each(data.safety_summary, function (_, item) {
-                summaryHtml += '<span class="dps-safety-tag dps-safety-tag--' + item.severity + '">' + item.icon + ' ' + item.label + '</span>';
+                summaryHtml += '<span class="dps-safety-tag dps-safety-tag--' + escapeHtml(item.severity) + '">' + escapeHtml(item.icon) + ' ' + escapeHtml(item.label) + '</span>';
             });
             summaryHtml += '</div>';
 
@@ -377,6 +377,21 @@
         // Se ambos check-in e check-out foram feitos, oculta o formulário
         if (data.has_checkin && data.has_checkout) {
             $panel.find('.dps-safety-items, .dps-checkin-observations').slideUp(200);
+        }
+
+        // Atualiza botão WhatsApp
+        if (data.has_checkin && data.whatsapp_url) {
+            var $waContainer = $panel.find('.dps-checkin-whatsapp');
+            if ($waContainer.length) {
+                $waContainer.find('.dps-checkin-btn--whatsapp').attr('href', data.whatsapp_url);
+                $waContainer.removeClass('dps-checkin-whatsapp--hidden').show();
+            } else {
+                var waHtml = '<div class="dps-checkin-whatsapp">' +
+                    '<a href="' + data.whatsapp_url + '" target="_blank" rel="noopener noreferrer" class="dps-checkin-btn dps-checkin-btn--whatsapp">' +
+                    '📱 ' + escapeHtml(cfg.messages.sendWhatsApp) +
+                    '</a></div>';
+                $panel.find('.dps-checkin-actions').after(waHtml);
+            }
         }
 
         // Atualiza indicadores compactos na linha do agendamento

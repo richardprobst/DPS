@@ -452,6 +452,7 @@ class DPS_Portal_Renderer {
         echo '<th>' . esc_html__( 'Pet', 'dps-client-portal' ) . '</th>';
         echo '<th>' . esc_html__( 'Serviços', 'dps-client-portal' ) . '</th>';
         echo '<th>' . esc_html__( 'Status', 'dps-client-portal' ) . '</th>';
+        echo '<th>' . esc_html__( 'Detalhes', 'dps-client-portal' ) . '</th>';
         echo '</tr></thead><tbody>';
         
         foreach ( $appointments as $appt ) {
@@ -485,6 +486,13 @@ class DPS_Portal_Renderer {
         echo '<td data-label="' . esc_attr__( 'Pet', 'dps-client-portal' ) . '">' . esc_html( $pet_name ) . '</td>';
         echo '<td data-label="' . esc_attr__( 'Serviços', 'dps-client-portal' ) . '">' . $services_text . '</td>';
         echo '<td data-label="' . esc_attr__( 'Status', 'dps-client-portal' ) . '">' . esc_html( ucfirst( $status ) ) . '</td>';
+        // Coluna Detalhes (Check-in/Check-out e itens de segurança, sem dados internos)
+        echo '<td data-label="' . esc_attr__( 'Detalhes', 'dps-client-portal' ) . '">';
+        if ( class_exists( 'DPS_Agenda_Addon' ) ) {
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado pelo render helper
+            echo DPS_Agenda_Addon::render_checkin_checklist_summary( $appointment->ID, true );
+        }
+        echo '</td>';
         echo '</tr>';
     }
 
@@ -1785,6 +1793,17 @@ class DPS_Portal_Renderer {
             echo '<p class="dps-timeline-notes__text">' . esc_html( $service['observations'] ) . '</p>';
             echo '</details>';
             echo '</div>';
+        }
+        
+        // Resumo de Check-in/Check-out e itens de segurança (portal público)
+        if ( $appointment_id > 0 && class_exists( 'DPS_Agenda_Addon' ) ) {
+            $ops_summary = DPS_Agenda_Addon::render_checkin_checklist_summary( $appointment_id, true );
+            if ( ! empty( $ops_summary ) ) {
+                echo '<div class="dps-timeline-ops">';
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado pelo render helper
+                echo $ops_summary;
+                echo '</div>';
+            }
         }
         
         // Ações
