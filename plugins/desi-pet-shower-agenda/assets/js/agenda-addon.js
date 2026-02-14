@@ -1018,7 +1018,12 @@
         row.css('background-color', '#d1fae5');
         setTimeout(function(){
           row.css('background-color', '');
-          location.reload(); // Reload para atualizar a coluna de pagamento
+          // Se status é finalizado ou finalizado_pago, abre popup do checklist operacional
+          if (status === 'finalizado' || status === 'finalizado_pago') {
+            openChecklistPopup(apptId);
+          } else {
+            location.reload();
+          }
         }, 800);
       } else {
         if (resp && resp.data && resp.data.error_code === 'version_conflict') {
@@ -1351,9 +1356,81 @@
     });
   });
 
+  /* ===========================
+     CHECKLIST OPERACIONAL — POPUP
+     =========================== */
+
+  /**
+   * Abre popup com o checklist operacional carregado via AJAX.
+   *
+   * @param {number} apptId ID do agendamento.
+   */
+  function openChecklistPopup(apptId) {
+    // Remove popup existente
+    $('.dps-checklist-modal-overlay').remove();
+
+    var loadingMsg = escapeHtml(getMessage('checklistLoading', 'Carregando checklist...'));
+    var titleMsg = escapeHtml(getMessage('checklistTitle', 'Checklist Operacional'));
+    var closeMsg = escapeHtml(getMessage('close', 'Fechar'));
+
+    var html =
+      '<div class="dps-checklist-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dps-checklist-modal-title">' +
+        '<div class="dps-checklist-modal">' +
+          '<div class="dps-checklist-modal-header">' +
+            '<h3 id="dps-checklist-modal-title">📋 ' + titleMsg + '</h3>' +
+            '<button type="button" class="dps-checklist-modal-close" title="' + closeMsg + '">&times;</button>' +
+          '</div>' +
+          '<div class="dps-checklist-modal-body">' +
+            '<p class="dps-checklist-modal-loading">' + loadingMsg + '</p>' +
+          '</div>' +
+          '<div class="dps-checklist-modal-footer">' +
+            '<button type="button" class="dps-checklist-btn dps-checklist-modal-close-btn">' + closeMsg + '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    $('body').append(html);
+
+    // Carrega o painel do checklist via AJAX
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_get_checklist_panel',
+      appointment_id: apptId,
+      nonce: DPS_AG_Addon.nonce_checklist
+    }, function(resp) {
+      if (resp && resp.success && resp.data && resp.data.html) {
+        $('.dps-checklist-modal-body').html(resp.data.html);
+      } else {
+        var errorMsg = getMessage('checklistError', 'Não foi possível carregar o checklist.');
+        $('.dps-checklist-modal-body').html('<p class="dps-checklist-modal-error">' + escapeHtml(errorMsg) + '</p>');
+      }
+    }).fail(function() {
+      var errorMsg = getMessage('checklistError', 'Não foi possível carregar o checklist.');
+      $('.dps-checklist-modal-body').html('<p class="dps-checklist-modal-error">' + escapeHtml(errorMsg) + '</p>');
+    });
+  }
+
+  // Fechar popup do checklist
+  $(document).on('click', '.dps-checklist-modal-close, .dps-checklist-modal-close-btn', function() {
+    $('.dps-checklist-modal-overlay').remove();
+    location.reload();
+  });
+
+  // Fechar popup do checklist clicando fora
+  $(document).on('click', '.dps-checklist-modal-overlay', function(e) {
+    if ($(e.target).hasClass('dps-checklist-modal-overlay')) {
+      $('.dps-checklist-modal-overlay').remove();
+      location.reload();
+    }
+  });
+
   // Fechar modais com ESC
   $(document).on('keydown', function(e){
     if (e.key === 'Escape') {
+      if ($('.dps-checklist-modal-overlay').length) {
+        $('.dps-checklist-modal-overlay').remove();
+        location.reload();
+        return;
+      }
       $('.dps-services-modal, .dps-payment-modal').remove();
       closeAppointmentModal();
     }

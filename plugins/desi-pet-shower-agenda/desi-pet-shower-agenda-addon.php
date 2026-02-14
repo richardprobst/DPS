@@ -303,9 +303,10 @@ class DPS_Agenda_Addon {
         add_action( 'wp_ajax_dps_get_appointment_history', [ $this, 'get_appointment_history_ajax' ] );
         add_action( 'wp_ajax_dps_get_admin_kpis', [ $this, 'get_admin_kpis_ajax' ] );
 
-        // Checklist Operacional: AJAX para atualizar etapas e registrar retrabalho
+        // Checklist Operacional: AJAX para atualizar etapas, registrar retrabalho e obter painel
         add_action( 'wp_ajax_dps_checklist_update', [ $this, 'checklist_update_ajax' ] );
         add_action( 'wp_ajax_dps_checklist_rework', [ $this, 'checklist_rework_ajax' ] );
+        add_action( 'wp_ajax_dps_get_checklist_panel', [ $this, 'get_checklist_panel_ajax' ] );
 
         // Check-in / Check-out: AJAX para registrar entrada e saída
         add_action( 'wp_ajax_dps_appointment_checkin', [ $this, 'appointment_checkin_ajax' ] );
@@ -1143,6 +1144,8 @@ class DPS_Agenda_Addon {
                 'nonce_history'   => wp_create_nonce( 'dps_appointment_history' ),
                 'nonce_modal_form'=> wp_create_nonce( 'dps_modal_appointment' ),
                 'nonce_kpis'      => wp_create_nonce( 'dps_admin_kpis' ),
+                // Checklist popup
+                'nonce_checklist' => wp_create_nonce( 'dps_checklist' ),
                 'statuses'      => [
                     'pendente'        => __( 'Pendente', 'dps-agenda-addon' ),
                     'finalizado'      => __( 'Finalizado', 'dps-agenda-addon' ),
@@ -1172,6 +1175,9 @@ class DPS_Agenda_Addon {
                     'formLoading'     => __( 'Carregando formulário de agendamento...', 'dps-agenda-addon' ),
                     'saveError'       => __( 'Não foi possível salvar o agendamento.', 'dps-agenda-addon' ),
                     'close'           => __( 'Fechar', 'dps-agenda-addon' ),
+                    'checklistTitle'  => __( 'Checklist Operacional', 'dps-agenda-addon' ),
+                    'checklistLoading'=> __( 'Carregando checklist...', 'dps-agenda-addon' ),
+                    'checklistError'  => __( 'Não foi possível carregar o checklist.', 'dps-agenda-addon' ),
                 ],
                 'reloadDelay'  => 700,
             ] );
@@ -1704,7 +1710,7 @@ class DPS_Agenda_Addon {
             echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Status do Serviço', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html( $column_labels['payment'] ?? __( 'Pagamento', 'dps-agenda-addon' ) ) . '</th>';
-            echo '<th>' . esc_html__( 'Checklist / Check-in', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Check-in / Check-out', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {
@@ -4467,6 +4473,33 @@ class DPS_Agenda_Addon {
             'progress'     => DPS_Agenda_Checklist_Service::get_progress( $appointment_id ),
             'rework_count' => DPS_Agenda_Checklist_Service::count_reworks( $appointment_id ),
         ] );
+    }
+
+    /**
+     * AJAX: Retorna o HTML do painel de checklist para exibição em popup.
+     *
+     * Espera POST: appointment_id, nonce (dps_checklist).
+     *
+     * @since 1.5.0
+     */
+    public function get_checklist_panel_ajax() {
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+        }
+
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checklist' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
+
+        $appointment_id = isset( $_POST['appointment_id'] ) ? absint( $_POST['appointment_id'] ) : 0;
+        if ( ! $appointment_id ) {
+            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+        }
+
+        $html = self::render_checklist_panel( $appointment_id );
+
+        wp_send_json_success( [ 'html' => $html ] );
     }
 
     /* ===========================

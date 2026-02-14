@@ -1170,12 +1170,29 @@ trait DPS_Agenda_Renderer {
         }
         echo '</td>';
 
-        // Coluna Checklist / Check-in (indicadores compactos + botão expandir)
-        echo '<td data-label="' . esc_attr__( 'Checklist / Check-in', 'dps-agenda-addon' ) . '">';
+        // Coluna Check-in / Check-out (indicadores compactos + botão expandir painel de check-in)
+        echo '<td data-label="' . esc_attr__( 'Check-in / Check-out', 'dps-agenda-addon' ) . '">';
         echo '<div class="dps-operational-indicators">';
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado por render_compact_indicators
-        echo DPS_Agenda_Addon::render_compact_indicators( $appt->ID );
-        echo '<button type="button" class="dps-expand-panels-btn" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Expandir checklist e check-in', 'dps-agenda-addon' ) . '" aria-expanded="false">▼</button>';
+        $has_checkin  = DPS_Agenda_Checkin_Service::has_checkin( $appt->ID );
+        $has_checkout = DPS_Agenda_Checkin_Service::has_checkout( $appt->ID );
+        $summary      = DPS_Agenda_Checkin_Service::get_safety_summary( $appt->ID );
+        ?>
+        <span class="dps-checkin-compact" title="<?php esc_attr_e( 'Check-in / Check-out', 'dps-agenda-addon' ); ?>">
+            <?php if ( $has_checkout ) : ?>
+                ✅
+            <?php elseif ( $has_checkin ) : ?>
+                📥
+            <?php else : ?>
+                ⬜
+            <?php endif; ?>
+        </span>
+        <?php foreach ( $summary as $item ) : ?>
+            <span class="dps-safety-tag dps-safety-tag--<?php echo esc_attr( $item['severity'] ); ?>" title="<?php echo esc_attr( $item['label'] ); ?>">
+                <?php echo esc_html( $item['icon'] ); ?>
+            </span>
+        <?php endforeach; ?>
+        <?php
+        echo '<button type="button" class="dps-expand-panels-btn" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Expandir check-in / check-out', 'dps-agenda-addon' ) . '" aria-expanded="false">▼</button>';
         echo '</div>';
         echo '</td>';
 
@@ -1187,13 +1204,11 @@ trait DPS_Agenda_Renderer {
         
         echo '</tr>';
 
-        // Linha expansível com painéis de Checklist e Check-in
-        $total_cols = 7; // Horário + Pet + Tutor + Status + Pagamento + Checklist/Check-in + Ações
+        // Linha expansível com painel de Check-in / Check-out
+        $total_cols = 7; // Horário + Pet + Tutor + Status + Pagamento + Check-in/Check-out + Ações
         echo '<tr class="dps-detail-row" data-appt-id="' . esc_attr( $appt->ID ) . '" style="display: none;">';
         echo '<td colspan="' . esc_attr( $total_cols ) . '">';
         echo '<div class="dps-detail-panels">';
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado por render_checklist_panel
-        echo DPS_Agenda_Addon::render_checklist_panel( $appt->ID );
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado por render_checkin_panel
         echo DPS_Agenda_Addon::render_checkin_panel( $appt->ID );
         echo '</div>';
