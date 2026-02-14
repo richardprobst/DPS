@@ -400,6 +400,22 @@
     cursor: not-allowed;
 }
 
+/* WhatsApp report button */
+.dps-checkin-whatsapp {
+    margin-top: 8px;
+}
+
+.dps-checkin-btn--whatsapp {
+    background: #25d366;
+    color: #fff;
+    text-decoration: none;
+}
+
+.dps-checkin-btn--whatsapp:hover {
+    background: #1ebe57;
+    color: #fff;
+}
+
 /* Safety summary (read-only, after check-in) */
 .dps-safety-summary {
     display: flex;

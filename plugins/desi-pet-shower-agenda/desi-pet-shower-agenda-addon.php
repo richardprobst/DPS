@@ -1051,6 +1051,7 @@ class DPS_Agenda_Addon {
                     'error'            => __( 'Erro ao salvar. Tente novamente.', 'dps-agenda-addon' ),
                     'checkin'          => __( 'Check-in', 'dps-agenda-addon' ),
                     'checkout'         => __( 'Check-out', 'dps-agenda-addon' ),
+                    'sendWhatsApp'     => __( 'Enviar relatório via WhatsApp', 'dps-agenda-addon' ),
                 ],
             ] );
             
@@ -4627,6 +4628,7 @@ class DPS_Agenda_Addon {
                 ? sprintf( __( '%d min', 'dps-agenda-addon' ), $duration )
                 : '',
             'safety_summary' => [],
+            'whatsapp_url'   => '',
         ];
 
         $summary = DPS_Agenda_Checkin_Service::get_safety_summary( $appointment_id );
@@ -4638,7 +4640,66 @@ class DPS_Agenda_Addon {
             ];
         }
 
+        // Gera link WhatsApp se houver check-in e helpers disponíveis.
+        if ( $checkin && class_exists( 'DPS_WhatsApp_Helper' ) ) {
+            $response['whatsapp_url'] = $this->build_checkin_whatsapp_url( $appointment_id );
+        }
+
         return $response;
+    }
+
+    /**
+     * Monta a URL do WhatsApp com mensagem de relatório do check-in/check-out.
+     *
+     * @since 1.3.0
+     * @param int $appointment_id ID do agendamento.
+     * @return string URL do WhatsApp ou string vazia se telefone indisponível.
+     */
+    private function build_checkin_whatsapp_url( $appointment_id ) {
+        $client_id = get_post_meta( $appointment_id, 'appointment_client_id', true );
+        $pet_id    = get_post_meta( $appointment_id, 'appointment_pet_id', true );
+
+        $client_post = $client_id ? get_post( $client_id ) : null;
+        $pet_post    = $pet_id ? get_post( $pet_id ) : null;
+
+        $client_phone = $client_post ? get_post_meta( $client_post->ID, 'client_phone', true ) : '';
+        if ( empty( $client_phone ) ) {
+            return '';
+        }
+
+        $client_name = $client_post ? $client_post->post_title : '';
+        $pet_name    = $pet_post ? $pet_post->post_title : '';
+
+        $checkin  = DPS_Agenda_Checkin_Service::get_checkin( $appointment_id );
+        $checkout = DPS_Agenda_Checkin_Service::get_checkout( $appointment_id );
+        $duration = DPS_Agenda_Checkin_Service::get_duration_minutes( $appointment_id );
+
+        $report_data = [
+            'client_name'    => $client_name,
+            'pet_name'       => $pet_name,
+            'checkin_time'   => $checkin ? mysql2date( 'H:i', $checkin['time'] ) : '',
+            'checkout_time'  => $checkout ? mysql2date( 'H:i', $checkout['time'] ) : '',
+            'duration'       => false !== $duration
+                ? sprintf( __( '%d min', 'dps-agenda-addon' ), $duration )
+                : '',
+            'safety_summary' => [],
+            'observations_in'  => $checkin && ! empty( $checkin['observations'] ) ? $checkin['observations'] : '',
+            'observations_out' => $checkout && ! empty( $checkout['observations'] ) ? $checkout['observations'] : '',
+        ];
+
+        // Monta safety_summary com notas para a mensagem.
+        $summary = DPS_Agenda_Checkin_Service::get_safety_summary( $appointment_id );
+        foreach ( $summary as $item ) {
+            $report_data['safety_summary'][] = [
+                'icon'  => $item['icon'],
+                'label' => $item['label'],
+                'notes' => isset( $item['notes'] ) ? $item['notes'] : '',
+            ];
+        }
+
+        $message = DPS_WhatsApp_Helper::get_checkin_report_message( $report_data );
+
+        return DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $message );
     }
 
     /* ===========================
@@ -4800,6 +4861,23 @@ class DPS_Agenda_Addon {
                     <button type="button" class="dps-checkin-btn dps-checkin-btn--checkout">📤 <?php esc_html_e( 'Check-out', 'dps-agenda-addon' ); ?></button>
                 <?php endif; ?>
             </div>
+
+            <?php
+            // Botão WhatsApp — exibido quando há check-in registrado.
+            if ( $checkin ) :
+                $instance   = self::get_instance();
+                $wa_url     = $instance->build_checkin_whatsapp_url( $appointment_id );
+                $has_wa_url = ! empty( $wa_url );
+            ?>
+                <div class="dps-checkin-whatsapp"<?php echo $has_wa_url ? '' : ' style="display:none"'; ?>>
+                    <a href="<?php echo $has_wa_url ? esc_url( $wa_url ) : '#'; ?>"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="dps-checkin-btn dps-checkin-btn--whatsapp">
+                        📱 <?php esc_html_e( 'Enviar relatório via WhatsApp', 'dps-agenda-addon' ); ?>
+                    </a>
+                </div>
+            <?php endif; ?>
         </div>
         <?php
         return ob_get_clean();
