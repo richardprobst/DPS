@@ -4903,13 +4903,6 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Renderiza indicadores compactos de checklist e check-in para uso em cards.
-     *
-     * @since 1.2.0
-     * @param int $appointment_id ID do agendamento.
-     * @return string HTML dos indicadores compactos.
-     */
-    /**
      * Renderiza resumo compacto de Checklist e Check-in/Check-out para uso em históricos.
      *
      * Exibe informações somente-leitura sobre o progresso do checklist operacional,
@@ -5011,6 +5004,13 @@ class DPS_Agenda_Addon {
         return ob_get_clean();
     }
 
+    /**
+     * Renderiza indicadores compactos de checklist e check-in para uso em cards.
+     *
+     * @since 1.2.0
+     * @param int $appointment_id ID do agendamento.
+     * @return string HTML dos indicadores compactos.
+     */
     public static function render_compact_indicators( $appointment_id ) {
         $appointment_id = absint( $appointment_id );
         if ( ! $appointment_id ) {
