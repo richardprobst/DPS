@@ -105,6 +105,7 @@ class DPS_Push_Admin {
                 'testing'           => __( 'Testando...', 'dps-push-addon' ),
                 'invalid_email'     => __( 'Email inválido: ', 'dps-push-addon' ),
                 'invalid_token'     => __( 'Formato de token inválido. Exemplo: 123456789:ABCdefGHIjklMNOpqrSTUvwxYZ', 'dps-push-addon' ),
+                'vapid_not_configured' => __( 'Chaves VAPID não configuradas. Desative e reative o plugin para gerá-las.', 'dps-push-addon' ),
             ],
         ] );
     }
