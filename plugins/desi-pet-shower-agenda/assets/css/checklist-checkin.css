@@ -636,3 +636,66 @@
         justify-content: center;
     }
 }
+
+/* ===========================
+   HISTORY OPS SUMMARY (read-only, used in history views)
+   =========================== */
+
+.dps-history-ops-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--md-sys-color-on-surface-variant, #49454f);
+}
+
+.dps-history-ops-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dps-history-ops-label {
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.dps-history-ops-value {
+    color: var(--md-sys-color-on-surface, #1d1b20);
+}
+
+.dps-history-ops-value--complete {
+    color: var(--md-sys-color-primary, #6750a4);
+    font-weight: 600;
+}
+
+.dps-history-ops-badge--rework {
+    font-size: 11px;
+    background: var(--md-sys-color-error-container, #f9dedc);
+    color: var(--md-sys-color-on-error-container, #410e0b);
+    border-radius: 10px;
+    padding: 1px 6px;
+}
+
+.dps-history-ops-safety {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.dps-history-ops-obs {
+    display: flex;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.dps-history-ops-obs-text {
+    color: var(--md-sys-color-on-surface-variant, #49454f);
+    font-style: italic;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+}

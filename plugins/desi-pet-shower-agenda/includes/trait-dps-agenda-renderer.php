@@ -1327,6 +1327,12 @@ trait DPS_Agenda_Renderer {
         }
         echo '</td>';
         
+        // Coluna Operacional (Checklist + Check-in/Check-out)
+        echo '<td data-label="' . esc_attr__( 'Operacional', 'dps-agenda-addon' ) . '">';
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado pelo render helper
+        echo DPS_Agenda_Addon::render_checkin_checklist_summary( $appt->ID );
+        echo '</td>';
+        
         // Coluna de Ações (reagendar)
         echo '<td data-label="' . esc_attr__( 'Ações', 'dps-agenda-addon' ) . '">';
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado pelo helper

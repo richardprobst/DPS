@@ -2713,6 +2713,7 @@ class DPS_Base_Frontend {
             echo '<th class="hide-mobile">' . esc_html__( 'Serviços', 'desi-pet-shower' ) . '</th>';
             echo '<th class="dps-sortable" data-sort="value">' . esc_html__( 'Valor', 'desi-pet-shower' ) . ' <span class="dps-sort-icon">⇅</span></th>';
             echo '<th class="dps-sortable" data-sort="status">' . esc_html__( 'Status', 'desi-pet-shower' ) . ' <span class="dps-sort-icon">⇅</span></th>';
+            echo '<th class="hide-mobile">' . esc_html__( 'Operacional', 'desi-pet-shower' ) . '</th>';
             echo '<th class="hide-mobile">' . esc_html__( 'Cobrança', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Ações', 'desi-pet-shower' ) . '</th>';
             echo '</tr></thead><tbody>';
@@ -2802,6 +2803,13 @@ class DPS_Base_Frontend {
                 echo '<td class="hide-mobile">' . esc_html( $services_text ) . '</td>';
                 echo '<td class="dps-history-value">' . esc_html( $total_display ) . '</td>';
                 echo '<td><span class="dps-status-badge ' . esc_attr( $badge_class ) . '">' . esc_html( $status_label ) . '</span></td>';
+                // Coluna Operacional (Checklist + Check-in/Check-out)
+                echo '<td class="hide-mobile">';
+                if ( class_exists( 'DPS_Agenda_Addon' ) ) {
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado pelo render helper
+                    echo DPS_Agenda_Addon::render_checkin_checklist_summary( $appt->ID );
+                }
+                echo '</td>';
                 echo '<td class="hide-mobile">' . self::build_charge_html( $appt->ID, 'historico' ) . '</td>';
 
                 // URLs de ações
@@ -4982,6 +4990,7 @@ class DPS_Base_Frontend {
             echo '<th>' . esc_html__( 'Valor', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Status', 'desi-pet-shower' ) . '</th>';
             echo '<th class="hide-mobile">' . esc_html__( 'Observações', 'desi-pet-shower' ) . '</th>';
+            echo '<th class="hide-mobile">' . esc_html__( 'Operacional', 'desi-pet-shower' ) . '</th>';
             echo '<th class="dps-no-export">' . esc_html__( 'Ações', 'desi-pet-shower' ) . '</th>';
             echo '</tr></thead>';
             echo '<tbody>';
@@ -5047,6 +5056,13 @@ class DPS_Base_Frontend {
                 echo '<td>R$ ' . esc_html( number_format_i18n( $total_value, 2 ) ) . '</td>';
                 echo '<td><span class="dps-status-badge ' . esc_attr( $status_info['class'] ) . '">' . esc_html( $status_info['label'] ) . '</span></td>';
                 echo '<td class="hide-mobile">' . esc_html( $notes ? wp_trim_words( $notes, $notes_word_limit, '...' ) : '-' ) . '</td>';
+                // Coluna Operacional (Checklist + Check-in/Check-out)
+                echo '<td class="hide-mobile">';
+                if ( class_exists( 'DPS_Agenda_Addon' ) ) {
+                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado pelo render helper
+                    echo DPS_Agenda_Addon::render_checkin_checklist_summary( $appt->ID );
+                }
+                echo '</td>';
                 echo '<td class="dps-actions-cell dps-no-export">';
                 echo '<a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a>';
                 echo '<span class="dps-action-separator" aria-hidden="true"> | </span>';
