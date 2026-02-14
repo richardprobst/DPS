@@ -4869,7 +4869,7 @@ class DPS_Agenda_Addon {
                 $wa_url     = $instance->build_checkin_whatsapp_url( $appointment_id );
                 $has_wa_url = ! empty( $wa_url );
             ?>
-                <div class="dps-checkin-whatsapp"<?php echo $has_wa_url ? '' : ' style="display:none"'; ?>>
+                <div class="dps-checkin-whatsapp<?php echo $has_wa_url ? '' : ' dps-checkin-whatsapp--hidden'; ?>">
                     <a href="<?php echo $has_wa_url ? esc_url( $wa_url ) : '#'; ?>"
                        target="_blank"
                        rel="noopener noreferrer"

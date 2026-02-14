@@ -384,10 +384,10 @@
             var $waContainer = $panel.find('.dps-checkin-whatsapp');
             if ($waContainer.length) {
                 $waContainer.find('.dps-checkin-btn--whatsapp').attr('href', data.whatsapp_url);
-                $waContainer.show();
+                $waContainer.removeClass('dps-checkin-whatsapp--hidden').show();
             } else {
                 var waHtml = '<div class="dps-checkin-whatsapp">' +
-                    '<a href="' + escapeHtml(data.whatsapp_url) + '" target="_blank" rel="noopener noreferrer" class="dps-checkin-btn dps-checkin-btn--whatsapp">' +
+                    '<a href="' + data.whatsapp_url + '" target="_blank" rel="noopener noreferrer" class="dps-checkin-btn dps-checkin-btn--whatsapp">' +
                     '📱 ' + escapeHtml(cfg.messages.sendWhatsApp) +
                     '</a></div>';
                 $panel.find('.dps-checkin-actions').after(waHtml);

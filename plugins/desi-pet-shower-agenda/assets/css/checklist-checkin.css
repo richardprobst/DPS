@@ -405,6 +405,10 @@
     margin-top: 8px;
 }
 
+.dps-checkin-whatsapp--hidden {
+    display: none;
+}
+
 .dps-checkin-btn--whatsapp {
     background: #25d366;
     color: #fff;
