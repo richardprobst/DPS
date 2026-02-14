@@ -378,6 +378,47 @@
         if (data.has_checkin && data.has_checkout) {
             $panel.find('.dps-safety-items, .dps-checkin-observations').slideUp(200);
         }
+
+        // Atualiza indicadores compactos na linha do agendamento
+        var apptId = $panel.data('appointment');
+        var $compactRow = $panel.closest('.dps-detail-row').prev('tr[data-appt-id="' + apptId + '"]');
+        if ($compactRow.length) {
+            var $checkinCompact = $compactRow.find('.dps-checkin-compact');
+            if ($checkinCompact.length) {
+                if (data.has_checkout) {
+                    $checkinCompact.html('✅');
+                } else if (data.has_checkin) {
+                    $checkinCompact.html('📥');
+                }
+            }
+        }
     }
+
+    /* ===========================
+       EXPAND/COLLAPSE DETAIL PANELS
+       =========================== */
+
+    /**
+     * Toggle da linha de detalhes (Checklist + Check-in) na Aba Operação.
+     */
+    $(document).on('click', '.dps-expand-panels-btn', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        var apptId = $btn.data('appt-id');
+        var $detailRow = $btn.closest('tr').next('.dps-detail-row[data-appt-id="' + apptId + '"]');
+
+        if ($detailRow.length) {
+            var isExpanded = $btn.attr('aria-expanded') === 'true';
+            if (isExpanded) {
+                $detailRow.slideUp(200);
+                $btn.attr('aria-expanded', 'false');
+            } else {
+                $detailRow.slideDown(200, function () {
+                    $(this).css('display', 'table-row');
+                });
+                $btn.attr('aria-expanded', 'true');
+            }
+        }
+    });
 
 })(jQuery);
