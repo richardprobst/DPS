@@ -318,7 +318,9 @@
                     return registration.pushManager.getSubscription().then(function(existingSub) {
                         if (existingSub) {
                             console.log('Removendo subscription existente antes de re-inscrever');
-                            return existingSub.unsubscribe().then(function() {
+                            return existingSub.unsubscribe().catch(function(err) {
+                                console.warn('Falha ao remover subscription anterior:', err);
+                            }).then(function() {
                                 return registration;
                             });
                         }
