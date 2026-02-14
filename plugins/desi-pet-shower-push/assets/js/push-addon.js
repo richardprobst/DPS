@@ -199,6 +199,7 @@
          *
          * Usa getRegistrations() em vez de navigator.serviceWorker.ready
          * para encontrar o SW de push independentemente do scope da página atual.
+         * Verifica SW em qualquer estado (installing, waiting ou active).
          */
         checkStatus: function() {
             var self = this;
@@ -232,35 +233,34 @@
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
                 var pushReg = null;
                 for (var i = 0; i < registrations.length; i++) {
-                    var active = registrations[i].active;
-                    if (active && active.scriptURL.indexOf('push-sw.js') !== -1) {
+                    var worker = registrations[i].active || registrations[i].waiting || registrations[i].installing;
+                    if (worker && worker.scriptURL.indexOf('push-sw.js') !== -1) {
                         pushReg = registrations[i];
                         break;
                     }
                 }
                 if (!pushReg) {
-                    return null;
+                    self.showNotSubscribed($indicator, $subscribeBtn);
+                    return;
                 }
-                return pushReg.pushManager.getSubscription();
-            }).then(function(subscription) {
-                if (subscription) {
-                    $indicator
-                        .removeClass('dps-push-checking')
-                        .addClass('dps-push-subscribed')
-                        .find('.dps-push-status-text')
-                        .text(DPS_Push.messages.subscribed);
-                    $subscribeBtn.text('Notificações Ativas').prop('disabled', true);
-                    $testBtn.show();
-                } else {
-                    $indicator
-                        .removeClass('dps-push-checking')
-                        .addClass('dps-push-not-subscribed')
-                        .find('.dps-push-status-text')
-                        .text('Notificações desativadas');
-                    $subscribeBtn.prop('disabled', false);
-                }
+                pushReg.pushManager.getSubscription().then(function(subscription) {
+                    if (subscription) {
+                        $indicator
+                            .removeClass('dps-push-checking')
+                            .addClass('dps-push-subscribed')
+                            .find('.dps-push-status-text')
+                            .text(DPS_Push.messages.subscribed);
+                        $subscribeBtn.text('Notificações Ativas').prop('disabled', true);
+                        $testBtn.show();
+                    } else {
+                        self.showNotSubscribed($indicator, $subscribeBtn);
+                    }
+                }).catch(function(err) {
+                    console.error('Erro ao verificar inscrição push:', err);
+                    self.showNotSubscribed($indicator, $subscribeBtn);
+                });
             }).catch(function(err) {
-                console.error('Erro ao verificar inscrição push:', err);
+                console.error('Erro ao verificar registrations:', err);
                 $indicator
                     .removeClass('dps-push-checking')
                     .addClass('dps-push-error')
@@ -270,10 +270,24 @@
         },
 
         /**
+         * Exibe estado "não inscrito" na UI.
+         */
+        showNotSubscribed: function($indicator, $subscribeBtn) {
+            $indicator
+                .removeClass('dps-push-checking')
+                .addClass('dps-push-not-subscribed')
+                .find('.dps-push-status-text')
+                .text(DPS_Push.messages.unsubscribed);
+            $subscribeBtn.prop('disabled', false);
+        },
+
+        /**
          * Inscreve para notificações push.
          *
          * Aguarda o Service Worker ficar ativo antes de chamar pushManager.subscribe(),
          * pois a subscription requer um SW no estado 'activated'.
+         * Remove qualquer subscription existente antes de inscrever, para evitar
+         * erro de VAPID key mismatch ("push service error").
          */
         subscribe: function(e) {
             e.preventDefault();
@@ -287,7 +301,7 @@
 
             // Validar chave VAPID antes de tentar inscrição
             if (!DPS_Push.vapid_public) {
-                alert(DPS_Push.messages.error + ' Chaves VAPID não configuradas.');
+                alert(DPS_Push.messages.vapid_not_configured || (DPS_Push.messages.error + ' Chaves VAPID não configuradas.'));
                 return;
             }
 
@@ -298,6 +312,18 @@
                 .then(function(registration) {
                     console.log('Service Worker registrado:', registration);
                     return self.waitForActive(registration);
+                })
+                .then(function(registration) {
+                    // Remover subscription existente para evitar VAPID key mismatch
+                    return registration.pushManager.getSubscription().then(function(existingSub) {
+                        if (existingSub) {
+                            console.log('Removendo subscription existente antes de re-inscrever');
+                            return existingSub.unsubscribe().then(function() {
+                                return registration;
+                            });
+                        }
+                        return registration;
+                    });
                 })
                 .then(function(registration) {
                     return registration.pushManager.subscribe({
@@ -476,11 +502,18 @@
                     return;
                 }
 
+                var timeoutId = setTimeout(function() {
+                    sw.removeEventListener('statechange', onStateChange);
+                    reject(new Error('Timeout aguardando ativação do Service Worker.'));
+                }, 10000);
+
                 function onStateChange() {
                     if (sw.state === 'activated') {
+                        clearTimeout(timeoutId);
                         sw.removeEventListener('statechange', onStateChange);
                         resolve(registration);
                     } else if (sw.state === 'redundant') {
+                        clearTimeout(timeoutId);
                         sw.removeEventListener('statechange', onStateChange);
                         reject(new Error('Service worker se tornou redundante.'));
                     }
