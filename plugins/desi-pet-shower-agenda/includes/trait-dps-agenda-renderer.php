@@ -1170,29 +1170,40 @@ trait DPS_Agenda_Renderer {
         }
         echo '</td>';
 
-        // Coluna Check-in / Check-out (indicadores compactos + botão expandir painel de check-in)
+        // Coluna Check-in / Check-out (botão claro com estado + indicadores de segurança)
         echo '<td data-label="' . esc_attr__( 'Check-in / Check-out', 'dps-agenda-addon' ) . '">';
         echo '<div class="dps-operational-indicators">';
         $has_checkin  = DPS_Agenda_Checkin_Service::has_checkin( $appt->ID );
         $has_checkout = DPS_Agenda_Checkin_Service::has_checkout( $appt->ID );
         $summary      = DPS_Agenda_Checkin_Service::get_safety_summary( $appt->ID );
-        ?>
-        <span class="dps-checkin-compact" title="<?php esc_attr_e( 'Check-in / Check-out', 'dps-agenda-addon' ); ?>">
-            <?php if ( $has_checkout ) : ?>
-                ✅
-            <?php elseif ( $has_checkin ) : ?>
-                📥
-            <?php else : ?>
-                ⬜
-            <?php endif; ?>
-        </span>
-        <?php foreach ( $summary as $item ) : ?>
-            <span class="dps-safety-tag dps-safety-tag--<?php echo esc_attr( $item['severity'] ); ?>" title="<?php echo esc_attr( $item['label'] ); ?>">
-                <?php echo esc_html( $item['icon'] ); ?>
-            </span>
-        <?php endforeach; ?>
-        <?php
-        echo '<button type="button" class="dps-expand-panels-btn" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Expandir check-in / check-out', 'dps-agenda-addon' ) . '" aria-expanded="false">▼</button>';
+
+        // Determina estado visual do botão
+        if ( $has_checkout ) {
+            $btn_icon  = '✅';
+            $btn_label = __( 'Concluído', 'dps-agenda-addon' );
+            $btn_class = 'dps-expand-panels-btn--done';
+        } elseif ( $has_checkin ) {
+            $btn_icon  = '📥';
+            $btn_label = __( 'Fazer Check-out', 'dps-agenda-addon' );
+            $btn_class = 'dps-expand-panels-btn--checkin';
+        } else {
+            $btn_icon  = '🏥';
+            $btn_label = __( 'Fazer Check-in', 'dps-agenda-addon' );
+            $btn_class = 'dps-expand-panels-btn--pending';
+        }
+
+        echo '<button type="button" class="dps-expand-panels-btn ' . esc_attr( $btn_class ) . '" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Abrir painel de Check-in / Check-out', 'dps-agenda-addon' ) . '" aria-expanded="false">';
+        echo '<span class="dps-expand-panels-btn__icon">' . esc_html( $btn_icon ) . '</span>';
+        echo '<span class="dps-expand-panels-btn__label">' . esc_html( $btn_label ) . '</span>';
+        echo '<span class="dps-expand-panels-btn__arrow">▼</span>';
+        echo '</button>';
+
+        foreach ( $summary as $item ) :
+            echo '<span class="dps-safety-tag dps-safety-tag--' . esc_attr( $item['severity'] ) . '" title="' . esc_attr( $item['label'] ) . '">';
+            echo esc_html( $item['icon'] );
+            echo '</span>';
+        endforeach;
+
         echo '</div>';
         echo '</td>';
 
