@@ -1025,6 +1025,14 @@ class DPS_Agenda_Addon {
                 true 
             );
 
+            wp_enqueue_script(
+                'dps-pet-profile-modal',
+                plugin_dir_url( __FILE__ ) . 'assets/js/pet-profile-modal.js',
+                [ 'jquery', 'dps-agenda-addon' ],
+                '1.0.0',
+                true
+            );
+
             // Script do Checklist Operacional e Check-in/Check-out
             wp_enqueue_script(
                 'dps-checklist-checkin',
@@ -1667,7 +1675,6 @@ class DPS_Agenda_Addon {
             echo '<table class="dps-table dps-table--tab1"><thead><tr>';
             echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
-            echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html( $column_labels['service'] ?? __( 'Serviços', 'dps-agenda-addon' ) ) . '</th>';
             echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '</th>';
             echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
@@ -1726,7 +1733,6 @@ class DPS_Agenda_Addon {
             echo '<table class="dps-table dps-table--tab2"><thead><tr>';
             echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
-            echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Status do Serviço', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html( $column_labels['payment'] ?? __( 'Pagamento', 'dps-agenda-addon' ) ) . '</th>';
             echo '<th>' . esc_html__( 'Check-in / Check-out', 'dps-agenda-addon' ) . '</th>';
@@ -1787,7 +1793,6 @@ class DPS_Agenda_Addon {
             echo '<table class="dps-table dps-table--tab3"><thead><tr>';
             echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
-            echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>TaxiDog</th>';
             echo '<th>' . esc_html__( 'Observações', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Operacional', 'dps-agenda-addon' ) . '</th>';

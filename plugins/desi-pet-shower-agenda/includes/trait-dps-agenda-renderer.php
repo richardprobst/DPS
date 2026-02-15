@@ -924,9 +924,53 @@ trait DPS_Agenda_Renderer {
     }
 
     /**
+     * Renderiza botão do pet com dados para modal de perfil Pet + Tutor.
+     *
+     * @param WP_Post|null $pet_post    Post do pet.
+     * @param WP_Post|null $client_post Post do tutor.
+     * @return string
+     */
+    private function render_pet_profile_trigger( $pet_post, $client_post ) {
+        $pet_name = $pet_post ? $pet_post->post_title : '';
+
+        if ( ! $pet_post ) {
+            return '<span class="dps-pet-name-text">' . esc_html( $pet_name ?: '—' ) . '</span>';
+        }
+
+        $pet_species = get_post_meta( $pet_post->ID, 'pet_species', true );
+        $pet_breed   = get_post_meta( $pet_post->ID, 'pet_breed', true );
+        $pet_size    = get_post_meta( $pet_post->ID, 'pet_size', true );
+        $pet_weight  = get_post_meta( $pet_post->ID, 'pet_weight', true );
+        $pet_sex     = get_post_meta( $pet_post->ID, 'pet_sex', true );
+
+        $client_name    = $client_post ? $client_post->post_title : '';
+        $client_phone   = $client_post ? get_post_meta( $client_post->ID, 'client_phone', true ) : '';
+        $client_email   = $client_post ? get_post_meta( $client_post->ID, 'client_email', true ) : '';
+        $client_address = $client_post ? get_post_meta( $client_post->ID, 'client_address', true ) : '';
+
+        $button  = '<button type="button" class="dps-pet-profile-trigger"';
+        $button .= ' data-pet-name="' . esc_attr( $pet_name ) . '"';
+        $button .= ' data-pet-species="' . esc_attr( $pet_species ) . '"';
+        $button .= ' data-pet-breed="' . esc_attr( $pet_breed ) . '"';
+        $button .= ' data-pet-size="' . esc_attr( $pet_size ) . '"';
+        $button .= ' data-pet-weight="' . esc_attr( $pet_weight ) . '"';
+        $button .= ' data-pet-sex="' . esc_attr( $pet_sex ) . '"';
+        $button .= ' data-client-name="' . esc_attr( $client_name ) . '"';
+        $button .= ' data-client-phone="' . esc_attr( $client_phone ) . '"';
+        $button .= ' data-client-email="' . esc_attr( $client_email ) . '"';
+        $button .= ' data-client-address="' . esc_attr( $client_address ) . '"';
+        $button .= ' title="' . esc_attr__( 'Ver perfil rápido do pet e tutor', 'dps-agenda-addon' ) . '">';
+        $button .= '<span class="dps-pet-profile-trigger__name">' . esc_html( $pet_name ) . '</span>';
+        $button .= '<span class="dps-pet-profile-trigger__icon" aria-hidden="true">↗</span>';
+        $button .= '</button>';
+
+        return $button;
+    }
+
+    /**
      * Renderiza a linha de um agendamento para a Aba 1 (Visão Rápida).
      * 
-     * Colunas: Checkbox, Horário, Pet (com badge agressivo), Tutor, Serviços (popup), Confirmação (dropdown)
+     * Colunas: Horário, Pet (com badge agressivo + perfil rápido), Serviços (popup), Confirmação (dropdown)
      * 
      * @since 1.4.0
      * @since 1.4.2 Modificado: Serviços com botão popup, Confirmação como dropdown elegante
@@ -973,11 +1017,10 @@ trait DPS_Agenda_Renderer {
             }
             $restrictions_badge = $this->get_pet_product_restrictions_badge( $pet_post );
         }
-        echo '<td data-label="' . esc_attr__( 'Pet', 'dps-agenda-addon' ) . '">' . esc_html( $pet_name ) . $aggr_badge . $restrictions_badge . '</td>';
-        
-        // Tutor
-        $client_name = $client_post ? $client_post->post_title : '';
-        echo '<td data-label="' . esc_attr__( 'Tutor', 'dps-agenda-addon' ) . '">' . esc_html( $client_name ) . '</td>';
+        echo '<td data-label="' . esc_attr__( 'Pet', 'dps-agenda-addon' ) . '">';
+        echo $this->render_pet_profile_trigger( $pet_post, $client_post );
+        echo $aggr_badge . $restrictions_badge;
+        echo '</td>';
         
         // Serviços (botão que abre popup)
         echo '<td data-label="' . esc_attr( $column_labels['service'] ?? __( 'Serviços', 'dps-agenda-addon' ) ) . '">';
@@ -1034,7 +1077,7 @@ trait DPS_Agenda_Renderer {
     /**
      * Renderiza a linha de um agendamento para a Aba 2 (Operação).
      * 
-     * Colunas: Checkbox, Horário, Pet (com badge agressivo), Tutor, Status (dropdown com ícones), Pagamento (popup)
+     * Colunas: Horário, Pet (com badge agressivo + perfil rápido), Status (dropdown com ícones), Pagamento (popup)
      * 
      * @since 1.4.0
      * @since 1.4.2 Modificado: Estrutura simplificada com dropdown de status elegante e popup de pagamento
@@ -1086,11 +1129,11 @@ trait DPS_Agenda_Renderer {
             }
             $restrictions_badge = $this->get_pet_product_restrictions_badge( $pet_post );
         }
-        echo '<td data-label="' . esc_attr__( 'Pet', 'dps-agenda-addon' ) . '">' . esc_html( $pet_name ) . $aggr_badge . $restrictions_badge . '</td>';
-        
-        // Tutor
         $client_name = $client_post ? $client_post->post_title : '';
-        echo '<td data-label="' . esc_attr__( 'Tutor', 'dps-agenda-addon' ) . '">' . esc_html( $client_name ) . '</td>';
+        echo '<td data-label="' . esc_attr__( 'Pet', 'dps-agenda-addon' ) . '">';
+        echo $this->render_pet_profile_trigger( $pet_post, $client_post );
+        echo $aggr_badge . $restrictions_badge;
+        echo '</td>';
         
         // Status do serviço (dropdown elegante com ícones)
         echo '<td data-label="' . esc_attr( $column_labels['status'] ?? __( 'Status do Serviço', 'dps-agenda-addon' ) ) . '">';
@@ -1220,7 +1263,7 @@ trait DPS_Agenda_Renderer {
         echo '</tr>';
 
         // Linha expansível com painel de Check-in / Check-out
-        $total_cols = 7; // Horário + Pet + Tutor + Status + Pagamento + Check-in/Check-out + Ações
+        $total_cols = 6; // Horário + Pet + Status + Pagamento + Check-in/Check-out + Ações
         echo '<tr class="dps-detail-row" data-appt-id="' . esc_attr( $appt->ID ) . '" style="display: none;">';
         echo '<td colspan="' . esc_attr( $total_cols ) . '">';
         echo '<div class="dps-detail-panels">';
@@ -1236,7 +1279,7 @@ trait DPS_Agenda_Renderer {
     /**
      * Renderiza a linha de um agendamento para a Aba 3 (Detalhes).
      * 
-     * Colunas: Checkbox, Horário, Pet (com badge agressivo), Tutor, TaxiDog (com dropdown condicional)
+     * Colunas: Horário, Pet (com badge agressivo + perfil rápido), TaxiDog (com dropdown condicional)
      * 
      * @since 1.4.0
      * @since 1.4.2 Modificado: Estrutura simplificada com TaxiDog condicional
@@ -1282,11 +1325,10 @@ trait DPS_Agenda_Renderer {
             }
             $restrictions_badge = $this->get_pet_product_restrictions_badge( $pet_post );
         }
-        echo '<td data-label="' . esc_attr__( 'Pet', 'dps-agenda-addon' ) . '">' . esc_html( $pet_name ) . $aggr_badge . $restrictions_badge . '</td>';
-        
-        // Tutor
-        $client_name = $client_post ? $client_post->post_title : '';
-        echo '<td data-label="' . esc_attr__( 'Tutor', 'dps-agenda-addon' ) . '">' . esc_html( $client_name ) . '</td>';
+        echo '<td data-label="' . esc_attr__( 'Pet', 'dps-agenda-addon' ) . '">';
+        echo $this->render_pet_profile_trigger( $pet_post, $client_post );
+        echo $aggr_badge . $restrictions_badge;
+        echo '</td>';
         
         // TaxiDog (exibe informação simples com botão para Google Maps quando solicitado)
         echo '<td data-label="TaxiDog">';

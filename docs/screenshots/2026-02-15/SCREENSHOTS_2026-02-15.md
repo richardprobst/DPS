@@ -1,20 +1,18 @@
-# Screenshots 2026-02-15 — Agenda (Check-in / Check-out responsivo)
+# Registro de screenshots — 2026-02-15
 
 ## Contexto
-- Objetivo da mudança: melhorar a responsividade da coluna e botão de Check-in / Check-out na Agenda, além da responsividade da área de opções aberta no painel.
-- Ambiente: container local deste repositório.
-- Referência de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+Atualização visual da Agenda nas abas **Visão Rápida**, **Operação** e **Detalhes**:
+- remoção da coluna Tutor;
+- nome do pet clicável para abrir modal com perfil rápido de pet + tutor;
+- ajustes de responsividade e aderência ao padrão M3.
 
-## Antes/Depois
-- Resumo do antes: em telas pequenas, o botão da coluna operacional ficava com texto longo e o painel de opções perdia legibilidade em alguns breakpoints.
-- Resumo do depois: o botão passa a usar rótulo curto em mobile, ocupa largura disponível para toque, e a grade/ações do painel se reorganiza melhor para telas menores.
-- Arquivos de código alterados:
-  - `plugins/desi-pet-shower-agenda/assets/css/checklist-checkin.css`
-  - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
-  - `plugins/desi-pet-shower-agenda/includes/class-dps-agenda-checkin-service.php`
+## Tentativa de captura
+Foi feita tentativa de captura automática via Playwright em `http://127.0.0.1:{8080,80,3000}`.
 
-## Capturas
-- Não foi possível gerar capturas nesta execução porque não havia aplicação web local acessível nas portas padrão testadas (`80`, `8080`, `8888`).
+**Resultado:** não foi possível gerar screenshot porque não havia aplicação web respondendo no ambiente atual (`ERR_EMPTY_RESPONSE`).
 
-## Observações
-- Tentativa de captura automatizada realizada com Playwright falhou por indisponibilidade de endpoint local.
+## Arquivos afetados
+- `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
+- `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+- `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+- `plugins/desi-pet-shower-agenda/assets/js/pet-profile-modal.js`
