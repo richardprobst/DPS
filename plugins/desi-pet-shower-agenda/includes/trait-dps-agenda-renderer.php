@@ -1171,7 +1171,7 @@ trait DPS_Agenda_Renderer {
         echo '</td>';
 
         // Coluna Check-in / Check-out (botão claro com estado + indicadores de segurança)
-        echo '<td data-label="' . esc_attr__( 'Check-in / Check-out', 'dps-agenda-addon' ) . '">';
+        echo '<td class="dps-operational-cell" data-label="' . esc_attr__( 'Check-in / Check-out', 'dps-agenda-addon' ) . '">';
         echo '<div class="dps-operational-indicators">';
         $has_checkin  = DPS_Agenda_Checkin_Service::has_checkin( $appt->ID );
         $has_checkout = DPS_Agenda_Checkin_Service::has_checkout( $appt->ID );
@@ -1181,20 +1181,24 @@ trait DPS_Agenda_Renderer {
         if ( $has_checkout ) {
             $btn_icon  = '✅';
             $btn_label = __( 'Concluído', 'dps-agenda-addon' );
+            $btn_label_short = __( 'Concluído', 'dps-agenda-addon' );
             $btn_class = 'dps-expand-panels-btn--done';
         } elseif ( $has_checkin ) {
             $btn_icon  = '📥';
             $btn_label = __( 'Fazer Check-out', 'dps-agenda-addon' );
+            $btn_label_short = __( 'Check-out', 'dps-agenda-addon' );
             $btn_class = 'dps-expand-panels-btn--checkin';
         } else {
             $btn_icon  = '🏥';
             $btn_label = __( 'Fazer Check-in', 'dps-agenda-addon' );
+            $btn_label_short = __( 'Check-in', 'dps-agenda-addon' );
             $btn_class = 'dps-expand-panels-btn--pending';
         }
 
         echo '<button type="button" class="dps-expand-panels-btn ' . esc_attr( $btn_class ) . '" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Abrir painel de Check-in / Check-out', 'dps-agenda-addon' ) . '" aria-expanded="false">';
         echo '<span class="dps-expand-panels-btn__icon">' . esc_html( $btn_icon ) . '</span>';
         echo '<span class="dps-expand-panels-btn__label">' . esc_html( $btn_label ) . '</span>';
+        echo '<span class="dps-expand-panels-btn__label-short">' . esc_html( $btn_label_short ) . '</span>';
         echo '<span class="dps-expand-panels-btn__arrow">▼</span>';
         echo '</button>';
 

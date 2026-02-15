@@ -59,7 +59,7 @@ class DPS_Agenda_Checkin_Service {
                 'severity' => 'alert',
             ],
             'alergia'     => [
-                'label'    => __( 'Alergia / Irritação na pele', 'dps-agenda-addon' ),
+                'label'    => __( 'Alergia / Irritação', 'dps-agenda-addon' ),
                 'icon'     => '⚠️',
                 'severity' => 'alert',
             ],
@@ -69,12 +69,12 @@ class DPS_Agenda_Checkin_Service {
                 'severity' => 'alert',
             ],
             'nos'         => [
-                'label'    => __( 'Nós / Pelagem embaraçada', 'dps-agenda-addon' ),
+                'label'    => __( 'Nós / Pelos embolados', 'dps-agenda-addon' ),
                 'icon'     => '🧶',
                 'severity' => 'info',
             ],
             'comportamento' => [
-                'label'    => __( 'Comportamento agressivo / ansioso', 'dps-agenda-addon' ),
+                'label'    => __( 'Agressivo / Ansioso', 'dps-agenda-addon' ),
                 'icon'     => '😤',
                 'severity' => 'warning',
             ],
