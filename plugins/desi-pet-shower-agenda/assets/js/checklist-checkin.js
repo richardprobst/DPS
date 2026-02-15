@@ -422,6 +422,9 @@
         var apptId = $btn.data('appt-id');
         var $detailRow = $btn.closest('tr').next('.dps-detail-row[data-appt-id="' + apptId + '"]');
 
+        var isCardLayout = $detailRow.closest('tbody').css('display') === 'flex';
+        var expandedDisplay = isCardLayout ? 'flex' : 'table-row';
+
         if ($detailRow.length) {
             var isExpanded = $btn.attr('aria-expanded') === 'true';
             if (isExpanded) {
@@ -429,7 +432,7 @@
                 $btn.attr('aria-expanded', 'false');
             } else {
                 $detailRow.slideDown(200, function () {
-                    $(this).css('display', 'table-row');
+                    $(this).css('display', expandedDisplay);
                 });
                 $btn.attr('aria-expanded', 'true');
             }
