@@ -3350,6 +3350,113 @@ tr.dps-row-updated {
     color: var(--dps-color-success);
 }
 
+
+.dps-pet-profile-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1px solid var(--dps-border);
+    background: color-mix(in srgb, var(--dps-color-primary) 8%, transparent);
+    color: var(--dps-color-primary);
+    border-radius: var(--dps-shape-chip);
+    padding: 0.25rem 0.6rem;
+    font-weight: 500;
+    cursor: pointer;
+    max-width: 100%;
+}
+
+.dps-pet-profile-trigger:hover {
+    border-color: var(--dps-color-primary);
+    background: color-mix(in srgb, var(--dps-color-primary) 14%, transparent);
+}
+
+.dps-pet-profile-trigger__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dps-pet-profile-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: color-mix(in srgb, var(--dps-color-on-surface) 60%, transparent);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+
+.dps-pet-profile-modal-content {
+    width: 100%;
+    max-width: 680px;
+    border-radius: var(--dps-shape-card);
+    background: var(--dps-color-surface-container-lowest);
+    box-shadow: var(--dps-elevation-3);
+    overflow: hidden;
+}
+
+.dps-pet-profile-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+}
+
+.dps-pet-profile-modal-title {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.dps-pet-profile-modal-close {
+    background: transparent;
+    border: none;
+    color: var(--dps-color-on-primary);
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.dps-pet-profile-modal-body {
+    padding: 1rem 1.25rem 1.2rem;
+}
+
+.dps-pet-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.dps-pet-profile-section {
+    border: 1px solid var(--dps-border);
+    border-radius: var(--dps-shape-chip);
+    padding: 0.8rem;
+    background: var(--dps-color-surface-container-low);
+}
+
+.dps-pet-profile-section h4 {
+    margin: 0 0 0.6rem;
+    font-size: 0.9rem;
+    color: var(--dps-muted);
+    text-transform: uppercase;
+}
+
+.dps-pet-profile-section p {
+    margin: 0 0 0.4rem;
+    font-size: 0.9rem;
+    color: var(--dps-color-on-surface);
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.dps-pet-profile-section p:last-child {
+    margin-bottom: 0;
+}
+
 /* === Modal de Popup de Serviços === */
 .dps-services-modal {
     /* CSS Variables para o modal (necessárias pois o modal é anexado ao body e não herda de .dps-agenda-wrapper) */
@@ -5007,4 +5114,16 @@ tr.dps-row-updated {
 .dps-payment-modal-close:hover,
 .dps-services-modal-close:hover {
     color: var(--dps-color-on-surface);
+}
+
+
+@media (max-width: 640px) {
+    .dps-pet-profile-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-pet-profile-trigger {
+        width: 100%;
+        justify-content: space-between;
+    }
 }
