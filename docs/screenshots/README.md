@@ -14,6 +14,7 @@ Este diretório centraliza registros visuais padronizados do sistema DPS.
   - [2026-02-11 — Agenda, Cadastro e Agendamento](2026-02-11/SCREENSHOTS_2026-02-11.md)
   - [2026-02-12 — Frontend V2 Completo (Registration V2 + Booking V2 Wizard + Admin)](2026-02-12/SCREENSHOTS_2026-02-12.md)
   - [2026-02-12 — Checklist Operacional & Check-in/Check-out (Agenda v1.2.0)](2026-02-12/SCREENSHOTS_2026-02-12_checklist-checkin.md)
+  - [2026-02-15 — Agenda (Check-in / Check-out responsivo)](2026-02-15/SCREENSHOTS_2026-02-15.md)
 
 ## Regras obrigatórias para novas mudanças visuais
 

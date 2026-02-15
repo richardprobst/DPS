@@ -259,8 +259,8 @@
 /* Safety items grid */
 .dps-safety-items {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px;
     margin: 12px 0;
 }
 
@@ -565,12 +565,18 @@
     font-size: 11px;
 }
 
+
+.dps-operational-cell {
+    min-width: 176px;
+}
+
 /* Operational indicators wrapper in Tab 2 */
 .dps-operational-indicators {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 /* Expand/collapse button for detail panels */
@@ -591,6 +597,11 @@
     line-height: 1.4;
 }
 
+.dps-expand-panels-btn__label-short {
+    display: none;
+    font-size: 12px;
+}
+
 .dps-expand-panels-btn__icon {
     font-size: 14px;
     line-height: 1;
@@ -599,6 +610,7 @@
 .dps-expand-panels-btn__label {
     font-size: 12px;
 }
+
 
 .dps-expand-panels-btn__arrow {
     font-size: 10px;
@@ -662,6 +674,17 @@
 }
 
 /* Responsive */
+@media (max-width: 900px) {
+    .dps-safety-items {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dps-safety-item-label {
+        align-items: flex-start;
+        line-height: 1.35;
+    }
+}
+
 @media (max-width: 600px) {
     .dps-safety-items {
         grid-template-columns: 1fr;
@@ -673,14 +696,34 @@
 
     .dps-checkin-btn {
         justify-content: center;
+        width: 100%;
+    }
+
+    .dps-operational-cell {
+        min-width: 0;
+    }
+
+    .dps-operational-indicators {
+        justify-content: flex-end;
+    }
+
+    .dps-expand-panels-btn {
+        width: 100%;
+        justify-content: space-between;
+        padding: 7px 10px;
+        border-radius: 14px;
     }
 
     .dps-expand-panels-btn__label {
         display: none;
     }
 
-    .dps-expand-panels-btn {
-        padding: 5px 8px;
+    .dps-expand-panels-btn__label-short {
+        display: inline;
+    }
+
+    .dps-checkin-panel {
+        padding: 12px;
     }
 }
 
