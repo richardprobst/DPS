@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DPS Formulário de Agendamento — Captura 2026-02-11</title>
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css" />
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-base.css" />
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-booking/assets/css/booking-addon.css" />
+    <style>
+        body {
+            margin: 0;
+            background: var(--dps-color-surface);
+            color: var(--dps-color-on-surface);
+            font-family: var(--dps-font-system);
+        }
+    </style>
+</head>
+<body>
+    <div class="dps-booking-wrapper dps-panel">
+        <!-- Header da página -->
+        <div class="dps-booking-page-header">
+            <h1 class="dps-page-title">Agendamentos</h1>
+            <p class="dps-page-subtitle">Gerencie e crie agendamentos para os clientes</p>
+        </div>
+
+        <!-- Seção de formulário -->
+        <div class="dps-section">
+            <h2 class="dps-section-title">
+                <span class="dps-section-title__icon" aria-hidden="true">📅</span>
+                Agendamentos
+            </h2>
+
+            <div class="dps-surface dps-surface--info">
+                <div class="dps-surface__title">
+                    <span aria-hidden="true">📝</span>
+                    Novo Agendamento
+                </div>
+
+                <form method="post" class="dps-form">
+                    <!-- FIELDSET 1: Tipo de Agendamento -->
+                    <fieldset class="dps-fieldset">
+                        <legend class="dps-fieldset__legend">Tipo de Agendamento</legend>
+
+                        <div class="dps-radio-group">
+                            <label class="dps-radio-option">
+                                <input type="radio" name="appointment_type" value="simple" checked>
+                                <div class="dps-radio-label">
+                                    <strong>Agendamento Simples</strong>
+                                    <p>Atendimento único, sem recorrência</p>
+                                </div>
+                            </label>
+
+                            <label class="dps-radio-option">
+                                <input type="radio" name="appointment_type" value="subscription">
+                                <div class="dps-radio-label">
+                                    <strong>Agendamento de Assinatura</strong>
+                                    <p>Atendimentos recorrentes (semanal ou quinzenal)</p>
+                                </div>
+                            </label>
+
+                            <label class="dps-radio-option">
+                                <input type="radio" name="appointment_type" value="past">
+                                <div class="dps-radio-label">
+                                    <strong>Agendamento Passado</strong>
+                                    <p>Registrar atendimento já realizado anteriormente</p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Campo: frequência para assinaturas (oculto por padrão) -->
+                        <div id="dps-appointment-frequency-wrapper" class="dps-conditional-field" style="display:none;">
+                            <label for="dps-appointment-frequency">Frequência <span class="dps-required">*</span></label>
+                            <select name="appointment_frequency" id="dps-appointment-frequency">
+                                <option value="semanal">Semanal</option>
+                                <option value="quinzenal">Quinzenal</option>
+                            </select>
+                        </div>
+                    </fieldset>
+
+                    <!-- FIELDSET 2: Cliente e Pet(s) -->
+                    <fieldset class="dps-fieldset">
+                        <legend class="dps-fieldset__legend">Cliente e Pet(s)</legend>
+
+                        <div class="dps-form-field">
+                            <label for="dps-appointment-cliente">Cliente <span class="dps-required">*</span></label>
+                            <select name="appointment_client_id" id="dps-appointment-cliente" class="dps-client-select" required>
+                                <option value="">Selecione...</option>
+                                <option value="1">Ana Carolina Silva</option>
+                                <option value="2">João Pedro Santos</option>
+                                <option value="3">Maria Fernanda Oliveira</option>
+                                <option value="4">Carlos Eduardo Lima</option>
+                            </select>
+                        </div>
+
+                        <div id="dps-appointment-pet-wrapper" class="dps-pet-picker" data-current-page="1" data-total-pages="1">
+                            <p id="dps-pet-selector-label">
+                                <strong>Pet(s) <span class="dps-required">*</span></strong>
+                                <span id="dps-pet-counter" class="dps-selection-counter">2 selecionados</span>
+                            </p>
+
+                            <div class="dps-pet-picker-actions">
+                                <button type="button" class="button button-secondary dps-pet-toggle" data-action="select">Selecionar todos</button>
+                                <button type="button" class="button button-secondary dps-pet-toggle" data-action="clear">Limpar seleção</button>
+                            </div>
+
+                            <div id="dps-appointment-pet-list" class="dps-pet-list" role="group" aria-labelledby="dps-pet-selector-label">
+                                <label class="dps-pet-option" data-owner="1" data-size="grande">
+                                    <input type="checkbox" class="dps-pet-checkbox" name="appointment_pet_ids[]" value="101" checked>
+                                    <span class="dps-pet-name">Thor</span>
+                                    <span class="dps-pet-breed"> – Golden Retriever</span>
+                                    <span class="dps-pet-size"> · Grande</span>
+                                </label>
+
+                                <label class="dps-pet-option" data-owner="1" data-size="pequeno">
+                                    <input type="checkbox" class="dps-pet-checkbox" name="appointment_pet_ids[]" value="102" checked>
+                                    <span class="dps-pet-name">Luna</span>
+                                    <span class="dps-pet-breed"> – Shih Tzu</span>
+                                    <span class="dps-pet-size"> · Pequeno</span>
+                                </label>
+
+                                <label class="dps-pet-option" data-owner="2" data-size="medio">
+                                    <input type="checkbox" class="dps-pet-checkbox" name="appointment_pet_ids[]" value="103">
+                                    <span class="dps-pet-name">Max</span>
+                                    <span class="dps-pet-breed"> – Beagle</span>
+                                    <span class="dps-pet-size"> · Médio</span>
+                                </label>
+
+                                <label class="dps-pet-option" data-owner="3" data-size="grande">
+                                    <input type="checkbox" class="dps-pet-checkbox" name="appointment_pet_ids[]" value="104">
+                                    <span class="dps-pet-name">Bob</span>
+                                    <span class="dps-pet-breed"> – Labrador</span>
+                                    <span class="dps-pet-size"> · Grande</span>
+                                </label>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- FIELDSET 3: Data e Horário -->
+                    <fieldset class="dps-fieldset">
+                        <legend class="dps-fieldset__legend">Data e Horário</legend>
+
+                        <div class="dps-form-row dps-form-row--2col">
+                            <div class="dps-form-field">
+                                <label for="appointment_date">Data <span class="dps-required">*</span></label>
+                                <input type="date" id="appointment_date" name="appointment_date" value="2026-02-15" required>
+                                <p class="dps-field-hint">Horários disponíveis serão carregados após escolher a data</p>
+                            </div>
+
+                            <div class="dps-form-field">
+                                <label for="appointment_time">Horário <span class="dps-required">*</span></label>
+                                <select id="appointment_time" name="appointment_time" required>
+                                    <option value="">Escolha uma data primeiro</option>
+                                    <option value="08:00">08:00</option>
+                                    <option value="09:00">09:00</option>
+                                    <option value="10:00" selected>10:00</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="14:00">14:00</option>
+                                </select>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- SEÇÃO: TaxiDog -->
+                    <div class="dps-taxidog-section">
+                        <div class="dps-taxidog-card" data-taxidog-active="1">
+                            <div class="dps-taxidog-card__header">
+                                <div class="dps-taxidog-card__icon-title">
+                                    <span class="dps-taxidog-icon" aria-hidden="true">🚗</span>
+                                    <span class="dps-taxidog-title">Solicitar TaxiDog?</span>
+                                </div>
+                                <label class="dps-toggle-switch">
+                                    <input type="checkbox" id="dps-taxidog-toggle" name="appointment_taxidog" value="1" checked>
+                                    <span class="dps-toggle-slider"></span>
+                                </label>
+                            </div>
+                            <p class="dps-taxidog-description">Serviço de transporte para buscar e/ou levar o pet</p>
+
+                            <div id="dps-taxidog-extra" class="dps-taxidog-card__value" style="display:flex;">
+                                <label for="dps-taxidog-price" class="dps-taxidog-value-label">Valor do serviço:</label>
+                                <div class="dps-input-with-prefix">
+                                    <span class="dps-input-prefix">R$</span>
+                                    <input type="number" id="dps-taxidog-price" name="appointment_taxidog_price" step="0.01" min="0" value="25.00" class="dps-input-money dps-taxidog-price-input" placeholder="0,00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FIELDSET 4: Serviços e Extras -->
+                    <fieldset class="dps-fieldset">
+                        <legend class="dps-fieldset__legend">Serviços e Extras</legend>
+
+                        <div id="dps-tosa-wrapper" class="dps-tosa-section" style="display:block;">
+                            <div class="dps-tosa-card" data-tosa-active="1">
+                                <div class="dps-tosa-card__header">
+                                    <div class="dps-tosa-card__icon-title">
+                                        <span class="dps-tosa-icon" aria-hidden="true">✂️</span>
+                                        <span class="dps-tosa-title">Adicionar tosa?</span>
+                                    </div>
+                                    <label class="dps-toggle-switch">
+                                        <input type="checkbox" id="dps-tosa-toggle" name="appointment_tosa" value="1" checked>
+                                        <span class="dps-toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <p class="dps-tosa-description">Serviço de tosa adicional em um dos atendimentos da assinatura</p>
+
+                                <div id="dps-tosa-fields" class="dps-tosa-card__fields" style="display:grid;">
+                                    <div class="dps-tosa-field">
+                                        <label for="dps-tosa-price" class="dps-tosa-field-label">Valor da tosa:</label>
+                                        <div class="dps-input-with-prefix">
+                                            <span class="dps-input-prefix">R$</span>
+                                            <input type="number" step="0.01" min="0" id="dps-tosa-price" name="appointment_tosa_price" value="30.00" class="dps-input-money dps-tosa-price-input" placeholder="30,00">
+                                        </div>
+                                    </div>
+
+                                    <div class="dps-tosa-field">
+                                        <label for="appointment_tosa_occurrence" class="dps-tosa-field-label">Em qual atendimento:</label>
+                                        <select name="appointment_tosa_occurrence" id="appointment_tosa_occurrence" class="dps-tosa-occurrence-select">
+                                            <option value="1">1º atendimento</option>
+                                            <option value="2">2º atendimento</option>
+                                            <option value="3">3º atendimento</option>
+                                            <option value="4">4º atendimento</option>
+                                        </select>
+                                        <p class="dps-tosa-field-hint">Escolha o atendimento em que a tosa será realizada</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- FIELDSET 5: Observações e Notas -->
+                    <fieldset class="dps-fieldset">
+                        <legend class="dps-fieldset__legend">Observações e Notas</legend>
+
+                        <label for="appointment_notes">Observações</label>
+                        <textarea id="appointment_notes" name="appointment_notes" rows="3" placeholder="Instruções especiais, preferências do cliente, etc.">Pet Thor precisa de cuidado especial com as orelhas. Luna não gosta de secador.</textarea>
+                        <p class="dps-field-hint">Opcional - use este campo para anotações internas</p>
+                    </fieldset>
+
+                    <!-- Resumo do Agendamento -->
+                    <div class="dps-appointment-summary" aria-live="polite">
+                        <h3><span class="dps-appointment-summary__icon" aria-hidden="true">📋</span>Resumo do agendamento</h3>
+                        <ul class="dps-appointment-summary__list">
+                            <li><strong>Cliente:</strong> <span data-summary="client">Ana Carolina Silva</span></li>
+                            <li><strong>Pets:</strong> <span data-summary="pets">Thor, Luna</span></li>
+                            <li><strong>Data:</strong> <span data-summary="date">15/02/2026</span></li>
+                            <li><strong>Horário:</strong> <span data-summary="time">10:00</span></li>
+                            <li><strong>Serviços:</strong> <span data-summary="services">Banho, TaxiDog, Tosa</span></li>
+                            <li><strong>Valor estimado:</strong> <span data-summary="price">R$ 155,00</span></li>
+                            <li class="dps-appointment-summary__notes"><strong>Observações:</strong> <span data-summary="notes">Pet Thor precisa de cuidado especial com as orelhas.</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Botões de ação -->
+                    <div class="dps-form-actions">
+                        <button type="submit" class="dps-btn dps-btn--primary dps-submit-btn dps-appointment-submit">✓ Salvar Agendamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

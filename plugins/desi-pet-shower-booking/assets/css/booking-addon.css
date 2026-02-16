@@ -156,6 +156,60 @@
     margin-top: 24px;
 }
 
+.dps-booking-wrapper .dps-surface--info {
+    background: var(--booking-surface-elevated);
+    border: 1px solid var(--booking-border);
+    border-radius: var(--dps-shape-medium);
+    box-shadow: var(--dps-elevation-1);
+}
+
+.dps-booking-wrapper .dps-form {
+    display: grid;
+    gap: var(--dps-space-5);
+}
+
+.dps-booking-wrapper .dps-radio-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--dps-space-3);
+}
+
+.dps-booking-wrapper .dps-pet-picker-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dps-space-2);
+    margin-bottom: var(--dps-space-3);
+}
+
+.dps-booking-wrapper .dps-pet-list {
+    max-height: 320px;
+    overflow: auto;
+    padding-right: var(--dps-space-2);
+}
+
+.dps-booking-wrapper .dps-appointment-summary {
+    position: sticky;
+    bottom: var(--dps-space-2);
+    z-index: 2;
+    border-radius: var(--dps-shape-medium);
+    border: 1px solid var(--booking-border);
+    box-shadow: var(--dps-elevation-1);
+}
+
+.dps-booking-wrapper .dps-form-actions .dps-btn {
+    min-height: 44px;
+}
+
+.dps-booking-wrapper .dps-btn:focus-visible,
+.dps-booking-wrapper input:focus-visible,
+.dps-booking-wrapper select:focus-visible,
+.dps-booking-wrapper textarea:focus-visible,
+.dps-booking-wrapper .dps-pet-option:focus-within,
+.dps-booking-wrapper .dps-radio-option:focus-within {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
+}
+
 /* ==========================================================================
    6. Confirmation Page
    ========================================================================== */
@@ -434,6 +488,14 @@
     .dps-confirmation-actions .dps-btn {
         width: 100%;
         justify-content: center;
+    }
+
+    .dps-booking-wrapper .dps-appointment-summary {
+        position: static;
+    }
+
+    .dps-booking-wrapper .dps-pet-list {
+        max-height: 260px;
     }
 }
 
