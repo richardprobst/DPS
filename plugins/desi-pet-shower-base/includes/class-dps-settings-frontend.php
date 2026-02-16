@@ -54,6 +54,19 @@ class DPS_Settings_Frontend {
     private static $callbacks = [];
 
     /**
+     * Chaves dos módulos do Frontend Add-on.
+     *
+     * @var string[]
+     */
+    private const FRONTEND_MODULE_KEYS = [
+        'registration',
+        'booking',
+        'settings',
+        'registration_v2',
+        'booking_v2',
+    ];
+
+    /**
      * Verifica se a renderização deve ser ignorada (durante requisições REST/AJAX).
      * 
      * Previne o erro "Falha ao publicar. A resposta não é um JSON válido" no
@@ -2943,13 +2956,12 @@ class DPS_Settings_Frontend {
      * @return void
      */
     private static function handle_save_frontend() {
-        $allowed_keys = [ 'registration', 'booking', 'settings', 'registration_v2', 'booking_v2' ];
-        $submitted    = isset( $_POST['dps_frontend_flags'] ) && is_array( $_POST['dps_frontend_flags'] )
+        $submitted = isset( $_POST['dps_frontend_flags'] ) && is_array( $_POST['dps_frontend_flags'] )
             ? array_map( 'sanitize_text_field', wp_unslash( $_POST['dps_frontend_flags'] ) )
             : [];
 
         $flags = [];
-        foreach ( $allowed_keys as $key ) {
+        foreach ( self::FRONTEND_MODULE_KEYS as $key ) {
             $flags[ $key ] = ! empty( $submitted[ $key ] );
         }
 
