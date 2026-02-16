@@ -160,6 +160,7 @@ Todos os plugins/add-ons DEVEM declarar:
 - **Banco**: versionar alterações de banco (option de versão + `dbDelta()` somente quando a versão salva for menor que a atual; nunca em todo request).
 - **Contratos**: preservar assinaturas de hooks/tabelas compartilhadas. Se precisar mudar, criar novo hook e manter compatibilidade com depreciação documentada.
 - **Segredos**: nunca expor segredos em código; usar constantes ou variáveis de ambiente.
+- **Cache proibido**: é **proibido** implementar qualquer tipo de cache no sistema — inclui, mas não se limita a: transients do WordPress (`set_transient`, `get_transient`), object cache (`wp_cache_*`), cache de queries, cache de fragmentos HTML, cache de API responses, cache em arquivos, e qualquer mecanismo customizado de armazenamento temporário para reutilização. Todas as consultas e renderizações devem ser executadas em tempo real, sem camadas intermediárias de cache.
 
 ### ASK BEFORE (requer validação humana)
 - Alterar schema de tabelas compartilhadas (`dps_transacoes`, `dps_parcelas`, etc.).
@@ -297,6 +298,7 @@ Ao decidir o que corrigir ou melhorar, siga esta ordem de prioridade:
 - ❌ Mudar assinaturas de hooks existentes (crie novos hooks e deprecie os antigos).
 - ❌ Remover/modificar capabilities sem análise de impacto.
 - ❌ Alterar schema de tabelas compartilhadas sem migração reversível + documentação + validação (ASK BEFORE).
+- ❌ Implementar qualquer tipo de cache (transients, object cache, cache de queries, cache de fragmentos, cache em arquivos ou qualquer mecanismo de armazenamento temporário). Ver regra **Cache proibido** na seção MUST.
 
 **Princípio geral:** na dúvida, prefira adicionalidade (criar novo em vez de quebrar existente) e documente o mínimo necessário.
 
