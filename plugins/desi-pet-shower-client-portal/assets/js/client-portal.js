@@ -692,14 +692,28 @@
         var ajaxUrl = window.dpsPortal.ajaxUrl;
 
         function copyToClipboard(text) {
-            if (!navigator.clipboard) {
-                return false;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(function() {
+                    if (window.DPSToast) {
+                        window.DPSToast.success('Link copiado!', 2500);
+                    }
+                }).catch(function() {});
+                return true;
             }
-            navigator.clipboard.writeText(text).then(function() {
+            // Fallback for non-HTTPS contexts
+            var textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
                 if (window.DPSToast) {
                     window.DPSToast.success('Link copiado!', 2500);
                 }
-            }).catch(function() {});
+            } catch (e) {}
+            document.body.removeChild(textarea);
             return true;
         }
 
@@ -774,6 +788,9 @@
             }).catch(function() {
                 button.disabled = false;
                 button.textContent = 'Carregar mais';
+                if (window.DPSToast) {
+                    window.DPSToast.error(loyaltyConfig.i18n.redeemError || 'Erro ao carregar. Tente novamente.', 3000);
+                }
             });
         }
 
@@ -788,6 +805,7 @@
             var input = redemptionForm.querySelector('#dps-loyalty-points-input');
             var feedback = redemptionForm.querySelector('.dps-loyalty-redemption__feedback');
             var submitBtn = redemptionForm.querySelector('.dps-loyalty-redeem-btn');
+            var originalBtnText = submitBtn ? submitBtn.textContent : '';
 
             redemptionForm.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -814,13 +832,15 @@
                         feedback.textContent = res.data.message || loyaltyConfig.i18n.redeemSuccess;
                         feedback.classList.remove('is-error');
                         feedback.classList.add('is-success');
-                        input.value = res.data.points;
 
                         var maxAttr = parseInt(redemptionForm.getAttribute('data-max-cents'), 10) || 0;
                         var rate = parseInt(redemptionForm.getAttribute('data-rate'), 10) || 1;
                         var maxByCap = maxAttr > 0 ? Math.floor((maxAttr / 100) * rate) : res.data.points;
                         var newMax = Math.min(res.data.points, maxByCap);
                         input.setAttribute('max', newMax);
+                        // Clamp input value to new max (prevent HTML5 validation errors)
+                        var minPoints = parseInt(redemptionForm.getAttribute('data-min-points'), 10) || 1;
+                        input.value = Math.min(Math.max(minPoints, newMax), newMax);
 
                         if (window.DPSToast) {
                             window.DPSToast.success(res.data.message || loyaltyConfig.i18n.redeemSuccess, 5000);
@@ -842,7 +862,7 @@
                     }
                 }).finally(function() {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Resgatar pontos';
+                    submitBtn.textContent = originalBtnText;
                 });
             });
         }

@@ -146,3 +146,39 @@
 ## Observações
 - Validação via php -l, node -c e inspeção de código.
 - Escopo: aba Início apenas — nenhuma outra aba foi alterada.
+
+---
+
+# Screenshots 2026-02-17 — Aba Fidelidade do Portal do Cliente (revisão completa)
+
+## Contexto
+- Objetivo: revisão UX/UI + funcional da segunda aba (Fidelidade) do portal do cliente.
+- Ambiente: validação via inspeção de código (sem WordPress rodando).
+
+## Antes/Depois
+- Resumo do antes:
+  - barra de progresso de nível sem atributos ARIA (role/aria-valuenow);
+  - nenhum elemento interativo na aba Fidelidade tinha `focus-visible`;
+  - campo numérico de resgate removia outline no foco (`outline: none`);
+  - botão de resgate usava `transition: all`;
+  - texto do botão de resgate era hardcoded a `'Resgatar pontos'` no finally (original: `'🎁 Resgatar Agora'`);
+  - input.value após resgate podia exceder max attribute;
+  - erro no carregamento de histórico era silencioso (sem feedback);
+  - copiar link de referral não funcionava em HTTP (sem fallback).
+- Resumo do depois:
+  - barra de progresso com `role="progressbar"`, `aria-valuenow`, `aria-valuemin="0"`, `aria-valuemax="100"`, `aria-label`;
+  - `focus-visible` em 4 tipos de elementos interativos;
+  - campo numérico mantém outline visível no foco;
+  - botão usa `transition: transform, box-shadow` + `focus-visible`;
+  - texto original do botão preservado via variável;
+  - input.value clamped ao novo max após resgate;
+  - toast exibido em erro de carregamento de histórico;
+  - fallback de clipboard via `document.execCommand('copy')`.
+- Arquivos de código alterados:
+  - `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
+  - `plugins/desi-pet-shower-client-portal/assets/css/client-portal.css`
+  - `plugins/desi-pet-shower-client-portal/assets/js/client-portal.js`
+
+## Observações
+- Validação via php -l, node -c e inspeção de código.
+- Escopo: aba Fidelidade apenas.

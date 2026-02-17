@@ -6996,6 +6996,26 @@ html {
     width: 100%;
 }
 
+.dps-loyalty-history-more:focus-visible {
+    outline: 2px solid var(--dps-color-primary, var(--dps-primary));
+    outline-offset: 2px;
+}
+
+.dps-loyalty-history-trigger:focus-visible {
+    outline: 2px solid var(--dps-color-primary, var(--dps-primary));
+    outline-offset: 2px;
+}
+
+.dps-portal-copy:focus-visible {
+    outline: 2px solid var(--dps-color-primary, var(--dps-primary));
+    outline-offset: 2px;
+}
+
+.dps-loyalty-referral-input:focus-visible {
+    outline: 2px solid var(--dps-color-primary, var(--dps-primary));
+    outline-offset: -2px;
+}
+
 /* Seção: Resgate Modernizado */
 .dps-loyalty-redemption {
     background: linear-gradient(135deg, var(--dps-success-bg) 0%, var(--dps-white) 100%);
@@ -7072,7 +7092,8 @@ html {
 }
 
 .dps-loyalty-redemption__form-group input[type="number"]:focus {
-    outline: none;
+    outline: 2px solid var(--dps-success);
+    outline-offset: -2px;
     border-color: var(--dps-success);
 }
 
@@ -7092,13 +7113,18 @@ html {
     border: none;
     border-radius: var(--dps-shape-small);
     cursor: pointer;
-    transition: all var(--dps-motion-hover);
+    transition: transform var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
     box-shadow: var(--dps-elevation-2);
 }
 
 .dps-loyalty-redeem-btn:hover {
     transform: translateY(-2px);
     box-shadow: var(--dps-elevation-3);
+}
+
+.dps-loyalty-redeem-btn:focus-visible {
+    outline: 2px solid var(--dps-color-on-primary, var(--dps-white));
+    outline-offset: 2px;
 }
 
 .dps-loyalty-redemption__feedback {

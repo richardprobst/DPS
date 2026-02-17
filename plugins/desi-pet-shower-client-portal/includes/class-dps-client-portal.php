@@ -1672,13 +1672,13 @@ final class DPS_Client_Portal {
             echo '<span class="dps-loyalty-progress__current">' . esc_html( number_format( $points, 0, ',', '.' ) ) . ' pts</span>';
             echo '<span class="dps-loyalty-progress__next">' . esc_html( number_format( $next_points, 0, ',', '.' ) ) . ' pts</span>';
             echo '</div>';
-            echo '<div class="dps-loyalty-progress__bar"><span style="width: ' . esc_attr( $progress ) . '%"></span></div>';
+            echo '<div class="dps-loyalty-progress__bar" role="progressbar" aria-valuenow="' . esc_attr( $progress ) . '" aria-valuemin="0" aria-valuemax="100" aria-label="' . esc_attr__( 'Progresso do nível', 'dps-client-portal' ) . '"><span style="width: ' . esc_attr( $progress ) . '%"></span></div>';
             echo '<p class="dps-loyalty-progress__hint">' . esc_html( sprintf( __( 'Faltam %s pontos para o próximo nível! 🚀', 'dps-client-portal' ), number_format( $remaining, 0, ',', '.' ) ) ) . '</p>';
         } else {
             echo '<div class="dps-loyalty-progress__info">';
             echo '<span class="dps-loyalty-progress__current">' . esc_html( number_format( $points, 0, ',', '.' ) ) . ' pts</span>';
             echo '</div>';
-            echo '<div class="dps-loyalty-progress__bar"><span style="width: 100%"></span></div>';
+            echo '<div class="dps-loyalty-progress__bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="' . esc_attr__( 'Progresso do nível', 'dps-client-portal' ) . '"><span style="width: 100%"></span></div>';
             echo '<p class="dps-loyalty-progress__hint">' . esc_html__( 'Você está no nível máximo! 🎉', 'dps-client-portal' ) . '</p>';
         }
         echo '</div>';

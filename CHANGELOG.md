@@ -104,6 +104,13 @@ Antes de criar uma nova versão oficial:
 - **Card de fidelidade**: corrigido clique no card de pontos (overview) — agora navega para a aba Fidelidade conforme esperado; suporte a Enter/Space para elementos com `role="button"`.
 - **Transições CSS**: substituído `transition: all` por propriedades específicas nos componentes pet card, quick action e pet action button.
 
+**Client Portal — Aba Fidelidade (revisão completa)**
+
+- **Acessibilidade**: barra de progresso com `role="progressbar"`, `aria-valuenow`, `aria-valuemin`, `aria-valuemax` e `aria-label`; `focus-visible` em todos os elementos interativos (botão copiar, link ver histórico, carregar mais, botão resgatar, input de referral); campo numérico agora mantém outline no foco (era removido com `outline: none`).
+- **Resiliência**: erro no carregamento de histórico agora exibe toast; botão de resgate preserva texto original após submit (era hardcoded); valor do input de resgate é clamped ao novo max após resgate bem-sucedido.
+- **Clipboard**: fallback via `document.execCommand('copy')` para contextos sem HTTPS.
+- **Transições CSS**: substituído `transition: all` por propriedades específicas no botão de resgate.
+
 #### Fixed (Corrigido)
 
 - **Segurança**: corrigida verificação de propriedade do pet na impressão de histórico — usava meta key incorreta `pet_client_id` ao invés de `owner_id`, impedindo acesso legítimo à funcionalidade.
