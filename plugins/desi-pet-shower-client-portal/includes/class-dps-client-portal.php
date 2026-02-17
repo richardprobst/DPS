@@ -644,8 +644,8 @@ final class DPS_Client_Portal {
         // Breadcrumb simples para contexto
         echo '<nav class="dps-portal-breadcrumb" aria-label="' . esc_attr__( 'Navegação', 'dps-client-portal' ) . '">';
         echo '<span class="dps-portal-breadcrumb__item">' . esc_html__( 'Portal do Cliente', 'dps-client-portal' ) . '</span>';
-        echo '<span class="dps-portal-breadcrumb__separator">›</span>';
-        echo '<span class="dps-portal-breadcrumb__item dps-portal-breadcrumb__item--active">' . esc_html__( 'Início', 'dps-client-portal' ) . '</span>';
+        echo '<span class="dps-portal-breadcrumb__separator" aria-hidden="true">›</span>';
+        echo '<span class="dps-portal-breadcrumb__item dps-portal-breadcrumb__item--active" data-breadcrumb-active>' . esc_html__( 'Início', 'dps-client-portal' ) . '</span>';
         
         echo '</nav>';
         
@@ -714,6 +714,7 @@ final class DPS_Client_Portal {
         $tabs = apply_filters( 'dps_portal_tabs', $default_tabs, $client_id );
         
         // Navegação por Tabs com badges
+        echo '<div class="dps-portal-tabs-wrapper">';
         echo '<nav class="dps-portal-tabs" role="tablist" aria-label="' . esc_attr__( 'Seções do portal', 'dps-client-portal' ) . '">';
         foreach ( $tabs as $tab_id => $tab ) {
             $is_active   = isset( $tab['active'] ) && $tab['active'];
@@ -758,6 +759,7 @@ final class DPS_Client_Portal {
         }
         echo '<span class="dps-portal-tabs__loading" aria-live="polite" aria-atomic="true"></span>';
         echo '</nav>';
+        echo '</div>'; // .dps-portal-tabs-wrapper
         
         // Hook: Antes de renderizar conteúdo das tabs (Fase 2.3)
         do_action( 'dps_portal_before_tab_content', $client_id );

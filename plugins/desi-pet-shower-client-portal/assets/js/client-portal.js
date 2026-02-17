@@ -157,11 +157,44 @@
         var tabs = Array.prototype.slice.call(document.querySelectorAll('.dps-portal-tabs__link'));
         var panels = document.querySelectorAll('.dps-portal-tab-panel');
         var tabNav = document.querySelector('.dps-portal-tabs');
+        var tabWrapper = document.querySelector('.dps-portal-tabs-wrapper');
         var tabContent = document.querySelector('.dps-portal-tab-content');
+        var breadcrumbActive = document.querySelector('[data-breadcrumb-active]');
         var loadingEl = tabNav ? tabNav.querySelector('.dps-portal-tabs__loading') : null;
         var loadingTimer = null;
         
         if (!tabs.length || !panels.length) return;
+
+        function updateScrollHints() {
+            if (!tabNav || !tabWrapper) return;
+            var scrollLeft = tabNav.scrollLeft;
+            var maxScroll = tabNav.scrollWidth - tabNav.clientWidth;
+            tabWrapper.classList.toggle('has-scroll-left', scrollLeft > 4);
+            tabWrapper.classList.toggle('has-scroll-right', maxScroll > 4 && scrollLeft < maxScroll - 4);
+        }
+
+        if (tabNav) {
+            tabNav.addEventListener('scroll', updateScrollHints, { passive: true });
+            window.addEventListener('resize', updateScrollHints, { passive: true });
+            updateScrollHints();
+        }
+
+        function scrollTabIntoView(tabElement) {
+            if (!tabNav || !tabElement) return;
+            var navRect = tabNav.getBoundingClientRect();
+            var tabRect = tabElement.getBoundingClientRect();
+            if (tabRect.left < navRect.left || tabRect.right > navRect.right) {
+                tabElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+            }
+        }
+
+        function updateBreadcrumb(tabElement) {
+            if (!breadcrumbActive || !tabElement) return;
+            var labelEl = tabElement.querySelector('.dps-portal-tabs__text');
+            if (labelEl) {
+                breadcrumbActive.textContent = labelEl.textContent;
+            }
+        }
 
         function setLoading(isLoading) {
             if (!tabNav || !tabContent) return;
@@ -180,6 +213,7 @@
             }
 
             if (targetTab.classList.contains('is-active')) {
+                updateBreadcrumb(targetTab);
                 return true;
             }
 
@@ -211,6 +245,9 @@
                 }
             }
 
+            updateBreadcrumb(targetTab);
+            scrollTabIntoView(targetTab);
+
             if (!opts.skipHash && history.pushState) {
                 history.pushState(null, null, '#tab-' + tabId);
             }
@@ -221,9 +258,11 @@
             if (!opts.silent) {
                 loadingTimer = setTimeout(function() {
                     setLoading(false);
+                    updateScrollHints();
                 }, LOADING_INDICATOR_DURATION);
             } else {
                 setLoading(false);
+                updateScrollHints();
             }
 
             return true;
