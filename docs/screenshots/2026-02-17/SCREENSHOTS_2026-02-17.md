@@ -78,3 +78,41 @@
 ## Observações
 - Como o ambiente não tinha WordPress rodando para captura da tela real do plugin, foi utilizado preview estático para validar shell e tabs.
 - O escopo foi restrito ao shell principal e navegação por abas, sem mudanças no conteúdo interno de cada painel.
+
+---
+
+# Screenshots 2026-02-17 — AI Add-on (assistente virtual no portal)
+
+## Contexto
+- Objetivo da mudança: revisão UX/UI + funcional do widget de assistente virtual na área de topo do portal do cliente.
+- Ambiente: validação via inspeção de código (sem WordPress rodando).
+- Referência de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+
+## Antes/Depois
+- Resumo do antes:
+  - sem `role="region"` ou `aria-label` no container principal;
+  - header não focável via teclado (sem `tabindex`);
+  - mensagens sem `aria-live` — screen readers não anunciavam novas mensagens;
+  - sem Escape key handler para fechar/recolher o widget;
+  - sem prevenção de envio duplo (clique rápido no botão Send);
+  - AJAX sem timeout, possível espera indefinida em caso de falha de rede;
+  - chevron apontava para cima quando colapsado (semanticamente invertido);
+  - vários elementos interativos sem `focus-visible` (sugestões, FAB, header, submit, feedback).
+- Resumo do depois:
+  - container com `role="region"` e `aria-label="Assistente virtual"`;
+  - header com `tabindex="0"` e estilo `focus-visible`;
+  - mensagens com `aria-live="polite"` e `aria-relevant="additions"`;
+  - Escape recolhe inline / fecha flutuante, devolvendo foco;
+  - flag `isSubmitting` bloqueia envios duplicados;
+  - AJAX com timeout de 15s e mensagem de erro específica para timeout;
+  - chevron corrigido: aponta para baixo quando colapsado, para cima quando expandido;
+  - `focus-visible` em header, FAB, sugestões, submit, feedback buttons;
+  - `aria-label` nos botões de sugestão.
+- Arquivos de código alterados:
+  - `plugins/desi-pet-shower-ai/includes/class-dps-ai-integration-portal.php`
+  - `plugins/desi-pet-shower-ai/assets/css/dps-ai-portal.css`
+  - `plugins/desi-pet-shower-ai/assets/js/dps-ai-portal.js`
+
+## Observações
+- Como o ambiente não tinha WordPress rodando, não há capturas de tela do widget real. As alterações foram validadas via inspeção de código, linting PHP/JS e verificação de acessibilidade.
+- O escopo foi restrito ao widget de assistente no topo do portal, sem mudanças no conteúdo interno das abas.

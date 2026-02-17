@@ -83,6 +83,13 @@ Antes de criar uma nova versão oficial:
 
 #### Changed (Alterado)
 
+**AI Add-on — Assistente Virtual no Portal do Cliente**
+
+- **Acessibilidade**: adicionado `role="region"` e `aria-label` ao container principal, `tabindex="0"` ao header, `aria-live="polite"` na área de mensagens, `aria-label` nos botões de sugestão, `focus-visible` em todos os elementos interativos (header, FAB, sugestões, enviar, feedback).
+- **Teclado**: tecla Escape recolhe o widget inline ou fecha o flutuante, retornando foco ao elemento adequado.
+- **Resiliência**: timeout de 15s no AJAX com mensagem de erro específica; prevenção de envio duplo com flag `isSubmitting`.
+- **Chevron**: ícone de seta agora aponta para baixo quando colapsado (indicando "expandir") e para cima quando expandido.
+
 **Client Portal — UX/UI do Shell e Navegação por Tabs**
 
 - **Navegação por tabs**: estado ativo mais forte (font-weight 600), scroll horizontal com snap em mobile, gradientes de overflow indicando direção de rolagem.
