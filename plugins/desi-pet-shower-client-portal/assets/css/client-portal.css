@@ -1739,7 +1739,7 @@ html {
     color: var(--dps-warning);
 }
 
-.dps-star-input:focus + .dps-star-label {
+.dps-star-input:focus-visible + .dps-star-label {
     outline: 2px solid var(--dps-primary);
     outline-offset: 2px;
     border-radius: var(--dps-shape-extra-small);
@@ -1811,6 +1811,18 @@ html {
 
 .dps-btn-submit-review .dps-btn-icon {
     font-size: 18px;
+}
+
+.dps-btn-submit-review:focus-visible {
+    outline: 2px solid var(--dps-color-primary, var(--dps-primary));
+    outline-offset: 2px;
+}
+
+.dps-btn-submit-review:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 /* Card do Google Reviews */
@@ -1928,6 +1940,11 @@ html {
     transform: translateY(-2px);
     box-shadow: var(--dps-elevation-4);
     color: #fff;
+}
+
+.dps-review-google-btn:focus-visible {
+    outline: 2px solid var(--dps-color-primary, var(--dps-primary));
+    outline-offset: 2px;
 }
 
 .dps-review-google-btn__icon {

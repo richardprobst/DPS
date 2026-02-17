@@ -1683,10 +1683,10 @@ window.DPSSkeleton = (function() {
                 charCount.textContent = count;
                 
                 // Cor de aviso quando próximo do limite
-                if (count > 450) {
-                    charCount.style.color = '#f59e0b';
-                } else if (count >= 500) {
+                if (count >= 500) {
                     charCount.style.color = '#ef4444';
+                } else if (count > 450) {
+                    charCount.style.color = '#f59e0b';
                 } else {
                     charCount.style.color = '';
                 }
@@ -1729,8 +1729,17 @@ window.DPSSkeleton = (function() {
             });
         });
 
+        // Prevenção de duplo envio
+        var isSubmitting = false;
+
         // Validação antes do envio
         form.addEventListener('submit', function(e) {
+            // Prevenção de duplo envio
+            if (isSubmitting) {
+                e.preventDefault();
+                return false;
+            }
+
             var selectedRating = form.querySelector('.dps-star-input:checked');
             
             if (!selectedRating) {
@@ -1753,6 +1762,9 @@ window.DPSSkeleton = (function() {
                 return false;
             }
             
+            // Marca como enviando para prevenir duplo clique
+            isSubmitting = true;
+
             // Feedback de envio
             var submitBtn = form.querySelector('.dps-btn-submit-review');
             if (submitBtn) {
