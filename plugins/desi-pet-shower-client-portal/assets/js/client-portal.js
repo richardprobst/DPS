@@ -404,6 +404,13 @@
                 }
             });
         }
+
+        // Tecla Escape para fechar o chat
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && chatConfig.isOpen) {
+                closeChat();
+            }
+        });
         
         // Carrega mensagens ao iniciar
         loadChatMessages();
@@ -421,7 +428,10 @@
         
         if (chatConfig.isOpen) {
             chatWindow.classList.add('is-open');
+            chatWindow.setAttribute('aria-hidden', 'false');
             toggle.classList.add('is-open');
+            toggle.setAttribute('aria-expanded', 'true');
+            toggle.setAttribute('aria-label', window.dpsPortalChat && window.dpsPortalChat.i18n ? window.dpsPortalChat.i18n.closeChat || 'Fechar chat' : 'Fechar chat');
             startPolling();
             scrollToBottom();
             
@@ -429,7 +439,10 @@
             markMessagesAsRead();
         } else {
             chatWindow.classList.remove('is-open');
+            chatWindow.setAttribute('aria-hidden', 'true');
             toggle.classList.remove('is-open');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.setAttribute('aria-label', window.dpsPortalChat && window.dpsPortalChat.i18n ? window.dpsPortalChat.i18n.openChat || 'Abrir chat' : 'Abrir chat');
             stopPolling();
         }
     }
@@ -444,7 +457,10 @@
         
         chatConfig.isOpen = false;
         chatWindow.classList.remove('is-open');
+        chatWindow.setAttribute('aria-hidden', 'true');
         toggle.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', window.dpsPortalChat && window.dpsPortalChat.i18n ? window.dpsPortalChat.i18n.openChat || 'Abrir chat' : 'Abrir chat');
         stopPolling();
     }
 
@@ -457,6 +473,7 @@
         var xhr = new XMLHttpRequest();
         xhr.open('POST', window.dpsPortalChat.ajaxUrl, true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.timeout = 15000;
         
         xhr.onload = function() {
             if (xhr.status === 200) {
@@ -473,6 +490,14 @@
                     console.error('Erro ao carregar mensagens:', e);
                 }
             }
+        };
+
+        xhr.onerror = function() {
+            console.error('Erro de rede ao carregar mensagens');
+        };
+
+        xhr.ontimeout = function() {
+            console.error('Timeout ao carregar mensagens');
         };
         
         var params = 'action=dps_chat_get_messages';
@@ -515,9 +540,13 @@
     /**
      * Envia mensagem via AJAX
      */
+    var isSending = false;
+
     function sendChatMessage(message) {
         if (!chatConfig.clientId || !window.dpsPortalChat) return;
-        
+        if (isSending) return;
+
+        isSending = true;
         var sendBtn = document.querySelector('.dps-chat-input__send');
         if (sendBtn) sendBtn.disabled = true;
         
@@ -527,8 +556,10 @@
         var xhr = new XMLHttpRequest();
         xhr.open('POST', window.dpsPortalChat.ajaxUrl, true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.timeout = 15000;
         
         xhr.onload = function() {
+            isSending = false;
             if (sendBtn) sendBtn.disabled = false;
             
             if (xhr.status === 200) {
@@ -538,11 +569,36 @@
                         // Recarrega mensagens para sincronizar
                         loadChatMessages();
                     } else {
-                        alert('Erro ao enviar mensagem. Tente novamente.');
+                        var errMsg = response.data && response.data.message
+                            ? response.data.message
+                            : 'Erro ao enviar mensagem. Tente novamente.';
+                        if (window.DPSToast) {
+                            window.DPSToast.error(errMsg);
+                        }
                     }
                 } catch (e) {
                     console.error('Erro ao enviar mensagem:', e);
                 }
+            } else {
+                if (window.DPSToast) {
+                    window.DPSToast.error('Erro de conexão. Tente novamente.');
+                }
+            }
+        };
+
+        xhr.onerror = function() {
+            isSending = false;
+            if (sendBtn) sendBtn.disabled = false;
+            if (window.DPSToast) {
+                window.DPSToast.error('Falha na conexão. Verifique sua internet e tente novamente.');
+            }
+        };
+
+        xhr.ontimeout = function() {
+            isSending = false;
+            if (sendBtn) sendBtn.disabled = false;
+            if (window.DPSToast) {
+                window.DPSToast.error('A conexão demorou muito. Tente novamente.');
             }
         };
         
@@ -575,18 +631,31 @@
     }
 
     /**
-     * Atualiza badge de mensagens não lidas
+     * Atualiza badge de mensagens não lidas (chat + tab nav)
      */
     function updateUnreadBadge(count) {
+        // Badge do chat flutuante
         var badge = document.querySelector('.dps-chat-badge');
-        if (!badge) return;
-        
-        if (count > 0) {
-            badge.textContent = count > 99 ? '99+' : count;
-            badge.style.display = 'flex';
-        } else {
-            badge.textContent = '';
-            badge.style.display = 'none';
+        if (badge) {
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.textContent = '';
+                badge.style.display = 'none';
+            }
+        }
+
+        // Badge na aba de navegação do portal
+        var tabBadge = document.querySelector('#dps-portal-tab-mensagens .dps-portal-tabs__badge');
+        if (tabBadge) {
+            if (count > 0) {
+                tabBadge.textContent = count > 99 ? '99+' : count;
+                tabBadge.style.display = '';
+            } else {
+                tabBadge.textContent = '';
+                tabBadge.style.display = 'none';
+            }
         }
     }
 
@@ -1468,18 +1537,49 @@ window.DPSSkeleton = (function() {
      * Mostra modal de cancelamento
      */
     function showCancelModal(appointmentId) {
-        if (!confirm('Tem certeza que deseja solicitar o cancelamento deste agendamento?\n\nA equipe do Banho e Tosa pode entrar em contato para confirmar.')) {
-            return;
-        }
-        
-        // Envia direto a solicitação de cancelamento
-        submitAppointmentRequest({
-            request_type: 'cancel',
-            original_appointment_id: appointmentId,
-            desired_date: '',
-            desired_period: '',
-            notes: 'Cliente solicitou cancelamento via portal'
+        var modal = document.createElement('div');
+        modal.className = 'dps-modal dps-appointment-request-modal';
+
+        var html = '<div class="dps-modal__overlay"></div>';
+        html += '<div class="dps-modal__content">';
+        html += '<div class="dps-modal__header">';
+        html += '<h3>Confirmar Cancelamento</h3>';
+        html += '<button class="dps-modal__close" aria-label="Fechar">×</button>';
+        html += '</div>';
+        html += '<div class="dps-modal__body">';
+        html += '<p>Tem certeza que deseja solicitar o cancelamento deste agendamento?</p>';
+        html += '<p class="dps-modal__notice">A equipe pode entrar em contato para confirmar.</p>';
+        html += '<div class="dps-form-actions">';
+        html += '<button type="button" class="button dps-modal-cancel">Voltar</button>';
+        html += '<button type="button" class="button button-primary dps-modal-confirm-cancel">Confirmar Cancelamento</button>';
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        modal.innerHTML = html;
+
+        modal.querySelector('.dps-modal__close').addEventListener('click', function() {
+            closeModal(modal);
         });
+        modal.querySelector('.dps-modal__overlay').addEventListener('click', function() {
+            closeModal(modal);
+        });
+        modal.querySelector('.dps-modal-cancel').addEventListener('click', function() {
+            closeModal(modal);
+        });
+        modal.querySelector('.dps-modal-confirm-cancel').addEventListener('click', function() {
+            closeModal(modal);
+            submitAppointmentRequest({
+                request_type: 'cancel',
+                original_appointment_id: appointmentId,
+                desired_date: '',
+                desired_period: '',
+                notes: 'Cliente solicitou cancelamento via portal'
+            });
+        });
+
+        document.body.appendChild(modal);
+        modal.classList.add('is-active');
     }
 
     /**
@@ -1574,6 +1674,15 @@ window.DPSSkeleton = (function() {
             submitAppointmentRequest(data);
             closeModal(modal);
         });
+
+        // Fecha modal com Escape
+        var escHandler = function(e) {
+            if (e.key === 'Escape') {
+                closeModal(modal);
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
         
         return modal;
     }
@@ -1623,21 +1732,34 @@ window.DPSSkeleton = (function() {
         })
         .then(function(result) {
             if (result.success) {
-                showNotification(result.data.message, 'success');
+                if (window.DPSToast) {
+                    window.DPSToast.success(result.data.message);
+                } else {
+                    showNotification(result.data.message, 'success');
+                }
                 // Recarrega a página após 2 segundos para mostrar o pedido
                 setTimeout(function() {
                     location.reload();
                 }, 2000);
             } else {
-                showNotification(result.data.message || 'Erro ao enviar solicitação', 'error');
+                var errMsg = result.data && result.data.message ? result.data.message : 'Erro ao enviar solicitação';
+                if (window.DPSToast) {
+                    window.DPSToast.error(errMsg);
+                } else {
+                    showNotification(errMsg, 'error');
+                }
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Enviar Solicitação';
                 }
             }
         })
-        .catch(function(error) {
-            showNotification('Erro ao enviar solicitação. Tente novamente.', 'error');
+        .catch(function() {
+            if (window.DPSToast) {
+                window.DPSToast.error('Falha na conexão. Verifique sua internet e tente novamente.');
+            } else {
+                showNotification('Erro ao enviar solicitação. Tente novamente.', 'error');
+            }
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Enviar Solicitação';
@@ -1683,10 +1805,10 @@ window.DPSSkeleton = (function() {
                 charCount.textContent = count;
                 
                 // Cor de aviso quando próximo do limite
-                if (count > 450) {
-                    charCount.style.color = '#f59e0b';
-                } else if (count >= 500) {
+                if (count >= 500) {
                     charCount.style.color = '#ef4444';
+                } else if (count > 450) {
+                    charCount.style.color = '#f59e0b';
                 } else {
                     charCount.style.color = '';
                 }
@@ -1729,8 +1851,17 @@ window.DPSSkeleton = (function() {
             });
         });
 
+        // Prevenção de duplo envio
+        var isSubmitting = false;
+
         // Validação antes do envio
         form.addEventListener('submit', function(e) {
+            // Prevenção de duplo envio
+            if (isSubmitting) {
+                e.preventDefault();
+                return false;
+            }
+
             var selectedRating = form.querySelector('.dps-star-input:checked');
             
             if (!selectedRating) {
@@ -1753,6 +1884,9 @@ window.DPSSkeleton = (function() {
                 return false;
             }
             
+            // Marca como enviando para prevenir duplo clique
+            isSubmitting = true;
+
             // Feedback de envio
             var submitBtn = form.querySelector('.dps-btn-submit-review');
             if (submitBtn) {

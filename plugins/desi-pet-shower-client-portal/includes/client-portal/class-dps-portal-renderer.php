@@ -213,7 +213,11 @@ class DPS_Portal_Renderer {
             $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( $whatsapp_message );
         } else {
             // Fallback
-            $whatsapp_number = get_option( 'dps_whatsapp_number', '5515991606299' );
+            $whatsapp_number = get_option( 'dps_whatsapp_number', '' );
+            if ( ! $whatsapp_number ) {
+                echo '</div>';
+                return;
+            }
             if ( class_exists( 'DPS_Phone_Helper' ) ) {
                 $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
             }
@@ -559,9 +563,87 @@ class DPS_Portal_Renderer {
      * @param int $client_id ID do cliente.
      */
     public function render_message_center( $client_id ) {
+        $unread_count = $this->data_provider->get_unread_messages_count( $client_id );
+        $messages     = $this->message_repository->get_messages_by_client( $client_id );
+        $total_count  = count( $messages );
+
         echo '<section class="dps-portal-section dps-portal-messages">';
-        echo '<h2>' . esc_html__( '💬 Central de Mensagens', 'dps-client-portal' ) . '</h2>';
-        echo '<p>' . esc_html__( 'Use o chat flutuante no canto inferior direito para conversar conosco em tempo real!', 'dps-client-portal' ) . '</p>';
+        echo '<h2 class="dps-section-title"><span class="dps-section-title__icon">💬</span>' . esc_html__( 'Central de Mensagens', 'dps-client-portal' ) . '</h2>';
+        echo '<p class="dps-section-subtitle">' . esc_html__( 'Converse com nossa equipe pelo chat flutuante no canto inferior direito.', 'dps-client-portal' ) . '</p>';
+
+        // Métricas
+        echo '<div class="dps-messages-metrics">';
+
+        echo '<div class="dps-messages-metric-card' . ( $unread_count > 0 ? ' dps-messages-metric-card--highlight' : '' ) . '">';
+        echo '<div class="dps-messages-metric-card__icon">📩</div>';
+        echo '<div class="dps-messages-metric-card__content">';
+        echo '<span class="dps-messages-metric-card__value">' . esc_html( $unread_count ) . '</span>';
+        echo '<span class="dps-messages-metric-card__label">' . esc_html( _n( 'Não lida', 'Não lidas', $unread_count, 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+
+        echo '<div class="dps-messages-metric-card">';
+        echo '<div class="dps-messages-metric-card__icon">📝</div>';
+        echo '<div class="dps-messages-metric-card__content">';
+        echo '<span class="dps-messages-metric-card__value">' . esc_html( $total_count ) . '</span>';
+        echo '<span class="dps-messages-metric-card__label">' . esc_html( _n( 'Mensagem', 'Mensagens', $total_count, 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+
+        echo '</div>'; // .dps-messages-metrics
+
+        // Caixa de entrada
+        echo '<div class="dps-messages-inbox">';
+        echo '<div class="dps-messages-inbox__header">';
+        echo '<span class="dps-messages-inbox__icon">📬</span>';
+        echo '<div>';
+        echo '<h3 class="dps-messages-inbox__title">' . esc_html__( 'Conversas Recentes', 'dps-client-portal' ) . '</h3>';
+        echo '<p class="dps-messages-inbox__subtitle">' . esc_html__( 'Histórico das suas últimas mensagens', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+        echo '</div>';
+
+        if ( ! empty( $messages ) ) {
+            echo '<div class="dps-portal-messages__list">';
+            $display_messages = array_slice( array_reverse( $messages ), 0, 10 );
+            foreach ( $display_messages as $msg ) {
+                $sender     = get_post_meta( $msg->ID, 'message_sender', true );
+                $is_admin   = ( 'admin' === $sender );
+                $read_at    = get_post_meta( $msg->ID, 'client_read_at', true );
+                $is_unread  = $is_admin && empty( $read_at );
+                $sender_lbl = $is_admin
+                    ? esc_html__( 'Equipe', 'dps-client-portal' )
+                    : esc_html__( 'Você', 'dps-client-portal' );
+
+                echo '<div class="dps-portal-message' . ( $is_unread ? ' dps-portal-message--unread' : '' ) . '">';
+                echo '<div class="dps-portal-message__avatar">' . ( $is_admin ? '🐾' : '👤' ) . '</div>';
+                echo '<div class="dps-portal-message__body">';
+                echo '<div class="dps-portal-message__header">';
+                echo '<span class="dps-portal-message__sender">' . esc_html( $sender_lbl ) . '</span>';
+                echo '<time class="dps-portal-message__time">' . esc_html( get_the_date( get_option( 'date_format', 'd/m/Y' ) . ' H:i', $msg ) ) . '</time>';
+                echo '</div>';
+                echo '<p class="dps-portal-message__text">' . esc_html( wp_trim_words( $msg->post_content, 20, '…' ) ) . '</p>';
+                echo '</div>';
+                echo '</div>';
+            }
+            echo '</div>'; // .dps-portal-messages__list
+        } else {
+            echo '<div class="dps-empty-state dps-empty-state--compact">';
+            echo '<div class="dps-empty-state__icon">💬</div>';
+            echo '<div class="dps-empty-state__message">' . esc_html__( 'Nenhuma mensagem ainda', 'dps-client-portal' ) . '</div>';
+            echo '<p class="dps-empty-state__hint">' . esc_html__( 'Use o chat flutuante no canto inferior direito para iniciar uma conversa.', 'dps-client-portal' ) . '</p>';
+            echo '</div>';
+        }
+
+        echo '</div>'; // .dps-messages-inbox
+
+        // CTA para abrir o chat
+        echo '<div class="dps-messages-cta">';
+        echo '<button type="button" class="dps-btn-open-chat" data-action="open-chat">';
+        echo '<span class="dps-btn-icon">💬</span>';
+        echo '<span class="dps-btn-text">' . esc_html__( 'Abrir Chat', 'dps-client-portal' ) . '</span>';
+        echo '</button>';
+        echo '</div>';
+
         echo '</section>';
     }
 

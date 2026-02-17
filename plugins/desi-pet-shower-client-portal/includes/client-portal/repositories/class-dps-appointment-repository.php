@@ -134,15 +134,24 @@ class DPS_Appointment_Repository {
      * @return array Array de agendamentos passados.
      */
     public function get_past_appointments_for_client( $client_id, $limit = -1 ) {
+        $today = current_time( 'Y-m-d' );
+
         return get_posts( [
             'post_type'      => 'dps_agendamento',
             'post_status'    => 'publish',
             'posts_per_page' => $limit,
             'meta_query'     => [
+                'relation' => 'AND',
                 [
                     'key'     => 'appointment_client_id',
                     'value'   => $client_id,
                     'compare' => '=',
+                ],
+                [
+                    'key'     => 'appointment_date',
+                    'value'   => $today,
+                    'compare' => '<',
+                    'type'    => 'DATE',
                 ],
             ],
             'orderby'        => 'meta_value',

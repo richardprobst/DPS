@@ -872,7 +872,7 @@ final class DPS_Client_Portal {
      * @return string
      */
     private function get_review_url() {
-        $default_review_url = defined( 'DPS_PORTAL_REVIEW_URL' ) ? DPS_PORTAL_REVIEW_URL : 'https://g.page/r/CUPivNuiAGwnEAE/review';
+        $default_review_url = defined( 'DPS_PORTAL_REVIEW_URL' ) ? DPS_PORTAL_REVIEW_URL : '';
         $review_url         = get_option( 'dps_portal_review_url', $default_review_url );
 
         /**
@@ -900,6 +900,29 @@ final class DPS_Client_Portal {
             ];
         }
 
+        // Busca contagem e média reais de todas as avaliações
+        $all_ids = get_posts( [
+            'post_type'      => 'dps_groomer_review',
+            'post_status'    => 'publish',
+            'posts_per_page' => 200,
+            'fields'         => 'ids',
+        ] );
+
+        $total_rating = 0;
+        $rated_count  = 0;
+
+        foreach ( $all_ids as $review_id ) {
+            $rating = (int) get_post_meta( $review_id, '_dps_review_rating', true );
+            $rating = max( 0, min( 5, $rating ) );
+            if ( $rating > 0 ) {
+                $total_rating += $rating;
+                $rated_count++;
+            }
+        }
+
+        $average = $rated_count > 0 ? round( $total_rating / $rated_count, 1 ) : 0;
+
+        // Busca os itens mais recentes para exibição
         $reviews = get_posts( [
             'post_type'      => 'dps_groomer_review',
             'post_status'    => 'publish',
@@ -908,28 +931,19 @@ final class DPS_Client_Portal {
             'order'          => 'DESC',
         ] );
 
-        $total_rating = 0;
-        $rated_count  = 0;
-        $items        = [];
+        $items = [];
 
         foreach ( $reviews as $review ) {
-            $rating = (int) get_post_meta( $review->ID, '_dps_review_rating', true );
-            $rating = max( 0, min( 5, $rating ) );
-
-            if ( $rating > 0 ) {
-                $total_rating += $rating;
-                $rated_count++;
-            }
+            $item_rating = (int) get_post_meta( $review->ID, '_dps_review_rating', true );
+            $item_rating = max( 0, min( 5, $item_rating ) );
 
             $items[] = [
-                'rating'  => $rating,
+                'rating'  => $item_rating,
                 'author'  => get_post_meta( $review->ID, '_dps_review_name', true ),
                 'date'    => get_the_date( get_option( 'date_format', 'd/m/Y' ), $review ),
                 'content' => $review->post_content,
             ];
         }
-
-        $average = $rated_count > 0 ? round( $total_rating / $rated_count, 1 ) : 0;
 
         return [
             'average' => $average,
@@ -1531,9 +1545,6 @@ final class DPS_Client_Portal {
     /**
      * Calcula taxa de satisfação (avaliações 4-5 estrelas).
      *
-     * Utiliza cache via transient para evitar recálculos frequentes.
-     * Cache é invalidado a cada 10 minutos ou quando uma nova avaliação é adicionada.
-     *
      * @return int Percentual de satisfação (0-100).
      */
     private function calculate_satisfaction_rate() {
@@ -1541,42 +1552,27 @@ final class DPS_Client_Portal {
             return 0;
         }
 
-        // Tenta obter do cache
-        $cache_key = 'dps_satisfaction_rate';
-        $cached    = get_transient( $cache_key );
-
-        if ( false !== $cached ) {
-            return (int) $cached;
-        }
-
         $total_reviews = get_posts( [
             'post_type'      => 'dps_groomer_review',
             'post_status'    => 'publish',
-            'posts_per_page' => 200, // Limite razoável para performance
+            'posts_per_page' => 200,
             'fields'         => 'ids',
         ] );
 
         if ( empty( $total_reviews ) ) {
-            set_transient( $cache_key, 0, 10 * MINUTE_IN_SECONDS );
             return 0;
         }
 
         $positive_count = 0;
         foreach ( $total_reviews as $review_id ) {
             $rating_raw = get_post_meta( $review_id, '_dps_review_rating', true );
-            // Trata casos onde meta pode ser vazio ou inválido
             $rating = is_numeric( $rating_raw ) ? (int) $rating_raw : 0;
             if ( $rating >= 4 ) {
                 $positive_count++;
             }
         }
 
-        $satisfaction = (int) round( ( $positive_count / count( $total_reviews ) ) * 100 );
-
-        // Armazena em cache por 10 minutos
-        set_transient( $cache_key, $satisfaction, 10 * MINUTE_IN_SECONDS );
-
-        return $satisfaction;
+        return (int) round( ( $positive_count / count( $total_reviews ) ) * 100 );
     }
 
     /**

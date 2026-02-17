@@ -607,8 +607,6 @@ class DPS_Portal_Actions_Handler {
         update_post_meta( $review_id, '_dps_review_client_id', $client_id );
         update_post_meta( $review_id, '_dps_review_source', 'portal' );
 
-        delete_transient( 'dps_satisfaction_rate' );
-
         do_action( 'dps_portal_after_internal_review', $review_id, $client_id, $rating, $comment );
 
         return add_query_arg( 'portal_msg', 'review_submitted', $redirect_url );

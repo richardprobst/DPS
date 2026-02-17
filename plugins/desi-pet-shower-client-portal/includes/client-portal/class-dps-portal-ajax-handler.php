@@ -396,19 +396,29 @@ class DPS_Portal_AJAX_Handler {
     /**
      * Verifica rate limiting para cliente.
      *
+     * Usa post meta no registro do cliente para persistir contagem sem cache.
+     *
      * @param int $client_id ID do cliente.
-     * @param int $max_requests Máximo de requisições permitidas.
+     * @param int $max_requests Máximo de requisições permitidas por minuto.
      * @return bool True se dentro do limite.
      */
     private function check_rate_limit( $client_id, $max_requests ) {
-        $rate_key  = 'dps_chat_rate_' . $client_id;
-        $rate_data = get_transient( $rate_key );
-        
-        if ( $rate_data && $rate_data >= $max_requests ) {
+        $meta_key  = '_dps_chat_rate';
+        $rate_data = get_post_meta( $client_id, $meta_key, true );
+        $now       = time();
+
+        // Reseta se dados inválidos ou janela de 60s expirou
+        if ( ! is_array( $rate_data ) || empty( $rate_data['start'] ) || ( $now - $rate_data['start'] ) > 60 ) {
+            update_post_meta( $client_id, $meta_key, [ 'start' => $now, 'count' => 1 ] );
+            return true;
+        }
+
+        if ( $rate_data['count'] >= $max_requests ) {
             return false;
         }
-        
-        set_transient( $rate_key, ( $rate_data ? $rate_data + 1 : 1 ), 60 );
+
+        $rate_data['count']++;
+        update_post_meta( $client_id, $meta_key, $rate_data );
         return true;
     }
 
