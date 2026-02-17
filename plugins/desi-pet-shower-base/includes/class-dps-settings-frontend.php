@@ -54,6 +54,19 @@ class DPS_Settings_Frontend {
     private static $callbacks = [];
 
     /**
+     * Chaves dos módulos do Frontend Add-on.
+     *
+     * @var string[]
+     */
+    private const FRONTEND_MODULE_KEYS = [
+        'registration',
+        'booking',
+        'settings',
+        'registration_v2',
+        'booking_v2',
+    ];
+
+    /**
      * Verifica se a renderização deve ser ignorada (durante requisições REST/AJAX).
      * 
      * Previne o erro "Falha ao publicar. A resposta não é um JSON válido" no
@@ -229,6 +242,20 @@ class DPS_Settings_Frontend {
                 __( '👤 Logins de Groomers', 'desi-pet-shower' ),
                 [ __CLASS__, 'render_tab_groomers' ],
                 105
+            );
+        }
+
+        // ========================================
+        // Aba Frontend (prioridade 110 - após Groomers)
+        // ========================================
+
+        // Aba Frontend (se Frontend Add-on ativo)
+        if ( class_exists( 'DPS_Frontend_Addon' ) ) {
+            self::register_tab(
+                'frontend',
+                __( '🖥️ Frontend', 'desi-pet-shower' ),
+                [ __CLASS__, 'render_tab_frontend' ],
+                110
             );
         }
     }
@@ -625,6 +652,12 @@ class DPS_Settings_Frontend {
             // ========================================
             case 'save_agenda':
                 self::handle_save_agenda();
+                break;
+            // ========================================
+            // Handler da Aba Frontend
+            // ========================================
+            case 'save_frontend':
+                self::handle_save_frontend();
                 break;
             default:
                 /**
@@ -2844,5 +2877,106 @@ class DPS_Settings_Frontend {
             <?php endif; ?>
         </div>
         <?php
+    }
+
+    /**
+     * Renderiza a aba Frontend.
+     *
+     * @return void
+     */
+    public static function render_tab_frontend() {
+        $flags = get_option( 'dps_frontend_feature_flags', [] );
+
+        $modules = [
+            'registration'    => [
+                'label'       => __( 'Cadastro (v1)', 'desi-pet-shower' ),
+                'description' => __( 'Módulo legado de cadastro de clientes e pets no frontend.', 'desi-pet-shower' ),
+            ],
+            'booking'         => [
+                'label'       => __( 'Agendamento (v1)', 'desi-pet-shower' ),
+                'description' => __( 'Módulo legado de agendamento de serviços no frontend.', 'desi-pet-shower' ),
+            ],
+            'settings'        => [
+                'label'       => __( 'Configurações', 'desi-pet-shower' ),
+                'description' => __( 'Módulo de configurações do frontend.', 'desi-pet-shower' ),
+            ],
+            'registration_v2' => [
+                'label'       => __( 'Cadastro (v2)', 'desi-pet-shower' ),
+                'description' => __( 'Novo módulo de cadastro com validação aprimorada e injeção de dependências.', 'desi-pet-shower' ),
+            ],
+            'booking_v2'      => [
+                'label'       => __( 'Agendamento (v2)', 'desi-pet-shower' ),
+                'description' => __( 'Novo módulo de agendamento com validação e confirmação aprimoradas.', 'desi-pet-shower' ),
+            ],
+        ];
+        ?>
+        <form method="post" action="" class="dps-settings-form">
+            <?php self::nonce_field(); ?>
+            <input type="hidden" name="dps_settings_action" value="save_frontend">
+
+            <div class="dps-surface dps-surface--info">
+                <h3 class="dps-surface__title">
+                    <span class="dashicons dashicons-desktop"></span>
+                    <?php esc_html_e( 'Módulos do Frontend', 'desi-pet-shower' ); ?>
+                </h3>
+                <p class="dps-surface__description">
+                    <?php esc_html_e( 'Ative ou desative individualmente os módulos do add-on Frontend. Módulos desativados não serão carregados no site.', 'desi-pet-shower' ); ?>
+                </p>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Módulos Disponíveis', 'desi-pet-shower' ); ?></legend>
+
+                    <?php foreach ( $modules as $key => $module ) :
+                        $enabled = ! empty( $flags[ $key ] );
+                    ?>
+                        <div class="dps-form-row">
+                            <label class="dps-checkbox-label">
+                                <input type="checkbox" name="dps_frontend_flags[<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( $enabled ); ?> />
+                                <strong><?php echo esc_html( $module['label'] ); ?></strong>
+                            </label>
+                            <p class="description"><?php echo esc_html( $module['description'] ); ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                </fieldset>
+            </div>
+
+            <p class="submit">
+                <button type="submit" class="button button-primary">
+                    <span class="dashicons dashicons-saved" style="margin-top: 4px;"></span>
+                    <?php esc_html_e( 'Salvar Configurações do Frontend', 'desi-pet-shower' ); ?>
+                </button>
+            </p>
+        </form>
+        <?php
+    }
+
+    /**
+     * Processa salvamento da aba Frontend.
+     *
+     * @return void
+     */
+    private static function handle_save_frontend() {
+        $submitted = isset( $_POST['dps_frontend_flags'] ) && is_array( $_POST['dps_frontend_flags'] )
+            ? array_map( 'sanitize_text_field', wp_unslash( $_POST['dps_frontend_flags'] ) )
+            : [];
+
+        $flags = [];
+        foreach ( self::FRONTEND_MODULE_KEYS as $key ) {
+            $flags[ $key ] = ! empty( $submitted[ $key ] );
+        }
+
+        update_option( 'dps_frontend_feature_flags', $flags, false );
+
+        DPS_Logger::log(
+            sprintf(
+                /* translators: %d: User ID who modified settings */
+                __( 'Configurações do Frontend atualizadas pelo usuário ID %d', 'desi-pet-shower' ),
+                get_current_user_id()
+            ),
+            DPS_Logger::LEVEL_INFO,
+            'frontend_settings_updated'
+        );
+
+        DPS_Message_Helper::add_success( __( 'Configurações do Frontend salvas com sucesso!', 'desi-pet-shower' ) );
     }
 }
