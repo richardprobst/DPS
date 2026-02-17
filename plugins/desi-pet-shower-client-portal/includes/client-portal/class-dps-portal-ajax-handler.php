@@ -835,11 +835,6 @@ HTML;
     }
 
     /**
-     * AJAX handler para exportar histórico do pet em formato para impressão/PDF.
-     *
-     * @since 2.5.0
-     */
-    /**
      * AJAX handler para carregar mais itens do histórico de serviços do pet.
      *
      * @since 3.1.0
@@ -849,12 +844,19 @@ HTML;
             wp_send_json_error( [ 'message' => __( 'Sessão expirada. Recarregue a página.', 'dps-client-portal' ) ] );
         }
 
-        $pet_id    = isset( $_POST['pet_id'] ) ? absint( $_POST['pet_id'] ) : 0;
-        $client_id = isset( $_POST['client_id'] ) ? absint( $_POST['client_id'] ) : 0;
-        $offset    = isset( $_POST['offset'] ) ? absint( $_POST['offset'] ) : 0;
-        $limit     = 10;
+        // Obtém client_id da sessão (não do POST, por segurança)
+        $session_manager = DPS_Portal_Session_Manager::get_instance();
+        $client_id       = $session_manager->get_authenticated_client_id();
 
-        if ( 0 === $pet_id || 0 === $client_id ) {
+        if ( ! $client_id ) {
+            wp_send_json_error( [ 'message' => __( 'Cliente não autenticado.', 'dps-client-portal' ) ], 403 );
+        }
+
+        $pet_id = isset( $_POST['pet_id'] ) ? absint( $_POST['pet_id'] ) : 0;
+        $offset = isset( $_POST['offset'] ) ? absint( $_POST['offset'] ) : 0;
+        $limit  = 10;
+
+        if ( 0 === $pet_id ) {
             wp_send_json_error( [ 'message' => __( 'Parâmetros inválidos.', 'dps-client-portal' ) ] );
         }
 
@@ -885,6 +887,11 @@ HTML;
         ] );
     }
 
+    /**
+     * AJAX handler para exportar histórico do pet em formato para impressão/PDF.
+     *
+     * @since 2.5.0
+     */
     public function ajax_export_pet_history_pdf() {
         // Verifica nonce usando helper (GET)
         if ( ! DPS_Request_Validator::verify_admin_action( 'dps_portal_export_pdf', null, 'nonce', false ) ) {

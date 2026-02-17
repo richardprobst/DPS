@@ -2118,7 +2118,7 @@ window.DPSSkeleton = (function() {
                 return;
             }
 
-            if (typeof dpsPortal === 'undefined' || !dpsPortal.clientId || !dpsPortal.petHistoryNonce) {
+            if (typeof dpsPortal === 'undefined' || !dpsPortal.petHistoryNonce) {
                 return;
             }
 
@@ -2131,7 +2131,6 @@ window.DPSSkeleton = (function() {
             formData.append('action', 'dps_load_more_pet_history');
             formData.append('nonce', dpsPortal.petHistoryNonce);
             formData.append('pet_id', petId);
-            formData.append('client_id', dpsPortal.clientId);
             formData.append('offset', offset);
 
             fetch(dpsPortal.ajaxUrl, {
