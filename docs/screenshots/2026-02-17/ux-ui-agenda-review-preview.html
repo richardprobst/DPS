@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPS Agenda — Revisão UX/UI (2026-02-17)</title>
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/checklist-checkin.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/dashboard.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 24px;
+            background: var(--dps-color-surface, #f8f9ff);
+            color: var(--dps-color-on-surface, #191c20);
+            font-family: var(--dps-font-system, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+        }
+        .preview-shell {
+            max-width: 1040px;
+            margin: 0 auto;
+            display: grid;
+            gap: 20px;
+        }
+        .preview-card {
+            background: var(--dps-color-surface-container-lowest, #fff);
+            border: 1px solid var(--dps-color-outline-variant, #c3c6cf);
+            border-radius: var(--dps-shape-medium, 12px);
+            padding: 16px;
+        }
+        .preview-title {
+            margin: 0 0 8px;
+            font-size: var(--dps-typescale-title-medium-size, 16px);
+            font-weight: var(--dps-typescale-title-medium-weight, 500);
+        }
+        .preview-subtitle {
+            margin: 0 0 14px;
+            color: var(--dps-color-on-surface-variant, #43474e);
+            font-size: var(--dps-typescale-body-small-size, 12px);
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .focus-demo {
+            border: 1px dashed var(--dps-color-outline-variant, #c3c6cf);
+            border-radius: var(--dps-shape-small, 8px);
+            padding: 10px;
+            margin-top: 12px;
+        }
+        .focus-demo p {
+            margin: 0 0 8px;
+            font-size: 12px;
+            color: var(--dps-color-on-surface-variant, #43474e);
+        }
+    </style>
+</head>
+<body>
+<div class="preview-shell">
+    <section class="preview-card">
+        <h1 class="preview-title">Agenda add-on — revisão UX/UI (M3)</h1>
+        <p class="preview-subtitle">Demonstração dos ajustes de acessibilidade visual, contraste e legibilidade responsiva.</p>
+
+        <div class="demo-grid">
+            <div class="dps-checklist-panel">
+                <h4>📋 Checklist Operacional</h4>
+                <ul class="dps-checklist-steps">
+                    <li class="dps-checklist-step" data-status="pending">
+                        <span class="dps-checklist-step-icon">🛁</span>
+                        <span class="dps-checklist-step-label">Banho completo</span>
+                        <span class="dps-checklist-step-actions">
+                            <button class="dps-checklist-btn dps-checklist-btn--done" type="button">✓ Concluir</button>
+                            <button class="dps-checklist-btn dps-checklist-btn--skip" type="button" disabled>Pular</button>
+                        </span>
+                    </li>
+                </ul>
+                <div class="focus-demo">
+                    <p>Foco visível em botões (tecla TAB)</p>
+                    <button class="dps-checkin-btn dps-checkin-btn--checkin" type="button">📥 Fazer Check-in</button>
+                </div>
+            </div>
+
+            <div class="dps-checkin-panel">
+                <h4>🏥 Check-in / Check-out</h4>
+                <div class="dps-checkin-status">
+                    <span class="dps-checkin-status-badge dps-checkin-status-badge--pending">⏳ Aguardando</span>
+                    <span class="dps-checkin-status-badge dps-checkin-status-badge--in">✅ Em andamento</span>
+                </div>
+                <button class="dps-expand-panels-btn dps-expand-panels-btn--pending" type="button" aria-expanded="false">
+                    <span class="dps-expand-panels-btn__icon">🏥</span>
+                    <span class="dps-expand-panels-btn__label">Fazer Check-in</span>
+                    <span class="dps-expand-panels-btn__arrow">▾</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section class="preview-card">
+        <h2 class="preview-title">Capacidade — heatmap mobile e foco do input</h2>
+        <p class="preview-subtitle">Ajustes de legibilidade em viewport menor e foco mais claro no campo numérico.</p>
+
+        <div class="dps-capacity-inputs">
+            <div class="dps-capacity-input-group">
+                <label for="capacidade-manha">Manhã</label>
+                <input id="capacidade-manha" type="number" value="8" autofocus>
+                <p class="description">Meta de pets para o período da manhã.</p>
+            </div>
+        </div>
+
+        <div class="dps-capacity-heatmap">
+            <table class="dps-heatmap-table">
+                <thead>
+                <tr>
+                    <th>Período</th>
+                    <th>
+                        <div class="dps-heatmap-day-header">
+                            <span class="dps-heatmap-day-name">SEG</span>
+                            <span class="dps-heatmap-day-num">17/02</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="dps-heatmap-day-header">
+                            <span class="dps-heatmap-day-name">TER</span>
+                            <span class="dps-heatmap-day-num">18/02</span>
+                        </div>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td class="dps-heatmap-period-label">Manhã</td>
+                    <td class="dps-heatmap-cell dps-heatmap-cell-available">
+                        <span class="dps-heatmap-ratio">4/8</span>
+                        <span class="dps-heatmap-percentage">50%</span>
+                    </td>
+                    <td class="dps-heatmap-cell dps-heatmap-cell-busy">
+                        <span class="dps-heatmap-ratio">7/8</span>
+                        <span class="dps-heatmap-percentage">88%</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+</body>
+</html>

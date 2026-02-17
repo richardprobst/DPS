@@ -16,6 +16,7 @@ Este diretório centraliza registros visuais padronizados do sistema DPS.
   - [2026-02-12 — Checklist Operacional & Check-in/Check-out (Agenda v1.2.0)](2026-02-12/SCREENSHOTS_2026-02-12_checklist-checkin.md)
   - [2026-02-15 — Agenda (Check-in / Check-out responsivo)](2026-02-15/SCREENSHOTS_2026-02-15.md)
   - [2026-02-16 — Booking add-on (revisão UX/UI)](2026-02-16/SCREENSHOTS_2026-02-16.md)
+  - [2026-02-17 — Agenda add-on (revisão UX/UI)](2026-02-17/SCREENSHOTS_2026-02-17.md)
 
 ## Regras obrigatórias para novas mudanças visuais
 
