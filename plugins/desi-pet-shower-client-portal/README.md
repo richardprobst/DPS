@@ -1,296 +1,223 @@
-# desi.pet by PRObst – Portal do Cliente Add-on
+# desi.pet by PRObst – Client Portal Add-on
 
-Área autenticada para clientes consultarem histórico, atualizarem dados e efetuarem pagamentos.
+Portal de autoatendimento para clientes do pet shop com autenticação por link seguro, histórico de atendimentos, dados de pets, mensagens e integrações opcionais com financeiro/fidelidade.
 
 ## Visão geral
 
-O **Portal do Cliente Add-on** fornece uma interface web completa para que clientes do pet shop possam acessar suas informações, consultar histórico de atendimentos, visualizar galeria de fotos dos pets, verificar pendências financeiras e atualizar dados cadastrais de forma autônoma.
+O **Client Portal Add-on** adiciona ao ecossistema DPS uma área autenticada para clientes acompanharem seus atendimentos e manterem dados atualizados sem depender de suporte manual no WhatsApp para tarefas rotineiras.
 
-Funcionalidades principais:
-- Autenticação via login padrão do WordPress (usuário/senha)
-- Criação automática de credenciais para novos clientes
-- Histórico completo de atendimentos do cliente
-- Galeria de fotos dos atendimentos
-- Visualização de pendências financeiras
-- Atualização de dados pessoais e de pets
-- Integração com Mercado Pago para pagamento de pendências
-- Exibição de código de indicação (Indique e Ganhe) se add-on Loyalty estiver ativo
+No estado atual do código, o add-on entrega:
 
-**Tipo**: Add-on (extensão do plugin base DPS)
-
-## Localização e identificação
-
-- **Diretório**: `plugins/desi-pet-shower-client-portal/`
-- **Slug**: `dps-client-portal`
-- **Classe principal**: `DPS_Client_Portal`
-- **Arquivo principal**: `desi-pet-shower-client-portal.php`
-- **Tipo**: Add-on (depende do plugin base)
-
-## Dependências e compatibilidade
-
-### Dependências obrigatórias
-- **desi.pet by PRObst Base**: v1.0.0 ou superior (obrigatório)
-- **WordPress**: 6.0 ou superior
-- **PHP**: 7.4 ou superior
-
-### Dependências opcionais
-- **Finance Add-on**: para exibir pendências financeiras e valores em aberto
-- **Payment Add-on**: para gerar links de pagamento via Mercado Pago
-- **Loyalty Add-on**: para exibir código e link de indicação (Indique e Ganhe)
-
-### Versão
-- **Introduzido em**: v0.1.0 (estimado)
-- **Versão atual**: v1.0.0
-- **Compatível com plugin base**: v1.0.0+
-
-## Funcionalidades principais
-
-### Autenticação e segurança
-- **Login WordPress**: utiliza sistema nativo de autenticação do WordPress
-- **Criação automática de usuários**: gera credenciais para clientes ao salvá-los no painel administrativo
-- **Associação cliente-usuário**: vincula usuário WordPress ao CPT `dps_client` via metadado
-- **Role customizada**: clientes recebem role `dps_customer` com permissões limitadas
-- **Sessões PHP**: gerenciamento adicional de sessão para dados do cliente logado
-
-### Visualização de dados
-- **Histórico de atendimentos**: lista completa de agendamentos concluídos do cliente
-- **Detalhes de atendimentos**: data, horário, pets atendidos, serviços realizados, valores
-- **Galeria de fotos**: exibe imagens de antes/depois dos pets (se disponíveis)
-- **Dados cadastrais**: exibe nome, telefone, e-mail, endereço do cliente
-- **Dados dos pets**: lista todos os pets do cliente com espécie, raça, porte
-
-### Atualização de dados
-- **Formulário de edição**: permite cliente atualizar telefone, e-mail, endereço
-- **Edição de pets**: permite atualizar dados dos pets (nome, raça, observações)
-- **Validação**: sanitização e validação de campos antes de salvar
-- **Feedback visual**: mensagens de sucesso/erro após operações
-
-### Financeiro (requer Finance Add-on)
-- **Pendências em aberto**: exibe lista de cobranças não pagas
-- **Valores detalhados**: mostra valor total, parcelas, datas de vencimento
-- **Links de pagamento**: botões para pagar via Mercado Pago (requer Payment Add-on)
-
-### Programa de indicação (requer Loyalty Add-on)
-- **Código único**: exibe código de indicação pessoal do cliente
-- **Link compartilhável**: URL de cadastro com código pré-preenchido
-- **Benefícios**: explica recompensas por indicações
-
-## Shortcodes, widgets e endpoints
-
-### Shortcodes
-
-#### `[dps_client_portal]`
-Renderiza o portal completo do cliente com todas as funcionalidades.
-
-**Uso**:
-```
-[dps_client_portal]
-```
-
-**Descrição**: Exibe interface de login (se não autenticado) ou painel completo do cliente (se autenticado) com abas de histórico, galeria, dados pessoais, pets e pendências financeiras.
-
-**Parâmetros**: Nenhum.
-
-**Permissões**: Usuário deve estar autenticado como cliente (role `dps_customer` ou associado a um `dps_client`).
-
-**Exemplo de página**:
-Crie uma página "Portal do Cliente" e insira o shortcode para que clientes acessem sua área.
+- autenticação por token (`magic link`) com sessão segura;
+- shortcode principal para renderização do portal;
+- criação automática de usuário WordPress para clientes (`dps_cliente`) quando necessário;
+- atualização de dados cadastrais do cliente e dos pets;
+- histórico de agendamentos, próxima visita e galeria;
+- área de mensagens/chat cliente ↔ equipe;
+- pedidos de agendamento pelo portal;
+- suporte a exportação de agendamento em `.ics`;
+- integrações opcionais com Loyalty, Finance, Payment e Tosa Consent.
 
 ---
 
-#### `[dps_client_login]`
-Exibe apenas o formulário de login.
+## Identificação do add-on
 
-**Uso**:
+- **Diretório:** `plugins/desi-pet-shower-client-portal/`
+- **Arquivo principal:** `desi-pet-shower-client-portal.php`
+- **Classe coordenadora:** `DPS_Client_Portal`
+- **Text domain:** `dps-client-portal`
+- **Versão atual:** `2.4.3`
+
+---
+
+## Requisitos e dependências
+
+### Requisitos mínimos
+
+- **WordPress:** 6.9+
+- **PHP:** 8.4+
+- **Plugin base:** `desi.pet by PRObst Base` ativo (`DPS_Base_Plugin`)
+
+### Dependências opcionais (integrações)
+
+- **Finance Add-on:** leitura de pendências financeiras
+- **Payment Add-on:** geração de links de pagamento
+- **Loyalty Add-on:** pontos, histórico e resgate
+- **Tosa Consent Add-on:** URL do termo de consentimento
+
+> Sem o plugin base, o add-on não inicializa e exibe aviso administrativo.
+
+---
+
+## Shortcodes
+
+### `[dps_client_portal]`
+Renderiza o portal completo (login + conteúdo autenticado).
+
+### `[dps_client_login]`
+Renderiza apenas a tela de acesso/login do portal.
+
+### `[dps_profile_update]`
+Renderiza o formulário de atualização de perfil via token de atualização (fluxo administrativo de link temporário).
+
+---
+
+## Fluxo de autenticação (resumo técnico)
+
+1. O cliente recebe um link com `?dps_token=...`.
+2. O token é validado por `DPS_Portal_Token_Manager`.
+3. Ao validar, o cliente é autenticado por `DPS_Portal_Session_Manager`.
+4. O acesso é registrado para auditoria (IP/UA e logs).
+5. O portal carrega autenticado sem exigir novo login na mesma requisição.
+
+Fallbacks de autenticação continuam disponíveis para compatibilidade com associação de usuário WordPress (`user_meta dps_client_id`).
+
+---
+
+## Estrutura de código
+
+```text
+plugins/desi-pet-shower-client-portal/
+├── desi-pet-shower-client-portal.php     # bootstrap e hooks principais
+├── includes/
+│   ├── class-dps-client-portal.php       # orquestrador do portal
+│   ├── class-dps-portal-token-manager.php
+│   ├── class-dps-portal-session-manager.php
+│   ├── class-dps-portal-admin-actions.php
+│   ├── class-dps-portal-profile-update.php
+│   ├── class-dps-portal-cache-helper.php
+│   ├── class-dps-calendar-helper.php
+│   ├── functions-portal-helpers.php
+│   └── client-portal/
+│       ├── class-dps-portal-data-provider.php
+│       ├── class-dps-portal-renderer.php
+│       ├── class-dps-portal-actions-handler.php
+│       ├── class-dps-portal-ajax-handler.php
+│       ├── class-dps-portal-admin.php
+│       ├── class-dps-portal-pet-history.php
+│       ├── interfaces/
+│       └── repositories/
+├── assets/
+├── templates/
+├── HOOKS.md
+└── TOKEN_AUTH_SYSTEM.md
 ```
-[dps_client_login]
-```
 
-**Descrição**: Renderiza formulário de login padrão do WordPress personalizado para clientes.
+---
 
-**Parâmetros**: Nenhum.
+## Dados e persistência
 
-**Redirect**: Após login, redireciona para página do portal (se configurada).
+### Tabela customizada
 
-## Hooks (actions e filters) relevantes
+- **`{$wpdb->prefix}dps_portal_tokens`**
+  - criada no hook de ativação;
+  - usada para controle de tokens de acesso/atualização.
 
-### Hooks CONSUMIDOS por este add-on
+### CPTs utilizados/registrados
 
-Este add-on consome hooks de outros add-ons quando disponíveis:
+- **`dps_cliente`** (base) — cliente
+- **`dps_pet`** (base) — pet
+- **`dps_agendamento`** (base) — agendamentos
+- **`dps_portal_message`** (registrado pelo add-on) — mensagens do portal
+- **`dps_appt_request`** (registrado pelo add-on) — pedidos de agendamento
 
-#### Hooks do Payment Add-on (opcional)
-- Busca funções de geração de link de pagamento Mercado Pago via `function_exists()`
-- Exibe botões de pagamento se Payment Add-on estiver ativo
+> Nota de nomenclatura: apesar dos CPTs estarem em português (`dps_cliente`, `dps_agendamento`), parte dos metadados legados usa chaves em inglês (ex.: `dps_client_id`, `appointment_client_id`) por compatibilidade histórica.
 
-#### Hooks do Loyalty Add-on (opcional)
-- Busca dados de código de indicação via functions do Loyalty
-- Exibe seção "Indique e Ganhe" se add-on estiver ativo
+### Options relevantes
 
-### Hooks DISPARADOS por este add-on
+- `dps_portal_page_id`
+- `dps_portal_logo_id`
+- `dps_portal_hero_id`
+- `dps_portal_primary_color`
+- `dps_portal_review_url`
+- `dps_portal_access_notification_enabled`
+- `dps_portal_tokens_db_version`
 
-Este add-on não dispara hooks customizados próprios; opera de forma autônoma.
+---
 
-## Dados armazenados (CPTs, tabelas, options)
+## Principais hooks de extensão
 
-### Custom Post Types
-Este add-on NÃO cria CPTs próprios. Utiliza CPTs do plugin base:
-- **`dps_client`**: busca dados do cliente logado
-- **`dps_pet`**: lista pets vinculados ao cliente
-- **`dps_appointment`**: exibe histórico de agendamentos
+### Actions
 
-### Metadados utilizados
+- `dps_portal_before_render`
+- `dps_portal_after_auth_check`
+- `dps_portal_client_authenticated`
+- `dps_client_portal_before_content`
+- `dps_portal_before_*_content` / `dps_portal_after_*_content` (tabs)
+- `dps_portal_after_update_client`
+- `dps_portal_after_update_preferences`
+- `dps_portal_after_update_pet_preferences`
+- `dps_portal_after_internal_review`
+- `dps_portal_profile_update_link_generated`
+- `dps_portal_profile_updated`
 
-#### Em clientes (`dps_client`)
-- **`client_user_id`**: ID do usuário WordPress associado ao cliente
-- **`client_phone`**: telefone do cliente
-- **`client_email`**: e-mail do cliente
-- **`client_address`**: endereço completo
+### Filters
 
-#### Em pets (`dps_pet`)
-- **`pet_client_id`**: ID do cliente proprietário
+- `dps_portal_tabs`
+- `dps_portal_login_screen`
+- `dps_portal_review_url`
+- `dps_tosa_consent_page_url`
+- `dps_portal_pre_ownership_check`
+- `dps_portal_ownership_validated`
 
-### Tabelas customizadas
-Este add-on não cria tabelas próprias. Consome tabela `dps_transacoes` do Finance Add-on se disponível.
+Para lista completa com exemplos de uso, consulte: `HOOKS.md`.
 
-### Options armazenadas
-Este add-on não armazena options globais.
+---
 
-### Sessões PHP
-- Usa `$_SESSION['dps_client_id']` para armazenar ID do cliente logado durante navegação no portal
+## AJAX endpoints (visão prática)
 
-## Como usar (visão funcional)
+Registrados principalmente em `DPS_Portal_AJAX_Handler` e `DPS_Portal_Admin_Actions`:
 
-### Para clientes
+- chat e mensagens (`dps_chat_*`);
+- solicitação de acesso por e-mail (`dps_request_access_link_by_email`);
+- pedido de agendamento (`dps_create_appointment_request`);
+- loyalty (histórico/resgate);
+- geração/revogação de tokens (admin);
+- geração de link de atualização de perfil (admin).
 
-1. **Acessar o portal**:
-   - Navegue até a página com o shortcode `[dps_client_portal]`
-   - Se não autenticado, será exibido formulário de login
+Todos os endpoints críticos passam por validação de autenticação/ownership e nonces quando aplicável.
 
-2. **Fazer login**:
-   - Insira usuário e senha recebidos do pet shop
-   - Clique em "Entrar"
-   - Será redirecionado para painel do portal
+---
 
-3. **Consultar histórico**:
-   - Aba "Histórico" exibe todos os atendimentos realizados
-   - Clique em atendimento para ver detalhes (data, pets, serviços, valores)
+## Instalação e configuração rápida
 
-4. **Visualizar galeria**:
-   - Aba "Galeria" mostra fotos de antes/depois dos pets
-   - Navegue entre imagens
+1. Ative o plugin base DPS.
+2. Ative o add-on **Client Portal**.
+3. Verifique/crie a página do portal com shortcode `[dps_client_portal]` (o add-on tenta criar automaticamente na ativação).
+4. Em **Configurações do DPS**, confirme a página definida em `dps_portal_page_id`.
+5. Gere links de acesso para clientes na área administrativa do portal.
 
-5. **Atualizar dados pessoais**:
-   - Aba "Meus Dados" permite editar telefone, e-mail, endereço
-   - Clique em "Salvar Alterações"
+---
 
-6. **Gerenciar pets**:
-   - Aba "Meus Pets" lista todos os pets cadastrados
-   - Edite informações de raça, observações, etc.
+## Segurança e governança
 
-7. **Verificar pendências** (se Finance Add-on ativo):
-   - Aba "Pendências" exibe cobranças em aberto
-   - Clique em "Pagar" para gerar link de pagamento Mercado Pago
+O add-on segue as diretrizes do repositório:
 
-8. **Compartilhar código de indicação** (se Loyalty Add-on ativo):
-   - Seção "Indique e Ganhe" exibe código único
-   - Copie link para compartilhar com amigos
+- validação de nonce/capability/sanitização/escape;
+- checagem de ownership para recursos de cliente;
+- proteção contra uso indevido de tokens;
+- trilha de auditoria de acessos;
+- manutenção de compatibilidade com hooks/contratos do ecossistema DPS.
 
-### Para administradores
+Referências obrigatórias:
 
-1. **Configurar página do portal**:
-   - Acesse a aba "Configurações" do DPS
-   - Clique na aba "Portal"
-   - Selecione a página onde o shortcode `[dps_client_portal]` está inserido
-   - Salve as configurações
-   - Copie o link do portal se necessário
+- `../../AGENTS.md`
+- `../../ANALYSIS.md`
 
-2. **Gerar links de acesso para clientes**:
-   - Acesse a aba "Logins de Clientes" nas configurações
-   - Busque o cliente desejado
-   - Clique em "Primeiro Acesso" (para novos clientes) ou "Gerar Novo Link"
-   - O link gerado é válido por 30 minutos
-   - Envie por WhatsApp ou e-mail usando os botões disponíveis
+---
 
-3. **Revogar acessos**:
-   - Na aba "Logins de Clientes", clique em "Revogar" para invalidar links ativos
-   - Use quando o cliente reportar perda de acesso ou por segurança
+## Observações para desenvolvimento
 
-## Notas para desenvolvimento
+- Ao alterar contratos, hooks ou fluxo de autenticação, documente impacto em `ANALYSIS.md`.
+- Para mudanças user-facing relevantes, atualize `CHANGELOG.md`.
+- Para mudanças visuais, seguir padrão M3 em `docs/visual/` e registrar evidências em `docs/screenshots/`.
+- Este add-on contém documentação complementar em `TOKEN_AUTH_SYSTEM.md` e `HOOKS.md`.
 
-### Convenções e padrões
+---
 
-Este add-on segue as diretrizes do repositório DPS:
-- **[AGENTS.md](../../AGENTS.md)**: regras de desenvolvimento, versionamento, segurança
-- **[ANALYSIS.md](../../ANALYSIS.md)**: arquitetura, estrutura modular com `includes/` e `assets/`
+## Documentos relacionados
 
-### Estrutura de arquivos
-
-Este add-on já segue o padrão modular recomendado:
-- **`includes/`**: classes auxiliares (ex.: `class-dps-client-portal.php`)
-- **`assets/`**: CSS e JS do portal
-- Arquivo principal apenas faz bootstrapping
-
-### Fluxo obrigatório para mudanças
-
-Ao modificar este add-on:
-
-1. **Ler ANALYSIS.md** para entender integrações com Finance, Payment e Loyalty
-2. **Implementar** seguindo políticas de segurança (autenticação, escape, sanitização)
-3. **Atualizar ANALYSIS.md** se criar novas integrações ou hooks
-4. **Atualizar CHANGELOG.md** antes de criar tags
-5. **Testar** fluxo completo de login, visualização e atualização
-
-### Políticas de segurança
-
-- ✅ **Autenticação obrigatória**: verifica login antes de exibir qualquer dado
-- ✅ **Isolamento de dados**: cliente só acessa seus próprios dados
-- ✅ **Nonces validados**: formulários de edição protegidos contra CSRF
-- ✅ **Sanitização**: todos os inputs sanitizados antes de salvar
-- ✅ **Escape**: saída escapada em templates
-- ⚠️ **Sessões PHP**: usar com cuidado; considerar migrar para user meta
-
-### Integração com outros add-ons
-
-#### Finance Add-on (opcional)
-- Verifica existência de tabela `dps_transacoes`
-- Busca pendências via query direta ou funções do Finance
-- Exibe aba "Pendências" apenas se Finance estiver ativo
-
-#### Payment Add-on (opcional)
-- Verifica `function_exists('dps_generate_mp_link')` ou similar
-- Gera links de pagamento via funções do Payment
-- Botões de pagamento aparecem apenas se Payment estiver ativo
-
-#### Loyalty Add-on (opcional)
-- Verifica `function_exists('dps_get_referral_code')` ou similar
-- Busca código de indicação do cliente
-- Exibe seção "Indique e Ganhe" apenas se Loyalty estiver ativo
-
-### Pontos de atenção
-
-- **Criação automática de usuários**: valide que e-mail não está em uso antes de criar
-- **Senhas temporárias**: use `wp_generate_password()` e notifique cliente por e-mail
-- **Sessões PHP**: considerar usar user meta do WordPress ao invés de `$_SESSION`
-- **Performance**: cache de queries pesadas de histórico e galeria
-- **Responsividade**: interface deve funcionar bem em mobile
-
-## Histórico de mudanças (resumo)
-
-### Principais marcos
-
-- **v2.1.0**: Adicionada configuração centralizada da página do portal
-  - Nova aba "Portal" nas configurações para selecionar página do portal
-  - Funções helper `dps_get_portal_page_url()` e `dps_get_portal_page_id()`
-  - Refatoração de 7 chamadas hardcoded para usar funções centralizadas
-- **v2.0.0**: Sistema de autenticação por tokens (magic links)
-  - Substituído login com senha por autenticação via tokens únicos
-  - Tabela `wp_dps_portal_tokens` para gerenciar tokens
-  - Tokens com expiração de 30 minutos e uso único
-- **v1.0.0**: Lançamento inicial com portal completo (login, histórico, galeria, atualização de dados, integração com Finance/Payment/Loyalty)
-
-### Melhorias implementadas
-- Estrutura modular com classes em `includes/` e assets em `assets/`
-- Integração condicional com add-ons opcionais via `function_exists()`
-- Interface administrativa integrada às configurações do sistema
-
-Para o histórico completo de mudanças, consulte `CHANGELOG.md` na raiz do repositório.
+- `plugins/desi-pet-shower-client-portal/HOOKS.md`
+- `plugins/desi-pet-shower-client-portal/TOKEN_AUTH_SYSTEM.md`
+- `ANALYSIS.md`
+- `CHANGELOG.md`
