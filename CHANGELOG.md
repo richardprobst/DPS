@@ -298,6 +298,19 @@ Antes de criar uma nova versão oficial:
 
 #### Changed (Alterado)
 
+**Client Portal Add-on — Revisão UX/UI da Página Principal e Navegação por Abas**
+
+- **Shell principal refinado** no shortcode `[dps_client_portal]` (estado autenticado): header reorganizado em bloco de conteúdo + ações globais (avaliar/sair), com hierarquia visual e espaçamento mais claros.
+- **Navegação por abas com acessibilidade reforçada**:
+  - foco visível consistente (`:focus-visible`),
+  - relacionamento ARIA explícito (`tablist`, `tab`, `tabpanel`, `aria-controls`, `aria-labelledby`, `aria-selected`),
+  - suporte a abas desabilitadas sem quebrar extensões.
+- **Interação por teclado aprimorada**: setas esquerda/direita, Home/End e ativação com Enter/Espaço.
+- **Persistência e navegação**: aba ativa preservada por hash (`#tab-*`) com sincronização em refresh/back.
+- **Feedback leve de troca de abas**: indicador visual/textual de carregamento sem alterar o conteúdo interno dos painéis.
+- **Mobile**: tabs mantêm labels visíveis e overflow horizontal controlado para melhor descobribilidade.
+- **Compatibilidade preservada**: filtro `dps_portal_tabs` e hooks `dps_portal_before_*_content` / `dps_portal_after_*_content` mantidos sem alteração de assinatura.
+
 **Booking Add-on v1.3.0 — Migração M3 e Melhorias de Segurança**
 
 - **Migração completa para M3 Expressive tokens** (`booking-addon.css`):

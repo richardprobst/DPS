@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Client Portal — Main + Tabs Preview</title>
+  <link rel="stylesheet" href="../../../plugins/desi-pet-shower-client-portal/assets/css/client-portal.css" />
+  <style>
+    body { background: #f5f6fa; padding: 24px; }
+  </style>
+</head>
+<body>
+  <div class="dps-client-portal">
+    <div class="dps-portal-notice dps-portal-notice--info">Este preview demonstra apenas shell principal + navegação por abas.</div>
+
+    <div class="dps-portal-header dps-portal-header--branded">
+      <div class="dps-portal-header__main">
+        <h1 class="dps-portal-title">Olá, Cliente 👋</h1>
+      </div>
+      <div class="dps-portal-header__actions">
+        <a href="#" class="dps-portal-review-link"><span class="dps-portal-review-icon">⭐</span><span class="dps-portal-review-text">Avalie-nos</span></a>
+        <a href="#" class="dps-portal-logout">Sair</a>
+      </div>
+    </div>
+
+    <nav class="dps-portal-breadcrumb" aria-label="Navegação">
+      <span class="dps-portal-breadcrumb__item">Portal do Cliente</span>
+      <span class="dps-portal-breadcrumb__separator">›</span>
+      <span class="dps-portal-breadcrumb__item dps-portal-breadcrumb__item--active">Início</span>
+    </nav>
+
+    <nav class="dps-portal-tabs is-loading" role="tablist" aria-label="Seções do portal">
+      <div class="dps-portal-tabs__item"><button type="button" class="dps-portal-tabs__link is-active" role="tab" aria-selected="true"><span class="dps-portal-tabs__icon">🏠</span><span class="dps-portal-tabs__text">Início</span></button></div>
+      <div class="dps-portal-tabs__item"><button type="button" class="dps-portal-tabs__link" role="tab" aria-selected="false"><span class="dps-portal-tabs__icon">🏆</span><span class="dps-portal-tabs__text">Fidelidade</span><span class="dps-portal-tabs__badge dps-portal-tabs__badge--loyalty">1,2k</span></button></div>
+      <div class="dps-portal-tabs__item"><button type="button" class="dps-portal-tabs__link" role="tab" aria-selected="false"><span class="dps-portal-tabs__icon">💬</span><span class="dps-portal-tabs__text">Mensagens</span><span class="dps-portal-tabs__badge">3</span></button></div>
+      <div class="dps-portal-tabs__item"><button type="button" class="dps-portal-tabs__link" role="tab" aria-selected="false"><span class="dps-portal-tabs__icon">📅</span><span class="dps-portal-tabs__text">Agendamentos</span><span class="dps-portal-tabs__badge">2</span></button></div>
+      <span class="dps-portal-tabs__loading" aria-live="polite" aria-atomic="true">Carregando seção...</span>
+    </nav>
+
+    <div class="dps-portal-tab-content is-loading">
+      <div class="dps-portal-tab-panel is-active" role="tabpanel" aria-hidden="false">
+        <section class="dps-portal-section">
+          <h2>Conteúdo da aba (placeholder)</h2>
+          <p>Conteúdo interno das abas não faz parte deste preview.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -153,58 +153,154 @@
      * Gerencia navegação por tabs
      */
     function handleTabNavigation() {
-        var tabs = document.querySelectorAll('.dps-portal-tabs__link');
+        var LOADING_INDICATOR_DURATION = 220;
+        var tabs = Array.prototype.slice.call(document.querySelectorAll('.dps-portal-tabs__link'));
         var panels = document.querySelectorAll('.dps-portal-tab-panel');
+        var tabNav = document.querySelector('.dps-portal-tabs');
+        var tabContent = document.querySelector('.dps-portal-tab-content');
+        var loadingEl = tabNav ? tabNav.querySelector('.dps-portal-tabs__loading') : null;
+        var loadingTimer = null;
         
         if (!tabs.length || !panels.length) return;
-        
-        // Obtém tab ativa da URL hash ou usa a primeira
-        var activeTab = window.location.hash.replace('#tab-', '') || 'inicio';
-        
+
+        function setLoading(isLoading) {
+            if (!tabNav || !tabContent) return;
+            tabNav.classList.toggle('is-loading', isLoading);
+            tabContent.classList.toggle('is-loading', isLoading);
+            if (loadingEl) {
+                loadingEl.textContent = isLoading ? 'Carregando seção...' : '';
+            }
+        }
+
+        function activateTab(tabId, options) {
+            var opts = options || {};
+            var targetTab = document.querySelector('.dps-portal-tabs__link[data-tab="' + tabId + '"]');
+            if (!targetTab || targetTab.getAttribute('aria-disabled') === 'true') {
+                return false;
+            }
+
+            if (targetTab.classList.contains('is-active')) {
+                return true;
+            }
+
+            if (!opts.silent) {
+                setLoading(true);
+            }
+
+            tabs.forEach(function(t) {
+                t.classList.remove('is-active');
+                t.setAttribute('aria-selected', 'false');
+                t.setAttribute('tabindex', '-1');
+            });
+
+            panels.forEach(function(p) {
+                p.classList.remove('is-active');
+                p.setAttribute('aria-hidden', 'true');
+            });
+
+            targetTab.classList.add('is-active');
+            targetTab.setAttribute('aria-selected', 'true');
+            targetTab.setAttribute('tabindex', '0');
+
+            var targetPanel = document.getElementById('panel-' + tabId);
+            if (targetPanel) {
+                targetPanel.classList.add('is-active');
+                targetPanel.setAttribute('aria-hidden', 'false');
+                if (opts.focusPanel) {
+                    targetPanel.focus();
+                }
+            }
+
+            if (!opts.skipHash && history.pushState) {
+                history.pushState(null, null, '#tab-' + tabId);
+            }
+
+            if (loadingTimer) {
+                clearTimeout(loadingTimer);
+            }
+            if (!opts.silent) {
+                loadingTimer = setTimeout(function() {
+                    setLoading(false);
+                }, LOADING_INDICATOR_DURATION);
+            } else {
+                setLoading(false);
+            }
+
+            return true;
+        }
+
         tabs.forEach(function(tab) {
             tab.addEventListener('click', function(e) {
                 e.preventDefault();
-                
                 var targetTab = this.getAttribute('data-tab');
-                if (!targetTab) return;
-                
-                // Remove active de todas as tabs
-                tabs.forEach(function(t) {
-                    t.classList.remove('is-active');
-                    t.setAttribute('aria-selected', 'false');
-                });
-                
-                // Remove active de todos os panels
-                panels.forEach(function(p) {
-                    p.classList.remove('is-active');
-                    p.setAttribute('aria-hidden', 'true');
-                });
-                
-                // Ativa a tab clicada
-                this.classList.add('is-active');
-                this.setAttribute('aria-selected', 'true');
-                
-                // Ativa o panel correspondente
-                var targetPanel = document.getElementById('panel-' + targetTab);
-                if (targetPanel) {
-                    targetPanel.classList.add('is-active');
-                    targetPanel.setAttribute('aria-hidden', 'false');
+                if (targetTab) {
+                    activateTab(targetTab);
                 }
-                
-                // Atualiza URL hash
-                if (history.pushState) {
-                    history.pushState(null, null, '#tab-' + targetTab);
+            });
+
+            tab.addEventListener('keydown', function(e) {
+                var enabledTabs = [];
+                tabs.forEach(function(item) {
+                    if (item.getAttribute('aria-disabled') !== 'true') {
+                        enabledTabs.push(item);
+                    }
+                });
+                var currentIndex = enabledTabs.indexOf(this);
+                var nextTab = null;
+
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    nextTab = enabledTabs[(currentIndex + 1) % enabledTabs.length];
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    nextTab = enabledTabs[(currentIndex - 1 + enabledTabs.length) % enabledTabs.length];
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    nextTab = enabledTabs[0];
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    nextTab = enabledTabs[enabledTabs.length - 1];
+                } else if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    var selectedTab = this.getAttribute('data-tab');
+                    if (selectedTab) {
+                        activateTab(selectedTab, { focusPanel: true });
+                    }
+                }
+
+                if (nextTab) {
+                    var nextTabId = nextTab.getAttribute('data-tab');
+                    if (nextTabId) {
+                        activateTab(nextTabId);
+                        nextTab.focus();
+                    }
                 }
             });
         });
-        
-        // Ativa tab inicial
-        var initialTab = document.querySelector('[data-tab="' + activeTab + '"]');
-        if (initialTab) {
-            initialTab.click();
-        } else if (tabs[0]) {
-            tabs[0].click();
+
+        function activateFromHash(silent) {
+            var activeTab = window.location.hash.replace('#tab-', '') || 'inicio';
+            if (activateTab(activeTab, { silent: !!silent, skipHash: true })) {
+                return;
+            }
+            var firstEnabledTab = null;
+            tabs.some(function(item) {
+                if (item.getAttribute('aria-disabled') !== 'true') {
+                    firstEnabledTab = item;
+                    return true;
+                }
+                return false;
+            });
+            if (firstEnabledTab) {
+                activateTab(firstEnabledTab.getAttribute('data-tab'), { silent: !!silent, skipHash: true });
+            }
         }
+
+        window.addEventListener('hashchange', function() {
+            activateFromHash(true);
+        });
+
+        activateFromHash(true);
     }
 
     /**

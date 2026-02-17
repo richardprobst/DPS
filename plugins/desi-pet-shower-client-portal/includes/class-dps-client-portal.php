@@ -591,6 +591,7 @@ final class DPS_Client_Portal {
         
         // Header com título e botão de logout
         echo '<div class="dps-portal-header dps-portal-header--branded">';
+        echo '<div class="dps-portal-header__main">';
         
         // Imagem hero (se configurada)
         if ( $hero_id ) {
@@ -618,10 +619,23 @@ final class DPS_Client_Portal {
             echo '<h1 class="dps-portal-title">' . esc_html__( 'Portal do Cliente', 'dps-client-portal' ) . '</h1>';
         }
         
+        echo '</div>';
+        echo '<div class="dps-portal-header__actions">';
+
+        // Link de avaliação discreto no topo do portal
+        $review_url = $this->get_review_url();
+        if ( $review_url ) {
+            echo '<a href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener" class="dps-portal-review-link" title="' . esc_attr__( 'Avalie nosso serviço', 'dps-client-portal' ) . '">';
+            echo '<span class="dps-portal-review-icon">⭐</span>';
+            echo '<span class="dps-portal-review-text">' . esc_html__( 'Avalie-nos', 'dps-client-portal' ) . '</span>';
+            echo '</a>';
+        }
+
         // Botão de logout
         $session_manager = DPS_Portal_Session_Manager::get_instance();
         $logout_url      = $session_manager->get_logout_url();
         echo '<a href="' . esc_url( $logout_url ) . '" class="dps-portal-logout">' . esc_html__( 'Sair', 'dps-client-portal' ) . '</a>';
+        echo '</div>';
         echo '</div>';
         
         // Hook para add-ons adicionarem conteúdo no topo do portal (ex: AI Assistant)
@@ -633,14 +647,6 @@ final class DPS_Client_Portal {
         echo '<span class="dps-portal-breadcrumb__separator">›</span>';
         echo '<span class="dps-portal-breadcrumb__item dps-portal-breadcrumb__item--active">' . esc_html__( 'Início', 'dps-client-portal' ) . '</span>';
         
-        // Link de avaliação discreto no canto superior (movido da seção de dados)
-        $review_url = $this->get_review_url();
-        if ( $review_url ) {
-            echo '<a href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener" class="dps-portal-review-link" title="' . esc_attr__( 'Avalie nosso serviço', 'dps-client-portal' ) . '">';
-            echo '<span class="dps-portal-review-icon">⭐</span>';
-            echo '<span class="dps-portal-review-text">' . esc_html__( 'Avalie-nos', 'dps-client-portal' ) . '</span>';
-            echo '</a>';
-        }
         echo '</nav>';
         
         // Define tabs padrão (Fase 2.3)
@@ -708,14 +714,19 @@ final class DPS_Client_Portal {
         $tabs = apply_filters( 'dps_portal_tabs', $default_tabs, $client_id );
         
         // Navegação por Tabs com badges
-        echo '<nav class="dps-portal-tabs" role="tablist">';
+        echo '<nav class="dps-portal-tabs" role="tablist" aria-label="' . esc_attr__( 'Seções do portal', 'dps-client-portal' ) . '">';
         foreach ( $tabs as $tab_id => $tab ) {
-            $is_active = isset( $tab['active'] ) && $tab['active'];
-            $class = 'dps-portal-tabs__link' . ( $is_active ? ' is-active' : '' );
-            $badge_count = isset( $tab['badge'] ) ? absint( $tab['badge'] ) : 0;
+            $is_active   = isset( $tab['active'] ) && $tab['active'];
+            $is_disabled = ! empty( $tab['disabled'] );
+            if ( $is_disabled ) {
+                $is_active = false;
+            }
+            $class         = 'dps-portal-tabs__link' . ( $is_active ? ' is-active' : '' ) . ( $is_disabled ? ' is-disabled' : '' );
+            $badge_count   = isset( $tab['badge'] ) ? absint( $tab['badge'] ) : 0;
+            $tab_button_id = 'dps-portal-tab-' . sanitize_key( $tab_id );
             
             echo '<div class="dps-portal-tabs__item">';
-            echo '<button class="' . esc_attr( $class ) . '" data-tab="' . esc_attr( $tab_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="panel-' . esc_attr( $tab_id ) . '">';
+            echo '<button type="button" id="' . esc_attr( $tab_button_id ) . '" class="' . esc_attr( $class ) . '" data-tab="' . esc_attr( $tab_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="panel-' . esc_attr( $tab_id ) . '" aria-disabled="' . ( $is_disabled ? 'true' : 'false' ) . '" tabindex="' . ( $is_active ? '0' : '-1' ) . '"' . ( $is_disabled ? ' disabled' : '' ) . '>';
             if ( isset( $tab['icon'] ) ) {
                 echo '<span class="dps-portal-tabs__icon">' . esc_html( $tab['icon'] ) . '</span>';
             }
@@ -745,6 +756,7 @@ final class DPS_Client_Portal {
             echo '</button>';
             echo '</div>';
         }
+        echo '<span class="dps-portal-tabs__loading" aria-live="polite" aria-atomic="true"></span>';
         echo '</nav>';
         
         // Hook: Antes de renderizar conteúdo das tabs (Fase 2.3)
@@ -754,7 +766,7 @@ final class DPS_Client_Portal {
         echo '<div class="dps-portal-tab-content">';
         
         // Panel: Início (Layout modernizado)
-        echo '<div id="panel-inicio" class="dps-portal-tab-panel is-active" role="tabpanel" aria-hidden="false">';
+        echo '<div id="panel-inicio" class="dps-portal-tab-panel is-active" role="tabpanel" aria-labelledby="dps-portal-tab-inicio" aria-hidden="false" tabindex="-1">';
         do_action( 'dps_portal_before_inicio_content', $client_id ); // Fase 2.3
         
         // Novo: Dashboard com métricas rápidas
@@ -787,49 +799,49 @@ final class DPS_Client_Portal {
         echo '</div>';
 
         // Panel: Fidelidade
-        echo '<div id="panel-fidelidade" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        echo '<div id="panel-fidelidade" class="dps-portal-tab-panel" role="tabpanel" aria-labelledby="dps-portal-tab-fidelidade" aria-hidden="true" tabindex="-1">';
         do_action( 'dps_portal_before_fidelidade_content', $client_id );
         $this->render_loyalty_panel( $client_id );
         do_action( 'dps_portal_after_fidelidade_content', $client_id );
         echo '</div>';
 
         // Panel: Avaliações (CTA + prova social)
-        echo '<div id="panel-avaliacoes" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        echo '<div id="panel-avaliacoes" class="dps-portal-tab-panel" role="tabpanel" aria-labelledby="dps-portal-tab-avaliacoes" aria-hidden="true" tabindex="-1">';
         do_action( 'dps_portal_before_reviews_content', $client_id );
         $this->render_reviews_hub( $client_id );
         do_action( 'dps_portal_after_reviews_content', $client_id );
         echo '</div>';
         
         // Panel: Mensagens (Fase 4 - continuação)
-        echo '<div id="panel-mensagens" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        echo '<div id="panel-mensagens" class="dps-portal-tab-panel" role="tabpanel" aria-labelledby="dps-portal-tab-mensagens" aria-hidden="true" tabindex="-1">';
         do_action( 'dps_portal_before_mensagens_content', $client_id );
         DPS_Portal_Renderer::get_instance()->render_message_center( $client_id );
         do_action( 'dps_portal_after_mensagens_content', $client_id );
         echo '</div>';
         
         // Panel: Agendamentos (Histórico completo)
-        echo '<div id="panel-agendamentos" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        echo '<div id="panel-agendamentos" class="dps-portal-tab-panel" role="tabpanel" aria-labelledby="dps-portal-tab-agendamentos" aria-hidden="true" tabindex="-1">';
         do_action( 'dps_portal_before_agendamentos_content', $client_id ); // Fase 2.3
         DPS_Portal_Renderer::get_instance()->render_appointment_history( $client_id );
         do_action( 'dps_portal_after_agendamentos_content', $client_id ); // Fase 2.3
         echo '</div>';
         
         // Panel: Histórico dos Pets (Fase 4)
-        echo '<div id="panel-historico-pets" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        echo '<div id="panel-historico-pets" class="dps-portal-tab-panel" role="tabpanel" aria-labelledby="dps-portal-tab-historico-pets" aria-hidden="true" tabindex="-1">';
         do_action( 'dps_portal_before_pet_history_content', $client_id );
         $this->render_pets_timeline( $client_id );
         do_action( 'dps_portal_after_pet_history_content', $client_id );
         echo '</div>';
         
         // Panel: Galeria
-        echo '<div id="panel-galeria" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        echo '<div id="panel-galeria" class="dps-portal-tab-panel" role="tabpanel" aria-labelledby="dps-portal-tab-galeria" aria-hidden="true" tabindex="-1">';
         do_action( 'dps_portal_before_galeria_content', $client_id ); // Fase 2.3
         DPS_Portal_Renderer::get_instance()->render_pet_gallery( $client_id );
         do_action( 'dps_portal_after_galeria_content', $client_id ); // Fase 2.3
         echo '</div>';
         
         // Panel: Meus Dados
-        echo '<div id="panel-dados" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        echo '<div id="panel-dados" class="dps-portal-tab-panel" role="tabpanel" aria-labelledby="dps-portal-tab-dados" aria-hidden="true" tabindex="-1">';
         do_action( 'dps_portal_before_dados_content', $client_id ); // Fase 2.3
         DPS_Portal_Renderer::get_instance()->render_update_forms( $client_id );
         $this->render_client_preferences( $client_id );
