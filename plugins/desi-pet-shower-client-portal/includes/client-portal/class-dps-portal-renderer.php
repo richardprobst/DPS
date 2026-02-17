@@ -1234,6 +1234,18 @@ class DPS_Portal_Renderer {
         
         echo '</fieldset>';
         
+        // Fieldset: Foto do Pet
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( '📷 Foto do Pet', 'dps-client-portal' ) . '</legend>';
+        echo '<p class="dps-fieldset__help">' . esc_html__( 'Envie uma foto do seu pet. Formatos aceitos: JPG, PNG, GIF ou WebP (máx. 5 MB).', 'dps-client-portal' ) . '</p>';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_photo_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Selecionar foto', 'dps-client-portal' ) . '</label>';
+        echo '<input type="file" name="pet_photo" id="pet_photo_' . esc_attr( $pet_id ) . '" class="dps-form-control" accept="image/jpeg,image/png,image/gif,image/webp">';
+        echo '</div>';
+        
+        echo '</fieldset>';
+        
         // Botão de submit
         echo '<div class="dps-form-actions">';
         echo '<button type="submit" class="button button-primary dps-btn-submit">';

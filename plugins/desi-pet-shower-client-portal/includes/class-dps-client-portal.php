@@ -2139,19 +2139,25 @@ Equipe %4$s', 'dps-client-portal' ),
         $contact_preference = get_post_meta( $client_id, 'client_contact_preference', true );
         $period_preference  = get_post_meta( $client_id, 'client_period_preference', true );
 
-        echo '<div class="dps-preferences-section">';
-        echo '<h3>⚙️ ' . esc_html__( 'Minhas Preferências', 'dps-client-portal' ) . '</h3>';
-        echo '<p class="dps-preferences-section__description">' . esc_html__( 'Personalize sua experiência no Banho e Tosa', 'dps-client-portal' ) . '</p>';
+        echo '<div class="dps-surface dps-surface--neutral dps-meus-dados-card dps-preferences-section">';
+        echo '<div class="dps-surface__title">';
+        echo '<span>⚙️</span>';
+        echo esc_html__( 'Minhas Preferências', 'dps-client-portal' );
+        echo '</div>';
+        echo '<p class="dps-surface__description">' . esc_html__( 'Personalize como e quando prefere ser atendido.', 'dps-client-portal' ) . '</p>';
         
-        echo '<form method="post" class="dps-portal-form">';
+        echo '<form method="post" class="dps-portal-form dps-meus-dados-form">';
         wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
         echo '<input type="hidden" name="dps_client_portal_action" value="update_client_preferences">';
         
-        echo '<div class="dps-preferences-grid">';
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( '📞 Comunicação', 'dps-client-portal' ) . '</legend>';
+        
+        echo '<div class="dps-form-row dps-form-row--2col">';
         
         // Canal de contato preferido
-        echo '<div class="dps-preference-item">';
-        echo '<label class="dps-preference-item__label" for="contact_preference">';
+        echo '<div class="dps-form-col">';
+        echo '<label class="dps-form-label" for="contact_preference">';
         echo esc_html__( 'Como prefere ser contatado?', 'dps-client-portal' );
         echo '</label>';
         echo '<select id="contact_preference" name="contact_preference" class="dps-form-control">';
@@ -2163,8 +2169,8 @@ Equipe %4$s', 'dps-client-portal' ),
         echo '</div>';
         
         // Período preferido
-        echo '<div class="dps-preference-item">';
-        echo '<label class="dps-preference-item__label" for="period_preference">';
+        echo '<div class="dps-form-col">';
+        echo '<label class="dps-form-label" for="period_preference">';
         echo esc_html__( 'Período preferido para banho/tosa', 'dps-client-portal' );
         echo '</label>';
         echo '<select id="period_preference" name="period_preference" class="dps-form-control">';
@@ -2175,16 +2181,17 @@ Equipe %4$s', 'dps-client-portal' ),
         echo '</select>';
         echo '</div>';
         
-        echo '</div>'; // .dps-preferences-grid
+        echo '</div>'; // .dps-form-row
+        echo '</fieldset>';
         
-        echo '<div class="dps-preferences-actions">';
-        echo '<button type="submit" class="button button-primary">';
-        echo esc_html__( 'Salvar Preferências', 'dps-client-portal' );
+        echo '<div class="dps-form-actions">';
+        echo '<button type="submit" class="button button-primary dps-btn-submit">';
+        echo '<span>💾</span> ' . esc_html__( 'Salvar Preferências', 'dps-client-portal' );
         echo '</button>';
         echo '</div>';
         
         echo '</form>';
-        echo '</div>'; // .dps-preferences-section
+        echo '</div>'; // .dps-surface
     }
 
 
