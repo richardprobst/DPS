@@ -524,6 +524,7 @@ final class DPS_Client_Portal {
             'chatNonce' => wp_create_nonce( 'dps_portal_chat' ),
             'requestNonce' => wp_create_nonce( 'dps_portal_appointment_request' ),
             'exportPdfNonce' => wp_create_nonce( 'dps_portal_export_pdf' ),
+            'petHistoryNonce' => wp_create_nonce( 'dps_portal_pet_history' ),
             'clientId' => $client_id,
             'loyalty' => [
                 'nonce' => wp_create_nonce( 'dps_portal_loyalty' ),

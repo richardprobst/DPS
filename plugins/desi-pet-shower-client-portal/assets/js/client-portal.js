@@ -47,6 +47,7 @@
         handlePetHistoryTabs(); // Revisão Jan/2026: Navegação por pet na aba Histórico
         handleRepeatService(); // Revisão Jan/2026: Botão repetir serviço via WhatsApp
         handleExportPdf(); // Funcionalidade 3: Export PDF
+        handleLoadMorePetHistory(); // Load more pet history items
     }
 
     /**
@@ -1908,43 +1909,95 @@ window.DPSSkeleton = (function() {
             return;
         }
 
-        petTabs.forEach(function(tab) {
-            tab.addEventListener('click', function() {
-                var targetPetId = this.getAttribute('data-pet-id');
+        /**
+         * Ativa uma tab de pet específica pelo índice.
+         * @param {number} index Índice da tab a ativar.
+         */
+        function activateTab(index) {
+            if (index < 0 || index >= petTabs.length) {
+                return;
+            }
 
-                // Valida que targetPetId é um número (IDs de post são numéricos)
-                if (!targetPetId || !/^\d+$/.test(targetPetId)) {
+            var targetPetId = petTabs[index].getAttribute('data-pet-id');
+            if (!targetPetId || !/^\d+$/.test(targetPetId)) {
+                return;
+            }
+
+            // Remove classe ativa e tabindex de todas as tabs
+            petTabs.forEach(function(t) {
+                t.classList.remove('dps-pet-tab--active');
+                t.setAttribute('aria-selected', 'false');
+                t.setAttribute('tabindex', '-1');
+            });
+
+            // Adiciona classe ativa à tab selecionada
+            petTabs[index].classList.add('dps-pet-tab--active');
+            petTabs[index].setAttribute('aria-selected', 'true');
+            petTabs[index].setAttribute('tabindex', '0');
+            petTabs[index].focus();
+
+            // Esconde todos os painéis
+            petPanels.forEach(function(panel) {
+                panel.classList.add('dps-pet-timeline-panel--hidden');
+                panel.setAttribute('aria-hidden', 'true');
+            });
+
+            // Mostra o painel correspondente (usa CSS.escape para prevenir XSS)
+            var escapedPetId = CSS.escape(targetPetId);
+            var targetPanel = document.querySelector('.dps-pet-timeline-panel[data-pet-id="' + escapedPetId + '"]');
+            if (targetPanel) {
+                targetPanel.classList.remove('dps-pet-timeline-panel--hidden');
+                targetPanel.setAttribute('aria-hidden', 'false');
+
+                // Scroll suave para o painel
+                targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // Click handler
+        petTabs.forEach(function(tab, idx) {
+            tab.addEventListener('click', function() {
+                activateTab(idx);
+            });
+        });
+
+        // Keyboard navigation (arrow keys, Home, End)
+        var tablist = document.querySelector('.dps-pet-tabs-nav__tabs[role="tablist"]');
+        if (tablist) {
+            tablist.addEventListener('keydown', function(e) {
+                var currentIndex = Array.prototype.indexOf.call(petTabs, document.activeElement);
+                if (currentIndex < 0) {
                     return;
                 }
 
-                // Remove classe ativa de todas as tabs
-                petTabs.forEach(function(t) {
-                    t.classList.remove('dps-pet-tab--active');
-                    t.setAttribute('aria-selected', 'false');
-                });
+                var newIndex = currentIndex;
 
-                // Adiciona classe ativa à tab clicada
-                this.classList.add('dps-pet-tab--active');
-                this.setAttribute('aria-selected', 'true');
-
-                // Esconde todos os painéis
-                petPanels.forEach(function(panel) {
-                    panel.classList.add('dps-pet-timeline-panel--hidden');
-                    panel.setAttribute('aria-hidden', 'true');
-                });
-
-                // Mostra o painel correspondente (usa CSS.escape para prevenir XSS)
-                var escapedPetId = CSS.escape(targetPetId);
-                var targetPanel = document.querySelector('.dps-pet-timeline-panel[data-pet-id="' + escapedPetId + '"]');
-                if (targetPanel) {
-                    targetPanel.classList.remove('dps-pet-timeline-panel--hidden');
-                    targetPanel.setAttribute('aria-hidden', 'false');
-
-                    // Scroll suave para o painel
-                    targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                switch (e.key) {
+                    case 'ArrowRight':
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        newIndex = (currentIndex + 1) % petTabs.length;
+                        break;
+                    case 'ArrowLeft':
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        newIndex = (currentIndex - 1 + petTabs.length) % petTabs.length;
+                        break;
+                    case 'Home':
+                        e.preventDefault();
+                        newIndex = 0;
+                        break;
+                    case 'End':
+                        e.preventDefault();
+                        newIndex = petTabs.length - 1;
+                        break;
+                    default:
+                        return;
                 }
+
+                activateTab(newIndex);
             });
-        });
+        }
     }
 
     /**
@@ -2043,6 +2096,93 @@ window.DPSSkeleton = (function() {
     }
 
     /**
+     * Gerencia botão "Ver mais serviços" na timeline de pets
+     * Carrega mais itens via AJAX e os insere na timeline
+     */
+    function handleLoadMorePetHistory() {
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.dps-btn-load-more-services');
+            if (!btn) {
+                return;
+            }
+
+            // Previne cliques duplos
+            if (btn.disabled) {
+                return;
+            }
+
+            var petId = btn.getAttribute('data-pet-id');
+            var offset = parseInt(btn.getAttribute('data-offset'), 10);
+
+            if (!petId || !/^\d+$/.test(petId) || isNaN(offset)) {
+                return;
+            }
+
+            if (typeof dpsPortal === 'undefined' || !dpsPortal.petHistoryNonce) {
+                return;
+            }
+
+            // Estado de carregamento
+            btn.disabled = true;
+            var originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ ' + (dpsPortal.i18n && dpsPortal.i18n.loading ? dpsPortal.i18n.loading : 'Carregando...');
+
+            var formData = new FormData();
+            formData.append('action', 'dps_load_more_pet_history');
+            formData.append('nonce', dpsPortal.petHistoryNonce);
+            formData.append('pet_id', petId);
+            formData.append('offset', offset);
+
+            fetch(dpsPortal.ajaxUrl, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success && data.data.html) {
+                    // Insere os novos itens antes do botão "Ver mais"
+                    var timeline = btn.closest('.dps-portal-pet-timeline').querySelector('.dps-timeline');
+                    if (timeline) {
+                        var temp = document.createElement('div');
+                        temp.innerHTML = data.data.html;
+                        while (temp.firstChild) {
+                            timeline.appendChild(temp.firstChild);
+                        }
+                    }
+
+                    if (data.data.hasMore) {
+                        btn.setAttribute('data-offset', data.data.newOffset);
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                    } else {
+                        // Sem mais itens - remove o botão
+                        var loadMoreContainer = btn.closest('.dps-timeline-load-more');
+                        if (loadMoreContainer) {
+                            loadMoreContainer.remove();
+                        }
+                    }
+                } else {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    if (typeof DPSToast !== 'undefined') {
+                        DPSToast.show(data.data && data.data.message ? data.data.message : 'Erro ao carregar mais serviços.', 'error');
+                    }
+                }
+            })
+            .catch(function() {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                if (typeof DPSToast !== 'undefined') {
+                    DPSToast.show('Erro de conexão. Tente novamente.', 'error');
+                }
+            });
+        });
+    }
+
+    /**
      * Gerencia filtro de pets na galeria de fotos
      * Revisão de layout: Janeiro 2026
      */
@@ -2099,7 +2239,8 @@ window.DPSSkeleton = (function() {
 
     /**
      * Lightbox simples para galeria de fotos
-     * Revisão de layout: Janeiro 2026
+     * Revisão de layout: Fevereiro 2026
+     * Acessibilidade: ARIA dialog, focus trap, focus restore, broken image fallback
      */
     function handleGalleryLightbox() {
         var lightboxLinks = document.querySelectorAll('.dps-gallery-photo__link');
@@ -2108,9 +2249,12 @@ window.DPSSkeleton = (function() {
             return;
         }
 
-        // Cria o container do lightbox
+        // Cria o container do lightbox com atributos ARIA
         var lightbox = document.createElement('div');
         lightbox.className = 'dps-lightbox';
+        lightbox.setAttribute('role', 'dialog');
+        lightbox.setAttribute('aria-modal', 'true');
+        lightbox.setAttribute('aria-label', 'Visualizar foto');
         lightbox.innerHTML = '' +
             '<div class="dps-lightbox__overlay"></div>' +
             '<div class="dps-lightbox__container">' +
@@ -2129,6 +2273,14 @@ window.DPSSkeleton = (function() {
         var lightboxDownload = lightbox.querySelector('.dps-lightbox__btn--download');
         var lightboxClose = lightbox.querySelector('.dps-lightbox__close');
         var lightboxOverlay = lightbox.querySelector('.dps-lightbox__overlay');
+        var lastFocusedElement = null;
+
+        // Broken image fallback
+        lightboxImg.addEventListener('error', function() {
+            this.alt = 'Imagem indisponível';
+            lightboxCaption.textContent = 'Imagem indisponível';
+            lightboxDownload.style.display = 'none';
+        });
 
         // Abre lightbox ao clicar em foto
         lightboxLinks.forEach(function(link) {
@@ -2142,13 +2294,19 @@ window.DPSSkeleton = (function() {
                     return;
                 }
 
+                lastFocusedElement = this;
+
                 lightboxImg.src = imgUrl;
-                lightboxImg.alt = imgTitle;
+                lightboxImg.alt = imgTitle || 'Foto do pet';
                 lightboxCaption.textContent = imgTitle;
                 lightboxDownload.href = imgUrl;
+                lightboxDownload.style.display = '';
 
                 lightbox.classList.add('is-active');
                 document.body.style.overflow = 'hidden';
+
+                // Foca no botão de fechar para acessibilidade
+                lightboxClose.focus();
             });
         });
 
@@ -2157,16 +2315,66 @@ window.DPSSkeleton = (function() {
             lightbox.classList.remove('is-active');
             document.body.style.overflow = '';
             lightboxImg.src = '';
+
+            // Restaura foco ao elemento que abriu o lightbox
+            if (lastFocusedElement) {
+                lastFocusedElement.focus();
+                lastFocusedElement = null;
+            }
         }
 
         lightboxClose.addEventListener('click', closeLightbox);
         lightboxOverlay.addEventListener('click', closeLightbox);
 
-        // Fecha com ESC
+        // Keyboard: ESC para fechar, Tab trap dentro do lightbox
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && lightbox.classList.contains('is-active')) {
-                closeLightbox();
+            if (!lightbox.classList.contains('is-active')) {
+                return;
             }
+
+            if (e.key === 'Escape') {
+                closeLightbox();
+                return;
+            }
+
+            // Focus trap: mantém foco dentro do lightbox
+            if (e.key === 'Tab') {
+                var focusable = lightbox.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])');
+                if (focusable.length === 0) {
+                    return;
+                }
+                var first = focusable[0];
+                var last = focusable[focusable.length - 1];
+
+                if (e.shiftKey) {
+                    if (document.activeElement === first) {
+                        e.preventDefault();
+                        last.focus();
+                    }
+                } else {
+                    if (document.activeElement === last) {
+                        e.preventDefault();
+                        first.focus();
+                    }
+                }
+            }
+        });
+
+        // Broken image fallback for gallery grid images
+        var galleryImages = document.querySelectorAll('.dps-gallery-photo__img');
+        galleryImages.forEach(function(img) {
+            img.addEventListener('error', function() {
+                this.style.display = 'none';
+                var parent = this.closest('.dps-gallery-photo__link');
+                if (parent) {
+                    var overlay = parent.querySelector('.dps-gallery-photo__overlay');
+                    if (overlay) {
+                        overlay.innerHTML = '<span class="dps-gallery-photo__zoom">⚠️</span>';
+                        overlay.style.opacity = '1';
+                        overlay.style.backgroundColor = 'var(--dps-gray-100)';
+                    }
+                }
+            });
         });
     }
 

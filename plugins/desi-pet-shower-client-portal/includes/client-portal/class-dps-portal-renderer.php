@@ -512,48 +512,203 @@ class DPS_Portal_Renderer {
 
     /**
      * Renderiza galeria de fotos dos pets.
+     * Revisão de layout: Fevereiro 2026
      *
+     * @since 2.5.0
      * @param int $client_id ID do cliente.
      */
     public function render_pet_gallery( $client_id ) {
-        // Usa repositório para buscar pets
         $pets = $this->pet_repository->get_pets_by_client( $client_id );
-        
+
         echo '<section class="dps-portal-section dps-portal-gallery">';
-        echo '<h2>' . esc_html__( '📸 Galeria de Fotos', 'dps-client-portal' ) . '</h2>';
-        
-        if ( $pets ) {
-            echo '<div class="dps-pet-gallery">';
+
+        // Header
+        echo '<div class="dps-gallery-header">';
+        echo '<h2 class="dps-section-title">';
+        echo '<span class="dps-section-title__icon">📸</span>';
+        echo esc_html__( 'Galeria de Fotos', 'dps-client-portal' );
+        echo '</h2>';
+        echo '<p class="dps-section-subtitle">' . esc_html__( 'Fotos dos seus pets cadastrados no nosso sistema.', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+
+        if ( empty( $pets ) ) {
+            $this->render_gallery_empty_state();
+            echo '</section>';
+            return;
+        }
+
+        // Conta fotos disponíveis
+        $total_photos = 0;
+        foreach ( $pets as $pet ) {
+            $photo_id = get_post_meta( $pet->ID, 'pet_photo_id', true );
+            if ( $photo_id && wp_get_attachment_image_url( $photo_id, 'thumbnail' ) ) {
+                $total_photos++;
+            }
+        }
+
+        // Métricas
+        echo '<div class="dps-gallery-metrics">';
+        echo '<div class="dps-gallery-metric-card">';
+        echo '<div class="dps-gallery-metric-card__icon">🐾</div>';
+        echo '<div class="dps-gallery-metric-card__content">';
+        echo '<span class="dps-gallery-metric-card__value">' . esc_html( count( $pets ) ) . '</span>';
+        echo '<span class="dps-gallery-metric-card__label">' . esc_html( _n( 'Pet', 'Pets', count( $pets ), 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+
+        echo '<div class="dps-gallery-metric-card' . ( $total_photos > 0 ? ' dps-gallery-metric-card--highlight' : '' ) . '">';
+        echo '<div class="dps-gallery-metric-card__icon">📷</div>';
+        echo '<div class="dps-gallery-metric-card__content">';
+        echo '<span class="dps-gallery-metric-card__value">' . esc_html( $total_photos ) . '</span>';
+        echo '<span class="dps-gallery-metric-card__label">' . esc_html( _n( 'Foto', 'Fotos', $total_photos, 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>'; // .dps-gallery-metrics
+
+        // Filtro por pet (quando múltiplos pets)
+        if ( count( $pets ) > 1 ) {
+            echo '<div class="dps-gallery-filter" role="toolbar" aria-label="' . esc_attr__( 'Filtrar por pet', 'dps-client-portal' ) . '">';
+            echo '<span class="dps-gallery-filter__label">' . esc_html__( 'Filtrar por:', 'dps-client-portal' ) . '</span>';
+            echo '<div class="dps-gallery-filter__buttons">';
+            echo '<button type="button" class="dps-gallery-filter__btn is-active" data-filter="all">';
+            echo esc_html__( 'Todos', 'dps-client-portal' );
+            echo '</button>';
             foreach ( $pets as $pet ) {
-                $this->render_pet_gallery_item( $pet );
+                echo '<button type="button" class="dps-gallery-filter__btn" data-filter="pet-' . esc_attr( $pet->ID ) . '">';
+                echo esc_html( get_the_title( $pet->ID ) );
+                echo '</button>';
             }
             echo '</div>';
-        } else {
-            echo '<div class="dps-empty-state">';
-            echo '<div class="dps-empty-state__icon">🐾</div>';
-            echo '<div class="dps-empty-state__message">' . esc_html__( 'Nenhum pet cadastrado ainda.', 'dps-client-portal' ) . '</div>';
             echo '</div>';
         }
-        
+
+        // Conteúdo: cards por pet
+        echo '<div class="dps-gallery-content">';
+        foreach ( $pets as $pet ) {
+            $this->render_gallery_pet_card( $pet );
+        }
+        echo '</div>';
+
+        // Nota informativa
+        echo '<div class="dps-gallery-info">';
+        echo '<p class="dps-gallery-info__text">';
+        echo '<span class="dps-gallery-info__icon">💡</span>';
+        echo esc_html__( 'As fotos são atualizadas pela equipe durante os atendimentos. Para solicitar uma atualização, entre em contato.', 'dps-client-portal' );
+        echo '</p>';
+        echo '</div>';
+
         echo '</section>';
     }
 
     /**
-     * Renderiza um item da galeria de pet.
+     * Renderiza card de galeria para um pet.
      *
+     * @since 2.5.0
      * @param WP_Post $pet Post do pet.
      */
-    private function render_pet_gallery_item( $pet ) {
-        $photo_id = get_post_meta( $pet->ID, 'pet_photo_id', true );
-        $photo_url = $photo_id ? wp_get_attachment_image_url( $photo_id, 'medium' ) : '';
-        
-        echo '<div class="dps-pet-gallery__item">';
-        if ( $photo_url ) {
-            echo '<img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( get_the_title( $pet->ID ) ) . '" class="dps-pet-gallery__image">';
-        } else {
-            echo '<div class="dps-pet-gallery__placeholder">🐾</div>';
+    private function render_gallery_pet_card( $pet ) {
+        $pet_id   = $pet->ID;
+        $pet_name = get_the_title( $pet_id );
+        $photo_id = get_post_meta( $pet_id, 'pet_photo_id', true );
+        $species  = get_post_meta( $pet_id, 'pet_species', true );
+
+        $species_icon = '🐾';
+        if ( $species ) {
+            $species_lower = strtolower( $species );
+            if ( str_contains( $species_lower, 'gato' ) || str_contains( $species_lower, 'cat' ) || str_contains( $species_lower, 'felin' ) ) {
+                $species_icon = '🐱';
+            } elseif ( str_contains( $species_lower, 'cão' ) || str_contains( $species_lower, 'cachorro' ) || str_contains( $species_lower, 'dog' ) || str_contains( $species_lower, 'canin' ) ) {
+                $species_icon = '🐶';
+            }
         }
-        echo '<div class="dps-pet-gallery__name">' . esc_html( get_the_title( $pet->ID ) ) . '</div>';
+
+        echo '<div class="dps-gallery-pet-card" data-pet-id="pet-' . esc_attr( $pet_id ) . '">';
+
+        // Header
+        echo '<div class="dps-gallery-pet-card__header">';
+        echo '<h3 class="dps-gallery-pet-card__name">';
+        echo '<span class="dps-gallery-pet-card__icon">' . $species_icon . '</span>';
+        echo esc_html( $pet_name );
+        echo '</h3>';
+        echo '</div>';
+
+        // Content
+        echo '<div class="dps-gallery-pet-card__content">';
+
+        if ( $photo_id ) {
+            $photo_url_medium = wp_get_attachment_image_url( $photo_id, 'medium' );
+            $photo_url_full   = wp_get_attachment_image_url( $photo_id, 'full' );
+
+            if ( $photo_url_medium && $photo_url_full ) {
+                echo '<div class="dps-gallery-photo-grid">';
+                echo '<div class="dps-gallery-photo dps-gallery-photo--profile">';
+                echo '<a href="' . esc_url( $photo_url_full ) . '" class="dps-gallery-photo__link" title="' . esc_attr( $pet_name ) . '">';
+                echo '<img src="' . esc_url( $photo_url_medium ) . '" alt="' . esc_attr( sprintf( __( 'Foto de %s', 'dps-client-portal' ), $pet_name ) ) . '" class="dps-gallery-photo__img" loading="lazy" />';
+                echo '<div class="dps-gallery-photo__overlay"><span class="dps-gallery-photo__zoom">🔍</span></div>';
+                echo '</a>';
+                echo '<div class="dps-gallery-photo__info">';
+                echo '<span class="dps-gallery-photo__label">' . esc_html__( 'Foto de perfil', 'dps-client-portal' ) . '</span>';
+                echo '<div class="dps-gallery-photo__actions">';
+                echo '<a href="' . esc_url( $photo_url_full ) . '" class="dps-gallery-photo__action dps-gallery-photo__action--download" download title="' . esc_attr__( 'Baixar foto', 'dps-client-portal' ) . '">';
+                echo '<span class="dps-gallery-photo__action-icon">⬇️</span>';
+                echo '</a>';
+                echo '</div>';
+                echo '</div>'; // .dps-gallery-photo__info
+                echo '</div>'; // .dps-gallery-photo
+                echo '</div>'; // .dps-gallery-photo-grid
+            } else {
+                $this->render_gallery_pet_empty( $pet_name );
+            }
+        } else {
+            $this->render_gallery_pet_empty( $pet_name );
+        }
+
+        echo '</div>'; // .dps-gallery-pet-card__content
+        echo '</div>'; // .dps-gallery-pet-card
+    }
+
+    /**
+     * Renderiza estado vazio para pet sem fotos.
+     *
+     * @since 2.5.0
+     * @param string $pet_name Nome do pet.
+     */
+    private function render_gallery_pet_empty( $pet_name ) {
+        echo '<div class="dps-gallery-pet-card__empty">';
+        echo '<div class="dps-gallery-pet-card__empty-icon">📷</div>';
+        echo '<p class="dps-gallery-pet-card__empty-text">';
+        /* translators: %s: pet name */
+        echo esc_html( sprintf( __( '%s ainda não tem fotos cadastradas.', 'dps-client-portal' ), $pet_name ) );
+        echo '</p>';
+        echo '<p class="dps-gallery-pet-card__empty-hint">' . esc_html__( 'As fotos são adicionadas durante os atendimentos.', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza estado vazio geral da galeria (sem pets).
+     *
+     * @since 2.5.0
+     */
+    private function render_gallery_empty_state() {
+        echo '<div class="dps-gallery-empty-state">';
+        echo '<div class="dps-gallery-empty-state__icon">📸</div>';
+        echo '<h3 class="dps-gallery-empty-state__title">' . esc_html__( 'Nenhum pet cadastrado', 'dps-client-portal' ) . '</h3>';
+        echo '<p class="dps-gallery-empty-state__message">' . esc_html__( 'Cadastre seus pets para visualizar a galeria de fotos.', 'dps-client-portal' ) . '</p>';
+        echo '<p class="dps-gallery-empty-state__hint">' . esc_html__( 'Entre em contato com a equipe para cadastrar seu pet.', 'dps-client-portal' ) . '</p>';
+
+        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+            $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( __( 'Olá! Gostaria de cadastrar meu pet.', 'dps-client-portal' ) );
+        } else {
+            $whatsapp_number = get_option( 'dps_whatsapp_number', '5515991606299' );
+            if ( class_exists( 'DPS_Phone_Helper' ) ) {
+                $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+            }
+            $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . urlencode( 'Olá! Gostaria de cadastrar meu pet.' );
+        }
+
+        echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" class="dps-gallery-empty-state__action">';
+        echo '💬 ' . esc_html__( 'Falar com a Equipe', 'dps-client-portal' );
+        echo '</a>';
         echo '</div>';
     }
 
@@ -1428,17 +1583,17 @@ class DPS_Portal_Renderer {
      */
     public function render_pet_tabs_navigation( $pets ) {
         echo '<div class="dps-pet-tabs-nav">';
-        echo '<div class="dps-pet-tabs-nav__label">' . esc_html__( 'Selecione o pet:', 'dps-client-portal' ) . '</div>';
-        echo '<div class="dps-pet-tabs-nav__tabs" role="tablist">';
+        echo '<div class="dps-pet-tabs-nav__label" id="dps-pet-tabs-label">' . esc_html__( 'Selecione o pet:', 'dps-client-portal' ) . '</div>';
+        echo '<div class="dps-pet-tabs-nav__tabs" role="tablist" aria-labelledby="dps-pet-tabs-label">';
 
         foreach ( $pets as $index => $pet ) {
             $pet_id    = $pet->ID;
             $pet_name  = get_the_title( $pet_id );
             $photo_id  = get_post_meta( $pet_id, 'pet_photo_id', true );
             $photo_url = $photo_id ? wp_get_attachment_image_url( $photo_id, 'thumbnail' ) : '';
-            $is_active = ( 0 === $index ) ? ' dps-pet-tab--active' : '';
+            $is_active = ( 0 === $index );
 
-            echo '<button type="button" class="dps-pet-tab' . esc_attr( $is_active ) . '" role="tab" aria-selected="' . ( 0 === $index ? 'true' : 'false' ) . '" data-pet-id="' . esc_attr( $pet_id ) . '">';
+            echo '<button type="button" class="dps-pet-tab' . ( $is_active ? ' dps-pet-tab--active' : '' ) . '" id="dps-pet-tab-' . esc_attr( $pet_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="dps-pet-panel-' . esc_attr( $pet_id ) . '" tabindex="' . ( $is_active ? '0' : '-1' ) . '" data-pet-id="' . esc_attr( $pet_id ) . '">';
             
             if ( $photo_url ) {
                 echo '<img src="' . esc_url( $photo_url ) . '" alt="" class="dps-pet-tab__photo" />';
@@ -1480,7 +1635,7 @@ class DPS_Portal_Renderer {
             $panel_class .= ' dps-pet-timeline-panel--hidden';
         }
 
-        echo '<section class="' . esc_attr( $panel_class ) . '" data-pet-id="' . esc_attr( $pet_id ) . '" role="' . ( $has_tabs ? 'tabpanel' : 'region' ) . '" aria-hidden="' . ( $is_active ? 'false' : 'true' ) . '">';
+        echo '<section id="dps-pet-panel-' . esc_attr( $pet_id ) . '" class="' . esc_attr( $panel_class ) . '" data-pet-id="' . esc_attr( $pet_id ) . '" role="' . ( $has_tabs ? 'tabpanel' : 'region' ) . '" aria-hidden="' . ( $is_active ? 'false' : 'true' ) . '"' . ( $has_tabs ? ' aria-labelledby="dps-pet-tab-' . esc_attr( $pet_id ) . '"' : '' ) . '>';
         
         // Card de info do pet
         echo '<div class="dps-pet-info-card">';
@@ -1791,6 +1946,18 @@ class DPS_Portal_Renderer {
     }
 
     /**
+     * Renderiza um item individual da timeline (acesso público para AJAX).
+     *
+     * @since 3.1.0
+     * @param array $service   Dados do serviço.
+     * @param int   $client_id ID do cliente.
+     * @param int   $pet_id    ID do pet.
+     */
+    public function render_single_timeline_item( $service, $client_id, $pet_id ) {
+        $this->render_timeline_item( $service, $client_id, $pet_id );
+    }
+
+    /**
      * Renderiza um item individual da timeline.
      * Revisão de layout: Janeiro 2026
      *
@@ -1803,13 +1970,23 @@ class DPS_Portal_Renderer {
         $time_info      = ! empty( $service['time'] ) ? $service['time'] : '';
         $status         = ! empty( $service['status'] ) ? $service['status'] : 'finalizado';
         
-        // Determina badge de status
+        // Determina badge de status baseado no status do agendamento
+        $status_lower = strtolower( $status );
         $status_class = 'dps-status-badge--completed';
         $status_label = __( 'Concluído', 'dps-client-portal' );
-        // PHP 8.0+: usa str_contains para verificação mais legível
-        if ( str_contains( strtolower( $status ), 'pago' ) ) {
+
+        if ( str_contains( $status_lower, 'pago' ) ) {
             $status_class = 'dps-status-badge--paid';
             $status_label = __( 'Pago', 'dps-client-portal' );
+        } elseif ( str_contains( $status_lower, 'cancelado' ) || str_contains( $status_lower, 'cancelad' ) ) {
+            $status_class = 'dps-status-badge--cancelled';
+            $status_label = __( 'Cancelado', 'dps-client-portal' );
+        } elseif ( str_contains( $status_lower, 'pendente' ) || str_contains( $status_lower, 'pending' ) ) {
+            $status_class = 'dps-status-badge--pending';
+            $status_label = __( 'Pendente', 'dps-client-portal' );
+        } elseif ( str_contains( $status_lower, 'andamento' ) || str_contains( $status_lower, 'progress' ) ) {
+            $status_class = 'dps-status-badge--in-progress';
+            $status_label = __( 'Em Andamento', 'dps-client-portal' );
         }
 
         // Busca valor do agendamento se disponível (valida ID antes de consultar)

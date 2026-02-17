@@ -84,6 +84,9 @@ class DPS_Portal_AJAX_Handler {
         // AJAX handler para export PDF do histórico do pet
         add_action( 'wp_ajax_dps_export_pet_history_pdf', [ $this, 'ajax_export_pet_history_pdf' ] );
         add_action( 'wp_ajax_nopriv_dps_export_pet_history_pdf', [ $this, 'ajax_export_pet_history_pdf' ] );
+
+        add_action( 'wp_ajax_dps_load_more_pet_history', [ $this, 'ajax_load_more_pet_history' ] );
+        add_action( 'wp_ajax_nopriv_dps_load_more_pet_history', [ $this, 'ajax_load_more_pet_history' ] );
     }
 
     /**
@@ -829,6 +832,59 @@ class DPS_Portal_AJAX_Handler {
 </body>
 </html>
 HTML;
+    }
+
+    /**
+     * AJAX handler para carregar mais itens do histórico de serviços do pet.
+     *
+     * @since 3.1.0
+     */
+    public function ajax_load_more_pet_history() {
+        if ( ! DPS_Request_Validator::verify_ajax_nonce( 'dps_portal_pet_history' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Sessão expirada. Recarregue a página.', 'dps-client-portal' ) ] );
+        }
+
+        // Obtém client_id da sessão (não do POST, por segurança)
+        $session_manager = DPS_Portal_Session_Manager::get_instance();
+        $client_id       = $session_manager->get_authenticated_client_id();
+
+        if ( ! $client_id ) {
+            wp_send_json_error( [ 'message' => __( 'Cliente não autenticado.', 'dps-client-portal' ) ], 403 );
+        }
+
+        $pet_id = isset( $_POST['pet_id'] ) ? absint( $_POST['pet_id'] ) : 0;
+        $offset = isset( $_POST['offset'] ) ? absint( $_POST['offset'] ) : 0;
+        $limit  = 10;
+
+        if ( 0 === $pet_id ) {
+            wp_send_json_error( [ 'message' => __( 'Parâmetros inválidos.', 'dps-client-portal' ) ] );
+        }
+
+        // Verifica ownership do pet
+        $pet_owner_id = get_post_meta( $pet_id, 'owner_id', true );
+        if ( absint( $pet_owner_id ) !== $client_id ) {
+            wp_send_json_error( [ 'message' => __( 'Acesso não autorizado.', 'dps-client-portal' ) ] );
+        }
+
+        $pet_history = DPS_Portal_Pet_History::get_instance();
+        // Busca todos os serviços e faz slice para paginação
+        $all_services = $pet_history->get_pet_service_history( $pet_id, -1 );
+        $services     = array_slice( $all_services, $offset, $limit );
+        $has_more     = ( $offset + $limit ) < count( $all_services );
+
+        // Captura HTML renderizado
+        ob_start();
+        $renderer = DPS_Portal_Renderer::get_instance();
+        foreach ( $services as $service ) {
+            $renderer->render_single_timeline_item( $service, $client_id, $pet_id );
+        }
+        $html = ob_get_clean();
+
+        wp_send_json_success( [
+            'html'      => $html,
+            'hasMore'   => $has_more,
+            'newOffset' => $offset + count( $services ),
+        ] );
     }
 
     /**
