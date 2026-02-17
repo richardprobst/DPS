@@ -81,6 +81,40 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Changed (Alterado)
+
+**AI Add-on — Assistente Virtual no Portal do Cliente**
+
+- **Acessibilidade**: adicionado `role="region"` e `aria-label` ao container principal, `tabindex="0"` ao header, `aria-live="polite"` na área de mensagens, `aria-label` nos botões de sugestão, `focus-visible` em todos os elementos interativos (header, FAB, sugestões, enviar, feedback).
+- **Teclado**: tecla Escape recolhe o widget inline ou fecha o flutuante, retornando foco ao elemento adequado.
+- **Resiliência**: timeout de 15s no AJAX com mensagem de erro específica; prevenção de envio duplo com flag `isSubmitting`.
+- **Chevron**: ícone de seta agora aponta para baixo quando colapsado (indicando "expandir") e para cima quando expandido.
+
+**Client Portal — UX/UI do Shell e Navegação por Tabs**
+
+- **Navegação por tabs**: estado ativo mais forte (font-weight 600), scroll horizontal com snap em mobile, gradientes de overflow indicando direção de rolagem.
+- **Breadcrumb dinâmico**: atualiza automaticamente o item ativo ao trocar de aba, mantendo contexto de navegação.
+- **Scroll automático**: aba ativa é rolada para a área visível em dispositivos móveis.
+- **Acessibilidade**: separador do breadcrumb com `aria-hidden`, suporte a `prefers-reduced-motion` na animação de troca de painel, transições CSS específicas (sem `transition: all`).
+- **Espaçamento**: hierarquia visual refinada com título e breadcrumb mais compactos.
+
+**Client Portal — Aba Início (revisão completa)**
+
+- **Acessibilidade**: `focus-visible` adicionado a todos os elementos interativos da aba Início (overview cards, quick actions, botões de ação pet, link buttons, collapsible header, botões de agendamento, botões de pagamento, botões de sugestão).
+- **Card de fidelidade**: corrigido clique no card de pontos (overview) — agora navega para a aba Fidelidade conforme esperado; suporte a Enter/Space para elementos com `role="button"`.
+- **Transições CSS**: substituído `transition: all` por propriedades específicas nos componentes pet card, quick action e pet action button.
+
+**Client Portal — Aba Fidelidade (revisão completa)**
+
+- **Acessibilidade**: barra de progresso com `role="progressbar"`, `aria-valuenow`, `aria-valuemin`, `aria-valuemax` e `aria-label`; `focus-visible` em todos os elementos interativos (botão copiar, link ver histórico, carregar mais, botão resgatar, input de referral); campo numérico agora mantém outline no foco (era removido com `outline: none`).
+- **Resiliência**: erro no carregamento de histórico agora exibe toast; botão de resgate preserva texto original após submit (era hardcoded); valor do input de resgate é clamped ao novo max após resgate bem-sucedido.
+- **Clipboard**: fallback via `document.execCommand('copy')` para contextos sem HTTPS.
+- **Transições CSS**: substituído `transition: all` por propriedades específicas no botão de resgate.
+
+#### Fixed (Corrigido)
+
+- **Segurança**: corrigida verificação de propriedade do pet na impressão de histórico — usava meta key incorreta `pet_client_id` ao invés de `owner_id`, impedindo acesso legítimo à funcionalidade.
+
 #### Added (Adicionado)
 
 **Agenda Add-on v1.2.0 — Checklist Operacional e Check-in/Check-out**

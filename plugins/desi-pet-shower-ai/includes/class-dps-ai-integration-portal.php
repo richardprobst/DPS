@@ -113,7 +113,7 @@ class DPS_AI_Integration_Portal {
         }
 
         ?>
-        <section id="dps-ai-assistant" class="<?php echo esc_attr( $widget_classes ); ?>" data-client-id="<?php echo esc_attr( $client_id ); ?>" data-feedback="<?php echo esc_attr( $enable_feedback ? 'true' : 'false' ); ?>">
+        <section id="dps-ai-assistant" class="<?php echo esc_attr( $widget_classes ); ?>" role="region" aria-label="<?php esc_attr_e( 'Assistente virtual', 'dps-ai' ); ?>" data-client-id="<?php echo esc_attr( $client_id ); ?>" data-feedback="<?php echo esc_attr( $enable_feedback ? 'true' : 'false' ); ?>">
             <?php if ( 'floating' === $widget_mode ) : ?>
                 <!-- Botão flutuante -->
                 <button id="dps-ai-fab" class="dps-ai-assistant__fab" aria-label="<?php esc_attr_e( 'Abrir assistente', 'dps-ai' ); ?>">
@@ -128,7 +128,7 @@ class DPS_AI_Integration_Portal {
 
             <div class="dps-ai-assistant__container <?php echo esc_attr( 'floating' === $widget_mode ? 'dps-ai-assistant__container--floating' : '' ); ?>">
                 <!-- Header com gradiente moderno -->
-                <header class="dps-ai-assistant__header" id="dps-ai-header">
+                <header class="dps-ai-assistant__header" id="dps-ai-header" tabindex="0">
                     <div class="dps-ai-assistant__header-content">
                         <div class="dps-ai-assistant__avatar">
                             <?php if ( $assistant_logo ) : ?>
@@ -179,7 +179,7 @@ class DPS_AI_Integration_Portal {
                             </p>
                             <div class="dps-ai-assistant__suggestions-grid">
                                 <?php foreach ( $faq_suggestions as $faq ) : ?>
-                                    <button type="button" class="dps-ai-assistant__suggestion-btn" data-question="<?php echo esc_attr( $faq ); ?>">
+                                    <button type="button" class="dps-ai-assistant__suggestion-btn" data-question="<?php echo esc_attr( $faq ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Perguntar: %s', 'dps-ai' ), $faq ) ); ?>">
                                         <span class="dps-ai-assistant__suggestion-text"><?php echo esc_html( $faq ); ?></span>
                                         <svg class="dps-ai-assistant__suggestion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                             <polyline points="9 18 15 12 9 6"></polyline>
@@ -191,7 +191,7 @@ class DPS_AI_Integration_Portal {
                     <?php endif; ?>
 
                     <!-- Área de conversa -->
-                    <div id="dps-ai-messages" class="dps-ai-assistant__messages">
+                    <div id="dps-ai-messages" class="dps-ai-assistant__messages" aria-live="polite" aria-relevant="additions">
                         <!-- Mensagens da conversa aparecerão aqui -->
                     </div>
 
@@ -451,6 +451,7 @@ class DPS_AI_Integration_Portal {
             'widgetMode'     => $settings['widget_mode'] ?? 'inline',
             'i18n'           => [
                 'errorGeneric'        => __( 'Ocorreu um erro ao processar sua pergunta. Tente novamente.', 'dps-ai' ),
+                'errorTimeout'        => __( 'A resposta está demorando mais que o esperado. Tente novamente em alguns instantes.', 'dps-ai' ),
                 'you'                 => __( 'Você', 'dps-ai' ),
                 'assistant'           => __( 'Assistente', 'dps-ai' ),
                 'pleaseEnterQuestion' => __( 'Por favor, digite uma pergunta.', 'dps-ai' ),

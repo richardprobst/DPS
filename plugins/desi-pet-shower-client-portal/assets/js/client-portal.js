@@ -68,7 +68,7 @@
         });
 
         // Botões de ação rápida que navegam para tabs
-        var tabButtons = document.querySelectorAll('.dps-quick-action[data-tab], .dps-link-button[data-tab], .dps-pet-card__action-btn[data-tab]');
+        var tabButtons = document.querySelectorAll('.dps-quick-action[data-tab], .dps-link-button[data-tab], .dps-pet-card__action-btn[data-tab], .dps-overview-card[data-tab]');
         // Lista de tabs válidas para prevenir DOM-based XSS
         var validTabs = ['inicio', 'fidelidade', 'avaliacoes', 'mensagens', 'agendamentos', 'historico-pets', 'galeria', 'dados'];
         
@@ -93,6 +93,16 @@
                     }
                 }
             });
+
+            // Keyboard support for role="button" elements (Enter/Space)
+            if (btn.getAttribute('role') === 'button') {
+                btn.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.click();
+                    }
+                });
+            }
         });
     }
 
@@ -154,14 +164,48 @@
      */
     function handleTabNavigation() {
         var LOADING_INDICATOR_DURATION = 220;
+        var SCROLL_THRESHOLD = 4;
         var tabs = Array.prototype.slice.call(document.querySelectorAll('.dps-portal-tabs__link'));
         var panels = document.querySelectorAll('.dps-portal-tab-panel');
         var tabNav = document.querySelector('.dps-portal-tabs');
+        var tabWrapper = document.querySelector('.dps-portal-tabs-wrapper');
         var tabContent = document.querySelector('.dps-portal-tab-content');
+        var breadcrumbActive = document.querySelector('[data-breadcrumb-active]');
         var loadingEl = tabNav ? tabNav.querySelector('.dps-portal-tabs__loading') : null;
         var loadingTimer = null;
         
         if (!tabs.length || !panels.length) return;
+
+        function updateScrollHints() {
+            if (!tabNav || !tabWrapper) return;
+            var scrollLeft = tabNav.scrollLeft;
+            var maxScroll = tabNav.scrollWidth - tabNav.clientWidth;
+            tabWrapper.classList.toggle('has-scroll-left', scrollLeft > SCROLL_THRESHOLD);
+            tabWrapper.classList.toggle('has-scroll-right', maxScroll > SCROLL_THRESHOLD && scrollLeft < maxScroll - SCROLL_THRESHOLD);
+        }
+
+        if (tabNav) {
+            tabNav.addEventListener('scroll', updateScrollHints, { passive: true });
+            window.addEventListener('resize', updateScrollHints, { passive: true });
+            updateScrollHints();
+        }
+
+        function scrollTabIntoView(tabElement) {
+            if (!tabNav || !tabElement) return;
+            var navRect = tabNav.getBoundingClientRect();
+            var tabRect = tabElement.getBoundingClientRect();
+            if (tabRect.left < navRect.left || tabRect.right > navRect.right) {
+                tabElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+            }
+        }
+
+        function updateBreadcrumb(tabElement) {
+            if (!breadcrumbActive || !tabElement) return;
+            var labelEl = tabElement.querySelector('.dps-portal-tabs__text');
+            if (labelEl) {
+                breadcrumbActive.textContent = labelEl.textContent;
+            }
+        }
 
         function setLoading(isLoading) {
             if (!tabNav || !tabContent) return;
@@ -180,6 +224,7 @@
             }
 
             if (targetTab.classList.contains('is-active')) {
+                updateBreadcrumb(targetTab);
                 return true;
             }
 
@@ -211,6 +256,9 @@
                 }
             }
 
+            updateBreadcrumb(targetTab);
+            scrollTabIntoView(targetTab);
+
             if (!opts.skipHash && history.pushState) {
                 history.pushState(null, null, '#tab-' + tabId);
             }
@@ -221,9 +269,11 @@
             if (!opts.silent) {
                 loadingTimer = setTimeout(function() {
                     setLoading(false);
+                    updateScrollHints();
                 }, LOADING_INDICATOR_DURATION);
             } else {
                 setLoading(false);
+                updateScrollHints();
             }
 
             return true;
@@ -642,14 +692,28 @@
         var ajaxUrl = window.dpsPortal.ajaxUrl;
 
         function copyToClipboard(text) {
-            if (!navigator.clipboard) {
-                return false;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(function() {
+                    if (window.DPSToast) {
+                        window.DPSToast.success('Link copiado!', 2500);
+                    }
+                }).catch(function() {});
+                return true;
             }
-            navigator.clipboard.writeText(text).then(function() {
+            // Fallback for non-HTTPS contexts
+            var textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
                 if (window.DPSToast) {
                     window.DPSToast.success('Link copiado!', 2500);
                 }
-            }).catch(function() {});
+            } catch (e) {}
+            document.body.removeChild(textarea);
             return true;
         }
 
@@ -724,6 +788,9 @@
             }).catch(function() {
                 button.disabled = false;
                 button.textContent = 'Carregar mais';
+                if (window.DPSToast) {
+                    window.DPSToast.error(loyaltyConfig.i18n.redeemError || 'Erro ao carregar. Tente novamente.', 3000);
+                }
             });
         }
 
@@ -738,6 +805,7 @@
             var input = redemptionForm.querySelector('#dps-loyalty-points-input');
             var feedback = redemptionForm.querySelector('.dps-loyalty-redemption__feedback');
             var submitBtn = redemptionForm.querySelector('.dps-loyalty-redeem-btn');
+            var originalBtnText = submitBtn ? submitBtn.textContent : '';
 
             redemptionForm.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -764,13 +832,15 @@
                         feedback.textContent = res.data.message || loyaltyConfig.i18n.redeemSuccess;
                         feedback.classList.remove('is-error');
                         feedback.classList.add('is-success');
-                        input.value = res.data.points;
 
                         var maxAttr = parseInt(redemptionForm.getAttribute('data-max-cents'), 10) || 0;
                         var rate = parseInt(redemptionForm.getAttribute('data-rate'), 10) || 1;
                         var maxByCap = maxAttr > 0 ? Math.floor((maxAttr / 100) * rate) : res.data.points;
                         var newMax = Math.min(res.data.points, maxByCap);
                         input.setAttribute('max', newMax);
+                        // Clamp input value to new max (prevent HTML5 validation errors)
+                        var minPoints = parseInt(redemptionForm.getAttribute('data-min-points'), 10) || 1;
+                        input.value = Math.min(Math.max(minPoints, newMax), newMax);
 
                         if (window.DPSToast) {
                             window.DPSToast.success(res.data.message || loyaltyConfig.i18n.redeemSuccess, 5000);
@@ -792,7 +862,7 @@
                     }
                 }).finally(function() {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Resgatar pontos';
+                    submitBtn.textContent = originalBtnText;
                 });
             });
         }

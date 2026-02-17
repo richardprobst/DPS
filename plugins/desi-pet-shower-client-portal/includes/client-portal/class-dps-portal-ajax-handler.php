@@ -841,8 +841,8 @@ HTML;
         }
 
         // Verifica se o pet pertence ao cliente (segurança)
-        $pet_client_id = get_post_meta( $pet_id, 'pet_client_id', true );
-        if ( absint( $pet_client_id ) !== $client_id ) {
+        $pet_owner_id = get_post_meta( $pet_id, 'owner_id', true );
+        if ( absint( $pet_owner_id ) !== $client_id ) {
             wp_die( esc_html__( 'Acesso não autorizado.', 'dps-client-portal' ), 403 );
         }
 

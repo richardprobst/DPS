@@ -36,6 +36,8 @@
         const clientId = widgetElement.data('client-id') || 0;
         const enableFeedback = dpsAI.enableFeedback || false;
         const isFloating = dpsAI.widgetMode === 'floating';
+        let isSubmitting = false;
+        const AJAX_TIMEOUT = 15000;
 
         // Chave para armazenar mensagens no sessionStorage
         const STORAGE_KEY = 'dps_ai_messages';
@@ -121,6 +123,22 @@
             });
         }
 
+        // Escape key: collapse inline widget or close floating widget
+        $(document).on('keydown', function(e) {
+            if (e.key !== 'Escape') return;
+            if (isFloating) {
+                if (widgetElement.hasClass('is-open')) {
+                    widgetElement.removeClass('is-open');
+                    $fab.focus();
+                }
+            } else {
+                if (!widgetElement.hasClass('is-collapsed')) {
+                    toggleWidget();
+                    $header.focus();
+                }
+            }
+        });
+
         function toggleWidget() {
             const isCollapsed = widgetElement.hasClass('is-collapsed');
             
@@ -172,6 +190,8 @@
          * Envia a pergunta para o servidor via AJAX.
          */
         function submitQuestion() {
+            if (isSubmitting) return;
+
             const question = $question.val().trim();
 
             // Valida se há pergunta
@@ -179,6 +199,8 @@
                 addMessage('error', dpsAI.i18n.pleaseEnterQuestion, 'Sistema');
                 return;
             }
+
+            isSubmitting = true;
 
             // Desabilita inputs durante o processamento
             $question.prop('disabled', true);
@@ -200,6 +222,7 @@
                 url: dpsAI.ajaxUrl,
                 type: 'POST',
                 dataType: 'json',
+                timeout: AJAX_TIMEOUT,
                 data: {
                     action: 'dps_ai_portal_ask',
                     nonce: dpsAI.nonce,
@@ -216,10 +239,15 @@
                         addMessage('error', errorMsg, 'Sistema');
                     }
                 },
-                error: function() {
-                    addMessage('error', dpsAI.i18n.errorGeneric, 'Sistema');
+                error: function(jqXHR, textStatus) {
+                    let errorMsg = dpsAI.i18n.errorGeneric;
+                    if (textStatus === 'timeout') {
+                        errorMsg = dpsAI.i18n.errorTimeout || dpsAI.i18n.errorGeneric;
+                    }
+                    addMessage('error', errorMsg, 'Sistema');
                 },
                 complete: function() {
+                    isSubmitting = false;
                     $question.prop('disabled', false);
                     $submit.prop('disabled', false);
                     $loading.slideUp(200);
