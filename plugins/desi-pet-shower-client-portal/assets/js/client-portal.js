@@ -47,6 +47,7 @@
         handlePetHistoryTabs(); // Revisão Jan/2026: Navegação por pet na aba Histórico
         handleRepeatService(); // Revisão Jan/2026: Botão repetir serviço via WhatsApp
         handleExportPdf(); // Funcionalidade 3: Export PDF
+        handleLoadMorePetHistory(); // Load more pet history items
     }
 
     /**
@@ -1908,43 +1909,95 @@ window.DPSSkeleton = (function() {
             return;
         }
 
-        petTabs.forEach(function(tab) {
-            tab.addEventListener('click', function() {
-                var targetPetId = this.getAttribute('data-pet-id');
+        /**
+         * Ativa uma tab de pet específica pelo índice.
+         * @param {number} index Índice da tab a ativar.
+         */
+        function activateTab(index) {
+            if (index < 0 || index >= petTabs.length) {
+                return;
+            }
 
-                // Valida que targetPetId é um número (IDs de post são numéricos)
-                if (!targetPetId || !/^\d+$/.test(targetPetId)) {
+            var targetPetId = petTabs[index].getAttribute('data-pet-id');
+            if (!targetPetId || !/^\d+$/.test(targetPetId)) {
+                return;
+            }
+
+            // Remove classe ativa e tabindex de todas as tabs
+            petTabs.forEach(function(t) {
+                t.classList.remove('dps-pet-tab--active');
+                t.setAttribute('aria-selected', 'false');
+                t.setAttribute('tabindex', '-1');
+            });
+
+            // Adiciona classe ativa à tab selecionada
+            petTabs[index].classList.add('dps-pet-tab--active');
+            petTabs[index].setAttribute('aria-selected', 'true');
+            petTabs[index].setAttribute('tabindex', '0');
+            petTabs[index].focus();
+
+            // Esconde todos os painéis
+            petPanels.forEach(function(panel) {
+                panel.classList.add('dps-pet-timeline-panel--hidden');
+                panel.setAttribute('aria-hidden', 'true');
+            });
+
+            // Mostra o painel correspondente (usa CSS.escape para prevenir XSS)
+            var escapedPetId = CSS.escape(targetPetId);
+            var targetPanel = document.querySelector('.dps-pet-timeline-panel[data-pet-id="' + escapedPetId + '"]');
+            if (targetPanel) {
+                targetPanel.classList.remove('dps-pet-timeline-panel--hidden');
+                targetPanel.setAttribute('aria-hidden', 'false');
+
+                // Scroll suave para o painel
+                targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // Click handler
+        petTabs.forEach(function(tab, idx) {
+            tab.addEventListener('click', function() {
+                activateTab(idx);
+            });
+        });
+
+        // Keyboard navigation (arrow keys, Home, End)
+        var tablist = document.querySelector('.dps-pet-tabs-nav__tabs[role="tablist"]');
+        if (tablist) {
+            tablist.addEventListener('keydown', function(e) {
+                var currentIndex = Array.prototype.indexOf.call(petTabs, document.activeElement);
+                if (currentIndex < 0) {
                     return;
                 }
 
-                // Remove classe ativa de todas as tabs
-                petTabs.forEach(function(t) {
-                    t.classList.remove('dps-pet-tab--active');
-                    t.setAttribute('aria-selected', 'false');
-                });
+                var newIndex = currentIndex;
 
-                // Adiciona classe ativa à tab clicada
-                this.classList.add('dps-pet-tab--active');
-                this.setAttribute('aria-selected', 'true');
-
-                // Esconde todos os painéis
-                petPanels.forEach(function(panel) {
-                    panel.classList.add('dps-pet-timeline-panel--hidden');
-                    panel.setAttribute('aria-hidden', 'true');
-                });
-
-                // Mostra o painel correspondente (usa CSS.escape para prevenir XSS)
-                var escapedPetId = CSS.escape(targetPetId);
-                var targetPanel = document.querySelector('.dps-pet-timeline-panel[data-pet-id="' + escapedPetId + '"]');
-                if (targetPanel) {
-                    targetPanel.classList.remove('dps-pet-timeline-panel--hidden');
-                    targetPanel.setAttribute('aria-hidden', 'false');
-
-                    // Scroll suave para o painel
-                    targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                switch (e.key) {
+                    case 'ArrowRight':
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        newIndex = (currentIndex + 1) % petTabs.length;
+                        break;
+                    case 'ArrowLeft':
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        newIndex = (currentIndex - 1 + petTabs.length) % petTabs.length;
+                        break;
+                    case 'Home':
+                        e.preventDefault();
+                        newIndex = 0;
+                        break;
+                    case 'End':
+                        e.preventDefault();
+                        newIndex = petTabs.length - 1;
+                        break;
+                    default:
+                        return;
                 }
+
+                activateTab(newIndex);
             });
-        });
+        }
     }
 
     /**
@@ -2038,6 +2091,94 @@ window.DPSSkeleton = (function() {
 
                 // Abre em nova janela (mantendo controles do browser para acessibilidade)
                 window.open(printUrl, '_blank', 'width=900,height=700');
+            });
+        });
+    }
+
+    /**
+     * Gerencia botão "Ver mais serviços" na timeline de pets
+     * Carrega mais itens via AJAX e os insere na timeline
+     */
+    function handleLoadMorePetHistory() {
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.dps-btn-load-more-services');
+            if (!btn) {
+                return;
+            }
+
+            // Previne cliques duplos
+            if (btn.disabled) {
+                return;
+            }
+
+            var petId = btn.getAttribute('data-pet-id');
+            var offset = parseInt(btn.getAttribute('data-offset'), 10);
+
+            if (!petId || !/^\d+$/.test(petId) || isNaN(offset)) {
+                return;
+            }
+
+            if (typeof dpsPortal === 'undefined' || !dpsPortal.clientId || !dpsPortal.petHistoryNonce) {
+                return;
+            }
+
+            // Estado de carregamento
+            btn.disabled = true;
+            var originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ ' + (dpsPortal.i18n && dpsPortal.i18n.loading ? dpsPortal.i18n.loading : 'Carregando...');
+
+            var formData = new FormData();
+            formData.append('action', 'dps_load_more_pet_history');
+            formData.append('nonce', dpsPortal.petHistoryNonce);
+            formData.append('pet_id', petId);
+            formData.append('client_id', dpsPortal.clientId);
+            formData.append('offset', offset);
+
+            fetch(dpsPortal.ajaxUrl, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success && data.data.html) {
+                    // Insere os novos itens antes do botão "Ver mais"
+                    var timeline = btn.closest('.dps-portal-pet-timeline').querySelector('.dps-timeline');
+                    if (timeline) {
+                        var temp = document.createElement('div');
+                        temp.innerHTML = data.data.html;
+                        while (temp.firstChild) {
+                            timeline.appendChild(temp.firstChild);
+                        }
+                    }
+
+                    if (data.data.hasMore) {
+                        btn.setAttribute('data-offset', data.data.newOffset);
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                    } else {
+                        // Sem mais itens - remove o botão
+                        var loadMoreContainer = btn.closest('.dps-timeline-load-more');
+                        if (loadMoreContainer) {
+                            loadMoreContainer.remove();
+                        }
+                    }
+                } else {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    if (typeof DPSToast !== 'undefined') {
+                        DPSToast.show(data.data && data.data.message ? data.data.message : 'Erro ao carregar mais serviços.', 'error');
+                    }
+                }
+            })
+            .catch(function() {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                if (typeof DPSToast !== 'undefined') {
+                    DPSToast.show('Erro de conexão. Tente novamente.', 'error');
+                }
             });
         });
     }

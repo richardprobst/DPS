@@ -1428,17 +1428,17 @@ class DPS_Portal_Renderer {
      */
     public function render_pet_tabs_navigation( $pets ) {
         echo '<div class="dps-pet-tabs-nav">';
-        echo '<div class="dps-pet-tabs-nav__label">' . esc_html__( 'Selecione o pet:', 'dps-client-portal' ) . '</div>';
-        echo '<div class="dps-pet-tabs-nav__tabs" role="tablist">';
+        echo '<div class="dps-pet-tabs-nav__label" id="dps-pet-tabs-label">' . esc_html__( 'Selecione o pet:', 'dps-client-portal' ) . '</div>';
+        echo '<div class="dps-pet-tabs-nav__tabs" role="tablist" aria-labelledby="dps-pet-tabs-label">';
 
         foreach ( $pets as $index => $pet ) {
             $pet_id    = $pet->ID;
             $pet_name  = get_the_title( $pet_id );
             $photo_id  = get_post_meta( $pet_id, 'pet_photo_id', true );
             $photo_url = $photo_id ? wp_get_attachment_image_url( $photo_id, 'thumbnail' ) : '';
-            $is_active = ( 0 === $index ) ? ' dps-pet-tab--active' : '';
+            $is_active = ( 0 === $index );
 
-            echo '<button type="button" class="dps-pet-tab' . esc_attr( $is_active ) . '" role="tab" aria-selected="' . ( 0 === $index ? 'true' : 'false' ) . '" data-pet-id="' . esc_attr( $pet_id ) . '">';
+            echo '<button type="button" class="dps-pet-tab' . ( $is_active ? ' dps-pet-tab--active' : '' ) . '" id="dps-pet-tab-' . esc_attr( $pet_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="dps-pet-panel-' . esc_attr( $pet_id ) . '" tabindex="' . ( $is_active ? '0' : '-1' ) . '" data-pet-id="' . esc_attr( $pet_id ) . '">';
             
             if ( $photo_url ) {
                 echo '<img src="' . esc_url( $photo_url ) . '" alt="" class="dps-pet-tab__photo" />';
@@ -1480,7 +1480,7 @@ class DPS_Portal_Renderer {
             $panel_class .= ' dps-pet-timeline-panel--hidden';
         }
 
-        echo '<section class="' . esc_attr( $panel_class ) . '" data-pet-id="' . esc_attr( $pet_id ) . '" role="' . ( $has_tabs ? 'tabpanel' : 'region' ) . '" aria-hidden="' . ( $is_active ? 'false' : 'true' ) . '">';
+        echo '<section id="dps-pet-panel-' . esc_attr( $pet_id ) . '" class="' . esc_attr( $panel_class ) . '" data-pet-id="' . esc_attr( $pet_id ) . '" role="' . ( $has_tabs ? 'tabpanel' : 'region' ) . '" aria-hidden="' . ( $is_active ? 'false' : 'true' ) . '"' . ( $has_tabs ? ' aria-labelledby="dps-pet-tab-' . esc_attr( $pet_id ) . '"' : '' ) . '>';
         
         // Card de info do pet
         echo '<div class="dps-pet-info-card">';
@@ -1791,6 +1791,18 @@ class DPS_Portal_Renderer {
     }
 
     /**
+     * Renderiza um item individual da timeline (acesso público para AJAX).
+     *
+     * @since 3.1.0
+     * @param array $service   Dados do serviço.
+     * @param int   $client_id ID do cliente.
+     * @param int   $pet_id    ID do pet.
+     */
+    public function render_single_timeline_item( $service, $client_id, $pet_id ) {
+        $this->render_timeline_item( $service, $client_id, $pet_id );
+    }
+
+    /**
      * Renderiza um item individual da timeline.
      * Revisão de layout: Janeiro 2026
      *
@@ -1803,13 +1815,23 @@ class DPS_Portal_Renderer {
         $time_info      = ! empty( $service['time'] ) ? $service['time'] : '';
         $status         = ! empty( $service['status'] ) ? $service['status'] : 'finalizado';
         
-        // Determina badge de status
+        // Determina badge de status baseado no status do agendamento
+        $status_lower = strtolower( $status );
         $status_class = 'dps-status-badge--completed';
         $status_label = __( 'Concluído', 'dps-client-portal' );
-        // PHP 8.0+: usa str_contains para verificação mais legível
-        if ( str_contains( strtolower( $status ), 'pago' ) ) {
+
+        if ( str_contains( $status_lower, 'pago' ) ) {
             $status_class = 'dps-status-badge--paid';
             $status_label = __( 'Pago', 'dps-client-portal' );
+        } elseif ( str_contains( $status_lower, 'cancelado' ) || str_contains( $status_lower, 'cancelad' ) ) {
+            $status_class = 'dps-status-badge--cancelled';
+            $status_label = __( 'Cancelado', 'dps-client-portal' );
+        } elseif ( str_contains( $status_lower, 'pendente' ) || str_contains( $status_lower, 'pending' ) ) {
+            $status_class = 'dps-status-badge--pending';
+            $status_label = __( 'Pendente', 'dps-client-portal' );
+        } elseif ( str_contains( $status_lower, 'andamento' ) || str_contains( $status_lower, 'progress' ) ) {
+            $status_class = 'dps-status-badge--in-progress';
+            $status_label = __( 'Em Andamento', 'dps-client-portal' );
         }
 
         // Busca valor do agendamento se disponível (valida ID antes de consultar)

@@ -4737,11 +4737,16 @@ html {
     border: 2px solid transparent;
     border-radius: var(--dps-shape-full);
     cursor: pointer;
-    transition: all var(--dps-motion-hover);
+    transition: background-color var(--dps-motion-hover), border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
 }
 
 .dps-pet-tab:hover {
     background: var(--dps-gray-100);
+}
+
+.dps-pet-tab:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 .dps-pet-tab--active {
