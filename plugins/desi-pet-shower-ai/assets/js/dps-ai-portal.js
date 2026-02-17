@@ -36,8 +36,8 @@
         const clientId = widgetElement.data('client-id') || 0;
         const enableFeedback = dpsAI.enableFeedback || false;
         const isFloating = dpsAI.widgetMode === 'floating';
-        var isSubmitting = false;
-        var AJAX_TIMEOUT = 15000;
+        let isSubmitting = false;
+        const AJAX_TIMEOUT = 15000;
 
         // Chave para armazenar mensagens no sessionStorage
         const STORAGE_KEY = 'dps_ai_messages';
@@ -240,7 +240,7 @@
                     }
                 },
                 error: function(jqXHR, textStatus) {
-                    var errorMsg = dpsAI.i18n.errorGeneric;
+                    let errorMsg = dpsAI.i18n.errorGeneric;
                     if (textStatus === 'timeout') {
                         errorMsg = dpsAI.i18n.errorTimeout || dpsAI.i18n.errorGeneric;
                     }
