@@ -341,6 +341,12 @@
     outline: none;
 }
 
+.dps-capacity-input-group input[type="number"]:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--dps-color-primary-container);
+}
+
 .dps-capacity-input-group .description {
     font-size: var(--dps-typescale-body-small-size);
     color: var(--dps-color-on-surface-variant);
@@ -488,7 +494,7 @@
     }
 
     .dps-heatmap-table {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
     }
 
     .dps-heatmap-table th,
@@ -497,7 +503,7 @@
     }
 
     .dps-heatmap-ratio {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 
     .dps-heatmap-percentage {

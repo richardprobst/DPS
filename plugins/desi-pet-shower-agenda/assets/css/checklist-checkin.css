@@ -120,6 +120,22 @@
     opacity: 0.85;
 }
 
+.dps-checklist-btn:disabled,
+.dps-checklist-btn[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.dps-checklist-btn:focus-visible,
+.dps-checkin-btn:focus-visible,
+.dps-expand-panels-btn:focus-visible,
+.dps-checklist-modal-close:focus-visible,
+.dps-checklist-modal-close-btn:focus-visible {
+    outline: 2px solid var(--md-sys-color-primary, #6750a4);
+    outline-offset: 2px;
+}
+
 .dps-checklist-btn--done {
     background: var(--md-sys-color-primary, #6750a4);
     color: var(--md-sys-color-on-primary, #fff);
@@ -239,6 +255,8 @@
 .dps-checkin-status-badge--pending {
     background: var(--md-sys-color-surface-variant, #e7e0ec);
     color: var(--md-sys-color-on-surface-variant, #49454f);
+    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
+    font-weight: 600;
 }
 
 .dps-checkin-status-badge--in {
