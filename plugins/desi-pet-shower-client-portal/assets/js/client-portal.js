@@ -404,6 +404,13 @@
                 }
             });
         }
+
+        // Tecla Escape para fechar o chat
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && chatConfig.isOpen) {
+                closeChat();
+            }
+        });
         
         // Carrega mensagens ao iniciar
         loadChatMessages();
@@ -421,7 +428,10 @@
         
         if (chatConfig.isOpen) {
             chatWindow.classList.add('is-open');
+            chatWindow.setAttribute('aria-hidden', 'false');
             toggle.classList.add('is-open');
+            toggle.setAttribute('aria-expanded', 'true');
+            toggle.setAttribute('aria-label', window.dpsPortalChat && window.dpsPortalChat.i18n ? window.dpsPortalChat.i18n.closeChat || 'Fechar chat' : 'Fechar chat');
             startPolling();
             scrollToBottom();
             
@@ -429,7 +439,10 @@
             markMessagesAsRead();
         } else {
             chatWindow.classList.remove('is-open');
+            chatWindow.setAttribute('aria-hidden', 'true');
             toggle.classList.remove('is-open');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.setAttribute('aria-label', window.dpsPortalChat && window.dpsPortalChat.i18n ? window.dpsPortalChat.i18n.openChat || 'Abrir chat' : 'Abrir chat');
             stopPolling();
         }
     }
@@ -444,7 +457,10 @@
         
         chatConfig.isOpen = false;
         chatWindow.classList.remove('is-open');
+        chatWindow.setAttribute('aria-hidden', 'true');
         toggle.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', window.dpsPortalChat && window.dpsPortalChat.i18n ? window.dpsPortalChat.i18n.openChat || 'Abrir chat' : 'Abrir chat');
         stopPolling();
     }
 
@@ -457,6 +473,7 @@
         var xhr = new XMLHttpRequest();
         xhr.open('POST', window.dpsPortalChat.ajaxUrl, true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.timeout = 15000;
         
         xhr.onload = function() {
             if (xhr.status === 200) {
@@ -473,6 +490,14 @@
                     console.error('Erro ao carregar mensagens:', e);
                 }
             }
+        };
+
+        xhr.onerror = function() {
+            console.error('Erro de rede ao carregar mensagens');
+        };
+
+        xhr.ontimeout = function() {
+            console.error('Timeout ao carregar mensagens');
         };
         
         var params = 'action=dps_chat_get_messages';
@@ -515,9 +540,13 @@
     /**
      * Envia mensagem via AJAX
      */
+    var isSending = false;
+
     function sendChatMessage(message) {
         if (!chatConfig.clientId || !window.dpsPortalChat) return;
-        
+        if (isSending) return;
+
+        isSending = true;
         var sendBtn = document.querySelector('.dps-chat-input__send');
         if (sendBtn) sendBtn.disabled = true;
         
@@ -527,8 +556,10 @@
         var xhr = new XMLHttpRequest();
         xhr.open('POST', window.dpsPortalChat.ajaxUrl, true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.timeout = 15000;
         
         xhr.onload = function() {
+            isSending = false;
             if (sendBtn) sendBtn.disabled = false;
             
             if (xhr.status === 200) {
@@ -538,11 +569,36 @@
                         // Recarrega mensagens para sincronizar
                         loadChatMessages();
                     } else {
-                        alert('Erro ao enviar mensagem. Tente novamente.');
+                        var errMsg = response.data && response.data.message
+                            ? response.data.message
+                            : 'Erro ao enviar mensagem. Tente novamente.';
+                        if (window.DPSToast) {
+                            window.DPSToast.error(errMsg);
+                        }
                     }
                 } catch (e) {
                     console.error('Erro ao enviar mensagem:', e);
                 }
+            } else {
+                if (window.DPSToast) {
+                    window.DPSToast.error('Erro de conexão. Tente novamente.');
+                }
+            }
+        };
+
+        xhr.onerror = function() {
+            isSending = false;
+            if (sendBtn) sendBtn.disabled = false;
+            if (window.DPSToast) {
+                window.DPSToast.error('Falha na conexão. Verifique sua internet e tente novamente.');
+            }
+        };
+
+        xhr.ontimeout = function() {
+            isSending = false;
+            if (sendBtn) sendBtn.disabled = false;
+            if (window.DPSToast) {
+                window.DPSToast.error('A conexão demorou muito. Tente novamente.');
             }
         };
         
@@ -575,18 +631,31 @@
     }
 
     /**
-     * Atualiza badge de mensagens não lidas
+     * Atualiza badge de mensagens não lidas (chat + tab nav)
      */
     function updateUnreadBadge(count) {
+        // Badge do chat flutuante
         var badge = document.querySelector('.dps-chat-badge');
-        if (!badge) return;
-        
-        if (count > 0) {
-            badge.textContent = count > 99 ? '99+' : count;
-            badge.style.display = 'flex';
-        } else {
-            badge.textContent = '';
-            badge.style.display = 'none';
+        if (badge) {
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.textContent = '';
+                badge.style.display = 'none';
+            }
+        }
+
+        // Badge na aba de navegação do portal
+        var tabBadge = document.querySelector('#dps-portal-tab-mensagens .dps-portal-tabs__badge');
+        if (tabBadge) {
+            if (count > 0) {
+                tabBadge.textContent = count > 99 ? '99+' : count;
+                tabBadge.style.display = '';
+            } else {
+                tabBadge.textContent = '';
+                tabBadge.style.display = 'none';
+            }
         }
     }
 

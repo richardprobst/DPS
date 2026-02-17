@@ -829,7 +829,7 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all var(--dps-motion-enter);
+    transition: transform var(--dps-motion-enter), box-shadow var(--dps-motion-enter);
     color: #fff;
     font-size: 24px;
 }
@@ -837,6 +837,11 @@ html {
 .dps-chat-toggle:hover {
     transform: scale(1.1);
     box-shadow: var(--dps-elevation-4);
+}
+
+.dps-chat-toggle:focus-visible {
+    outline: 2px solid var(--dps-color-primary, var(--dps-primary));
+    outline-offset: 2px;
 }
 
 .dps-chat-toggle__icon {
@@ -968,6 +973,11 @@ html {
 
 .dps-chat-header__close:hover {
     background: rgba(255, 255, 255, 0.3);
+}
+
+.dps-chat-header__close:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
 }
 
 /* Área de mensagens */
@@ -3472,6 +3482,70 @@ html {
     font-size: 14px;
     color: var(--dps-gray-500);
     margin: 0;
+}
+
+/* Header da mensagem individual */
+.dps-portal-message__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    gap: 12px;
+}
+
+.dps-portal-message__sender {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--dps-gray-800);
+}
+
+.dps-portal-message__time {
+    font-size: 12px;
+    color: var(--dps-gray-500);
+    flex-shrink: 0;
+}
+
+.dps-portal-message__text {
+    font-size: 14px;
+    color: var(--dps-gray-600);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* CTA para abrir chat */
+.dps-messages-cta {
+    text-align: center;
+    padding: 8px 0;
+}
+
+.dps-btn-open-chat {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, var(--dps-primary) 0%, var(--dps-primary-hover) 100%);
+    color: #fff;
+    border: none;
+    border-radius: var(--dps-shape-small);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--dps-elevation-2);
+    transition: transform var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
+}
+
+.dps-btn-open-chat:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--dps-elevation-3);
+}
+
+.dps-btn-open-chat:focus-visible {
+    outline: 2px solid var(--dps-color-primary, var(--dps-primary));
+    outline-offset: 2px;
+}
+
+.dps-btn-open-chat .dps-btn-icon {
+    font-size: 18px;
 }
 
 /* Formulário de Nova Mensagem (Compose) */
