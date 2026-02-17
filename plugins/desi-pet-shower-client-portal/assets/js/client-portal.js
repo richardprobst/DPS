@@ -2239,7 +2239,8 @@ window.DPSSkeleton = (function() {
 
     /**
      * Lightbox simples para galeria de fotos
-     * Revisão de layout: Janeiro 2026
+     * Revisão de layout: Fevereiro 2026
+     * Acessibilidade: ARIA dialog, focus trap, focus restore, broken image fallback
      */
     function handleGalleryLightbox() {
         var lightboxLinks = document.querySelectorAll('.dps-gallery-photo__link');
@@ -2248,9 +2249,12 @@ window.DPSSkeleton = (function() {
             return;
         }
 
-        // Cria o container do lightbox
+        // Cria o container do lightbox com atributos ARIA
         var lightbox = document.createElement('div');
         lightbox.className = 'dps-lightbox';
+        lightbox.setAttribute('role', 'dialog');
+        lightbox.setAttribute('aria-modal', 'true');
+        lightbox.setAttribute('aria-label', 'Visualizar foto');
         lightbox.innerHTML = '' +
             '<div class="dps-lightbox__overlay"></div>' +
             '<div class="dps-lightbox__container">' +
@@ -2269,6 +2273,14 @@ window.DPSSkeleton = (function() {
         var lightboxDownload = lightbox.querySelector('.dps-lightbox__btn--download');
         var lightboxClose = lightbox.querySelector('.dps-lightbox__close');
         var lightboxOverlay = lightbox.querySelector('.dps-lightbox__overlay');
+        var lastFocusedElement = null;
+
+        // Broken image fallback
+        lightboxImg.addEventListener('error', function() {
+            this.alt = 'Imagem indisponível';
+            lightboxCaption.textContent = 'Imagem indisponível';
+            lightboxDownload.style.display = 'none';
+        });
 
         // Abre lightbox ao clicar em foto
         lightboxLinks.forEach(function(link) {
@@ -2282,13 +2294,19 @@ window.DPSSkeleton = (function() {
                     return;
                 }
 
+                lastFocusedElement = this;
+
                 lightboxImg.src = imgUrl;
-                lightboxImg.alt = imgTitle;
+                lightboxImg.alt = imgTitle || 'Foto do pet';
                 lightboxCaption.textContent = imgTitle;
                 lightboxDownload.href = imgUrl;
+                lightboxDownload.style.display = '';
 
                 lightbox.classList.add('is-active');
                 document.body.style.overflow = 'hidden';
+
+                // Foca no botão de fechar para acessibilidade
+                lightboxClose.focus();
             });
         });
 
@@ -2297,16 +2315,66 @@ window.DPSSkeleton = (function() {
             lightbox.classList.remove('is-active');
             document.body.style.overflow = '';
             lightboxImg.src = '';
+
+            // Restaura foco ao elemento que abriu o lightbox
+            if (lastFocusedElement) {
+                lastFocusedElement.focus();
+                lastFocusedElement = null;
+            }
         }
 
         lightboxClose.addEventListener('click', closeLightbox);
         lightboxOverlay.addEventListener('click', closeLightbox);
 
-        // Fecha com ESC
+        // Keyboard: ESC para fechar, Tab trap dentro do lightbox
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && lightbox.classList.contains('is-active')) {
-                closeLightbox();
+            if (!lightbox.classList.contains('is-active')) {
+                return;
             }
+
+            if (e.key === 'Escape') {
+                closeLightbox();
+                return;
+            }
+
+            // Focus trap: mantém foco dentro do lightbox
+            if (e.key === 'Tab') {
+                var focusable = lightbox.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])');
+                if (focusable.length === 0) {
+                    return;
+                }
+                var first = focusable[0];
+                var last = focusable[focusable.length - 1];
+
+                if (e.shiftKey) {
+                    if (document.activeElement === first) {
+                        e.preventDefault();
+                        last.focus();
+                    }
+                } else {
+                    if (document.activeElement === last) {
+                        e.preventDefault();
+                        first.focus();
+                    }
+                }
+            }
+        });
+
+        // Broken image fallback for gallery grid images
+        var galleryImages = document.querySelectorAll('.dps-gallery-photo__img');
+        galleryImages.forEach(function(img) {
+            img.addEventListener('error', function() {
+                this.style.display = 'none';
+                var parent = this.closest('.dps-gallery-photo__link');
+                if (parent) {
+                    var overlay = parent.querySelector('.dps-gallery-photo__overlay');
+                    if (overlay) {
+                        overlay.innerHTML = '<span class="dps-gallery-photo__zoom">⚠️</span>';
+                        overlay.style.opacity = '1';
+                        overlay.style.backgroundColor = 'var(--dps-gray-100)';
+                    }
+                }
+            });
         });
     }
 

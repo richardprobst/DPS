@@ -2693,12 +2693,17 @@ html {
     font-weight: 500;
     color: var(--dps-gray-600);
     cursor: pointer;
-    transition: all var(--dps-motion-hover);
+    transition: background-color var(--dps-motion-hover), border-color var(--dps-motion-hover), color var(--dps-motion-hover);
 }
 
 .dps-gallery-filter__btn:hover {
     background-color: var(--dps-gray-100);
     color: var(--dps-gray-800);
+}
+
+.dps-gallery-filter__btn:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 .dps-gallery-filter__btn.is-active {
@@ -2849,12 +2854,17 @@ html {
     background-color: var(--dps-gray-100);
     color: var(--dps-gray-600);
     text-decoration: none;
-    transition: all var(--dps-motion-hover);
+    transition: background-color var(--dps-motion-hover), color var(--dps-motion-hover);
 }
 
 .dps-gallery-photo__action:hover {
     background-color: var(--dps-gray-200);
     color: var(--dps-gray-800);
+}
+
+.dps-gallery-photo__action:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 .dps-gallery-photo__action--whatsapp:hover {
@@ -3126,6 +3136,11 @@ html {
 
 .dps-lightbox__close:hover {
     background-color: rgba(255, 255, 255, 0.2);
+}
+
+.dps-lightbox__close:focus-visible {
+    outline: 2px solid var(--dps-white);
+    outline-offset: 2px;
 }
 
 .dps-lightbox__img {
