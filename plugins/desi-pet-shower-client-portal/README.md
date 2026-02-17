@@ -121,6 +121,8 @@ plugins/desi-pet-shower-client-portal/
 - **`dps_portal_message`** (registrado pelo add-on) — mensagens do portal
 - **`dps_appt_request`** (registrado pelo add-on) — pedidos de agendamento
 
+> Nota de nomenclatura: apesar dos CPTs estarem em português (`dps_cliente`, `dps_agendamento`), parte dos metadados legados usa chaves em inglês (ex.: `dps_client_id`, `appointment_client_id`) por compatibilidade histórica.
+
 ### Options relevantes
 
 - `dps_portal_page_id`
