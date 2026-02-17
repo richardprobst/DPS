@@ -81,6 +81,16 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Changed (Alterado)
+
+**Client Portal — UX/UI do Shell e Navegação por Tabs**
+
+- **Navegação por tabs**: estado ativo mais forte (font-weight 600), scroll horizontal com snap em mobile, gradientes de overflow indicando direção de rolagem.
+- **Breadcrumb dinâmico**: atualiza automaticamente o item ativo ao trocar de aba, mantendo contexto de navegação.
+- **Scroll automático**: aba ativa é rolada para a área visível em dispositivos móveis.
+- **Acessibilidade**: separador do breadcrumb com `aria-hidden`, suporte a `prefers-reduced-motion` na animação de troca de painel, transições CSS específicas (sem `transition: all`).
+- **Espaçamento**: hierarquia visual refinada com título e breadcrumb mais compactos.
+
 #### Added (Adicionado)
 
 **Agenda Add-on v1.2.0 — Checklist Operacional e Check-in/Check-out**

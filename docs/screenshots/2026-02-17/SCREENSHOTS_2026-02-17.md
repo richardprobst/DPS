@@ -41,13 +41,23 @@
   - área de topo sem agrupamento claro de ações principais;
   - tabs sem foco visível dedicado e sem navegação por teclado com setas/home/end;
   - estado de carregamento ao trocar aba inexistente;
-  - em mobile os rótulos das abas ficavam ocultos, reduzindo descobribilidade.
+  - em mobile os rótulos das abas ficavam ocultos, reduzindo descobribilidade;
+  - breadcrumb estático (sempre exibia "Início" independente da aba ativa);
+  - sem indicadores visuais de overflow na barra de abas em mobile;
+  - active tab sem diferenciação visual forte (mesmo font-weight das demais).
 - Resumo do depois:
   - header com hierarquia mais clara (`main` + `actions`) e ação de logout estilizada;
   - tabs com foco visível, suporte a `aria-disabled`, `tabindex` roving e ARIA melhorada;
   - navegação por teclado (`ArrowLeft/Right`, `Home/End`, `Enter`/`Space`) e deep link por hash;
   - feedback de carregamento curto na troca de aba;
-  - mobile com rótulos visíveis e overflow horizontal controlado.
+  - mobile com rótulos visíveis e overflow horizontal controlado;
+  - breadcrumb dinâmico que atualiza ao trocar de aba;
+  - gradientes de overflow (fade hints) indicando direção de rolagem em mobile;
+  - scroll-snap e auto-scroll da aba ativa para área visível;
+  - active tab com font-weight 600 (mais forte e claro);
+  - transições CSS específicas (sem `transition: all`);
+  - `prefers-reduced-motion` respeitado na animação dos painéis;
+  - separador do breadcrumb com `aria-hidden="true"`.
 - Arquivos de código alterados:
   - `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
   - `plugins/desi-pet-shower-client-portal/assets/css/client-portal.css`
@@ -59,9 +69,11 @@
 - `./client-portal-main-tabs-mobile-fullpage.png`
 - `./client-portal-main-tabs-preview.html` (fonte visual de validação)
 - Evidências externas fornecidas no contexto da revisão:
-  - `https://github.com/user-attachments/assets/988b5065-fb7a-421f-a7a8-0358b4c65ec3`
-  - `https://github.com/user-attachments/assets/2a9d2816-6af9-4ddb-9a0b-daf96ef4b0d8`
-  - `https://github.com/user-attachments/assets/d2f14754-f53d-4dbb-b170-52a255bfc1ea`
+  - Desktop (após): `https://github.com/user-attachments/assets/0a78fe84-ec60-423f-9eec-a36bcd197c1b`
+  - Mobile (após): `https://github.com/user-attachments/assets/1be0e197-d102-40e5-9099-d79cb4b58776`
+  - Desktop (anterior): `https://github.com/user-attachments/assets/988b5065-fb7a-421f-a7a8-0358b4c65ec3`
+  - Tablet (anterior): `https://github.com/user-attachments/assets/2a9d2816-6af9-4ddb-9a0b-daf96ef4b0d8`
+  - Mobile (anterior): `https://github.com/user-attachments/assets/d2f14754-f53d-4dbb-b170-52a255bfc1ea`
 
 ## Observações
 - Como o ambiente não tinha WordPress rodando para captura da tela real do plugin, foi utilizado preview estático para validar shell e tabs.
