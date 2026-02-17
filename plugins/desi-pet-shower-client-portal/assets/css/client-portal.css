@@ -1366,7 +1366,7 @@ html {
     font-weight: var(--dps-typescale-label-medium-weight, 500);
     text-decoration: none;
     cursor: pointer;
-    transition: all var(--dps-motion-hover);
+    transition: background-color var(--dps-motion-hover), border-color var(--dps-motion-hover), transform var(--dps-motion-hover);
     min-height: 36px;
     box-sizing: border-box;
     line-height: 1.2;
@@ -1397,7 +1397,7 @@ html {
     font-weight: var(--dps-typescale-label-large-weight, 500);
     font-size: var(--dps-typescale-label-large-size, 14px);
     align-self: flex-start;
-    transition: all var(--dps-motion-hover);
+    transition: background-color var(--dps-motion-hover), transform var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
     min-height: 36px;
 }
 
@@ -1468,13 +1468,18 @@ html {
     font-size: var(--dps-typescale-body-small-size, 12px);
     font-weight: var(--dps-typescale-label-medium-weight, 500);
     text-decoration: none;
-    transition: all var(--dps-motion-hover);
+    transition: background-color var(--dps-motion-hover), border-color var(--dps-motion-hover), color var(--dps-motion-hover);
 }
 
 .dps-appointment-card__action-btn:hover {
     background: var(--dps-color-surface-container-low);
     border-color: var(--dps-color-primary);
     color: var(--dps-color-primary);
+}
+
+.dps-appointment-card__action-btn:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
 }
 
 /* Status variations */

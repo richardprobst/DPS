@@ -213,7 +213,11 @@ class DPS_Portal_Renderer {
             $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( $whatsapp_message );
         } else {
             // Fallback
-            $whatsapp_number = get_option( 'dps_whatsapp_number', '5515991606299' );
+            $whatsapp_number = get_option( 'dps_whatsapp_number', '' );
+            if ( ! $whatsapp_number ) {
+                echo '</div>';
+                return;
+            }
             if ( class_exists( 'DPS_Phone_Helper' ) ) {
                 $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
             }

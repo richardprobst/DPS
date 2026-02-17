@@ -1537,18 +1537,49 @@ window.DPSSkeleton = (function() {
      * Mostra modal de cancelamento
      */
     function showCancelModal(appointmentId) {
-        if (!confirm('Tem certeza que deseja solicitar o cancelamento deste agendamento?\n\nA equipe do Banho e Tosa pode entrar em contato para confirmar.')) {
-            return;
-        }
-        
-        // Envia direto a solicitação de cancelamento
-        submitAppointmentRequest({
-            request_type: 'cancel',
-            original_appointment_id: appointmentId,
-            desired_date: '',
-            desired_period: '',
-            notes: 'Cliente solicitou cancelamento via portal'
+        var modal = document.createElement('div');
+        modal.className = 'dps-modal dps-appointment-request-modal';
+
+        var html = '<div class="dps-modal__overlay"></div>';
+        html += '<div class="dps-modal__content">';
+        html += '<div class="dps-modal__header">';
+        html += '<h3>Confirmar Cancelamento</h3>';
+        html += '<button class="dps-modal__close" aria-label="Fechar">×</button>';
+        html += '</div>';
+        html += '<div class="dps-modal__body">';
+        html += '<p>Tem certeza que deseja solicitar o cancelamento deste agendamento?</p>';
+        html += '<p class="dps-modal__notice">A equipe pode entrar em contato para confirmar.</p>';
+        html += '<div class="dps-form-actions">';
+        html += '<button type="button" class="button dps-modal-cancel">Voltar</button>';
+        html += '<button type="button" class="button button-primary dps-modal-confirm-cancel">Confirmar Cancelamento</button>';
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        modal.innerHTML = html;
+
+        modal.querySelector('.dps-modal__close').addEventListener('click', function() {
+            closeModal(modal);
         });
+        modal.querySelector('.dps-modal__overlay').addEventListener('click', function() {
+            closeModal(modal);
+        });
+        modal.querySelector('.dps-modal-cancel').addEventListener('click', function() {
+            closeModal(modal);
+        });
+        modal.querySelector('.dps-modal-confirm-cancel').addEventListener('click', function() {
+            closeModal(modal);
+            submitAppointmentRequest({
+                request_type: 'cancel',
+                original_appointment_id: appointmentId,
+                desired_date: '',
+                desired_period: '',
+                notes: 'Cliente solicitou cancelamento via portal'
+            });
+        });
+
+        document.body.appendChild(modal);
+        modal.classList.add('is-active');
     }
 
     /**
@@ -1643,6 +1674,15 @@ window.DPSSkeleton = (function() {
             submitAppointmentRequest(data);
             closeModal(modal);
         });
+
+        // Fecha modal com Escape
+        var escHandler = function(e) {
+            if (e.key === 'Escape') {
+                closeModal(modal);
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
         
         return modal;
     }
@@ -1692,21 +1732,34 @@ window.DPSSkeleton = (function() {
         })
         .then(function(result) {
             if (result.success) {
-                showNotification(result.data.message, 'success');
+                if (window.DPSToast) {
+                    window.DPSToast.success(result.data.message);
+                } else {
+                    showNotification(result.data.message, 'success');
+                }
                 // Recarrega a página após 2 segundos para mostrar o pedido
                 setTimeout(function() {
                     location.reload();
                 }, 2000);
             } else {
-                showNotification(result.data.message || 'Erro ao enviar solicitação', 'error');
+                var errMsg = result.data && result.data.message ? result.data.message : 'Erro ao enviar solicitação';
+                if (window.DPSToast) {
+                    window.DPSToast.error(errMsg);
+                } else {
+                    showNotification(errMsg, 'error');
+                }
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Enviar Solicitação';
                 }
             }
         })
-        .catch(function(error) {
-            showNotification('Erro ao enviar solicitação. Tente novamente.', 'error');
+        .catch(function() {
+            if (window.DPSToast) {
+                window.DPSToast.error('Falha na conexão. Verifique sua internet e tente novamente.');
+            } else {
+                showNotification('Erro ao enviar solicitação. Tente novamente.', 'error');
+            }
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Enviar Solicitação';
