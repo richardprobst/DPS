@@ -154,6 +154,7 @@
      */
     function handleTabNavigation() {
         var LOADING_INDICATOR_DURATION = 220;
+        var SCROLL_THRESHOLD = 4;
         var tabs = Array.prototype.slice.call(document.querySelectorAll('.dps-portal-tabs__link'));
         var panels = document.querySelectorAll('.dps-portal-tab-panel');
         var tabNav = document.querySelector('.dps-portal-tabs');
@@ -169,8 +170,8 @@
             if (!tabNav || !tabWrapper) return;
             var scrollLeft = tabNav.scrollLeft;
             var maxScroll = tabNav.scrollWidth - tabNav.clientWidth;
-            tabWrapper.classList.toggle('has-scroll-left', scrollLeft > 4);
-            tabWrapper.classList.toggle('has-scroll-right', maxScroll > 4 && scrollLeft < maxScroll - 4);
+            tabWrapper.classList.toggle('has-scroll-left', scrollLeft > SCROLL_THRESHOLD);
+            tabWrapper.classList.toggle('has-scroll-right', maxScroll > SCROLL_THRESHOLD && scrollLeft < maxScroll - SCROLL_THRESHOLD);
         }
 
         if (tabNav) {
