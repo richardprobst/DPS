@@ -98,6 +98,16 @@ Antes de criar uma nova versão oficial:
 - **Acessibilidade**: separador do breadcrumb com `aria-hidden`, suporte a `prefers-reduced-motion` na animação de troca de painel, transições CSS específicas (sem `transition: all`).
 - **Espaçamento**: hierarquia visual refinada com título e breadcrumb mais compactos.
 
+**Client Portal — Aba Início (revisão completa)**
+
+- **Acessibilidade**: `focus-visible` adicionado a todos os elementos interativos da aba Início (overview cards, quick actions, botões de ação pet, link buttons, collapsible header, botões de agendamento, botões de pagamento, botões de sugestão).
+- **Card de fidelidade**: corrigido clique no card de pontos (overview) — agora navega para a aba Fidelidade conforme esperado; suporte a Enter/Space para elementos com `role="button"`.
+- **Transições CSS**: substituído `transition: all` por propriedades específicas nos componentes pet card, quick action e pet action button.
+
+#### Fixed (Corrigido)
+
+- **Segurança**: corrigida verificação de propriedade do pet na impressão de histórico — usava meta key incorreta `pet_client_id` ao invés de `owner_id`, impedindo acesso legítimo à funcionalidade.
+
 #### Added (Adicionado)
 
 **Agenda Add-on v1.2.0 — Checklist Operacional e Check-in/Check-out**

@@ -68,7 +68,7 @@
         });
 
         // Botões de ação rápida que navegam para tabs
-        var tabButtons = document.querySelectorAll('.dps-quick-action[data-tab], .dps-link-button[data-tab], .dps-pet-card__action-btn[data-tab]');
+        var tabButtons = document.querySelectorAll('.dps-quick-action[data-tab], .dps-link-button[data-tab], .dps-pet-card__action-btn[data-tab], .dps-overview-card[data-tab]');
         // Lista de tabs válidas para prevenir DOM-based XSS
         var validTabs = ['inicio', 'fidelidade', 'avaliacoes', 'mensagens', 'agendamentos', 'historico-pets', 'galeria', 'dados'];
         
@@ -93,6 +93,16 @@
                     }
                 }
             });
+
+            // Keyboard support for role="button" elements (Enter/Space)
+            if (btn.getAttribute('role') === 'button') {
+                btn.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.click();
+                    }
+                });
+            }
         });
     }
 

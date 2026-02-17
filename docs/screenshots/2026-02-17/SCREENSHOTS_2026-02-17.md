@@ -116,3 +116,33 @@
 ## Observações
 - Como o ambiente não tinha WordPress rodando, não há capturas de tela do widget real. As alterações foram validadas via inspeção de código, linting PHP/JS e verificação de acessibilidade.
 - O escopo foi restrito ao widget de assistente no topo do portal, sem mudanças no conteúdo interno das abas.
+
+---
+
+# Screenshots 2026-02-17 — Aba Início do Portal do Cliente (revisão completa)
+
+## Contexto
+- Objetivo: revisão UX/UI + funcional da primeira aba (Início) do portal do cliente.
+- Ambiente: validação via inspeção de código (sem WordPress rodando).
+
+## Antes/Depois
+- Resumo do antes:
+  - Card de fidelidade (overview) tinha `role="button"` e `cursor:pointer` mas clique não funcionava (dead click).
+  - Verificação de propriedade do pet em impressão de histórico usava meta key incorreta `pet_client_id` em vez de `owner_id`.
+  - Nenhum elemento interativo na aba Início tinha `focus-visible` (overview cards, quick actions, pet cards, collapsible, botões de pagamento, sugestões).
+  - Vários componentes usavam `transition: all` em vez de propriedades específicas.
+  - Elementos com `role="button"` não respondiam a Enter/Space no teclado.
+- Resumo do depois:
+  - Card de fidelidade navega para aba correta ao clicar ou usar Enter/Space.
+  - Propriedade do pet usa meta key canônica `owner_id`.
+  - `focus-visible` em todos os elementos interativos da aba (8 componentes).
+  - Transições CSS específicas em pet-card, quick-action e pet-action-btn.
+  - Suporte a Enter/Space em elementos `role="button"` com `data-tab`.
+- Arquivos de código alterados:
+  - `plugins/desi-pet-shower-client-portal/includes/client-portal/class-dps-portal-ajax-handler.php`
+  - `plugins/desi-pet-shower-client-portal/assets/css/client-portal.css`
+  - `plugins/desi-pet-shower-client-portal/assets/js/client-portal.js`
+
+## Observações
+- Validação via php -l, node -c e inspeção de código.
+- Escopo: aba Início apenas — nenhuma outra aba foi alterada.
