@@ -3554,7 +3554,7 @@ html {
     
     .dps-portal-tabs__item {
         flex: 0 0 auto;
-        min-width: 132px;
+        min-width: max-content;
     }
     
     .dps-portal-tabs__link {

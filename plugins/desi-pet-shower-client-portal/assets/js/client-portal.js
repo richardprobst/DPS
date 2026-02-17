@@ -153,6 +153,7 @@
      * Gerencia navegação por tabs
      */
     function handleTabNavigation() {
+        var LOADING_INDICATOR_DURATION = 220;
         var tabs = Array.prototype.slice.call(document.querySelectorAll('.dps-portal-tabs__link'));
         var panels = document.querySelectorAll('.dps-portal-tab-panel');
         var tabNav = document.querySelector('.dps-portal-tabs');
@@ -220,7 +221,7 @@
             if (!opts.silent) {
                 loadingTimer = setTimeout(function() {
                     setLoading(false);
-                }, 220);
+                }, LOADING_INDICATOR_DURATION);
             } else {
                 setLoading(false);
             }
