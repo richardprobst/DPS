@@ -533,7 +533,7 @@ class DPS_Base_Frontend {
      *
      * @return string
      */
-    private static function get_redirect_url( $tab = '' ) {
+    public static function get_redirect_url( $tab = '' ) {
         $base = self::get_redirect_base_url();
         $base = remove_query_arg(
             [ 
@@ -2934,254 +2934,21 @@ class DPS_Base_Frontend {
     }
 
     /**
-     * Salva cliente (inserção ou atualização)
+     * Salva cliente (inserção ou atualização).
+     * 
+     * Delegado para DPS_Client_Handler (Fase 2.1).
      */
     private static function save_client() {
-        if ( ! current_user_can( 'dps_manage_clients' ) ) {
-            wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
-        }
-        $name      = isset( $_POST['client_name'] ) ? sanitize_text_field( wp_unslash( $_POST['client_name'] ) ) : '';
-        $cpf       = isset( $_POST['client_cpf'] ) ? sanitize_text_field( wp_unslash( $_POST['client_cpf'] ) ) : '';
-        $phone     = isset( $_POST['client_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['client_phone'] ) ) : '';
-        $email     = isset( $_POST['client_email'] ) ? sanitize_email( wp_unslash( $_POST['client_email'] ) ) : '';
-        $birth     = isset( $_POST['client_birth'] ) ? sanitize_text_field( wp_unslash( $_POST['client_birth'] ) ) : '';
-        $insta     = isset( $_POST['client_instagram'] ) ? sanitize_text_field( wp_unslash( $_POST['client_instagram'] ) ) : '';
-        $facebook  = isset( $_POST['client_facebook'] ) ? sanitize_text_field( wp_unslash( $_POST['client_facebook'] ) ) : '';
-        $photo_auth= isset( $_POST['client_photo_auth'] ) ? 1 : 0;
-        $address   = isset( $_POST['client_address'] ) ? sanitize_textarea_field( wp_unslash( $_POST['client_address'] ) ) : '';
-        $referral  = isset( $_POST['client_referral'] ) ? sanitize_text_field( wp_unslash( $_POST['client_referral'] ) ) : '';
-        // Coordenadas (podem estar vazias se não selecionadas)
-        $lat       = isset( $_POST['client_lat'] ) ? sanitize_text_field( wp_unslash( $_POST['client_lat'] ) ) : '';
-        $lng       = isset( $_POST['client_lng'] ) ? sanitize_text_field( wp_unslash( $_POST['client_lng'] ) ) : '';
-        
-        // Validação de campos obrigatórios
-        $errors = [];
-        if ( empty( $name ) ) {
-            $errors[] = __( 'O campo Nome é obrigatório.', 'desi-pet-shower' );
-        }
-        if ( empty( $phone ) ) {
-            $errors[] = __( 'O campo Telefone é obrigatório.', 'desi-pet-shower' );
-        }
-        
-        if ( ! empty( $errors ) ) {
-            foreach ( $errors as $error ) {
-                DPS_Message_Helper::add_error( $error );
-            }
-            wp_safe_redirect( self::get_redirect_url( 'clientes' ) );
-            exit;
-        }
-        $client_id = isset( $_POST['client_id'] ) ? intval( wp_unslash( $_POST['client_id'] ) ) : 0;
-        if ( $client_id ) {
-            // Atualiza
-            $client_id = wp_update_post( [
-                'ID'         => $client_id,
-                'post_title' => $name,
-            ], true );
-        } else {
-            $client_id = wp_insert_post( [
-                'post_type'   => 'dps_cliente',
-                'post_title'  => $name,
-                'post_status' => 'publish',
-            ], true );
-        }
-
-        if ( is_wp_error( $client_id ) || ! $client_id ) {
-            DPS_Message_Helper::add_error( __( 'Não foi possível salvar o cliente. Tente novamente.', 'desi-pet-shower' ) );
-            if ( is_wp_error( $client_id ) ) {
-                DPS_Message_Helper::add_error( $client_id->get_error_message() );
-            }
-            wp_safe_redirect( self::get_redirect_url( 'clientes' ) );
-            exit;
-        }
-
-        update_post_meta( $client_id, 'client_cpf', $cpf );
-        update_post_meta( $client_id, 'client_phone', $phone );
-        update_post_meta( $client_id, 'client_email', $email );
-        update_post_meta( $client_id, 'client_birth', $birth );
-        update_post_meta( $client_id, 'client_instagram', $insta );
-        update_post_meta( $client_id, 'client_facebook', $facebook );
-        update_post_meta( $client_id, 'client_photo_auth', $photo_auth );
-        update_post_meta( $client_id, 'client_address', $address );
-        update_post_meta( $client_id, 'client_referral', $referral );
-        // Salva coordenadas se fornecidas
-        if ( $lat !== '' && $lng !== '' ) {
-            update_post_meta( $client_id, 'client_lat', $lat );
-            update_post_meta( $client_id, 'client_lng', $lng );
-        }
-
-        DPS_Message_Helper::add_success( __( 'Cliente salvo com sucesso!', 'desi-pet-shower' ) );
-        // Redireciona para a aba de clientes
-        wp_safe_redirect( self::get_redirect_url( 'clientes' ) );
-        exit;
+        DPS_Client_Handler::save_from_request( [ __CLASS__, 'get_redirect_url' ] );
     }
 
     /**
-     * Salva pet (inserção ou atualização)
+     * Salva pet (inserção ou atualização).
+     * 
+     * Delegado para DPS_Pet_Handler (Fase 2.1).
      */
     private static function save_pet() {
-        if ( ! current_user_can( 'dps_manage_pets' ) ) {
-            wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
-        }
-        $owner_id  = isset( $_POST['owner_id'] ) ? intval( wp_unslash( $_POST['owner_id'] ) ) : 0;
-        $name      = isset( $_POST['pet_name'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_name'] ) ) : '';
-        $species   = isset( $_POST['pet_species'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_species'] ) ) : '';
-        $breed     = isset( $_POST['pet_breed'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_breed'] ) ) : '';
-        $size      = isset( $_POST['pet_size'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_size'] ) ) : '';
-        $weight    = isset( $_POST['pet_weight'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_weight'] ) ) : '';
-        $coat      = isset( $_POST['pet_coat'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_coat'] ) ) : '';
-        $color     = isset( $_POST['pet_color'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_color'] ) ) : '';
-        $birth     = isset( $_POST['pet_birth'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_birth'] ) ) : '';
-        $sex       = isset( $_POST['pet_sex'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_sex'] ) ) : '';
-        $care      = isset( $_POST['pet_care'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_care'] ) ) : '';
-        $aggressive= isset( $_POST['pet_aggressive'] ) ? 1 : 0;
-        // Campos adicionais para pets
-        $vaccinations = isset( $_POST['pet_vaccinations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_vaccinations'] ) ) : '';
-        $allergies    = isset( $_POST['pet_allergies'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_allergies'] ) ) : '';
-        $behavior     = isset( $_POST['pet_behavior'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior'] ) ) : '';
-        // Preferências de produtos
-        $shampoo_pref         = isset( $_POST['pet_shampoo_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_shampoo_pref'] ) ) : '';
-        $perfume_pref         = isset( $_POST['pet_perfume_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_perfume_pref'] ) ) : '';
-        $accessories_pref     = isset( $_POST['pet_accessories_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_accessories_pref'] ) ) : '';
-        $product_restrictions = isset( $_POST['pet_product_restrictions'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_product_restrictions'] ) ) : '';
-        
-        // Validação de campos obrigatórios
-        $errors = [];
-        if ( empty( $name ) ) {
-            $errors[] = __( 'O campo Nome do Pet é obrigatório.', 'desi-pet-shower' );
-        }
-        if ( empty( $owner_id ) ) {
-            $errors[] = __( 'O campo Cliente (Tutor) é obrigatório.', 'desi-pet-shower' );
-        }
-        if ( empty( $species ) ) {
-            $errors[] = __( 'O campo Espécie é obrigatório.', 'desi-pet-shower' );
-        }
-        if ( empty( $size ) ) {
-            $errors[] = __( 'O campo Tamanho é obrigatório.', 'desi-pet-shower' );
-        }
-        if ( empty( $sex ) ) {
-            $errors[] = __( 'O campo Sexo é obrigatório.', 'desi-pet-shower' );
-        }
-        
-        if ( ! empty( $errors ) ) {
-            foreach ( $errors as $error ) {
-                DPS_Message_Helper::add_error( $error );
-            }
-            wp_safe_redirect( self::get_redirect_url( 'pets' ) );
-            exit;
-        }
-        $pet_id = isset( $_POST['pet_id'] ) ? intval( wp_unslash( $_POST['pet_id'] ) ) : 0;
-        if ( $pet_id ) {
-            // Update
-            $pet_id = wp_update_post( [
-                'ID'         => $pet_id,
-                'post_title' => $name,
-            ], true );
-        } else {
-            $pet_id = wp_insert_post( [
-                'post_type'   => 'dps_pet',
-                'post_title'  => $name,
-                'post_status' => 'publish',
-            ], true );
-        }
-
-        if ( is_wp_error( $pet_id ) || ! $pet_id ) {
-            DPS_Message_Helper::add_error( __( 'Não foi possível salvar o pet. Tente novamente.', 'desi-pet-shower' ) );
-            if ( is_wp_error( $pet_id ) ) {
-                DPS_Message_Helper::add_error( $pet_id->get_error_message() );
-            }
-            wp_safe_redirect( self::get_redirect_url( 'pets' ) );
-            exit;
-        }
-
-        update_post_meta( $pet_id, 'owner_id', $owner_id );
-        update_post_meta( $pet_id, 'pet_species', $species );
-        update_post_meta( $pet_id, 'pet_breed', $breed );
-        update_post_meta( $pet_id, 'pet_size', $size );
-        update_post_meta( $pet_id, 'pet_weight', $weight );
-        update_post_meta( $pet_id, 'pet_coat', $coat );
-        update_post_meta( $pet_id, 'pet_color', $color );
-        update_post_meta( $pet_id, 'pet_birth', $birth );
-        update_post_meta( $pet_id, 'pet_sex', $sex );
-        update_post_meta( $pet_id, 'pet_care', $care );
-        update_post_meta( $pet_id, 'pet_aggressive', $aggressive );
-        update_post_meta( $pet_id, 'pet_vaccinations', $vaccinations );
-        update_post_meta( $pet_id, 'pet_allergies', $allergies );
-        update_post_meta( $pet_id, 'pet_behavior', $behavior );
-        // Preferências de produtos
-        update_post_meta( $pet_id, 'pet_shampoo_pref', $shampoo_pref );
-        update_post_meta( $pet_id, 'pet_perfume_pref', $perfume_pref );
-        update_post_meta( $pet_id, 'pet_accessories_pref', $accessories_pref );
-        update_post_meta( $pet_id, 'pet_product_restrictions', $product_restrictions );
-        // Lida com upload da foto do pet, se houver
-        if ( isset( $_FILES['pet_photo'] ) && ! empty( $_FILES['pet_photo']['name'] ) ) {
-            $file = $_FILES['pet_photo'];
-            
-            // Lista de MIME types permitidos para imagens
-            $allowed_mimes = [
-                'jpg'  => 'image/jpeg',
-                'jpeg' => 'image/jpeg',
-                'gif'  => 'image/gif',
-                'png'  => 'image/png',
-                'webp' => 'image/webp',
-            ];
-            
-            // Carrega funções de upload do WordPress
-            if ( ! function_exists( 'wp_handle_upload' ) ) {
-                require_once ABSPATH . 'wp-admin/includes/file.php';
-            }
-            if ( ! function_exists( 'wp_check_filetype_and_ext' ) ) {
-                require_once ABSPATH . 'wp-includes/functions.php';
-            }
-            
-            // Validação primária usando wp_check_filetype_and_ext (mais segura que extensão)
-            $wp_filetype = wp_check_filetype_and_ext( $file['tmp_name'], $file['name'], $allowed_mimes );
-            
-            // Verifica se o tipo MIME retornado está na lista de permitidos
-            if ( empty( $wp_filetype['type'] ) || ! in_array( $wp_filetype['type'], $allowed_mimes, true ) ) {
-                DPS_Message_Helper::add_error( __( 'Tipo de arquivo não permitido. Use apenas imagens (JPG, PNG, GIF, WebP).', 'desi-pet-shower' ) );
-            } else {
-                // Restringe MIME types permitidos no upload
-                $overrides = [
-                    'test_form' => false,
-                    'mimes'     => $allowed_mimes,
-                ];
-                $uploaded  = wp_handle_upload( $file, $overrides );
-                
-                if ( isset( $uploaded['file'] ) && isset( $uploaded['type'] ) && empty( $uploaded['error'] ) ) {
-                    // Validação final: verifica se o MIME type do arquivo salvo está na lista permitida
-                    if ( in_array( $uploaded['type'], $allowed_mimes, true ) ) {
-                        $attachment = [
-                            'post_mime_type' => $uploaded['type'],
-                            'post_title'     => sanitize_file_name( basename( $uploaded['file'] ) ),
-                            'post_content'   => '',
-                            'post_status'    => 'inherit',
-                        ];
-                        $attach_id = wp_insert_attachment( $attachment, $uploaded['file'] );
-                        if ( ! function_exists( 'wp_generate_attachment_metadata' ) ) {
-                            require_once ABSPATH . 'wp-admin/includes/image.php';
-                        }
-                        $attach_data = wp_generate_attachment_metadata( $attach_id, $uploaded['file'] );
-                        wp_update_attachment_metadata( $attach_id, $attach_data );
-                        update_post_meta( $pet_id, 'pet_photo_id', $attach_id );
-                    } else {
-                        // Remove arquivo se não for imagem válida
-                        if ( file_exists( $uploaded['file'] ) ) {
-                            wp_delete_file( $uploaded['file'] );
-                        }
-                        DPS_Message_Helper::add_error( __( 'O arquivo enviado não é uma imagem válida.', 'desi-pet-shower' ) );
-                    }
-                } elseif ( ! empty( $uploaded['error'] ) ) {
-                    DPS_Message_Helper::add_error( $uploaded['error'] );
-                }
-            }
-        }
-        // Adiciona mensagem de sucesso
-        if ( $pet_id ) {
-            DPS_Message_Helper::add_success( __( 'Pet salvo com sucesso!', 'desi-pet-shower' ) );
-        }
-        // Redireciona para aba pets
-        wp_safe_redirect( self::get_redirect_url( 'pets' ) );
-        exit;
+        DPS_Pet_Handler::save_from_request( [ __CLASS__, 'get_redirect_url' ] );
     }
 
     /**
