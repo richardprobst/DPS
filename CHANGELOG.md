@@ -143,6 +143,8 @@ Antes de criar uma nova versão oficial:
 - **dbDelta version checks**: adicionados guards de versão em `DPS_AI_Analytics::maybe_create_tables()` e `DPS_AI_Conversations_Repository::maybe_create_tables()` para evitar `dbDelta()` em toda requisição.
 - **WP_Query otimizada**: `DPS_Query_Helper::get_all_posts_by_type()`, `get_posts_by_meta()` e `get_posts_by_meta_query()` agora incluem `no_found_rows => true` por padrão, eliminando SQL_CALC_FOUND_ROWS desnecessário em todas as consultas centralizadas.
 - **Assets condicionais**: Stock add-on corrigido — CSS não é mais carregado globalmente em todas as páginas admin; agora usa `$hook_suffix` para carregamento condicional.
+- **Subscription queries**: queries de delete de agendamentos e contagem migradas para `fields => 'ids'` + `no_found_rows => true`, eliminando carregamento desnecessário de objetos completos.
+- **Auditoria de rate limiting**: verificado que rate limiting já existe em 3 camadas: magic link request (3/hora por IP+email), token validation (5/hora por IP), chat (10/60s por cliente).
 
 #### Added (Adicionado)
 

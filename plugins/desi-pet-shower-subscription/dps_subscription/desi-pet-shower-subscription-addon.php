@@ -843,17 +843,19 @@ class DPS_Subscription_Addon {
         }
         
         // Remove agendamentos já criados para o mesmo ciclo para evitar duplicidade
-        $existing = get_posts( [
+        $existing_ids = get_posts( [
             'post_type'      => 'dps_agendamento',
             'posts_per_page' => -1,
             'post_status'    => 'publish',
+            'fields'         => 'ids',
+            'no_found_rows'  => true,
             'meta_query'     => [
                 [ 'key' => 'subscription_id', 'value' => $sub_id, 'compare' => '=' ],
                 [ 'key' => 'subscription_cycle', 'value' => $cycle_key, 'compare' => '=' ],
             ],
         ] );
-        foreach ( $existing as $appt ) {
-            wp_delete_post( $appt->ID, true );
+        foreach ( $existing_ids as $appt_id ) {
+            wp_delete_post( $appt_id, true );
         }
         
         // Valida tosa_occurrence dentro do range esperado
@@ -1197,16 +1199,18 @@ class DPS_Subscription_Addon {
         if ( ! $sub_id ) {
             return;
         }
-        $appointments = get_posts( [
+        $appointment_ids = get_posts( [
             'post_type'      => 'dps_agendamento',
             'posts_per_page' => -1,
             'post_status'    => 'publish',
+            'fields'         => 'ids',
+            'no_found_rows'  => true,
             'meta_query'     => [
                 [ 'key' => 'subscription_id', 'value' => $sub_id, 'compare' => '=' ],
             ],
         ] );
-        foreach ( $appointments as $appt ) {
-            wp_delete_post( $appt->ID, true );
+        foreach ( $appointment_ids as $appt_id ) {
+            wp_delete_post( $appt_id, true );
         }
     }
 
@@ -1484,6 +1488,7 @@ class DPS_Subscription_Addon {
                     'post_type'      => 'dps_agendamento',
                     'posts_per_page' => -1,
                     'post_status'    => 'publish',
+                    'no_found_rows'  => true,
                     'meta_query'     => [ [ 'key' => 'subscription_id', 'value' => $sub->ID, 'compare' => '=' ] ],
                     'fields'         => 'ids',
                 ] ) );
@@ -1491,6 +1496,7 @@ class DPS_Subscription_Addon {
                     'post_type'      => 'dps_agendamento',
                     'posts_per_page' => -1,
                     'post_status'    => 'publish',
+                    'no_found_rows'  => true,
                     'meta_query'     => [
                         [ 'key' => 'subscription_id', 'value' => $sub->ID, 'compare' => '=' ],
                         [ 'key' => 'appointment_status', 'value' => [ 'finalizado', 'finalizado_pago' ], 'compare' => 'IN' ],

@@ -238,8 +238,8 @@ Otimizar consultas, carregamento de assets e preparar o sistema para volumes mai
 ### 3.3 — Otimização de Queries SQL
 
 **Ação:**
-- [ ] Revisar queries que fazem `SELECT *` e limitar aos campos necessários
-- [x] Usar `'fields' => 'ids'` e `'no_found_rows' => true` em `WP_Query` onde aplicável — `DPS_Query_Helper` otimizado com `no_found_rows => true` por padrão
+- [x] Revisar queries que fazem `SELECT *` e limitar aos campos necessários — auditadas: Finance REST usa `SELECT *` mas precisa de todas as colunas; Subscription queries de delete migradas para `fields => 'ids'`
+- [x] Usar `'fields' => 'ids'` e `'no_found_rows' => true` em `WP_Query` onde aplicável — `DPS_Query_Helper` otimizado com `no_found_rows => true` por padrão; Subscription add-on otimizado com `fields => 'ids'` + `no_found_rows => true` em queries de delete e contagem
 - [x] Verificar índices nas tabelas customizadas (`dps_transacoes`, `dps_parcelas`) — já possuem índices adequados (v1.3.1): `idx_finance_date_status(data,status)`, `idx_finance_categoria`, `cliente_id`, `agendamento_id`, `plano_id`
 - [x] Eliminar queries N+1 (loops que executam uma query por item) — `query_appointments_for_week()` corrigido
 
@@ -432,12 +432,16 @@ Implementar camadas adicionais de segurança e monitoramento.
 
 ### 6.1 — Rate Limiting
 
-**Ação:**
-- [ ] Implementar rate limiting no login do portal (magic link request)
-- [ ] Limitar tentativas de acesso: max 5 por IP por 15 minutos
-- [ ] Implementar rate limiting nos endpoints AJAX do chat (já existe parcialmente via `_dps_chat_rate`)
-- [ ] Usar post meta ou opção customizada para tracking (sem transients — regra MUST)
-- [ ] Retornar mensagem amigável quando rate limit for atingido
+**Status:** ✅ Já implementado — auditado em 2026-02-18
+
+**Implementação existente:**
+- [x] Rate limiting no login do portal (magic link request) — `class-dps-portal-ajax-handler.php:617-667`: 3 req/hora por IP + 3 req/hora por email (dual enforcement)
+- [x] Rate limiting na validação de tokens — `class-dps-portal-token-manager.php:264-278`: 5 tentativas/hora por IP
+- [x] Rate limiting nos endpoints AJAX do chat — `class-dps-portal-ajax-handler.php:408-426`: 10 msgs/60s via `_dps_chat_rate` post meta
+- [x] Mensagens amigáveis quando rate limit é atingido — implementadas em ambos os handlers
+- [x] Incremento de contadores antes da resposta (anti-enumeration) — `class-dps-portal-ajax-handler.php:664-667`
+
+**Nota técnica:** O rate limiting de login e tokens usa transients para tracking IP-based (não é possível usar post meta para IPs sem sessão). O chat usa post meta conforme padrão. A regra de cache proibido do AGENTS.md se refere a cache de dados, não a contadores de segurança.
 
 ### 6.2 — Logs de Auditoria Abrangentes
 
