@@ -2,7 +2,7 @@
 
 > **Data de criação:** 2026-02-18
 > **Baseado em:** Relatório de Sugestões de Melhoria para o Sistema DPS
-> **Status:** Planejamento aprovado — aguardando início da execução
+> **Status:** Planejamento aprovado — Fase 1 concluída em 2026-02-18
 
 ---
 
@@ -69,6 +69,7 @@ Este plano organiza todas as sugestões de melhoria do Relatório de Sugestões 
 > **Esforço estimado:** 2–3 sprints
 > **Dependências:** Nenhuma — deve ser executada imediatamente
 > **Referência existente:** `docs/analysis/FINANCE_ADDON_ANALYSIS.md` (seção Segurança)
+> **Status:** ✅ Concluída em 2026-02-18 — ver `docs/security/AUDIT_FASE1.md`
 
 ### Objetivo
 
@@ -79,12 +80,12 @@ Eliminar todas as vulnerabilidades de segurança conhecidas, com foco em SQL Inj
 **Problema:** Existem 10+ queries diretas sem `$wpdb->prepare()` em `desi-pet-shower-finance-addon.php`, incluindo `ALTER TABLE`, `UPDATE`, `CREATE INDEX` e `DROP TABLE`.
 
 **Ação:**
-- [ ] Auditar todas as queries em `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php`
-- [ ] Substituir queries diretas por `$wpdb->prepare()` onde recebem dados variáveis
-- [ ] Para queries DDL (ALTER, CREATE INDEX) que usam nomes de tabela construídos a partir de `$wpdb->prefix`, validar que o prefixo vem exclusivamente de `$wpdb->prefix` (constante do WP, não de entrada do usuário)
-- [ ] Auditar `includes/class-dps-finance-api.php` e `includes/class-dps-finance-rest.php` para queries adicionais
-- [ ] Auditar `includes/class-dps-finance-revenue-query.php` para padrões similares
-- [ ] Adicionar `sanitize_text_field()`, `absint()` e `sanitize_key()` em todas as entradas do usuário
+- [x] Auditar todas as queries em `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php`
+- [x] Substituir queries diretas por `$wpdb->prepare()` onde recebem dados variáveis
+- [x] Para queries DDL (ALTER, CREATE INDEX) que usam nomes de tabela construídos a partir de `$wpdb->prefix`, validar que o prefixo vem exclusivamente de `$wpdb->prefix` (constante do WP, não de entrada do usuário)
+- [x] Auditar `includes/class-dps-finance-api.php` e `includes/class-dps-finance-rest.php` para queries adicionais
+- [x] Auditar `includes/class-dps-finance-revenue-query.php` para padrões similares
+- [x] Adicionar `sanitize_text_field()`, `absint()` e `sanitize_key()` em todas as entradas do usuário
 
 **Validação:**
 - `php -l` em todos os arquivos alterados
@@ -94,18 +95,18 @@ Eliminar todas as vulnerabilidades de segurança conhecidas, com foco em SQL Inj
 ### 1.2 — Auditoria de Segurança Completa em Todos os Add-ons
 
 **Ação:**
-- [ ] Executar grep global por padrões vulneráveis: `$wpdb->query(`, `$_GET[`, `$_POST[` sem sanitização
-- [ ] Verificar presença de nonce em todos os handlers AJAX (`wp_verify_nonce`)
-- [ ] Verificar capability checks em todos os endpoints admin
-- [ ] Revisar escape de saída HTML (`esc_html`, `esc_attr`, `wp_kses`)
-- [ ] Documentar achados em `docs/security/AUDIT_FASE1.md`
+- [x] Executar grep global por padrões vulneráveis: `$wpdb->query(`, `$_GET[`, `$_POST[` sem sanitização
+- [x] Verificar presença de nonce em todos os handlers AJAX (`wp_verify_nonce`)
+- [x] Verificar capability checks em todos os endpoints admin
+- [x] Revisar escape de saída HTML (`esc_html`, `esc_attr`, `wp_kses`)
+- [x] Documentar achados em `docs/security/AUDIT_FASE1.md`
 
 ### 1.3 — Revisão de Capabilities
 
 **Ação:**
-- [ ] Mapear todas as capabilities utilizadas no sistema
-- [ ] Verificar aderência ao Princípio do Menor Privilégio
-- [ ] Documentar capabilities por add-on em `ANALYSIS.md`
+- [x] Mapear todas as capabilities utilizadas no sistema
+- [x] Verificar aderência ao Princípio do Menor Privilégio
+- [x] Documentar capabilities por add-on em `ANALYSIS.md`
 
 ### Entregáveis
 
@@ -113,6 +114,7 @@ Eliminar todas as vulnerabilidades de segurança conhecidas, com foco em SQL Inj
 - ✅ Nonce verificado em 100% dos handlers AJAX/REST
 - ✅ Documento de auditoria `docs/security/AUDIT_FASE1.md`
 - ✅ Atualização do `CHANGELOG.md` na seção Security
+- ✅ Capabilities mapeadas e documentadas em `ANALYSIS.md`
 
 ---
 

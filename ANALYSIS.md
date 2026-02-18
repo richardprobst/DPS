@@ -3007,6 +3007,37 @@ if ( null !== $result ) {
 
 ---
 
+## Mapeamento de Capabilities
+
+> **Adicionado em:** 2026-02-18 — Fase 1 do Plano de Implementação
+
+### Capabilities utilizadas no sistema
+
+| Capability | Contexto de Uso | Plugins |
+|-----------|-----------------|---------|
+| `manage_options` | Admin pages, REST endpoints, AJAX handlers, configurações | Todos os add-ons |
+| `dps_manage_clients` | Gestão de clientes (CRUD) | Base, Frontend |
+| `dps_manage_pets` | Gestão de pets (CRUD) | Base, Frontend |
+| `dps_manage_appointments` | Gestão de agendamentos (CRUD) | Base, Agenda, Frontend |
+
+### Modelo de permissões
+
+- **Administradores** (`manage_options`): acesso total a todas as operações do sistema, incluindo configurações, relatórios financeiros e endpoints REST.
+- **Gestores** (`dps_manage_*`): acesso às operações de gestão do dia a dia (clientes, pets, agendamentos).
+- **Portal do cliente**: autenticação via token/sessão sem WordPress capabilities. Acesso restrito via `DPS_Portal_Session_Manager::get_authenticated_client_id()`.
+
+### Endpoints REST — Modelo de Permissão
+
+| Plugin | Endpoint | Permission Callback |
+|--------|----------|---------------------|
+| Finance | `dps-finance/v1/transactions` | `current_user_can('manage_options')` |
+| Loyalty | `dps-loyalty/v1/*` (5 rotas) | `current_user_can('manage_options')` |
+| Communications | `dps-communications/v1/*` (3 rotas) | `current_user_can('manage_options')` |
+| AI | `dps-ai/v1/whatsapp-webhook` | `__return_true` (webhook público com validação interna) |
+| Agenda | `dps/v1/google-calendar-webhook` | `__return_true` (webhook público com validação interna) |
+
+---
+
 ## Integrações Futuras Propostas
 
 ### Integração com Google Tarefas (Google Tasks API)

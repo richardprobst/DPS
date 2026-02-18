@@ -115,6 +115,17 @@ Antes de criar uma nova versão oficial:
 
 - **Segurança**: corrigida verificação de propriedade do pet na impressão de histórico — usava meta key incorreta `pet_client_id` ao invés de `owner_id`, impedindo acesso legítimo à funcionalidade.
 
+#### Security (Segurança)
+
+**Fase 1 — Segurança Crítica (Plano de Implementação)**
+
+- **Finance Add-on**: adicionados backticks em table identifiers e `phpcs:ignore` documentado em queries DDL (ALTER TABLE, CREATE INDEX, SHOW COLUMNS) que usam `$wpdb->prefix`. Queries `get_col`, `count_query` e `all_trans_query` agora utilizam backticks e documentação de segurança.
+- **Base Plugin**: corrigida query LIKE sem `esc_like`/`prepare()` em `class-dps-base-frontend.php`. Adicionada documentação de segurança em `class-dps-logs-admin-page.php` e `uninstall.php`.
+- **Backup Add-on**: migradas queries SELECT/DELETE que usavam `$ids_in` com `intval()` para padrão correto com placeholders dinâmicos e `$wpdb->prepare()`. Queries LIKE agora usam `$wpdb->prepare()`.
+- **AI Add-on**: adicionados backticks e documentação de segurança em queries COUNT/MIN em `class-dps-ai-maintenance.php` e `class-dps-ai-analytics.php`.
+- **Services Add-on**: sanitização imediata de arrays `$_POST` (`appointment_extra_names`, `appointment_extra_prices`) com `sanitize_text_field()` e `wp_unslash()`.
+- **Auditoria**: criado documento completo de auditoria em `docs/security/AUDIT_FASE1.md` com mapeamento de todas as queries, nonces, capabilities, REST permissions e sanitização de entrada.
+
 #### Added (Adicionado)
 
 **Agenda Add-on v1.2.0 — Checklist Operacional e Check-in/Check-out**
