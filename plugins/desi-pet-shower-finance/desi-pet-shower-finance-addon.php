@@ -329,26 +329,36 @@ class DPS_Finance_Addon {
         
         // Migração v1.2.0: adicionar colunas created_at e updated_at, converter valor para centavos
         if ( version_compare( $transacoes_version, '1.2.0', '<' ) ) {
+            // F1.1: FASE 1 - Segurança: DDL queries abaixo usam $transacoes_table que vem de $wpdb->prefix (constante WP, não de entrada do usuário)
+            // $wpdb->prepare() não suporta identificadores de tabela como placeholder, portanto o uso direto é seguro aqui
             // Adiciona coluna valor_cents se não existir
-            $col_valor_cents = $wpdb->get_results( "SHOW COLUMNS FROM $transacoes_table LIKE 'valor_cents'" );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+            $col_valor_cents = $wpdb->get_results( "SHOW COLUMNS FROM `{$transacoes_table}` LIKE 'valor_cents'" );
             if ( empty( $col_valor_cents ) ) {
-                $wpdb->query( "ALTER TABLE $transacoes_table ADD COLUMN valor_cents BIGINT(20) DEFAULT 0 AFTER valor" );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+                $wpdb->query( "ALTER TABLE `{$transacoes_table}` ADD COLUMN valor_cents BIGINT(20) DEFAULT 0 AFTER valor" );
                 // Migra valores existentes de float para centavos
-                $wpdb->query( "UPDATE $transacoes_table SET valor_cents = ROUND(valor * 100) WHERE valor_cents = 0 OR valor_cents IS NULL" );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+                $wpdb->query( "UPDATE `{$transacoes_table}` SET valor_cents = ROUND(valor * 100) WHERE valor_cents = 0 OR valor_cents IS NULL" );
             }
             
             // Adiciona coluna created_at se não existir
-            $col_created = $wpdb->get_results( "SHOW COLUMNS FROM $transacoes_table LIKE 'created_at'" );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+            $col_created = $wpdb->get_results( "SHOW COLUMNS FROM `{$transacoes_table}` LIKE 'created_at'" );
             if ( empty( $col_created ) ) {
-                $wpdb->query( "ALTER TABLE $transacoes_table ADD COLUMN created_at DATETIME DEFAULT NULL" );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+                $wpdb->query( "ALTER TABLE `{$transacoes_table}` ADD COLUMN created_at DATETIME DEFAULT NULL" );
                 // Define created_at = data para registros existentes
-                $wpdb->query( "UPDATE $transacoes_table SET created_at = CONCAT(data, ' 00:00:00') WHERE created_at IS NULL AND data IS NOT NULL" );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+                $wpdb->query( "UPDATE `{$transacoes_table}` SET created_at = CONCAT(data, ' 00:00:00') WHERE created_at IS NULL AND data IS NOT NULL" );
             }
             
             // Adiciona coluna updated_at se não existir
-            $col_updated = $wpdb->get_results( "SHOW COLUMNS FROM $transacoes_table LIKE 'updated_at'" );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+            $col_updated = $wpdb->get_results( "SHOW COLUMNS FROM `{$transacoes_table}` LIKE 'updated_at'" );
             if ( empty( $col_updated ) ) {
-                $wpdb->query( "ALTER TABLE $transacoes_table ADD COLUMN updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP" );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+                $wpdb->query( "ALTER TABLE `{$transacoes_table}` ADD COLUMN updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP" );
             }
             
             update_option( 'dps_transacoes_db_version', '1.2.0' );
@@ -358,17 +368,20 @@ class DPS_Finance_Addon {
         // F1.3: FASE 1 - Performance: Adicionar índices otimizados (v1.3.1)
         if ( version_compare( $transacoes_version, '1.3.1', '<' ) ) {
             // Verifica e adiciona índices se não existirem
-            $indexes = $wpdb->get_results( "SHOW INDEX FROM $transacoes_table" );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+            $indexes = $wpdb->get_results( "SHOW INDEX FROM `{$transacoes_table}`" );
             $existing_indexes = array_column( $indexes, 'Key_name' );
             
             // Índice composto em data + status (queries de filtro mais comuns)
             if ( ! in_array( 'idx_finance_date_status', $existing_indexes, true ) ) {
-                $wpdb->query( "CREATE INDEX idx_finance_date_status ON $transacoes_table(data, status)" );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+                $wpdb->query( "CREATE INDEX idx_finance_date_status ON `{$transacoes_table}`(data, status)" );
             }
             
             // Índice em categoria (filtros por categoria)
             if ( ! in_array( 'idx_finance_categoria', $existing_indexes, true ) ) {
-                $wpdb->query( "CREATE INDEX idx_finance_categoria ON $transacoes_table(categoria)" );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+                $wpdb->query( "CREATE INDEX idx_finance_categoria ON `{$transacoes_table}`(categoria)" );
             }
             
             // Nota: cliente_id, agendamento_id e plano_id já possuem índices (KEY) da v1.0.0
@@ -407,20 +420,27 @@ class DPS_Finance_Addon {
         
         // Migração v1.2.0: adicionar coluna valor_cents e created_at
         if ( version_compare( $parcelas_version, '1.2.0', '<' ) ) {
+            // F1.1: FASE 1 - Segurança: DDL queries abaixo usam $parcelas_table que vem de $wpdb->prefix (constante WP)
             // Adiciona coluna valor_cents se não existir
-            $col_valor_cents = $wpdb->get_results( "SHOW COLUMNS FROM $parcelas_table LIKE 'valor_cents'" );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+            $col_valor_cents = $wpdb->get_results( "SHOW COLUMNS FROM `{$parcelas_table}` LIKE 'valor_cents'" );
             if ( empty( $col_valor_cents ) ) {
-                $wpdb->query( "ALTER TABLE $parcelas_table ADD COLUMN valor_cents BIGINT(20) DEFAULT 0 AFTER valor" );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+                $wpdb->query( "ALTER TABLE `{$parcelas_table}` ADD COLUMN valor_cents BIGINT(20) DEFAULT 0 AFTER valor" );
                 // Migra valores existentes de float para centavos
-                $wpdb->query( "UPDATE $parcelas_table SET valor_cents = ROUND(valor * 100) WHERE valor_cents = 0 OR valor_cents IS NULL" );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+                $wpdb->query( "UPDATE `{$parcelas_table}` SET valor_cents = ROUND(valor * 100) WHERE valor_cents = 0 OR valor_cents IS NULL" );
             }
             
             // Adiciona coluna created_at se não existir
-            $col_created = $wpdb->get_results( "SHOW COLUMNS FROM $parcelas_table LIKE 'created_at'" );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+            $col_created = $wpdb->get_results( "SHOW COLUMNS FROM `{$parcelas_table}` LIKE 'created_at'" );
             if ( empty( $col_created ) ) {
-                $wpdb->query( "ALTER TABLE $parcelas_table ADD COLUMN created_at DATETIME DEFAULT NULL" );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+                $wpdb->query( "ALTER TABLE `{$parcelas_table}` ADD COLUMN created_at DATETIME DEFAULT NULL" );
                 // Define created_at = data para registros existentes
-                $wpdb->query( "UPDATE $parcelas_table SET created_at = CONCAT(data, ' 00:00:00') WHERE created_at IS NULL AND data IS NOT NULL" );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+                $wpdb->query( "UPDATE `{$parcelas_table}` SET created_at = CONCAT(data, ' 00:00:00') WHERE created_at IS NULL AND data IS NOT NULL" );
             }
             
             update_option( 'dps_parcelas_db_version', '1.2.0' );
@@ -1717,7 +1737,8 @@ class DPS_Finance_Addon {
         }
         
         // Busca categorias distintas na base para uso no datalist e dropdown
-        $cats = $wpdb->get_col( "SELECT DISTINCT categoria FROM $table ORDER BY categoria" );
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table vem de $wpdb->prefix (seguro)
+        $cats = $wpdb->get_col( "SELECT DISTINCT categoria FROM `{$table}` ORDER BY categoria" );
         
         // Filtros de datas - SEGURANÇA: Sanitiza com wp_unslash()
         $start_date = isset( $_GET['fin_start'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_start'] ) ) : '';
@@ -1785,19 +1806,21 @@ class DPS_Finance_Addon {
         $offset      = ( $current_page - 1 ) * $per_page;
 
         // Conta total de registros para paginação
+        // F1.1: FASE 1 - Segurança: Sempre usar prepare() mesmo quando $where é constante (1=1)
         if ( ! empty( $params ) ) {
-            $count_query = $wpdb->prepare( "SELECT COUNT(*) FROM $table WHERE $where", $params );
+            $count_query = $wpdb->prepare( "SELECT COUNT(*) FROM `{$table}` WHERE $where", $params );
         } else {
-            $count_query = "SELECT COUNT(*) FROM $table WHERE $where";
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table vem de $wpdb->prefix, $where é '1=1' (constante)
+            $count_query = "SELECT COUNT(*) FROM `{$table}` WHERE {$where}";
         }
         $total_items = (int) $wpdb->get_var( $count_query );
         $total_pages = ceil( $total_items / $per_page );
 
         // Query com paginação
         if ( ! empty( $params ) ) {
-            $query = $wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY data DESC LIMIT %d OFFSET %d", array_merge( $params, [ $per_page, $offset ] ) );
+            $query = $wpdb->prepare( "SELECT * FROM `{$table}` WHERE $where ORDER BY data DESC LIMIT %d OFFSET %d", array_merge( $params, [ $per_page, $offset ] ) );
         } else {
-            $query = $wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY data DESC LIMIT %d OFFSET %d", $per_page, $offset );
+            $query = $wpdb->prepare( "SELECT * FROM `{$table}` WHERE {$where} ORDER BY data DESC LIMIT %d OFFSET %d", $per_page, $offset );
         }
 
         // Lista de transações (paginada)
@@ -1813,21 +1836,22 @@ class DPS_Finance_Addon {
             // Cria query otimizada com agregação SQL para melhor performance
             if ( ! empty( $params ) ) {
                 $all_trans_query = $wpdb->prepare( 
-                    "SELECT * FROM $table WHERE $where AND data >= %s ORDER BY data DESC", 
+                    "SELECT * FROM `{$table}` WHERE $where AND data >= %s ORDER BY data DESC", 
                     array_merge( $params, [ $chart_limit_date ] )
                 );
             } else {
                 $all_trans_query = $wpdb->prepare(
-                    "SELECT * FROM $table WHERE data >= %s ORDER BY data DESC",
+                    "SELECT * FROM `{$table}` WHERE data >= %s ORDER BY data DESC",
                     $chart_limit_date
                 );
             }
         } else {
             // Usa query original quando usuário aplicou filtro de data
             if ( ! empty( $params ) ) {
-                $all_trans_query = $wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY data DESC", $params );
+                $all_trans_query = $wpdb->prepare( "SELECT * FROM `{$table}` WHERE $where ORDER BY data DESC", $params );
             } else {
-                $all_trans_query = "SELECT * FROM $table ORDER BY data DESC";
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table vem de $wpdb->prefix, sem filtros (seguro)
+                $all_trans_query = "SELECT * FROM `{$table}` ORDER BY data DESC";
             }
         }
         

@@ -55,7 +55,8 @@ foreach ( $dps_post_types as $post_type ) {
 // Remove tabela de logs
 global $wpdb;
 $table_name = $wpdb->prefix . 'dps_logs';
-$wpdb->query( "DROP TABLE IF EXISTS {$table_name}" );
+// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
+$wpdb->query( "DROP TABLE IF EXISTS `{$table_name}`" );
 
 // Remove options do plugin
 $dps_options = [

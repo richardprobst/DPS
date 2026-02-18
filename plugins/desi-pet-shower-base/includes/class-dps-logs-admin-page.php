@@ -236,7 +236,8 @@ class DPS_Logs_Admin_Page {
         $items = $wpdb->get_results( $sql, ARRAY_A );
 
         if ( empty( $where_sql ) ) {
-            $total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table vem de DPS_Logger::get_table_name() ($wpdb->prefix, seguro)
+            $total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table}`" );
         } else {
             $count_sql = $wpdb->prepare( "SELECT COUNT(*) FROM {$table} {$where_sql}", $params );
             $total     = (int) $wpdb->get_var( $count_sql );

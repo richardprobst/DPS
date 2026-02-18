@@ -5756,8 +5756,12 @@ class DPS_Base_Frontend {
         // Verifica se alguma opção coincide com a URL
         $file_url = trailingslashit( $uploads['baseurl'] ) . 'dps_docs/' . basename( $filename );
         global $wpdb;
-        // Busca opções que comecem com dps_fin_doc_
-        $options = $wpdb->get_results( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE 'dps_fin_doc_%'" );
+        // F1.1: FASE 1 - Segurança: Usar $wpdb->prepare() com esc_like() para padrão LIKE
+        $like_pattern = $wpdb->esc_like( 'dps_fin_doc_' ) . '%';
+        $options = $wpdb->get_results( $wpdb->prepare(
+            "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
+            $like_pattern
+        ) );
         if ( $options ) {
             foreach ( $options as $opt ) {
                 $opt_val = get_option( $opt->option_name );

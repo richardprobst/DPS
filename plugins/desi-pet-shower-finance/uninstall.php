@@ -22,7 +22,8 @@ $tables = [
 ];
 
 foreach ( $tables as $table ) {
-    // Backticks protegem identificadores com caracteres especiais
+    // F1.1: FASE 1 - Segurança: Backticks protegem identificadores; $table vem de $wpdb->prefix (constante WP)
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- DDL com table name de $wpdb->prefix
     $wpdb->query( "DROP TABLE IF EXISTS `{$table}`" );
 }
 

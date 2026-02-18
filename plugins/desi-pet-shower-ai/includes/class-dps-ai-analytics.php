@@ -449,8 +449,8 @@ class DPS_AI_Analytics {
         }
 
         // Todos os feedbacks
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-        return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table_name}" );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table_name vem de $wpdb->prefix (seguro)
+        return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table_name}`" );
     }
 
     /**

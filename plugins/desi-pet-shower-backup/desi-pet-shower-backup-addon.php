@@ -870,16 +870,25 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             $postmeta_table = $wpdb->postmeta;
             $options_table  = $wpdb->options;
 
-            $posts = $wpdb->get_results( "SELECT * FROM {$posts_table} WHERE post_type LIKE 'dps\\_%' ESCAPE '\\' ORDER BY ID ASC", ARRAY_A );
+            // F1.1: FASE 1 - Segurança: Usar prepare() com LIKE pattern
+            $posts = $wpdb->get_results( $wpdb->prepare(
+                "SELECT * FROM {$posts_table} WHERE post_type LIKE %s ESCAPE '\\\\' ORDER BY ID ASC",
+                'dps\\_%'
+            ), ARRAY_A );
             $post_ids = array_map( 'intval', wp_list_pluck( $posts, 'ID' ) );
 
             $meta = [];
             if ( $post_ids ) {
-                $ids_in = implode( ',', array_map( 'intval', $post_ids ) );
-                $meta   = $wpdb->get_results( "SELECT * FROM {$postmeta_table} WHERE post_id IN ( {$ids_in} ) ORDER BY meta_id ASC", ARRAY_A );
+                $placeholders = implode( ',', array_fill( 0, count( $post_ids ), '%d' ) );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholders gerados dinamicamente
+                $meta   = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$postmeta_table} WHERE post_id IN ( {$placeholders} ) ORDER BY meta_id ASC", $post_ids ), ARRAY_A );
             }
 
-            $options = $wpdb->get_results( "SELECT option_name, option_value, autoload FROM {$options_table} WHERE option_name LIKE 'dps\\_%' ESCAPE '\\' ORDER BY option_name", ARRAY_A );
+            // F1.1: FASE 1 - Segurança: Usar prepare() com LIKE pattern
+            $options = $wpdb->get_results( $wpdb->prepare(
+                "SELECT option_name, option_value, autoload FROM {$options_table} WHERE option_name LIKE %s ESCAPE '\\\\' ORDER BY option_name",
+                'dps\\_%'
+            ), ARRAY_A );
 
             $tables = $this->gather_custom_tables();
             if ( is_wp_error( $tables ) ) {
@@ -1068,7 +1077,8 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 return [];
             }
 
-            $rows = $wpdb->get_results( "SELECT * FROM {$table} ORDER BY id ASC", ARRAY_A );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table vem de $wpdb->prefix (seguro)
+            $rows = $wpdb->get_results( "SELECT * FROM `{$table}` ORDER BY id ASC", ARRAY_A );
             return is_array( $rows ) ? $rows : [];
         }
 
@@ -1593,9 +1603,10 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             $post_types = $this->get_post_types_from_components( $components );
             $existing_posts = [];
             if ( $post_types ) {
-                $post_types_sql = implode( "','", array_map( 'esc_sql', $post_types ) );
-                // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Escapado com esc_sql()
-                $existing_posts = $wpdb->get_col( "SELECT ID FROM {$posts_table} WHERE post_type IN ('{$post_types_sql}')" );
+                // F1.1: FASE 1 - Segurança: Usar prepare() com placeholders dinâmicos
+                $placeholders = implode( ',', array_fill( 0, count( $post_types ), '%s' ) );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholders dinâmicos com prepare()
+                $existing_posts = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$posts_table} WHERE post_type IN ({$placeholders})", $post_types ) );
             }
 
             $attachment_meta_ids = [];
@@ -1608,36 +1619,39 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
 
             $attachment_by_parent = [];
             if ( $existing_posts && in_array( 'files', $components, true ) ) {
-                $ids_in              = implode( ',', array_map( 'intval', $existing_posts ) );
-                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IDs sanitizados com intval()
-                $attachment_by_parent = $wpdb->get_col( "SELECT ID FROM {$posts_table} WHERE post_type = 'attachment' AND post_parent IN ( {$ids_in} )" );
+                $sanitized_ids = array_map( 'intval', $existing_posts );
+                $id_placeholders = implode( ',', array_fill( 0, count( $sanitized_ids ), '%d' ) );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholders dinâmicos com prepare()
+                $attachment_by_parent = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$posts_table} WHERE post_type = 'attachment' AND post_parent IN ( {$id_placeholders} )", $sanitized_ids ) );
             }
 
             $all_attachments = array_unique( array_merge( $attachment_meta_ids, array_map( 'intval', $attachment_by_parent ) ) );
 
             if ( $existing_posts ) {
-                $ids_in = implode( ',', array_map( 'intval', $existing_posts ) );
-                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IDs sanitizados com intval()
-                $meta_delete = $wpdb->query( "DELETE FROM {$postmeta_table} WHERE post_id IN ( {$ids_in} )" );
+                $sanitized_ids = array_map( 'intval', $existing_posts );
+                $id_placeholders = implode( ',', array_fill( 0, count( $sanitized_ids ), '%d' ) );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholders dinâmicos com prepare()
+                $meta_delete = $wpdb->query( $wpdb->prepare( "DELETE FROM {$postmeta_table} WHERE post_id IN ( {$id_placeholders} )", $sanitized_ids ) );
                 if ( false === $meta_delete ) {
                     throw new Exception( __( 'Falha ao limpar metadados existentes antes da restauração.', 'dps-backup-addon' ) );
                 }
-                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IDs sanitizados com intval()
-                $post_delete = $wpdb->query( "DELETE FROM {$posts_table} WHERE ID IN ( {$ids_in} )" );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholders dinâmicos com prepare()
+                $post_delete = $wpdb->query( $wpdb->prepare( "DELETE FROM {$posts_table} WHERE ID IN ( {$id_placeholders} )", $sanitized_ids ) );
                 if ( false === $post_delete ) {
                     throw new Exception( __( 'Falha ao remover posts existentes antes da restauração.', 'dps-backup-addon' ) );
                 }
             }
 
             if ( $all_attachments ) {
-                $attach_in = implode( ',', array_map( 'intval', $all_attachments ) );
-                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IDs sanitizados com intval()
-                $attach_meta = $wpdb->query( "DELETE FROM {$postmeta_table} WHERE post_id IN ( {$attach_in} )" );
+                $sanitized_attach = array_map( 'intval', $all_attachments );
+                $attach_placeholders = implode( ',', array_fill( 0, count( $sanitized_attach ), '%d' ) );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholders dinâmicos com prepare()
+                $attach_meta = $wpdb->query( $wpdb->prepare( "DELETE FROM {$postmeta_table} WHERE post_id IN ( {$attach_placeholders} )", $sanitized_attach ) );
                 if ( false === $attach_meta ) {
                     throw new Exception( __( 'Falha ao remover metadados de anexos antigos.', 'dps-backup-addon' ) );
                 }
-                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IDs sanitizados com intval()
-                $attach_posts = $wpdb->query( "DELETE FROM {$posts_table} WHERE ID IN ( {$attach_in} )" );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholders dinâmicos com prepare()
+                $attach_posts = $wpdb->query( $wpdb->prepare( "DELETE FROM {$posts_table} WHERE ID IN ( {$attach_placeholders} )", $sanitized_attach ) );
                 if ( false === $attach_posts ) {
                     throw new Exception( __( 'Falha ao remover anexos antigos.', 'dps-backup-addon' ) );
                 }
@@ -2153,8 +2167,10 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
 
             $attachment_ids = [];
             if ( $post_ids ) {
-                $ids_in         = implode( ',', array_map( 'intval', $post_ids ) );
-                $by_parent      = $wpdb->get_col( "SELECT ID FROM {$posts_table} WHERE post_type = 'attachment' AND post_parent IN ( {$ids_in} )" );
+                $placeholders   = implode( ',', array_fill( 0, count( $post_ids ), '%d' ) );
+                $sanitized_ids  = array_map( 'intval', $post_ids );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholders dinâmicos com prepare()
+                $by_parent      = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$posts_table} WHERE post_type = 'attachment' AND post_parent IN ( {$placeholders} )", $sanitized_ids ) );
                 $attachment_ids = array_merge( $attachment_ids, array_map( 'intval', $by_parent ) );
             }
 
@@ -2172,18 +2188,21 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 return [];
             }
 
-            $ids_in = implode( ',', array_map( 'intval', $attachment_ids ) );
+            $placeholders = implode( ',', array_fill( 0, count( $attachment_ids ), '%d' ) );
+            $sanitized_ids = array_map( 'intval', $attachment_ids );
 
             $attachments = [];
             $formats     = $this->get_post_formats();
 
-            $posts_rows = $wpdb->get_results( "SELECT * FROM {$posts_table} WHERE ID IN ( {$ids_in} )", ARRAY_A );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholders dinâmicos com prepare()
+            $posts_rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$posts_table} WHERE ID IN ( {$placeholders} )", $sanitized_ids ), ARRAY_A );
             $posts_map  = [];
             foreach ( $posts_rows as $row ) {
                 $posts_map[ (int) $row['ID'] ] = $row;
             }
 
-            $meta_rows = $wpdb->get_results( "SELECT * FROM {$postmeta_table} WHERE post_id IN ( {$ids_in} )", ARRAY_A );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholders dinâmicos com prepare()
+            $meta_rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$postmeta_table} WHERE post_id IN ( {$placeholders} )", $sanitized_ids ), ARRAY_A );
             $meta_map  = [];
             foreach ( $meta_rows as $meta_row ) {
                 $post_id = (int) $meta_row['post_id'];
