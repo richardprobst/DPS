@@ -1232,13 +1232,13 @@
         var messages = {
             'updated': {
                 type: 'success',
-                title: 'Sucesso!',
-                message: 'Seus dados foram atualizados com sucesso.'
+                title: 'Dados Salvos!',
+                message: 'Seus dados pessoais foram atualizados com sucesso.'
             },
             'pet_updated': {
                 type: 'success',
-                title: 'Sucesso!',
-                message: 'Dados do pet atualizados com sucesso.'
+                title: 'Pet Atualizado!',
+                message: 'As informações do pet foram salvas com sucesso.'
             },
             'preferences_updated': {
                 type: 'success',
@@ -1247,43 +1247,68 @@
             },
             'pet_preferences_updated': {
                 type: 'success',
-                title: 'Sucesso!',
-                message: 'Preferências do pet atualizadas com sucesso.'
+                title: 'Preferências do Pet Salvas',
+                message: 'As preferências de produtos do pet foram atualizadas.'
             },
             'upload_error': {
                 type: 'error',
                 title: 'Erro no Upload',
-                message: 'Não foi possível enviar a foto. Verifique o arquivo e tente novamente.'
+                message: 'Não foi possível enviar a foto. Verifique se o arquivo é uma imagem válida (JPG, PNG, GIF ou WebP) com até 5 MB.'
             },
             'invalid_file_type': {
                 type: 'error',
-                title: 'Formato Inválido',
-                message: 'Use uma imagem nos formatos JPG, PNG, GIF ou WebP.'
+                title: 'Formato Não Aceito',
+                message: 'O arquivo enviado não é uma imagem válida. Use JPG, PNG, GIF ou WebP.'
             },
             'file_too_large': {
                 type: 'error',
-                title: 'Arquivo Grande Demais',
-                message: 'A foto deve ter no máximo 5 MB. Reduza o tamanho e tente novamente.'
+                title: 'Foto Grande Demais',
+                message: 'A foto deve ter no máximo 5 MB. Reduza o tamanho da imagem e tente novamente.'
             },
             'session_expired': {
                 type: 'error',
                 title: 'Sessão Expirada',
-                message: 'Sua sessão expirou. Faça login novamente para continuar.'
+                message: 'Sua sessão expirou por segurança. Solicite um novo link de acesso para continuar.'
             },
             'message_sent': {
                 type: 'success',
-                title: 'Mensagem Enviada',
-                message: 'Sua mensagem foi enviada para a equipe.'
+                title: 'Mensagem Enviada!',
+                message: 'Sua mensagem foi enviada para a equipe. Responderemos o mais breve possível.'
+            },
+            'message_error': {
+                type: 'error',
+                title: 'Erro ao Enviar',
+                message: 'Não foi possível enviar sua mensagem. Verifique o conteúdo e tente novamente.'
+            },
+            'review_submitted': {
+                type: 'success',
+                title: 'Avaliação Enviada! 🎉',
+                message: 'Obrigado pela sua avaliação! Sua opinião é muito importante para nós.'
+            },
+            'review_already': {
+                type: 'info',
+                title: 'Avaliação Já Registrada',
+                message: 'Você já enviou uma avaliação anteriormente. Obrigado pelo feedback!'
+            },
+            'review_invalid': {
+                type: 'error',
+                title: 'Avaliação Incompleta',
+                message: 'Por favor, selecione uma nota de 1 a 5 estrelas antes de enviar.'
+            },
+            'review_error': {
+                type: 'error',
+                title: 'Erro na Avaliação',
+                message: 'Não foi possível registrar sua avaliação. Tente novamente em alguns instantes.'
             },
             'error': {
                 type: 'error',
-                title: 'Erro',
-                message: 'Ocorreu um erro ao processar sua solicitação. Tente novamente.'
+                title: 'Algo Deu Errado',
+                message: 'Não foi possível processar sua solicitação. Tente novamente ou entre em contato pelo chat.'
             },
             'unauthorized': {
                 type: 'error',
-                title: 'Acesso Negado',
-                message: 'Você não tem permissão para acessar este recurso.'
+                title: 'Acesso Não Autorizado',
+                message: 'Seu link de acesso pode ter expirado. Solicite um novo link para continuar.'
             }
         };
         
