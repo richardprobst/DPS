@@ -1638,7 +1638,7 @@ final class DPS_Client_Portal {
         $achievement_definitions = DPS_Loyalty_Achievements::get_achievements_definitions();
         $unlocked_achievements  = DPS_Loyalty_Achievements::get_client_achievements( $client_id );
 
-        $credit_display = class_exists( 'DPS_Money_Helper' ) ? 'R$ ' . DPS_Money_Helper::format_to_brazilian( $credit ) : 'R$ ' . number_format( $credit / 100, 2, ',', '.' );
+        $credit_display = DPS_Money_Helper::format_currency( $credit );
         $progress       = isset( $tier['progress'] ) ? (int) $tier['progress'] : 0;
         $next_points    = isset( $tier['next_points'] ) ? (int) $tier['next_points'] : null;
         $loyalty_nonce  = wp_create_nonce( 'dps_portal_loyalty' );
@@ -1649,7 +1649,7 @@ final class DPS_Client_Portal {
         $max_discount_cents   = isset( $settings['portal_max_discount_amount'] ) ? (int) $settings['portal_max_discount_amount'] : 0;
         $max_points_by_cap    = $max_discount_cents > 0 ? (int) floor( ( $max_discount_cents / 100 ) * $points_per_real ) : $points;
         $max_points_available = min( $points, $max_points_by_cap );
-        $max_discount_display = class_exists( 'DPS_Money_Helper' ) ? DPS_Money_Helper::format_to_brazilian( $max_discount_cents ) : number_format( $max_discount_cents / 100, 2, ',', '.' );
+        $max_discount_display = DPS_Money_Helper::format_to_brazilian( $max_discount_cents );
 
         // Hero Section - Tier e Progresso
         echo '<div class="dps-loyalty-hero" data-loyalty-nonce="' . esc_attr( $loyalty_nonce ) . '" data-history-limit="' . esc_attr( $history_limit ) . '">';

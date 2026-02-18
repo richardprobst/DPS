@@ -176,12 +176,7 @@ class DPS_Google_Tasks_Sync {
         $valor_cents = (int) $transaction['valor_cents'];
         $valor_real  = $valor_cents / 100;
 
-        // Usa DPS_Money_Helper se disponível
-        if ( class_exists( 'DPS_Money_Helper' ) ) {
-            $valor_formatado = DPS_Money_Helper::format_for_display( $valor_cents );
-        } else {
-            $valor_formatado = 'R$ ' . number_format( $valor_real, 2, ',', '.' );
-        }
+        $valor_formatado = DPS_Money_Helper::format_currency( $valor_cents );
 
         $due_date  = $transaction['data_vencimento'];
         $admin_url = admin_url( 'post.php?post=' . $appt_id . '&action=edit' );

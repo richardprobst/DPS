@@ -603,11 +603,7 @@ class DPS_AI_Assistant {
         }
 
         // Formata valor total usando helper se disponível
-        if ( class_exists( 'DPS_Money_Helper' ) ) {
-            $formatted_total = 'R$ ' . DPS_Money_Helper::format_to_brazilian( $total_pending );
-        } else {
-            $formatted_total = 'R$ ' . number_format( $total_pending / 100, 2, ',', '.' );
-        }
+        $formatted_total = DPS_Money_Helper::format_currency( $total_pending );
 
         return "{$count} cobrança(s) pendente(s), total: {$formatted_total}";
     }

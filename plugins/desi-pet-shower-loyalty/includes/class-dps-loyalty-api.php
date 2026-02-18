@@ -1183,10 +1183,7 @@ class DPS_Loyalty_API {
             case 'points':
                 return sprintf( '%d pts', (int) $value );
             case 'fixed':
-                if ( class_exists( 'DPS_Money_Helper' ) ) {
-                    return 'R$ ' . DPS_Money_Helper::format_to_brazilian( (int) $value );
-                }
-                return 'R$ ' . number_format( (int) $value / 100, 2, ',', '.' );
+                return DPS_Money_Helper::format_currency( (int) $value );
             case 'percent':
                 return $value . '%';
             default:

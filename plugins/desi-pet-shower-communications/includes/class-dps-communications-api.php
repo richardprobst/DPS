@@ -447,11 +447,7 @@ class DPS_Communications_API {
 
         // Formata valor
         $amount_formatted = '';
-        if ( class_exists( 'DPS_Money_Helper' ) ) {
-            $amount_formatted = DPS_Money_Helper::format_to_brazilian( $amount_cents );
-        } else {
-            $amount_formatted = 'R$ ' . number_format( $amount_cents / 100, 2, ',', '.' );
-        }
+        $amount_formatted = DPS_Money_Helper::format_currency( $amount_cents );
 
         // Prepara mensagem
         $client_name = $client->post_title;

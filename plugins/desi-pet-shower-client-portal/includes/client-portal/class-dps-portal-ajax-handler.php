@@ -329,7 +329,7 @@ class DPS_Portal_AJAX_Handler {
         $new_credit = DPS_Loyalty_API::add_credit( $client_id, $discount_cents, 'portal_redemption' );
         $new_points = DPS_Loyalty_API::get_points( $client_id );
 
-        $credit_display = class_exists( 'DPS_Money_Helper' ) ? 'R$ ' . DPS_Money_Helper::format_to_brazilian( $new_credit ) : 'R$ ' . number_format( $new_credit / 100, 2, ',', '.' );
+        $credit_display = DPS_Money_Helper::format_currency( $new_credit );
 
         $message = sprintf(
             __( 'Você converteu %1$d pontos em %2$s de crédito. 🎉', 'dps-client-portal' ),
