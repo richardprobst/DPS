@@ -135,18 +135,19 @@ Reduzir a complexidade do código-fonte, melhorar a manutenibilidade e estabelec
 
 **Ação:**
 - [x] Mapear todas as responsabilidades do arquivo (métodos agrupados por função)
-- [ ] Extrair classe `DPS_Form_Renderer` — renderização de formulários HTML (seções clients/pets/agendas)
-- [ ] Extrair classe `DPS_Form_Validator` — validação de campos
 - [x] Extrair classe `DPS_Appointment_Handler` — lógica de agendamento (810 linhas)
 - [x] Extrair classe `DPS_Client_Handler` — CRUD de clientes (184 linhas)
 - [x] Extrair classe `DPS_Pet_Handler` — CRUD de pets (337 linhas)
-- [x] Extrair classe `DPS_Client_Page_Renderer` — página de detalhes do cliente (1.506 linhas, 23 métodos: renderização, ações, dados, documentos, labels)
+- [x] Extrair classe `DPS_Client_Page_Renderer` — página de detalhes do cliente (1.506 linhas, 23 métodos)
 - [x] Extrair classe `DPS_Breed_Registry` — dataset de raças por espécie (201 linhas)
 - [x] Extrair classe `DPS_History_Section_Renderer` — seção de histórico de atendimentos (481 linhas)
+- [x] Extrair classe `DPS_Appointments_Section_Renderer` — seção de agendamentos com formulário e listagem (926 linhas)
+- [x] Extrair classe `DPS_Clients_Section_Renderer` — seção de clientes com filtros e estatísticas (270 linhas)
+- [x] Extrair classe `DPS_Pets_Section_Renderer` — seção de pets com filtros e paginação (345 linhas)
 - [x] Manter `class-dps-base-frontend.php` como orquestrador (fachada) que delega para as novas classes
 - [x] Garantir que hooks existentes continuem funcionando (backward compatibility)
 - [x] Atualizar `ANALYSIS.md` com a nova estrutura de classes
-- [x] Monólito reduzido de 5.986 para 2.875 linhas (–52%)
+- [x] Monólito reduzido de 5.986 para 1.581 linhas (–74%)
 
 **Princípios (SRP):**
 - Cada classe com responsabilidade única
