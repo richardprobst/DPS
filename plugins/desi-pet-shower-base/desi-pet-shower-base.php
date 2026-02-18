@@ -83,6 +83,9 @@ require_once DPS_BASE_DIR . 'includes/class-dps-client-page-renderer.php';
 // Registro centralizado de raças (extraído do frontend)
 require_once DPS_BASE_DIR . 'includes/class-dps-breed-registry.php';
 
+// Carrega renderer da seção de histórico
+require_once DPS_BASE_DIR . 'includes/class-dps-history-section-renderer.php';
+
 // Carrega classe de frontend
 require_once DPS_BASE_DIR . 'includes/class-dps-base-frontend.php';
 
