@@ -130,7 +130,7 @@ Antes de criar uma nova versão oficial:
 
 **Fase 2 — Refatoração Estrutural (Plano de Implementação)**
 
-- **Decomposição do monólito**: extraídas classes `DPS_Client_Handler` (184 linhas), `DPS_Pet_Handler` (337 linhas) e `DPS_Appointment_Handler` (810 linhas) de `class-dps-base-frontend.php` (–1.025 linhas total: 5.986 → 4.961). Cada classe encapsula CRUD, validação e sanitização, seguindo SRP. O frontend agora delega via callback pattern.
+- **Decomposição do monólito**: extraídas classes `DPS_Client_Handler` (184 linhas), `DPS_Pet_Handler` (337 linhas), `DPS_Appointment_Handler` (810 linhas) e `DPS_Client_Page_Renderer` (1.506 linhas, 23 métodos) de `class-dps-base-frontend.php` (–2.509 linhas total: 5.986 → 3.477, –42%). Cada classe encapsula responsabilidade única (SRP). O frontend mantém facades que delegam para as classes extraídas.
 - **DPS_Phone_Helper::clean()**: adicionado método utilitário para limpeza de telefone (remove não-dígitos), centralizando lógica duplicada em 9+ arquivos.
 - **Centralização DPS_Money_Helper**: migradas 16 instâncias de `number_format()` para `DPS_Money_Helper::format_currency()` e `format_currency_from_decimal()` em 10 add-ons (Communications, AI, Agenda, Finance, Loyalty, Client Portal). Removidos fallbacks `class_exists()` desnecessários.
 - **Template padrão de add-on**: documentado em `ANALYSIS.md` com estrutura de diretórios, header WP, padrão de inicialização (init@1, classes@5, admin_menu@20), assets condicionais e tabela de compliance.

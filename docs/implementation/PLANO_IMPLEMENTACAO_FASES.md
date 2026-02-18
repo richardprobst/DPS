@@ -135,14 +135,16 @@ Reduzir a complexidade do código-fonte, melhorar a manutenibilidade e estabelec
 
 **Ação:**
 - [x] Mapear todas as responsabilidades do arquivo (métodos agrupados por função)
-- [ ] Extrair classe `DPS_Form_Renderer` — renderização de formulários HTML
+- [ ] Extrair classe `DPS_Form_Renderer` — renderização de formulários HTML (seções clients/pets/agendas)
 - [ ] Extrair classe `DPS_Form_Validator` — validação de campos
-- [x] Extrair classe `DPS_Appointment_Handler` — lógica de agendamento
-- [x] Extrair classe `DPS_Client_Handler` — CRUD de clientes
-- [x] Extrair classe `DPS_Pet_Handler` — CRUD de pets
+- [x] Extrair classe `DPS_Appointment_Handler` — lógica de agendamento (810 linhas)
+- [x] Extrair classe `DPS_Client_Handler` — CRUD de clientes (184 linhas)
+- [x] Extrair classe `DPS_Pet_Handler` — CRUD de pets (337 linhas)
+- [x] Extrair classe `DPS_Client_Page_Renderer` — página de detalhes do cliente (1.506 linhas, 23 métodos: renderização, ações, dados, documentos, labels)
 - [x] Manter `class-dps-base-frontend.php` como orquestrador (fachada) que delega para as novas classes
 - [x] Garantir que hooks existentes continuem funcionando (backward compatibility)
 - [x] Atualizar `ANALYSIS.md` com a nova estrutura de classes
+- [x] Monólito reduzido de 5.986 para 3.477 linhas (–42%)
 
 **Princípios (SRP):**
 - Cada classe com responsabilidade única
