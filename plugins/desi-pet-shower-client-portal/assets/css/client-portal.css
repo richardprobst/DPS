@@ -5673,6 +5673,7 @@ html {
     border: 1px solid var(--dps-border-color);
     border-radius: var(--dps-shape-small);
     padding: 24px;
+    margin-top: 24px;
     margin-bottom: 24px;
 }
 
@@ -7754,6 +7755,11 @@ html {
     box-shadow: 0 0 0 3px var(--dps-primary-light);
 }
 
+.dps-meus-dados-form .dps-form-control:focus-visible {
+    outline: 2px solid var(--dps-color-primary, var(--dps-primary));
+    outline-offset: 2px;
+}
+
 .dps-meus-dados-form .dps-form-control::placeholder {
     color: var(--dps-gray-400);
 }
@@ -7827,8 +7833,25 @@ html {
     transform: translateY(0);
 }
 
+.dps-meus-dados-form .dps-btn-submit:focus-visible {
+    outline: 2px solid var(--dps-color-primary, var(--dps-primary));
+    outline-offset: 2px;
+}
+
+.dps-meus-dados-form .dps-btn-submit:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
 .dps-meus-dados-form .dps-btn-submit span {
     font-size: 16px;
+}
+
+/* File input styling */
+.dps-meus-dados-form input[type="file"].dps-form-control {
+    padding: 8px 12px;
+    cursor: pointer;
 }
 
 /* Header do card de pet com foto */

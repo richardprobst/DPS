@@ -727,7 +727,7 @@
         
         forms.forEach(function(form) {
             form.addEventListener('submit', function(e) {
-                var submitBtn = form.querySelector('.dps-submit-btn');
+                var submitBtn = form.querySelector('.dps-btn-submit, .dps-submit-btn');
                 
                 if (submitBtn && !submitBtn.disabled) {
                     // Salva texto original
@@ -1076,6 +1076,36 @@
                 type: 'success',
                 title: 'Sucesso!',
                 message: 'Dados do pet atualizados com sucesso.'
+            },
+            'preferences_updated': {
+                type: 'success',
+                title: 'Preferências Salvas',
+                message: 'Suas preferências foram atualizadas com sucesso.'
+            },
+            'pet_preferences_updated': {
+                type: 'success',
+                title: 'Sucesso!',
+                message: 'Preferências do pet atualizadas com sucesso.'
+            },
+            'upload_error': {
+                type: 'error',
+                title: 'Erro no Upload',
+                message: 'Não foi possível enviar a foto. Verifique o arquivo e tente novamente.'
+            },
+            'invalid_file_type': {
+                type: 'error',
+                title: 'Formato Inválido',
+                message: 'Use uma imagem nos formatos JPG, PNG, GIF ou WebP.'
+            },
+            'file_too_large': {
+                type: 'error',
+                title: 'Arquivo Grande Demais',
+                message: 'A foto deve ter no máximo 5 MB. Reduza o tamanho e tente novamente.'
+            },
+            'session_expired': {
+                type: 'error',
+                title: 'Sessão Expirada',
+                message: 'Sua sessão expirou. Faça login novamente para continuar.'
             },
             'message_sent': {
                 type: 'success',
