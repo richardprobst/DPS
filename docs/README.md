@@ -100,6 +100,7 @@ Resumos de implementação de features.
 - `WHATSAPP_IMPLEMENTATION_SUMMARY.md` - Implementação de integração WhatsApp
 - `FRONTEND_ROLLOUT_GUIDE.md` - **🆕** Guia operacional de rollout do Frontend Add-on (ativação por ambiente, verificação, monitoramento)
 - `FRONTEND_RUNBOOK.md` - **🆕** Runbook de incidentes do Frontend Add-on (diagnóstico, rollback, cenários)
+- `PLANO_IMPLEMENTACAO_FASES.md` - **🆕** Plano completo de implementação em 8 fases (Segurança → Refatoração → Performance → UX → Features → Auditoria → Testes → Integrações)
 
 ### 📁 /docs/improvements
 
