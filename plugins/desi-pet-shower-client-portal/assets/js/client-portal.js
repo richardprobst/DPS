@@ -34,6 +34,7 @@
     function init() {
         cleanTokenFromURL();
         handleTabNavigation();
+        handleFormValidation(); // Fase 4.2: validação em tempo real
         handleFormSubmits();
         handleFileUploadPreview();
         handleSmoothScroll();
@@ -720,6 +721,165 @@
     }
 
     /**
+     * Fase 4.2: Validação em tempo real nos formulários do portal.
+     * Valida campos on blur/input e mostra mensagens inline acessíveis.
+     */
+    function handleFormValidation() {
+        var forms = document.querySelectorAll('.dps-portal-form');
+        if (!forms.length) return;
+
+        // Regras de validação por name do campo
+        var rules = {
+            'client_phone': {
+                pattern: /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/,
+                message: 'Informe um telefone válido. Ex: (11) 99999-9999'
+            },
+            'client_email': {
+                pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: 'Informe um e-mail válido. Ex: nome@email.com'
+            },
+            'client_zip': {
+                pattern: /^\d{5}-?\d{3}$/,
+                message: 'Informe um CEP válido. Ex: 01234-567'
+            },
+            'client_state': {
+                pattern: /^[A-Za-z]{2}$/,
+                message: 'Use a sigla do estado com 2 letras. Ex: SP'
+            },
+            'pet_name': {
+                required: true,
+                message: 'O nome do pet é obrigatório.'
+            },
+            'pet_weight': {
+                pattern: /^\d+([.,]\d{1,2})?$/,
+                message: 'Informe um peso válido. Ex: 8.5'
+            },
+            'pet_birth': {
+                maxDate: new Date().toISOString().split('T')[0],
+                message: 'A data de nascimento não pode ser no futuro.'
+            }
+        };
+
+        /**
+         * Valida um campo individual.
+         * @param {HTMLElement} field - O campo a validar.
+         * @returns {boolean} true se válido.
+         */
+        function validateField(field) {
+            var name = field.getAttribute('name');
+            var value = field.value.trim();
+            var rule = rules[name];
+            var errorEl = field.parentNode.querySelector('.dps-field-error');
+
+            // Sem regra customizada — usa validação HTML5 nativa
+            if (!rule) {
+                if (field.hasAttribute('required') && !value) {
+                    setInvalid(field, errorEl, 'Este campo é obrigatório.');
+                    return false;
+                }
+                setValid(field, errorEl);
+                return true;
+            }
+
+            // Campo vazio: só erro se obrigatório
+            if (!value) {
+                if (rule.required || field.hasAttribute('required')) {
+                    setInvalid(field, errorEl, rule.message);
+                    return false;
+                }
+                clearState(field, errorEl);
+                return true;
+            }
+
+            // Validação de pattern
+            if (rule.pattern && !rule.pattern.test(value)) {
+                setInvalid(field, errorEl, rule.message);
+                return false;
+            }
+
+            // Validação de data máxima
+            if (rule.maxDate && value > rule.maxDate) {
+                setInvalid(field, errorEl, rule.message);
+                return false;
+            }
+
+            setValid(field, errorEl);
+            return true;
+        }
+
+        function setInvalid(field, errorEl, message) {
+            field.classList.add('is-invalid');
+            field.classList.remove('is-valid');
+            field.setAttribute('aria-invalid', 'true');
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+            }
+        }
+
+        function setValid(field, errorEl) {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+            field.setAttribute('aria-invalid', 'false');
+            if (errorEl) {
+                errorEl.textContent = '';
+                errorEl.style.display = 'none';
+            }
+        }
+
+        function clearState(field, errorEl) {
+            field.classList.remove('is-invalid', 'is-valid');
+            field.removeAttribute('aria-invalid');
+            if (errorEl) {
+                errorEl.textContent = '';
+                errorEl.style.display = 'none';
+            }
+        }
+
+        forms.forEach(function(form) {
+            var fields = form.querySelectorAll('.dps-form-control');
+
+            fields.forEach(function(field) {
+                // Validar ao sair do campo (blur)
+                field.addEventListener('blur', function() {
+                    // Só valida se o campo já foi tocado (tem valor ou perdeu foco)
+                    if (field.value.trim() || field.hasAttribute('required')) {
+                        validateField(field);
+                    }
+                });
+
+                // Limpar erro enquanto digita (feedback imediato)
+                field.addEventListener('input', function() {
+                    if (field.classList.contains('is-invalid')) {
+                        validateField(field);
+                    }
+                });
+            });
+
+            // Validar todos os campos antes do submit
+            form.addEventListener('submit', function(e) {
+                var allValid = true;
+                var firstInvalid = null;
+
+                fields.forEach(function(field) {
+                    if (!validateField(field)) {
+                        allValid = false;
+                        if (!firstInvalid) firstInvalid = field;
+                    }
+                });
+
+                if (!allValid) {
+                    e.preventDefault();
+                    if (firstInvalid) {
+                        firstInvalid.focus();
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            });
+        });
+    }
+
+    /**
      * Adiciona feedback visual durante submit de formulários
      */
     function handleFormSubmits() {
@@ -727,6 +887,9 @@
         
         forms.forEach(function(form) {
             form.addEventListener('submit', function(e) {
+                // Se a validação customizada já preveniu o submit, não prosseguir
+                if (e.defaultPrevented) return;
+
                 var submitBtn = form.querySelector('.dps-btn-submit, .dps-submit-btn');
                 
                 if (submitBtn && !submitBtn.disabled) {

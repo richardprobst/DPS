@@ -900,12 +900,14 @@ class DPS_Portal_Renderer {
         
         echo '<div class="dps-form-col">';
         echo '<label for="client_phone" class="dps-form-label">' . esc_html__( 'Telefone / WhatsApp', 'dps-client-portal' ) . '</label>';
-        echo '<input type="tel" name="client_phone" id="client_phone" value="' . esc_attr( $phone ) . '" class="dps-form-control" placeholder="(XX) XXXXX-XXXX">';
+        echo '<input type="tel" name="client_phone" id="client_phone" value="' . esc_attr( $phone ) . '" class="dps-form-control" placeholder="(XX) XXXXX-XXXX" aria-describedby="client_phone_error">';
+        echo '<span class="dps-field-error" id="client_phone_error" role="alert"></span>';
         echo '</div>';
         
         echo '<div class="dps-form-col">';
         echo '<label for="client_email" class="dps-form-label">' . esc_html__( 'E-mail', 'dps-client-portal' ) . '</label>';
-        echo '<input type="email" name="client_email" id="client_email" value="' . esc_attr( $email ) . '" class="dps-form-control" placeholder="seu@email.com">';
+        echo '<input type="email" name="client_email" id="client_email" value="' . esc_attr( $email ) . '" class="dps-form-control" placeholder="seu@email.com" aria-describedby="client_email_error">';
+        echo '<span class="dps-field-error" id="client_email_error" role="alert"></span>';
         echo '</div>';
         
         echo '</div>'; // .dps-form-row
@@ -929,12 +931,14 @@ class DPS_Portal_Renderer {
         
         echo '<div class="dps-form-col">';
         echo '<label for="client_state" class="dps-form-label">' . esc_html__( 'Estado', 'dps-client-portal' ) . '</label>';
-        echo '<input type="text" name="client_state" id="client_state" value="' . esc_attr( $state ) . '" class="dps-form-control" maxlength="2" placeholder="UF">';
+        echo '<input type="text" name="client_state" id="client_state" value="' . esc_attr( $state ) . '" class="dps-form-control" maxlength="2" placeholder="UF" aria-describedby="client_state_error">';
+        echo '<span class="dps-field-error" id="client_state_error" role="alert"></span>';
         echo '</div>';
         
         echo '<div class="dps-form-col">';
         echo '<label for="client_zip" class="dps-form-label">' . esc_html__( 'CEP', 'dps-client-portal' ) . '</label>';
-        echo '<input type="text" name="client_zip" id="client_zip" value="' . esc_attr( $zip ) . '" class="dps-form-control" placeholder="XXXXX-XXX">';
+        echo '<input type="text" name="client_zip" id="client_zip" value="' . esc_attr( $zip ) . '" class="dps-form-control" placeholder="XXXXX-XXX" inputmode="numeric" aria-describedby="client_zip_error">';
+        echo '<span class="dps-field-error" id="client_zip_error" role="alert"></span>';
         echo '</div>';
         
         echo '</div>'; // .dps-form-row
@@ -1041,7 +1045,8 @@ class DPS_Portal_Renderer {
         
         echo '<div class="dps-form-col">';
         echo '<label for="pet_name_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Nome', 'dps-client-portal' ) . '</label>';
-        echo '<input type="text" name="pet_name" id="pet_name_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $pet_name ) . '" class="dps-form-control" required>';
+        echo '<input type="text" name="pet_name" id="pet_name_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $pet_name ) . '" class="dps-form-control" required aria-required="true" aria-describedby="pet_name_' . esc_attr( $pet_id ) . '_error">';
+        echo '<span class="dps-field-error" id="pet_name_' . esc_attr( $pet_id ) . '_error" role="alert"></span>';
         echo '</div>';
         
         echo '<div class="dps-form-col">';
@@ -1097,12 +1102,14 @@ class DPS_Portal_Renderer {
         
         echo '<div class="dps-form-col">';
         echo '<label for="pet_weight_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Peso (kg)', 'dps-client-portal' ) . '</label>';
-        echo '<input type="number" name="pet_weight" id="pet_weight_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $weight ) . '" class="dps-form-control" step="0.1" min="0" placeholder="Ex: 8.5">';
+        echo '<input type="number" name="pet_weight" id="pet_weight_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $weight ) . '" class="dps-form-control" step="0.1" min="0" max="200" placeholder="Ex: 8.5" aria-describedby="pet_weight_' . esc_attr( $pet_id ) . '_error">';
+        echo '<span class="dps-field-error" id="pet_weight_' . esc_attr( $pet_id ) . '_error" role="alert"></span>';
         echo '</div>';
         
         echo '<div class="dps-form-col">';
         echo '<label for="pet_birth_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Nascimento', 'dps-client-portal' ) . '</label>';
-        echo '<input type="date" name="pet_birth" id="pet_birth_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $birth ) . '" class="dps-form-control">';
+        echo '<input type="date" name="pet_birth" id="pet_birth_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $birth ) . '" class="dps-form-control" max="' . esc_attr( gmdate( 'Y-m-d' ) ) . '" aria-describedby="pet_birth_' . esc_attr( $pet_id ) . '_error">';
+        echo '<span class="dps-field-error" id="pet_birth_' . esc_attr( $pet_id ) . '_error" role="alert"></span>';
         echo '</div>';
         
         echo '</div>'; // .dps-form-row

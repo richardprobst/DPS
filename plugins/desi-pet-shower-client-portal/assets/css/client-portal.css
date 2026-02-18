@@ -7944,3 +7944,73 @@ html {
         gap: 16px;
     }
 }
+
+/* ========================================
+   FORM VALIDATION (Fase 4.2)
+   Validação em tempo real nos formulários
+   ======================================== */
+
+/* Mensagem de erro inline */
+.dps-field-error {
+    display: none;
+    font-size: 13px;
+    color: var(--dps-color-error, #ba1a1a);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+.dps-field-error::before {
+    content: '⚠ ';
+}
+
+/* Mostrar quando campo é inválido e já foi tocado */
+.dps-form-control.is-invalid ~ .dps-field-error {
+    display: block;
+}
+
+/* Estado inválido no input */
+.dps-meus-dados-form .dps-form-control.is-invalid {
+    border-color: var(--dps-color-error, #ba1a1a);
+    box-shadow: 0 0 0 1px var(--dps-color-error, #ba1a1a);
+}
+
+.dps-meus-dados-form .dps-form-control.is-invalid:focus {
+    border-color: var(--dps-color-error, #ba1a1a);
+    box-shadow: 0 0 0 3px var(--dps-color-error-container, #ffdad6);
+}
+
+/* Estado válido no input (apenas após interação) */
+.dps-meus-dados-form .dps-form-control.is-valid {
+    border-color: var(--dps-color-success, #1a7a3a);
+}
+
+.dps-meus-dados-form .dps-form-control.is-valid:focus {
+    border-color: var(--dps-color-success, #1a7a3a);
+    box-shadow: 0 0 0 3px var(--dps-color-success-container, #a8f5b5);
+}
+
+/* Contador de caracteres */
+.dps-field-counter {
+    display: block;
+    font-size: 12px;
+    color: var(--dps-gray-400, #9ca3af);
+    text-align: right;
+    margin-top: 2px;
+}
+
+.dps-field-counter.is-near-limit {
+    color: var(--dps-color-warning, #8b6914);
+}
+
+.dps-field-counter.is-over-limit {
+    color: var(--dps-color-error, #ba1a1a);
+    font-weight: 600;
+}
+
+/* Acessibilidade: respeitar prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    .dps-meus-dados-form .dps-form-control.is-invalid,
+    .dps-meus-dados-form .dps-form-control.is-valid {
+        transition: none;
+    }
+}
