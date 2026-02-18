@@ -126,6 +126,18 @@ Antes de criar uma nova versão oficial:
 - **Services Add-on**: sanitização imediata de arrays `$_POST` (`appointment_extra_names`, `appointment_extra_prices`) com `sanitize_text_field()` e `wp_unslash()`.
 - **Auditoria**: criado documento completo de auditoria em `docs/security/AUDIT_FASE1.md` com mapeamento de todas as queries, nonces, capabilities, REST permissions e sanitização de entrada.
 
+#### Refactoring (Interno)
+
+**Fase 2 — Refatoração Estrutural (Plano de Implementação)**
+
+- **Decomposição do monólito**: extraídas classes `DPS_Client_Handler` e `DPS_Pet_Handler` de `class-dps-base-frontend.php` (–233 linhas). Cada classe encapsula CRUD, validação, sanitização e upload, seguindo SRP. O frontend original agora delega para os handlers via callback.
+- **Documentação de metadados**: adicionada seção "Contratos de Metadados dos CPTs" no `ANALYSIS.md` com tabelas detalhadas de meta keys para `dps_cliente`, `dps_pet` e `dps_agendamento`, incluindo tipos, formatos e relações.
+
+**Fase 3 — Performance e Escalabilidade (Plano de Implementação)**
+
+- **N+1 eliminado**: refatorado `query_appointments_for_week()` no trait `DPS_Agenda_Query` de 7 queries separadas para 1 query com `BETWEEN` + agrupamento em PHP (–85% queries DB).
+- **Lazy loading**: adicionado `loading="lazy"` em 5 imagens nos plugins Base e Client Portal (`class-dps-base-frontend.php`, `pet-form.php`, `class-dps-portal-renderer.php`).
+
 #### Added (Adicionado)
 
 **Agenda Add-on v1.2.0 — Checklist Operacional e Check-in/Check-out**

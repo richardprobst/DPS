@@ -3038,6 +3038,87 @@ if ( null !== $result ) {
 
 ---
 
+## Contratos de Metadados dos CPTs
+
+> **Adicionado em:** 2026-02-18 — Fase 2.5 do Plano de Implementação
+
+### dps_cliente — Metadados do Cliente
+
+| Meta Key | Tipo/Formato | Obrigatório | Descrição |
+|----------|-------------|-------------|-----------|
+| `client_cpf` | String (CPF: `000.000.000-00`) | Não | CPF do cliente |
+| `client_phone` | String (telefone) | **Sim** | Telefone principal |
+| `client_email` | String (email) | Não | E-mail do cliente |
+| `client_birth` | String (data: `Y-m-d`) | Não | Data de nascimento |
+| `client_instagram` | String | Não | Handle do Instagram |
+| `client_facebook` | String | Não | Perfil do Facebook |
+| `client_photo_auth` | Int (`0` ou `1`) | Não | Autorização para fotos |
+| `client_address` | String (textarea) | Não | Endereço completo |
+| `client_referral` | String | Não | Código de indicação |
+| `client_lat` | String (float: `-23.5505`) | Não | Latitude (geolocalização) |
+| `client_lng` | String (float: `-46.6333`) | Não | Longitude (geolocalização) |
+
+**Classe handler:** `DPS_Client_Handler` (`includes/class-dps-client-handler.php`)
+**Campos obrigatórios na validação:** `client_name` (post_title), `client_phone`
+
+### dps_pet — Metadados do Pet
+
+| Meta Key | Tipo/Formato | Obrigatório | Descrição |
+|----------|-------------|-------------|-----------|
+| `owner_id` | Int (ID do `dps_cliente`) | **Sim** | ID do tutor/proprietário |
+| `pet_species` | String (enum: `cachorro`, `gato`, `outro`) | **Sim** | Espécie |
+| `pet_breed` | String | Não | Raça |
+| `pet_size` | String (enum: `pequeno`, `medio`, `grande`, `gigante`) | **Sim** | Porte |
+| `pet_weight` | String (float em kg) | Não | Peso |
+| `pet_coat` | String | Não | Tipo de pelagem |
+| `pet_color` | String | Não | Cor/marcações |
+| `pet_birth` | String (data: `Y-m-d`) | Não | Data de nascimento |
+| `pet_sex` | String (enum: `macho`, `femea`) | **Sim** | Sexo |
+| `pet_care` | String (textarea) | Não | Cuidados especiais |
+| `pet_aggressive` | Int (`0` ou `1`) | Não | Flag de agressividade |
+| `pet_vaccinations` | String (textarea) | Não | Registro de vacinação |
+| `pet_allergies` | String (textarea) | Não | Alergias conhecidas |
+| `pet_behavior` | String (textarea) | Não | Notas comportamentais |
+| `pet_shampoo_pref` | String | Não | Preferência de shampoo |
+| `pet_perfume_pref` | String | Não | Preferência de perfume |
+| `pet_accessories_pref` | String | Não | Preferência de acessórios |
+| `pet_product_restrictions` | String (textarea) | Não | Restrições de produtos |
+| `pet_photo_id` | Int (attachment ID) | Não | ID da foto do pet |
+
+**Classe handler:** `DPS_Pet_Handler` (`includes/class-dps-pet-handler.php`)
+**Campos obrigatórios na validação:** `pet_name` (post_title), `owner_id`, `pet_species`, `pet_size`, `pet_sex`
+
+### dps_agendamento — Metadados do Agendamento
+
+| Meta Key | Tipo/Formato | Obrigatório | Descrição |
+|----------|-------------|-------------|-----------|
+| `appointment_client_id` | Int (ID do `dps_cliente`) | **Sim** | ID do cliente |
+| `appointment_pet_id` | Int (ID do `dps_pet`) | **Sim** | Pet principal (legado) |
+| `appointment_pet_ids` | Array serializado de IDs | Não | Multi-pet: lista de pet IDs |
+| `appointment_date` | String (data: `Y-m-d`) | **Sim** | Data do atendimento |
+| `appointment_time` | String (hora: `H:i`) | **Sim** | Horário do atendimento |
+| `appointment_status` | String (enum) | **Sim** | Status do agendamento |
+| `appointment_type` | String (enum: `simple`, `subscription`, `past`) | Não | Tipo de agendamento |
+| `appointment_services` | Array serializado de IDs | Não | IDs dos serviços |
+| `appointment_service_prices` | Array serializado de floats | Não | Preços dos serviços |
+| `appointment_total_value` | Float | Não | Valor total |
+| `appointment_notes` | String (textarea) | Não | Observações |
+| `appointment_taxidog` | Int (`0` ou `1`) | Não | Flag de TaxiDog |
+| `appointment_taxidog_price` | Float | Não | Preço do TaxiDog |
+
+**Status possíveis:** `pendente`, `confirmado`, `em_atendimento`, `finalizado`, `finalizado e pago`, `finalizado_pago`, `cancelado`
+
+### Relações entre CPTs
+
+```
+dps_cliente (1) ──── (N) dps_pet          via pet.owner_id → cliente.ID
+dps_cliente (1) ──── (N) dps_agendamento  via agendamento.appointment_client_id → cliente.ID
+dps_pet     (1) ──── (N) dps_agendamento  via agendamento.appointment_pet_id → pet.ID
+dps_pet     (N) ──── (N) dps_agendamento  via agendamento.appointment_pet_ids (serializado)
+```
+
+---
+
 ## Integrações Futuras Propostas
 
 ### Integração com Google Tarefas (Google Tasks API)

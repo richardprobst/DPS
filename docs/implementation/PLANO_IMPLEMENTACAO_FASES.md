@@ -134,15 +134,15 @@ Reduzir a complexidade do código-fonte, melhorar a manutenibilidade e estabelec
 **Problema:** Arquivo com 5.500+ linhas misturando renderização, validação, lógica de negócio e CRUD.
 
 **Ação:**
-- [ ] Mapear todas as responsabilidades do arquivo (métodos agrupados por função)
+- [x] Mapear todas as responsabilidades do arquivo (métodos agrupados por função)
 - [ ] Extrair classe `DPS_Form_Renderer` — renderização de formulários HTML
 - [ ] Extrair classe `DPS_Form_Validator` — validação de campos
 - [ ] Extrair classe `DPS_Appointment_Handler` — lógica de agendamento
-- [ ] Extrair classe `DPS_Client_Handler` — CRUD de clientes
-- [ ] Extrair classe `DPS_Pet_Handler` — CRUD de pets
-- [ ] Manter `class-dps-base-frontend.php` como orquestrador (fachada) que delega para as novas classes
-- [ ] Garantir que hooks existentes continuem funcionando (backward compatibility)
-- [ ] Atualizar `ANALYSIS.md` com a nova estrutura de classes
+- [x] Extrair classe `DPS_Client_Handler` — CRUD de clientes
+- [x] Extrair classe `DPS_Pet_Handler` — CRUD de pets
+- [x] Manter `class-dps-base-frontend.php` como orquestrador (fachada) que delega para as novas classes
+- [x] Garantir que hooks existentes continuem funcionando (backward compatibility)
+- [x] Atualizar `ANALYSIS.md` com a nova estrutura de classes
 
 **Princípios (SRP):**
 - Cada classe com responsabilidade única
@@ -189,10 +189,10 @@ Reduzir a complexidade do código-fonte, melhorar a manutenibilidade e estabelec
 ### 2.5 — Documentação de Contratos de Metadados
 
 **Ação:**
-- [ ] Documentar todos os meta_keys usados por CPT (`dps_cliente`, `dps_pet`, `dps_agendamento`)
-- [ ] Documentar formatos esperados (ex: `appointment_date` usa `Y-m-d`)
-- [ ] Documentar relações entre metadados (ex: `appointment_client_id` → `dps_cliente` post_id)
-- [ ] Adicionar seção específica em `ANALYSIS.md`
+- [x] Documentar todos os meta_keys usados por CPT (`dps_cliente`, `dps_pet`, `dps_agendamento`)
+- [x] Documentar formatos esperados (ex: `appointment_date` usa `Y-m-d`)
+- [x] Documentar relações entre metadados (ex: `appointment_client_id` → `dps_cliente` post_id)
+- [x] Adicionar seção específica em `ANALYSIS.md`
 
 ### Entregáveis
 
@@ -241,7 +241,7 @@ Otimizar consultas, carregamento de assets e preparar o sistema para volumes mai
 - [ ] Revisar queries que fazem `SELECT *` e limitar aos campos necessários
 - [ ] Usar `'fields' => 'ids'` e `'no_found_rows' => true` em `WP_Query` onde aplicável
 - [ ] Verificar índices nas tabelas customizadas (`dps_transacoes`, `dps_parcelas`)
-- [ ] Eliminar queries N+1 (loops que executam uma query por item)
+- [x] Eliminar queries N+1 (loops que executam uma query por item) — `query_appointments_for_week()` corrigido
 
 ### 3.4 — Otimização de Assets (CSS/JS)
 
@@ -256,7 +256,7 @@ Otimizar consultas, carregamento de assets e preparar o sistema para volumes mai
 ### 3.5 — Lazy Loading
 
 **Ação:**
-- [ ] Adicionar `loading="lazy"` em imagens renderizadas pelo sistema (galeria de pets, fotos)
+- [x] Adicionar `loading="lazy"` em imagens renderizadas pelo sistema (galeria de pets, fotos)
 - [ ] Implementar carregamento sob demanda para seções pesadas (histórico completo, transações)
 
 ### Entregáveis
