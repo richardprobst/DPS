@@ -1018,7 +1018,7 @@ class DPS_Portal_Renderer {
         // Header do card com foto do pet
         echo '<div class="dps-pet-form-header">';
         if ( $photo_url ) {
-            echo '<img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet_name ) . '" class="dps-pet-form-header__photo" />';
+            echo '<img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet_name ) . '" class="dps-pet-form-header__photo" loading="lazy" />';
         } else {
             echo '<span class="dps-pet-form-header__placeholder">🐾</span>';
         }
@@ -1608,7 +1608,7 @@ class DPS_Portal_Renderer {
             echo '<button type="button" class="dps-pet-tab' . ( $is_active ? ' dps-pet-tab--active' : '' ) . '" id="dps-pet-tab-' . esc_attr( $pet_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="dps-pet-panel-' . esc_attr( $pet_id ) . '" tabindex="' . ( $is_active ? '0' : '-1' ) . '" data-pet-id="' . esc_attr( $pet_id ) . '">';
             
             if ( $photo_url ) {
-                echo '<img src="' . esc_url( $photo_url ) . '" alt="" class="dps-pet-tab__photo" />';
+                echo '<img src="' . esc_url( $photo_url ) . '" alt="" class="dps-pet-tab__photo" loading="lazy" />';
             } else {
                 echo '<span class="dps-pet-tab__icon">🐾</span>';
             }
@@ -1655,7 +1655,7 @@ class DPS_Portal_Renderer {
         if ( $pet_photo ) {
             $photo_url = wp_get_attachment_image_url( $pet_photo, 'thumbnail' );
             if ( $photo_url ) {
-                echo '<img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet_name ) . '" />';
+                echo '<img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet_name ) . '" loading="lazy" />';
             } else {
                 echo '<span class="dps-pet-info-card__placeholder">🐾</span>';
             }
@@ -1848,7 +1848,7 @@ class DPS_Portal_Renderer {
 
             <div class="pet-info">
                 <?php if ( $photo_url ) : ?>
-                    <img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $pet_name ); ?>" class="pet-info__photo">
+                    <img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $pet_name ); ?>" class="pet-info__photo" loading="lazy">
                 <?php else : ?>
                     <div class="pet-info__placeholder">🐾</div>
                 <?php endif; ?>

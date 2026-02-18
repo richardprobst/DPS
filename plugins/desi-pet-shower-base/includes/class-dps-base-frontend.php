@@ -4875,7 +4875,7 @@ class DPS_Base_Frontend {
         if ( $photo_id ) {
             $img_url = wp_get_attachment_image_url( $photo_id, 'thumbnail' );
             if ( $img_url ) {
-                echo '<img src="' . esc_url( $img_url ) . '" alt="' . esc_attr( $pet->post_title ) . '" class="dps-pet-card__photo">';
+                echo '<img src="' . esc_url( $img_url ) . '" alt="' . esc_attr( $pet->post_title ) . '" class="dps-pet-card__photo" loading="lazy">';
             } else {
                 echo '<div class="dps-pet-card__photo dps-pet-card__photo--placeholder">' . $species_icon . '</div>';
             }

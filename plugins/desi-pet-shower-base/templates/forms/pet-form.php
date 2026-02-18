@@ -291,7 +291,7 @@ $btn_text = $edit_id ? esc_html__( 'Atualizar Pet', 'desi-pet-shower' ) : esc_ht
 			</label>
 			<?php if ( $photo_url ) : ?>
 				<div class="dps-file-upload__preview">
-					<img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $pet_name ); ?>">
+					<img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $pet_name ); ?>" loading="lazy">
 				</div>
 			<?php endif; ?>
 		</div>
