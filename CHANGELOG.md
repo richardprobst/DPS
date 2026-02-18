@@ -130,13 +130,16 @@ Antes de criar uma nova versão oficial:
 
 **Fase 2 — Refatoração Estrutural (Plano de Implementação)**
 
-- **Decomposição do monólito**: extraídas classes `DPS_Client_Handler` e `DPS_Pet_Handler` de `class-dps-base-frontend.php` (–233 linhas). Cada classe encapsula CRUD, validação, sanitização e upload, seguindo SRP. O frontend original agora delega para os handlers via callback.
+- **Decomposição do monólito**: extraídas classes `DPS_Client_Handler` (184 linhas), `DPS_Pet_Handler` (337 linhas) e `DPS_Appointment_Handler` (810 linhas) de `class-dps-base-frontend.php` (–1.025 linhas total: 5.986 → 4.961). Cada classe encapsula CRUD, validação e sanitização, seguindo SRP. O frontend agora delega via callback pattern.
+- **DPS_Phone_Helper::clean()**: adicionado método utilitário para limpeza de telefone (remove não-dígitos), centralizando lógica duplicada em 9+ arquivos.
 - **Documentação de metadados**: adicionada seção "Contratos de Metadados dos CPTs" no `ANALYSIS.md` com tabelas detalhadas de meta keys para `dps_cliente`, `dps_pet` e `dps_agendamento`, incluindo tipos, formatos e relações.
 
 **Fase 3 — Performance e Escalabilidade (Plano de Implementação)**
 
 - **N+1 eliminado**: refatorado `query_appointments_for_week()` no trait `DPS_Agenda_Query` de 7 queries separadas para 1 query com `BETWEEN` + agrupamento em PHP (–85% queries DB).
 - **Lazy loading**: adicionado `loading="lazy"` em 5 imagens nos plugins Base e Client Portal (`class-dps-base-frontend.php`, `pet-form.php`, `class-dps-portal-renderer.php`).
+- **dbDelta version checks**: adicionados guards de versão em `DPS_AI_Analytics::maybe_create_tables()` e `DPS_AI_Conversations_Repository::maybe_create_tables()` para evitar `dbDelta()` em toda requisição.
+- **WP_Query otimizada**: `DPS_Query_Helper::get_all_posts_by_type()`, `get_posts_by_meta()` e `get_posts_by_meta_query()` agora incluem `no_found_rows => true` por padrão, eliminando SQL_CALC_FOUND_ROWS desnecessário em todas as consultas centralizadas.
 
 #### Added (Adicionado)
 

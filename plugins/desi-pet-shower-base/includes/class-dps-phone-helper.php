@@ -111,4 +111,22 @@ class DPS_Phone_Helper {
 
         return true;
     }
+
+    /**
+     * Remove todos os caracteres não numéricos de um telefone.
+     *
+     * Utilitário simples para limpeza de máscaras e formatações.
+     * Use quando precisar apenas dos dígitos puros, sem formatação.
+     *
+     * @since 2.0.0
+     * @param string $phone Número de telefone com ou sem máscara.
+     * @return string Apenas os dígitos numéricos.
+     *
+     * @example
+     * DPS_Phone_Helper::clean('(11) 98765-4321')  // retorna '11987654321'
+     * DPS_Phone_Helper::clean('+55 11 98765-4321') // retorna '5511987654321'
+     */
+    public static function clean( $phone ) {
+        return preg_replace( '/\D/', '', (string) $phone );
+    }
 }

@@ -88,8 +88,17 @@ class DPS_AI_Conversations_Repository {
      * Cria as tabelas de conversas e mensagens se não existirem.
      *
      * Esta função deve ser chamada durante ativação/upgrade do plugin.
+     * F3.1: Adicionado version check para evitar dbDelta desnecessário.
      */
     public static function maybe_create_tables() {
+        $db_version = '1.0.0';
+        $option_key = 'dps_ai_conversations_db_version';
+        $installed  = get_option( $option_key, '' );
+
+        if ( $installed === $db_version ) {
+            return;
+        }
+
         global $wpdb;
 
         $charset_collate     = $wpdb->get_charset_collate();
@@ -140,6 +149,8 @@ class DPS_AI_Conversations_Repository {
 
         dbDelta( $sql_conversations );
         dbDelta( $sql_messages );
+
+        update_option( $option_key, $db_version );
     }
 
     /**

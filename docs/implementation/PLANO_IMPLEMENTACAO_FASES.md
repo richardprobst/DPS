@@ -137,7 +137,7 @@ Reduzir a complexidade do código-fonte, melhorar a manutenibilidade e estabelec
 - [x] Mapear todas as responsabilidades do arquivo (métodos agrupados por função)
 - [ ] Extrair classe `DPS_Form_Renderer` — renderização de formulários HTML
 - [ ] Extrair classe `DPS_Form_Validator` — validação de campos
-- [ ] Extrair classe `DPS_Appointment_Handler` — lógica de agendamento
+- [x] Extrair classe `DPS_Appointment_Handler` — lógica de agendamento
 - [x] Extrair classe `DPS_Client_Handler` — CRUD de clientes
 - [x] Extrair classe `DPS_Pet_Handler` — CRUD de pets
 - [x] Manter `class-dps-base-frontend.php` como orquestrador (fachada) que delega para as novas classes
@@ -220,11 +220,11 @@ Otimizar consultas, carregamento de assets e preparar o sistema para volumes mai
 **Problema:** Verificação de `dbDelta()` acontecendo desnecessariamente.
 
 **Ação:**
-- [ ] Verificar que todos os add-ons usam version check antes de `dbDelta()`
-- [ ] Garantir que `dbDelta()` só executa no activation hook ou quando a versão do banco for menor que a do plugin
+- [x] Verificar que todos os add-ons usam version check antes de `dbDelta()` — 10/12 OK, 2 corrigidos (AI Analytics, AI Conversations)
+- [x] Garantir que `dbDelta()` só executa no activation hook ou quando a versão do banco for menor que a do plugin
 - [ ] Documentar padrão recomendado em `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`
 
-**Nota:** A análise atual mostra que o Finance Add-on já usa version check ✅. Verificar os demais add-ons.
+**Nota:** A análise atual mostra que o Finance Add-on já usa version check ✅. Logger, Communications, Groomer Tokens, Portal Tokens, Loyalty já tinham version check ✅. AI Analytics e AI Conversations corrigidos em 2026-02-18.
 
 ### 3.2 — Paginação em Listagens Grandes
 
@@ -239,7 +239,7 @@ Otimizar consultas, carregamento de assets e preparar o sistema para volumes mai
 
 **Ação:**
 - [ ] Revisar queries que fazem `SELECT *` e limitar aos campos necessários
-- [ ] Usar `'fields' => 'ids'` e `'no_found_rows' => true` em `WP_Query` onde aplicável
+- [x] Usar `'fields' => 'ids'` e `'no_found_rows' => true` em `WP_Query` onde aplicável — `DPS_Query_Helper` otimizado com `no_found_rows => true` por padrão
 - [ ] Verificar índices nas tabelas customizadas (`dps_transacoes`, `dps_parcelas`)
 - [x] Eliminar queries N+1 (loops que executam uma query por item) — `query_appointments_for_week()` corrigido
 
