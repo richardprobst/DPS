@@ -93,3 +93,49 @@ Quando a tarefa envolver UI, frontend ou layout:
 
 - Em conflito, prevalecem as regras da raiz em `AGENTS.md` (MUST / ASK BEFORE / segurança).
 - Este playbook funciona como guia complementar para decisões de implementação.
+
+---
+
+## Padrão de dbDelta e Versionamento de Tabelas (Fase 3.1)
+
+Toda criação ou alteração de tabela customizada DEVE seguir este padrão:
+
+```php
+public static function maybe_create_tables() {
+    $db_version = '1.0.0'; // Incrementar ao alterar schema
+    $option_key = 'dps_{addon}_db_version';
+    $installed  = get_option( $option_key, '' );
+
+    // Guard: só executa dbDelta se a versão mudou
+    if ( $installed === $db_version ) {
+        return;
+    }
+
+    global $wpdb;
+    $charset_collate = $wpdb->get_charset_collate();
+    $table_name      = $wpdb->prefix . 'dps_{nome}';
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+    // IMPORTANTE: dbDelta() exige formatação estrita:
+    // - 2 espaços entre 'PRIMARY KEY' e '(' (não 1)
+    // - Usar 'KEY' em vez de 'INDEX' para índices secundários
+    // Ref: https://developer.wordpress.org/reference/functions/dbdelta/
+    $sql = "CREATE TABLE {$table_name} (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        ...
+        PRIMARY KEY  (id),
+        KEY some_index (column)
+    ) {$charset_collate};";
+
+    dbDelta( $sql );
+    update_option( $option_key, $db_version );
+}
+```
+
+### Regras:
+1. **Sempre** usar `get_option()` com version check antes de `dbDelta()`
+2. **Sempre** chamar `update_option()` após `dbDelta()` bem-sucedido
+3. Incrementar a versão ao alterar schema (novas colunas, índices, etc.)
+4. Migrações de dados devem estar em blocos `version_compare()` separados
+5. DDL queries (ALTER TABLE, CREATE INDEX) usam `$wpdb->prefix` direto — são seguras por não receberem input do usuário

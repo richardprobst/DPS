@@ -222,7 +222,7 @@ Otimizar consultas, carregamento de assets e preparar o sistema para volumes mai
 **Ação:**
 - [x] Verificar que todos os add-ons usam version check antes de `dbDelta()` — 10/12 OK, 2 corrigidos (AI Analytics, AI Conversations)
 - [x] Garantir que `dbDelta()` só executa no activation hook ou quando a versão do banco for menor que a do plugin
-- [ ] Documentar padrão recomendado em `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`
+- [x] Documentar padrão recomendado em `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`
 
 **Nota:** A análise atual mostra que o Finance Add-on já usa version check ✅. Logger, Communications, Groomer Tokens, Portal Tokens, Loyalty já tinham version check ✅. AI Analytics e AI Conversations corrigidos em 2026-02-18.
 
