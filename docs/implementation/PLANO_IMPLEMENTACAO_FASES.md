@@ -298,21 +298,26 @@ Melhorar a experiência do usuário final no Portal do Cliente, tornando o fluxo
 ### 4.2 — Validação em Tempo Real (Client-side)
 
 **Ação:**
-- [ ] Identificar todos os campos de formulário no portal do cliente
-- [ ] Implementar validação JavaScript em tempo real para: e-mail, telefone, CPF, campos obrigatórios
-- [ ] Mostrar mensagens inline de erro/sucesso abaixo de cada campo
-- [ ] Manter validação server-side como backup (nunca confiar apenas em client-side)
-- [ ] Seguir padrão acessível: `aria-invalid`, `aria-describedby` para mensagens de erro
+- [x] Identificar todos os campos de formulário no portal do cliente
+- [x] Implementar validação JavaScript em tempo real para: e-mail, telefone, CEP, UF, campos obrigatórios, peso, data nascimento
+- [x] Mostrar mensagens inline de erro/sucesso abaixo de cada campo — `<span class="dps-field-error" role="alert">`
+- [x] Manter validação server-side como backup (nunca confiar apenas em client-side)
+- [x] Seguir padrão acessível: `aria-invalid`, `aria-describedby`, `aria-required`, `role="alert"` para mensagens de erro
+- [x] Adicionar CSS `.is-invalid`/`.is-valid` com cores M3 (error: `#ba1a1a`, success: `#1a7a3a`)
+- [x] Adicionar `inputmode="numeric"` no CEP, `max` no campo de data e peso
+
+**Nota:** Validação de CPF não implementada pois o campo não existe nos formulários do portal.
 
 ### 4.3 — Mensagens de Erro/Sucesso Aprimoradas
 
 **Problema:** Mensagens de erro/sucesso podem não ser claras o suficiente.
 
 **Ação:**
-- [ ] Auditar todas as mensagens do portal (já mapeadas: `portal_msg` values em `client-portal.js`)
-- [ ] Reescrever mensagens que não orientem ação (ex: "Erro" → "Não foi possível salvar. Tente novamente ou entre em contato")
-- [ ] Garantir consistência via `DPS_Message_Helper`
-- [ ] Usar toasts para feedback não-bloqueante (já implementado via `DPSToast`)
+- [x] Auditar todas as mensagens do portal (já mapeadas: `portal_msg` values em `client-portal.js`)
+- [x] Reescrever mensagens que não orientem ação (ex: "Erro" → "Algo Deu Errado — Tente novamente ou entre em contato pelo chat")
+- [x] Adicionar 5 tipos de mensagem faltantes: `message_error`, `review_submitted`, `review_already`, `review_invalid`, `review_error`
+- [x] Usar toasts para feedback não-bloqueante (já implementado via `DPSToast`)
+- [x] Títulos descritivos em vez de genéricos: "Dados Salvos!" vs "Sucesso!"
 
 ### 4.4 — Histórico de Agendamentos Aprimorado
 

@@ -146,6 +146,17 @@ Antes de criar uma nova versão oficial:
 - **Subscription queries**: queries de delete de agendamentos e contagem migradas para `fields => 'ids'` + `no_found_rows => true`, eliminando carregamento desnecessário de objetos completos.
 - **Auditoria de rate limiting**: verificado que rate limiting já existe em 3 camadas: magic link request (3/hora por IP+email), token validation (5/hora por IP), chat (10/60s por cliente).
 
+#### Changed (Alterado)
+
+**Fase 4 — UX do Portal do Cliente (Plano de Implementação)**
+
+- **Validação em tempo real**: adicionado `handleFormValidation()` no portal do cliente com regras para telefone (formato BR), e-mail, CEP, UF, peso do pet, data de nascimento e campos obrigatórios. Validação on blur + limpeza instantânea on input + validação completa pre-submit com scroll automático para o primeiro erro.
+- **Estados visuais**: CSS para `.is-invalid` (borda e glow vermelho) e `.is-valid` (borda verde) nos inputs `.dps-form-control`, com suporte a `prefers-reduced-motion`.
+- **Containers de erro**: adicionados `<span class="dps-field-error" role="alert">` após campos validados, com `aria-describedby` vinculando input ao container de mensagem.
+- **Acessibilidade ARIA**: `aria-required="true"` em campos obrigatórios (pet name), `aria-describedby` em 7 campos, `role="alert"` em containers de erro, `inputmode="numeric"` no CEP.
+- **Atributos HTML5**: `max` no campo de data de nascimento (impede futuro), `max="200"` no campo de peso.
+- **Mensagens aprimoradas**: 5 novos tipos de mensagem toast (message_error, review_submitted, review_already, review_invalid, review_error). Todas as mensagens reescritas com títulos descritivos e textos orientados a ação.
+
 #### Added (Adicionado)
 
 **Agenda Add-on v1.2.0 — Checklist Operacional e Check-in/Check-out**
