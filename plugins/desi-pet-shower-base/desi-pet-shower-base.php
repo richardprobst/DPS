@@ -80,6 +80,9 @@ require_once DPS_BASE_DIR . 'includes/class-dps-pet-handler.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-appointment-handler.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-client-page-renderer.php';
 
+// Registro centralizado de raças (extraído do frontend)
+require_once DPS_BASE_DIR . 'includes/class-dps-breed-registry.php';
+
 // Carrega classe de frontend
 require_once DPS_BASE_DIR . 'includes/class-dps-base-frontend.php';
 
