@@ -892,7 +892,7 @@ class DPS_Base_Frontend {
      *
      * @return array Lista de posts do tipo dps_cliente.
      */
-    private static function get_clients() {
+    public static function get_clients() {
         return DPS_Query_Helper::get_all_posts_by_type( 'dps_cliente' );
     }
 
@@ -902,211 +902,75 @@ class DPS_Base_Frontend {
      * @param int $page Número da página (default: 1).
      * @return WP_Query Objeto de consulta com pets paginados.
      */
-    private static function get_pets( $page = 1 ) {
+    public static function get_pets( $page = 1 ) {
         return DPS_Query_Helper::get_paginated_posts( 'dps_pet', $page, DPS_BASE_PETS_PER_PAGE );
     }
 
     /**
      * Seção de clientes: listagem e atalhos administrativos.
-     * 
-     * REFATORADO: Separa preparação de dados da renderização.
-     * A lógica de dados permanece aqui, a renderização foi movida para o template.
-     * 
+     *
      * @since 1.0.0
+     * @since 2.1.0 Delegado para DPS_Clients_Section_Renderer.
      * @return string HTML da seção de clientes.
      */
     private static function section_clients() {
-        // 1. Preparar dados (lógica de negócio)
-        $data = self::prepare_clients_section_data();
-        
-        // 2. Renderizar usando template (apresentação)
-        return self::render_clients_section( $data );
+        return DPS_Clients_Section_Renderer::render();
     }
-    
+
     /**
      * Prepara os dados necessários para a seção de clientes.
-     * 
+     *
      * @since 1.0.0
-     * @return array {
-     *     Dados estruturados para o template.
-     *     
-     *     @type array       $clients          Lista de posts de clientes (WP_Post[]).
-     *     @type array       $client_meta      Metadados principais dos clientes.
-     *     @type array       $pets_counts      Contagem de pets por cliente.
-     *     @type array       $summary          Resumo de métricas da lista de clientes.
-     *     @type string      $current_filter   Filtro ativo (all|without_pets|missing_contact).
-     *     @type string      $registration_url URL da página dedicada de cadastro.
-     *     @type string      $base_url         URL base da página atual.
-     *     @type int         $edit_id          ID do cliente sendo editado (0 se não estiver editando).
-     *     @type WP_Post|null $editing         Post do cliente sendo editado (null se não estiver editando).
-     *     @type array       $edit_meta        Metadados do cliente sendo editado.
-     *     @type string      $api_key          Chave da API do Google Maps.
-     * }
+     * @since 2.1.0 Delegado para DPS_Clients_Section_Renderer.
+     * @return array Dados estruturados para o template.
      */
     private static function prepare_clients_section_data() {
-        $clients = self::get_clients();
-        $client_meta = self::build_clients_meta( $clients );
-        $pets_counts = self::get_clients_pets_counts( $clients );
-        $summary     = self::summarize_clients_data( $clients, $client_meta, $pets_counts );
-
-        $filter = isset( $_GET['dps_clients_filter'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_clients_filter'] ) ) : 'all';
-        $allowed_filters = [ 'all', 'without_pets', 'missing_contact' ];
-        if ( ! in_array( $filter, $allowed_filters, true ) ) {
-            $filter = 'all';
-        }
-
-        $registration_url = get_option( 'dps_clients_registration_url', '' );
-        $registration_url = apply_filters( 'dps_clients_registration_url', $registration_url );
-
-        // Detecta edição via parâmetros GET (com sanitização adequada)
-        $edit_type = isset( $_GET['dps_edit'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_edit'] ) ) : '';
-        $edit_id   = ( 'client' === $edit_type && isset( $_GET['id'] ) )
-                     ? absint( $_GET['id'] )
-                     : 0;
-        $editing   = null;
-        $edit_meta = [];
-
-        if ( $edit_id ) {
-            $editing = get_post( $edit_id );
-            if ( $editing && 'dps_cliente' === $editing->post_type ) {
-                // Carrega metadados do cliente para edição
-                $edit_meta = [
-                    'cpf'        => get_post_meta( $edit_id, 'client_cpf', true ),
-                    'phone'      => get_post_meta( $edit_id, 'client_phone', true ),
-                    'email'      => get_post_meta( $edit_id, 'client_email', true ),
-                    'birth'      => get_post_meta( $edit_id, 'client_birth', true ),
-                    'instagram'  => get_post_meta( $edit_id, 'client_instagram', true ),
-                    'facebook'   => get_post_meta( $edit_id, 'client_facebook', true ),
-                    'photo_auth' => get_post_meta( $edit_id, 'client_photo_auth', true ),
-                    'address'    => get_post_meta( $edit_id, 'client_address', true ),
-                    'referral'   => get_post_meta( $edit_id, 'client_referral', true ),
-                    'lat'        => get_post_meta( $edit_id, 'client_lat', true ),
-                    'lng'        => get_post_meta( $edit_id, 'client_lng', true ),
-                ];
-            } else {
-                // ID inválido ou post_type incorreto
-                $edit_id = 0;
-                $editing = null;
-            }
-        }
-
-        return [
-            'clients'          => self::filter_clients_list( $clients, $client_meta, $pets_counts, $filter ),
-            'client_meta'      => $client_meta,
-            'pets_counts'      => $pets_counts,
-            'summary'          => $summary,
-            'current_filter'   => $filter,
-            'registration_url' => $registration_url,
-            'base_url'         => DPS_URL_Builder::safe_get_permalink(),
-            'edit_id'          => $edit_id,
-            'editing'          => $editing,
-            'edit_meta'        => $edit_meta,
-            'api_key'          => get_option( 'dps_google_api_key', '' ),
-        ];
+        return DPS_Clients_Section_Renderer::prepare_data();
     }
 
     /**
-     * Pré-carrega metadados críticos dos clientes para evitar consultas repetidas.
+     * Pré-carrega metadados críticos dos clientes.
      *
      * @since 1.0.0
+     * @since 2.1.0 Delegado para DPS_Clients_Section_Renderer.
      * @param array $clients Lista de posts de clientes.
      * @return array
      */
     private static function build_clients_meta( $clients ) {
-        $meta = [];
-
-        foreach ( $clients as $client ) {
-            $id = (int) $client->ID;
-            $meta[ $id ] = [
-                'phone' => get_post_meta( $id, 'client_phone', true ),
-                'email' => get_post_meta( $id, 'client_email', true ),
-            ];
-        }
-
-        return $meta;
+        return DPS_Clients_Section_Renderer::build_clients_meta( $clients );
     }
 
     /**
      * Retorna contagem de pets para cada cliente informado.
      *
      * @since 1.0.0
+     * @since 2.1.0 Delegado para DPS_Clients_Section_Renderer.
      * @param array $clients Lista de posts de clientes.
      * @return array
      */
     private static function get_clients_pets_counts( $clients ) {
-        $pets_counts = [];
-
-        if ( empty( $clients ) ) {
-            return $pets_counts;
-        }
-
-        $client_ids   = array_map( 'intval', wp_list_pluck( $clients, 'ID' ) );
-        $placeholders = implode( ',', array_fill( 0, count( $client_ids ), '%d' ) );
-
-        global $wpdb;
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-        $results = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT meta_value AS owner_id, COUNT(*) AS pet_count
-                 FROM {$wpdb->postmeta} pm
-                 INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-                 WHERE pm.meta_key = 'owner_id'
-                 AND p.post_type = 'dps_pet'
-                 AND p.post_status = 'publish'
-                 AND pm.meta_value IN ($placeholders)
-                 GROUP BY pm.meta_value",
-                ...$client_ids
-            ),
-            ARRAY_A
-        );
-
-        foreach ( $results as $row ) {
-            $pets_counts[ $row['owner_id'] ] = (int) $row['pet_count'];
-        }
-
-        return $pets_counts;
+        return DPS_Clients_Section_Renderer::get_clients_pets_counts( $clients );
     }
 
     /**
      * Calcula métricas administrativas da lista de clientes.
      *
      * @since 1.0.0
+     * @since 2.1.0 Delegado para DPS_Clients_Section_Renderer.
      * @param array $clients     Lista de posts de clientes.
      * @param array $client_meta Metadados principais dos clientes.
      * @param array $pets_counts Contagem de pets por cliente.
      * @return array
      */
     private static function summarize_clients_data( $clients, $client_meta, $pets_counts ) {
-        $missing_contact = 0;
-        $without_pets    = 0;
-
-        foreach ( $clients as $client ) {
-            $id    = (int) $client->ID;
-            $meta  = isset( $client_meta[ $id ] ) ? $client_meta[ $id ] : [ 'phone' => '', 'email' => '' ];
-            $phone = isset( $meta['phone'] ) ? $meta['phone'] : '';
-            $email = isset( $meta['email'] ) ? $meta['email'] : '';
-
-            if ( empty( $phone ) && empty( $email ) ) {
-                $missing_contact++;
-            }
-
-            $pets_for_client = isset( $pets_counts[ (string) $id ] ) ? (int) $pets_counts[ (string) $id ] : 0;
-            if ( 0 === $pets_for_client ) {
-                $without_pets++;
-            }
-        }
-
-        return [
-            'total'            => count( $clients ),
-            'missing_contact'  => $missing_contact,
-            'without_pets'     => $without_pets,
-        ];
+        return DPS_Clients_Section_Renderer::summarize_clients_data( $clients, $client_meta, $pets_counts );
     }
 
     /**
      * Filtra lista de clientes conforme necessidade administrativa.
      *
      * @since 1.0.0
+     * @since 2.1.0 Delegado para DPS_Clients_Section_Renderer.
      * @param array  $clients     Lista de posts de clientes.
      * @param array  $client_meta Metadados principais dos clientes.
      * @param array  $pets_counts Contagem de pets por cliente.
@@ -1114,375 +978,78 @@ class DPS_Base_Frontend {
      * @return array
      */
     private static function filter_clients_list( $clients, $client_meta, $pets_counts, $filter ) {
-        if ( 'without_pets' === $filter ) {
-            return array_values(
-                array_filter(
-                    $clients,
-                    function( $client ) use ( $pets_counts ) {
-                        $client_id = (string) $client->ID;
-                        $count     = isset( $pets_counts[ $client_id ] ) ? (int) $pets_counts[ $client_id ] : 0;
-                        return 0 === $count;
-                    }
-                )
-            );
-        }
-
-        if ( 'missing_contact' === $filter ) {
-            return array_values(
-                array_filter(
-                    $clients,
-                    function( $client ) use ( $client_meta ) {
-                        $client_id = (int) $client->ID;
-                        $meta      = isset( $client_meta[ $client_id ] ) ? $client_meta[ $client_id ] : [ 'phone' => '', 'email' => '' ];
-                        $phone     = isset( $meta['phone'] ) ? $meta['phone'] : '';
-                        $email     = isset( $meta['email'] ) ? $meta['email'] : '';
-
-                        return empty( $phone ) && empty( $email );
-                    }
-                )
-            );
-        }
-
-        return $clients;
+        return DPS_Clients_Section_Renderer::filter_clients_list( $clients, $client_meta, $pets_counts, $filter );
     }
-    
+
     /**
      * Renderiza a seção de clientes usando template.
-     * 
+     *
      * @since 1.0.0
-     * @param array $data {
-     *     Dados preparados para renderização.
-     *     
-     *     @type array       $clients          Lista de posts de clientes.
-     *     @type array       $client_meta      Metadados principais dos clientes.
-     *     @type array       $pets_counts      Contagem de pets por cliente.
-     *     @type array       $summary          Resumo de métricas da lista de clientes.
-     *     @type string      $current_filter   Filtro ativo (all|without_pets|missing_contact).
-     *     @type string      $registration_url URL da página dedicada de cadastro.
-     *     @type string      $base_url         URL base da página.
-     * }
+     * @since 2.1.0 Delegado para DPS_Clients_Section_Renderer.
+     * @param array $data Dados preparados para renderização.
      * @return string HTML da seção.
      */
     private static function render_clients_section( $data ) {
-        ob_start();
-        dps_get_template( 'frontend/clients-section.php', $data );
-        return ob_get_clean();
+        return DPS_Clients_Section_Renderer::render_section( $data );
     }
 
     /**
-     * Seção de pets: formulário e listagem
-     * 
-     * REFATORADO v1.0.4: Separa preparação de dados da renderização.
-     * A lógica de dados permanece aqui, a renderização foi movida para templates.
-     * 
+     * Seção de pets: formulário e listagem.
+     *
      * @since 1.0.0
-     * @since 1.0.4 Refatorado para usar templates.
+     * @since 2.1.0 Delegado para DPS_Pets_Section_Renderer.
      * @return string HTML da seção de pets.
      */
     private static function section_pets() {
-        // 1. Preparar dados (lógica de negócio)
-        $data = self::prepare_pets_section_data();
-        
-        // 2. Renderizar usando template (apresentação)
-        return self::render_pets_section( $data );
+        return DPS_Pets_Section_Renderer::render();
     }
-    
+
     /**
      * Prepara os dados necessários para a seção de pets.
-     * 
+     *
      * @since 1.0.4
-     * @return array {
-     *     Dados estruturados para o template.
-     *     
-     *     @type array       $pets          Lista de posts de pets.
-     *     @type int         $pets_page     Página atual da paginação.
-     *     @type int         $pets_pages    Total de páginas.
-     *     @type array       $clients       Lista de clientes disponíveis.
-     *     @type int         $edit_id       ID do pet sendo editado (0 se novo).
-     *     @type WP_Post|null $editing      Post do pet em edição (null se novo).
-     *     @type array       $meta          Metadados do pet.
-     *     @type array       $breed_options Lista de raças disponíveis.
-     *     @type array       $breed_data    Dataset completo de raças por espécie.
-     *     @type string      $base_url      URL base da página.
-     * }
+     * @since 2.1.0 Delegado para DPS_Pets_Section_Renderer.
+     * @return array Dados estruturados para o template.
      */
     private static function prepare_pets_section_data() {
-        $clients    = self::get_clients();
-        
-        // Busca todos os pets para estatísticas (sem paginação)
-        $all_pets_query = new WP_Query( [
-            'post_type'      => 'dps_pet',
-            'posts_per_page' => -1,
-            'post_status'    => 'publish',
-            'fields'         => 'ids',
-            'no_found_rows'  => true,
-        ] );
-        $all_pet_ids = $all_pets_query->posts;
-        
-        // Pré-carrega metadados dos pets
-        if ( ! empty( $all_pet_ids ) ) {
-            update_meta_cache( 'post', $all_pet_ids );
-        }
-        
-        // Coleta estatísticas dos pets
-        $pets_stats = self::build_pets_statistics( $all_pet_ids );
-        
-        // Detecta filtro via parâmetros GET
-        $filter = isset( $_GET['dps_pets_filter'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_pets_filter'] ) ) : 'all';
-        $allowed_filters = [ 'all', 'aggressive', 'without_owner', 'cao', 'gato', 'outro' ];
-        if ( ! in_array( $filter, $allowed_filters, true ) ) {
-            $filter = 'all';
-        }
-        
-        // Paginação
-        $pets_page  = isset( $_GET['dps_pets_page'] ) ? max( 1, intval( $_GET['dps_pets_page'] ) ) : 1;
-        
-        // Aplica filtro na busca
-        $filtered_pets_query = self::get_filtered_pets( $pets_page, $filter );
-        $pets       = $filtered_pets_query->posts;
-        $pets_pages = (int) max( 1, $filtered_pets_query->max_num_pages );
-        
-        // Pré-carrega contagem de agendamentos e última data de atendimento para cada pet
-        $pet_ids_in_page = wp_list_pluck( $pets, 'ID' );
-        $appointments_stats = self::get_pets_appointments_stats( $pet_ids_in_page );
-        
-        // Detecta edição via parâmetros GET
-        $edit_id = ( isset( $_GET['dps_edit'] ) && 'pet' === $_GET['dps_edit'] && isset( $_GET['id'] ) ) 
-                   ? intval( $_GET['id'] ) 
-                   : 0;
-        
-        $editing = null;
-        $meta    = [];
-        
-        if ( $edit_id ) {
-            $editing = get_post( $edit_id );
-            if ( $editing ) {
-                // Carrega metadados do pet para edição
-                $meta = [
-                    'owner_id'             => get_post_meta( $edit_id, 'owner_id', true ),
-                    'species'              => get_post_meta( $edit_id, 'pet_species', true ),
-                    'breed'                => get_post_meta( $edit_id, 'pet_breed', true ),
-                    'size'                 => get_post_meta( $edit_id, 'pet_size', true ),
-                    'weight'               => get_post_meta( $edit_id, 'pet_weight', true ),
-                    'coat'                 => get_post_meta( $edit_id, 'pet_coat', true ),
-                    'color'                => get_post_meta( $edit_id, 'pet_color', true ),
-                    'birth'                => get_post_meta( $edit_id, 'pet_birth', true ),
-                    'sex'                  => get_post_meta( $edit_id, 'pet_sex', true ),
-                    'care'                 => get_post_meta( $edit_id, 'pet_care', true ),
-                    'aggressive'           => get_post_meta( $edit_id, 'pet_aggressive', true ),
-                    'vaccinations'         => get_post_meta( $edit_id, 'pet_vaccinations', true ),
-                    'allergies'            => get_post_meta( $edit_id, 'pet_allergies', true ),
-                    'behavior'             => get_post_meta( $edit_id, 'pet_behavior', true ),
-                    'photo_id'             => get_post_meta( $edit_id, 'pet_photo_id', true ),
-                    // Preferências de produtos
-                    'shampoo_pref'         => get_post_meta( $edit_id, 'pet_shampoo_pref', true ),
-                    'perfume_pref'         => get_post_meta( $edit_id, 'pet_perfume_pref', true ),
-                    'accessories_pref'     => get_post_meta( $edit_id, 'pet_accessories_pref', true ),
-                    'product_restrictions' => get_post_meta( $edit_id, 'pet_product_restrictions', true ),
-                ];
-            }
-        }
-        
-        // Detecta pref_owner para pré-selecionar cliente no formulário
-        $pref_owner = isset( $_GET['pref_owner'] ) ? absint( $_GET['pref_owner'] ) : 0;
-        if ( $pref_owner && empty( $meta['owner_id'] ) ) {
-            $meta['owner_id'] = $pref_owner;
-        }
-        
-        $species_val   = $meta['species'] ?? '';
-        $breed_data    = self::get_breed_dataset();
-        $breed_options = self::get_breed_options_for_species( $species_val );
-        
-        return [
-            'pets'               => $pets,
-            'pets_page'          => $pets_page,
-            'pets_pages'         => $pets_pages,
-            'pets_total'         => count( $all_pet_ids ),
-            'clients'            => $clients,
-            'edit_id'            => $edit_id,
-            'editing'            => $editing,
-            'meta'               => $meta,
-            'breed_options'      => $breed_options,
-            'breed_data'         => $breed_data,
-            'base_url'           => DPS_URL_Builder::safe_get_permalink(),
-            'current_filter'     => $filter,
-            'summary'            => $pets_stats,
-            'appointments_stats' => $appointments_stats,
-        ];
+        return DPS_Pets_Section_Renderer::prepare_data();
     }
-    
+
     /**
      * Busca pets com filtro aplicado.
      *
      * @since 1.0.5
+     * @since 2.1.0 Delegado para DPS_Pets_Section_Renderer.
      * @param int    $page   Número da página.
      * @param string $filter Filtro a ser aplicado.
      * @return WP_Query
      */
     private static function get_filtered_pets( $page, $filter ) {
-        $args = [
-            'post_type'      => 'dps_pet',
-            'posts_per_page' => DPS_BASE_PETS_PER_PAGE,
-            'post_status'    => 'publish',
-            'paged'          => $page,
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-        ];
-        
-        $meta_query = [];
-        
-        switch ( $filter ) {
-            case 'aggressive':
-                $meta_query[] = [
-                    'key'     => 'pet_aggressive',
-                    'value'   => '1',
-                    'compare' => '=',
-                ];
-                break;
-            case 'without_owner':
-                $meta_query[] = [
-                    'relation' => 'OR',
-                    [
-                        'key'     => 'owner_id',
-                        'compare' => 'NOT EXISTS',
-                    ],
-                    [
-                        'key'     => 'owner_id',
-                        'value'   => '',
-                        'compare' => '=',
-                    ],
-                    [
-                        'key'     => 'owner_id',
-                        'value'   => '0',
-                        'compare' => '=',
-                    ],
-                ];
-                break;
-            case 'cao':
-            case 'gato':
-            case 'outro':
-                $meta_query[] = [
-                    'key'     => 'pet_species',
-                    'value'   => $filter,
-                    'compare' => '=',
-                ];
-                break;
-        }
-        
-        if ( ! empty( $meta_query ) ) {
-            $args['meta_query'] = $meta_query;
-        }
-        
-        return new WP_Query( $args );
+        return DPS_Pets_Section_Renderer::get_filtered_pets( $page, $filter );
     }
-    
+
     /**
      * Calcula estatísticas dos pets para o painel de resumo.
      *
      * @since 1.0.5
+     * @since 2.1.0 Delegado para DPS_Pets_Section_Renderer.
      * @param array $pet_ids Lista de IDs de pets.
      * @return array
      */
     private static function build_pets_statistics( $pet_ids ) {
-        $stats = [
-            'total'         => count( $pet_ids ),
-            'aggressive'    => 0,
-            'without_owner' => 0,
-            'dogs'          => 0,
-            'cats'          => 0,
-            'others'        => 0,
-        ];
-        
-        if ( empty( $pet_ids ) ) {
-            return $stats;
-        }
-        
-        foreach ( $pet_ids as $pet_id ) {
-            $aggressive = get_post_meta( $pet_id, 'pet_aggressive', true );
-            $owner_id   = get_post_meta( $pet_id, 'owner_id', true );
-            $species    = get_post_meta( $pet_id, 'pet_species', true );
-            
-            if ( $aggressive ) {
-                $stats['aggressive']++;
-            }
-            
-            if ( empty( $owner_id ) ) {
-                $stats['without_owner']++;
-            }
-            
-            switch ( $species ) {
-                case 'cao':
-                    $stats['dogs']++;
-                    break;
-                case 'gato':
-                    $stats['cats']++;
-                    break;
-                default:
-                    $stats['others']++;
-                    break;
-            }
-        }
-        
-        return $stats;
+        return DPS_Pets_Section_Renderer::build_pets_statistics( $pet_ids );
     }
-    
+
     /**
      * Busca estatísticas de agendamentos para cada pet.
      *
      * @since 1.0.5
+     * @since 2.1.0 Delegado para DPS_Pets_Section_Renderer.
      * @param array $pet_ids Lista de IDs de pets.
-     * @return array Array com contagem de agendamentos e última data por pet_id.
+     * @return array
      */
     private static function get_pets_appointments_stats( $pet_ids ) {
-        $stats = [];
-        
-        if ( empty( $pet_ids ) ) {
-            return $stats;
-        }
-        
-        global $wpdb;
-        
-        $pet_ids = array_map( 'intval', $pet_ids );
-        $placeholders = implode( ',', array_fill( 0, count( $pet_ids ), '%s' ) );
-        
-        // Busca contagem de agendamentos e última data para cada pet
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-        $results = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT pm.meta_value AS pet_id, 
-                        COUNT(DISTINCT pm.post_id) AS appointment_count,
-                        MAX(pm2.meta_value) AS last_appointment_date
-                 FROM {$wpdb->postmeta} pm
-                 INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-                 LEFT JOIN {$wpdb->postmeta} pm2 ON pm.post_id = pm2.post_id AND pm2.meta_key = 'appointment_date'
-                 WHERE pm.meta_key = 'appointment_pet_id'
-                 AND p.post_type = 'dps_agendamento'
-                 AND p.post_status = 'publish'
-                 AND pm.meta_value IN ($placeholders)
-                 GROUP BY pm.meta_value",
-                ...$pet_ids
-            ),
-            ARRAY_A
-        );
-        
-        foreach ( $results as $row ) {
-            $stats[ $row['pet_id'] ] = [
-                'count'     => (int) $row['appointment_count'],
-                'last_date' => $row['last_appointment_date'],
-            ];
-        }
-        
-        // Preenche pets sem agendamentos
-        foreach ( $pet_ids as $pet_id ) {
-            if ( ! isset( $stats[ (string) $pet_id ] ) ) {
-                $stats[ (string) $pet_id ] = [
-                    'count'     => 0,
-                    'last_date' => null,
-                ];
-            }
-        }
-        
-        return $stats;
+        return DPS_Pets_Section_Renderer::get_pets_appointments_stats( $pet_ids );
     }
 
     /**
@@ -1524,15 +1091,14 @@ class DPS_Base_Frontend {
     
     /**
      * Renderiza a seção de pets usando template.
-     * 
+     *
      * @since 1.0.4
+     * @since 2.1.0 Delegado para DPS_Pets_Section_Renderer.
      * @param array $data Dados preparados para renderização.
      * @return string HTML da seção.
      */
     private static function render_pets_section( $data ) {
-        ob_start();
-        dps_get_template( 'frontend/pets-section.php', $data );
-        return ob_get_clean();
+        return DPS_Pets_Section_Renderer::render_section( $data );
     }
 
     /**

@@ -89,6 +89,12 @@ require_once DPS_BASE_DIR . 'includes/class-dps-history-section-renderer.php';
 // Carrega renderer da seção de agendamentos
 require_once DPS_BASE_DIR . 'includes/class-dps-appointments-section-renderer.php';
 
+// Carrega renderer da seção de clientes
+require_once DPS_BASE_DIR . 'includes/class-dps-clients-section-renderer.php';
+
+// Carrega renderer da seção de pets
+require_once DPS_BASE_DIR . 'includes/class-dps-pets-section-renderer.php';
+
 // Carrega classe de frontend
 require_once DPS_BASE_DIR . 'includes/class-dps-base-frontend.php';
 
