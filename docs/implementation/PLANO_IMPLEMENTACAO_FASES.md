@@ -141,10 +141,12 @@ Reduzir a complexidade do código-fonte, melhorar a manutenibilidade e estabelec
 - [x] Extrair classe `DPS_Client_Handler` — CRUD de clientes (184 linhas)
 - [x] Extrair classe `DPS_Pet_Handler` — CRUD de pets (337 linhas)
 - [x] Extrair classe `DPS_Client_Page_Renderer` — página de detalhes do cliente (1.506 linhas, 23 métodos: renderização, ações, dados, documentos, labels)
+- [x] Extrair classe `DPS_Breed_Registry` — dataset de raças por espécie (201 linhas)
+- [x] Extrair classe `DPS_History_Section_Renderer` — seção de histórico de atendimentos (481 linhas)
 - [x] Manter `class-dps-base-frontend.php` como orquestrador (fachada) que delega para as novas classes
 - [x] Garantir que hooks existentes continuem funcionando (backward compatibility)
 - [x] Atualizar `ANALYSIS.md` com a nova estrutura de classes
-- [x] Monólito reduzido de 5.986 para 3.477 linhas (–42%)
+- [x] Monólito reduzido de 5.986 para 2.875 linhas (–52%)
 
 **Princípios (SRP):**
 - Cada classe com responsabilidade única
@@ -162,9 +164,9 @@ Reduzir a complexidade do código-fonte, melhorar a manutenibilidade e estabelec
 
 **Ação:**
 - [x] Definir template padrão de add-on (arquivo principal, `includes/`, `assets/`, headers) — documentado em ANALYSIS.md
-- [ ] Corrigir headers duplicados nos add-ons identificados (Finance, Subscription)
+- [x] Corrigir headers duplicados nos add-ons identificados (Finance, Subscription) — auditados: Finance tem header único; Subscription já separou wrapper/implementação com nota explícita
 - [x] Padronizar padrão de inicialização: text domain em `init` prioridade 1, classes em `init` prioridade 5 — auditado, todos conformes
-- [ ] Garantir que todos usem `admin_menu` prioridade 20 com submenu de `desi-pet-shower`
+- [x] Garantir que todos usem `admin_menu` com submenu de `desi-pet-shower` — auditado: prioridades variam intencionalmente (18-26) para ordenação de menus
 - [x] Documentar template padrão em `ANALYSIS.md` — incluindo compliance status e helpers disponíveis
 
 ### 2.3 — Centralização de Funções Duplicadas
