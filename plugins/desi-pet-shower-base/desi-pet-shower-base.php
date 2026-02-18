@@ -77,6 +77,7 @@ require_once DPS_BASE_DIR . 'includes/class-dps-github-updater.php';
 // Handlers de CRUD extraídos do frontend (Fase 2.1)
 require_once DPS_BASE_DIR . 'includes/class-dps-client-handler.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-pet-handler.php';
+require_once DPS_BASE_DIR . 'includes/class-dps-appointment-handler.php';
 
 // Carrega classe de frontend
 require_once DPS_BASE_DIR . 'includes/class-dps-base-frontend.php';
