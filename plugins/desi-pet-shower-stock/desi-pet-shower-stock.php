@@ -112,9 +112,8 @@ class DPS_Stock_Addon {
         add_action( 'dps_base_nav_tabs_after_history', [ $this, 'add_stock_tab' ], 30, 1 );
         add_action( 'dps_base_sections_after_history', [ $this, 'add_stock_section' ], 30, 1 );
 
-        // Enfileira assets CSS para responsividade
-        add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+        // Enfileira assets CSS condicionalmente (apenas em páginas DPS)
+        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 
         // Integração com agendamentos: baixa estoque quando o atendimento é concluído.
         add_action( 'dps_base_after_save_appointment', [ $this, 'maybe_handle_appointment_completion' ], 10, 2 );
@@ -132,11 +131,18 @@ class DPS_Stock_Addon {
 
     /**
      * Enfileira CSS responsivo do add-on de estoque.
+     * Carregamento condicional: apenas nas páginas admin do plugin DPS.
      *
      * @since 1.1.0
      * @since 1.2.0 Atualizado para versão 1.2.0 com novo layout moderno.
+     * @since 2.0.0 F3.4 — Carregamento condicional (não mais global).
+     * @param string $hook Hook suffix da página admin atual.
      */
-    public function enqueue_assets() {
+    public function enqueue_admin_assets( $hook ) {
+        if ( false === strpos( $hook, 'desi-pet-shower' ) ) {
+            return;
+        }
+
         $addon_url = plugin_dir_url( __FILE__ );
         $version   = '1.2.0';
 

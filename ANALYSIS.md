@@ -3038,6 +3038,105 @@ if ( null !== $result ) {
 
 ---
 
+## Template Padrão de Add-on (Fase 2.2)
+
+> Documentação do padrão de inicialização e estrutura de add-ons. Todos os add-ons devem seguir este template para garantir consistência.
+
+### Estrutura de Diretórios
+
+```
+desi-pet-shower-{nome}/
+├── desi-pet-shower-{nome}-addon.php   # Arquivo principal com header WP
+├── includes/                           # Classes PHP
+│   ├── class-dps-{nome}-*.php         # Classes de negócio
+│   └── ...
+├── assets/                             # CSS/JS
+│   ├── css/
+│   └── js/
+├── templates/                          # Templates HTML (quando aplicável)
+└── uninstall.php                       # Limpeza na desinstalação (quando tem tabelas)
+```
+
+### Header WordPress Obrigatório
+
+```php
+/**
+ * Plugin Name: Desi Pet Shower - {Nome} Add-on
+ * Plugin URI: https://github.com/richardprobst/DPS
+ * Description: {Descrição curta}
+ * Version: X.Y.Z
+ * Author: PRObst
+ * Author URI: https://probst.pro
+ * Text Domain: desi-pet-shower
+ * Domain Path: /languages
+ * Requires at least: 6.9
+ * Requires PHP: 8.4
+ */
+```
+
+### Padrão de Inicialização
+
+| Etapa | Hook | Prioridade | Responsabilidade |
+|-------|------|-----------|------------------|
+| Text domain | `init` | 1 | `load_plugin_textdomain()` |
+| Classes/lógica | `init` | 5 | Instanciar classes, registrar CPTs, hooks |
+| Admin menus | `admin_menu` | 20 | Submenu de `desi-pet-shower` |
+| Admin assets | `admin_enqueue_scripts` | 10 | CSS/JS condicionais (`$hook_suffix`) |
+| Ativação | `register_activation_hook` | — | dbDelta, flush rewrite, capabilities |
+
+### Assets — Carregamento Condicional (Obrigatório)
+
+```php
+add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+
+public function enqueue_admin_assets( $hook ) {
+    // Carrega apenas nas páginas do DPS
+    if ( false === strpos( $hook, 'desi-pet-shower' ) ) {
+        return;
+    }
+    wp_enqueue_style( 'dps-{nome}-addon', ... );
+    wp_enqueue_script( 'dps-{nome}-addon', ... );
+}
+```
+
+### Helpers Globais Disponíveis (Base Plugin)
+
+| Helper | Métodos Principais |
+|--------|-------------------|
+| `DPS_Money_Helper` | `format_currency($cents)`, `format_currency_from_decimal($val)`, `format_decimal_to_brazilian($val)` |
+| `DPS_Phone_Helper` | `clean($phone)`, `format_for_display($phone)`, `format_for_whatsapp($phone)` |
+| `DPS_Query_Helper` | `get_all_posts_by_type($type)`, `get_posts_by_meta($type, $key, $val)` |
+| `DPS_Message_Helper` | `add_success($msg)`, `add_error($msg)`, `add_warning($msg)` |
+| `DPS_Request_Validator` | `verify_nonce($action)`, `verify_ajax_nonce($action)` |
+| `DPS_URL_Builder` | `build_admin_url($page, $params)` |
+| `DPS_Logger` | `info($msg, $ctx, $cat)`, `warning(...)`, `error(...)` |
+
+### Compliance Status (Fev/2026)
+
+| Add-on | Init@1 | Classes@5 | Menu@20 | Assets Cond. | Activation |
+|--------|--------|-----------|---------|-------------|------------|
+| agenda | ✅ | ✅ | ✅ | ✅ | ✅ |
+| ai | ✅ | ✅ | ✅ | ✅ | ✅ |
+| backup | ✅ | ✅ | ✅ | ✅ | ❌ |
+| booking | ✅ | ✅ | — | — | ✅ |
+| client-portal | ✅ | ✅ | ✅ | ✅ | ✅ |
+| communications | ✅ | ✅ | ✅ | ✅ | ❌ |
+| finance | ✅ | ✅ | ✅ | ✅ | ✅ |
+| frontend | ✅ | ✅ | — | — | ❌ |
+| groomers | ✅ | ✅ | ✅ | ✅ | ✅ |
+| loyalty | ✅ | ✅ | ✅ | ✅ | ✅ |
+| payment | ✅ | ✅ | ✅ | ✅ | ❌ |
+| push | ✅ | ✅ | ✅ | ✅ | ✅ |
+| registration | ✅ | ✅ | ✅ | ✅ | ✅ |
+| services | ✅ | ✅ | — | — | ✅ |
+| stats | ✅ | ✅ | — | — | ❌ |
+| stock | ✅ | ✅ | — | ✅ | ✅ |
+| subscription | ✅ | ✅ | — | — | ❌ |
+
+**Legenda:** ✅ Conforme | ❌ Ausente | — Não aplicável (add-on sem UI admin própria)
+
+---
+
 ## Contratos de Metadados dos CPTs
 
 > **Adicionado em:** 2026-02-18 — Fase 2.5 do Plano de Implementação

@@ -159,21 +159,21 @@ Reduzir a complexidade do código-fonte, melhorar a manutenibilidade e estabelec
 **Problema:** Add-ons com estruturas inconsistentes, headers duplicados.
 
 **Ação:**
-- [ ] Definir template padrão de add-on (arquivo principal, `includes/`, `assets/`, headers)
+- [x] Definir template padrão de add-on (arquivo principal, `includes/`, `assets/`, headers) — documentado em ANALYSIS.md
 - [ ] Corrigir headers duplicados nos add-ons identificados (Finance, Subscription)
-- [ ] Padronizar padrão de inicialização: text domain em `init` prioridade 1, classes em `init` prioridade 5
+- [x] Padronizar padrão de inicialização: text domain em `init` prioridade 1, classes em `init` prioridade 5 — auditado, todos conformes
 - [ ] Garantir que todos usem `admin_menu` prioridade 20 com submenu de `desi-pet-shower`
-- [ ] Documentar template padrão em `ANALYSIS.md`
+- [x] Documentar template padrão em `ANALYSIS.md` — incluindo compliance status e helpers disponíveis
 
 ### 2.3 — Centralização de Funções Duplicadas
 
 **Problema:** Funções duplicadas entre add-ons (formatação de moeda, telefone, URLs, etc.).
 
 **Ação:**
-- [ ] Inventariar funções duplicadas com grep global
-- [ ] Verificar uso dos helpers globais existentes (`DPS_Phone_Helper`, `DPS_Money_Helper`, `DPS_URL_Builder`, `DPS_Query_Helper`, `DPS_Request_Validator`)
-- [ ] Migrar add-ons que ainda usam implementações locais para os helpers globais
-- [ ] Remover código duplicado após migração
+- [x] Inventariar funções duplicadas com grep global — 16 instâncias de `number_format` identificadas
+- [x] Verificar uso dos helpers globais existentes (`DPS_Phone_Helper`, `DPS_Money_Helper`, `DPS_URL_Builder`, `DPS_Query_Helper`, `DPS_Request_Validator`)
+- [x] Migrar add-ons que ainda usam implementações locais para os helpers globais — 10 arquivos migrados para `DPS_Money_Helper::format_currency()`
+- [x] Remover código duplicado após migração — fallbacks `class_exists()` removidos
 - [ ] Atualizar `docs/FUNCTIONS_REFERENCE.md` se novos helpers forem criados
 
 ### 2.4 — Sistema de Templates
@@ -240,15 +240,15 @@ Otimizar consultas, carregamento de assets e preparar o sistema para volumes mai
 **Ação:**
 - [ ] Revisar queries que fazem `SELECT *` e limitar aos campos necessários
 - [x] Usar `'fields' => 'ids'` e `'no_found_rows' => true` em `WP_Query` onde aplicável — `DPS_Query_Helper` otimizado com `no_found_rows => true` por padrão
-- [ ] Verificar índices nas tabelas customizadas (`dps_transacoes`, `dps_parcelas`)
+- [x] Verificar índices nas tabelas customizadas (`dps_transacoes`, `dps_parcelas`) — já possuem índices adequados (v1.3.1): `idx_finance_date_status(data,status)`, `idx_finance_categoria`, `cliente_id`, `agendamento_id`, `plano_id`
 - [x] Eliminar queries N+1 (loops que executam uma query por item) — `query_appointments_for_week()` corrigido
 
 ### 3.4 — Otimização de Assets (CSS/JS)
 
 **Ação:**
-- [ ] Auditar carregamento de CSS/JS em todas as páginas admin
-- [ ] Garantir que assets são carregados apenas nas telas relevantes (`admin_enqueue_scripts` com `$hook_suffix`)
-- [ ] Verificar se arquivos JS/CSS estão sendo carregados no frontend sem necessidade
+- [x] Auditar carregamento de CSS/JS em todas as páginas admin — 17 add-ons auditados
+- [x] Garantir que assets são carregados apenas nas telas relevantes (`admin_enqueue_scripts` com `$hook_suffix`) — Stock add-on corrigido (carregamento global → condicional)
+- [x] Verificar se arquivos JS/CSS estão sendo carregados no frontend sem necessidade — Stock add-on corrigido
 - [ ] Considerar minificação manual dos arquivos CSS/JS mais pesados (sem build process obrigatório)
 
 **Nota:** O AGENTS.md proíbe cache (transients, object cache, etc.). Todas as otimizações devem ser feitas via queries eficientes e carregamento condicional, não via cache.
