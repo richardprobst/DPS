@@ -96,6 +96,15 @@ Antes de criar uma nova versão oficial:
 - **Pet selector**: dropdown de pet no Step 1 do modal de agendamento, visível quando cliente tem 2+ pets, com ícones de espécie (🐶/🐱/🐾). Dados de pets via `dpsPortal.clientPets`.
 - **Revisão com pet**: pet selecionado aparece no resumo de revisão (Step 3). Pet pré-selecionado quando ação vem de botão com `data-pet-id`.
 
+**Client Portal — Fase 5.5: Aba Pagamentos**
+
+- **Nova aba "Pagamentos"**: aba dedicada no portal com badge de pendências, acessível via tab navigation.
+- **Cards de resumo**: grid com cards "Pendente" (⏳) e "Pago" (✅), exibindo totais formatados e contagem de pendências.
+- **Transações com parcelas**: cada transação exibida como card com data, descrição, valor, status. Cards pendentes com borda laranja, pagos com borda verde.
+- **Detalhamento de parcelas**: parcelas registradas exibidas em rows com data, método de pagamento (PIX/Cartão/Dinheiro/Fidelidade) e valor. Saldo restante calculado para pendentes.
+- **Botão "Pagar Agora"**: em cada transação pendente para integração com gateway.
+- **Responsivo**: layout adapta-se a mobile (480px).
+
 #### Changed (Alterado)
 
 **AI Add-on — Assistente Virtual no Portal do Cliente**

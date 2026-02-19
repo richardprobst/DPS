@@ -240,7 +240,7 @@ Otimizar consultas, carregamento de assets e preparar o sistema para volumes mai
 - [x] Limitar summary query: LIMIT 5000 safety cap quando filtro de data aplicado
 - [x] Limitar busca de clientes: LIMIT 200 resultados
 - [x] Usar `LIMIT`/`OFFSET` com `$wpdb->prepare()`
-- [ ] Adicionar controles de paginação na UI admin
+- [x] Adicionar controles de paginação na UI admin — `render_pagination()` renderiza: info de registros, botões anterior/próximo, números de página com ellipsis, estados disabled. CSS em `finance-addon.css:839+`
 
 ### 3.3 — Otimização de Queries SQL
 
@@ -426,11 +426,17 @@ Adicionar funcionalidades que criam valor para o cliente final e diferenciam o p
 ### 5.5 — Integração com Pagamentos no Portal
 
 **Ação:**
-- [ ] Verificar estado atual do add-on Payment
-- [ ] Avaliar viabilidade de pré-pagamento ou pagamento online pelo portal
-- [ ] Implementar visualização de parcelas pendentes (integração Finance)
-- [ ] Adicionar botão "Pagar agora" com link para gateway configurado
-- [ ] Seguir regra ASK BEFORE para novas integrações de pagamento
+- [x] Verificar estado atual do add-on Payment — Payment add-on existe mas integração gateway requer ASK BEFORE
+- [x] Implementar visualização de parcelas pendentes (integração Finance) — aba "Pagamentos" no portal com: cards de resumo (pendente/pago), lista de transações pendentes com parcelas e saldo restante, histórico de transações pagas com parcelas detalhadas
+- [x] Adicionar botão "Pagar agora" com link para gateway configurado — botão "Pagar Agora" em cada transação pendente (reusa formulário existente)
+- [ ] Avaliar viabilidade de pré-pagamento ou pagamento online pelo portal — futuro (requer ASK BEFORE)
+- [ ] Seguir regra ASK BEFORE para novas integrações de pagamento — futuro
+
+**Implementação:**
+- PHP: `render_payments_tab()` em `class-dps-portal-renderer.php` com sub-métodos: `render_payments_summary_cards()`, `render_payments_pending_section()`, `render_payments_paid_section()`, `render_payment_card()`, `render_parcela_row()`
+- Repository: `get_parcelas_for_transaction()`, `get_parcelas_sum()`, `get_client_financial_summary()` em `class-dps-finance-repository.php`
+- CSS: `.dps-payments-summary-grid`, `.dps-payments-stat-card`, `.dps-payment-card`, `.dps-parcela-row` em `client-portal.css`
+- Tab "pagamentos" com badge de pendências no portal
 
 ### Entregáveis
 
