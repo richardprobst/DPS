@@ -77,6 +77,9 @@ require_once DPS_BASE_DIR . 'includes/class-dps-addon-manager.php';
 // GitHub Updater - Atualizações automáticas via GitHub
 require_once DPS_BASE_DIR . 'includes/class-dps-github-updater.php';
 
+// Template Engine compartilhado (Fase 2.4)
+require_once DPS_BASE_DIR . 'includes/class-dps-base-template-engine.php';
+
 // Handlers de CRUD extraídos do frontend (Fase 2.1)
 require_once DPS_BASE_DIR . 'includes/class-dps-client-handler.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-pet-handler.php';
