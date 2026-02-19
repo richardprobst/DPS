@@ -51,10 +51,12 @@ Este é o **guia de referência definitivo** para todas as funções, métodos e
 - [DPS_URL_Builder](#dps_url_builder)
 - [DPS_Cache_Control](#dps_cache_control)
 - [DPS_GitHub_Updater](#dps_github_updater)
+- [DPS_Base_Template_Engine](#dps_base_template_engine)
 
 ### Core Utilities
 - [DPS_Logger](#dps_logger)
 - [DPS_Request_Validator](#dps_request_validator)
+- [DPS_Audit_Logger](#dps_audit_logger)
 
 ### Loyalty System
 - [DPS_Loyalty_API](#dps_loyalty_api)
@@ -75,6 +77,9 @@ Este é o **guia de referência definitivo** para todas as funções, métodos e
 ### Client Portal Add-on
 - [DPS_Portal_Session_Manager](#dps_portal_session_manager)
 - [DPS_Portal_Token_Manager](#dps_portal_token_manager)
+- [DPS_Portal_2FA](#dps_portal_2fa)
+- [DPS_Scheduling_Suggestions](#dps_scheduling_suggestions)
+- [DPS_Finance_Repository](#dps_finance_repository)
 - [Portal Repository Classes](#portal-repositories)
 
 ### Push Notifications Add-on
@@ -1677,6 +1682,88 @@ $message = DPS_WhatsApp_Helper::get_payment_request_message(
 ### Arquivo
 
 `plugins/desi-pet-shower-base/includes/class-dps-whatsapp-helper.php`
+
+---
+
+## DPS_Base_Template_Engine
+
+🔧 **Classe Singleton** | **Desde:** 3.2.0
+
+Motor de templates compartilhado para renderização de componentes PHP com output buffering e suporte a override pelo tema (Fase 2.4).
+
+**Arquivo:** `plugins/desi-pet-shower-base/includes/class-dps-base-template-engine.php`
+
+### Métodos
+
+#### 🔧 get_instance()
+
+**Método Estático**
+
+Recupera instância singleton. Na primeira chamada, inicializa com path do plugin base.
+
+**Assinatura:**
+
+```php
+DPS_Base_Template_Engine::get_instance()
+```
+
+**Retorno:** `DPS_Base_Template_Engine`
+
+---
+
+#### 🔧 render()
+
+**Método de Instância**
+
+Renderiza template com dados fornecidos usando output buffering. Dados extraídos com `EXTR_SKIP` para segurança.
+
+**Assinatura:**
+
+```php
+$engine->render($template, $data = [])
+```
+
+**Parâmetros:**
+
+- `$template` (`string`): Caminho relativo do template (ex: `components/client-summary-cards.php`)
+- `$data` (`array`): Dados disponibilizados como variáveis no template
+
+**Retorno:** `string HTML renderizado (string vazia se template não encontrado)`
+
+**Exemplo:**
+
+```php
+$engine = DPS_Base_Template_Engine::get_instance();
+echo $engine->render( 'components/client-summary-cards.php', [
+    'total_appointments' => 15,
+    'total_pets'         => 3,
+    'total_value'        => 'R$ 1.500,00',
+] );
+```
+
+---
+
+#### 🔧 exists()
+
+**Método de Instância**
+
+Verifica se um template existe (no tema override ou no plugin).
+
+**Assinatura:**
+
+```php
+$engine->exists($template)
+```
+
+**Parâmetros:**
+
+- `$template` (`string`): Caminho relativo do template
+
+**Retorno:** `bool True se o template existe`
+
+**Ordem de busca:**
+1. Tema: `{theme_dir}/dps-templates/{prefix}/{template}`
+2. Plugin: `{plugin_dir}/templates/{template}`
 
 ---
 
@@ -4380,6 +4467,353 @@ $petreposit->pet_belongs_to_client($pet_id, $client_id)
 ```
 
 **Retorno:** `bool True se o pet pertence ao cliente.`
+
+
+### DPS_Portal_2FA
+
+Autenticação de dois fatores via e-mail para o portal do cliente (Fase 6.4).
+
+**Arquivo:** `plugins/desi-pet-shower-client-portal/includes/class-dps-portal-2fa.php`
+
+**Padrão:** Singleton via `DPS_Portal_2FA::get_instance()`
+
+
+#### 🔧 is_enabled()
+
+**Método de Instância**
+
+Verifica se 2FA está habilitado nas configurações do portal.
+
+**Assinatura:**
+
+```php
+$twofa->is_enabled()
+```
+
+**Retorno:** `bool True se 2FA está habilitado (option dps_portal_2fa_enabled)`
+
+---
+
+
+#### 🔧 generate_code()
+
+**Método de Instância**
+
+Gera código de verificação de 6 dígitos, armazena hash e metadados em transient (10 min).
+
+**Assinatura:**
+
+```php
+$twofa->generate_code($client_id)
+```
+
+**Parâmetros:**
+
+- `$client_id` (`int`): ID do cliente
+
+**Retorno:** `string Código de 6 dígitos em texto plano (para envio por e-mail)`
+
+---
+
+
+#### 🔧 verify_code()
+
+**Método de Instância**
+
+Verifica código informado pelo cliente contra hash armazenado. Máximo 5 tentativas (anti-brute-force).
+
+**Assinatura:**
+
+```php
+$twofa->verify_code($client_id, $code)
+```
+
+**Parâmetros:**
+
+- `$client_id` (`int`): ID do cliente
+- `$code` (`string`): Código de 6 dígitos informado pelo cliente
+
+**Retorno:** `bool True se código válido e dentro do prazo/tentativas`
+
+---
+
+
+#### 🔧 send_code_email()
+
+**Método de Instância**
+
+Envia código de verificação por e-mail com template HTML estilizado.
+
+**Assinatura:**
+
+```php
+$twofa->send_code_email($client_id, $code)
+```
+
+**Parâmetros:**
+
+- `$client_id` (`int`): ID do cliente
+- `$code` (`string`): Código de 6 dígitos
+
+**Retorno:** `bool True se e-mail enviado com sucesso`
+
+---
+
+
+#### 🔧 set_pending_2fa()
+
+**Método de Instância**
+
+Registra que um cliente está aguardando verificação 2FA (transient de 15 min).
+
+**Assinatura:**
+
+```php
+$twofa->set_pending_2fa($client_id, $session_key)
+```
+
+**Parâmetros:**
+
+- `$client_id` (`int`): ID do cliente
+- `$session_key` (`string`): Chave da sessão pendente
+
+---
+
+
+#### 🔧 get_pending_client()
+
+**Método de Instância**
+
+Recupera client_id de uma sessão pendente de 2FA.
+
+**Assinatura:**
+
+```php
+$twofa->get_pending_client($session_key)
+```
+
+**Parâmetros:**
+
+- `$session_key` (`string`): Chave da sessão pendente
+
+**Retorno:** `int|false Client ID ou false se não encontrado/expirado`
+
+---
+
+
+#### 🔧 render_verification_form()
+
+**Método de Instância**
+
+Renderiza formulário de verificação 2FA com 6 inputs individuais, auto-advance e suporte a paste.
+
+**Assinatura:**
+
+```php
+$twofa->render_verification_form($session_key, $email)
+```
+
+**Parâmetros:**
+
+- `$session_key` (`string`): Chave da sessão pendente
+- `$email` (`string`): E-mail do cliente (exibido ofuscado)
+
+**Retorno:** `string HTML do formulário de verificação`
+
+---
+
+
+#### 🎯 ajax_verify_2fa_code()
+
+**Método de Instância** | **AJAX Handler**
+
+Handler AJAX para verificação de código 2FA. Registrado em `wp_ajax_nopriv_dps_verify_2fa_code`.
+
+**Assinatura:**
+
+```php
+$twofa->ajax_verify_2fa_code()
+```
+
+**Retorno:** `void (wp_send_json_success ou wp_send_json_error)`
+
+
+### DPS_Scheduling_Suggestions
+
+Sugestões inteligentes de agendamento baseadas no histórico do pet (Fase 8.1).
+
+**Arquivo:** `plugins/desi-pet-shower-client-portal/includes/class-dps-scheduling-suggestions.php`
+
+**Padrão:** Singleton via `DPS_Scheduling_Suggestions::get_instance()`
+
+
+#### 🔧 get_suggestions_for_client()
+
+**Método de Instância**
+
+Analisa histórico de agendamentos para cada pet do cliente e retorna sugestões.
+
+**Assinatura:**
+
+```php
+$suggestions->get_suggestions_for_client($client_id, $pets)
+```
+
+**Parâmetros:**
+
+- `$client_id` (`int`): ID do cliente
+- `$pets` (`array`): Array de IDs de pets do cliente
+
+**Retorno:** `array Array indexado por pet_id com: suggested_date (Y-m-d), avg_interval (dias), days_since_last, top_services (array com nome e count, max 3), urgency ('overdue'|'soon'|'normal'), last_date (Y-m-d)`
+
+**Exemplo:**
+
+```php
+$suggestions = DPS_Scheduling_Suggestions::get_instance();
+$data = $suggestions->get_suggestions_for_client( 123, [456, 789] );
+// $data[456] = [
+//     'suggested_date' => '2026-03-01',
+//     'avg_interval'   => 28,
+//     'days_since_last' => 32,
+//     'top_services'   => [['name' => 'Banho', 'count' => 8], ...],
+//     'urgency'        => 'overdue',
+//     'last_date'      => '2026-01-28',
+// ]
+```
+
+
+### DPS_Finance_Repository
+
+Repositório de dados financeiros para o portal do cliente.
+
+**Arquivo:** `plugins/desi-pet-shower-client-portal/includes/client-portal/repositories/class-dps-finance-repository.php`
+
+**Padrão:** Singleton via `DPS_Finance_Repository::get_instance()`
+
+
+#### 🔧 get_pending_transactions_for_client()
+
+**Método de Instância**
+
+Retorna transações pendentes (não pagas) de um cliente.
+
+**Assinatura:**
+
+```php
+$repo->get_pending_transactions_for_client($client_id)
+```
+
+**Parâmetros:**
+
+- `$client_id` (`int`): ID do cliente
+
+**Retorno:** `array Array de objetos de transação`
+
+---
+
+
+#### 🔧 get_paid_transactions_for_client()
+
+**Método de Instância**
+
+Retorna transações pagas de um cliente (ordenadas por data desc).
+
+**Assinatura:**
+
+```php
+$repo->get_paid_transactions_for_client($client_id, $limit = -1)
+```
+
+**Parâmetros:**
+
+- `$client_id` (`int`): ID do cliente
+- `$limit` (`int`): Número máximo de resultados (-1 = sem limite)
+
+**Retorno:** `array Array de objetos de transação`
+
+---
+
+
+#### 🔧 get_parcelas_for_transaction()
+
+**Método de Instância**
+
+Retorna parcelas (pagamentos parciais) de uma transação.
+
+**Assinatura:**
+
+```php
+$repo->get_parcelas_for_transaction($transaction_id)
+```
+
+**Parâmetros:**
+
+- `$transaction_id` (`int`): ID da transação
+
+**Retorno:** `array Array de objetos de parcela (data, valor, metodo_pagamento)`
+
+---
+
+
+#### 🔧 get_parcelas_sum()
+
+**Método de Instância**
+
+Retorna soma dos valores de parcelas de uma transação.
+
+**Assinatura:**
+
+```php
+$repo->get_parcelas_sum($transaction_id)
+```
+
+**Parâmetros:**
+
+- `$transaction_id` (`int`): ID da transação
+
+**Retorno:** `float Soma dos valores das parcelas`
+
+---
+
+
+#### 🔧 get_client_financial_summary()
+
+**Método de Instância**
+
+Retorna resumo financeiro do cliente (total pendente, total pago).
+
+**Assinatura:**
+
+```php
+$repo->get_client_financial_summary($client_id)
+```
+
+**Parâmetros:**
+
+- `$client_id` (`int`): ID do cliente
+
+**Retorno:** `object { pending_total: float, paid_total: float }`
+
+---
+
+
+#### 🔧 count_pending_transactions()
+
+**Método de Instância**
+
+Conta transações pendentes de um cliente (usado para badge na aba Pagamentos).
+
+**Assinatura:**
+
+```php
+$repo->count_pending_transactions($client_id)
+```
+
+**Parâmetros:**
+
+- `$client_id` (`int`): ID do cliente
+
+**Retorno:** `int Número de transações pendentes`
 
 
 ## 🔔 PUSH ADD-ON

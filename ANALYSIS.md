@@ -491,6 +491,31 @@ if ( dps_is_template_overridden( 'tosa-consent-form.php' ) ) {
 - A action `dps_template_loaded` é útil para logging e diagnóstico de problemas
 - Quando sobrescrever templates no tema, mantenha as variáveis esperadas pelo sistema
 
+#### DPS_Base_Template_Engine
+**Propósito**: Motor de templates compartilhado para renderização de componentes PHP com output buffering e suporte a override pelo tema. Portado do Frontend Add-on para uso global (Fase 2.4).
+
+**Arquivo**: `includes/class-dps-base-template-engine.php`
+
+**Padrão**: Singleton via `DPS_Base_Template_Engine::get_instance()`
+
+**Métodos**:
+- `render( string $template, array $data = [] )`: Renderiza template e retorna HTML. Usa `extract( $data, EXTR_SKIP )` + `ob_start()`/`ob_get_clean()`.
+- `exists( string $template )`: Verifica se um template existe (no tema ou no plugin) → bool.
+- `locateTemplate( string $template )` (private): Busca template em: 1) tema `dps-templates/{prefix}/{file}`, 2) plugin `templates/{file}`.
+
+**Templates disponíveis** (em `templates/`):
+- `components/client-summary-cards.php`: cards de resumo do cliente (total atendimentos, pets, valor total)
+
+**Exemplo**:
+```php
+$engine = DPS_Base_Template_Engine::get_instance();
+echo $engine->render( 'components/client-summary-cards.php', [
+    'total_appointments' => 15,
+    'total_pets'         => 3,
+    'total_value'        => 'R$ 1.500,00',
+] );
+```
+
 ### Feedback visual e organização de interface
 - Todos os formulários principais (clientes, pets, agendamentos) utilizam `DPS_Message_Helper` para feedback após salvar ou excluir
 - Formulários são organizados em fieldsets semânticos com bordas sutis (`1px solid #e5e7eb`) e legends descritivos
@@ -1200,6 +1225,14 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Sistema de autenticação via tokens (magic links) sem necessidade de senhas
 - Link de atualização de perfil para clientes atualizarem seus dados sem login
 - Coleta de consentimento de tosa com máquina via link tokenizado
+- Aba de pagamentos com resumo financeiro, pendências e histórico de parcelas (Fase 5.5)
+- Galeria multi-fotos por pet com lightbox (Fase 5.1)
+- Preferências de notificação configuráveis pelo cliente (Fase 5.2)
+- Seletor de pet no modal de agendamento para clientes com múltiplos pets (Fase 5.3)
+- Barra de progresso stepper (3 etapas) no fluxo de agendamento (Fase 4.1)
+- Sugestões inteligentes de agendamento baseadas no histórico do pet (Fase 8.1)
+- Autenticação de dois fatores (2FA) via e-mail, opcional (Fase 6.4)
+- Remember-me com cookie permanente (Fase 4.6)
 
 **Shortcodes expostos**:
 - `[dps_client_portal]`: renderiza portal completo do cliente
@@ -1213,15 +1246,44 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
   - Suporta 5 tipos de token: `login` (temporário 30min), `first_access` (temporário 30min), `permanent` (válido até revogação), `profile_update` (7 dias), `tosa_consent` (7 dias)
 - Sessões PHP próprias para autenticação independente do WordPress
 - Option `dps_portal_page_id`: armazena ID da página configurada do portal
+- Option `dps_portal_2fa_enabled`: habilita/desabilita 2FA via e-mail (padrão: desabilitado)
 - Tipos de mensagem customizados para notificações
 
+**Abas do portal**:
+- `inicio`: dashboard com resumo (agendamentos, pets, status financeiro)
+- `agendamentos`: histórico de atendimentos com filtro por período
+- `pagamentos`: resumo financeiro, transações pendentes com parcelas, histórico de pagos (Fase 5.5)
+- `pet-history`: timeline de atendimentos por pet com info card detalhado
+- `galeria`: galeria multi-fotos por pet com lightbox (Fase 5.1)
+- `fidelidade`: programa de indicação e recompensas
+- `reviews`: avaliações pós-serviço
+- `mensagens`: comunicação com o pet shop
+- `dados`: dados pessoais, pets e preferências de notificação
+- Hook `dps_portal_tabs` (filter): permite add-ons adicionarem abas customizadas
+
 **Menus administrativos**:
-- **Portal do Cliente** (`dps-client-portal-settings`): configurações gerais do portal
+- **Portal do Cliente** (`dps-client-portal-settings`): configurações gerais do portal, toggle 2FA
 - **Logins de Clientes** (`dps-client-logins`): gerenciamento de tokens de acesso
   - Interface para gerar tokens temporários ou permanentes
   - Revogação manual de tokens ativos
   - Envio de links por WhatsApp ou e-mail
   - Histórico de acessos por cliente
+
+**Classes principais**:
+
+| Classe | Arquivo | Propósito |
+|--------|---------|-----------|
+| `DPS_Client_Portal` | `includes/class-dps-client-portal.php` | Classe principal: shortcode, auth flow, tabs, localize_script |
+| `DPS_Portal_2FA` | `includes/class-dps-portal-2fa.php` | 2FA via e-mail: gera/verifica códigos, renderiza form, AJAX handler |
+| `DPS_Scheduling_Suggestions` | `includes/class-dps-scheduling-suggestions.php` | Sugestões de agendamento baseadas no histórico do pet |
+| `DPS_Portal_Renderer` | `includes/client-portal/class-dps-portal-renderer.php` | Renderização das abas e componentes visuais |
+| `DPS_Portal_Actions_Handler` | `includes/client-portal/class-dps-portal-actions-handler.php` | Handlers de ações POST (save, update, upload) |
+| `DPS_Portal_Ajax_Handler` | `includes/client-portal/class-dps-portal-ajax-handler.php` | Handlers de requisições AJAX |
+| `DPS_Portal_Session_Manager` | `includes/class-dps-portal-session-manager.php` | Gerenciamento de sessões PHP |
+| `DPS_Portal_Token_Manager` | `includes/class-dps-portal-token-manager.php` | CRUD de tokens com suporte a permanentes e temporários |
+| `DPS_Finance_Repository` | `includes/client-portal/repositories/class-dps-finance-repository.php` | Acesso a dados financeiros (transações, parcelas, resumos) |
+| `DPS_Pet_Repository` | `includes/client-portal/repositories/class-dps-pet-repository.php` | Acesso a dados de pets do cliente |
+| `DPS_Appointment_Repository` | `includes/client-portal/repositories/class-dps-appointment-repository.php` | Acesso a dados de agendamentos do cliente |
 
 **Hooks consumidos**:
 - ~~`dps_settings_nav_tabs`~~: (migrado para sistema moderno) abas "Portal do Cliente" e "Logins de Clientes" registradas em `DPS_Settings_Frontend`
@@ -1232,12 +1294,19 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 **Hooks disparados**:
 - `dps_client_portal_before_content`: disparado após o menu de navegação e antes das seções de conteúdo; passa $client_id como parâmetro; útil para adicionar conteúdo no topo do portal (ex: widgets, assistentes)
 - `dps_client_portal_after_content`: disparado ao final do portal, antes do fechamento do container principal; passa $client_id como parâmetro
+- `dps_portal_tabs` (filter): filtra o array de abas do portal; passa $tabs e $client_id
+- `dps_portal_before_{tab}_content` / `dps_portal_after_{tab}_content` (action): disparados antes/depois do conteúdo de cada aba (inicio, agendamentos, pagamentos, pet-history, galeria, fidelidade, reviews, mensagens, dados); passa $client_id
+- `dps_portal_custom_tab_panels` (action): renderiza painéis de abas customizadas; passa $client_id e $tabs
 - `dps_portal_profile_update_link_generated`: disparado quando um link de atualização de perfil é gerado; passa $client_id e $update_url como parâmetros
 - `dps_portal_profile_updated`: disparado quando o cliente atualiza seu perfil; passa $client_id como parâmetro
 - `dps_portal_new_pet_created`: disparado quando um novo pet é cadastrado via formulário de atualização; passa $pet_id e $client_id como parâmetros
 - `dps_portal_tosa_consent_link_generated`: disparado ao gerar link de consentimento; passa $client_id e $consent_url
 - `dps_portal_tosa_consent_saved`: disparado ao salvar consentimento; passa $client_id
 - `dps_portal_tosa_consent_revoked`: disparado ao revogar consentimento; passa $client_id
+- `dps_portal_after_update_preferences` (action): disparado após salvar preferências de notificação; passa $client_id
+- `dps_portal_before_render` / `dps_portal_after_auth_check` / `dps_portal_client_authenticated` (actions): hooks do ciclo de vida do shortcode
+- `dps_portal_access_notification_sent` (action): disparado após enviar notificação de acesso; passa $client_id, $sent, $access_date, $ip_address
+- `dps_portal_review_url` (filter): permite filtrar a URL de avaliação do Google
 
 **Métodos públicos da classe `DPS_Client_Portal`**:
 - `get_current_client_id()`: retorna o ID do cliente autenticado via sessão ou usuário WordPress (0 se não autenticado); permite que add-ons obtenham o cliente logado no portal
@@ -1247,9 +1316,15 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - `dps_get_portal_page_id()`: retorna ID da página do portal (configurada ou fallback)
 - `dps_get_tosa_consent_page_url()`: retorna URL da página de consentimento (configurada ou fallback)
 
+**Metadados de cliente utilizados** (meta keys em `dps_cliente` CPT):
+- `client_notification_reminders` (default '1'): preferência de lembretes de agendamento
+- `client_notification_payments` (default '1'): preferência de notificações financeiras
+- `client_notification_promotions` (default '0'): preferência de promoções
+- `client_notification_updates` (default ''): preferência de atualizações do sistema
+
 **Dependências**:
 - Depende do plugin base para CPTs de clientes e pets
-- Integra-se com add-on Financeiro para exibir pendências
+- Integra-se com add-on Financeiro para exibir pendências e parcelas (aba Pagamentos)
 - Integra-se com add-on de Fidelidade para exibir código de indicação
 
 **Introduzido em**: v0.1.0 (estimado)
@@ -1261,12 +1336,15 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Cleanup automático de tokens expirados via cron job hourly
 - Configuração centralizada da página do portal via interface administrativa
 - Menu administrativo registrado sob `desi-pet-shower` desde v2.1.0
+- 2FA opcional via e-mail (códigos hashed com `wp_hash_password`, 10min expiração, 5 tentativas max)
+- Remember-me: cookie permanente (HttpOnly, Secure, SameSite=Strict, 90 dias)
+- Sugestões inteligentes: análise de até 20 atendimentos por pet (intervalo médio, top 3 serviços, urgência)
 
 **Análise de Layout e UX**:
 - Consulte `docs/analysis/CLIENT_PORTAL_ADDON_DEEP_ANALYSIS.md` para análise detalhada de usabilidade e arquitetura do portal
 - Consulte `docs/screenshots/CLIENT_PORTAL_REBRANDING_SCREENSHOTS.md` para registro visual e resumo executivo das melhorias aplicadas
-- Principais achados: estrutura "all-in-one" sem navegação, responsividade precária em mobile, paleta de cores excessiva (15+ cores vs 8 recomendadas), feedback visual ausente
-- Melhorias prioritárias documentadas em 3 fases (26.5h totais): navegação interna, cards destacados, tabelas responsivas, feedback visual, redução de paleta, fieldsets em formulários
+- Portal usa design M3 com tabs, cards, lightbox, progress bar stepper, formulários com validação real-time
+- Responsividade em 480px, 768px e 1024px; suporte a `prefers-reduced-motion`
 
 ---
 
@@ -2101,6 +2179,30 @@ Esta seção consolida os principais hooks expostos pelo núcleo e pelos add-ons
   - **Parâmetros**: `$client_id` (int), `$referral_code` (string|null)
   - **Propósito**: disparado após criar novo cliente via formulário público
   - **Consumido por**: Campanhas & Fidelidade (registra indicações)
+
+#### Add-on Portal do Cliente
+
+- **`dps_portal_tabs`** (filter)
+  - **Parâmetros**: `$tabs` (array), `$client_id` (int)
+  - **Propósito**: filtrar abas do portal; permite add-ons adicionarem ou removerem abas
+  - **Retorno**: array de abas com keys: label, icon, badge (opcional)
+
+- **`dps_portal_before_{tab}_content`** / **`dps_portal_after_{tab}_content`** (action)
+  - **Parâmetros**: `$client_id` (int)
+  - **Propósito**: injetar conteúdo antes/depois do conteúdo de cada aba
+  - **Abas disponíveis**: inicio, agendamentos, pagamentos, pet-history, galeria, fidelidade, reviews, mensagens, dados
+
+- **`dps_portal_custom_tab_panels`** (action)
+  - **Parâmetros**: `$client_id` (int), `$tabs` (array)
+  - **Propósito**: renderizar painéis de abas customizadas adicionadas via `dps_portal_tabs`
+
+- **`dps_portal_after_update_preferences`** (action)
+  - **Parâmetros**: `$client_id` (int)
+  - **Propósito**: executar ações após salvar preferências de notificação do cliente
+
+- **`dps_portal_access_notification_sent`** (action)
+  - **Parâmetros**: `$client_id` (int), `$sent` (bool), `$access_date` (string), `$ip_address` (string)
+  - **Propósito**: executar ações após enviar notificação de acesso ao portal
 
 #### Cron jobs de add-ons
 

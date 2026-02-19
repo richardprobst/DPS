@@ -139,6 +139,12 @@ Antes de criar uma nova versão oficial:
 
 - **Seção adicionada** ao `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`: documenta 3 estratégias de instanciação (Singleton, Constructor Injection, Static Renderers) com exemplos e regras de quando usar cada uma.
 
+**Documentação — Fase 8.2: Atualização Contínua**
+
+- **ANALYSIS.md**: Portal do Cliente expandido com 2FA, payments tab, scheduling suggestions, progress bar, multi-pet selector, classes e hooks. Base Plugin: DPS_Base_Template_Engine. Hooks map: hooks do Portal Add-on adicionados.
+- **FUNCTIONS_REFERENCE.md**: DPS_Portal_2FA (8 métodos), DPS_Scheduling_Suggestions (1 método), DPS_Finance_Repository (6 métodos), DPS_Base_Template_Engine (3 métodos) documentados com assinaturas, parâmetros, retornos e exemplos.
+- **Table of Contents**: atualizada com novos links para DPS_Portal_2FA, DPS_Scheduling_Suggestions, DPS_Finance_Repository, DPS_Base_Template_Engine, DPS_Audit_Logger.
+
 #### Changed (Alterado)
 
 **AI Add-on — Assistente Virtual no Portal do Cliente**

@@ -623,11 +623,13 @@ Explorar integrações avançadas e funcionalidades inteligentes.
 
 ### 8.2 — Documentação Contínua
 
+**Status:** ✅ Atualizada em 2026-02-19
+
 **Ação (a cada fase):**
-- [ ] Atualizar `ANALYSIS.md` com novas classes, hooks, tabelas, metadados
-- [ ] Atualizar `CHANGELOG.md` com todas as mudanças user-facing
-- [ ] Atualizar `docs/FUNCTIONS_REFERENCE.md` com novas funções/métodos
-- [ ] Manter `docs/README.md` sincronizado com novos documentos
+- [x] Atualizar `ANALYSIS.md` com novas classes, hooks, tabelas, metadados — Portal do Cliente expandido (2FA, payments, scheduling, progress bar, multi-pet), DPS_Base_Template_Engine, hooks de add-on Portal documentados
+- [x] Atualizar `CHANGELOG.md` com todas as mudanças user-facing — atualizado a cada fase
+- [x] Atualizar `docs/FUNCTIONS_REFERENCE.md` com novas funções/métodos — DPS_Portal_2FA, DPS_Scheduling_Suggestions, DPS_Finance_Repository, DPS_Base_Template_Engine adicionados
+- [x] Manter `docs/README.md` sincronizado com novos documentos — verificado, sem novos documentos pendentes
 
 ---
 
