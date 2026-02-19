@@ -130,4 +130,86 @@ class DPS_Finance_Repository {
         
         return absint( $count );
     }
+
+    /**
+     * Busca parcelas (pagamentos parciais) de uma transação.
+     *
+     * @param int $transaction_id ID da transação.
+     * @return array Array de objetos de parcela.
+     * @since 3.1.0
+     */
+    public function get_parcelas_for_transaction( $transaction_id ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_parcelas';
+
+        // Verifica se a tabela de parcelas existe
+        $table_exists = $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND table_name = %s",
+            DB_NAME,
+            $table
+        ) );
+
+        if ( ! $table_exists ) {
+            return [];
+        }
+
+        return $wpdb->get_results( $wpdb->prepare(
+            "SELECT * FROM {$table} WHERE trans_id = %d ORDER BY data ASC",
+            $transaction_id
+        ) );
+    }
+
+    /**
+     * Calcula o total de parcelas pagas de uma transação.
+     *
+     * @param int $transaction_id ID da transação.
+     * @return float Total pago em parcelas.
+     * @since 3.1.0
+     */
+    public function get_parcelas_sum( $transaction_id ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_parcelas';
+
+        $table_exists = $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND table_name = %s",
+            DB_NAME,
+            $table
+        ) );
+
+        if ( ! $table_exists ) {
+            return 0.0;
+        }
+
+        $sum = $wpdb->get_var( $wpdb->prepare(
+            "SELECT COALESCE(SUM(valor), 0) FROM {$table} WHERE trans_id = %d",
+            $transaction_id
+        ) );
+
+        return (float) $sum;
+    }
+
+    /**
+     * Calcula o total financeiro de um cliente (pendentes + pagos).
+     *
+     * @param int $client_id ID do cliente.
+     * @return array [ 'total_pending' => float, 'total_paid' => float ]
+     * @since 3.1.0
+     */
+    public function get_client_financial_summary( $client_id ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_transacoes';
+
+        $row = $wpdb->get_row( $wpdb->prepare(
+            "SELECT 
+                COALESCE(SUM(CASE WHEN status IN ('em_aberto', 'pendente') THEN valor ELSE 0 END), 0) AS total_pending,
+                COALESCE(SUM(CASE WHEN status = 'pago' THEN valor ELSE 0 END), 0) AS total_paid
+            FROM {$table} WHERE cliente_id = %d AND status != 'cancelado'",
+            $client_id
+        ) );
+
+        return [
+            'total_pending' => $row ? (float) $row->total_pending : 0.0,
+            'total_paid'    => $row ? (float) $row->total_paid : 0.0,
+        ];
+    }
 }

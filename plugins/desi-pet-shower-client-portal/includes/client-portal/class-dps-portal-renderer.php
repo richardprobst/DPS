@@ -356,6 +356,213 @@ class DPS_Portal_Renderer {
     }
 
     /**
+     * Renderiza a aba completa de Pagamentos (Fase 5.5).
+     *
+     * Exibe resumo financeiro, pendências com parcelas, e histórico de pagos.
+     *
+     * @param int $client_id ID do cliente.
+     * @since 3.1.0
+     */
+    public function render_payments_tab( $client_id ) {
+        $summary  = $this->finance_repository->get_client_financial_summary( $client_id );
+        $pendings = $this->finance_repository->get_pending_transactions_for_client( $client_id );
+        $paid     = $this->finance_repository->get_paid_transactions_for_client( $client_id, 20 );
+
+        // Resumo financeiro global
+        $this->render_payments_summary_cards( $summary, count( $pendings ) );
+
+        // Seção de pendências
+        if ( ! empty( $pendings ) ) {
+            $this->render_payments_pending_section( $pendings );
+        }
+
+        // Seção de histórico de pagos
+        $this->render_payments_paid_section( $paid );
+    }
+
+    /**
+     * Renderiza cards de resumo financeiro.
+     *
+     * @param array $summary Dados do resumo financeiro.
+     * @param int   $pending_count Número de transações pendentes.
+     */
+    private function render_payments_summary_cards( $summary, $pending_count ) {
+        echo '<div class="dps-payments-summary-grid">';
+
+        // Card: Total Pendente
+        echo '<div class="dps-payments-stat-card' . ( $pending_count > 0 ? ' dps-payments-stat-card--warning' : '' ) . '">';
+        echo '<div class="dps-payments-stat-card__icon">⏳</div>';
+        echo '<div class="dps-payments-stat-card__content">';
+        echo '<div class="dps-payments-stat-card__label">' . esc_html__( 'Pendente', 'dps-client-portal' ) . '</div>';
+        echo '<div class="dps-payments-stat-card__value">' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $summary['total_pending'] ) ) . '</div>';
+        if ( $pending_count > 0 ) {
+            echo '<div class="dps-payments-stat-card__badge">' . esc_html( sprintf(
+                _n( '%d pendência', '%d pendências', $pending_count, 'dps-client-portal' ),
+                $pending_count
+            ) ) . '</div>';
+        }
+        echo '</div>';
+        echo '</div>';
+
+        // Card: Total Pago
+        echo '<div class="dps-payments-stat-card dps-payments-stat-card--success">';
+        echo '<div class="dps-payments-stat-card__icon">✅</div>';
+        echo '<div class="dps-payments-stat-card__content">';
+        echo '<div class="dps-payments-stat-card__label">' . esc_html__( 'Pago', 'dps-client-portal' ) . '</div>';
+        echo '<div class="dps-payments-stat-card__value">' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $summary['total_paid'] ) ) . '</div>';
+        echo '</div>';
+        echo '</div>';
+
+        echo '</div>'; // .dps-payments-summary-grid
+    }
+
+    /**
+     * Renderiza seção de transações pendentes com detalhes de parcelas.
+     *
+     * @param array $pendings Array de transações pendentes.
+     */
+    private function render_payments_pending_section( $pendings ) {
+        echo '<section class="dps-portal-section dps-payments-section">';
+        echo '<h3 class="dps-payments-section__title">⚠️ ' . esc_html__( 'Pendências', 'dps-client-portal' ) . '</h3>';
+
+        foreach ( $pendings as $trans ) {
+            $this->render_payment_card( $trans, 'pending' );
+        }
+
+        echo '</section>';
+    }
+
+    /**
+     * Renderiza seção de transações pagas.
+     *
+     * @param array $paid Array de transações pagas.
+     */
+    private function render_payments_paid_section( $paid ) {
+        echo '<section class="dps-portal-section dps-payments-section">';
+        echo '<h3 class="dps-payments-section__title">✅ ' . esc_html__( 'Histórico de Pagamentos', 'dps-client-portal' ) . '</h3>';
+
+        if ( empty( $paid ) ) {
+            echo '<div class="dps-empty-state">';
+            echo '<p>' . esc_html__( 'Nenhum pagamento registrado ainda.', 'dps-client-portal' ) . '</p>';
+            echo '</div>';
+        } else {
+            foreach ( $paid as $trans ) {
+                $this->render_payment_card( $trans, 'paid' );
+            }
+        }
+
+        echo '</section>';
+    }
+
+    /**
+     * Renderiza card individual de pagamento com parcelas.
+     *
+     * @param object $transaction Objeto da transação.
+     * @param string $type        Tipo: 'pending' ou 'paid'.
+     */
+    private function render_payment_card( $transaction, $type = 'pending' ) {
+        $date  = date_i18n( 'd/m/Y', strtotime( $transaction->data ) );
+        $desc  = $transaction->descricao ? $transaction->descricao : __( 'Serviço', 'dps-client-portal' );
+        $valor = DPS_Money_Helper::format_currency_from_decimal( (float) $transaction->valor );
+
+        $status_class = 'pending' === $type ? 'dps-payment-card--pending' : 'dps-payment-card--paid';
+        $status_label = 'pending' === $type
+            ? __( 'Em Aberto', 'dps-client-portal' )
+            : __( 'Pago', 'dps-client-portal' );
+        $status_icon  = 'pending' === $type ? '🔴' : '🟢';
+
+        echo '<div class="dps-payment-card ' . esc_attr( $status_class ) . '">';
+        echo '<div class="dps-payment-card__header">';
+        echo '<div class="dps-payment-card__info">';
+        echo '<span class="dps-payment-card__date">' . esc_html( $date ) . '</span>';
+        echo '<span class="dps-payment-card__desc">' . esc_html( $desc ) . '</span>';
+        echo '</div>';
+        echo '<div class="dps-payment-card__amount-area">';
+        echo '<span class="dps-payment-card__amount">' . esc_html( $valor ) . '</span>';
+        echo '<span class="dps-payment-card__status">' . esc_html( $status_icon . ' ' . $status_label ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+
+        // Parcelas (installments) detail
+        $parcelas = $this->finance_repository->get_parcelas_for_transaction( $transaction->id );
+        if ( ! empty( $parcelas ) ) {
+            $parcelas_sum = 0.0;
+            foreach ( $parcelas as $p ) {
+                $parcelas_sum += (float) $p->valor;
+            }
+
+            echo '<div class="dps-payment-card__parcelas">';
+            echo '<div class="dps-payment-card__parcelas-header">';
+            echo '<span>' . esc_html( sprintf(
+                _n( '%d parcela registrada', '%d parcelas registradas', count( $parcelas ), 'dps-client-portal' ),
+                count( $parcelas )
+            ) ) . '</span>';
+            echo '<span>' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $parcelas_sum ) ) . '</span>';
+            echo '</div>';
+
+            echo '<div class="dps-payment-card__parcelas-list">';
+            foreach ( $parcelas as $parcela ) {
+                $this->render_parcela_row( $parcela );
+            }
+            echo '</div>';
+
+            // Saldo restante para pendentes
+            if ( 'pending' === $type ) {
+                $remaining = (float) $transaction->valor - $parcelas_sum;
+                if ( $remaining > 0.01 ) {
+                    echo '<div class="dps-payment-card__remaining">';
+                    echo '<span>' . esc_html__( 'Saldo restante:', 'dps-client-portal' ) . '</span>';
+                    echo '<span class="dps-payment-card__remaining-value">' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $remaining ) ) . '</span>';
+                    echo '</div>';
+                }
+            }
+            echo '</div>'; // .dps-payment-card__parcelas
+        }
+
+        // Botão "Pagar Agora" apenas para pendentes
+        if ( 'pending' === $type ) {
+            echo '<div class="dps-payment-card__actions">';
+            echo '<form method="post" style="display:inline;">';
+            wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
+            echo '<input type="hidden" name="dps_client_portal_action" value="pay_transaction">';
+            echo '<input type="hidden" name="trans_id" value="' . esc_attr( $transaction->id ) . '">';
+            echo '<button type="submit" class="button button-primary dps-btn-pay">' . esc_html__( 'Pagar Agora', 'dps-client-portal' ) . '</button>';
+            echo '</form>';
+            echo '</div>';
+        }
+
+        echo '</div>'; // .dps-payment-card
+    }
+
+    /**
+     * Renderiza uma linha de parcela.
+     *
+     * @param object $parcela Objeto da parcela.
+     */
+    private function render_parcela_row( $parcela ) {
+        $date   = date_i18n( 'd/m/Y', strtotime( $parcela->data ) );
+        $valor  = DPS_Money_Helper::format_currency_from_decimal( (float) $parcela->valor );
+        $method = isset( $parcela->metodo ) ? $parcela->metodo : '';
+
+        $method_labels = [
+            'pix'              => 'PIX',
+            'cartao'           => __( 'Cartão', 'dps-client-portal' ),
+            'dinheiro'         => __( 'Dinheiro', 'dps-client-portal' ),
+            'credito_fidelidade' => __( 'Crédito Fidelidade', 'dps-client-portal' ),
+            'outro'            => __( 'Outro', 'dps-client-portal' ),
+        ];
+        $method_label = isset( $method_labels[ $method ] ) ? $method_labels[ $method ] : $method;
+
+        echo '<div class="dps-parcela-row">';
+        echo '<span class="dps-parcela-row__date">' . esc_html( $date ) . '</span>';
+        if ( $method_label ) {
+            echo '<span class="dps-parcela-row__method">' . esc_html( $method_label ) . '</span>';
+        }
+        echo '<span class="dps-parcela-row__value">' . esc_html( $valor ) . '</span>';
+        echo '</div>';
+    }
+
+    /**
      * Renderiza sugestões contextuais baseadas no histórico do cliente.
      * Fase 2: Personalização da experiência
      *

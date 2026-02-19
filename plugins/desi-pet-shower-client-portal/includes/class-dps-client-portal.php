@@ -815,6 +815,12 @@ final class DPS_Client_Portal {
                 'active' => false,
                 'badge' => DPS_Portal_Data_Provider::get_instance()->count_upcoming_appointments( $client_id ),
             ],
+            'pagamentos' => [
+                'icon'  => '💳',
+                'label' => __( 'Pagamentos', 'dps-client-portal' ),
+                'active' => false,
+                'badge' => DPS_Finance_Repository::get_instance()->count_pending_transactions( $client_id ),
+            ],
             'historico-pets' => [
                 'icon'  => '🐾',
                 'label' => __( 'Histórico dos Pets', 'dps-client-portal' ),
@@ -951,6 +957,13 @@ final class DPS_Client_Portal {
         do_action( 'dps_portal_before_agendamentos_content', $client_id ); // Fase 2.3
         DPS_Portal_Renderer::get_instance()->render_appointment_history( $client_id );
         do_action( 'dps_portal_after_agendamentos_content', $client_id ); // Fase 2.3
+        echo '</div>';
+        
+        // Panel: Pagamentos (Fase 5.5)
+        echo '<div id="panel-pagamentos" class="dps-portal-tab-panel" role="tabpanel" aria-labelledby="dps-portal-tab-pagamentos" aria-hidden="true" tabindex="-1">';
+        do_action( 'dps_portal_before_pagamentos_content', $client_id );
+        DPS_Portal_Renderer::get_instance()->render_payments_tab( $client_id );
+        do_action( 'dps_portal_after_pagamentos_content', $client_id );
         echo '</div>';
         
         // Panel: Histórico dos Pets (Fase 4)
