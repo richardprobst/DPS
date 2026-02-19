@@ -1856,13 +1856,37 @@ window.DPSSkeleton = (function() {
         html += '<form class="dps-request-form" id="dps-request-form" novalidate>';
         html += '<input type="hidden" name="request_type" value="' + type + '">';
         html += '<input type="hidden" name="original_appointment_id" value="' + (appointmentId || '') + '">';
-        if (petId) {
+
+        // Phase 5.3: Pet selector for multi-pet clients
+        var clientPets = (typeof dpsPortal !== 'undefined' && Array.isArray(dpsPortal.clientPets)) ? dpsPortal.clientPets : [];
+        var showPetSelector = clientPets.length > 1;
+        if (petId && !showPetSelector) {
             html += '<input type="hidden" name="pet_id" value="' + petId + '">';
         }
 
-        // Step 1: Date & Period
+        // Step 1: Date & Period (+ Pet selector when applicable)
         html += '<div class="dps-step-panel dps-step-panel--active" data-step="1">';
         html += '<p class="dps-modal__notice"><strong>⚠️ Importante:</strong> Este é um <strong>pedido de agendamento</strong>. A equipe do Banho e Tosa irá confirmar o horário final com você.</p>';
+
+        // Pet selector for multi-pet clients
+        if (showPetSelector) {
+            html += '<div class="dps-form-field">';
+            html += '<label for="pet_id">Pet <span class="required">*</span></label>';
+            html += '<select id="pet_id" name="pet_id" required aria-required="true">';
+            if (!petId) {
+                html += '<option value="">Selecione o pet...</option>';
+            }
+            for (var p = 0; p < clientPets.length; p++) {
+                var selected = (petId && String(clientPets[p].id) === String(petId)) ? ' selected' : '';
+                html += '<option value="' + clientPets[p].id + '"' + selected + '>' + clientPets[p].icon + ' ' + clientPets[p].name + '</option>';
+            }
+            html += '</select>';
+            html += '<span class="dps-field-error" role="alert" id="pet_id_error"></span>';
+            html += '</div>';
+        } else if (petId && showPetSelector) {
+            html += '<input type="hidden" name="pet_id" value="' + petId + '">';
+        }
+
         html += '<div class="dps-form-field">';
         html += '<label for="desired_date">Data Desejada <span class="required">*</span></label>';
         html += '<input type="date" id="desired_date" name="desired_date" required min="' + getTomorrowDate() + '" aria-required="true">';
@@ -1915,6 +1939,7 @@ window.DPSSkeleton = (function() {
             var dateInput = modal.querySelector('#desired_date');
             var periodInput = modal.querySelector('#desired_period');
             var notesInput = modal.querySelector('#notes');
+            var petSelect = modal.querySelector('#pet_id');
             var summary = modal.querySelector('#dps-review-summary');
 
             var dateValue = dateInput.value;
@@ -1931,6 +1956,23 @@ window.DPSSkeleton = (function() {
 
             var summaryHtml = '';
             summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">Tipo</span><span class="dps-review-summary__value">' + (typeMap[type] || type) + '</span></div>';
+
+            // Pet name in review (Phase 5.3)
+            if (petSelect && petSelect.selectedIndex > 0) {
+                summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🐾 Pet</span><span class="dps-review-summary__value">' + petSelect.options[petSelect.selectedIndex].text + '</span></div>';
+            } else if (petId && clientPets.length > 0) {
+                var petName = '';
+                for (var pi = 0; pi < clientPets.length; pi++) {
+                    if (String(clientPets[pi].id) === String(petId)) {
+                        petName = clientPets[pi].icon + ' ' + clientPets[pi].name;
+                        break;
+                    }
+                }
+                if (petName) {
+                    summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🐾 Pet</span><span class="dps-review-summary__value">' + petName + '</span></div>';
+                }
+            }
+
             summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">📅 Data</span><span class="dps-review-summary__value">' + formattedDate + '</span></div>';
             summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🕐 Período</span><span class="dps-review-summary__value">' + periodText + '</span></div>';
             summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">📝 Observações</span><span class="dps-review-summary__value">' + notesText + '</span></div>';
@@ -1992,6 +2034,7 @@ window.DPSSkeleton = (function() {
         // Validate step before proceeding
         function validateStep(step) {
             if (step === 1) {
+                var petSelect = modal.querySelector('#pet_id');
                 var dateInput = modal.querySelector('#desired_date');
                 var periodInput = modal.querySelector('#desired_period');
                 var dateError = modal.querySelector('#desired_date_error');
@@ -2003,10 +2046,23 @@ window.DPSSkeleton = (function() {
                 dateInput.classList.remove('is-invalid');
                 periodInput.classList.remove('is-invalid');
 
+                // Validate pet selection (Phase 5.3)
+                if (petSelect) {
+                    var petError = modal.querySelector('#pet_id_error');
+                    petError.textContent = '';
+                    petSelect.classList.remove('is-invalid');
+                    if (!petSelect.value) {
+                        petError.textContent = 'Selecione o pet para o agendamento.';
+                        petSelect.classList.add('is-invalid');
+                        petSelect.focus();
+                        valid = false;
+                    }
+                }
+
                 if (!dateInput.value) {
                     dateError.textContent = 'Selecione uma data para o agendamento.';
                     dateInput.classList.add('is-invalid');
-                    dateInput.focus();
+                    if (valid) dateInput.focus();
                     valid = false;
                 }
 

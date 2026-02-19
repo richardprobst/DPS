@@ -624,6 +624,24 @@ final class DPS_Client_Portal {
         do_action( 'dps_portal_client_authenticated', $client_id );
         
         // Localiza script com dados do chat e appointment requests (Fase 4)
+        // Phase 5.3: Incluir lista de pets do cliente para seletor rápido no modal
+        $client_pets_data = [];
+        $pet_repo = DPS_Pet_Repository::get_instance();
+        $client_pets = $pet_repo->get_pets_by_client( $client_id );
+        foreach ( $client_pets as $pet ) {
+            $species = get_post_meta( $pet->ID, 'pet_species', true );
+            $species_icons = [
+                'Cachorro' => '🐶',
+                'Gato'     => '🐱',
+            ];
+            $client_pets_data[] = [
+                'id'      => $pet->ID,
+                'name'    => $pet->post_title,
+                'species' => $species,
+                'icon'    => isset( $species_icons[ $species ] ) ? $species_icons[ $species ] : '🐾',
+            ];
+        }
+
         wp_localize_script( 'dps-client-portal', 'dpsPortal', [
             'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
             'chatNonce' => wp_create_nonce( 'dps_portal_chat' ),
@@ -631,6 +649,7 @@ final class DPS_Client_Portal {
             'exportPdfNonce' => wp_create_nonce( 'dps_portal_export_pdf' ),
             'petHistoryNonce' => wp_create_nonce( 'dps_portal_pet_history' ),
             'clientId' => $client_id,
+            'clientPets' => $client_pets_data,
             'loyalty' => [
                 'nonce' => wp_create_nonce( 'dps_portal_loyalty' ),
                 'historyLimit' => 5,

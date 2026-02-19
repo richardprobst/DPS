@@ -5864,6 +5864,19 @@ html {
     box-shadow: 0 0 0 3px var(--dps-primary-light);
 }
 
+.dps-request-form .is-invalid {
+    border-color: var(--dps-color-error, #ba1a1a);
+    box-shadow: 0 0 0 3px var(--dps-color-error-container, #ffdad6);
+}
+
+.dps-request-form .dps-field-error {
+    display: block;
+    font-size: var(--dps-typescale-body-small-size, 12px);
+    color: var(--dps-color-error, #ba1a1a);
+    margin-top: 4px;
+    min-height: 16px;
+}
+
 .dps-form-actions {
     display: flex;
     gap: 12px;
