@@ -676,6 +676,9 @@ class DPS_Portal_AJAX_Handler {
         $client_id = $clients[0];
         $client_name = get_the_title( $client_id );
         
+        // F4.6: FASE 4 - Verifica se cliente quer manter acesso permanente
+        $remember_me = isset( $_POST['remember_me'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['remember_me'] ) );
+        
         // Gera token de acesso
         $token_manager = DPS_Portal_Token_Manager::get_instance();
         $token_plain   = $token_manager->generate_token( $client_id, 'login' );
@@ -687,8 +690,11 @@ class DPS_Portal_AJAX_Handler {
             ] );
         }
         
-        // Gera URL de acesso
+        // Gera URL de acesso (com flag remember se solicitado)
         $access_url = $token_manager->generate_access_url( $token_plain );
+        if ( $remember_me ) {
+            $access_url = add_query_arg( 'dps_remember', '1', $access_url );
+        }
         
         // Monta email HTML moderno
         $safe_client_name = wp_strip_all_tags( $client_name );

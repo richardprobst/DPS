@@ -119,6 +119,10 @@ if ( ! defined( 'ABSPATH' ) ) {
                             <?php echo esc_html__( 'Enviar Link', 'dps-client-portal' ); ?>
                         </button>
                     </div>
+                    <label class="dps-portal-access__remember-label">
+                        <input type="checkbox" id="dps-remember-me" name="remember_me" value="1">
+                        <span><?php echo esc_html__( 'Manter acesso neste dispositivo', 'dps-client-portal' ); ?></span>
+                    </label>
                 </form>
                 
                 <div id="dps-email-feedback" class="dps-portal-access__feedback" style="display:none;"></div>
@@ -160,6 +164,8 @@ if ( ! defined( 'ABSPATH' ) ) {
                         
                         var email = emailInput.value.trim();
                         var nonce = nonceField.value;
+                        var rememberMe = document.getElementById('dps-remember-me');
+                        var remember = (rememberMe && rememberMe.checked) ? '1' : '0';
                         
                         if (!email) {
                             feedback.textContent = '<?php echo esc_js( __( 'Por favor, informe seu e-mail.', 'dps-client-portal' ) ); ?>';
@@ -178,7 +184,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
                             },
-                            body: 'action=dps_request_access_link_by_email&email=' + encodeURIComponent(email) + '&_wpnonce=' + encodeURIComponent(nonce)
+                            body: 'action=dps_request_access_link_by_email&email=' + encodeURIComponent(email) + '&remember_me=' + remember + '&_wpnonce=' + encodeURIComponent(nonce)
                         })
                         .then(function(response) { return response.json(); })
                         .then(function(data) {

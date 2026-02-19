@@ -1768,9 +1768,10 @@ class DPS_Finance_Addon {
         // F2.5: FASE 2 - Filtro de busca por nome de cliente
         if ( $search_client ) {
             // Busca clientes cujo título contenha o termo de busca
+            // F3.2: FASE 3 - Limita resultado da busca a 200 clientes
             $search_like = '%' . $wpdb->esc_like( $search_client ) . '%';
             $matching_clients = $wpdb->get_col( $wpdb->prepare(
-                "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'dps_cliente' AND post_title LIKE %s AND post_status = 'publish'",
+                "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'dps_cliente' AND post_title LIKE %s AND post_status = 'publish' LIMIT 200",
                 $search_like
             ) );
             
@@ -1842,23 +1843,27 @@ class DPS_Finance_Addon {
             }
         } else {
             // Usa query original quando usuário aplicou filtro de data
+            // F3.2: FASE 3 - Limite de segurança: máximo 5000 registros para evitar estouro de memória
             if ( ! empty( $params ) ) {
-                $all_trans_query = $wpdb->prepare( "SELECT * FROM `{$table}` WHERE $where ORDER BY data DESC", $params );
+                $all_trans_query = $wpdb->prepare( "SELECT * FROM `{$table}` WHERE $where ORDER BY data DESC LIMIT 5000", $params );
             } else {
                 // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table vem de $wpdb->prefix, sem filtros (seguro)
-                $all_trans_query = "SELECT * FROM `{$table}` ORDER BY data DESC";
+                $all_trans_query = "SELECT * FROM `{$table}` ORDER BY data DESC LIMIT 5000";
             }
         }
         
         $all_trans = $wpdb->get_results( $all_trans_query );
 
-        // Lista de clientes para seleção opcional
+        // Lista de clientes para seleção opcional (otimizado: apenas ID e título)
         $clients = get_posts( [
             'post_type'      => 'dps_cliente',
             'posts_per_page' => -1,
             'post_status'    => 'publish',
             'orderby'        => 'title',
             'order'          => 'ASC',
+            'no_found_rows'  => true,
+            'update_post_meta_cache' => false,
+            'update_post_term_cache' => false,
         ] );
         ob_start();
         echo '<div class="dps-section" id="dps-section-financeiro">';

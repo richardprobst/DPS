@@ -358,6 +358,24 @@
     box-shadow: none;
 }
 
+/* F4.6: FASE 4 - Checkbox "Manter acesso" */
+.dps-portal-access__remember-label {
+    display: flex;
+    align-items: center;
+    gap: var(--dps-space-2);
+    margin-top: var(--dps-space-2);
+    font-size: var(--dps-typescale-body-small-size);
+    color: var(--dps-gray-600);
+    cursor: pointer;
+}
+
+.dps-portal-access__remember-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--dps-primary);
+    cursor: pointer;
+}
+
 /* Seção de WhatsApp */
 .dps-portal-access__whatsapp-section {
     padding-top: var(--dps-space-4);

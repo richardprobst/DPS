@@ -69,6 +69,7 @@ final class DPS_Client_Portal {
             $this->handle_portal_settings_save();
         } else {
             add_action( 'init', [ $this, 'handle_token_authentication' ], 5 );
+            add_action( 'init', [ $this, 'handle_remember_cookie' ], 5 );
             add_action( 'init', [ $this, 'handle_logout_request' ], 6 );
             add_action( 'init', [ $this, 'handle_portal_actions' ] );
             add_action( 'init', [ $this, 'handle_portal_settings_save' ] );
@@ -134,6 +135,39 @@ final class DPS_Client_Portal {
             $token_manager->mark_as_used( $token_data['id'] );
         }
 
+        // F4.6: FASE 4 - "Manter acesso neste dispositivo"
+        // Se dps_remember=1 na URL, cria token permanente e cookie de longa duração
+        $remember = isset( $_GET['dps_remember'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['dps_remember'] ) );
+        if ( $remember ) {
+            $permanent_token = $token_manager->generate_token( $token_data['client_id'], 'permanent' );
+            if ( false !== $permanent_token ) {
+                $cookie_expiry = time() + ( 90 * DAY_IN_SECONDS );
+                setcookie(
+                    'dps_portal_remember',
+                    $permanent_token,
+                    $cookie_expiry,
+                    COOKIEPATH,
+                    COOKIE_DOMAIN,
+                    is_ssl(),
+                    true // HttpOnly
+                );
+                // SameSite=Strict via header
+                if ( ! headers_sent() ) {
+                    header(
+                        sprintf(
+                            'Set-Cookie: dps_portal_remember=%s; Expires=%s; Path=%s; Domain=%s%s; HttpOnly; SameSite=Strict',
+                            $permanent_token,
+                            gmdate( 'D, d M Y H:i:s T', $cookie_expiry ),
+                            COOKIEPATH,
+                            COOKIE_DOMAIN,
+                            is_ssl() ? '; Secure' : ''
+                        ),
+                        false
+                    );
+                }
+            }
+        }
+
         // Registra acesso bem-sucedido
         $this->log_security_event( 'token_auth_success', [
             'client_id' => $token_data['client_id'],
@@ -156,6 +190,69 @@ final class DPS_Client_Portal {
 
         // NÃO redireciona - permite que a página atual carregue com o cliente autenticado
         // O JavaScript limpará o token da URL por segurança (ver assets/js/client-portal.js)
+    }
+
+    /**
+     * F4.6: FASE 4 - Verifica cookie "manter acesso" para auto-autenticação.
+     *
+     * Se o cliente não tem sessão ativa mas tem um cookie dps_portal_remember com
+     * um token permanente válido, re-autentica automaticamente.
+     *
+     * @since 2.6.0
+     */
+    public function handle_remember_cookie() {
+        // Ignora se já existe token na URL (handle_token_authentication cuida)
+        if ( isset( $_GET['dps_token'] ) ) {
+            return;
+        }
+
+        // Ignora se já existe sessão ativa
+        $session_manager = DPS_Portal_Session_Manager::get_instance();
+        if ( $session_manager->get_authenticated_client_id() ) {
+            return;
+        }
+
+        // Verifica cookie de acesso permanente
+        if ( ! isset( $_COOKIE['dps_portal_remember'] ) ) {
+            return;
+        }
+
+        $remember_token = sanitize_text_field( wp_unslash( $_COOKIE['dps_portal_remember'] ) );
+        if ( empty( $remember_token ) ) {
+            return;
+        }
+
+        // Valida o token permanente
+        $token_manager = DPS_Portal_Token_Manager::get_instance();
+        $token_data    = $token_manager->validate_token( $remember_token );
+
+        if ( false === $token_data || ! isset( $token_data['type'] ) || 'permanent' !== $token_data['type'] ) {
+            // Token inválido ou não permanente — remove cookie
+            setcookie( 'dps_portal_remember', '', time() - 3600, COOKIEPATH, COOKIE_DOMAIN );
+            return;
+        }
+
+        // Token permanente válido — autentica o cliente
+        $authenticated = $session_manager->authenticate_client( $token_data['client_id'] );
+        if ( ! $authenticated ) {
+            return;
+        }
+
+        $ip_address = $this->get_client_ip();
+
+        // Registra acesso via remember cookie
+        $this->log_security_event( 'remember_cookie_auth', [
+            'client_id' => $token_data['client_id'],
+            'ip'        => $ip_address,
+        ], DPS_Logger::LEVEL_INFO );
+
+        $user_agent = '';
+        if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && is_string( $_SERVER['HTTP_USER_AGENT'] ) ) {
+            $user_agent = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
+        }
+        $token_manager->log_access( $token_data['client_id'], $token_data['id'], $ip_address, $user_agent );
+
+        $this->current_request_client_id = $token_data['client_id'];
     }
 
     /**
