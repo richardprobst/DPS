@@ -165,6 +165,14 @@ class DPS_Client_Handler {
             update_post_meta( $client_id, 'client_lng', $data['lng'] );
         }
 
+        // Auditoria (Fase 6.2)
+        $action = ! empty( $data['client_id'] ) ? 'update' : 'create';
+        DPS_Audit_Logger::log_client_change( $client_id, $action, [
+            'name'  => $data['name'],
+            'phone' => $data['phone'],
+            'email' => $data['email'],
+        ] );
+
         return $client_id;
     }
 
@@ -179,6 +187,15 @@ class DPS_Client_Handler {
             return false;
         }
 
-        return (bool) wp_delete_post( $client_id, true );
+        $client_name = get_the_title( $client_id );
+        $result      = (bool) wp_delete_post( $client_id, true );
+
+        if ( $result ) {
+            DPS_Audit_Logger::log_client_change( $client_id, 'delete', [
+                'name' => $client_name,
+            ] );
+        }
+
+        return $result;
     }
 }

@@ -208,6 +208,14 @@ class DPS_Pet_Handler {
         update_post_meta( $pet_id, 'pet_accessories_pref', $data['accessories_pref'] );
         update_post_meta( $pet_id, 'pet_product_restrictions', $data['product_restrictions'] );
 
+        // Auditoria (Fase 6.2)
+        $action = ! empty( $data['pet_id'] ) ? 'update' : 'create';
+        DPS_Audit_Logger::log_pet_change( $pet_id, $action, [
+            'name'     => $data['name'],
+            'species'  => $data['species'],
+            'owner_id' => $data['owner_id'],
+        ] );
+
         return $pet_id;
     }
 
@@ -287,7 +295,16 @@ class DPS_Pet_Handler {
             return false;
         }
 
-        return (bool) wp_delete_post( $pet_id, true );
+        $pet_name = get_the_title( $pet_id );
+        $result   = (bool) wp_delete_post( $pet_id, true );
+
+        if ( $result ) {
+            DPS_Audit_Logger::log_pet_change( $pet_id, 'delete', [
+                'name' => $pet_name,
+            ] );
+        }
+
+        return $result;
     }
 
     /**

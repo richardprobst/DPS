@@ -46,6 +46,9 @@ require_once DPS_BASE_DIR . 'includes/class-dps-cpt-helper.php';
 // Logger e UI de logs
 require_once DPS_BASE_DIR . 'includes/class-dps-logger.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-logs-admin-page.php';
+// Audit Logger e UI de auditoria (Fase 6.2)
+require_once DPS_BASE_DIR . 'includes/class-dps-audit-logger.php';
+require_once DPS_BASE_DIR . 'includes/class-dps-audit-admin-page.php';
 // Helper classes para refatoração
 require_once DPS_BASE_DIR . 'includes/class-dps-money-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-url-builder.php';
@@ -222,6 +225,7 @@ class DPS_Base_Plugin {
 
         add_option( 'dps_logger_min_level', DPS_Logger::LEVEL_INFO );
         DPS_Logger::maybe_install();
+        DPS_Audit_Logger::maybe_install();
 
         // Cria página de consentimento de tosa se não existir
         if ( class_exists( 'DPS_Tosa_Consent' ) ) {
@@ -1076,6 +1080,16 @@ if ( ! function_exists( 'dps_base_maybe_install_logger_table' ) ) {
     }
 }
 add_action( 'plugins_loaded', 'dps_base_maybe_install_logger_table' );
+
+if ( ! function_exists( 'dps_base_maybe_install_audit_table' ) ) {
+    /**
+     * Garante atualização de tabela de auditoria quando a flag de versão não coincide.
+     */
+    function dps_base_maybe_install_audit_table() {
+        DPS_Audit_Logger::maybe_install();
+    }
+}
+add_action( 'plugins_loaded', 'dps_base_maybe_install_audit_table' );
 
 // Registra hook de ativação para criação de capabilities e papéis padrão
 register_activation_hook( __FILE__, [ 'DPS_Base_Plugin', 'activate' ] );

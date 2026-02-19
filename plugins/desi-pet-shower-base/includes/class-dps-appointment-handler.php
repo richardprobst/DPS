@@ -225,6 +225,12 @@ class DPS_Appointment_Handler {
         }
 
         update_post_meta( $appt_id, 'appointment_status', $status );
+
+        // Auditoria (Fase 6.2)
+        DPS_Audit_Logger::log_appointment_change( $appt_id, 'status_change', [
+            'new_status' => $status,
+        ] );
+
         $appt_type = get_post_meta( $appt_id, 'appointment_type', true );
         if ( ! $appt_type ) {
             $appt_type = 'simple';
@@ -654,6 +660,17 @@ class DPS_Appointment_Handler {
         }
 
         DPS_Message_Helper::add_success( __( 'Agendamento salvo com sucesso!', 'desi-pet-shower' ) );
+
+        // Auditoria (Fase 6.2)
+        $action = ! empty( $data['edit_id'] ) ? 'update' : 'create';
+        DPS_Audit_Logger::log_appointment_change( $appt_id, $action, [
+            'client_id' => $client_id,
+            'pet_id'    => $pet_id,
+            'date'      => $date,
+            'time'      => $time,
+            'type'      => $appt_type,
+        ] );
+
         return [
             'client_id'        => $client_id,
             'appointment_id'   => $appt_id,
