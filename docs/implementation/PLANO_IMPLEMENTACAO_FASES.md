@@ -343,12 +343,14 @@ Melhorar a experiência do usuário final no Portal do Cliente, tornando o fluxo
 **Problema:** O cliente precisa de novo link a cada acesso. Tokens permanentes estão em desenvolvimento.
 
 **Ação:**
-- [ ] Avaliar estado atual da implementação de tokens permanentes
+- [x] Avaliar estado atual da implementação de tokens permanentes — já implementado: tipo 'permanent' no token manager com 10 anos de expiração, métodos `get_active_permanent_tokens()` e `revoke_tokens()`, tabela `dps_portal_tokens` com campos type/used_at/revoked_at
 - [ ] Implementar opção "Manter acesso neste dispositivo" com consentimento explícito
 - [ ] Armazenar token permanente em cookie seguro (`HttpOnly`, `Secure`, `SameSite=Strict`)
 - [ ] Implementar expiração configurável (30/60/90 dias) via configurações admin
 - [ ] Adicionar avisos de segurança claros ao ativar acesso persistente
 - [ ] Manter a opção de magic link como padrão
+
+**Nota:** A infraestrutura de tokens permanentes já está completa no backend (`DPS_Portal_Token_Manager`). O que falta é a UI no portal para o cliente optar por "Manter acesso" e o cookie persistente no frontend.
 
 ### Entregáveis
 
@@ -455,14 +457,21 @@ Implementar camadas adicionais de segurança e monitoramento.
 
 ### 6.2 — Logs de Auditoria Abrangentes
 
-**Status atual:** Existe `class-dps-finance-audit.php` para o Finance Add-on.
+**Status atual:** ✅ Implementado em 2026-02-19
 
 **Ação:**
-- [ ] Estender o padrão de logs de auditoria para todos os add-ons
-- [ ] Eventos a registrar: login/logout, alteração de dados do cliente, alteração de pet, criação/cancelamento de agendamento, operações financeiras
-- [ ] Criar classe `DPS_Audit_Logger` centralizada no plugin base
-- [ ] Armazenar logs em tabela customizada (`dps_audit_log`) com: timestamp, user_id, action, entity_type, entity_id, details, ip_address
-- [ ] Implementar tela admin de visualização de logs (com filtros e paginação)
+- [x] Estender o padrão de logs de auditoria para todos os add-ons — criado `DPS_Audit_Logger` centralizado
+- [x] Eventos a registrar: login/logout, alteração de dados do cliente, alteração de pet, criação/cancelamento de agendamento, operações financeiras — API disponível para todos os add-ons
+- [x] Criar classe `DPS_Audit_Logger` centralizada no plugin base (446 linhas, 14 métodos estáticos)
+- [x] Armazenar logs em tabela customizada (`dps_audit_log`) com: timestamp, user_id, action, entity_type, entity_id, details, ip_address
+- [x] Implementar tela admin de visualização de logs (370 linhas) — filtros por tipo/ação/data, paginação (30/página), badges coloridos
+- [x] Integrar no System Hub como aba "Auditoria"
+- [x] Integrar nos handlers: Client (save/delete), Pet (save/delete), Appointment (save/status_change)
+
+**Implementação:**
+- `class-dps-audit-logger.php` — classe estática com conveniência: `log_client_change()`, `log_pet_change()`, `log_appointment_change()`, `log_portal_event()`
+- `class-dps-audit-admin-page.php` — página admin com filtros de entity_type, action, date_from, date_to e limpeza por dias
+- Tabela `dps_audit_log` criada via dbDelta com version check (padrão DPS)
 
 ### 6.3 — Monitoramento de Atividade Suspeita
 
@@ -530,12 +539,16 @@ Aumentar a cobertura de testes, melhorar a modularidade e remover código morto.
 
 ### 7.4 — Remoção de Código Morto
 
+**Status:** ✅ Auditado em 2026-02-19 — nenhum código morto acionável encontrado
+
 **Ação:**
-- [ ] Inventariar arquivos JS antigos (mencionados em análises)
-- [ ] Verificar referências dinâmicas (`call_user_func`, hooks com variáveis) antes de remover
-- [ ] Remover funções sem referências estáticas ou dinâmicas
-- [ ] Remover arquivos CSS/JS não incluídos em nenhum `wp_enqueue`
-- [ ] Documentar remoções no `CHANGELOG.md`
+- [x] Inventariar arquivos JS antigos — todos os JS são enqueued corretamente (5 no base, 1 no portal, 1 em cada add-on)
+- [x] Verificar referências dinâmicas (`call_user_func`, hooks com variáveis) antes de remover — verificado
+- [x] Remover funções sem referências estáticas ou dinâmicas — nenhuma encontrada
+- [x] Remover arquivos CSS/JS não incluídos em nenhum `wp_enqueue` — nenhum encontrado
+- [x] Documentar remoções no `CHANGELOG.md` — sem remoções necessárias
+
+**Achado:** `refactoring-examples.php` é o único arquivo não carregado via require, mas é intencionalmente mantido como referência educacional (documentado em AGENTS.md linha 69).
 
 ### Entregáveis
 

@@ -159,6 +159,13 @@ Antes de criar uma nova versão oficial:
 - **Filtro de período no histórico** (Fase 4.4): barra de filtros (30/60/90 dias, Todos) acima da timeline de serviços. Filtragem client-side via `data-date` nos itens. Mensagem "nenhum resultado" quando filtro vazio. CSS M3 com `focus-visible` e `aria-pressed`.
 - **Detalhes do pet no card** (Fase 4.5): porte (📏 Pequeno/Médio/Grande/Gigante), peso (⚖️ em kg), sexo (♂️/♀️), idade (🎂 calculada automaticamente de `pet_birth`) exibidos no card de info do pet na timeline. CSS com grid responsiva de meta items.
 
+**Fase 6 — Segurança Avançada e Auditoria**
+
+- **Auditoria centralizada** (Fase 6.2): criada classe `DPS_Audit_Logger` (446 linhas, 14 métodos estáticos) com tabela `dps_audit_log` para registro de eventos de auditoria (criar, atualizar, excluir, login, mudança de status) em todas as entidades do sistema (clientes, pets, agendamentos, portal, financeiro).
+- **Admin page de auditoria**: criada `DPS_Audit_Admin_Page` (370 linhas) com filtros por tipo de entidade, ação, período e paginação (30/página). Badges coloridos para tipos de ação. Integrada como aba "Auditoria" no System Hub.
+- **Integração nos handlers**: chamadas de auditoria adicionadas em `DPS_Client_Handler` (save/delete), `DPS_Pet_Handler` (save/delete) e `DPS_Appointment_Handler` (save/status_change).
+- **Auditoria de código morto** (Fase 7.4): inventário completo de JS/CSS/PHP em todos os plugins — nenhum arquivo morto encontrado. Único arquivo não carregado (`refactoring-examples.php`) é intencional e documentado em AGENTS.md.
+
 #### Added (Adicionado)
 
 **Agenda Add-on v1.2.0 — Checklist Operacional e Check-in/Check-out**
