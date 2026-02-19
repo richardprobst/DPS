@@ -629,6 +629,10 @@ class DPS_Portal_AJAX_Handler {
         }
         
         if ( $ip_count >= 3 ) {
+            // F6.3: FASE 6 - Audit log de rate limit atingido
+            if ( class_exists( 'DPS_Audit_Logger' ) ) {
+                DPS_Audit_Logger::log_portal_event( 'rate_limit_ip', 0, [ 'ip' => $ip, 'count' => $ip_count ] );
+            }
             wp_send_json_error( [ 
                 'message' => __( 'Você já solicitou o link várias vezes. Aguarde alguns minutos antes de tentar novamente.', 'dps-client-portal' ) 
             ] );

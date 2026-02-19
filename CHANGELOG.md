@@ -144,6 +144,7 @@ Antes de criar uma nova versão oficial:
 - **WP_Query otimizada**: `DPS_Query_Helper::get_all_posts_by_type()`, `get_posts_by_meta()` e `get_posts_by_meta_query()` agora incluem `no_found_rows => true` por padrão, eliminando SQL_CALC_FOUND_ROWS desnecessário em todas as consultas centralizadas.
 - **Assets condicionais**: Stock add-on corrigido — CSS não é mais carregado globalmente em todas as páginas admin; agora usa `$hook_suffix` para carregamento condicional.
 - **Subscription queries**: queries de delete de agendamentos e contagem migradas para `fields => 'ids'` + `no_found_rows => true`, eliminando carregamento desnecessário de objetos completos.
+- **Finance query limits** (Fase 3.2): dropdown de clientes otimizado com `no_found_rows => true` e desabilitação de meta/term cache. Query de resumo financeiro limitada a 5.000 registros (safety cap). Busca de clientes limitada a 200 resultados.
 - **Auditoria de rate limiting**: verificado que rate limiting já existe em 3 camadas: magic link request (3/hora por IP+email), token validation (5/hora por IP), chat (10/60s por cliente).
 
 #### Changed (Alterado)
@@ -158,6 +159,7 @@ Antes de criar uma nova versão oficial:
 - **Mensagens aprimoradas**: 5 novos tipos de mensagem toast (message_error, review_submitted, review_already, review_invalid, review_error). Todas as mensagens reescritas com títulos descritivos e textos orientados a ação.
 - **Filtro de período no histórico** (Fase 4.4): barra de filtros (30/60/90 dias, Todos) acima da timeline de serviços. Filtragem client-side via `data-date` nos itens. Mensagem "nenhum resultado" quando filtro vazio. CSS M3 com `focus-visible` e `aria-pressed`.
 - **Detalhes do pet no card** (Fase 4.5): porte (📏 Pequeno/Médio/Grande/Gigante), peso (⚖️ em kg), sexo (♂️/♀️), idade (🎂 calculada automaticamente de `pet_birth`) exibidos no card de info do pet na timeline. CSS com grid responsiva de meta items.
+- **"Manter acesso neste dispositivo"** (Fase 4.6): checkbox no formulário de login por e-mail permite manter sessão permanente. Gera token permanente com cookie seguro `dps_portal_remember` (HttpOnly, Secure, SameSite=Strict, 90 dias). Auto-autenticação via `handle_remember_cookie()` na próxima visita. Cookie removido no logout.
 
 **Fase 6 — Segurança Avançada e Auditoria**
 
@@ -165,6 +167,7 @@ Antes de criar uma nova versão oficial:
 - **Admin page de auditoria**: criada `DPS_Audit_Admin_Page` (370 linhas) com filtros por tipo de entidade, ação, período e paginação (30/página). Badges coloridos para tipos de ação. Integrada como aba "Auditoria" no System Hub.
 - **Integração nos handlers**: chamadas de auditoria adicionadas em `DPS_Client_Handler` (save/delete), `DPS_Pet_Handler` (save/delete) e `DPS_Appointment_Handler` (save/status_change).
 - **Auditoria de código morto** (Fase 7.4): inventário completo de JS/CSS/PHP em todos os plugins — nenhum arquivo morto encontrado. Único arquivo não carregado (`refactoring-examples.php`) é intencional e documentado em AGENTS.md.
+- **Logging de tentativas falhadas** (Fase 6.3): integrado `DPS_Audit_Logger` nos fluxos de autenticação do portal — registra token_validation_failed, login_success e rate_limit_ip no log de auditoria centralizado.
 
 #### Added (Adicionado)
 

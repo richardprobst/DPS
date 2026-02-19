@@ -113,6 +113,10 @@ final class DPS_Client_Portal {
             $this->log_security_event( 'token_invalid', [
                 'ip' => $ip_address,
             ] );
+            // F6.3: FASE 6 - Audit log de tentativa falhada
+            if ( class_exists( 'DPS_Audit_Logger' ) ) {
+                DPS_Audit_Logger::log_portal_event( 'token_validation_failed', 0, [ 'ip' => $ip_address ] );
+            }
             $this->redirect_to_access_screen( 'invalid' );
             return;
         }
@@ -173,6 +177,10 @@ final class DPS_Client_Portal {
             'client_id' => $token_data['client_id'],
             'ip'        => $ip_address,
         ], DPS_Logger::LEVEL_INFO );
+        // F6.3: FASE 6 - Audit log de login bem-sucedido
+        if ( class_exists( 'DPS_Audit_Logger' ) ) {
+            DPS_Audit_Logger::log_portal_event( 'login_success', $token_data['client_id'], [ 'ip' => $ip_address ] );
+        }
         
         // Registra acesso no histórico para auditoria
         $user_agent = '';

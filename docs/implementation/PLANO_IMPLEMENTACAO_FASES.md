@@ -234,10 +234,12 @@ Otimizar consultas, carregamento de assets e preparar o sistema para volumes mai
 ### 3.2 — Paginação em Listagens Grandes
 
 **Ação:**
-- [ ] Identificar todas as listagens admin que carregam dados sem limite
-- [ ] Implementar paginação server-side nas listagens de transações financeiras
-- [ ] Implementar paginação nas listagens de clientes e agendamentos (se não existir)
-- [ ] Usar `LIMIT`/`OFFSET` com `$wpdb->prepare()`
+- [x] Identificar todas as listagens admin que carregam dados sem limite — Finance addon tem paginação (20/page), mas dropdown de clientes e summary queries não tinham limites
+- [x] Implementar paginação server-side nas listagens de transações financeiras — já existente (20/page)
+- [x] Limitar dropdown de clientes: `no_found_rows => true`, disable meta/term cache
+- [x] Limitar summary query: LIMIT 5000 safety cap quando filtro de data aplicado
+- [x] Limitar busca de clientes: LIMIT 200 resultados
+- [x] Usar `LIMIT`/`OFFSET` com `$wpdb->prepare()`
 - [ ] Adicionar controles de paginação na UI admin
 
 ### 3.3 — Otimização de Queries SQL
@@ -344,13 +346,14 @@ Melhorar a experiência do usuário final no Portal do Cliente, tornando o fluxo
 
 **Ação:**
 - [x] Avaliar estado atual da implementação de tokens permanentes — já implementado: tipo 'permanent' no token manager com 10 anos de expiração, métodos `get_active_permanent_tokens()` e `revoke_tokens()`, tabela `dps_portal_tokens` com campos type/used_at/revoked_at
-- [ ] Implementar opção "Manter acesso neste dispositivo" com consentimento explícito
-- [ ] Armazenar token permanente em cookie seguro (`HttpOnly`, `Secure`, `SameSite=Strict`)
-- [ ] Implementar expiração configurável (30/60/90 dias) via configurações admin
-- [ ] Adicionar avisos de segurança claros ao ativar acesso persistente
-- [ ] Manter a opção de magic link como padrão
+- [x] Implementar opção "Manter acesso neste dispositivo" com consentimento explícito — checkbox no formulário de email em portal-access.php
+- [x] Armazenar token permanente em cookie seguro (`HttpOnly`, `Secure`, `SameSite=Strict`) — cookie `dps_portal_remember` com 90 dias de validade
+- [x] Auto-autenticação via `handle_remember_cookie()` no carregamento do portal
+- [x] Cookie removido no logout via `DPS_Portal_Session_Manager::logout()`
+- [x] Manter a opção de magic link como padrão — checkbox desmarcado por padrão
+- [ ] Implementar expiração configurável (30/60/90 dias) via configurações admin — futuro
 
-**Nota:** A infraestrutura de tokens permanentes já está completa no backend (`DPS_Portal_Token_Manager`). O que falta é a UI no portal para o cliente optar por "Manter acesso" e o cookie persistente no frontend.
+**Nota:** Implementação completa: checkbox no form → flag remember_me no AJAX → parâmetro dps_remember na URL → token permanente + cookie → auto-auth → logout limpa cookie.
 
 ### Entregáveis
 
@@ -476,9 +479,10 @@ Implementar camadas adicionais de segurança e monitoramento.
 ### 6.3 — Monitoramento de Atividade Suspeita
 
 **Ação:**
-- [ ] Registrar tentativas de acesso falhas (token inválido, token expirado)
-- [ ] Alertar admin (via add-on Push) quando houver N tentativas falhas do mesmo IP
-- [ ] Registrar acessos de IPs incomuns por cliente
+- [x] Registrar tentativas de acesso falhas (token inválido, token expirado) — integrado `DPS_Audit_Logger::log_portal_event()` em `handle_token_authentication()` para token_validation_failed e login_success
+- [x] Registrar rate limit atingido — integrado em `ajax_request_access_link_by_email()` para rate_limit_ip
+- [ ] Alertar admin (via add-on Push) quando houver N tentativas falhas do mesmo IP — futuro
+- [ ] Registrar acessos de IPs incomuns por cliente — futuro
 
 ### 6.4 — Autenticação de Dois Fatores (2FA)
 
