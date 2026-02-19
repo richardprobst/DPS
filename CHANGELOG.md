@@ -156,6 +156,8 @@ Antes de criar uma nova versão oficial:
 - **Acessibilidade ARIA**: `aria-required="true"` em campos obrigatórios (pet name), `aria-describedby` em 7 campos, `role="alert"` em containers de erro, `inputmode="numeric"` no CEP.
 - **Atributos HTML5**: `max` no campo de data de nascimento (impede futuro), `max="200"` no campo de peso.
 - **Mensagens aprimoradas**: 5 novos tipos de mensagem toast (message_error, review_submitted, review_already, review_invalid, review_error). Todas as mensagens reescritas com títulos descritivos e textos orientados a ação.
+- **Filtro de período no histórico** (Fase 4.4): barra de filtros (30/60/90 dias, Todos) acima da timeline de serviços. Filtragem client-side via `data-date` nos itens. Mensagem "nenhum resultado" quando filtro vazio. CSS M3 com `focus-visible` e `aria-pressed`.
+- **Detalhes do pet no card** (Fase 4.5): porte (📏 Pequeno/Médio/Grande/Gigante), peso (⚖️ em kg), sexo (♂️/♀️), idade (🎂 calculada automaticamente de `pet_birth`) exibidos no card de info do pet na timeline. CSS com grid responsiva de meta items.
 
 #### Added (Adicionado)
 

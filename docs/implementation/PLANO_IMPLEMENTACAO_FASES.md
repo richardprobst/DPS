@@ -324,19 +324,19 @@ Melhorar a experiência do usuário final no Portal do Cliente, tornando o fluxo
 **Problema:** O portal já exibe histórico de serviços, mas pode ser expandido.
 
 **Ação:**
-- [ ] Verificar a implementação atual de `DPS_Portal_Pet_History::get_pet_service_history()`
-- [ ] Adicionar filtros por período (últimos 30/60/90 dias) na visualização
-- [ ] Diferenciar visualmente agendamentos futuros de passados
-- [ ] Mostrar status com cores: agendado (azul), finalizado (verde), cancelado (vermelho)
-- [ ] Implementar paginação AJAX para históricos longos (padrão load-more já existente)
+- [x] Verificar a implementação atual de `DPS_Portal_Pet_History::get_pet_service_history()` — retorna serviços concluídos com date, time, services, professional, status, observations
+- [x] Adicionar filtros por período (últimos 30/60/90 dias) na visualização — barra de filtros com `aria-pressed` e filtragem client-side via `data-date`
+- [x] Diferenciar visualmente agendamentos futuros de passados — já existente: status badges com cores distintas (Concluído, Pago, Cancelado, Pendente, Em Andamento)
+- [x] Mostrar status com cores: agendado (azul), finalizado (verde), cancelado (vermelho) — já implementado via classes `dps-status-badge--*`
+- [x] Implementar paginação AJAX para históricos longos (padrão load-more já existente) — `handleLoadMorePetHistory()` com offset/limit
 
 ### 4.5 — Informações Detalhadas do Pet
 
 **Ação:**
-- [ ] Verificar quais metadados de pet já são armazenados (`dps_pet` CPT)
-- [ ] Exibir raça, idade/data de nascimento, porte no card do pet
-- [ ] Considerar campo para informações de vacinas (se aplicável ao negócio)
-- [ ] Adicionar ícones por espécie (já existente na galeria — reutilizar)
+- [x] Verificar quais metadados de pet já são armazenados (`dps_pet` CPT) — 19 meta keys documentadas em ANALYSIS.md
+- [x] Exibir raça, idade/data de nascimento, porte no card do pet — porte (📏), peso (⚖️), sexo (♂️/♀️), idade (🎂) calculada de pet_birth
+- [x] Considerar campo para informações de vacinas (se aplicável ao negócio) — `pet_vaccinations` existe mas é texto livre; exibição no portal seria confusa sem estruturação
+- [x] Adicionar ícones por espécie (já existente na galeria — reutilizar) — espécie já exibida no card com raça
 
 ### 4.6 — Tokens de Acesso Permanentes
 
