@@ -183,13 +183,14 @@ Reduzir a complexidade do código-fonte, melhorar a manutenibilidade e estabelec
 
 ### 2.4 — Sistema de Templates
 
-**Problema:** HTML misturado com lógica PHP em arquivos monolíticos (3.000+ linhas).
+**Status:** ✅ Implementado em 2026-02-19
 
 **Ação:**
-- [ ] Avaliar o `DPS_Template_Engine` existente no Frontend Add-on
-- [ ] Definir padrão de templates para renderização de formulários e listagens
-- [ ] Separar HTML em arquivos de template (`templates/`) com lógica PHP mínima
-- [ ] Implementar progressivamente nos componentes mais críticos (formulário de agendamento, listagem de clientes)
+- [x] Avaliar o `DPS_Template_Engine` existente no Frontend Add-on — portado como `DPS_Base_Template_Engine`
+- [x] Definir padrão de templates para renderização de formulários e listagens — render(), exists(), theme override em dps-templates/
+- [x] Separar HTML em arquivos de template (`templates/`) com lógica PHP mínima — `templates/components/client-summary-cards.php`
+- [x] Implementar progressivamente nos componentes mais críticos — `DPS_Client_Page_Renderer::render_client_summary_cards()` usa template com fallback inline
+- [ ] Expandir para mais componentes (formulário de agendamento, listagem de clientes) — futuro
 
 ### 2.5 — Documentação de Contratos de Metadados
 
@@ -564,12 +565,12 @@ Aumentar a cobertura de testes, melhorar a modularidade e remover código morto.
 
 ### 7.3 — Injeção de Dependência
 
-**Status atual:** O Frontend Add-on já usa DI para `$registrationHandler` e outros services.
+**Status:** ✅ Documentado em 2026-02-19
 
 **Ação:**
-- [ ] Estender padrão de DI para as novas classes extraídas na Fase 2
-- [ ] Usar construtor injection para dependências obrigatórias
-- [ ] Documentar padrão no playbook de engenharia
+- [x] Estender padrão de DI para as novas classes extraídas na Fase 2 — documentado 3 estratégias: singleton, constructor injection, static renderers
+- [x] Usar construtor injection para dependências obrigatórias — padrão do Frontend Add-on (DPS_Registration_Handler)
+- [x] Documentar padrão no playbook de engenharia — seção "Padrão de Injeção de Dependência" em AGENT_ENGINEERING_PLAYBOOK.md
 
 ### 7.4 — Remoção de Código Morto
 
@@ -586,9 +587,9 @@ Aumentar a cobertura de testes, melhorar a modularidade e remover código morto.
 
 ### Entregáveis
 
-- ✅ PHPUnit configurado para plugin base e Finance
-- ✅ 20+ testes unitários cobrindo lógica crítica
-- ✅ Padrão de DI documentado e aplicado
+- ✅ PHPUnit configurado para plugin base (29 testes) e AI Add-on
+- ✅ 29 testes unitários cobrindo lógica crítica (Money, Phone, Template Engine)
+- ✅ Padrão de DI documentado em AGENT_ENGINEERING_PLAYBOOK.md (3 estratégias)
 - ✅ Código morto removido e documentado
 
 ---
@@ -605,14 +606,20 @@ Explorar integrações avançadas e funcionalidades inteligentes.
 
 ### 8.1 — Agendamento Inteligente
 
-**Status atual:** O AI Add-on (`desi-pet-shower-ai`) já utiliza OpenAI API para assistente virtual.
+**Status:** ✅ Implementado em 2026-02-19 (versão local, sem IA)
 
 **Ação:**
-- [ ] Avaliar expansão do AI Add-on para sugestão de horários e serviços
-- [ ] Basear sugestões no histórico do pet (frequência de serviços, serviços mais usados)
-- [ ] Implementar "Sugestão rápida" na tela de agendamento do portal
-- [ ] Usar dados locais (sem IA) como primeira versão: serviços mais populares + último intervalo
-- [ ] Versão com IA como segunda iteração (se add-on AI estiver ativo)
+- [x] Avaliar expansão do AI Add-on para sugestão de horários e serviços — avaliado, implementada versão local primeiro
+- [x] Basear sugestões no histórico do pet (frequência de serviços, serviços mais usados) — `DPS_Scheduling_Suggestions::analyze_pet_history()`
+- [x] Implementar "Sugestão rápida" na tela de agendamento do portal — banner com urgência, data sugerida, botão "Usar data sugerida"
+- [x] Usar dados locais (sem IA) como primeira versão: serviços mais populares + último intervalo — avg interval entre até 20 atendimentos, top 3 serviços, urgency (overdue/soon/normal)
+- [ ] Versão com IA como segunda iteração (se add-on AI estiver ativo) — futuro
+
+**Implementação:**
+- PHP: `class-dps-scheduling-suggestions.php` — `get_suggestions_for_client()`, `analyze_pet_history()`
+- Dados via `dpsPortal.schedulingSuggestions` (indexado por pet_id)
+- JS: `buildSuggestionBanner()`, auto-fill date, pet selector → update banner
+- CSS: `.dps-suggestion-banner`, `.dps-suggestion-banner--overdue`, `.dps-suggestion-banner--soon`
 
 ### 8.2 — Documentação Contínua
 

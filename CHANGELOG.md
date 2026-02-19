@@ -120,6 +120,25 @@ Antes de criar uma nova versão oficial:
 - **22 testes unitários**: 13 testes para `DPS_Money_Helper` (parse, format, cents, currency, validação) + 9 testes para `DPS_Phone_Helper` (clean, format, validate, WhatsApp).
 - **Comando**: `cd plugins/desi-pet-shower-base && composer install && vendor/bin/phpunit`
 
+**Base Plugin — Fase 2.4: Sistema de Templates**
+
+- **Template Engine**: `DPS_Base_Template_Engine` — renderiza templates PHP com dados injetados via `extract()`, suporta override via tema em `dps-templates/base/`. Singleton com `get_instance()`, métodos `render()` e `exists()`.
+- **Primeiro template**: `templates/components/client-summary-cards.php` — cards de métricas do cliente (cadastro, atendimentos, total gasto, último atendimento, pendências).
+- **7 testes unitários** para o template engine (render, exists, subdirectory, XSS escaping, static content, nonexistent).
+- **Total: 29 testes** passando no plugin base.
+
+**Client Portal — Fase 8.1: Sugestões Inteligentes de Agendamento**
+
+- **Sugestão baseada em histórico**: `DPS_Scheduling_Suggestions` analisa até 20 atendimentos por pet para calcular intervalo médio, serviços mais frequentes (top 3), dias desde último atendimento e urgência.
+- **Banner no modal**: exibido no Step 1 do wizard de agendamento com 3 níveis de urgência: ⏰ Atenção (overdue/amber), 📅 Em breve (soon/blue), 💡 Sugestão (normal/cinza).
+- **Auto-fill**: data sugerida preenchida automaticamente no campo de data. Botão "Usar data sugerida" para aplicar.
+- **Multi-pet**: banner atualiza dinamicamente ao trocar pet no seletor, mostrando sugestão específica de cada pet.
+- **Dados via JS**: `dpsPortal.schedulingSuggestions` indexado por pet_id com suggested_date, avg_interval, days_since_last, top_services, urgency.
+
+**Documentação — Fase 7.3: Padrão de DI**
+
+- **Seção adicionada** ao `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`: documenta 3 estratégias de instanciação (Singleton, Constructor Injection, Static Renderers) com exemplos e regras de quando usar cada uma.
+
 #### Changed (Alterado)
 
 **AI Add-on — Assistente Virtual no Portal do Cliente**
