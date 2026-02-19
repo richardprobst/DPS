@@ -2550,7 +2550,17 @@ window.DPSSkeleton = (function() {
             return;
         }
 
-        // Cria o container do lightbox com atributos ARIA
+        // Agrupa links por galeria (data-gallery)
+        var galleries = {};
+        lightboxLinks.forEach(function(link) {
+            var gallery = link.getAttribute('data-gallery') || 'default';
+            if (!galleries[gallery]) {
+                galleries[gallery] = [];
+            }
+            galleries[gallery].push(link);
+        });
+
+        // Cria o container do lightbox com navegação
         var lightbox = document.createElement('div');
         lightbox.className = 'dps-lightbox';
         lightbox.setAttribute('role', 'dialog');
@@ -2560,9 +2570,12 @@ window.DPSSkeleton = (function() {
             '<div class="dps-lightbox__overlay"></div>' +
             '<div class="dps-lightbox__container">' +
                 '<button class="dps-lightbox__close" aria-label="Fechar">&times;</button>' +
+                '<button class="dps-lightbox__nav dps-lightbox__nav--prev" aria-label="Foto anterior">&#10094;</button>' +
                 '<img class="dps-lightbox__img" src="" alt="">' +
+                '<button class="dps-lightbox__nav dps-lightbox__nav--next" aria-label="Próxima foto">&#10095;</button>' +
                 '<div class="dps-lightbox__caption"></div>' +
                 '<div class="dps-lightbox__actions">' +
+                    '<span class="dps-lightbox__counter"></span>' +
                     '<a href="" class="dps-lightbox__btn dps-lightbox__btn--download" download>⬇️ Baixar</a>' +
                 '</div>' +
             '</div>';
@@ -2574,7 +2587,12 @@ window.DPSSkeleton = (function() {
         var lightboxDownload = lightbox.querySelector('.dps-lightbox__btn--download');
         var lightboxClose = lightbox.querySelector('.dps-lightbox__close');
         var lightboxOverlay = lightbox.querySelector('.dps-lightbox__overlay');
+        var lightboxPrev = lightbox.querySelector('.dps-lightbox__nav--prev');
+        var lightboxNext = lightbox.querySelector('.dps-lightbox__nav--next');
+        var lightboxCounter = lightbox.querySelector('.dps-lightbox__counter');
         var lastFocusedElement = null;
+        var currentGallery = null;
+        var currentIndex = 0;
 
         // Broken image fallback
         lightboxImg.addEventListener('error', function() {
@@ -2583,32 +2601,62 @@ window.DPSSkeleton = (function() {
             lightboxDownload.style.display = 'none';
         });
 
+        function showPhoto(index) {
+            if (!currentGallery || !galleries[currentGallery]) {
+                return;
+            }
+            var links = galleries[currentGallery];
+            if (index < 0 || index >= links.length) {
+                return;
+            }
+            currentIndex = index;
+            var link = links[index];
+            var imgUrl = link.getAttribute('href');
+            var imgTitle = link.getAttribute('title') || '';
+
+            lightboxImg.src = imgUrl;
+            lightboxImg.alt = imgTitle || 'Foto do pet';
+            lightboxCaption.textContent = imgTitle;
+            lightboxDownload.href = imgUrl;
+            lightboxDownload.style.display = '';
+
+            // Navegação: mostra/oculta botões
+            var hasMultiple = links.length > 1;
+            lightboxPrev.style.display = hasMultiple ? '' : 'none';
+            lightboxNext.style.display = hasMultiple ? '' : 'none';
+            lightboxPrev.disabled = index === 0;
+            lightboxNext.disabled = index === links.length - 1;
+
+            // Contador
+            lightboxCounter.textContent = hasMultiple ? (index + 1) + ' / ' + links.length : '';
+        }
+
         // Abre lightbox ao clicar em foto
         lightboxLinks.forEach(function(link) {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 var imgUrl = this.getAttribute('href');
-                var imgTitle = this.getAttribute('title') || '';
-
-                // Valida URL da imagem
                 if (!imgUrl) {
                     return;
                 }
 
                 lastFocusedElement = this;
+                currentGallery = this.getAttribute('data-gallery') || 'default';
+                currentIndex = parseInt(this.getAttribute('data-index') || '0', 10);
 
-                lightboxImg.src = imgUrl;
-                lightboxImg.alt = imgTitle || 'Foto do pet';
-                lightboxCaption.textContent = imgTitle;
-                lightboxDownload.href = imgUrl;
-                lightboxDownload.style.display = '';
-
+                showPhoto(currentIndex);
                 lightbox.classList.add('is-active');
                 document.body.style.overflow = 'hidden';
-
-                // Foca no botão de fechar para acessibilidade
                 lightboxClose.focus();
             });
+        });
+
+        // Navegação
+        lightboxPrev.addEventListener('click', function() {
+            showPhoto(currentIndex - 1);
+        });
+        lightboxNext.addEventListener('click', function() {
+            showPhoto(currentIndex + 1);
         });
 
         // Fecha lightbox
@@ -2616,8 +2664,8 @@ window.DPSSkeleton = (function() {
             lightbox.classList.remove('is-active');
             document.body.style.overflow = '';
             lightboxImg.src = '';
+            currentGallery = null;
 
-            // Restaura foco ao elemento que abriu o lightbox
             if (lastFocusedElement) {
                 lastFocusedElement.focus();
                 lastFocusedElement = null;
@@ -2627,7 +2675,7 @@ window.DPSSkeleton = (function() {
         lightboxClose.addEventListener('click', closeLightbox);
         lightboxOverlay.addEventListener('click', closeLightbox);
 
-        // Keyboard: ESC para fechar, Tab trap dentro do lightbox
+        // Keyboard: ESC, arrows, Tab trap
         document.addEventListener('keydown', function(e) {
             if (!lightbox.classList.contains('is-active')) {
                 return;
@@ -2638,9 +2686,21 @@ window.DPSSkeleton = (function() {
                 return;
             }
 
-            // Focus trap: mantém foco dentro do lightbox
+            // Arrow navigation
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                showPhoto(currentIndex - 1);
+                return;
+            }
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                showPhoto(currentIndex + 1);
+                return;
+            }
+
+            // Focus trap
             if (e.key === 'Tab') {
-                var focusable = lightbox.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])');
+                var focusable = lightbox.querySelectorAll('button:not([style*="display: none"]):not(:disabled), a[href], [tabindex]:not([tabindex="-1"])');
                 if (focusable.length === 0) {
                     return;
                 }

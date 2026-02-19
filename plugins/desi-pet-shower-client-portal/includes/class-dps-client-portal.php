@@ -2244,6 +2244,20 @@ Equipe %4$s', 'dps-client-portal' ),
         $contact_preference = get_post_meta( $client_id, 'client_contact_preference', true );
         $period_preference  = get_post_meta( $client_id, 'client_period_preference', true );
 
+        // Preferências de notificação
+        $notif_reminders  = get_post_meta( $client_id, 'client_notification_reminders', true );
+        $notif_payments   = get_post_meta( $client_id, 'client_notification_payments', true );
+        $notif_promotions = get_post_meta( $client_id, 'client_notification_promotions', true );
+        $notif_updates    = get_post_meta( $client_id, 'client_notification_updates', true );
+
+        // Default: ligado para reminders/payments, desligado para promotions
+        if ( $notif_reminders === '' ) {
+            $notif_reminders = '1';
+        }
+        if ( $notif_payments === '' ) {
+            $notif_payments = '1';
+        }
+
         echo '<div class="dps-surface dps-surface--neutral dps-meus-dados-card dps-preferences-section">';
         echo '<div class="dps-surface__title">';
         echo '<span>⚙️</span>';
@@ -2287,6 +2301,64 @@ Equipe %4$s', 'dps-client-portal' ),
         echo '</div>';
         
         echo '</div>'; // .dps-form-row
+        echo '</fieldset>';
+
+        // Preferências de notificação
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( '🔔 Notificações', 'dps-client-portal' ) . '</legend>';
+        echo '<p class="dps-fieldset__description">' . esc_html__( 'Escolha quais notificações deseja receber.', 'dps-client-portal' ) . '</p>';
+
+        echo '<div class="dps-notification-toggles">';
+
+        // Lembretes de agendamento
+        echo '<label class="dps-toggle-row">';
+        echo '<span class="dps-toggle-row__label">';
+        echo '<span class="dps-toggle-row__icon">📅</span>';
+        echo esc_html__( 'Lembretes de agendamento', 'dps-client-portal' );
+        echo '</span>';
+        echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Receba avisos antes do horário marcado', 'dps-client-portal' ) . '</span>';
+        echo '<input type="hidden" name="notification_reminders" value="0">';
+        echo '<input type="checkbox" name="notification_reminders" value="1" class="dps-toggle-input"' . checked( $notif_reminders, '1', false ) . '>';
+        echo '<span class="dps-toggle-switch" aria-hidden="true"></span>';
+        echo '</label>';
+
+        // Notificações de pagamento
+        echo '<label class="dps-toggle-row">';
+        echo '<span class="dps-toggle-row__label">';
+        echo '<span class="dps-toggle-row__icon">💰</span>';
+        echo esc_html__( 'Avisos de pagamento', 'dps-client-portal' );
+        echo '</span>';
+        echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Receba lembretes de parcelas e cobranças', 'dps-client-portal' ) . '</span>';
+        echo '<input type="hidden" name="notification_payments" value="0">';
+        echo '<input type="checkbox" name="notification_payments" value="1" class="dps-toggle-input"' . checked( $notif_payments, '1', false ) . '>';
+        echo '<span class="dps-toggle-switch" aria-hidden="true"></span>';
+        echo '</label>';
+
+        // Promoções
+        echo '<label class="dps-toggle-row">';
+        echo '<span class="dps-toggle-row__label">';
+        echo '<span class="dps-toggle-row__icon">🎁</span>';
+        echo esc_html__( 'Promoções e ofertas', 'dps-client-portal' );
+        echo '</span>';
+        echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Fique por dentro de descontos e novidades', 'dps-client-portal' ) . '</span>';
+        echo '<input type="hidden" name="notification_promotions" value="0">';
+        echo '<input type="checkbox" name="notification_promotions" value="1" class="dps-toggle-input"' . checked( $notif_promotions, '1', false ) . '>';
+        echo '<span class="dps-toggle-switch" aria-hidden="true"></span>';
+        echo '</label>';
+
+        // Atualizações do pet
+        echo '<label class="dps-toggle-row">';
+        echo '<span class="dps-toggle-row__label">';
+        echo '<span class="dps-toggle-row__icon">🐾</span>';
+        echo esc_html__( 'Atualizações do pet', 'dps-client-portal' );
+        echo '</span>';
+        echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Novas fotos, observações e relatórios', 'dps-client-portal' ) . '</span>';
+        echo '<input type="hidden" name="notification_updates" value="0">';
+        echo '<input type="checkbox" name="notification_updates" value="1" class="dps-toggle-input"' . checked( $notif_updates, '1', false ) . '>';
+        echo '<span class="dps-toggle-switch" aria-hidden="true"></span>';
+        echo '</label>';
+
+        echo '</div>'; // .dps-notification-toggles
         echo '</fieldset>';
         
         echo '<div class="dps-form-actions">';

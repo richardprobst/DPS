@@ -45,6 +45,7 @@ class DPS_Pet_Handler {
         'pet_accessories_pref',
         'pet_product_restrictions',
         'pet_photo_id',
+        'pet_photos',
     ];
 
     /**
@@ -272,6 +273,16 @@ class DPS_Pet_Handler {
                 $attach_data = wp_generate_attachment_metadata( $attach_id, $uploaded['file'] );
                 wp_update_attachment_metadata( $attach_id, $attach_data );
                 update_post_meta( $pet_id, 'pet_photo_id', $attach_id );
+
+                // Adiciona ao array pet_photos (galeria multi-foto)
+                $photos = get_post_meta( $pet_id, 'pet_photos', true );
+                if ( ! is_array( $photos ) ) {
+                    $photos = [];
+                }
+                if ( ! in_array( $attach_id, $photos, true ) ) {
+                    $photos[] = $attach_id;
+                    update_post_meta( $pet_id, 'pet_photos', $photos );
+                }
             } else {
                 // Remove arquivo se não for imagem válida
                 if ( file_exists( $uploaded['file'] ) ) {
@@ -305,6 +316,25 @@ class DPS_Pet_Handler {
         }
 
         return $result;
+    }
+
+    /**
+     * Retorna todos os IDs de fotos de um pet (pet_photos + pet_photo_id fallback).
+     *
+     * @param int $pet_id ID do pet.
+     * @return array Array de IDs de attachment válidos.
+     */
+    public static function get_all_photo_ids( $pet_id ) {
+        $photos = get_post_meta( $pet_id, 'pet_photos', true );
+        if ( ! is_array( $photos ) || empty( $photos ) ) {
+            // Fallback: usa pet_photo_id legado
+            $single = get_post_meta( $pet_id, 'pet_photo_id', true );
+            return $single ? [ (int) $single ] : [];
+        }
+        // Filtra somente IDs de attachments que existem
+        return array_values( array_filter( array_map( 'intval', $photos ), function( $id ) {
+            return $id > 0 && wp_get_attachment_image_url( $id, 'thumbnail' );
+        } ) );
     }
 
     /**

@@ -540,9 +540,13 @@ class DPS_Portal_Renderer {
         // Conta fotos disponíveis
         $total_photos = 0;
         foreach ( $pets as $pet ) {
-            $photo_id = get_post_meta( $pet->ID, 'pet_photo_id', true );
-            if ( $photo_id && wp_get_attachment_image_url( $photo_id, 'thumbnail' ) ) {
-                $total_photos++;
+            if ( class_exists( 'DPS_Pet_Handler' ) ) {
+                $total_photos += count( DPS_Pet_Handler::get_all_photo_ids( $pet->ID ) );
+            } else {
+                $photo_id = get_post_meta( $pet->ID, 'pet_photo_id', true );
+                if ( $photo_id && wp_get_attachment_image_url( $photo_id, 'thumbnail' ) ) {
+                    $total_photos++;
+                }
             }
         }
 
@@ -609,8 +613,18 @@ class DPS_Portal_Renderer {
     private function render_gallery_pet_card( $pet ) {
         $pet_id   = $pet->ID;
         $pet_name = get_the_title( $pet_id );
-        $photo_id = get_post_meta( $pet_id, 'pet_photo_id', true );
         $species  = get_post_meta( $pet_id, 'pet_species', true );
+
+        // Busca todas as fotos (multi-foto com fallback)
+        $photo_ids = [];
+        if ( class_exists( 'DPS_Pet_Handler' ) ) {
+            $photo_ids = DPS_Pet_Handler::get_all_photo_ids( $pet_id );
+        } else {
+            $single = get_post_meta( $pet_id, 'pet_photo_id', true );
+            if ( $single ) {
+                $photo_ids = [ (int) $single ];
+            }
+        }
 
         $species_icon = '🐾';
         if ( $species ) {
@@ -629,25 +643,38 @@ class DPS_Portal_Renderer {
         echo '<h3 class="dps-gallery-pet-card__name">';
         echo '<span class="dps-gallery-pet-card__icon">' . $species_icon . '</span>';
         echo esc_html( $pet_name );
+        if ( count( $photo_ids ) > 1 ) {
+            echo ' <span class="dps-gallery-pet-card__count">(' . esc_html( count( $photo_ids ) ) . ' ' . esc_html__( 'fotos', 'dps-client-portal' ) . ')</span>';
+        }
         echo '</h3>';
         echo '</div>';
 
         // Content
         echo '<div class="dps-gallery-pet-card__content">';
 
-        if ( $photo_id ) {
-            $photo_url_medium = wp_get_attachment_image_url( $photo_id, 'medium' );
-            $photo_url_full   = wp_get_attachment_image_url( $photo_id, 'full' );
+        if ( ! empty( $photo_ids ) ) {
+            echo '<div class="dps-gallery-photo-grid' . ( count( $photo_ids ) > 1 ? ' dps-gallery-photo-grid--multi' : '' ) . '">';
+            $index = 0;
+            foreach ( $photo_ids as $photo_id ) {
+                $photo_url_medium = wp_get_attachment_image_url( $photo_id, 'medium' );
+                $photo_url_full   = wp_get_attachment_image_url( $photo_id, 'full' );
 
-            if ( $photo_url_medium && $photo_url_full ) {
-                echo '<div class="dps-gallery-photo-grid">';
-                echo '<div class="dps-gallery-photo dps-gallery-photo--profile">';
-                echo '<a href="' . esc_url( $photo_url_full ) . '" class="dps-gallery-photo__link" title="' . esc_attr( $pet_name ) . '">';
+                if ( ! $photo_url_medium || ! $photo_url_full ) {
+                    continue;
+                }
+
+                $is_profile = ( $index === 0 );
+                $label      = $is_profile
+                    ? esc_html__( 'Foto de perfil', 'dps-client-portal' )
+                    : esc_html( sprintf( __( 'Foto %d', 'dps-client-portal' ), $index + 1 ) );
+
+                echo '<div class="dps-gallery-photo' . ( $is_profile ? ' dps-gallery-photo--profile' : '' ) . '">';
+                echo '<a href="' . esc_url( $photo_url_full ) . '" class="dps-gallery-photo__link" title="' . esc_attr( $pet_name ) . '" data-gallery="pet-' . esc_attr( $pet_id ) . '" data-index="' . esc_attr( $index ) . '">';
                 echo '<img src="' . esc_url( $photo_url_medium ) . '" alt="' . esc_attr( sprintf( __( 'Foto de %s', 'dps-client-portal' ), $pet_name ) ) . '" class="dps-gallery-photo__img" loading="lazy" />';
                 echo '<div class="dps-gallery-photo__overlay"><span class="dps-gallery-photo__zoom">🔍</span></div>';
                 echo '</a>';
                 echo '<div class="dps-gallery-photo__info">';
-                echo '<span class="dps-gallery-photo__label">' . esc_html__( 'Foto de perfil', 'dps-client-portal' ) . '</span>';
+                echo '<span class="dps-gallery-photo__label">' . $label . '</span>';
                 echo '<div class="dps-gallery-photo__actions">';
                 echo '<a href="' . esc_url( $photo_url_full ) . '" class="dps-gallery-photo__action dps-gallery-photo__action--download" download title="' . esc_attr__( 'Baixar foto', 'dps-client-portal' ) . '">';
                 echo '<span class="dps-gallery-photo__action-icon">⬇️</span>';
@@ -655,10 +682,10 @@ class DPS_Portal_Renderer {
                 echo '</div>';
                 echo '</div>'; // .dps-gallery-photo__info
                 echo '</div>'; // .dps-gallery-photo
-                echo '</div>'; // .dps-gallery-photo-grid
-            } else {
-                $this->render_gallery_pet_empty( $pet_name );
+
+                $index++;
             }
+            echo '</div>'; // .dps-gallery-photo-grid
         } else {
             $this->render_gallery_pet_empty( $pet_name );
         }
