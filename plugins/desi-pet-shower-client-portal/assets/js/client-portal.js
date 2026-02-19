@@ -1812,6 +1812,67 @@ window.DPSSkeleton = (function() {
     }
 
     /**
+     * Phase 8.1: Constrói HTML do banner de sugestão inteligente de agendamento.
+     */
+    function buildSuggestionBanner(suggestion) {
+        if (!suggestion) return '';
+        var html = '';
+        var urgencyClass = '';
+        var urgencyIcon = '💡';
+        var urgencyLabel = 'Sugestão';
+
+        if (suggestion.urgency === 'overdue') {
+            urgencyClass = ' dps-suggestion-banner--overdue';
+            urgencyIcon = '⏰';
+            urgencyLabel = 'Atenção';
+        } else if (suggestion.urgency === 'soon') {
+            urgencyClass = ' dps-suggestion-banner--soon';
+            urgencyIcon = '📅';
+            urgencyLabel = 'Em breve';
+        }
+
+        html += '<div class="dps-suggestion-banner__content' + urgencyClass + '">';
+        html += '<div class="dps-suggestion-banner__header">';
+        html += '<span class="dps-suggestion-banner__icon">' + urgencyIcon + '</span>';
+        html += '<strong>' + escapeHtml(urgencyLabel) + '</strong>';
+        if (suggestion.pet_name) {
+            html += ' — ' + escapeHtml(suggestion.pet_name);
+        }
+        html += '</div>';
+
+        var details = [];
+        if (suggestion.days_since_last > 0) {
+            details.push('Último atendimento: <strong>' + suggestion.days_since_last + ' dias atrás</strong>');
+        }
+        if (suggestion.avg_interval > 0) {
+            details.push('Frequência média: a cada <strong>' + suggestion.avg_interval + ' dias</strong>');
+        }
+        if (suggestion.top_services && suggestion.top_services.length > 0) {
+            details.push('Serviços frequentes: <strong>' + suggestion.top_services.map(escapeHtml).join(', ') + '</strong>');
+        }
+        if (suggestion.suggested_date) {
+            var parts = suggestion.suggested_date.split('-');
+            var dateFormatted = parts[2] + '/' + parts[1] + '/' + parts[0];
+            details.push('Data sugerida: <strong>' + escapeHtml(dateFormatted) + '</strong>');
+        }
+
+        if (details.length > 0) {
+            html += '<div class="dps-suggestion-banner__details">';
+            for (var d = 0; d < details.length; d++) {
+                html += '<div class="dps-suggestion-banner__detail">' + details[d] + '</div>';
+            }
+            html += '</div>';
+        }
+
+        if (suggestion.suggested_date) {
+            html += '<button type="button" class="dps-suggestion-banner__apply" data-date="' + escapeHtml(suggestion.suggested_date) + '">Usar data sugerida</button>';
+        }
+
+        html += '</div>';
+        return html;
+    }
+
+    /**
      * Cria modal de pedido de agendamento com wizard multi-etapa (Phase 4.1)
      */
     function createRequestModal(type, appointmentId, petId, services) {
@@ -1887,9 +1948,20 @@ window.DPSSkeleton = (function() {
             html += '<input type="hidden" name="pet_id" value="' + petId + '">';
         }
 
+        // Phase 8.1: Smart scheduling suggestions
+        var suggestions = (typeof dpsPortal !== 'undefined' && dpsPortal.schedulingSuggestions) ? dpsPortal.schedulingSuggestions : {};
+        var activePetId = petId || (clientPets.length === 1 ? String(clientPets[0].id) : '');
+        var activeSuggestion = activePetId && suggestions[activePetId] ? suggestions[activePetId] : null;
+
+        html += '<div id="dps-scheduling-suggestion" class="dps-suggestion-banner"' + (!activeSuggestion ? ' style="display:none"' : '') + '>';
+        if (activeSuggestion) {
+            html += buildSuggestionBanner(activeSuggestion);
+        }
+        html += '</div>';
+
         html += '<div class="dps-form-field">';
         html += '<label for="desired_date">Data Desejada <span class="required">*</span></label>';
-        html += '<input type="date" id="desired_date" name="desired_date" required min="' + getTomorrowDate() + '" aria-required="true">';
+        html += '<input type="date" id="desired_date" name="desired_date" required min="' + getTomorrowDate() + '"' + (activeSuggestion && activeSuggestion.suggested_date ? ' value="' + escapeHtml(activeSuggestion.suggested_date) + '"' : '') + ' aria-required="true">';
         html += '<span class="dps-field-error" role="alert" id="desired_date_error"></span>';
         html += '</div>';
         html += '<div class="dps-form-field">';
@@ -2114,6 +2186,49 @@ window.DPSSkeleton = (function() {
                 goToStep(prevStep);
             });
         });
+
+        // Phase 8.1: Suggestion banner interactions
+        // "Usar data sugerida" button
+        modal.addEventListener('click', function(e) {
+            if (e.target.classList.contains('dps-suggestion-banner__apply')) {
+                var suggestedDate = e.target.getAttribute('data-date');
+                if (suggestedDate) {
+                    var dateInput = modal.querySelector('#desired_date');
+                    if (dateInput) {
+                        dateInput.value = suggestedDate;
+                        dateInput.classList.remove('is-invalid');
+                        dateInput.classList.add('is-valid');
+                        var err = modal.querySelector('#desired_date_error');
+                        if (err) err.textContent = '';
+                    }
+                }
+            }
+        });
+
+        // Pet selector change → update suggestion banner
+        var petSelect = modal.querySelector('#pet_id');
+        if (petSelect) {
+            petSelect.addEventListener('change', function() {
+                var selectedPetId = this.value;
+                var banner = modal.querySelector('#dps-scheduling-suggestion');
+                if (!banner) return;
+                var newSuggestion = selectedPetId && suggestions[selectedPetId] ? suggestions[selectedPetId] : null;
+                if (newSuggestion) {
+                    banner.innerHTML = buildSuggestionBanner(newSuggestion);
+                    banner.style.display = '';
+                    // Auto-fill date if suggestion available
+                    if (newSuggestion.suggested_date) {
+                        var dateField = modal.querySelector('#desired_date');
+                        if (dateField && !dateField.value) {
+                            dateField.value = newSuggestion.suggested_date;
+                        }
+                    }
+                } else {
+                    banner.innerHTML = '';
+                    banner.style.display = 'none';
+                }
+            });
+        }
         
         modal.querySelector('#dps-request-form').addEventListener('submit', function(e) {
             e.preventDefault();

@@ -699,6 +699,13 @@ final class DPS_Client_Portal {
             ];
         }
 
+        // Phase 8.1: Gera sugestões inteligentes de agendamento baseadas no histórico
+        $scheduling_suggestions = [];
+        if ( ! empty( $client_pets ) ) {
+            $suggestions_service = DPS_Scheduling_Suggestions::get_instance();
+            $scheduling_suggestions = $suggestions_service->get_suggestions_for_client( $client_id, $client_pets );
+        }
+
         wp_localize_script( 'dps-client-portal', 'dpsPortal', [
             'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
             'chatNonce' => wp_create_nonce( 'dps_portal_chat' ),
@@ -707,6 +714,7 @@ final class DPS_Client_Portal {
             'petHistoryNonce' => wp_create_nonce( 'dps_portal_pet_history' ),
             'clientId' => $client_id,
             'clientPets' => $client_pets_data,
+            'schedulingSuggestions' => $scheduling_suggestions,
             'loyalty' => [
                 'nonce' => wp_create_nonce( 'dps_portal_loyalty' ),
                 'historyLimit' => 5,

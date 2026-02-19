@@ -106,6 +106,9 @@ require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-por
 // Hub centralizado do Portal (Fase 2 - Reorganização de Menus)
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-hub.php';
 
+// Sugestões inteligentes de agendamento (Fase 8.1)
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-scheduling-suggestions.php';
+
 // Inclui classe principal (coordenador)
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-client-portal.php';
 
