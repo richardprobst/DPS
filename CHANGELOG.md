@@ -161,6 +161,12 @@ Antes de criar uma nova versão oficial:
 - **Detalhes do pet no card** (Fase 4.5): porte (📏 Pequeno/Médio/Grande/Gigante), peso (⚖️ em kg), sexo (♂️/♀️), idade (🎂 calculada automaticamente de `pet_birth`) exibidos no card de info do pet na timeline. CSS com grid responsiva de meta items.
 - **"Manter acesso neste dispositivo"** (Fase 4.6): checkbox no formulário de login por e-mail permite manter sessão permanente. Gera token permanente com cookie seguro `dps_portal_remember` (HttpOnly, Secure, SameSite=Strict, 90 dias). Auto-autenticação via `handle_remember_cookie()` na próxima visita. Cookie removido no logout.
 
+**Fase 5 — Funcionalidades Novas (Portal)**
+
+- **Galeria multi-fotos** (Fase 5.1): pets agora suportam múltiplas fotos via meta key `pet_photos` (array de IDs) com fallback automático para `pet_photo_id` legado. Adicionado `DPS_Pet_Handler::get_all_photo_ids()`. Grid multi-foto responsiva com contagem de fotos por pet. Lightbox com navegação prev/next (setas clicáveis + ArrowLeft/ArrowRight no teclado), contador de fotos (1/N) e agrupamento por `data-gallery`.
+- **Preferências de notificação** (Fase 5.2): 4 toggles M3 na tela de preferências — lembretes de agendamento (📅), avisos de pagamento (💰), promoções e ofertas (🎁), atualizações do pet (🐾). Defaults inteligentes: lembretes e pagamentos ligados, promoções e updates desligados. Toggle switches CSS com focus-visible e hover states. Handler atualizado com hook `dps_portal_after_update_preferences` expandido.
+- **Feedback pós-agendamento** (Fase 5.4): prompt de avaliação exibido no final do histórico de agendamentos. Star rating interativo (1-5 estrelas, `role="radiogroup"` com ARIA labels). Textarea para comentário opcional. Integração com handler existente `submit_internal_review` e CPT `dps_groomer_review`. Estado "já avaliou" com estrelas e mensagem de agradecimento.
+
 **Fase 6 — Segurança Avançada e Auditoria**
 
 - **Auditoria centralizada** (Fase 6.2): criada classe `DPS_Audit_Logger` (446 linhas, 14 métodos estáticos) com tabela `dps_audit_log` para registro de eventos de auditoria (criar, atualizar, excluir, login, mudança de status) em todas as entidades do sistema (clientes, pets, agendamentos, portal, financeiro).

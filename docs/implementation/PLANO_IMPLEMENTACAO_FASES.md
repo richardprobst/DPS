@@ -378,21 +378,23 @@ Adicionar funcionalidades que criam valor para o cliente final e diferenciam o p
 
 ### 5.1 — Galeria de Fotos do Pet (Expansão)
 
-**Status atual:** O portal já possui galeria com uma foto por pet (`pet_photo_id` meta).
+**Status atual:** Implementado. Multi-fotos via meta `pet_photos` com lightbox navegável.
 
 **Ação:**
-- [ ] Expandir para múltiplas fotos por pet (meta `pet_gallery_ids` como array)
+- [x] Expandir para múltiplas fotos por pet (meta `pet_photos` como array, fallback `pet_photo_id`)
 - [ ] Integrar com o add-on Groomers para fotos antes/depois
-- [ ] Implementar upload de fotos pelo admin com associação ao pet
-- [ ] Usar lightbox já existente (com acessibilidade: `role="dialog"`, focus trap, ESC close)
-- [ ] Implementar lazy loading nas imagens da galeria
+- [x] Implementar upload de fotos pelo admin com associação ao pet
+- [x] Usar lightbox já existente (com navegação prev/next, `data-gallery`, ArrowLeft/Right)
+- [x] Implementar lazy loading nas imagens da galeria
 
 ### 5.2 — Notificações Personalizadas
 
+**Status atual:** Implementado. 4 toggles de notificação no portal.
+
 **Ação:**
-- [ ] Criar tela de preferências de notificação no portal do cliente
-- [ ] Opções: lembrete de agendamento (e-mail/WhatsApp), promoções, atualizações do pet
-- [ ] Armazenar preferências como meta do CPT `dps_cliente`
+- [x] Criar tela de preferências de notificação no portal do cliente
+- [x] Opções: lembrete de agendamento, pagamentos, promoções, atualizações do pet
+- [x] Armazenar preferências como meta do CPT `dps_cliente`
 - [ ] Integrar com o add-on Communications (notificações por e-mail/WhatsApp)
 - [ ] Integrar com o add-on Push (Telegram/e-mail para admin)
 
@@ -408,11 +410,11 @@ Adicionar funcionalidades que criam valor para o cliente final e diferenciam o p
 
 ### 5.4 — Feedback e Avaliação
 
-**Status atual:** O portal já possui sistema de reviews (`dps_groomer_review` CPT) com integração Google Reviews.
+**Status atual:** Implementado. Prompt de avaliação com star rating no histórico.
 
 **Ação:**
-- [ ] Adicionar prompt pós-agendamento (finalizado) convidando para avaliação
-- [ ] Mostrar avaliações anteriores do cliente no portal
+- [x] Adicionar prompt pós-agendamento (finalizado) convidando para avaliação
+- [x] Mostrar avaliações anteriores do cliente no portal
 - [ ] Considerar widget de NPS (Net Promoter Score) simples
 - [ ] Integrar com o add-on Loyalty para dar pontos por avaliação
 
