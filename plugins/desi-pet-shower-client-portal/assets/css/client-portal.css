@@ -376,6 +376,52 @@
     cursor: pointer;
 }
 
+/* F6.4: FASE 6 - 2FA Code Input */
+.dps-2fa-form {
+    text-align: center;
+}
+
+.dps-2fa-code-inputs {
+    display: flex;
+    justify-content: center;
+    gap: var(--dps-space-2, 8px);
+    margin: var(--dps-space-5, 20px) 0;
+}
+
+.dps-2fa-digit {
+    width: 44px;
+    height: 52px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+    border: 2px solid var(--dps-border-color, #e5e7eb);
+    border-radius: var(--dps-shape-small, 8px);
+    background: var(--dps-white, #fff);
+    color: var(--dps-gray-800, #1f2937);
+    transition: border-color var(--dps-motion-hover, 200ms), box-shadow var(--dps-motion-hover, 200ms);
+    outline: none;
+}
+
+.dps-2fa-digit:focus {
+    border-color: var(--dps-primary, #0b6bcb);
+    box-shadow: 0 0 0 3px rgba(11, 107, 203, 0.15);
+}
+
+.dps-2fa-digit:not(:placeholder-shown) {
+    border-color: var(--dps-primary, #0b6bcb);
+}
+
+@media (max-width: 480px) {
+    .dps-2fa-code-inputs {
+        gap: var(--dps-space-1, 4px);
+    }
+    .dps-2fa-digit {
+        width: 38px;
+        height: 46px;
+        font-size: 20px;
+    }
+}
+
 /* Seção de WhatsApp */
 .dps-portal-access__whatsapp-section {
     padding-top: var(--dps-space-4);

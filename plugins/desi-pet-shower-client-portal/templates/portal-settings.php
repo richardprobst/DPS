@@ -100,6 +100,24 @@ echo '</div>';
 
 echo '</fieldset>';
 
+// Seção: Verificação em Duas Etapas (Fase 6.4)
+echo '<fieldset class="dps-fieldset">';
+echo '<legend>' . esc_html__( 'Verificação em Duas Etapas (2FA)', 'dps-client-portal' ) . '</legend>';
+
+$twofa_enabled = get_option( 'dps_portal_2fa_enabled', false );
+
+echo '<div class="dps-form-field">';
+echo '<label>';
+echo '<input type="checkbox" name="dps_portal_2fa_enabled" id="dps_portal_2fa_enabled" value="1" ' . checked( $twofa_enabled, 1, false ) . ' />';
+echo ' ' . esc_html__( 'Exigir código de verificação por e-mail ao acessar o portal', 'dps-client-portal' );
+echo '</label>';
+echo '<p class="dps-field-description">';
+echo esc_html__( 'Quando ativado, após clicar no link de acesso, o cliente receberá um código de 6 dígitos por e-mail que deve ser informado para completar o login. O código expira em 10 minutos e permite até 5 tentativas. Requer que o cliente tenha e-mail cadastrado.', 'dps-client-portal' );
+echo '</p>';
+echo '</div>';
+
+echo '</fieldset>';
+
 // Seção: Instruções
 echo '<fieldset class="dps-fieldset">';
 echo '<legend>' . esc_html__( 'Como Usar', 'dps-client-portal' ) . '</legend>';

@@ -85,6 +85,7 @@ require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-admin-acti
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-cache-helper.php'; // Fase 2.2
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-calendar-helper.php'; // Fase 2.8
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-profile-update.php'; // Fase 5 - Atualização de perfil via link
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-2fa.php'; // Fase 6.4 - 2FA via e-mail
 
 // Inclui repositórios (Fase 3.1 - Repository Pattern)
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/class-dps-client-repository.php';
