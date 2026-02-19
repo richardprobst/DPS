@@ -437,6 +437,7 @@ class DPS_Portal_Renderer {
         
         if ( $appointments ) {
             $this->render_appointments_table( $appointments );
+            $this->render_review_prompt( $client_id );
         } else {
             $this->render_no_history_state();
         }
@@ -508,6 +509,88 @@ class DPS_Portal_Renderer {
         echo '<div class="dps-empty-state__icon">📋</div>';
         echo '<div class="dps-empty-state__message">' . esc_html__( 'Você ainda não tem histórico de agendamentos.', 'dps-client-portal' ) . '</div>';
         echo '</div>';
+    }
+
+    /**
+     * Renderiza prompt de avaliação pós-agendamento.
+     *
+     * Exibe formulário de avaliação se o cliente ainda não avaliou
+     * e se o CPT dps_groomer_review existe.
+     *
+     * @since 3.3.0
+     * @param int $client_id ID do cliente.
+     */
+    private function render_review_prompt( $client_id ) {
+        // Verifica se o CPT de review existe
+        if ( ! post_type_exists( 'dps_groomer_review' ) ) {
+            return;
+        }
+
+        // Verifica se o cliente já avaliou
+        $existing = get_posts( [
+            'post_type'      => 'dps_groomer_review',
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+            'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+                [
+                    'key'   => '_dps_review_client_id',
+                    'value' => $client_id,
+                ],
+            ],
+            'fields'         => 'ids',
+            'no_found_rows'  => true,
+        ] );
+
+        if ( ! empty( $existing ) ) {
+            // Mostra mensagem de "já avaliou" com a nota
+            $review_id = $existing[0];
+            $rating    = (int) get_post_meta( $review_id, '_dps_review_rating', true );
+            echo '<div class="dps-review-prompt dps-review-prompt--done">';
+            echo '<div class="dps-review-prompt__icon">✅</div>';
+            echo '<p class="dps-review-prompt__text">';
+            echo esc_html__( 'Obrigado pela sua avaliação!', 'dps-client-portal' );
+            if ( $rating > 0 ) {
+                echo ' <span class="dps-review-prompt__stars">' . esc_html( str_repeat( '⭐', $rating ) ) . '</span>';
+            }
+            echo '</p>';
+            echo '</div>';
+            return;
+        }
+
+        // Formulário de avaliação
+        echo '<div class="dps-review-prompt">';
+        echo '<div class="dps-review-prompt__header">';
+        echo '<span class="dps-review-prompt__icon">⭐</span>';
+        echo '<h3 class="dps-review-prompt__title">' . esc_html__( 'Como foi sua experiência?', 'dps-client-portal' ) . '</h3>';
+        echo '<p class="dps-review-prompt__subtitle">' . esc_html__( 'Sua opinião nos ajuda a melhorar!', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+
+        echo '<form method="post" class="dps-review-form dps-portal-form">';
+        wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
+        echo '<input type="hidden" name="dps_client_portal_action" value="submit_internal_review">';
+
+        // Star rating
+        echo '<div class="dps-star-rating" role="radiogroup" aria-label="' . esc_attr__( 'Nota de 1 a 5', 'dps-client-portal' ) . '">';
+        for ( $i = 1; $i <= 5; $i++ ) {
+            echo '<label class="dps-star-rating__label" title="' . esc_attr( $i ) . ' ' . esc_attr( _n( 'estrela', 'estrelas', $i, 'dps-client-portal' ) ) . '">';
+            echo '<input type="radio" name="review_rating" value="' . esc_attr( $i ) . '" class="dps-star-rating__input" required>';
+            echo '<span class="dps-star-rating__star" aria-hidden="true">☆</span>';
+            echo '</label>';
+        }
+        echo '</div>';
+
+        // Comment
+        echo '<div class="dps-form-group">';
+        echo '<label class="dps-form-label" for="review_comment">' . esc_html__( 'Comentário (opcional)', 'dps-client-portal' ) . '</label>';
+        echo '<textarea id="review_comment" name="review_comment" class="dps-form-control" rows="3" maxlength="500" placeholder="' . esc_attr__( 'Conte como foi sua experiência...', 'dps-client-portal' ) . '"></textarea>';
+        echo '</div>';
+
+        echo '<button type="submit" class="button button-primary dps-btn-submit">';
+        echo '<span>📝</span> ' . esc_html__( 'Enviar Avaliação', 'dps-client-portal' );
+        echo '</button>';
+
+        echo '</form>';
+        echo '</div>'; // .dps-review-prompt
     }
 
     /**

@@ -1570,6 +1570,88 @@ html {
     box-shadow: var(--dps-elevation-2);
 }
 
+/* Review Prompt (Fase 5.4) */
+.dps-review-prompt {
+    margin-top: 24px;
+    padding: 24px;
+    background: linear-gradient(135deg, var(--dps-color-surface-container-low, #f8f9fa), var(--dps-white));
+    border: 1px solid var(--dps-border-color);
+    border-radius: var(--dps-shape-card, 12px);
+}
+.dps-review-prompt--done {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--dps-color-success-container, #e8f5e9);
+    border-color: var(--dps-color-success, #4caf50);
+}
+.dps-review-prompt__header { margin-bottom: 20px; }
+.dps-review-prompt__icon { font-size: 28px; }
+.dps-review-prompt__title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dps-gray-900);
+    margin: 4px 0 2px;
+}
+.dps-review-prompt__subtitle {
+    font-size: 14px;
+    color: var(--dps-gray-500, #666);
+    margin: 0;
+}
+.dps-review-prompt__text {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--dps-color-success, #2e7d32);
+    margin: 0;
+}
+.dps-review-prompt__stars { white-space: nowrap; }
+
+/* Star rating */
+.dps-star-rating {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+}
+.dps-star-rating__input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.dps-star-rating__label {
+    cursor: pointer;
+}
+.dps-star-rating__star {
+    font-size: 36px;
+    color: var(--dps-gray-300, #ccc);
+    transition: color var(--dps-motion-hover), transform var(--dps-motion-hover);
+    display: inline-block;
+}
+.dps-star-rating__label:hover .dps-star-rating__star,
+.dps-star-rating__label:hover ~ .dps-star-rating__label .dps-star-rating__star { color: var(--dps-gray-300, #ccc); }
+.dps-star-rating__label:hover .dps-star-rating__star {
+    color: #ffc107;
+    transform: scale(1.15);
+}
+.dps-star-rating__input:checked + .dps-star-rating__star { color: #ffc107; }
+.dps-star-rating__input:focus-visible + .dps-star-rating__star {
+    outline: 2px solid var(--dps-color-primary, #4a7c59);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+/* Highlight all stars up to checked one (CSS reverse trick with flex-direction) */
+.dps-star-rating { direction: rtl; justify-content: flex-end; }
+.dps-star-rating__label { direction: ltr; }
+.dps-star-rating__input:checked + .dps-star-rating__star,
+.dps-star-rating__label:has(~ .dps-star-rating__label .dps-star-rating__input:checked) .dps-star-rating__star {
+    color: #ffc107;
+}
+.dps-star-rating__label:hover .dps-star-rating__star,
+.dps-star-rating__label:has(~ .dps-star-rating__label:hover) .dps-star-rating__star {
+    color: #ffc107;
+}
+
 /* ================================================
    AVALIAÇÕES (CTA + PROVA SOCIAL)
    Layout moderno com métricas, formulário e cards
