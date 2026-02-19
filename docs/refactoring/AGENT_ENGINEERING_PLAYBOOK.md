@@ -139,3 +139,92 @@ public static function maybe_create_tables() {
 3. Incrementar a versão ao alterar schema (novas colunas, índices, etc.)
 4. Migrações de dados devem estar em blocos `version_compare()` separados
 5. DDL queries (ALTER TABLE, CREATE INDEX) usam `$wpdb->prefix` direto — são seguras por não receberem input do usuário
+
+---
+
+## Padrão de Injeção de Dependência (Fase 7.3)
+
+O projeto utiliza duas estratégias de instanciação, escolhidas conforme o caso:
+
+### 1. Singleton (classes utilitárias e repositórios)
+
+Usado para classes sem estado mutável ou com estado compartilhado (repositórios, helpers):
+
+```php
+class DPS_Appointment_Repository {
+    private static ?self $instance = null;
+
+    public static function get_instance(): self {
+        if ( null === self::$instance ) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    private function __construct() {}
+}
+```
+
+**Quando usar:** Repositories, Helpers (Money, Phone, URL), Template Engine, Suggestion Services.
+
+### 2. Constructor Injection (classes com dependências substituíveis)
+
+Usado no Frontend Add-on para handlers que precisam de serviços injetáveis (testabilidade, substituição):
+
+```php
+class DPS_Registration_Handler {
+    public function __construct(
+        DPS_Form_Validator $formValidator,
+        DPS_Client_Service $clientService,
+        DPS_Pet_Service $petService,
+        DPS_Duplicate_Detector $duplicateDetector,
+        DPS_Recaptcha_Service $recaptchaService,
+        DPS_Email_Service $emailService,
+        DPS_Registration_Bridge $registrationBridge,
+        DPS_Logger $logger
+    ) {
+        $this->formValidator = $formValidator;
+        // ... demais atribuições
+    }
+}
+```
+
+**Composição root** (no arquivo principal do plugin):
+```php
+$formValidator = new DPS_Form_Validator();
+$clientService = new DPS_Client_Service();
+// ... instancia serviços
+$handler = new DPS_Registration_Handler(
+    $formValidator, $clientService, ...
+);
+$registrationV2->setHandler( $handler );
+```
+
+**Quando usar:** Handlers com lógica complexa que se beneficiam de substituição em testes, ou quando há múltiplas implementações possíveis.
+
+### 3. Renderers estáticos (classes do base plugin)
+
+Os section renderers (`DPS_Clients_Section_Renderer`, `DPS_Pets_Section_Renderer`, etc.) usam métodos estáticos por serem puros (dados in, HTML out) e não precisarem de estado ou substituição:
+
+```php
+class DPS_Clients_Section_Renderer {
+    public static function render() { ... }
+    public static function prepare_data() { ... }
+}
+```
+
+A facade `DPS_Base_Frontend` delega para eles:
+```php
+public static function render_clients_section() {
+    return DPS_Clients_Section_Renderer::render();
+}
+```
+
+**Trade-off:** Métodos estáticos não são facilmente mockáveis em testes unitários, mas a simplicidade compensa para renderers puros. Se no futuro for necessário testar renderers com mock de dados, converter para instâncias com DI.
+
+### Regras:
+1. **Preferir singleton** para classes utilitárias sem dependências externas
+2. **Preferir constructor injection** para handlers com lógica de negócio e múltiplas dependências
+3. **Composição root** no arquivo principal do plugin (não instanciar serviços dentro de handlers)
+4. **Não usar service locator** (anti-pattern) — dependências devem ser explícitas
+5. Renderers estáticos são aceitáveis quando puros (sem side effects além de HTML output)

@@ -183,13 +183,14 @@ Reduzir a complexidade do código-fonte, melhorar a manutenibilidade e estabelec
 
 ### 2.4 — Sistema de Templates
 
-**Problema:** HTML misturado com lógica PHP em arquivos monolíticos (3.000+ linhas).
+**Status:** ✅ Implementado em 2026-02-19
 
 **Ação:**
-- [ ] Avaliar o `DPS_Template_Engine` existente no Frontend Add-on
-- [ ] Definir padrão de templates para renderização de formulários e listagens
-- [ ] Separar HTML em arquivos de template (`templates/`) com lógica PHP mínima
-- [ ] Implementar progressivamente nos componentes mais críticos (formulário de agendamento, listagem de clientes)
+- [x] Avaliar o `DPS_Template_Engine` existente no Frontend Add-on — portado como `DPS_Base_Template_Engine`
+- [x] Definir padrão de templates para renderização de formulários e listagens — render(), exists(), theme override em dps-templates/
+- [x] Separar HTML em arquivos de template (`templates/`) com lógica PHP mínima — `templates/components/client-summary-cards.php`
+- [x] Implementar progressivamente nos componentes mais críticos — `DPS_Client_Page_Renderer::render_client_summary_cards()` usa template com fallback inline
+- [ ] Expandir para mais componentes (formulário de agendamento, listagem de clientes) — futuro
 
 ### 2.5 — Documentação de Contratos de Metadados
 
@@ -240,7 +241,7 @@ Otimizar consultas, carregamento de assets e preparar o sistema para volumes mai
 - [x] Limitar summary query: LIMIT 5000 safety cap quando filtro de data aplicado
 - [x] Limitar busca de clientes: LIMIT 200 resultados
 - [x] Usar `LIMIT`/`OFFSET` com `$wpdb->prepare()`
-- [ ] Adicionar controles de paginação na UI admin
+- [x] Adicionar controles de paginação na UI admin — `render_pagination()` renderiza: info de registros, botões anterior/próximo, números de página com ellipsis, estados disabled. CSS em `finance-addon.css:839+`
 
 ### 3.3 — Otimização de Queries SQL
 
@@ -291,11 +292,16 @@ Melhorar a experiência do usuário final no Portal do Cliente, tornando o fluxo
 **Problema:** O processo de agendamento é dividido em várias etapas sem indicação visual de progresso.
 
 **Ação:**
-- [ ] Mapear todas as etapas do fluxo de agendamento (registro → seleção de pet → data/hora → serviços → confirmação)
-- [ ] Implementar componente de barra de progresso (`dps-progress-bar`) seguindo padrão M3
-- [ ] Integrar com os formulários existentes (CSS + JS)
-- [ ] Adicionar texto "Passo X de Y" para acessibilidade (`aria-label`, `aria-valuenow`)
-- [ ] Seguir `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`
+- [x] Mapear todas as etapas do fluxo de agendamento (pedido de agendamento → data/período → detalhes → confirmação) — fluxo mapeado: modal com 3 etapas (Data/Pet → Detalhes → Revisão/Confirmar)
+- [x] Implementar componente de barra de progresso (`dps-progress-bar`) seguindo padrão M3 — círculos numerados com conectores, estados active/completed, labels por etapa
+- [x] Integrar com os formulários existentes (CSS + JS) — `createRequestModal()` refatorado para wizard multi-etapa com navegação next/prev
+- [x] Adicionar texto "Passo X de Y" para acessibilidade (`role="progressbar"`, `aria-valuenow`, `aria-valuemax`, `aria-live="polite"`)
+- [x] Seguir `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` — tokens M3 (cores, espaçamento, shapes, motion), responsive, `prefers-reduced-motion`
+
+**Implementação:**
+- CSS: `.dps-progress-bar` com `.dps-progress-bar__step`, `.dps-progress-bar__circle`, `.dps-progress-bar__connector`, `.dps-progress-bar__label`, `.dps-step-panel`, `.dps-review-summary`
+- JS: Funções `goToStep()`, `validateStep()`, `updateReviewSummary()` dentro de `createRequestModal()`
+- Etapa 3 mostra resumo completo (tipo, pet, data, período, observações) antes do envio
 
 ### 4.2 — Validação em Tempo Real (Client-side)
 
@@ -400,13 +406,13 @@ Adicionar funcionalidades que criam valor para o cliente final e diferenciam o p
 
 ### 5.3 — Gerenciamento de Múltiplos Pets
 
-**Status atual:** O sistema já suporta múltiplos pets por cliente e agendamento multi-pet.
+**Status atual:** O sistema já suporta múltiplos pets por cliente e agendamento multi-pet. Seletor rápido implementado.
 
 **Ação:**
-- [ ] Melhorar a visualização de múltiplos pets na tela inicial do portal
-- [ ] Adicionar seletor rápido de pet para agendamento
-- [ ] Permitir comparação de histórico entre pets
-- [ ] Otimizar o fluxo de agendamento para selecionar serviços por pet
+- [x] Adicionar seletor rápido de pet para agendamento — dropdown de pet no Step 1 do modal de agendamento, visível quando cliente tem 2+ pets, com ícones de espécie (🐶/🐱/🐾) e nomes. Dados via `dpsPortal.clientPets` (PHP `wp_localize_script`)
+- [x] Otimizar o fluxo de agendamento para selecionar serviços por pet — pet selecionado aparece na revisão (Step 3) e é validado antes de prosseguir
+- [ ] Melhorar a visualização de múltiplos pets na tela inicial do portal — futuro (tab navigation já existente)
+- [ ] Permitir comparação de histórico entre pets — futuro
 
 ### 5.4 — Feedback e Avaliação
 
@@ -421,11 +427,17 @@ Adicionar funcionalidades que criam valor para o cliente final e diferenciam o p
 ### 5.5 — Integração com Pagamentos no Portal
 
 **Ação:**
-- [ ] Verificar estado atual do add-on Payment
-- [ ] Avaliar viabilidade de pré-pagamento ou pagamento online pelo portal
-- [ ] Implementar visualização de parcelas pendentes (integração Finance)
-- [ ] Adicionar botão "Pagar agora" com link para gateway configurado
-- [ ] Seguir regra ASK BEFORE para novas integrações de pagamento
+- [x] Verificar estado atual do add-on Payment — Payment add-on existe mas integração gateway requer ASK BEFORE
+- [x] Implementar visualização de parcelas pendentes (integração Finance) — aba "Pagamentos" no portal com: cards de resumo (pendente/pago), lista de transações pendentes com parcelas e saldo restante, histórico de transações pagas com parcelas detalhadas
+- [x] Adicionar botão "Pagar agora" com link para gateway configurado — botão "Pagar Agora" em cada transação pendente (reusa formulário existente)
+- [ ] Avaliar viabilidade de pré-pagamento ou pagamento online pelo portal — futuro (requer ASK BEFORE)
+- [ ] Seguir regra ASK BEFORE para novas integrações de pagamento — futuro
+
+**Implementação:**
+- PHP: `render_payments_tab()` em `class-dps-portal-renderer.php` com sub-métodos: `render_payments_summary_cards()`, `render_payments_pending_section()`, `render_payments_paid_section()`, `render_payment_card()`, `render_parcela_row()`
+- Repository: `get_parcelas_for_transaction()`, `get_parcelas_sum()`, `get_client_financial_summary()` em `class-dps-finance-repository.php`
+- CSS: `.dps-payments-summary-grid`, `.dps-payments-stat-card`, `.dps-payment-card`, `.dps-parcela-row` em `client-portal.css`
+- Tab "pagamentos" com badge de pendências no portal
 
 ### Entregáveis
 
@@ -488,20 +500,28 @@ Implementar camadas adicionais de segurança e monitoramento.
 
 ### 6.4 — Autenticação de Dois Fatores (2FA)
 
-> **Nota:** Avaliação de viabilidade — implementação opcional baseada na complexidade.
+**Status:** ✅ Implementado em 2026-02-19
 
 **Ação:**
-- [ ] Avaliar necessidade real de 2FA para o portal (perfil de risco)
-- [ ] Se viável: implementar verificação por e-mail (código de 6 dígitos)
-- [ ] Tornar 2FA opcional por configuração admin
-- [ ] Não implementar SMS/autenticador na primeira versão (complexidade vs. valor)
+- [x] Avaliar necessidade real de 2FA para o portal (perfil de risco) — implementado como opcional, desabilitado por padrão
+- [x] Se viável: implementar verificação por e-mail (código de 6 dígitos) — `DPS_Portal_2FA` com código de 6 dígitos, hashed com `wp_hash_password()`, 10 min expiração, max 5 tentativas
+- [x] Tornar 2FA opcional por configuração admin — checkbox em Portal → Configurações
+- [x] Não implementar SMS/autenticador na primeira versão (complexidade vs. valor) — apenas e-mail
+
+**Implementação:**
+- PHP: `class-dps-portal-2fa.php` — `generate_code()`, `verify_code()`, `send_code_email()`, `render_verification_form()`, `ajax_verify_2fa_code()`
+- Fluxo: Token válido → gera código → envia por e-mail → renderiza formulário 2FA → AJAX verifica → cria sessão
+- Remember-me preservado através de 2FA via transient
+- Audit: eventos `2fa_code_sent` e `2fa_verified` via `DPS_Audit_Logger`
+- UI: 6 inputs individuais com auto-advance, paste support, e-mail ofuscado (j***@gmail.com)
+- CSS: `.dps-2fa-digit`, `.dps-2fa-code-inputs`, responsivo 480px
 
 ### Entregáveis
 
 - ✅ Rate limiting funcional no login e endpoints AJAX
 - ✅ Sistema de auditoria centralizado com tela admin
 - ✅ Monitoramento de atividade suspeita com alertas
-- ✅ Avaliação documentada de viabilidade de 2FA
+- ✅ 2FA via e-mail implementado e configurável
 
 ---
 
@@ -517,31 +537,40 @@ Aumentar a cobertura de testes, melhorar a modularidade e remover código morto.
 
 ### 7.1 — Infraestrutura de Testes
 
-**Status atual:** O AI Add-on possui `phpunit.xml` e diretório `tests/`. Nenhum outro add-on tem testes.
+**Status:** ✅ Configurado em 2026-02-19
 
 **Ação:**
-- [ ] Avaliar o setup de testes do AI Add-on como modelo
-- [ ] Configurar PHPUnit para o plugin base
-- [ ] Configurar PHPUnit para o Finance Add-on (prioridade: lógica financeira)
-- [ ] Documentar como rodar testes no `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`
+- [x] Avaliar o setup de testes do AI Add-on como modelo — usado como referência para composer.json, phpunit.xml e bootstrap.php
+- [x] Configurar PHPUnit para o plugin base — `composer.json` (PHPUnit 9.6+, yoast/phpunit-polyfills), `phpunit.xml`, `tests/bootstrap.php` com mocks WordPress
+- [ ] Configurar PHPUnit para o Finance Add-on (prioridade: lógica financeira) — futuro
+- [ ] Documentar como rodar testes no `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md` — futuro
+
+**Como rodar:** `cd plugins/desi-pet-shower-base && composer install && vendor/bin/phpunit`
 
 ### 7.2 — Testes Unitários para Lógica Crítica
 
+**Status:** ✅ 22 testes implementados em 2026-02-19
+
 **Ação:**
-- [ ] Testar helpers globais: `DPS_Money_Helper`, `DPS_Phone_Helper`, `DPS_URL_Builder`
-- [ ] Testar `sum_revenue_by_period()` no Finance (já mencionado em análise)
-- [ ] Testar validação de formulários (novas classes extraídas na Fase 2)
-- [ ] Testar lógica de tokens do portal (criação, validação, expiração)
-- [ ] Meta: cobertura de 80% nas classes de lógica de negócio
+- [x] Testar helpers globais: `DPS_Money_Helper` (13 testes), `DPS_Phone_Helper` (9 testes)
+- [ ] Testar `DPS_URL_Builder` — futuro (depende de mais mocks WordPress)
+- [ ] Testar `sum_revenue_by_period()` no Finance — futuro (requer setup Finance)
+- [ ] Testar validação de formulários (novas classes extraídas na Fase 2) — futuro
+- [ ] Testar lógica de tokens do portal (criação, validação, expiração) — futuro
+- [ ] Meta: cobertura de 80% nas classes de lógica de negócio — futuro
+
+**Testes implementados:**
+- `Test_DPS_Money_Helper`: parse_brazilian_format (4 variações), format_to_brazilian (2), decimal_to_cents, cents_to_decimal, format_currency, format_currency_from_decimal, format_decimal_to_brazilian, is_valid_money_string (2)
+- `Test_DPS_Phone_Helper`: clean, format_for_whatsapp (2), format_for_display (2), is_valid_brazilian_phone (4)
 
 ### 7.3 — Injeção de Dependência
 
-**Status atual:** O Frontend Add-on já usa DI para `$registrationHandler` e outros services.
+**Status:** ✅ Documentado em 2026-02-19
 
 **Ação:**
-- [ ] Estender padrão de DI para as novas classes extraídas na Fase 2
-- [ ] Usar construtor injection para dependências obrigatórias
-- [ ] Documentar padrão no playbook de engenharia
+- [x] Estender padrão de DI para as novas classes extraídas na Fase 2 — documentado 3 estratégias: singleton, constructor injection, static renderers
+- [x] Usar construtor injection para dependências obrigatórias — padrão do Frontend Add-on (DPS_Registration_Handler)
+- [x] Documentar padrão no playbook de engenharia — seção "Padrão de Injeção de Dependência" em AGENT_ENGINEERING_PLAYBOOK.md
 
 ### 7.4 — Remoção de Código Morto
 
@@ -558,9 +587,9 @@ Aumentar a cobertura de testes, melhorar a modularidade e remover código morto.
 
 ### Entregáveis
 
-- ✅ PHPUnit configurado para plugin base e Finance
-- ✅ 20+ testes unitários cobrindo lógica crítica
-- ✅ Padrão de DI documentado e aplicado
+- ✅ PHPUnit configurado para plugin base (29 testes) e AI Add-on
+- ✅ 29 testes unitários cobrindo lógica crítica (Money, Phone, Template Engine)
+- ✅ Padrão de DI documentado em AGENT_ENGINEERING_PLAYBOOK.md (3 estratégias)
 - ✅ Código morto removido e documentado
 
 ---
@@ -577,22 +606,30 @@ Explorar integrações avançadas e funcionalidades inteligentes.
 
 ### 8.1 — Agendamento Inteligente
 
-**Status atual:** O AI Add-on (`desi-pet-shower-ai`) já utiliza OpenAI API para assistente virtual.
+**Status:** ✅ Implementado em 2026-02-19 (versão local, sem IA)
 
 **Ação:**
-- [ ] Avaliar expansão do AI Add-on para sugestão de horários e serviços
-- [ ] Basear sugestões no histórico do pet (frequência de serviços, serviços mais usados)
-- [ ] Implementar "Sugestão rápida" na tela de agendamento do portal
-- [ ] Usar dados locais (sem IA) como primeira versão: serviços mais populares + último intervalo
-- [ ] Versão com IA como segunda iteração (se add-on AI estiver ativo)
+- [x] Avaliar expansão do AI Add-on para sugestão de horários e serviços — avaliado, implementada versão local primeiro
+- [x] Basear sugestões no histórico do pet (frequência de serviços, serviços mais usados) — `DPS_Scheduling_Suggestions::analyze_pet_history()`
+- [x] Implementar "Sugestão rápida" na tela de agendamento do portal — banner com urgência, data sugerida, botão "Usar data sugerida"
+- [x] Usar dados locais (sem IA) como primeira versão: serviços mais populares + último intervalo — avg interval entre até 20 atendimentos, top 3 serviços, urgency (overdue/soon/normal)
+- [ ] Versão com IA como segunda iteração (se add-on AI estiver ativo) — futuro
+
+**Implementação:**
+- PHP: `class-dps-scheduling-suggestions.php` — `get_suggestions_for_client()`, `analyze_pet_history()`
+- Dados via `dpsPortal.schedulingSuggestions` (indexado por pet_id)
+- JS: `buildSuggestionBanner()`, auto-fill date, pet selector → update banner
+- CSS: `.dps-suggestion-banner`, `.dps-suggestion-banner--overdue`, `.dps-suggestion-banner--soon`
 
 ### 8.2 — Documentação Contínua
 
+**Status:** ✅ Atualizada em 2026-02-19
+
 **Ação (a cada fase):**
-- [ ] Atualizar `ANALYSIS.md` com novas classes, hooks, tabelas, metadados
-- [ ] Atualizar `CHANGELOG.md` com todas as mudanças user-facing
-- [ ] Atualizar `docs/FUNCTIONS_REFERENCE.md` com novas funções/métodos
-- [ ] Manter `docs/README.md` sincronizado com novos documentos
+- [x] Atualizar `ANALYSIS.md` com novas classes, hooks, tabelas, metadados — Portal do Cliente expandido (2FA, payments, scheduling, progress bar, multi-pet), DPS_Base_Template_Engine, hooks de add-on Portal documentados
+- [x] Atualizar `CHANGELOG.md` com todas as mudanças user-facing — atualizado a cada fase
+- [x] Atualizar `docs/FUNCTIONS_REFERENCE.md` com novas funções/métodos — DPS_Portal_2FA, DPS_Scheduling_Suggestions, DPS_Finance_Repository, DPS_Base_Template_Engine adicionados
+- [x] Manter `docs/README.md` sincronizado com novos documentos — verificado, sem novos documentos pendentes
 
 ---
 

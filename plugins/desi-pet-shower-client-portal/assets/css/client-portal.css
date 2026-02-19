@@ -376,6 +376,52 @@
     cursor: pointer;
 }
 
+/* F6.4: FASE 6 - 2FA Code Input */
+.dps-2fa-form {
+    text-align: center;
+}
+
+.dps-2fa-code-inputs {
+    display: flex;
+    justify-content: center;
+    gap: var(--dps-space-2, 8px);
+    margin: var(--dps-space-5, 20px) 0;
+}
+
+.dps-2fa-digit {
+    width: 44px;
+    height: 52px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+    border: 2px solid var(--dps-border-color, #e5e7eb);
+    border-radius: var(--dps-shape-small, 8px);
+    background: var(--dps-white, #fff);
+    color: var(--dps-gray-800, #1f2937);
+    transition: border-color var(--dps-motion-hover, 200ms), box-shadow var(--dps-motion-hover, 200ms);
+    outline: none;
+}
+
+.dps-2fa-digit:focus {
+    border-color: var(--dps-primary, #0b6bcb);
+    box-shadow: 0 0 0 3px rgba(11, 107, 203, 0.15);
+}
+
+.dps-2fa-digit:not(:placeholder-shown) {
+    border-color: var(--dps-primary, #0b6bcb);
+}
+
+@media (max-width: 480px) {
+    .dps-2fa-code-inputs {
+        gap: var(--dps-space-1, 4px);
+    }
+    .dps-2fa-digit {
+        width: 38px;
+        height: 46px;
+        font-size: 20px;
+    }
+}
+
 /* Seção de WhatsApp */
 .dps-portal-access__whatsapp-section {
     padding-top: var(--dps-space-4);
@@ -2409,6 +2455,234 @@ html {
     
     .dps-financial-summary__action .button {
         width: 100%;
+    }
+}
+
+/* ========================================
+   Aba Pagamentos — Fase 5.5
+   ======================================== */
+
+.dps-payments-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--dps-space-4, 16px);
+    margin-bottom: var(--dps-space-6, 24px);
+}
+
+.dps-payments-stat-card {
+    display: flex;
+    align-items: center;
+    gap: var(--dps-space-3, 12px);
+    padding: var(--dps-space-4, 16px);
+    background: var(--dps-white, #fff);
+    border: 1px solid var(--dps-border-color, #e5e7eb);
+    border-radius: var(--dps-shape-card, 12px);
+    transition: box-shadow var(--dps-motion-hover, 200ms);
+}
+
+.dps-payments-stat-card:hover {
+    box-shadow: var(--dps-elevation-1, 0 1px 2px rgba(0,0,0,0.05));
+}
+
+.dps-payments-stat-card--warning {
+    border-left: 3px solid var(--dps-warning, #8b6914);
+}
+
+.dps-payments-stat-card--success {
+    border-left: 3px solid var(--dps-success, #1a7a3a);
+}
+
+.dps-payments-stat-card__icon {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.dps-payments-stat-card__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.dps-payments-stat-card__label {
+    font-size: var(--dps-typescale-label-large-size, 14px);
+    font-weight: 500;
+    color: var(--dps-gray-500, #6b7280);
+    margin-bottom: 2px;
+}
+
+.dps-payments-stat-card__value {
+    font-size: var(--dps-typescale-title-medium-size, 16px);
+    font-weight: 500;
+    color: var(--dps-gray-800, #1f2937);
+}
+
+.dps-payments-stat-card__badge {
+    font-size: var(--dps-typescale-label-small-size, 11px);
+    color: var(--dps-warning, #8b6914);
+    margin-top: 2px;
+}
+
+.dps-payments-section {
+    margin-bottom: var(--dps-space-6, 24px);
+}
+
+.dps-payments-section__title {
+    font-size: var(--dps-typescale-title-medium-size, 16px);
+    font-weight: 500;
+    color: var(--dps-gray-800, #1f2937);
+    margin-bottom: var(--dps-space-4, 16px);
+}
+
+/* Payment card */
+.dps-payment-card {
+    background: var(--dps-white, #fff);
+    border: 1px solid var(--dps-border-color, #e5e7eb);
+    border-radius: var(--dps-shape-card, 12px);
+    padding: var(--dps-space-4, 16px);
+    margin-bottom: var(--dps-space-3, 12px);
+    transition: box-shadow var(--dps-motion-hover, 200ms);
+}
+
+.dps-payment-card:hover {
+    box-shadow: var(--dps-elevation-1, 0 1px 2px rgba(0,0,0,0.05));
+}
+
+.dps-payment-card--pending {
+    border-left: 3px solid var(--dps-warning, #8b6914);
+}
+
+.dps-payment-card--paid {
+    border-left: 3px solid var(--dps-success, #1a7a3a);
+}
+
+.dps-payment-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--dps-space-3, 12px);
+}
+
+.dps-payment-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.dps-payment-card__date {
+    font-size: var(--dps-typescale-label-small-size, 11px);
+    color: var(--dps-gray-500, #6b7280);
+}
+
+.dps-payment-card__desc {
+    font-size: var(--dps-typescale-body-medium-size, 14px);
+    color: var(--dps-gray-800, #1f2937);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dps-payment-card__amount-area {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
+.dps-payment-card__amount {
+    font-size: var(--dps-typescale-title-medium-size, 16px);
+    font-weight: 500;
+    color: var(--dps-gray-800, #1f2937);
+}
+
+.dps-payment-card__status {
+    font-size: var(--dps-typescale-label-small-size, 11px);
+    color: var(--dps-gray-500, #6b7280);
+}
+
+/* Parcelas section inside card */
+.dps-payment-card__parcelas {
+    margin-top: var(--dps-space-3, 12px);
+    padding-top: var(--dps-space-3, 12px);
+    border-top: 1px solid var(--dps-border-color, #e5e7eb);
+}
+
+.dps-payment-card__parcelas-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--dps-typescale-label-large-size, 14px);
+    font-weight: 500;
+    color: var(--dps-gray-600, #6b7280);
+    margin-bottom: var(--dps-space-2, 8px);
+}
+
+.dps-payment-card__parcelas-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-space-1, 4px);
+}
+
+.dps-parcela-row {
+    display: flex;
+    align-items: center;
+    gap: var(--dps-space-3, 12px);
+    padding: var(--dps-space-2, 8px);
+    background: var(--dps-gray-50, #f8f9ff);
+    border-radius: var(--dps-shape-small, 8px);
+    font-size: var(--dps-typescale-body-small-size, 12px);
+}
+
+.dps-parcela-row__date {
+    color: var(--dps-gray-500, #6b7280);
+    min-width: 70px;
+}
+
+.dps-parcela-row__method {
+    color: var(--dps-gray-600, #6b7280);
+    flex: 1;
+}
+
+.dps-parcela-row__value {
+    font-weight: 500;
+    color: var(--dps-success, #1a7a3a);
+}
+
+.dps-payment-card__remaining {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--dps-space-2, 8px);
+    padding: var(--dps-space-2, 8px);
+    background: var(--dps-warning-bg, #ffdea3);
+    border-radius: var(--dps-shape-small, 8px);
+    font-size: var(--dps-typescale-body-small-size, 12px);
+    color: var(--dps-warning-text, #8b6914);
+}
+
+.dps-payment-card__remaining-value {
+    font-weight: 500;
+}
+
+.dps-payment-card__actions {
+    margin-top: var(--dps-space-3, 12px);
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .dps-payment-card__header {
+        flex-direction: column;
+    }
+
+    .dps-payment-card__amount-area {
+        align-items: flex-start;
+        flex-direction: row;
+        gap: var(--dps-space-2, 8px);
+    }
+
+    .dps-parcela-row {
+        flex-wrap: wrap;
     }
 }
 
@@ -5864,11 +6138,302 @@ html {
     box-shadow: 0 0 0 3px var(--dps-primary-light);
 }
 
+.dps-request-form .is-invalid {
+    border-color: var(--dps-color-error, #ba1a1a);
+    box-shadow: 0 0 0 3px var(--dps-color-error-container, #ffdad6);
+}
+
+.dps-request-form .dps-field-error {
+    display: block;
+    font-size: var(--dps-typescale-body-small-size, 12px);
+    color: var(--dps-color-error, #ba1a1a);
+    margin-top: 4px;
+    min-height: 16px;
+}
+
 .dps-form-actions {
     display: flex;
     gap: 12px;
     justify-content: flex-end;
     margin-top: 24px;
+}
+
+/* ========================================
+   Progress Bar / Stepper (Phase 4.1)
+   Componente reutilizável para fluxos multi-etapa
+   ======================================== */
+
+.dps-progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 24px;
+    padding: 0 8px;
+}
+
+.dps-progress-bar__step {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.dps-progress-bar__circle {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--dps-shape-full, 9999px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--dps-typescale-label-large-size, 14px);
+    font-weight: 500;
+    transition: all var(--dps-motion-duration-short-4, 200ms) var(--dps-motion-easing-standard, ease);
+    background: var(--dps-gray-200, #ecedf4);
+    color: var(--dps-gray-500, #6b7280);
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.dps-progress-bar__step--active .dps-progress-bar__circle {
+    background: var(--dps-primary, #0b6bcb);
+    color: var(--dps-white, #fff);
+    box-shadow: 0 0 0 4px var(--dps-primary-light, #d4e4ff);
+}
+
+.dps-progress-bar__step--completed .dps-progress-bar__circle {
+    background: var(--dps-success, #1a7a3a);
+    color: var(--dps-white, #fff);
+}
+
+.dps-progress-bar__label {
+    font-size: var(--dps-typescale-label-small-size, 11px);
+    color: var(--dps-gray-500, #6b7280);
+    margin-top: 4px;
+    text-align: center;
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dps-progress-bar__step--active .dps-progress-bar__label {
+    color: var(--dps-primary, #0b6bcb);
+    font-weight: 500;
+}
+
+.dps-progress-bar__step--completed .dps-progress-bar__label {
+    color: var(--dps-success, #1a7a3a);
+}
+
+.dps-progress-bar__connector {
+    flex: 1;
+    height: 2px;
+    min-width: 24px;
+    max-width: 60px;
+    background: var(--dps-gray-200, #ecedf4);
+    margin: 0 4px;
+    transition: background var(--dps-motion-duration-short-4, 200ms) var(--dps-motion-easing-standard, ease);
+}
+
+.dps-progress-bar__connector--completed {
+    background: var(--dps-success, #1a7a3a);
+}
+
+.dps-progress-bar__step-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Step content panels */
+.dps-step-panel {
+    display: none;
+    animation: dpsStepFadeIn var(--dps-motion-duration-medium-2, 300ms) var(--dps-motion-easing-emphasized-decelerate, ease);
+}
+
+.dps-step-panel--active {
+    display: block;
+}
+
+@keyframes dpsStepFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Step navigation actions */
+.dps-step-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    margin-top: 24px;
+}
+
+.dps-step-actions__left {
+    display: flex;
+    gap: 8px;
+}
+
+.dps-step-actions__right {
+    display: flex;
+    gap: 8px;
+}
+
+/* Step status text (Passo X de Y) */
+.dps-progress-bar__status {
+    text-align: center;
+    font-size: var(--dps-typescale-body-small-size, 12px);
+    color: var(--dps-gray-500, #6b7280);
+    margin-bottom: 16px;
+}
+
+/* Review summary in step 3 */
+.dps-review-summary {
+    background: var(--dps-gray-100, #f2f3fa);
+    border-radius: var(--dps-shape-medium, 12px);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.dps-review-summary__item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--dps-border-color, #e5e7eb);
+    font-size: var(--dps-typescale-body-medium-size, 14px);
+}
+
+.dps-review-summary__item:last-child {
+    border-bottom: none;
+}
+
+.dps-review-summary__label {
+    color: var(--dps-gray-500, #6b7280);
+    font-weight: 500;
+}
+
+.dps-review-summary__value {
+    color: var(--dps-gray-800, #1f2937);
+}
+
+/* Responsive stepper */
+@media (max-width: 480px) {
+    .dps-progress-bar {
+        padding: 0 4px;
+    }
+
+    .dps-progress-bar__circle {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .dps-progress-bar__label {
+        font-size: 10px;
+        max-width: 60px;
+    }
+
+    .dps-progress-bar__connector {
+        min-width: 16px;
+    }
+
+    .dps-step-actions {
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+
+    .dps-step-actions__left,
+    .dps-step-actions__right {
+        width: 100%;
+    }
+
+    .dps-step-actions__left .button,
+    .dps-step-actions__right .button {
+        flex: 1;
+    }
+}
+
+/* Phase 8.1: Smart scheduling suggestion banner */
+.dps-suggestion-banner {
+    margin-bottom: 16px;
+}
+
+.dps-suggestion-banner__content {
+    background: var(--dps-gray-100, #f2f3fa);
+    border: 1px solid var(--dps-primary-light, #c4d7f2);
+    border-radius: var(--dps-shape-medium, 12px);
+    padding: 12px 16px;
+    border-left: 4px solid var(--dps-primary, #0b6bcb);
+}
+
+.dps-suggestion-banner__content.dps-suggestion-banner--overdue {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    border-left-color: #d97706;
+}
+
+.dps-suggestion-banner__content.dps-suggestion-banner--soon {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    border-left-color: #3b82f6;
+}
+
+.dps-suggestion-banner__header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--dps-typescale-body-medium-size, 14px);
+    color: var(--dps-gray-800, #1f2937);
+    margin-bottom: 8px;
+}
+
+.dps-suggestion-banner__icon {
+    font-size: 16px;
+}
+
+.dps-suggestion-banner__details {
+    font-size: var(--dps-typescale-body-small-size, 12px);
+    color: var(--dps-gray-600, #4b5563);
+    line-height: 1.6;
+}
+
+.dps-suggestion-banner__detail {
+    padding: 2px 0;
+}
+
+.dps-suggestion-banner__apply {
+    margin-top: 8px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid var(--dps-primary, #0b6bcb);
+    background: var(--dps-white, #fff);
+    color: var(--dps-primary, #0b6bcb);
+    border-radius: var(--dps-shape-small, 8px);
+    cursor: pointer;
+    transition: background 200ms, color 200ms;
+}
+
+.dps-suggestion-banner__apply:hover {
+    background: var(--dps-primary, #0b6bcb);
+    color: var(--dps-white, #fff);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .dps-step-panel {
+        animation: none;
+    }
+
+    .dps-progress-bar__circle,
+    .dps-progress-bar__connector {
+        transition: none;
+    }
 }
 
 /* Responsivo para Timeline e Modais */

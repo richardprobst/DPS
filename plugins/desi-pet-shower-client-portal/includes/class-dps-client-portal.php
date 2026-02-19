@@ -46,6 +46,22 @@ final class DPS_Client_Portal {
     private $current_request_client_id = 0;
 
     /**
+     * Chave da sessão pendente de 2FA (quando 2FA está ativo).
+     *
+     * @since 3.2.0
+     * @var string
+     */
+    private $pending_2fa_session_key = '';
+
+    /**
+     * ID do cliente com 2FA pendente.
+     *
+     * @since 3.2.0
+     * @var int
+     */
+    private $pending_2fa_client_id = 0;
+
+    /**
      * Recupera a instância única (singleton).
      *
      * @return DPS_Client_Portal
@@ -119,6 +135,40 @@ final class DPS_Client_Portal {
             }
             $this->redirect_to_access_screen( 'invalid' );
             return;
+        }
+
+        // F6.4: FASE 6 - 2FA via e-mail
+        // Se 2FA habilitado, interrompe fluxo normal e exige verificação por código
+        $twofa = DPS_Portal_2FA::get_instance();
+        if ( $twofa->is_enabled() ) {
+            // Marca token como usado para evitar reutilização
+            if ( ! isset( $token_data['type'] ) || 'permanent' !== $token_data['type'] ) {
+                $token_manager->mark_as_used( $token_data['id'] );
+            }
+
+            // Gera código e envia por e-mail
+            $code = $twofa->generate_code( $token_data['client_id'] );
+            $twofa->send_code_email( $token_data['client_id'], $code );
+
+            // Cria sessão pendente (2FA não concluído)
+            $session_key = wp_generate_password( 32, false );
+            $twofa->set_pending_2fa( $token_data['client_id'], $session_key );
+
+            // Armazena remember flag para aplicar após 2FA
+            if ( isset( $_GET['dps_remember'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['dps_remember'] ) ) ) {
+                set_transient( 'dps_2fa_remember_' . $session_key, '1', 600 );
+            }
+
+            // Sinaliza 2FA pendente para o shortcode renderizar o formulário
+            $this->pending_2fa_session_key = $session_key;
+            $this->pending_2fa_client_id   = $token_data['client_id'];
+
+            // Log
+            if ( class_exists( 'DPS_Audit_Logger' ) ) {
+                DPS_Audit_Logger::log_portal_event( '2fa_code_sent', $token_data['client_id'], [ 'ip' => $ip_address ] );
+            }
+
+            return; // Interrompe — shortcode exibirá formulário 2FA
         }
 
         // Token válido - autentica o cliente
@@ -591,6 +641,13 @@ final class DPS_Client_Portal {
         // Verifica autenticação pelo novo sistema
         $client_id = $this->get_authenticated_client_id();
         
+        // F6.4: Se há 2FA pendente, renderiza formulário de verificação
+        if ( ! $client_id && ! empty( $this->pending_2fa_session_key ) ) {
+            $email = get_post_meta( $this->pending_2fa_client_id, 'client_email', true );
+            $twofa = DPS_Portal_2FA::get_instance();
+            return $twofa->render_verification_form( $this->pending_2fa_session_key, $email );
+        }
+        
         // Hook: Após verificar autenticação (Fase 2.3)
         do_action( 'dps_portal_after_auth_check', $client_id );
         
@@ -624,6 +681,31 @@ final class DPS_Client_Portal {
         do_action( 'dps_portal_client_authenticated', $client_id );
         
         // Localiza script com dados do chat e appointment requests (Fase 4)
+        // Phase 5.3: Incluir lista de pets do cliente para seletor rápido no modal
+        $client_pets_data = [];
+        $pet_repo = DPS_Pet_Repository::get_instance();
+        $client_pets = $pet_repo->get_pets_by_client( $client_id );
+        foreach ( $client_pets as $pet ) {
+            $species = get_post_meta( $pet->ID, 'pet_species', true );
+            $species_icons = [
+                'Cachorro' => '🐶',
+                'Gato'     => '🐱',
+            ];
+            $client_pets_data[] = [
+                'id'      => $pet->ID,
+                'name'    => $pet->post_title,
+                'species' => $species,
+                'icon'    => isset( $species_icons[ $species ] ) ? $species_icons[ $species ] : '🐾',
+            ];
+        }
+
+        // Phase 8.1: Gera sugestões inteligentes de agendamento baseadas no histórico
+        $scheduling_suggestions = [];
+        if ( ! empty( $client_pets ) ) {
+            $suggestions_service = DPS_Scheduling_Suggestions::get_instance();
+            $scheduling_suggestions = $suggestions_service->get_suggestions_for_client( $client_id, $client_pets );
+        }
+
         wp_localize_script( 'dps-client-portal', 'dpsPortal', [
             'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
             'chatNonce' => wp_create_nonce( 'dps_portal_chat' ),
@@ -631,6 +713,8 @@ final class DPS_Client_Portal {
             'exportPdfNonce' => wp_create_nonce( 'dps_portal_export_pdf' ),
             'petHistoryNonce' => wp_create_nonce( 'dps_portal_pet_history' ),
             'clientId' => $client_id,
+            'clientPets' => $client_pets_data,
+            'schedulingSuggestions' => $scheduling_suggestions,
             'loyalty' => [
                 'nonce' => wp_create_nonce( 'dps_portal_loyalty' ),
                 'historyLimit' => 5,
@@ -796,6 +880,12 @@ final class DPS_Client_Portal {
                 'active' => false,
                 'badge' => DPS_Portal_Data_Provider::get_instance()->count_upcoming_appointments( $client_id ),
             ],
+            'pagamentos' => [
+                'icon'  => '💳',
+                'label' => __( 'Pagamentos', 'dps-client-portal' ),
+                'active' => false,
+                'badge' => DPS_Finance_Repository::get_instance()->count_pending_transactions( $client_id ),
+            ],
             'historico-pets' => [
                 'icon'  => '🐾',
                 'label' => __( 'Histórico dos Pets', 'dps-client-portal' ),
@@ -932,6 +1022,13 @@ final class DPS_Client_Portal {
         do_action( 'dps_portal_before_agendamentos_content', $client_id ); // Fase 2.3
         DPS_Portal_Renderer::get_instance()->render_appointment_history( $client_id );
         do_action( 'dps_portal_after_agendamentos_content', $client_id ); // Fase 2.3
+        echo '</div>';
+        
+        // Panel: Pagamentos (Fase 5.5)
+        echo '<div id="panel-pagamentos" class="dps-portal-tab-panel" role="tabpanel" aria-labelledby="dps-portal-tab-pagamentos" aria-hidden="true" tabindex="-1">';
+        do_action( 'dps_portal_before_pagamentos_content', $client_id );
+        DPS_Portal_Renderer::get_instance()->render_payments_tab( $client_id );
+        do_action( 'dps_portal_after_pagamentos_content', $client_id );
         echo '</div>';
         
         // Panel: Histórico dos Pets (Fase 4)
@@ -2054,6 +2151,10 @@ final class DPS_Client_Portal {
         // Salva configuração de notificação de acesso (Fase 1.3)
         $access_notification = isset( $_POST['dps_portal_access_notification_enabled'] ) ? 1 : 0;
         update_option( 'dps_portal_access_notification_enabled', $access_notification );
+        
+        // Salva configuração de 2FA (Fase 6.4)
+        $twofa_enabled = isset( $_POST['dps_portal_2fa_enabled'] ) ? 1 : 0;
+        update_option( 'dps_portal_2fa_enabled', $twofa_enabled );
         
         // Redireciona com mensagem de sucesso
         $redirect_url = add_query_arg( [

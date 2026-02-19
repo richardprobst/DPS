@@ -427,7 +427,6 @@ class DPS_Client_Page_Renderer {
         }
 
         // Calcula tempo de cadastro (cliente desde)
-        // Usa formato explícito 'm/Y' para consistência entre locales
         $client_since = '';
         if ( $client && isset( $client->post_date ) ) {
             $post_datetime = get_post_datetime( $client, 'date', 'gmt' );
@@ -436,9 +435,22 @@ class DPS_Client_Page_Renderer {
             }
         }
 
+        // Fase 2.4: Usa template engine se disponível, com fallback inline
+        $engine = DPS_Base_Template_Engine::get_instance();
+        if ( $engine->exists( 'components/client-summary-cards.php' ) ) {
+            echo $engine->render( 'components/client-summary-cards.php', [
+                'client_since'       => $client_since,
+                'total_appointments' => $total_appointments,
+                'total_spent'        => $total_spent,
+                'last_appointment'   => $last_appointment,
+                'pending_amount'     => $pending_amount,
+            ] );
+            return;
+        }
+
+        // Fallback: renderização inline (mantido para retrocompatibilidade)
         echo '<div class="dps-client-summary">';
 
-        // Cliente desde (data de cadastro)
         if ( $client_since ) {
             echo '<div class="dps-summary-card">';
             echo '<span class="dps-summary-card__icon" aria-hidden="true">🗓️</span>';
@@ -447,28 +459,24 @@ class DPS_Client_Page_Renderer {
             echo '</div>';
         }
 
-        // Total de atendimentos
         echo '<div class="dps-summary-card dps-summary-card--highlight">';
         echo '<span class="dps-summary-card__icon" aria-hidden="true">📋</span>';
         echo '<span class="dps-summary-card__value">' . esc_html( $total_appointments ) . '</span>';
         echo '<span class="dps-summary-card__label">' . esc_html__( 'Total de Atendimentos', 'desi-pet-shower' ) . '</span>';
         echo '</div>';
 
-        // Total gasto
         echo '<div class="dps-summary-card dps-summary-card--success">';
         echo '<span class="dps-summary-card__icon" aria-hidden="true">💰</span>';
         echo '<span class="dps-summary-card__value">R$ ' . esc_html( number_format_i18n( $total_spent, 2 ) ) . '</span>';
         echo '<span class="dps-summary-card__label">' . esc_html__( 'Total Gasto', 'desi-pet-shower' ) . '</span>';
         echo '</div>';
 
-        // Último atendimento
         echo '<div class="dps-summary-card">';
         echo '<span class="dps-summary-card__icon" aria-hidden="true">📅</span>';
         echo '<span class="dps-summary-card__value">' . esc_html( $last_appointment ?: '-' ) . '</span>';
         echo '<span class="dps-summary-card__label">' . esc_html__( 'Último Atendimento', 'desi-pet-shower' ) . '</span>';
         echo '</div>';
 
-        // Pendências
         $pending_class = $pending_amount > 0 ? 'dps-summary-card--warning' : '';
         echo '<div class="dps-summary-card ' . esc_attr( $pending_class ) . '">';
         echo '<span class="dps-summary-card__icon" aria-hidden="true">' . ( $pending_amount > 0 ? '⚠️' : '✅' ) . '</span>';

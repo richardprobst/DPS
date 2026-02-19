@@ -81,6 +81,70 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Added (Adicionado)
+
+**Client Portal — Fase 4.1: Indicador de Progresso no Agendamento**
+
+- **Progress bar (stepper)**: modal de pedido de agendamento transformado em wizard de 3 etapas — Data/Pet → Detalhes → Revisão/Confirmar. Componente reutilizável `dps-progress-bar` com círculos numerados, conectores e labels.
+- **Revisão pré-envio**: Step 3 exibe resumo completo (tipo, pet, data, período, observações) antes do envio da solicitação.
+- **Validação por etapa**: campos obrigatórios validados antes de prosseguir para a próxima etapa, com mensagens inline de erro (`role="alert"`).
+- **Acessibilidade**: `role="progressbar"`, `aria-valuenow`, `aria-valuemax`, `aria-live="polite"` para anúncio de "Passo X de Y", `aria-required` em campos obrigatórios.
+- **Responsivo**: stepper adapta-se a mobile (480px), botões empilhados verticalmente. `prefers-reduced-motion` remove animações.
+
+**Client Portal — Fase 5.3: Seletor Rápido de Pet (Multi-pet)**
+
+- **Pet selector**: dropdown de pet no Step 1 do modal de agendamento, visível quando cliente tem 2+ pets, com ícones de espécie (🐶/🐱/🐾). Dados de pets via `dpsPortal.clientPets`.
+- **Revisão com pet**: pet selecionado aparece no resumo de revisão (Step 3). Pet pré-selecionado quando ação vem de botão com `data-pet-id`.
+
+**Client Portal — Fase 5.5: Aba Pagamentos**
+
+- **Nova aba "Pagamentos"**: aba dedicada no portal com badge de pendências, acessível via tab navigation.
+- **Cards de resumo**: grid com cards "Pendente" (⏳) e "Pago" (✅), exibindo totais formatados e contagem de pendências.
+- **Transações com parcelas**: cada transação exibida como card com data, descrição, valor, status. Cards pendentes com borda laranja, pagos com borda verde.
+- **Detalhamento de parcelas**: parcelas registradas exibidas em rows com data, método de pagamento (PIX/Cartão/Dinheiro/Fidelidade) e valor. Saldo restante calculado para pendentes.
+- **Botão "Pagar Agora"**: em cada transação pendente para integração com gateway.
+- **Responsivo**: layout adapta-se a mobile (480px).
+
+**Client Portal — Fase 6.4: Autenticação de Dois Fatores (2FA)**
+
+- **2FA via e-mail**: verificação de segurança opcional com código de 6 dígitos enviado por e-mail após clicar no magic link. Habilitável em Portal → Configurações.
+- **Segurança**: código hashed com `wp_hash_password()`, expiração de 10 minutos, máximo 5 tentativas (anti-brute-force). Anti-enumeration: tentativas incrementadas antes da verificação.
+- **UI de verificação**: 6 inputs individuais com auto-advance entre dígitos, suporte a paste (colar código inteiro), auto-submit quando completo. E-mail ofuscado no formulário (j***@gmail.com).
+- **E-mail responsivo**: template HTML com dígitos em caixas estilizadas, branding do portal.
+- **Remember-me preservado**: flag de "Manter acesso" é mantida através do fluxo 2FA via transient.
+- **Auditoria**: eventos `2fa_code_sent` e `2fa_verified` registrados via `DPS_Audit_Logger`.
+
+**Base Plugin — Fase 7.1+7.2: Infraestrutura de Testes**
+
+- **PHPUnit configurado**: `composer.json`, `phpunit.xml`, `tests/bootstrap.php` com mocks WordPress para o plugin base.
+- **22 testes unitários**: 13 testes para `DPS_Money_Helper` (parse, format, cents, currency, validação) + 9 testes para `DPS_Phone_Helper` (clean, format, validate, WhatsApp).
+- **Comando**: `cd plugins/desi-pet-shower-base && composer install && vendor/bin/phpunit`
+
+**Base Plugin — Fase 2.4: Sistema de Templates**
+
+- **Template Engine**: `DPS_Base_Template_Engine` — renderiza templates PHP com dados injetados via `extract()`, suporta override via tema em `dps-templates/base/`. Singleton com `get_instance()`, métodos `render()` e `exists()`.
+- **Primeiro template**: `templates/components/client-summary-cards.php` — cards de métricas do cliente (cadastro, atendimentos, total gasto, último atendimento, pendências).
+- **7 testes unitários** para o template engine (render, exists, subdirectory, XSS escaping, static content, nonexistent).
+- **Total: 29 testes** passando no plugin base.
+
+**Client Portal — Fase 8.1: Sugestões Inteligentes de Agendamento**
+
+- **Sugestão baseada em histórico**: `DPS_Scheduling_Suggestions` analisa até 20 atendimentos por pet para calcular intervalo médio, serviços mais frequentes (top 3), dias desde último atendimento e urgência.
+- **Banner no modal**: exibido no Step 1 do wizard de agendamento com 3 níveis de urgência: ⏰ Atenção (overdue/amber), 📅 Em breve (soon/blue), 💡 Sugestão (normal/cinza).
+- **Auto-fill**: data sugerida preenchida automaticamente no campo de data. Botão "Usar data sugerida" para aplicar.
+- **Multi-pet**: banner atualiza dinamicamente ao trocar pet no seletor, mostrando sugestão específica de cada pet.
+- **Dados via JS**: `dpsPortal.schedulingSuggestions` indexado por pet_id com suggested_date, avg_interval, days_since_last, top_services, urgency.
+
+**Documentação — Fase 7.3: Padrão de DI**
+
+- **Seção adicionada** ao `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`: documenta 3 estratégias de instanciação (Singleton, Constructor Injection, Static Renderers) com exemplos e regras de quando usar cada uma.
+
+**Documentação — Fase 8.2: Atualização Contínua**
+
+- **ANALYSIS.md**: Portal do Cliente expandido com 2FA, payments tab, scheduling suggestions, progress bar, multi-pet selector, classes e hooks. Base Plugin: DPS_Base_Template_Engine. Hooks map: hooks do Portal Add-on adicionados.
+- **FUNCTIONS_REFERENCE.md**: DPS_Portal_2FA (8 métodos), DPS_Scheduling_Suggestions (1 método), DPS_Finance_Repository (6 métodos), DPS_Base_Template_Engine (3 métodos) documentados com assinaturas, parâmetros, retornos e exemplos.
+- **Table of Contents**: atualizada com novos links para DPS_Portal_2FA, DPS_Scheduling_Suggestions, DPS_Finance_Repository, DPS_Base_Template_Engine, DPS_Audit_Logger.
+
 #### Changed (Alterado)
 
 **AI Add-on — Assistente Virtual no Portal do Cliente**

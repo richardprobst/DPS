@@ -73,7 +73,7 @@
         // Botões de ação rápida que navegam para tabs
         var tabButtons = document.querySelectorAll('.dps-quick-action[data-tab], .dps-link-button[data-tab], .dps-pet-card__action-btn[data-tab], .dps-overview-card[data-tab]');
         // Lista de tabs válidas para prevenir DOM-based XSS
-        var validTabs = ['inicio', 'fidelidade', 'avaliacoes', 'mensagens', 'agendamentos', 'historico-pets', 'galeria', 'dados'];
+        var validTabs = ['inicio', 'fidelidade', 'avaliacoes', 'mensagens', 'agendamentos', 'pagamentos', 'historico-pets', 'galeria', 'dados'];
         
         tabButtons.forEach(function(btn) {
             btn.addEventListener('click', function(e) {
@@ -1812,7 +1812,68 @@ window.DPSSkeleton = (function() {
     }
 
     /**
-     * Cria modal de pedido de agendamento
+     * Phase 8.1: Constrói HTML do banner de sugestão inteligente de agendamento.
+     */
+    function buildSuggestionBanner(suggestion) {
+        if (!suggestion) return '';
+        var html = '';
+        var urgencyClass = '';
+        var urgencyIcon = '💡';
+        var urgencyLabel = 'Sugestão';
+
+        if (suggestion.urgency === 'overdue') {
+            urgencyClass = ' dps-suggestion-banner--overdue';
+            urgencyIcon = '⏰';
+            urgencyLabel = 'Atenção';
+        } else if (suggestion.urgency === 'soon') {
+            urgencyClass = ' dps-suggestion-banner--soon';
+            urgencyIcon = '📅';
+            urgencyLabel = 'Em breve';
+        }
+
+        html += '<div class="dps-suggestion-banner__content' + urgencyClass + '">';
+        html += '<div class="dps-suggestion-banner__header">';
+        html += '<span class="dps-suggestion-banner__icon">' + urgencyIcon + '</span>';
+        html += '<strong>' + escapeHtml(urgencyLabel) + '</strong>';
+        if (suggestion.pet_name) {
+            html += ' — ' + escapeHtml(suggestion.pet_name);
+        }
+        html += '</div>';
+
+        var details = [];
+        if (suggestion.days_since_last > 0) {
+            details.push('Último atendimento: <strong>' + suggestion.days_since_last + ' dias atrás</strong>');
+        }
+        if (suggestion.avg_interval > 0) {
+            details.push('Frequência média: a cada <strong>' + suggestion.avg_interval + ' dias</strong>');
+        }
+        if (suggestion.top_services && suggestion.top_services.length > 0) {
+            details.push('Serviços frequentes: <strong>' + suggestion.top_services.map(escapeHtml).join(', ') + '</strong>');
+        }
+        if (suggestion.suggested_date) {
+            var parts = suggestion.suggested_date.split('-');
+            var dateFormatted = parts[2] + '/' + parts[1] + '/' + parts[0];
+            details.push('Data sugerida: <strong>' + escapeHtml(dateFormatted) + '</strong>');
+        }
+
+        if (details.length > 0) {
+            html += '<div class="dps-suggestion-banner__details">';
+            for (var d = 0; d < details.length; d++) {
+                html += '<div class="dps-suggestion-banner__detail">' + details[d] + '</div>';
+            }
+            html += '</div>';
+        }
+
+        if (suggestion.suggested_date) {
+            html += '<button type="button" class="dps-suggestion-banner__apply" data-date="' + escapeHtml(suggestion.suggested_date) + '">Usar data sugerida</button>';
+        }
+
+        html += '</div>';
+        return html;
+    }
+
+    /**
+     * Cria modal de pedido de agendamento com wizard multi-etapa (Phase 4.1)
      */
     function createRequestModal(type, appointmentId, petId, services) {
         var modal = document.createElement('div');
@@ -1824,6 +1885,10 @@ window.DPSSkeleton = (function() {
         };
         
         var title = titles[type] || 'Solicitar Agendamento';
+        var totalSteps = 3;
+        var currentStep = 1;
+
+        var stepLabels = ['Data', 'Detalhes', 'Confirmar'];
         
         var html = '<div class="dps-modal__overlay"></div>';
         html += '<div class="dps-modal__content">';
@@ -1832,38 +1897,258 @@ window.DPSSkeleton = (function() {
         html += '<button class="dps-modal__close" aria-label="Fechar">×</button>';
         html += '</div>';
         html += '<div class="dps-modal__body">';
-        html += '<p class="dps-modal__notice"><strong>⚠️ Importante:</strong> Este é um <strong>pedido de agendamento</strong>. A equipe do Banho e Tosa irá confirmar o horário final com você.</p>';
-        html += '<form class="dps-request-form" id="dps-request-form">';
+
+        // Progress bar
+        html += '<div class="dps-progress-bar" role="progressbar" aria-label="Progresso do agendamento" aria-valuenow="1" aria-valuemin="1" aria-valuemax="' + totalSteps + '">';
+        for (var s = 1; s <= totalSteps; s++) {
+            if (s > 1) {
+                html += '<div class="dps-progress-bar__connector' + (s <= currentStep ? ' dps-progress-bar__connector--completed' : '') + '" data-connector="' + s + '"></div>';
+            }
+            html += '<div class="dps-progress-bar__step' + (s === currentStep ? ' dps-progress-bar__step--active' : '') + '" data-step-indicator="' + s + '">';
+            html += '<div class="dps-progress-bar__step-wrapper">';
+            html += '<div class="dps-progress-bar__circle">' + s + '</div>';
+            html += '<span class="dps-progress-bar__label">' + stepLabels[s - 1] + '</span>';
+            html += '</div>';
+            html += '</div>';
+        }
+        html += '</div>';
+        html += '<div class="dps-progress-bar__status" aria-live="polite">Passo 1 de ' + totalSteps + '</div>';
+
+        html += '<form class="dps-request-form" id="dps-request-form" novalidate>';
         html += '<input type="hidden" name="request_type" value="' + type + '">';
         html += '<input type="hidden" name="original_appointment_id" value="' + (appointmentId || '') + '">';
-        if (petId) {
+
+        // Phase 5.3: Pet selector for multi-pet clients
+        var clientPets = (typeof dpsPortal !== 'undefined' && Array.isArray(dpsPortal.clientPets)) ? dpsPortal.clientPets : [];
+        var showPetSelector = clientPets.length > 1;
+        if (petId && !showPetSelector) {
             html += '<input type="hidden" name="pet_id" value="' + petId + '">';
         }
+
+        // Step 1: Date & Period (+ Pet selector when applicable)
+        html += '<div class="dps-step-panel dps-step-panel--active" data-step="1">';
+        html += '<p class="dps-modal__notice"><strong>⚠️ Importante:</strong> Este é um <strong>pedido de agendamento</strong>. A equipe do Banho e Tosa irá confirmar o horário final com você.</p>';
+
+        // Pet selector for multi-pet clients
+        if (showPetSelector) {
+            html += '<div class="dps-form-field">';
+            html += '<label for="pet_id">Pet <span class="required">*</span></label>';
+            html += '<select id="pet_id" name="pet_id" required aria-required="true">';
+            if (!petId) {
+                html += '<option value="">Selecione o pet...</option>';
+            }
+            for (var p = 0; p < clientPets.length; p++) {
+                var selected = (petId && String(clientPets[p].id) === String(petId)) ? ' selected' : '';
+                html += '<option value="' + escapeHtml(String(clientPets[p].id)) + '"' + selected + '>' + escapeHtml(clientPets[p].icon + ' ' + clientPets[p].name) + '</option>';
+            }
+            html += '</select>';
+            html += '<span class="dps-field-error" role="alert" id="pet_id_error"></span>';
+            html += '</div>';
+        } else if (petId && showPetSelector) {
+            html += '<input type="hidden" name="pet_id" value="' + petId + '">';
+        }
+
+        // Phase 8.1: Smart scheduling suggestions
+        var suggestions = (typeof dpsPortal !== 'undefined' && dpsPortal.schedulingSuggestions) ? dpsPortal.schedulingSuggestions : {};
+        var activePetId = petId || (clientPets.length === 1 ? String(clientPets[0].id) : '');
+        var activeSuggestion = activePetId && suggestions[activePetId] ? suggestions[activePetId] : null;
+
+        html += '<div id="dps-scheduling-suggestion" class="dps-suggestion-banner"' + (!activeSuggestion ? ' style="display:none"' : '') + '>';
+        if (activeSuggestion) {
+            html += buildSuggestionBanner(activeSuggestion);
+        }
+        html += '</div>';
+
         html += '<div class="dps-form-field">';
         html += '<label for="desired_date">Data Desejada <span class="required">*</span></label>';
-        html += '<input type="date" id="desired_date" name="desired_date" required min="' + getTomorrowDate() + '">';
+        html += '<input type="date" id="desired_date" name="desired_date" required min="' + getTomorrowDate() + '"' + (activeSuggestion && activeSuggestion.suggested_date ? ' value="' + escapeHtml(activeSuggestion.suggested_date) + '"' : '') + ' aria-required="true">';
+        html += '<span class="dps-field-error" role="alert" id="desired_date_error"></span>';
         html += '</div>';
         html += '<div class="dps-form-field">';
         html += '<label for="desired_period">Período Desejado <span class="required">*</span></label>';
-        html += '<select id="desired_period" name="desired_period" required>';
+        html += '<select id="desired_period" name="desired_period" required aria-required="true">';
         html += '<option value="">Selecione...</option>';
         html += '<option value="morning">Manhã</option>';
         html += '<option value="afternoon">Tarde</option>';
         html += '</select>';
+        html += '<span class="dps-field-error" role="alert" id="desired_period_error"></span>';
         html += '</div>';
+        html += '<div class="dps-step-actions">';
+        html += '<div class="dps-step-actions__left"><button type="button" class="button dps-modal-cancel">Cancelar</button></div>';
+        html += '<div class="dps-step-actions__right"><button type="button" class="button button-primary dps-step-next" data-next="2">Próximo →</button></div>';
+        html += '</div>';
+        html += '</div>';
+
+        // Step 2: Notes
+        html += '<div class="dps-step-panel" data-step="2">';
         html += '<div class="dps-form-field">';
         html += '<label for="notes">Observações (opcional)</label>';
         html += '<textarea id="notes" name="notes" rows="3" placeholder="Alguma preferência ou observação?"></textarea>';
         html += '</div>';
-        html += '<div class="dps-form-actions">';
-        html += '<button type="button" class="button dps-modal-cancel">Cancelar</button>';
-        html += '<button type="submit" class="button button-primary">Enviar Solicitação</button>';
+        html += '<div class="dps-step-actions">';
+        html += '<div class="dps-step-actions__left"><button type="button" class="button dps-step-prev" data-prev="1">← Voltar</button></div>';
+        html += '<div class="dps-step-actions__right"><button type="button" class="button button-primary dps-step-next" data-next="3">Próximo →</button></div>';
         html += '</div>';
+        html += '</div>';
+
+        // Step 3: Review & confirm
+        html += '<div class="dps-step-panel" data-step="3">';
+        html += '<div class="dps-review-summary" id="dps-review-summary"></div>';
+        html += '<div class="dps-step-actions">';
+        html += '<div class="dps-step-actions__left"><button type="button" class="button dps-step-prev" data-prev="2">← Voltar</button></div>';
+        html += '<div class="dps-step-actions__right"><button type="submit" class="button button-primary">Enviar Solicitação ✓</button></div>';
+        html += '</div>';
+        html += '</div>';
+
         html += '</form>';
         html += '</div>';
         html += '</div>';
         
         modal.innerHTML = html;
+
+        // Render review summary
+        function updateReviewSummary() {
+            var dateInput = modal.querySelector('#desired_date');
+            var periodInput = modal.querySelector('#desired_period');
+            var notesInput = modal.querySelector('#notes');
+            var petSelect = modal.querySelector('#pet_id');
+            var summary = modal.querySelector('#dps-review-summary');
+
+            var dateValue = dateInput.value;
+            var formattedDate = '';
+            if (dateValue) {
+                var parts = dateValue.split('-');
+                formattedDate = parts[2] + '/' + parts[1] + '/' + parts[0];
+            }
+
+            var periodMap = { morning: 'Manhã', afternoon: 'Tarde' };
+            var periodText = periodMap[periodInput.value] || periodInput.value;
+            var notesText = notesInput.value ? notesInput.value : '—';
+            var typeMap = { reschedule: 'Reagendamento', new: 'Novo agendamento', cancel: 'Cancelamento' };
+
+            var summaryHtml = '';
+            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">Tipo</span><span class="dps-review-summary__value">' + (typeMap[type] || type) + '</span></div>';
+
+            // Pet name in review (Phase 5.3)
+            if (petSelect && petSelect.selectedIndex > 0) {
+                summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🐾 Pet</span><span class="dps-review-summary__value">' + escapeHtml(petSelect.options[petSelect.selectedIndex].text) + '</span></div>';
+            } else if (petId && clientPets.length > 0) {
+                var petName = '';
+                for (var pi = 0; pi < clientPets.length; pi++) {
+                    if (String(clientPets[pi].id) === String(petId)) {
+                        petName = clientPets[pi].icon + ' ' + clientPets[pi].name;
+                        break;
+                    }
+                }
+                if (petName) {
+                    summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🐾 Pet</span><span class="dps-review-summary__value">' + escapeHtml(petName) + '</span></div>';
+                }
+            }
+
+            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">📅 Data</span><span class="dps-review-summary__value">' + escapeHtml(formattedDate) + '</span></div>';
+            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🕐 Período</span><span class="dps-review-summary__value">' + escapeHtml(periodText) + '</span></div>';
+            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">📝 Observações</span><span class="dps-review-summary__value">' + escapeHtml(notesText) + '</span></div>';
+            summary.innerHTML = summaryHtml;
+        }
+
+        // Step navigation
+        function goToStep(step) {
+            if (step < 1 || step > totalSteps) return;
+            currentStep = step;
+
+            // Update panels
+            var panels = modal.querySelectorAll('.dps-step-panel');
+            panels.forEach(function(panel) {
+                var panelStep = parseInt(panel.getAttribute('data-step'), 10);
+                if (panelStep === currentStep) {
+                    panel.classList.add('dps-step-panel--active');
+                } else {
+                    panel.classList.remove('dps-step-panel--active');
+                }
+            });
+
+            // Update progress indicators
+            for (var i = 1; i <= totalSteps; i++) {
+                var indicator = modal.querySelector('[data-step-indicator="' + i + '"]');
+                var circle = indicator.querySelector('.dps-progress-bar__circle');
+                indicator.classList.remove('dps-progress-bar__step--active', 'dps-progress-bar__step--completed');
+                if (i === currentStep) {
+                    indicator.classList.add('dps-progress-bar__step--active');
+                    circle.textContent = i;
+                } else if (i < currentStep) {
+                    indicator.classList.add('dps-progress-bar__step--completed');
+                    circle.textContent = '✓';
+                } else {
+                    circle.textContent = i;
+                }
+
+                if (i > 1) {
+                    var connector = modal.querySelector('[data-connector="' + i + '"]');
+                    if (i <= currentStep) {
+                        connector.classList.add('dps-progress-bar__connector--completed');
+                    } else {
+                        connector.classList.remove('dps-progress-bar__connector--completed');
+                    }
+                }
+            }
+
+            // Update aria and status text
+            var progressBar = modal.querySelector('.dps-progress-bar');
+            progressBar.setAttribute('aria-valuenow', currentStep);
+            modal.querySelector('.dps-progress-bar__status').textContent = 'Passo ' + currentStep + ' de ' + totalSteps;
+
+            // Populate review summary on step 3
+            if (currentStep === totalSteps) {
+                updateReviewSummary();
+            }
+        }
+
+        // Validate step before proceeding
+        function validateStep(step) {
+            if (step === 1) {
+                var petSelect = modal.querySelector('#pet_id');
+                var dateInput = modal.querySelector('#desired_date');
+                var periodInput = modal.querySelector('#desired_period');
+                var dateError = modal.querySelector('#desired_date_error');
+                var periodError = modal.querySelector('#desired_period_error');
+                var valid = true;
+
+                dateError.textContent = '';
+                periodError.textContent = '';
+                dateInput.classList.remove('is-invalid');
+                periodInput.classList.remove('is-invalid');
+
+                // Validate pet selection (Phase 5.3)
+                if (petSelect) {
+                    var petError = modal.querySelector('#pet_id_error');
+                    petError.textContent = '';
+                    petSelect.classList.remove('is-invalid');
+                    if (!petSelect.value) {
+                        petError.textContent = 'Selecione o pet para o agendamento.';
+                        petSelect.classList.add('is-invalid');
+                        petSelect.focus();
+                        valid = false;
+                    }
+                }
+
+                if (!dateInput.value) {
+                    dateError.textContent = 'Selecione uma data para o agendamento.';
+                    dateInput.classList.add('is-invalid');
+                    if (valid) dateInput.focus();
+                    valid = false;
+                }
+
+                if (!periodInput.value) {
+                    periodError.textContent = 'Selecione o período desejado.';
+                    periodInput.classList.add('is-invalid');
+                    if (valid) periodInput.focus();
+                    valid = false;
+                }
+
+                return valid;
+            }
+            return true;
+        }
         
         // Event listeners
         modal.querySelector('.dps-modal__close').addEventListener('click', function() {
@@ -1873,10 +2158,77 @@ window.DPSSkeleton = (function() {
         modal.querySelector('.dps-modal__overlay').addEventListener('click', function() {
             closeModal(modal);
         });
-        
-        modal.querySelector('.dps-modal-cancel').addEventListener('click', function() {
-            closeModal(modal);
+
+        // Cancel buttons
+        var cancelBtns = modal.querySelectorAll('.dps-modal-cancel');
+        cancelBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                closeModal(modal);
+            });
         });
+
+        // Next buttons
+        var nextBtns = modal.querySelectorAll('.dps-step-next');
+        nextBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var nextStep = parseInt(this.getAttribute('data-next'), 10);
+                if (validateStep(currentStep)) {
+                    goToStep(nextStep);
+                }
+            });
+        });
+
+        // Prev buttons
+        var prevBtns = modal.querySelectorAll('.dps-step-prev');
+        prevBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var prevStep = parseInt(this.getAttribute('data-prev'), 10);
+                goToStep(prevStep);
+            });
+        });
+
+        // Phase 8.1: Suggestion banner interactions
+        // "Usar data sugerida" button
+        modal.addEventListener('click', function(e) {
+            if (e.target.classList.contains('dps-suggestion-banner__apply')) {
+                var suggestedDate = e.target.getAttribute('data-date');
+                if (suggestedDate) {
+                    var dateInput = modal.querySelector('#desired_date');
+                    if (dateInput) {
+                        dateInput.value = suggestedDate;
+                        dateInput.classList.remove('is-invalid');
+                        dateInput.classList.add('is-valid');
+                        var err = modal.querySelector('#desired_date_error');
+                        if (err) err.textContent = '';
+                    }
+                }
+            }
+        });
+
+        // Pet selector change → update suggestion banner
+        var petSelect = modal.querySelector('#pet_id');
+        if (petSelect) {
+            petSelect.addEventListener('change', function() {
+                var selectedPetId = this.value;
+                var banner = modal.querySelector('#dps-scheduling-suggestion');
+                if (!banner) return;
+                var newSuggestion = selectedPetId && suggestions[selectedPetId] ? suggestions[selectedPetId] : null;
+                if (newSuggestion) {
+                    banner.innerHTML = buildSuggestionBanner(newSuggestion);
+                    banner.style.display = '';
+                    // Auto-fill date if suggestion available
+                    if (newSuggestion.suggested_date) {
+                        var dateField = modal.querySelector('#desired_date');
+                        if (dateField && !dateField.value) {
+                            dateField.value = newSuggestion.suggested_date;
+                        }
+                    }
+                } else {
+                    banner.innerHTML = '';
+                    banner.style.display = 'none';
+                }
+            });
+        }
         
         modal.querySelector('#dps-request-form').addEventListener('submit', function(e) {
             e.preventDefault();
