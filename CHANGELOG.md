@@ -81,6 +81,21 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Added (Adicionado)
+
+**Client Portal — Fase 4.1: Indicador de Progresso no Agendamento**
+
+- **Progress bar (stepper)**: modal de pedido de agendamento transformado em wizard de 3 etapas — Data/Pet → Detalhes → Revisão/Confirmar. Componente reutilizável `dps-progress-bar` com círculos numerados, conectores e labels.
+- **Revisão pré-envio**: Step 3 exibe resumo completo (tipo, pet, data, período, observações) antes do envio da solicitação.
+- **Validação por etapa**: campos obrigatórios validados antes de prosseguir para a próxima etapa, com mensagens inline de erro (`role="alert"`).
+- **Acessibilidade**: `role="progressbar"`, `aria-valuenow`, `aria-valuemax`, `aria-live="polite"` para anúncio de "Passo X de Y", `aria-required` em campos obrigatórios.
+- **Responsivo**: stepper adapta-se a mobile (480px), botões empilhados verticalmente. `prefers-reduced-motion` remove animações.
+
+**Client Portal — Fase 5.3: Seletor Rápido de Pet (Multi-pet)**
+
+- **Pet selector**: dropdown de pet no Step 1 do modal de agendamento, visível quando cliente tem 2+ pets, com ícones de espécie (🐶/🐱/🐾). Dados de pets via `dpsPortal.clientPets`.
+- **Revisão com pet**: pet selecionado aparece no resumo de revisão (Step 3). Pet pré-selecionado quando ação vem de botão com `data-pet-id`.
+
 #### Changed (Alterado)
 
 **AI Add-on — Assistente Virtual no Portal do Cliente**

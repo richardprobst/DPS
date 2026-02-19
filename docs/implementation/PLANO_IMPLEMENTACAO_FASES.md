@@ -291,11 +291,16 @@ Melhorar a experiência do usuário final no Portal do Cliente, tornando o fluxo
 **Problema:** O processo de agendamento é dividido em várias etapas sem indicação visual de progresso.
 
 **Ação:**
-- [ ] Mapear todas as etapas do fluxo de agendamento (registro → seleção de pet → data/hora → serviços → confirmação)
-- [ ] Implementar componente de barra de progresso (`dps-progress-bar`) seguindo padrão M3
-- [ ] Integrar com os formulários existentes (CSS + JS)
-- [ ] Adicionar texto "Passo X de Y" para acessibilidade (`aria-label`, `aria-valuenow`)
-- [ ] Seguir `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`
+- [x] Mapear todas as etapas do fluxo de agendamento (pedido de agendamento → data/período → detalhes → confirmação) — fluxo mapeado: modal com 3 etapas (Data/Pet → Detalhes → Revisão/Confirmar)
+- [x] Implementar componente de barra de progresso (`dps-progress-bar`) seguindo padrão M3 — círculos numerados com conectores, estados active/completed, labels por etapa
+- [x] Integrar com os formulários existentes (CSS + JS) — `createRequestModal()` refatorado para wizard multi-etapa com navegação next/prev
+- [x] Adicionar texto "Passo X de Y" para acessibilidade (`role="progressbar"`, `aria-valuenow`, `aria-valuemax`, `aria-live="polite"`)
+- [x] Seguir `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` — tokens M3 (cores, espaçamento, shapes, motion), responsive, `prefers-reduced-motion`
+
+**Implementação:**
+- CSS: `.dps-progress-bar` com `.dps-progress-bar__step`, `.dps-progress-bar__circle`, `.dps-progress-bar__connector`, `.dps-progress-bar__label`, `.dps-step-panel`, `.dps-review-summary`
+- JS: Funções `goToStep()`, `validateStep()`, `updateReviewSummary()` dentro de `createRequestModal()`
+- Etapa 3 mostra resumo completo (tipo, pet, data, período, observações) antes do envio
 
 ### 4.2 — Validação em Tempo Real (Client-side)
 
@@ -400,13 +405,13 @@ Adicionar funcionalidades que criam valor para o cliente final e diferenciam o p
 
 ### 5.3 — Gerenciamento de Múltiplos Pets
 
-**Status atual:** O sistema já suporta múltiplos pets por cliente e agendamento multi-pet.
+**Status atual:** O sistema já suporta múltiplos pets por cliente e agendamento multi-pet. Seletor rápido implementado.
 
 **Ação:**
-- [ ] Melhorar a visualização de múltiplos pets na tela inicial do portal
-- [ ] Adicionar seletor rápido de pet para agendamento
-- [ ] Permitir comparação de histórico entre pets
-- [ ] Otimizar o fluxo de agendamento para selecionar serviços por pet
+- [x] Adicionar seletor rápido de pet para agendamento — dropdown de pet no Step 1 do modal de agendamento, visível quando cliente tem 2+ pets, com ícones de espécie (🐶/🐱/🐾) e nomes. Dados via `dpsPortal.clientPets` (PHP `wp_localize_script`)
+- [x] Otimizar o fluxo de agendamento para selecionar serviços por pet — pet selecionado aparece na revisão (Step 3) e é validado antes de prosseguir
+- [ ] Melhorar a visualização de múltiplos pets na tela inicial do portal — futuro (tab navigation já existente)
+- [ ] Permitir comparação de histórico entre pets — futuro
 
 ### 5.4 — Feedback e Avaliação
 
