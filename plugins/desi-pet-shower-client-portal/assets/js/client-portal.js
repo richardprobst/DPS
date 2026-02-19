@@ -1878,7 +1878,7 @@ window.DPSSkeleton = (function() {
             }
             for (var p = 0; p < clientPets.length; p++) {
                 var selected = (petId && String(clientPets[p].id) === String(petId)) ? ' selected' : '';
-                html += '<option value="' + clientPets[p].id + '"' + selected + '>' + clientPets[p].icon + ' ' + clientPets[p].name + '</option>';
+                html += '<option value="' + escapeHtml(String(clientPets[p].id)) + '"' + selected + '>' + escapeHtml(clientPets[p].icon + ' ' + clientPets[p].name) + '</option>';
             }
             html += '</select>';
             html += '<span class="dps-field-error" role="alert" id="pet_id_error"></span>';
@@ -1959,7 +1959,7 @@ window.DPSSkeleton = (function() {
 
             // Pet name in review (Phase 5.3)
             if (petSelect && petSelect.selectedIndex > 0) {
-                summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🐾 Pet</span><span class="dps-review-summary__value">' + petSelect.options[petSelect.selectedIndex].text + '</span></div>';
+                summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🐾 Pet</span><span class="dps-review-summary__value">' + escapeHtml(petSelect.options[petSelect.selectedIndex].text) + '</span></div>';
             } else if (petId && clientPets.length > 0) {
                 var petName = '';
                 for (var pi = 0; pi < clientPets.length; pi++) {
@@ -1969,13 +1969,13 @@ window.DPSSkeleton = (function() {
                     }
                 }
                 if (petName) {
-                    summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🐾 Pet</span><span class="dps-review-summary__value">' + petName + '</span></div>';
+                    summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🐾 Pet</span><span class="dps-review-summary__value">' + escapeHtml(petName) + '</span></div>';
                 }
             }
 
-            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">📅 Data</span><span class="dps-review-summary__value">' + formattedDate + '</span></div>';
-            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🕐 Período</span><span class="dps-review-summary__value">' + periodText + '</span></div>';
-            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">📝 Observações</span><span class="dps-review-summary__value">' + notesText + '</span></div>';
+            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">📅 Data</span><span class="dps-review-summary__value">' + escapeHtml(formattedDate) + '</span></div>';
+            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🕐 Período</span><span class="dps-review-summary__value">' + escapeHtml(periodText) + '</span></div>';
+            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">📝 Observações</span><span class="dps-review-summary__value">' + escapeHtml(notesText) + '</span></div>';
             summary.innerHTML = summaryHtml;
         }
 
