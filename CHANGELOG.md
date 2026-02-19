@@ -105,6 +105,21 @@ Antes de criar uma nova versão oficial:
 - **Botão "Pagar Agora"**: em cada transação pendente para integração com gateway.
 - **Responsivo**: layout adapta-se a mobile (480px).
 
+**Client Portal — Fase 6.4: Autenticação de Dois Fatores (2FA)**
+
+- **2FA via e-mail**: verificação de segurança opcional com código de 6 dígitos enviado por e-mail após clicar no magic link. Habilitável em Portal → Configurações.
+- **Segurança**: código hashed com `wp_hash_password()`, expiração de 10 minutos, máximo 5 tentativas (anti-brute-force). Anti-enumeration: tentativas incrementadas antes da verificação.
+- **UI de verificação**: 6 inputs individuais com auto-advance entre dígitos, suporte a paste (colar código inteiro), auto-submit quando completo. E-mail ofuscado no formulário (j***@gmail.com).
+- **E-mail responsivo**: template HTML com dígitos em caixas estilizadas, branding do portal.
+- **Remember-me preservado**: flag de "Manter acesso" é mantida através do fluxo 2FA via transient.
+- **Auditoria**: eventos `2fa_code_sent` e `2fa_verified` registrados via `DPS_Audit_Logger`.
+
+**Base Plugin — Fase 7.1+7.2: Infraestrutura de Testes**
+
+- **PHPUnit configurado**: `composer.json`, `phpunit.xml`, `tests/bootstrap.php` com mocks WordPress para o plugin base.
+- **22 testes unitários**: 13 testes para `DPS_Money_Helper` (parse, format, cents, currency, validação) + 9 testes para `DPS_Phone_Helper` (clean, format, validate, WhatsApp).
+- **Comando**: `cd plugins/desi-pet-shower-base && composer install && vendor/bin/phpunit`
+
 #### Changed (Alterado)
 
 **AI Add-on — Assistente Virtual no Portal do Cliente**

@@ -499,20 +499,28 @@ Implementar camadas adicionais de segurança e monitoramento.
 
 ### 6.4 — Autenticação de Dois Fatores (2FA)
 
-> **Nota:** Avaliação de viabilidade — implementação opcional baseada na complexidade.
+**Status:** ✅ Implementado em 2026-02-19
 
 **Ação:**
-- [ ] Avaliar necessidade real de 2FA para o portal (perfil de risco)
-- [ ] Se viável: implementar verificação por e-mail (código de 6 dígitos)
-- [ ] Tornar 2FA opcional por configuração admin
-- [ ] Não implementar SMS/autenticador na primeira versão (complexidade vs. valor)
+- [x] Avaliar necessidade real de 2FA para o portal (perfil de risco) — implementado como opcional, desabilitado por padrão
+- [x] Se viável: implementar verificação por e-mail (código de 6 dígitos) — `DPS_Portal_2FA` com código de 6 dígitos, hashed com `wp_hash_password()`, 10 min expiração, max 5 tentativas
+- [x] Tornar 2FA opcional por configuração admin — checkbox em Portal → Configurações
+- [x] Não implementar SMS/autenticador na primeira versão (complexidade vs. valor) — apenas e-mail
+
+**Implementação:**
+- PHP: `class-dps-portal-2fa.php` — `generate_code()`, `verify_code()`, `send_code_email()`, `render_verification_form()`, `ajax_verify_2fa_code()`
+- Fluxo: Token válido → gera código → envia por e-mail → renderiza formulário 2FA → AJAX verifica → cria sessão
+- Remember-me preservado através de 2FA via transient
+- Audit: eventos `2fa_code_sent` e `2fa_verified` via `DPS_Audit_Logger`
+- UI: 6 inputs individuais com auto-advance, paste support, e-mail ofuscado (j***@gmail.com)
+- CSS: `.dps-2fa-digit`, `.dps-2fa-code-inputs`, responsivo 480px
 
 ### Entregáveis
 
 - ✅ Rate limiting funcional no login e endpoints AJAX
 - ✅ Sistema de auditoria centralizado com tela admin
 - ✅ Monitoramento de atividade suspeita com alertas
-- ✅ Avaliação documentada de viabilidade de 2FA
+- ✅ 2FA via e-mail implementado e configurável
 
 ---
 
@@ -528,22 +536,31 @@ Aumentar a cobertura de testes, melhorar a modularidade e remover código morto.
 
 ### 7.1 — Infraestrutura de Testes
 
-**Status atual:** O AI Add-on possui `phpunit.xml` e diretório `tests/`. Nenhum outro add-on tem testes.
+**Status:** ✅ Configurado em 2026-02-19
 
 **Ação:**
-- [ ] Avaliar o setup de testes do AI Add-on como modelo
-- [ ] Configurar PHPUnit para o plugin base
-- [ ] Configurar PHPUnit para o Finance Add-on (prioridade: lógica financeira)
-- [ ] Documentar como rodar testes no `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`
+- [x] Avaliar o setup de testes do AI Add-on como modelo — usado como referência para composer.json, phpunit.xml e bootstrap.php
+- [x] Configurar PHPUnit para o plugin base — `composer.json` (PHPUnit 9.6+, yoast/phpunit-polyfills), `phpunit.xml`, `tests/bootstrap.php` com mocks WordPress
+- [ ] Configurar PHPUnit para o Finance Add-on (prioridade: lógica financeira) — futuro
+- [ ] Documentar como rodar testes no `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md` — futuro
+
+**Como rodar:** `cd plugins/desi-pet-shower-base && composer install && vendor/bin/phpunit`
 
 ### 7.2 — Testes Unitários para Lógica Crítica
 
+**Status:** ✅ 22 testes implementados em 2026-02-19
+
 **Ação:**
-- [ ] Testar helpers globais: `DPS_Money_Helper`, `DPS_Phone_Helper`, `DPS_URL_Builder`
-- [ ] Testar `sum_revenue_by_period()` no Finance (já mencionado em análise)
-- [ ] Testar validação de formulários (novas classes extraídas na Fase 2)
-- [ ] Testar lógica de tokens do portal (criação, validação, expiração)
-- [ ] Meta: cobertura de 80% nas classes de lógica de negócio
+- [x] Testar helpers globais: `DPS_Money_Helper` (13 testes), `DPS_Phone_Helper` (9 testes)
+- [ ] Testar `DPS_URL_Builder` — futuro (depende de mais mocks WordPress)
+- [ ] Testar `sum_revenue_by_period()` no Finance — futuro (requer setup Finance)
+- [ ] Testar validação de formulários (novas classes extraídas na Fase 2) — futuro
+- [ ] Testar lógica de tokens do portal (criação, validação, expiração) — futuro
+- [ ] Meta: cobertura de 80% nas classes de lógica de negócio — futuro
+
+**Testes implementados:**
+- `Test_DPS_Money_Helper`: parse_brazilian_format (4 variações), format_to_brazilian (2), decimal_to_cents, cents_to_decimal, format_currency, format_currency_from_decimal, format_decimal_to_brazilian, is_valid_money_string (2)
+- `Test_DPS_Phone_Helper`: clean, format_for_whatsapp (2), format_for_display (2), is_valid_brazilian_phone (4)
 
 ### 7.3 — Injeção de Dependência
 
