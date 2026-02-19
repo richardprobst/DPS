@@ -3007,6 +3007,217 @@ if ( null !== $result ) {
 
 ---
 
+## Mapeamento de Capabilities
+
+> **Adicionado em:** 2026-02-18 — Fase 1 do Plano de Implementação
+
+### Capabilities utilizadas no sistema
+
+| Capability | Contexto de Uso | Plugins |
+|-----------|-----------------|---------|
+| `manage_options` | Admin pages, REST endpoints, AJAX handlers, configurações | Todos os add-ons |
+| `dps_manage_clients` | Gestão de clientes (CRUD) | Base, Frontend |
+| `dps_manage_pets` | Gestão de pets (CRUD) | Base, Frontend |
+| `dps_manage_appointments` | Gestão de agendamentos (CRUD) | Base, Agenda, Frontend |
+
+### Modelo de permissões
+
+- **Administradores** (`manage_options`): acesso total a todas as operações do sistema, incluindo configurações, relatórios financeiros e endpoints REST.
+- **Gestores** (`dps_manage_*`): acesso às operações de gestão do dia a dia (clientes, pets, agendamentos).
+- **Portal do cliente**: autenticação via token/sessão sem WordPress capabilities. Acesso restrito via `DPS_Portal_Session_Manager::get_authenticated_client_id()`.
+
+### Endpoints REST — Modelo de Permissão
+
+| Plugin | Endpoint | Permission Callback |
+|--------|----------|---------------------|
+| Finance | `dps-finance/v1/transactions` | `current_user_can('manage_options')` |
+| Loyalty | `dps-loyalty/v1/*` (5 rotas) | `current_user_can('manage_options')` |
+| Communications | `dps-communications/v1/*` (3 rotas) | `current_user_can('manage_options')` |
+| AI | `dps-ai/v1/whatsapp-webhook` | `__return_true` (webhook público com validação interna) |
+| Agenda | `dps/v1/google-calendar-webhook` | `__return_true` (webhook público com validação interna) |
+
+---
+
+## Template Padrão de Add-on (Fase 2.2)
+
+> Documentação do padrão de inicialização e estrutura de add-ons. Todos os add-ons devem seguir este template para garantir consistência.
+
+### Estrutura de Diretórios
+
+```
+desi-pet-shower-{nome}/
+├── desi-pet-shower-{nome}-addon.php   # Arquivo principal com header WP
+├── includes/                           # Classes PHP
+│   ├── class-dps-{nome}-*.php         # Classes de negócio
+│   └── ...
+├── assets/                             # CSS/JS
+│   ├── css/
+│   └── js/
+├── templates/                          # Templates HTML (quando aplicável)
+└── uninstall.php                       # Limpeza na desinstalação (quando tem tabelas)
+```
+
+### Header WordPress Obrigatório
+
+```php
+/**
+ * Plugin Name: Desi Pet Shower - {Nome} Add-on
+ * Plugin URI: https://github.com/richardprobst/DPS
+ * Description: {Descrição curta}
+ * Version: X.Y.Z
+ * Author: PRObst
+ * Author URI: https://probst.pro
+ * Text Domain: desi-pet-shower
+ * Domain Path: /languages
+ * Requires at least: 6.9
+ * Requires PHP: 8.4
+ */
+```
+
+### Padrão de Inicialização
+
+| Etapa | Hook | Prioridade | Responsabilidade |
+|-------|------|-----------|------------------|
+| Text domain | `init` | 1 | `load_plugin_textdomain()` |
+| Classes/lógica | `init` | 5 | Instanciar classes, registrar CPTs, hooks |
+| Admin menus | `admin_menu` | 20 | Submenu de `desi-pet-shower` |
+| Admin assets | `admin_enqueue_scripts` | 10 | CSS/JS condicionais (`$hook_suffix`) |
+| Ativação | `register_activation_hook` | — | dbDelta, flush rewrite, capabilities |
+
+### Assets — Carregamento Condicional (Obrigatório)
+
+```php
+add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+
+public function enqueue_admin_assets( $hook ) {
+    // Carrega apenas nas páginas do DPS
+    if ( false === strpos( $hook, 'desi-pet-shower' ) ) {
+        return;
+    }
+    wp_enqueue_style( 'dps-{nome}-addon', ... );
+    wp_enqueue_script( 'dps-{nome}-addon', ... );
+}
+```
+
+### Helpers Globais Disponíveis (Base Plugin)
+
+| Helper | Métodos Principais |
+|--------|-------------------|
+| `DPS_Money_Helper` | `format_currency($cents)`, `format_currency_from_decimal($val)`, `format_decimal_to_brazilian($val)` |
+| `DPS_Phone_Helper` | `clean($phone)`, `format_for_display($phone)`, `format_for_whatsapp($phone)` |
+| `DPS_Query_Helper` | `get_all_posts_by_type($type)`, `get_posts_by_meta($type, $key, $val)` |
+| `DPS_Message_Helper` | `add_success($msg)`, `add_error($msg)`, `add_warning($msg)` |
+| `DPS_Request_Validator` | `verify_nonce($action)`, `verify_ajax_nonce($action)` |
+| `DPS_URL_Builder` | `build_admin_url($page, $params)` |
+| `DPS_Logger` | `info($msg, $ctx, $cat)`, `warning(...)`, `error(...)` |
+
+### Compliance Status (Fev/2026)
+
+| Add-on | Init@1 | Classes@5 | Menu@20 | Assets Cond. | Activation |
+|--------|--------|-----------|---------|-------------|------------|
+| agenda | ✅ | ✅ | ✅ | ✅ | ✅ |
+| ai | ✅ | ✅ | ✅ | ✅ | ✅ |
+| backup | ✅ | ✅ | ✅ | ✅ | ❌ |
+| booking | ✅ | ✅ | — | — | ✅ |
+| client-portal | ✅ | ✅ | ✅ | ✅ | ✅ |
+| communications | ✅ | ✅ | ✅ | ✅ | ❌ |
+| finance | ✅ | ✅ | ✅ | ✅ | ✅ |
+| frontend | ✅ | ✅ | — | — | ❌ |
+| groomers | ✅ | ✅ | ✅ | ✅ | ✅ |
+| loyalty | ✅ | ✅ | ✅ | ✅ | ✅ |
+| payment | ✅ | ✅ | ✅ | ✅ | ❌ |
+| push | ✅ | ✅ | ✅ | ✅ | ✅ |
+| registration | ✅ | ✅ | ✅ | ✅ | ✅ |
+| services | ✅ | ✅ | — | — | ✅ |
+| stats | ✅ | ✅ | — | — | ❌ |
+| stock | ✅ | ✅ | — | ✅ | ✅ |
+| subscription | ✅ | ✅ | — | — | ❌ |
+
+**Legenda:** ✅ Conforme | ❌ Ausente | — Não aplicável (add-on sem UI admin própria)
+
+---
+
+## Contratos de Metadados dos CPTs
+
+> **Adicionado em:** 2026-02-18 — Fase 2.5 do Plano de Implementação
+
+### dps_cliente — Metadados do Cliente
+
+| Meta Key | Tipo/Formato | Obrigatório | Descrição |
+|----------|-------------|-------------|-----------|
+| `client_cpf` | String (CPF: `000.000.000-00`) | Não | CPF do cliente |
+| `client_phone` | String (telefone) | **Sim** | Telefone principal |
+| `client_email` | String (email) | Não | E-mail do cliente |
+| `client_birth` | String (data: `Y-m-d`) | Não | Data de nascimento |
+| `client_instagram` | String | Não | Handle do Instagram |
+| `client_facebook` | String | Não | Perfil do Facebook |
+| `client_photo_auth` | Int (`0` ou `1`) | Não | Autorização para fotos |
+| `client_address` | String (textarea) | Não | Endereço completo |
+| `client_referral` | String | Não | Código de indicação |
+| `client_lat` | String (float: `-23.5505`) | Não | Latitude (geolocalização) |
+| `client_lng` | String (float: `-46.6333`) | Não | Longitude (geolocalização) |
+
+**Classe handler:** `DPS_Client_Handler` (`includes/class-dps-client-handler.php`)
+**Campos obrigatórios na validação:** `client_name` (post_title), `client_phone`
+
+### dps_pet — Metadados do Pet
+
+| Meta Key | Tipo/Formato | Obrigatório | Descrição |
+|----------|-------------|-------------|-----------|
+| `owner_id` | Int (ID do `dps_cliente`) | **Sim** | ID do tutor/proprietário |
+| `pet_species` | String (enum: `cachorro`, `gato`, `outro`) | **Sim** | Espécie |
+| `pet_breed` | String | Não | Raça |
+| `pet_size` | String (enum: `pequeno`, `medio`, `grande`, `gigante`) | **Sim** | Porte |
+| `pet_weight` | String (float em kg) | Não | Peso |
+| `pet_coat` | String | Não | Tipo de pelagem |
+| `pet_color` | String | Não | Cor/marcações |
+| `pet_birth` | String (data: `Y-m-d`) | Não | Data de nascimento |
+| `pet_sex` | String (enum: `macho`, `femea`) | **Sim** | Sexo |
+| `pet_care` | String (textarea) | Não | Cuidados especiais |
+| `pet_aggressive` | Int (`0` ou `1`) | Não | Flag de agressividade |
+| `pet_vaccinations` | String (textarea) | Não | Registro de vacinação |
+| `pet_allergies` | String (textarea) | Não | Alergias conhecidas |
+| `pet_behavior` | String (textarea) | Não | Notas comportamentais |
+| `pet_shampoo_pref` | String | Não | Preferência de shampoo |
+| `pet_perfume_pref` | String | Não | Preferência de perfume |
+| `pet_accessories_pref` | String | Não | Preferência de acessórios |
+| `pet_product_restrictions` | String (textarea) | Não | Restrições de produtos |
+| `pet_photo_id` | Int (attachment ID) | Não | ID da foto do pet |
+
+**Classe handler:** `DPS_Pet_Handler` (`includes/class-dps-pet-handler.php`)
+**Campos obrigatórios na validação:** `pet_name` (post_title), `owner_id`, `pet_species`, `pet_size`, `pet_sex`
+
+### dps_agendamento — Metadados do Agendamento
+
+| Meta Key | Tipo/Formato | Obrigatório | Descrição |
+|----------|-------------|-------------|-----------|
+| `appointment_client_id` | Int (ID do `dps_cliente`) | **Sim** | ID do cliente |
+| `appointment_pet_id` | Int (ID do `dps_pet`) | **Sim** | Pet principal (legado) |
+| `appointment_pet_ids` | Array serializado de IDs | Não | Multi-pet: lista de pet IDs |
+| `appointment_date` | String (data: `Y-m-d`) | **Sim** | Data do atendimento |
+| `appointment_time` | String (hora: `H:i`) | **Sim** | Horário do atendimento |
+| `appointment_status` | String (enum) | **Sim** | Status do agendamento |
+| `appointment_type` | String (enum: `simple`, `subscription`, `past`) | Não | Tipo de agendamento |
+| `appointment_services` | Array serializado de IDs | Não | IDs dos serviços |
+| `appointment_service_prices` | Array serializado de floats | Não | Preços dos serviços |
+| `appointment_total_value` | Float | Não | Valor total |
+| `appointment_notes` | String (textarea) | Não | Observações |
+| `appointment_taxidog` | Int (`0` ou `1`) | Não | Flag de TaxiDog |
+| `appointment_taxidog_price` | Float | Não | Preço do TaxiDog |
+
+**Status possíveis:** `pendente`, `confirmado`, `em_atendimento`, `finalizado`, `finalizado e pago`, `finalizado_pago`, `cancelado`
+
+### Relações entre CPTs
+
+```
+dps_cliente (1) ──── (N) dps_pet          via pet.owner_id → cliente.ID
+dps_cliente (1) ──── (N) dps_agendamento  via agendamento.appointment_client_id → cliente.ID
+dps_pet     (1) ──── (N) dps_agendamento  via agendamento.appointment_pet_id → pet.ID
+dps_pet     (N) ──── (N) dps_agendamento  via agendamento.appointment_pet_ids (serializado)
+```
+
+---
+
 ## Integrações Futuras Propostas
 
 ### Integração com Google Tarefas (Google Tasks API)

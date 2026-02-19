@@ -2246,12 +2246,13 @@ class DPS_Services_Addon {
             delete_post_meta( $post_id, 'appointment_services_executed' );
         }
         // Extras
-        $extra_names  = isset( $_POST['appointment_extra_names'] ) ? (array) $_POST['appointment_extra_names'] : [];
-        $extra_prices = isset( $_POST['appointment_extra_prices'] ) ? (array) $_POST['appointment_extra_prices'] : [];
+        // F1.1: FASE 1 - Segurança: Sanitizar imediatamente ao receber dados de $_POST
+        $extra_names  = isset( $_POST['appointment_extra_names'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['appointment_extra_names'] ) ) : [];
+        $extra_prices = isset( $_POST['appointment_extra_prices'] ) ? (array) wp_unslash( $_POST['appointment_extra_prices'] ) : [];
         $extras = [];
         $sum   = 0;
         foreach ( $extra_names as $idx => $ename ) {
-            $name  = sanitize_text_field( $ename );
+            $name  = $ename; // Já sanitizado acima
             $price = 0;
             if ( isset( $extra_prices[ $idx ] ) ) {
                 $price = floatval( str_replace( ',', '.', $extra_prices[ $idx ] ) );

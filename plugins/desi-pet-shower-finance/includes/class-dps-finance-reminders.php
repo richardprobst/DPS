@@ -195,12 +195,7 @@ class DPS_Finance_Reminders {
             }
         }
 
-        // Formata valor
-        if ( class_exists( 'DPS_Money_Helper' ) ) {
-            $valor_formatted = 'R$ ' . DPS_Money_Helper::format_to_brazilian( (int) round( (float) $trans->valor * 100 ) );
-        } else {
-            $valor_formatted = 'R$ ' . number_format( (float) $trans->valor, 2, ',', '.' );
-        }
+        $valor_formatted = DPS_Money_Helper::format_currency_from_decimal( (float) $trans->valor );
 
         // Busca link de pagamento (se existir)
         $payment_link = '';

@@ -45,7 +45,7 @@ class DPS_Query_Helper {
     public static function get_all_posts_by_type( $post_type, $extra_args = [] ) {
         $query_args = self::build_base_query_args(
             $post_type,
-            array_merge( [ 'posts_per_page' => -1 ], $extra_args )
+            array_merge( [ 'posts_per_page' => -1, 'no_found_rows' => true ], $extra_args )
         );
 
         $query = new WP_Query( $query_args );
@@ -91,8 +91,9 @@ class DPS_Query_Helper {
             array_merge(
                 [
                     'posts_per_page' => -1,
-                    'meta_key' => $meta_key,
-                    'meta_value' => $meta_value,
+                    'no_found_rows'  => true,
+                    'meta_key'       => $meta_key,
+                    'meta_value'     => $meta_value,
                 ],
                 $extra_args
             )
@@ -116,7 +117,8 @@ class DPS_Query_Helper {
             array_merge(
                 [
                     'posts_per_page' => -1,
-                    'meta_query' => $meta_query,
+                    'no_found_rows'  => true,
+                    'meta_query'     => $meta_query,
                 ],
                 $extra_args
             )

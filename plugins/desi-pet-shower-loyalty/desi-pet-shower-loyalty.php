@@ -298,13 +298,7 @@ class DPS_Loyalty_Addon {
             $credit_cents = 0;
         }
 
-        // Formata usando helper ou fallback.
-        if ( class_exists( 'DPS_Money_Helper' ) ) {
-            return 'R$ ' . DPS_Money_Helper::format_to_brazilian( $credit_cents );
-        }
-
-        // Fallback: formata manualmente.
-        return 'R$ ' . number_format( $credit_cents / 100, 2, ',', '.' );
+        return DPS_Money_Helper::format_currency( $credit_cents );
     }
 
     /**
@@ -323,13 +317,7 @@ class DPS_Loyalty_Addon {
             $credits = 0;
         }
 
-        // Formata usando helper ou fallback.
-        if ( class_exists( 'DPS_Money_Helper' ) ) {
-            return 'R$ ' . DPS_Money_Helper::format_to_brazilian( $credits );
-        }
-
-        // Fallback: formata manualmente.
-        return 'R$ ' . number_format( $credits / 100, 2, ',', '.' );
+        return DPS_Money_Helper::format_currency( $credits );
     }
 
     public function register_post_type() {
@@ -997,10 +985,7 @@ class DPS_Loyalty_Addon {
             case 'points':
                 return sprintf( '%d pts', (int) $value );
             case 'fixed':
-                if ( class_exists( 'DPS_Money_Helper' ) ) {
-                    return 'R$ ' . DPS_Money_Helper::format_to_brazilian( (int) $value );
-                }
-                return 'R$ ' . number_format( (int) $value / 100, 2, ',', '.' );
+                return DPS_Money_Helper::format_currency( (int) $value );
             case 'percent':
                 return $value . '%';
             default:
@@ -3036,12 +3021,7 @@ if ( ! function_exists( 'dps_format_money_br' ) ) {
      */
     function dps_format_money_br( $int ) {
         _deprecated_function( __FUNCTION__, '1.1.0', 'DPS_Money_Helper::format_to_brazilian()' );
-        if ( class_exists( 'DPS_Money_Helper' ) ) {
-            return DPS_Money_Helper::format_to_brazilian( $int );
-        }
-        // Fallback se helper não disponível
-        $float = (int) $int / 100;
-        return number_format( $float, 2, ',', '.' );
+        return DPS_Money_Helper::format_to_brazilian( $int );
     }
 }
 

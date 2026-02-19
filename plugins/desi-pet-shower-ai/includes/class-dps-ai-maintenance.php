@@ -307,17 +307,17 @@ class DPS_AI_Maintenance {
         $metrics_table  = $wpdb->prefix . DPS_AI_Analytics::TABLE_NAME;
         $feedback_table = $wpdb->prefix . DPS_AI_Analytics::FEEDBACK_TABLE_NAME;
         
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-        $metrics_count = $wpdb->get_var( "SELECT COUNT(*) FROM {$metrics_table}" );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $metrics_table vem de $wpdb->prefix (seguro)
+        $metrics_count = $wpdb->get_var( "SELECT COUNT(*) FROM `{$metrics_table}`" );
         
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-        $feedback_count = $wpdb->get_var( "SELECT COUNT(*) FROM {$feedback_table}" );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $feedback_table vem de $wpdb->prefix (seguro)
+        $feedback_count = $wpdb->get_var( "SELECT COUNT(*) FROM `{$feedback_table}`" );
         
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-        $oldest_metric = $wpdb->get_var( "SELECT MIN(date) FROM {$metrics_table}" );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $metrics_table vem de $wpdb->prefix (seguro)
+        $oldest_metric = $wpdb->get_var( "SELECT MIN(date) FROM `{$metrics_table}`" );
         
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-        $oldest_feedback = $wpdb->get_var( "SELECT MIN(created_at) FROM {$feedback_table}" );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $feedback_table vem de $wpdb->prefix (seguro)
+        $oldest_feedback = $wpdb->get_var( "SELECT MIN(created_at) FROM `{$feedback_table}`" );
         
         return [
             'metrics_count'    => absint( $metrics_count ),

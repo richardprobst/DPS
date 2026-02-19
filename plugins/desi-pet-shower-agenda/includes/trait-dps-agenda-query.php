@@ -58,19 +58,43 @@ trait DPS_Agenda_Query {
             return $appointments_by_day;
         }
         
+        $end = clone $start;
+        $end->modify( '+6 days' );
+        $end_date = $end->format( 'Y-m-d' );
+        
+        // F3.3: FASE 3 - Performance: Buscar todos os agendamentos da semana em uma única query
+        // ao invés de 7 queries separadas (N+1 pattern eliminado)
+        $all_week_appointments = get_posts( [
+            'post_type'      => 'dps_agendamento',
+            'posts_per_page' => $daily_limit * 7,
+            'meta_query'     => [
+                [
+                    'key'     => 'appointment_date',
+                    'value'   => [ $start_date, $end_date ],
+                    'compare' => 'BETWEEN',
+                    'type'    => 'DATE',
+                ],
+            ],
+            'orderby'        => 'meta_value',
+            'meta_key'       => 'appointment_date',
+            'order'          => 'ASC',
+            'post_status'    => 'publish',
+            'no_found_rows'  => true,
+        ] );
+        
+        // Inicializa todos os 7 dias como arrays vazios
+        $current = clone $start;
         for ( $i = 0; $i < 7; $i++ ) {
-            $day_date = $start->format( 'Y-m-d' );
-            $appointments_by_day[ $day_date ] = get_posts( [
-                'post_type'      => 'dps_agendamento',
-                'posts_per_page' => $daily_limit,
-                'meta_key'       => 'appointment_date',
-                'meta_value'     => $day_date,
-                'orderby'        => 'meta_value',
-                'order'          => 'ASC',
-                'post_status'    => 'publish',
-                'no_found_rows'  => true,
-            ] );
-            $start->modify( '+1 day' );
+            $appointments_by_day[ $current->format( 'Y-m-d' ) ] = [];
+            $current->modify( '+1 day' );
+        }
+        
+        // Agrupa os agendamentos por data
+        foreach ( $all_week_appointments as $appointment ) {
+            $appt_date = get_post_meta( $appointment->ID, 'appointment_date', true );
+            if ( isset( $appointments_by_day[ $appt_date ] ) ) {
+                $appointments_by_day[ $appt_date ][] = $appointment;
+            }
         }
         
         return $appointments_by_day;

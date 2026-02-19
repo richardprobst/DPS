@@ -329,7 +329,7 @@ class DPS_Portal_AJAX_Handler {
         $new_credit = DPS_Loyalty_API::add_credit( $client_id, $discount_cents, 'portal_redemption' );
         $new_points = DPS_Loyalty_API::get_points( $client_id );
 
-        $credit_display = class_exists( 'DPS_Money_Helper' ) ? 'R$ ' . DPS_Money_Helper::format_to_brazilian( $new_credit ) : 'R$ ' . number_format( $new_credit / 100, 2, ',', '.' );
+        $credit_display = DPS_Money_Helper::format_currency( $new_credit );
 
         $message = sprintf(
             __( 'Você converteu %1$d pontos em %2$s de crédito. 🎉', 'dps-client-portal' ),
@@ -629,6 +629,10 @@ class DPS_Portal_AJAX_Handler {
         }
         
         if ( $ip_count >= 3 ) {
+            // F6.3: FASE 6 - Audit log de rate limit atingido
+            if ( class_exists( 'DPS_Audit_Logger' ) ) {
+                DPS_Audit_Logger::log_portal_event( 'rate_limit_ip', 0, [ 'ip' => $ip, 'count' => $ip_count ] );
+            }
             wp_send_json_error( [ 
                 'message' => __( 'Você já solicitou o link várias vezes. Aguarde alguns minutos antes de tentar novamente.', 'dps-client-portal' ) 
             ] );
@@ -676,6 +680,9 @@ class DPS_Portal_AJAX_Handler {
         $client_id = $clients[0];
         $client_name = get_the_title( $client_id );
         
+        // F4.6: FASE 4 - Verifica se cliente quer manter acesso permanente
+        $remember_me = isset( $_POST['remember_me'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['remember_me'] ) );
+        
         // Gera token de acesso
         $token_manager = DPS_Portal_Token_Manager::get_instance();
         $token_plain   = $token_manager->generate_token( $client_id, 'login' );
@@ -687,8 +694,11 @@ class DPS_Portal_AJAX_Handler {
             ] );
         }
         
-        // Gera URL de acesso
+        // Gera URL de acesso (com flag remember se solicitado)
         $access_url = $token_manager->generate_access_url( $token_plain );
+        if ( $remember_me ) {
+            $access_url = add_query_arg( 'dps_remember', '1', $access_url );
+        }
         
         // Monta email HTML moderno
         $safe_client_name = wp_strip_all_tags( $client_name );

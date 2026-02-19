@@ -115,6 +115,66 @@ Antes de criar uma nova versão oficial:
 
 - **Segurança**: corrigida verificação de propriedade do pet na impressão de histórico — usava meta key incorreta `pet_client_id` ao invés de `owner_id`, impedindo acesso legítimo à funcionalidade.
 
+#### Security (Segurança)
+
+**Fase 1 — Segurança Crítica (Plano de Implementação)**
+
+- **Finance Add-on**: adicionados backticks em table identifiers e `phpcs:ignore` documentado em queries DDL (ALTER TABLE, CREATE INDEX, SHOW COLUMNS) que usam `$wpdb->prefix`. Queries `get_col`, `count_query` e `all_trans_query` agora utilizam backticks e documentação de segurança.
+- **Base Plugin**: corrigida query LIKE sem `esc_like`/`prepare()` em `class-dps-base-frontend.php`. Adicionada documentação de segurança em `class-dps-logs-admin-page.php` e `uninstall.php`.
+- **Backup Add-on**: migradas queries SELECT/DELETE que usavam `$ids_in` com `intval()` para padrão correto com placeholders dinâmicos e `$wpdb->prepare()`. Queries LIKE agora usam `$wpdb->prepare()`.
+- **AI Add-on**: adicionados backticks e documentação de segurança em queries COUNT/MIN em `class-dps-ai-maintenance.php` e `class-dps-ai-analytics.php`.
+- **Services Add-on**: sanitização imediata de arrays `$_POST` (`appointment_extra_names`, `appointment_extra_prices`) com `sanitize_text_field()` e `wp_unslash()`.
+- **Auditoria**: criado documento completo de auditoria em `docs/security/AUDIT_FASE1.md` com mapeamento de todas as queries, nonces, capabilities, REST permissions e sanitização de entrada.
+
+#### Refactoring (Interno)
+
+**Fase 2 — Refatoração Estrutural (Plano de Implementação)**
+
+- **Decomposição do monólito**: extraídas 9 classes de `class-dps-base-frontend.php` (5.986 → 1.581 linhas, –74%): `DPS_Client_Handler` (184L), `DPS_Pet_Handler` (337L), `DPS_Appointment_Handler` (810L), `DPS_Client_Page_Renderer` (1.506L, 23 métodos), `DPS_Breed_Registry` (201L, dataset de raças por espécie), `DPS_History_Section_Renderer` (481L, seção de histórico), `DPS_Appointments_Section_Renderer` (926L, seção de agendamentos com formulário e listagem), `DPS_Clients_Section_Renderer` (270L, seção de clientes com filtros e estatísticas), `DPS_Pets_Section_Renderer` (345L, seção de pets com filtros e paginação). Cada classe encapsula responsabilidade única (SRP). O frontend mantém facades que delegam para as classes extraídas.
+- **DPS_Phone_Helper::clean()**: adicionado método utilitário para limpeza de telefone (remove não-dígitos), centralizando lógica duplicada em 9+ arquivos.
+- **Centralização DPS_Money_Helper**: migradas 16 instâncias de `number_format()` para `DPS_Money_Helper::format_currency()` e `format_currency_from_decimal()` em 10 add-ons (Communications, AI, Agenda, Finance, Loyalty, Client Portal). Removidos fallbacks `class_exists()` desnecessários.
+- **Template padrão de add-on**: documentado em `ANALYSIS.md` com estrutura de diretórios, header WP, padrão de inicialização (init@1, classes@5, admin_menu@20), assets condicionais e tabela de compliance.
+- **Documentação de metadados**: adicionada seção "Contratos de Metadados dos CPTs" no `ANALYSIS.md` com tabelas detalhadas de meta keys para `dps_cliente`, `dps_pet` e `dps_agendamento`, incluindo tipos, formatos e relações.
+
+**Fase 3 — Performance e Escalabilidade (Plano de Implementação)**
+
+- **N+1 eliminado**: refatorado `query_appointments_for_week()` no trait `DPS_Agenda_Query` de 7 queries separadas para 1 query com `BETWEEN` + agrupamento em PHP (–85% queries DB).
+- **Lazy loading**: adicionado `loading="lazy"` em 5 imagens nos plugins Base e Client Portal (`class-dps-base-frontend.php`, `pet-form.php`, `class-dps-portal-renderer.php`).
+- **dbDelta version checks**: adicionados guards de versão em `DPS_AI_Analytics::maybe_create_tables()` e `DPS_AI_Conversations_Repository::maybe_create_tables()` para evitar `dbDelta()` em toda requisição.
+- **WP_Query otimizada**: `DPS_Query_Helper::get_all_posts_by_type()`, `get_posts_by_meta()` e `get_posts_by_meta_query()` agora incluem `no_found_rows => true` por padrão, eliminando SQL_CALC_FOUND_ROWS desnecessário em todas as consultas centralizadas.
+- **Assets condicionais**: Stock add-on corrigido — CSS não é mais carregado globalmente em todas as páginas admin; agora usa `$hook_suffix` para carregamento condicional.
+- **Subscription queries**: queries de delete de agendamentos e contagem migradas para `fields => 'ids'` + `no_found_rows => true`, eliminando carregamento desnecessário de objetos completos.
+- **Finance query limits** (Fase 3.2): dropdown de clientes otimizado com `no_found_rows => true` e desabilitação de meta/term cache. Query de resumo financeiro limitada a 5.000 registros (safety cap). Busca de clientes limitada a 200 resultados.
+- **Auditoria de rate limiting**: verificado que rate limiting já existe em 3 camadas: magic link request (3/hora por IP+email), token validation (5/hora por IP), chat (10/60s por cliente).
+
+#### Changed (Alterado)
+
+**Fase 4 — UX do Portal do Cliente (Plano de Implementação)**
+
+- **Validação em tempo real**: adicionado `handleFormValidation()` no portal do cliente com regras para telefone (formato BR), e-mail, CEP, UF, peso do pet, data de nascimento e campos obrigatórios. Validação on blur + limpeza instantânea on input + validação completa pre-submit com scroll automático para o primeiro erro.
+- **Estados visuais**: CSS para `.is-invalid` (borda e glow vermelho) e `.is-valid` (borda verde) nos inputs `.dps-form-control`, com suporte a `prefers-reduced-motion`.
+- **Containers de erro**: adicionados `<span class="dps-field-error" role="alert">` após campos validados, com `aria-describedby` vinculando input ao container de mensagem.
+- **Acessibilidade ARIA**: `aria-required="true"` em campos obrigatórios (pet name), `aria-describedby` em 7 campos, `role="alert"` em containers de erro, `inputmode="numeric"` no CEP.
+- **Atributos HTML5**: `max` no campo de data de nascimento (impede futuro), `max="200"` no campo de peso.
+- **Mensagens aprimoradas**: 5 novos tipos de mensagem toast (message_error, review_submitted, review_already, review_invalid, review_error). Todas as mensagens reescritas com títulos descritivos e textos orientados a ação.
+- **Filtro de período no histórico** (Fase 4.4): barra de filtros (30/60/90 dias, Todos) acima da timeline de serviços. Filtragem client-side via `data-date` nos itens. Mensagem "nenhum resultado" quando filtro vazio. CSS M3 com `focus-visible` e `aria-pressed`.
+- **Detalhes do pet no card** (Fase 4.5): porte (📏 Pequeno/Médio/Grande/Gigante), peso (⚖️ em kg), sexo (♂️/♀️), idade (🎂 calculada automaticamente de `pet_birth`) exibidos no card de info do pet na timeline. CSS com grid responsiva de meta items.
+- **"Manter acesso neste dispositivo"** (Fase 4.6): checkbox no formulário de login por e-mail permite manter sessão permanente. Gera token permanente com cookie seguro `dps_portal_remember` (HttpOnly, Secure, SameSite=Strict, 90 dias). Auto-autenticação via `handle_remember_cookie()` na próxima visita. Cookie removido no logout.
+
+**Fase 5 — Funcionalidades Novas (Portal)**
+
+- **Galeria multi-fotos** (Fase 5.1): pets agora suportam múltiplas fotos via meta key `pet_photos` (array de IDs) com fallback automático para `pet_photo_id` legado. Adicionado `DPS_Pet_Handler::get_all_photo_ids()`. Grid multi-foto responsiva com contagem de fotos por pet. Lightbox com navegação prev/next (setas clicáveis + ArrowLeft/ArrowRight no teclado), contador de fotos (1/N) e agrupamento por `data-gallery`.
+- **Preferências de notificação** (Fase 5.2): 4 toggles M3 na tela de preferências — lembretes de agendamento (📅), avisos de pagamento (💰), promoções e ofertas (🎁), atualizações do pet (🐾). Defaults inteligentes: lembretes e pagamentos ligados, promoções e updates desligados. Toggle switches CSS com focus-visible e hover states. Handler atualizado com hook `dps_portal_after_update_preferences` expandido.
+- **Feedback pós-agendamento** (Fase 5.4): prompt de avaliação exibido no final do histórico de agendamentos. Star rating interativo (1-5 estrelas, `role="radiogroup"` com ARIA labels). Textarea para comentário opcional. Integração com handler existente `submit_internal_review` e CPT `dps_groomer_review`. Estado "já avaliou" com estrelas e mensagem de agradecimento.
+
+**Fase 6 — Segurança Avançada e Auditoria**
+
+- **Auditoria centralizada** (Fase 6.2): criada classe `DPS_Audit_Logger` (446 linhas, 14 métodos estáticos) com tabela `dps_audit_log` para registro de eventos de auditoria (criar, atualizar, excluir, login, mudança de status) em todas as entidades do sistema (clientes, pets, agendamentos, portal, financeiro).
+- **Admin page de auditoria**: criada `DPS_Audit_Admin_Page` (370 linhas) com filtros por tipo de entidade, ação, período e paginação (30/página). Badges coloridos para tipos de ação. Integrada como aba "Auditoria" no System Hub.
+- **Integração nos handlers**: chamadas de auditoria adicionadas em `DPS_Client_Handler` (save/delete), `DPS_Pet_Handler` (save/delete) e `DPS_Appointment_Handler` (save/status_change).
+- **Auditoria de código morto** (Fase 7.4): inventário completo de JS/CSS/PHP em todos os plugins — nenhum arquivo morto encontrado. Único arquivo não carregado (`refactoring-examples.php`) é intencional e documentado em AGENTS.md.
+- **Logging de tentativas falhadas** (Fase 6.3): integrado `DPS_Audit_Logger` nos fluxos de autenticação do portal — registra token_validation_failed, login_success e rate_limit_ip no log de auditoria centralizado.
+
 #### Added (Adicionado)
 
 **Agenda Add-on v1.2.0 — Checklist Operacional e Check-in/Check-out**

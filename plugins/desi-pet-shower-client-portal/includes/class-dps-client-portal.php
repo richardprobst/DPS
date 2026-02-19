@@ -69,6 +69,7 @@ final class DPS_Client_Portal {
             $this->handle_portal_settings_save();
         } else {
             add_action( 'init', [ $this, 'handle_token_authentication' ], 5 );
+            add_action( 'init', [ $this, 'handle_remember_cookie' ], 5 );
             add_action( 'init', [ $this, 'handle_logout_request' ], 6 );
             add_action( 'init', [ $this, 'handle_portal_actions' ] );
             add_action( 'init', [ $this, 'handle_portal_settings_save' ] );
@@ -112,6 +113,10 @@ final class DPS_Client_Portal {
             $this->log_security_event( 'token_invalid', [
                 'ip' => $ip_address,
             ] );
+            // F6.3: FASE 6 - Audit log de tentativa falhada
+            if ( class_exists( 'DPS_Audit_Logger' ) ) {
+                DPS_Audit_Logger::log_portal_event( 'token_validation_failed', 0, [ 'ip' => $ip_address ] );
+            }
             $this->redirect_to_access_screen( 'invalid' );
             return;
         }
@@ -134,11 +139,48 @@ final class DPS_Client_Portal {
             $token_manager->mark_as_used( $token_data['id'] );
         }
 
+        // F4.6: FASE 4 - "Manter acesso neste dispositivo"
+        // Se dps_remember=1 na URL, cria token permanente e cookie de longa duração
+        $remember = isset( $_GET['dps_remember'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['dps_remember'] ) );
+        if ( $remember ) {
+            $permanent_token = $token_manager->generate_token( $token_data['client_id'], 'permanent' );
+            if ( false !== $permanent_token ) {
+                $cookie_expiry = time() + ( 90 * DAY_IN_SECONDS );
+                setcookie(
+                    'dps_portal_remember',
+                    $permanent_token,
+                    $cookie_expiry,
+                    COOKIEPATH,
+                    COOKIE_DOMAIN,
+                    is_ssl(),
+                    true // HttpOnly
+                );
+                // SameSite=Strict via header
+                if ( ! headers_sent() ) {
+                    header(
+                        sprintf(
+                            'Set-Cookie: dps_portal_remember=%s; Expires=%s; Path=%s; Domain=%s%s; HttpOnly; SameSite=Strict',
+                            $permanent_token,
+                            gmdate( 'D, d M Y H:i:s T', $cookie_expiry ),
+                            COOKIEPATH,
+                            COOKIE_DOMAIN,
+                            is_ssl() ? '; Secure' : ''
+                        ),
+                        false
+                    );
+                }
+            }
+        }
+
         // Registra acesso bem-sucedido
         $this->log_security_event( 'token_auth_success', [
             'client_id' => $token_data['client_id'],
             'ip'        => $ip_address,
         ], DPS_Logger::LEVEL_INFO );
+        // F6.3: FASE 6 - Audit log de login bem-sucedido
+        if ( class_exists( 'DPS_Audit_Logger' ) ) {
+            DPS_Audit_Logger::log_portal_event( 'login_success', $token_data['client_id'], [ 'ip' => $ip_address ] );
+        }
         
         // Registra acesso no histórico para auditoria
         $user_agent = '';
@@ -156,6 +198,69 @@ final class DPS_Client_Portal {
 
         // NÃO redireciona - permite que a página atual carregue com o cliente autenticado
         // O JavaScript limpará o token da URL por segurança (ver assets/js/client-portal.js)
+    }
+
+    /**
+     * F4.6: FASE 4 - Verifica cookie "manter acesso" para auto-autenticação.
+     *
+     * Se o cliente não tem sessão ativa mas tem um cookie dps_portal_remember com
+     * um token permanente válido, re-autentica automaticamente.
+     *
+     * @since 2.6.0
+     */
+    public function handle_remember_cookie() {
+        // Ignora se já existe token na URL (handle_token_authentication cuida)
+        if ( isset( $_GET['dps_token'] ) ) {
+            return;
+        }
+
+        // Ignora se já existe sessão ativa
+        $session_manager = DPS_Portal_Session_Manager::get_instance();
+        if ( $session_manager->get_authenticated_client_id() ) {
+            return;
+        }
+
+        // Verifica cookie de acesso permanente
+        if ( ! isset( $_COOKIE['dps_portal_remember'] ) ) {
+            return;
+        }
+
+        $remember_token = sanitize_text_field( wp_unslash( $_COOKIE['dps_portal_remember'] ) );
+        if ( empty( $remember_token ) ) {
+            return;
+        }
+
+        // Valida o token permanente
+        $token_manager = DPS_Portal_Token_Manager::get_instance();
+        $token_data    = $token_manager->validate_token( $remember_token );
+
+        if ( false === $token_data || ! isset( $token_data['type'] ) || 'permanent' !== $token_data['type'] ) {
+            // Token inválido ou não permanente — remove cookie
+            setcookie( 'dps_portal_remember', '', time() - 3600, COOKIEPATH, COOKIE_DOMAIN );
+            return;
+        }
+
+        // Token permanente válido — autentica o cliente
+        $authenticated = $session_manager->authenticate_client( $token_data['client_id'] );
+        if ( ! $authenticated ) {
+            return;
+        }
+
+        $ip_address = $this->get_client_ip();
+
+        // Registra acesso via remember cookie
+        $this->log_security_event( 'remember_cookie_auth', [
+            'client_id' => $token_data['client_id'],
+            'ip'        => $ip_address,
+        ], DPS_Logger::LEVEL_INFO );
+
+        $user_agent = '';
+        if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && is_string( $_SERVER['HTTP_USER_AGENT'] ) ) {
+            $user_agent = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
+        }
+        $token_manager->log_access( $token_data['client_id'], $token_data['id'], $ip_address, $user_agent );
+
+        $this->current_request_client_id = $token_data['client_id'];
     }
 
     /**
@@ -1638,7 +1743,7 @@ final class DPS_Client_Portal {
         $achievement_definitions = DPS_Loyalty_Achievements::get_achievements_definitions();
         $unlocked_achievements  = DPS_Loyalty_Achievements::get_client_achievements( $client_id );
 
-        $credit_display = class_exists( 'DPS_Money_Helper' ) ? 'R$ ' . DPS_Money_Helper::format_to_brazilian( $credit ) : 'R$ ' . number_format( $credit / 100, 2, ',', '.' );
+        $credit_display = DPS_Money_Helper::format_currency( $credit );
         $progress       = isset( $tier['progress'] ) ? (int) $tier['progress'] : 0;
         $next_points    = isset( $tier['next_points'] ) ? (int) $tier['next_points'] : null;
         $loyalty_nonce  = wp_create_nonce( 'dps_portal_loyalty' );
@@ -1649,7 +1754,7 @@ final class DPS_Client_Portal {
         $max_discount_cents   = isset( $settings['portal_max_discount_amount'] ) ? (int) $settings['portal_max_discount_amount'] : 0;
         $max_points_by_cap    = $max_discount_cents > 0 ? (int) floor( ( $max_discount_cents / 100 ) * $points_per_real ) : $points;
         $max_points_available = min( $points, $max_points_by_cap );
-        $max_discount_display = class_exists( 'DPS_Money_Helper' ) ? DPS_Money_Helper::format_to_brazilian( $max_discount_cents ) : number_format( $max_discount_cents / 100, 2, ',', '.' );
+        $max_discount_display = DPS_Money_Helper::format_to_brazilian( $max_discount_cents );
 
         // Hero Section - Tier e Progresso
         echo '<div class="dps-loyalty-hero" data-loyalty-nonce="' . esc_attr( $loyalty_nonce ) . '" data-history-limit="' . esc_attr( $history_limit ) . '">';
@@ -2139,6 +2244,20 @@ Equipe %4$s', 'dps-client-portal' ),
         $contact_preference = get_post_meta( $client_id, 'client_contact_preference', true );
         $period_preference  = get_post_meta( $client_id, 'client_period_preference', true );
 
+        // Preferências de notificação
+        $notif_reminders  = get_post_meta( $client_id, 'client_notification_reminders', true );
+        $notif_payments   = get_post_meta( $client_id, 'client_notification_payments', true );
+        $notif_promotions = get_post_meta( $client_id, 'client_notification_promotions', true );
+        $notif_updates    = get_post_meta( $client_id, 'client_notification_updates', true );
+
+        // Default: ligado para reminders/payments, desligado para promotions
+        if ( $notif_reminders === '' ) {
+            $notif_reminders = '1';
+        }
+        if ( $notif_payments === '' ) {
+            $notif_payments = '1';
+        }
+
         echo '<div class="dps-surface dps-surface--neutral dps-meus-dados-card dps-preferences-section">';
         echo '<div class="dps-surface__title">';
         echo '<span>⚙️</span>';
@@ -2182,6 +2301,64 @@ Equipe %4$s', 'dps-client-portal' ),
         echo '</div>';
         
         echo '</div>'; // .dps-form-row
+        echo '</fieldset>';
+
+        // Preferências de notificação
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( '🔔 Notificações', 'dps-client-portal' ) . '</legend>';
+        echo '<p class="dps-fieldset__description">' . esc_html__( 'Escolha quais notificações deseja receber.', 'dps-client-portal' ) . '</p>';
+
+        echo '<div class="dps-notification-toggles">';
+
+        // Lembretes de agendamento
+        echo '<label class="dps-toggle-row">';
+        echo '<span class="dps-toggle-row__label">';
+        echo '<span class="dps-toggle-row__icon">📅</span>';
+        echo esc_html__( 'Lembretes de agendamento', 'dps-client-portal' );
+        echo '</span>';
+        echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Receba avisos antes do horário marcado', 'dps-client-portal' ) . '</span>';
+        echo '<input type="hidden" name="notification_reminders" value="0">';
+        echo '<input type="checkbox" name="notification_reminders" value="1" class="dps-toggle-input"' . checked( $notif_reminders, '1', false ) . '>';
+        echo '<span class="dps-toggle-switch" aria-hidden="true"></span>';
+        echo '</label>';
+
+        // Notificações de pagamento
+        echo '<label class="dps-toggle-row">';
+        echo '<span class="dps-toggle-row__label">';
+        echo '<span class="dps-toggle-row__icon">💰</span>';
+        echo esc_html__( 'Avisos de pagamento', 'dps-client-portal' );
+        echo '</span>';
+        echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Receba lembretes de parcelas e cobranças', 'dps-client-portal' ) . '</span>';
+        echo '<input type="hidden" name="notification_payments" value="0">';
+        echo '<input type="checkbox" name="notification_payments" value="1" class="dps-toggle-input"' . checked( $notif_payments, '1', false ) . '>';
+        echo '<span class="dps-toggle-switch" aria-hidden="true"></span>';
+        echo '</label>';
+
+        // Promoções
+        echo '<label class="dps-toggle-row">';
+        echo '<span class="dps-toggle-row__label">';
+        echo '<span class="dps-toggle-row__icon">🎁</span>';
+        echo esc_html__( 'Promoções e ofertas', 'dps-client-portal' );
+        echo '</span>';
+        echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Fique por dentro de descontos e novidades', 'dps-client-portal' ) . '</span>';
+        echo '<input type="hidden" name="notification_promotions" value="0">';
+        echo '<input type="checkbox" name="notification_promotions" value="1" class="dps-toggle-input"' . checked( $notif_promotions, '1', false ) . '>';
+        echo '<span class="dps-toggle-switch" aria-hidden="true"></span>';
+        echo '</label>';
+
+        // Atualizações do pet
+        echo '<label class="dps-toggle-row">';
+        echo '<span class="dps-toggle-row__label">';
+        echo '<span class="dps-toggle-row__icon">🐾</span>';
+        echo esc_html__( 'Atualizações do pet', 'dps-client-portal' );
+        echo '</span>';
+        echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Novas fotos, observações e relatórios', 'dps-client-portal' ) . '</span>';
+        echo '<input type="hidden" name="notification_updates" value="0">';
+        echo '<input type="checkbox" name="notification_updates" value="1" class="dps-toggle-input"' . checked( $notif_updates, '1', false ) . '>';
+        echo '<span class="dps-toggle-switch" aria-hidden="true"></span>';
+        echo '</label>';
+
+        echo '</div>'; // .dps-notification-toggles
         echo '</fieldset>';
         
         echo '<div class="dps-form-actions">';

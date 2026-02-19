@@ -64,8 +64,17 @@ class DPS_AI_Analytics {
 
     /**
      * Cria as tabelas de métricas se não existirem.
+     * F3.1: Adicionado version check para evitar dbDelta desnecessário.
      */
     public static function maybe_create_tables() {
+        $db_version = '1.0.0';
+        $option_key = 'dps_ai_analytics_db_version';
+        $installed  = get_option( $option_key, '' );
+
+        if ( $installed === $db_version ) {
+            return;
+        }
+
         global $wpdb;
 
         $charset_collate = $wpdb->get_charset_collate();
@@ -116,6 +125,8 @@ class DPS_AI_Analytics {
 
         dbDelta( $sql_metrics );
         dbDelta( $sql_feedback );
+
+        update_option( $option_key, $db_version );
     }
 
     /**
@@ -449,8 +460,8 @@ class DPS_AI_Analytics {
         }
 
         // Todos os feedbacks
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-        return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table_name}" );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table_name vem de $wpdb->prefix (seguro)
+        return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table_name}`" );
     }
 
     /**

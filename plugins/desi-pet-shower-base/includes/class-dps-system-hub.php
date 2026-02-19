@@ -72,6 +72,10 @@ class DPS_System_Hub {
         $tabs['logs'] = __( 'Logs', 'desi-pet-shower' );
         $callbacks['logs'] = [ $this, 'render_logs_tab' ];
 
+        // Aba Auditoria (sempre disponível - do base plugin, Fase 6.2)
+        $tabs['audit'] = __( 'Auditoria', 'desi-pet-shower' );
+        $callbacks['audit'] = [ $this, 'render_audit_tab' ];
+
         // Aba Backup (se add-on ativo e atualizado)
         if ( class_exists( 'DPS_Backup_Addon' ) && method_exists( 'DPS_Backup_Addon', 'get_instance' ) ) {
             $tabs['backup'] = __( 'Backup', 'desi-pet-shower' );
@@ -112,6 +116,25 @@ class DPS_System_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
+            echo $content;
+        }
+    }
+
+    /**
+     * Renderiza a aba de Auditoria.
+     *
+     * @since 2.6.0
+     */
+    public function render_audit_tab() {
+        if ( class_exists( 'DPS_Audit_Admin_Page' ) ) {
+            ob_start();
+            DPS_Audit_Admin_Page::render_page();
+            $content = ob_get_clean();
+
+            $content = preg_replace( '/^<div class="wrap[^>]*">/i', '', $content );
+            $content = preg_replace( '/<\/div>\s*$/i', '', $content );
+            $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
+
             echo $content;
         }
     }

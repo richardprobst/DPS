@@ -508,11 +508,21 @@ class DPS_Portal_Actions_Handler {
         
         update_post_meta( $client_id, 'client_contact_preference', $contact_pref );
         update_post_meta( $client_id, 'client_period_preference', $period_pref );
+
+        // Preferências de notificação
+        $notif_keys = [ 'notification_reminders', 'notification_payments', 'notification_promotions', 'notification_updates' ];
+        $notif_data = [];
+        foreach ( $notif_keys as $key ) {
+            $value = isset( $_POST[ $key ] ) ? absint( $_POST[ $key ] ) : 0;
+            $value = $value ? '1' : '0';
+            update_post_meta( $client_id, 'client_' . $key, $value );
+            $notif_data[ $key ] = $value;
+        }
         
-        do_action( 'dps_portal_after_update_preferences', $client_id, [
+        do_action( 'dps_portal_after_update_preferences', $client_id, array_merge( [
             'contact_preference' => $contact_pref,
             'period_preference'  => $period_pref,
-        ] );
+        ], $notif_data ) );
         
         return add_query_arg( 'portal_msg', 'preferences_updated', wp_get_referer() ?: home_url() );
     }

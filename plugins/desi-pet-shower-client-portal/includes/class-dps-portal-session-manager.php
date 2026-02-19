@@ -263,6 +263,11 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
                     false
                 );
             }
+
+            // F4.6: FASE 4 - Remove cookie "manter acesso" no logout
+            if ( isset( $_COOKIE['dps_portal_remember'] ) ) {
+                setcookie( 'dps_portal_remember', '', $expires, $path, $domain, $secure, $httponly );
+            }
         }
     }
 

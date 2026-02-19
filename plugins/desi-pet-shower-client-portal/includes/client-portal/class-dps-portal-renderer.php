@@ -437,6 +437,7 @@ class DPS_Portal_Renderer {
         
         if ( $appointments ) {
             $this->render_appointments_table( $appointments );
+            $this->render_review_prompt( $client_id );
         } else {
             $this->render_no_history_state();
         }
@@ -511,6 +512,88 @@ class DPS_Portal_Renderer {
     }
 
     /**
+     * Renderiza prompt de avaliação pós-agendamento.
+     *
+     * Exibe formulário de avaliação se o cliente ainda não avaliou
+     * e se o CPT dps_groomer_review existe.
+     *
+     * @since 3.3.0
+     * @param int $client_id ID do cliente.
+     */
+    private function render_review_prompt( $client_id ) {
+        // Verifica se o CPT de review existe
+        if ( ! post_type_exists( 'dps_groomer_review' ) ) {
+            return;
+        }
+
+        // Verifica se o cliente já avaliou
+        $existing = get_posts( [
+            'post_type'      => 'dps_groomer_review',
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+            'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+                [
+                    'key'   => '_dps_review_client_id',
+                    'value' => $client_id,
+                ],
+            ],
+            'fields'         => 'ids',
+            'no_found_rows'  => true,
+        ] );
+
+        if ( ! empty( $existing ) ) {
+            // Mostra mensagem de "já avaliou" com a nota
+            $review_id = $existing[0];
+            $rating    = (int) get_post_meta( $review_id, '_dps_review_rating', true );
+            echo '<div class="dps-review-prompt dps-review-prompt--done">';
+            echo '<div class="dps-review-prompt__icon">✅</div>';
+            echo '<p class="dps-review-prompt__text">';
+            echo esc_html__( 'Obrigado pela sua avaliação!', 'dps-client-portal' );
+            if ( $rating > 0 ) {
+                echo ' <span class="dps-review-prompt__stars">' . esc_html( str_repeat( '⭐', $rating ) ) . '</span>';
+            }
+            echo '</p>';
+            echo '</div>';
+            return;
+        }
+
+        // Formulário de avaliação
+        echo '<div class="dps-review-prompt">';
+        echo '<div class="dps-review-prompt__header">';
+        echo '<span class="dps-review-prompt__icon">⭐</span>';
+        echo '<h3 class="dps-review-prompt__title">' . esc_html__( 'Como foi sua experiência?', 'dps-client-portal' ) . '</h3>';
+        echo '<p class="dps-review-prompt__subtitle">' . esc_html__( 'Sua opinião nos ajuda a melhorar!', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+
+        echo '<form method="post" class="dps-review-form dps-portal-form">';
+        wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
+        echo '<input type="hidden" name="dps_client_portal_action" value="submit_internal_review">';
+
+        // Star rating
+        echo '<div class="dps-star-rating" role="radiogroup" aria-label="' . esc_attr__( 'Nota de 1 a 5', 'dps-client-portal' ) . '">';
+        for ( $i = 1; $i <= 5; $i++ ) {
+            echo '<label class="dps-star-rating__label" title="' . esc_attr( $i ) . ' ' . esc_attr( _n( 'estrela', 'estrelas', $i, 'dps-client-portal' ) ) . '">';
+            echo '<input type="radio" name="review_rating" value="' . esc_attr( $i ) . '" class="dps-star-rating__input" required>';
+            echo '<span class="dps-star-rating__star" aria-hidden="true">☆</span>';
+            echo '</label>';
+        }
+        echo '</div>';
+
+        // Comment
+        echo '<div class="dps-form-group">';
+        echo '<label class="dps-form-label" for="review_comment">' . esc_html__( 'Comentário (opcional)', 'dps-client-portal' ) . '</label>';
+        echo '<textarea id="review_comment" name="review_comment" class="dps-form-control" rows="3" maxlength="500" placeholder="' . esc_attr__( 'Conte como foi sua experiência...', 'dps-client-portal' ) . '"></textarea>';
+        echo '</div>';
+
+        echo '<button type="submit" class="button button-primary dps-btn-submit">';
+        echo '<span>📝</span> ' . esc_html__( 'Enviar Avaliação', 'dps-client-portal' );
+        echo '</button>';
+
+        echo '</form>';
+        echo '</div>'; // .dps-review-prompt
+    }
+
+    /**
      * Renderiza galeria de fotos dos pets.
      * Revisão de layout: Fevereiro 2026
      *
@@ -540,9 +623,13 @@ class DPS_Portal_Renderer {
         // Conta fotos disponíveis
         $total_photos = 0;
         foreach ( $pets as $pet ) {
-            $photo_id = get_post_meta( $pet->ID, 'pet_photo_id', true );
-            if ( $photo_id && wp_get_attachment_image_url( $photo_id, 'thumbnail' ) ) {
-                $total_photos++;
+            if ( class_exists( 'DPS_Pet_Handler' ) ) {
+                $total_photos += count( DPS_Pet_Handler::get_all_photo_ids( $pet->ID ) );
+            } else {
+                $photo_id = get_post_meta( $pet->ID, 'pet_photo_id', true );
+                if ( $photo_id && wp_get_attachment_image_url( $photo_id, 'thumbnail' ) ) {
+                    $total_photos++;
+                }
             }
         }
 
@@ -609,8 +696,18 @@ class DPS_Portal_Renderer {
     private function render_gallery_pet_card( $pet ) {
         $pet_id   = $pet->ID;
         $pet_name = get_the_title( $pet_id );
-        $photo_id = get_post_meta( $pet_id, 'pet_photo_id', true );
         $species  = get_post_meta( $pet_id, 'pet_species', true );
+
+        // Busca todas as fotos (multi-foto com fallback)
+        $photo_ids = [];
+        if ( class_exists( 'DPS_Pet_Handler' ) ) {
+            $photo_ids = DPS_Pet_Handler::get_all_photo_ids( $pet_id );
+        } else {
+            $single = get_post_meta( $pet_id, 'pet_photo_id', true );
+            if ( $single ) {
+                $photo_ids = [ (int) $single ];
+            }
+        }
 
         $species_icon = '🐾';
         if ( $species ) {
@@ -629,25 +726,38 @@ class DPS_Portal_Renderer {
         echo '<h3 class="dps-gallery-pet-card__name">';
         echo '<span class="dps-gallery-pet-card__icon">' . $species_icon . '</span>';
         echo esc_html( $pet_name );
+        if ( count( $photo_ids ) > 1 ) {
+            echo ' <span class="dps-gallery-pet-card__count">(' . esc_html( count( $photo_ids ) ) . ' ' . esc_html__( 'fotos', 'dps-client-portal' ) . ')</span>';
+        }
         echo '</h3>';
         echo '</div>';
 
         // Content
         echo '<div class="dps-gallery-pet-card__content">';
 
-        if ( $photo_id ) {
-            $photo_url_medium = wp_get_attachment_image_url( $photo_id, 'medium' );
-            $photo_url_full   = wp_get_attachment_image_url( $photo_id, 'full' );
+        if ( ! empty( $photo_ids ) ) {
+            echo '<div class="dps-gallery-photo-grid' . ( count( $photo_ids ) > 1 ? ' dps-gallery-photo-grid--multi' : '' ) . '">';
+            $index = 0;
+            foreach ( $photo_ids as $photo_id ) {
+                $photo_url_medium = wp_get_attachment_image_url( $photo_id, 'medium' );
+                $photo_url_full   = wp_get_attachment_image_url( $photo_id, 'full' );
 
-            if ( $photo_url_medium && $photo_url_full ) {
-                echo '<div class="dps-gallery-photo-grid">';
-                echo '<div class="dps-gallery-photo dps-gallery-photo--profile">';
-                echo '<a href="' . esc_url( $photo_url_full ) . '" class="dps-gallery-photo__link" title="' . esc_attr( $pet_name ) . '">';
+                if ( ! $photo_url_medium || ! $photo_url_full ) {
+                    continue;
+                }
+
+                $is_profile = ( $index === 0 );
+                $label      = $is_profile
+                    ? esc_html__( 'Foto de perfil', 'dps-client-portal' )
+                    : esc_html( sprintf( __( 'Foto %d', 'dps-client-portal' ), $index + 1 ) );
+
+                echo '<div class="dps-gallery-photo' . ( $is_profile ? ' dps-gallery-photo--profile' : '' ) . '">';
+                echo '<a href="' . esc_url( $photo_url_full ) . '" class="dps-gallery-photo__link" title="' . esc_attr( $pet_name ) . '" data-gallery="pet-' . esc_attr( $pet_id ) . '" data-index="' . esc_attr( $index ) . '">';
                 echo '<img src="' . esc_url( $photo_url_medium ) . '" alt="' . esc_attr( sprintf( __( 'Foto de %s', 'dps-client-portal' ), $pet_name ) ) . '" class="dps-gallery-photo__img" loading="lazy" />';
                 echo '<div class="dps-gallery-photo__overlay"><span class="dps-gallery-photo__zoom">🔍</span></div>';
                 echo '</a>';
                 echo '<div class="dps-gallery-photo__info">';
-                echo '<span class="dps-gallery-photo__label">' . esc_html__( 'Foto de perfil', 'dps-client-portal' ) . '</span>';
+                echo '<span class="dps-gallery-photo__label">' . $label . '</span>';
                 echo '<div class="dps-gallery-photo__actions">';
                 echo '<a href="' . esc_url( $photo_url_full ) . '" class="dps-gallery-photo__action dps-gallery-photo__action--download" download title="' . esc_attr__( 'Baixar foto', 'dps-client-portal' ) . '">';
                 echo '<span class="dps-gallery-photo__action-icon">⬇️</span>';
@@ -655,10 +765,10 @@ class DPS_Portal_Renderer {
                 echo '</div>';
                 echo '</div>'; // .dps-gallery-photo__info
                 echo '</div>'; // .dps-gallery-photo
-                echo '</div>'; // .dps-gallery-photo-grid
-            } else {
-                $this->render_gallery_pet_empty( $pet_name );
+
+                $index++;
             }
+            echo '</div>'; // .dps-gallery-photo-grid
         } else {
             $this->render_gallery_pet_empty( $pet_name );
         }
@@ -900,12 +1010,14 @@ class DPS_Portal_Renderer {
         
         echo '<div class="dps-form-col">';
         echo '<label for="client_phone" class="dps-form-label">' . esc_html__( 'Telefone / WhatsApp', 'dps-client-portal' ) . '</label>';
-        echo '<input type="tel" name="client_phone" id="client_phone" value="' . esc_attr( $phone ) . '" class="dps-form-control" placeholder="(XX) XXXXX-XXXX">';
+        echo '<input type="tel" name="client_phone" id="client_phone" value="' . esc_attr( $phone ) . '" class="dps-form-control" placeholder="(XX) XXXXX-XXXX" aria-describedby="client_phone_error">';
+        echo '<span class="dps-field-error" id="client_phone_error" role="alert"></span>';
         echo '</div>';
         
         echo '<div class="dps-form-col">';
         echo '<label for="client_email" class="dps-form-label">' . esc_html__( 'E-mail', 'dps-client-portal' ) . '</label>';
-        echo '<input type="email" name="client_email" id="client_email" value="' . esc_attr( $email ) . '" class="dps-form-control" placeholder="seu@email.com">';
+        echo '<input type="email" name="client_email" id="client_email" value="' . esc_attr( $email ) . '" class="dps-form-control" placeholder="seu@email.com" aria-describedby="client_email_error">';
+        echo '<span class="dps-field-error" id="client_email_error" role="alert"></span>';
         echo '</div>';
         
         echo '</div>'; // .dps-form-row
@@ -929,12 +1041,14 @@ class DPS_Portal_Renderer {
         
         echo '<div class="dps-form-col">';
         echo '<label for="client_state" class="dps-form-label">' . esc_html__( 'Estado', 'dps-client-portal' ) . '</label>';
-        echo '<input type="text" name="client_state" id="client_state" value="' . esc_attr( $state ) . '" class="dps-form-control" maxlength="2" placeholder="UF">';
+        echo '<input type="text" name="client_state" id="client_state" value="' . esc_attr( $state ) . '" class="dps-form-control" maxlength="2" placeholder="UF" aria-describedby="client_state_error">';
+        echo '<span class="dps-field-error" id="client_state_error" role="alert"></span>';
         echo '</div>';
         
         echo '<div class="dps-form-col">';
         echo '<label for="client_zip" class="dps-form-label">' . esc_html__( 'CEP', 'dps-client-portal' ) . '</label>';
-        echo '<input type="text" name="client_zip" id="client_zip" value="' . esc_attr( $zip ) . '" class="dps-form-control" placeholder="XXXXX-XXX">';
+        echo '<input type="text" name="client_zip" id="client_zip" value="' . esc_attr( $zip ) . '" class="dps-form-control" placeholder="XXXXX-XXX" inputmode="numeric" aria-describedby="client_zip_error">';
+        echo '<span class="dps-field-error" id="client_zip_error" role="alert"></span>';
         echo '</div>';
         
         echo '</div>'; // .dps-form-row
@@ -1018,7 +1132,7 @@ class DPS_Portal_Renderer {
         // Header do card com foto do pet
         echo '<div class="dps-pet-form-header">';
         if ( $photo_url ) {
-            echo '<img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet_name ) . '" class="dps-pet-form-header__photo" />';
+            echo '<img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet_name ) . '" class="dps-pet-form-header__photo" loading="lazy" />';
         } else {
             echo '<span class="dps-pet-form-header__placeholder">🐾</span>';
         }
@@ -1041,7 +1155,8 @@ class DPS_Portal_Renderer {
         
         echo '<div class="dps-form-col">';
         echo '<label for="pet_name_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Nome', 'dps-client-portal' ) . '</label>';
-        echo '<input type="text" name="pet_name" id="pet_name_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $pet_name ) . '" class="dps-form-control" required>';
+        echo '<input type="text" name="pet_name" id="pet_name_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $pet_name ) . '" class="dps-form-control" required aria-required="true" aria-describedby="pet_name_' . esc_attr( $pet_id ) . '_error">';
+        echo '<span class="dps-field-error" id="pet_name_' . esc_attr( $pet_id ) . '_error" role="alert"></span>';
         echo '</div>';
         
         echo '<div class="dps-form-col">';
@@ -1097,12 +1212,14 @@ class DPS_Portal_Renderer {
         
         echo '<div class="dps-form-col">';
         echo '<label for="pet_weight_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Peso (kg)', 'dps-client-portal' ) . '</label>';
-        echo '<input type="number" name="pet_weight" id="pet_weight_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $weight ) . '" class="dps-form-control" step="0.1" min="0" placeholder="Ex: 8.5">';
+        echo '<input type="number" name="pet_weight" id="pet_weight_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $weight ) . '" class="dps-form-control" step="0.1" min="0" max="200" placeholder="Ex: 8.5" aria-describedby="pet_weight_' . esc_attr( $pet_id ) . '_error">';
+        echo '<span class="dps-field-error" id="pet_weight_' . esc_attr( $pet_id ) . '_error" role="alert"></span>';
         echo '</div>';
         
         echo '<div class="dps-form-col">';
         echo '<label for="pet_birth_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Nascimento', 'dps-client-portal' ) . '</label>';
-        echo '<input type="date" name="pet_birth" id="pet_birth_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $birth ) . '" class="dps-form-control">';
+        echo '<input type="date" name="pet_birth" id="pet_birth_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $birth ) . '" class="dps-form-control" max="' . esc_attr( gmdate( 'Y-m-d' ) ) . '" aria-describedby="pet_birth_' . esc_attr( $pet_id ) . '_error">';
+        echo '<span class="dps-field-error" id="pet_birth_' . esc_attr( $pet_id ) . '_error" role="alert"></span>';
         echo '</div>';
         
         echo '</div>'; // .dps-form-row
@@ -1608,7 +1725,7 @@ class DPS_Portal_Renderer {
             echo '<button type="button" class="dps-pet-tab' . ( $is_active ? ' dps-pet-tab--active' : '' ) . '" id="dps-pet-tab-' . esc_attr( $pet_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="dps-pet-panel-' . esc_attr( $pet_id ) . '" tabindex="' . ( $is_active ? '0' : '-1' ) . '" data-pet-id="' . esc_attr( $pet_id ) . '">';
             
             if ( $photo_url ) {
-                echo '<img src="' . esc_url( $photo_url ) . '" alt="" class="dps-pet-tab__photo" />';
+                echo '<img src="' . esc_url( $photo_url ) . '" alt="" class="dps-pet-tab__photo" loading="lazy" />';
             } else {
                 echo '<span class="dps-pet-tab__icon">🐾</span>';
             }
@@ -1640,6 +1757,10 @@ class DPS_Portal_Renderer {
         $pet_photo   = get_post_meta( $pet_id, 'pet_photo_id', true );
         $pet_species = get_post_meta( $pet_id, 'pet_species', true );
         $pet_breed   = get_post_meta( $pet_id, 'pet_breed', true );
+        $pet_size    = get_post_meta( $pet_id, 'pet_size', true );
+        $pet_weight  = get_post_meta( $pet_id, 'pet_weight', true );
+        $pet_birth   = get_post_meta( $pet_id, 'pet_birth', true );
+        $pet_sex     = get_post_meta( $pet_id, 'pet_sex', true );
 
         // Classes e atributos para tab panel
         $panel_class = 'dps-portal-section dps-portal-pet-timeline dps-pet-timeline-panel';
@@ -1655,7 +1776,7 @@ class DPS_Portal_Renderer {
         if ( $pet_photo ) {
             $photo_url = wp_get_attachment_image_url( $pet_photo, 'thumbnail' );
             if ( $photo_url ) {
-                echo '<img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet_name ) . '" />';
+                echo '<img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet_name ) . '" loading="lazy" />';
             } else {
                 echo '<span class="dps-pet-info-card__placeholder">🐾</span>';
             }
@@ -1670,6 +1791,50 @@ class DPS_Portal_Renderer {
             echo esc_html( trim( $pet_species . ' ' . ( $pet_breed ? '• ' . $pet_breed : '' ) ) );
             echo '</p>';
         }
+
+        // Detalhes adicionais do pet (Fase 4.5)
+        $pet_meta_items = [];
+        if ( $pet_size ) {
+            $size_labels = [
+                'pequeno' => __( 'Pequeno', 'dps-client-portal' ),
+                'medio'   => __( 'Médio', 'dps-client-portal' ),
+                'grande'  => __( 'Grande', 'dps-client-portal' ),
+                'gigante' => __( 'Gigante', 'dps-client-portal' ),
+            ];
+            $pet_meta_items[] = '<span class="dps-pet-info-card__meta-item" title="' . esc_attr__( 'Porte', 'dps-client-portal' ) . '">📏 ' . esc_html( $size_labels[ $pet_size ] ?? $pet_size ) . '</span>';
+        }
+        if ( $pet_weight && is_numeric( $pet_weight ) && (float) $pet_weight > 0 ) {
+            $pet_meta_items[] = '<span class="dps-pet-info-card__meta-item" title="' . esc_attr__( 'Peso', 'dps-client-portal' ) . '">⚖️ ' . esc_html( rtrim( rtrim( number_format( (float) $pet_weight, 1, ',', '' ), '0' ), ',' ) ) . ' kg</span>';
+        }
+        if ( $pet_sex ) {
+            $sex_labels = [
+                'macho' => __( 'Macho', 'dps-client-portal' ),
+                'femea' => __( 'Fêmea', 'dps-client-portal' ),
+            ];
+            $sex_icon = ( 'macho' === $pet_sex ) ? '♂️' : '♀️';
+            $pet_meta_items[] = '<span class="dps-pet-info-card__meta-item" title="' . esc_attr__( 'Sexo', 'dps-client-portal' ) . '">' . $sex_icon . ' ' . esc_html( $sex_labels[ $pet_sex ] ?? $pet_sex ) . '</span>';
+        }
+        if ( $pet_birth ) {
+            $birth_date = DateTime::createFromFormat( 'Y-m-d', $pet_birth );
+            if ( $birth_date ) {
+                $now  = new DateTime();
+                $diff = $now->diff( $birth_date );
+                if ( $diff->y > 0 ) {
+                    /* translators: %d: number of years */
+                    $age_text = sprintf( _n( '%d ano', '%d anos', $diff->y, 'dps-client-portal' ), $diff->y );
+                } else {
+                    /* translators: %d: number of months */
+                    $age_text = sprintf( _n( '%d mês', '%d meses', max( 1, $diff->m ), 'dps-client-portal' ), max( 1, $diff->m ) );
+                }
+                $pet_meta_items[] = '<span class="dps-pet-info-card__meta-item" title="' . esc_attr__( 'Idade', 'dps-client-portal' ) . '">🎂 ' . esc_html( $age_text ) . '</span>';
+            }
+        }
+        if ( ! empty( $pet_meta_items ) ) {
+            echo '<div class="dps-pet-info-card__meta">';
+            echo implode( '', $pet_meta_items ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Each item already escaped above
+            echo '</div>';
+        }
+
         echo '<span class="dps-pet-info-card__count">';
         /* translators: %d: number of services */
         echo esc_html( sprintf( _n( '%d serviço realizado', '%d serviços realizados', count( $services ), 'dps-client-portal' ), count( $services ) ) );
@@ -1687,6 +1852,23 @@ class DPS_Portal_Renderer {
         if ( empty( $services ) ) {
             $this->render_pet_timeline_empty_state( $pet_name );
         } else {
+            // Filtro de período (Fase 4.4)
+            echo '<div class="dps-timeline-filter" role="toolbar" aria-label="' . esc_attr__( 'Filtrar por período', 'dps-client-portal' ) . '">';
+            echo '<span class="dps-timeline-filter__label">' . esc_html__( 'Período:', 'dps-client-portal' ) . '</span>';
+            $periods = [
+                '30'  => __( '30 dias', 'dps-client-portal' ),
+                '60'  => __( '60 dias', 'dps-client-portal' ),
+                '90'  => __( '90 dias', 'dps-client-portal' ),
+                'all' => __( 'Todos', 'dps-client-portal' ),
+            ];
+            foreach ( $periods as $value => $label ) {
+                $is_default = ( 'all' === $value );
+                echo '<button type="button" class="dps-timeline-filter__btn' . ( $is_default ? ' dps-timeline-filter__btn--active' : '' ) . '" data-period="' . esc_attr( $value ) . '"' . ( $is_default ? ' aria-pressed="true"' : ' aria-pressed="false"' ) . '>';
+                echo esc_html( $label );
+                echo '</button>';
+            }
+            echo '</div>';
+
             $this->render_timeline_items( $services, $client_id, $pet_id );
             
             // Botão "Ver mais" se há mais serviços
@@ -1848,7 +2030,7 @@ class DPS_Portal_Renderer {
 
             <div class="pet-info">
                 <?php if ( $photo_url ) : ?>
-                    <img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $pet_name ); ?>" class="pet-info__photo">
+                    <img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $pet_name ); ?>" class="pet-info__photo" loading="lazy">
                 <?php else : ?>
                     <div class="pet-info__placeholder">🐾</div>
                 <?php endif; ?>
@@ -2008,7 +2190,7 @@ class DPS_Portal_Renderer {
             $appointment_value = get_post_meta( $appointment_id, 'appointment_value', true );
         }
 
-        echo '<div class="dps-timeline-item">';
+        echo '<div class="dps-timeline-item" data-date="' . esc_attr( $service['date'] ?? '' ) . '">';
         echo '<div class="dps-timeline-marker"></div>';
         echo '<div class="dps-timeline-content">';
         

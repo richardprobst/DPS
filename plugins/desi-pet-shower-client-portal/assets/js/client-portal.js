@@ -34,6 +34,7 @@
     function init() {
         cleanTokenFromURL();
         handleTabNavigation();
+        handleFormValidation(); // Fase 4.2: validação em tempo real
         handleFormSubmits();
         handleFileUploadPreview();
         handleSmoothScroll();
@@ -48,6 +49,7 @@
         handleRepeatService(); // Revisão Jan/2026: Botão repetir serviço via WhatsApp
         handleExportPdf(); // Funcionalidade 3: Export PDF
         handleLoadMorePetHistory(); // Load more pet history items
+        handleTimelinePeriodFilter(); // Fase 4.4: Filtro de período no histórico
     }
 
     /**
@@ -720,6 +722,165 @@
     }
 
     /**
+     * Fase 4.2: Validação em tempo real nos formulários do portal.
+     * Valida campos on blur/input e mostra mensagens inline acessíveis.
+     */
+    function handleFormValidation() {
+        var forms = document.querySelectorAll('.dps-portal-form');
+        if (!forms.length) return;
+
+        // Regras de validação por name do campo
+        var rules = {
+            'client_phone': {
+                pattern: /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/,
+                message: 'Informe um telefone válido. Ex: (11) 99999-9999'
+            },
+            'client_email': {
+                pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: 'Informe um e-mail válido. Ex: nome@email.com'
+            },
+            'client_zip': {
+                pattern: /^\d{5}-?\d{3}$/,
+                message: 'Informe um CEP válido. Ex: 01234-567'
+            },
+            'client_state': {
+                pattern: /^[A-Za-z]{2}$/,
+                message: 'Use a sigla do estado com 2 letras. Ex: SP'
+            },
+            'pet_name': {
+                required: true,
+                message: 'O nome do pet é obrigatório.'
+            },
+            'pet_weight': {
+                pattern: /^\d+([.,]\d{1,2})?$/,
+                message: 'Informe um peso válido. Ex: 8.5'
+            },
+            'pet_birth': {
+                maxDate: new Date().toISOString().split('T')[0],
+                message: 'A data de nascimento não pode ser no futuro.'
+            }
+        };
+
+        /**
+         * Valida um campo individual.
+         * @param {HTMLElement} field - O campo a validar.
+         * @returns {boolean} true se válido.
+         */
+        function validateField(field) {
+            var name = field.getAttribute('name');
+            var value = field.value.trim();
+            var rule = rules[name];
+            var errorEl = field.parentNode.querySelector('.dps-field-error');
+
+            // Sem regra customizada — usa validação HTML5 nativa
+            if (!rule) {
+                if (field.hasAttribute('required') && !value) {
+                    setInvalid(field, errorEl, 'Este campo é obrigatório.');
+                    return false;
+                }
+                setValid(field, errorEl);
+                return true;
+            }
+
+            // Campo vazio: só erro se obrigatório
+            if (!value) {
+                if (rule.required || field.hasAttribute('required')) {
+                    setInvalid(field, errorEl, rule.message);
+                    return false;
+                }
+                clearState(field, errorEl);
+                return true;
+            }
+
+            // Validação de pattern
+            if (rule.pattern && !rule.pattern.test(value)) {
+                setInvalid(field, errorEl, rule.message);
+                return false;
+            }
+
+            // Validação de data máxima
+            if (rule.maxDate && value > rule.maxDate) {
+                setInvalid(field, errorEl, rule.message);
+                return false;
+            }
+
+            setValid(field, errorEl);
+            return true;
+        }
+
+        function setInvalid(field, errorEl, message) {
+            field.classList.add('is-invalid');
+            field.classList.remove('is-valid');
+            field.setAttribute('aria-invalid', 'true');
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+            }
+        }
+
+        function setValid(field, errorEl) {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+            field.setAttribute('aria-invalid', 'false');
+            if (errorEl) {
+                errorEl.textContent = '';
+                errorEl.style.display = 'none';
+            }
+        }
+
+        function clearState(field, errorEl) {
+            field.classList.remove('is-invalid', 'is-valid');
+            field.removeAttribute('aria-invalid');
+            if (errorEl) {
+                errorEl.textContent = '';
+                errorEl.style.display = 'none';
+            }
+        }
+
+        forms.forEach(function(form) {
+            var fields = form.querySelectorAll('.dps-form-control');
+
+            fields.forEach(function(field) {
+                // Validar ao sair do campo (blur)
+                field.addEventListener('blur', function() {
+                    // Só valida se o campo já foi tocado (tem valor ou perdeu foco)
+                    if (field.value.trim() || field.hasAttribute('required')) {
+                        validateField(field);
+                    }
+                });
+
+                // Limpar erro enquanto digita (feedback imediato)
+                field.addEventListener('input', function() {
+                    if (field.classList.contains('is-invalid')) {
+                        validateField(field);
+                    }
+                });
+            });
+
+            // Validar todos os campos antes do submit
+            form.addEventListener('submit', function(e) {
+                var allValid = true;
+                var firstInvalid = null;
+
+                fields.forEach(function(field) {
+                    if (!validateField(field)) {
+                        allValid = false;
+                        if (!firstInvalid) firstInvalid = field;
+                    }
+                });
+
+                if (!allValid) {
+                    e.preventDefault();
+                    if (firstInvalid) {
+                        firstInvalid.focus();
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            });
+        });
+    }
+
+    /**
      * Adiciona feedback visual durante submit de formulários
      */
     function handleFormSubmits() {
@@ -727,6 +888,9 @@
         
         forms.forEach(function(form) {
             form.addEventListener('submit', function(e) {
+                // Se a validação customizada já preveniu o submit, não prosseguir
+                if (e.defaultPrevented) return;
+
                 var submitBtn = form.querySelector('.dps-btn-submit, .dps-submit-btn');
                 
                 if (submitBtn && !submitBtn.disabled) {
@@ -1069,13 +1233,13 @@
         var messages = {
             'updated': {
                 type: 'success',
-                title: 'Sucesso!',
-                message: 'Seus dados foram atualizados com sucesso.'
+                title: 'Dados Salvos!',
+                message: 'Seus dados pessoais foram atualizados com sucesso.'
             },
             'pet_updated': {
                 type: 'success',
-                title: 'Sucesso!',
-                message: 'Dados do pet atualizados com sucesso.'
+                title: 'Pet Atualizado!',
+                message: 'As informações do pet foram salvas com sucesso.'
             },
             'preferences_updated': {
                 type: 'success',
@@ -1084,43 +1248,68 @@
             },
             'pet_preferences_updated': {
                 type: 'success',
-                title: 'Sucesso!',
-                message: 'Preferências do pet atualizadas com sucesso.'
+                title: 'Preferências do Pet Salvas',
+                message: 'As preferências de produtos do pet foram atualizadas.'
             },
             'upload_error': {
                 type: 'error',
                 title: 'Erro no Upload',
-                message: 'Não foi possível enviar a foto. Verifique o arquivo e tente novamente.'
+                message: 'Não foi possível enviar a foto. Verifique se o arquivo é uma imagem válida (JPG, PNG, GIF ou WebP) com até 5 MB.'
             },
             'invalid_file_type': {
                 type: 'error',
-                title: 'Formato Inválido',
-                message: 'Use uma imagem nos formatos JPG, PNG, GIF ou WebP.'
+                title: 'Formato Não Aceito',
+                message: 'O arquivo enviado não é uma imagem válida. Use JPG, PNG, GIF ou WebP.'
             },
             'file_too_large': {
                 type: 'error',
-                title: 'Arquivo Grande Demais',
-                message: 'A foto deve ter no máximo 5 MB. Reduza o tamanho e tente novamente.'
+                title: 'Foto Grande Demais',
+                message: 'A foto deve ter no máximo 5 MB. Reduza o tamanho da imagem e tente novamente.'
             },
             'session_expired': {
                 type: 'error',
                 title: 'Sessão Expirada',
-                message: 'Sua sessão expirou. Faça login novamente para continuar.'
+                message: 'Sua sessão expirou por segurança. Solicite um novo link de acesso para continuar.'
             },
             'message_sent': {
                 type: 'success',
-                title: 'Mensagem Enviada',
-                message: 'Sua mensagem foi enviada para a equipe.'
+                title: 'Mensagem Enviada!',
+                message: 'Sua mensagem foi enviada para a equipe. Responderemos o mais breve possível.'
+            },
+            'message_error': {
+                type: 'error',
+                title: 'Erro ao Enviar',
+                message: 'Não foi possível enviar sua mensagem. Verifique o conteúdo e tente novamente.'
+            },
+            'review_submitted': {
+                type: 'success',
+                title: 'Avaliação Enviada! 🎉',
+                message: 'Obrigado pela sua avaliação! Sua opinião é muito importante para nós.'
+            },
+            'review_already': {
+                type: 'info',
+                title: 'Avaliação Já Registrada',
+                message: 'Você já enviou uma avaliação anteriormente. Obrigado pelo feedback!'
+            },
+            'review_invalid': {
+                type: 'error',
+                title: 'Avaliação Incompleta',
+                message: 'Por favor, selecione uma nota de 1 a 5 estrelas antes de enviar.'
+            },
+            'review_error': {
+                type: 'error',
+                title: 'Erro na Avaliação',
+                message: 'Não foi possível registrar sua avaliação. Tente novamente em alguns instantes.'
             },
             'error': {
                 type: 'error',
-                title: 'Erro',
-                message: 'Ocorreu um erro ao processar sua solicitação. Tente novamente.'
+                title: 'Algo Deu Errado',
+                message: 'Não foi possível processar sua solicitação. Tente novamente ou entre em contato pelo chat.'
             },
             'unauthorized': {
                 type: 'error',
-                title: 'Acesso Negado',
-                message: 'Você não tem permissão para acessar este recurso.'
+                title: 'Acesso Não Autorizado',
+                message: 'Seu link de acesso pode ter expirado. Solicite um novo link para continuar.'
             }
         };
         
@@ -2213,6 +2402,88 @@ window.DPSSkeleton = (function() {
     }
 
     /**
+     * Filtra timeline de histórico por período (Fase 4.4).
+     * Filtragem client-side: esconde/mostra itens com base no data-date.
+     */
+    function handleTimelinePeriodFilter() {
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.dps-timeline-filter__btn');
+            if (!btn) {
+                return;
+            }
+
+            var toolbar = btn.closest('.dps-timeline-filter');
+            if (!toolbar) {
+                return;
+            }
+
+            // Atualiza estado ativo
+            var siblings = toolbar.querySelectorAll('.dps-timeline-filter__btn');
+            for (var i = 0; i < siblings.length; i++) {
+                siblings[i].classList.remove('dps-timeline-filter__btn--active');
+                siblings[i].setAttribute('aria-pressed', 'false');
+            }
+            btn.classList.add('dps-timeline-filter__btn--active');
+            btn.setAttribute('aria-pressed', 'true');
+
+            var period = btn.getAttribute('data-period');
+            var panel = btn.closest('.dps-portal-pet-timeline');
+            if (!panel) {
+                return;
+            }
+
+            var items = panel.querySelectorAll('.dps-timeline-item[data-date]');
+            if (!items.length) {
+                return;
+            }
+
+            var cutoffDate = null;
+            if (period !== 'all') {
+                var days = parseInt(period, 10);
+                if (!isNaN(days) && days > 0) {
+                    cutoffDate = new Date();
+                    cutoffDate.setDate(cutoffDate.getDate() - days);
+                    cutoffDate.setHours(0, 0, 0, 0);
+                }
+            }
+
+            var visibleCount = 0;
+            for (var j = 0; j < items.length; j++) {
+                var itemDate = items[j].getAttribute('data-date');
+                if (!cutoffDate || !itemDate) {
+                    items[j].style.display = '';
+                    visibleCount++;
+                } else {
+                    var d = new Date(itemDate + 'T00:00:00');
+                    if (d >= cutoffDate) {
+                        items[j].style.display = '';
+                        visibleCount++;
+                    } else {
+                        items[j].style.display = 'none';
+                    }
+                }
+            }
+
+            // Mostra/esconde mensagem de "nenhum resultado"
+            var timeline = panel.querySelector('.dps-timeline');
+            if (timeline) {
+                var emptyMsg = timeline.querySelector('.dps-timeline-filter-empty');
+                if (visibleCount === 0) {
+                    if (!emptyMsg) {
+                        emptyMsg = document.createElement('p');
+                        emptyMsg.className = 'dps-timeline-filter-empty';
+                        emptyMsg.textContent = 'Nenhum serviço encontrado neste período.';
+                        timeline.appendChild(emptyMsg);
+                    }
+                    emptyMsg.style.display = '';
+                } else if (emptyMsg) {
+                    emptyMsg.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    /**
      * Gerencia filtro de pets na galeria de fotos
      * Revisão de layout: Janeiro 2026
      */
@@ -2279,7 +2550,17 @@ window.DPSSkeleton = (function() {
             return;
         }
 
-        // Cria o container do lightbox com atributos ARIA
+        // Agrupa links por galeria (data-gallery)
+        var galleries = {};
+        lightboxLinks.forEach(function(link) {
+            var gallery = link.getAttribute('data-gallery') || 'default';
+            if (!galleries[gallery]) {
+                galleries[gallery] = [];
+            }
+            galleries[gallery].push(link);
+        });
+
+        // Cria o container do lightbox com navegação
         var lightbox = document.createElement('div');
         lightbox.className = 'dps-lightbox';
         lightbox.setAttribute('role', 'dialog');
@@ -2289,9 +2570,12 @@ window.DPSSkeleton = (function() {
             '<div class="dps-lightbox__overlay"></div>' +
             '<div class="dps-lightbox__container">' +
                 '<button class="dps-lightbox__close" aria-label="Fechar">&times;</button>' +
+                '<button class="dps-lightbox__nav dps-lightbox__nav--prev" aria-label="Foto anterior">&#10094;</button>' +
                 '<img class="dps-lightbox__img" src="" alt="">' +
+                '<button class="dps-lightbox__nav dps-lightbox__nav--next" aria-label="Próxima foto">&#10095;</button>' +
                 '<div class="dps-lightbox__caption"></div>' +
                 '<div class="dps-lightbox__actions">' +
+                    '<span class="dps-lightbox__counter"></span>' +
                     '<a href="" class="dps-lightbox__btn dps-lightbox__btn--download" download>⬇️ Baixar</a>' +
                 '</div>' +
             '</div>';
@@ -2303,7 +2587,12 @@ window.DPSSkeleton = (function() {
         var lightboxDownload = lightbox.querySelector('.dps-lightbox__btn--download');
         var lightboxClose = lightbox.querySelector('.dps-lightbox__close');
         var lightboxOverlay = lightbox.querySelector('.dps-lightbox__overlay');
+        var lightboxPrev = lightbox.querySelector('.dps-lightbox__nav--prev');
+        var lightboxNext = lightbox.querySelector('.dps-lightbox__nav--next');
+        var lightboxCounter = lightbox.querySelector('.dps-lightbox__counter');
         var lastFocusedElement = null;
+        var currentGallery = null;
+        var currentIndex = 0;
 
         // Broken image fallback
         lightboxImg.addEventListener('error', function() {
@@ -2312,32 +2601,62 @@ window.DPSSkeleton = (function() {
             lightboxDownload.style.display = 'none';
         });
 
+        function showPhoto(index) {
+            if (!currentGallery || !galleries[currentGallery]) {
+                return;
+            }
+            var links = galleries[currentGallery];
+            if (index < 0 || index >= links.length) {
+                return;
+            }
+            currentIndex = index;
+            var link = links[index];
+            var imgUrl = link.getAttribute('href');
+            var imgTitle = link.getAttribute('title') || '';
+
+            lightboxImg.src = imgUrl;
+            lightboxImg.alt = imgTitle || 'Foto do pet';
+            lightboxCaption.textContent = imgTitle;
+            lightboxDownload.href = imgUrl;
+            lightboxDownload.style.display = '';
+
+            // Navegação: mostra/oculta botões
+            var hasMultiple = links.length > 1;
+            lightboxPrev.style.display = hasMultiple ? '' : 'none';
+            lightboxNext.style.display = hasMultiple ? '' : 'none';
+            lightboxPrev.disabled = index === 0;
+            lightboxNext.disabled = index === links.length - 1;
+
+            // Contador
+            lightboxCounter.textContent = hasMultiple ? (index + 1) + ' / ' + links.length : '';
+        }
+
         // Abre lightbox ao clicar em foto
         lightboxLinks.forEach(function(link) {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 var imgUrl = this.getAttribute('href');
-                var imgTitle = this.getAttribute('title') || '';
-
-                // Valida URL da imagem
                 if (!imgUrl) {
                     return;
                 }
 
                 lastFocusedElement = this;
+                currentGallery = this.getAttribute('data-gallery') || 'default';
+                currentIndex = parseInt(this.getAttribute('data-index') || '0', 10);
 
-                lightboxImg.src = imgUrl;
-                lightboxImg.alt = imgTitle || 'Foto do pet';
-                lightboxCaption.textContent = imgTitle;
-                lightboxDownload.href = imgUrl;
-                lightboxDownload.style.display = '';
-
+                showPhoto(currentIndex);
                 lightbox.classList.add('is-active');
                 document.body.style.overflow = 'hidden';
-
-                // Foca no botão de fechar para acessibilidade
                 lightboxClose.focus();
             });
+        });
+
+        // Navegação
+        lightboxPrev.addEventListener('click', function() {
+            showPhoto(currentIndex - 1);
+        });
+        lightboxNext.addEventListener('click', function() {
+            showPhoto(currentIndex + 1);
         });
 
         // Fecha lightbox
@@ -2345,8 +2664,8 @@ window.DPSSkeleton = (function() {
             lightbox.classList.remove('is-active');
             document.body.style.overflow = '';
             lightboxImg.src = '';
+            currentGallery = null;
 
-            // Restaura foco ao elemento que abriu o lightbox
             if (lastFocusedElement) {
                 lastFocusedElement.focus();
                 lastFocusedElement = null;
@@ -2356,7 +2675,7 @@ window.DPSSkeleton = (function() {
         lightboxClose.addEventListener('click', closeLightbox);
         lightboxOverlay.addEventListener('click', closeLightbox);
 
-        // Keyboard: ESC para fechar, Tab trap dentro do lightbox
+        // Keyboard: ESC, arrows, Tab trap
         document.addEventListener('keydown', function(e) {
             if (!lightbox.classList.contains('is-active')) {
                 return;
@@ -2367,9 +2686,21 @@ window.DPSSkeleton = (function() {
                 return;
             }
 
-            // Focus trap: mantém foco dentro do lightbox
+            // Arrow navigation
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                showPhoto(currentIndex - 1);
+                return;
+            }
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                showPhoto(currentIndex + 1);
+                return;
+            }
+
+            // Focus trap
             if (e.key === 'Tab') {
-                var focusable = lightbox.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])');
+                var focusable = lightbox.querySelectorAll('button:not([style*="display: none"]):not(:disabled), a[href], [tabindex]:not([tabindex="-1"])');
                 if (focusable.length === 0) {
                     return;
                 }

@@ -422,11 +422,7 @@ class DPS_Finance_REST {
      * @return string Valor formatado.
      */
     private static function format_money( $value ) {
-        if ( class_exists( 'DPS_Money_Helper' ) ) {
-            return 'R$ ' . DPS_Money_Helper::format_to_brazilian( (int) round( $value * 100 ) );
-        }
-
-        return 'R$ ' . number_format( $value, 2, ',', '.' );
+        return DPS_Money_Helper::format_currency_from_decimal( $value );
     }
 }
 

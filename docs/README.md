@@ -198,6 +198,7 @@ Documentação de configurações do sistema.
 Documentação de segurança e auditoria.
 
 **Arquivos:**
+- `AUDIT_FASE1.md` - Auditoria de segurança completa — Fase 1 do Plano de Implementação
 - `EXEMPLOS_ANTES_DEPOIS_SEGURANCA.md` - Exemplos antes/depois de correções de segurança
 - `SECURITY_FIXES_FINANCE_SUMMARY.md` - Resumo de correções de segurança do Finance Add-on
 
