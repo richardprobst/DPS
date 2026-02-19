@@ -5871,6 +5871,218 @@ html {
     margin-top: 24px;
 }
 
+/* ========================================
+   Progress Bar / Stepper (Phase 4.1)
+   Componente reutilizável para fluxos multi-etapa
+   ======================================== */
+
+.dps-progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 24px;
+    padding: 0 8px;
+}
+
+.dps-progress-bar__step {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.dps-progress-bar__circle {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--dps-shape-full, 9999px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--dps-typescale-label-large-size, 14px);
+    font-weight: 500;
+    transition: all var(--dps-motion-duration-short-4, 200ms) var(--dps-motion-easing-standard, ease);
+    background: var(--dps-gray-200, #ecedf4);
+    color: var(--dps-gray-500, #6b7280);
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.dps-progress-bar__step--active .dps-progress-bar__circle {
+    background: var(--dps-primary, #0b6bcb);
+    color: var(--dps-white, #fff);
+    box-shadow: 0 0 0 4px var(--dps-primary-light, #d4e4ff);
+}
+
+.dps-progress-bar__step--completed .dps-progress-bar__circle {
+    background: var(--dps-success, #1a7a3a);
+    color: var(--dps-white, #fff);
+}
+
+.dps-progress-bar__label {
+    font-size: var(--dps-typescale-label-small-size, 11px);
+    color: var(--dps-gray-500, #6b7280);
+    margin-top: 4px;
+    text-align: center;
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dps-progress-bar__step--active .dps-progress-bar__label {
+    color: var(--dps-primary, #0b6bcb);
+    font-weight: 500;
+}
+
+.dps-progress-bar__step--completed .dps-progress-bar__label {
+    color: var(--dps-success, #1a7a3a);
+}
+
+.dps-progress-bar__connector {
+    flex: 1;
+    height: 2px;
+    min-width: 24px;
+    max-width: 60px;
+    background: var(--dps-gray-200, #ecedf4);
+    margin: 0 4px;
+    transition: background var(--dps-motion-duration-short-4, 200ms) var(--dps-motion-easing-standard, ease);
+}
+
+.dps-progress-bar__connector--completed {
+    background: var(--dps-success, #1a7a3a);
+}
+
+.dps-progress-bar__step-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Step content panels */
+.dps-step-panel {
+    display: none;
+    animation: dpsStepFadeIn var(--dps-motion-duration-medium-2, 300ms) var(--dps-motion-easing-emphasized-decelerate, ease);
+}
+
+.dps-step-panel--active {
+    display: block;
+}
+
+@keyframes dpsStepFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Step navigation actions */
+.dps-step-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    margin-top: 24px;
+}
+
+.dps-step-actions__left {
+    display: flex;
+    gap: 8px;
+}
+
+.dps-step-actions__right {
+    display: flex;
+    gap: 8px;
+}
+
+/* Step status text (Passo X de Y) */
+.dps-progress-bar__status {
+    text-align: center;
+    font-size: var(--dps-typescale-body-small-size, 12px);
+    color: var(--dps-gray-500, #6b7280);
+    margin-bottom: 16px;
+}
+
+/* Review summary in step 3 */
+.dps-review-summary {
+    background: var(--dps-gray-100, #f2f3fa);
+    border-radius: var(--dps-shape-medium, 12px);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.dps-review-summary__item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--dps-border-color, #e5e7eb);
+    font-size: var(--dps-typescale-body-medium-size, 14px);
+}
+
+.dps-review-summary__item:last-child {
+    border-bottom: none;
+}
+
+.dps-review-summary__label {
+    color: var(--dps-gray-500, #6b7280);
+    font-weight: 500;
+}
+
+.dps-review-summary__value {
+    color: var(--dps-gray-800, #1f2937);
+}
+
+/* Responsive stepper */
+@media (max-width: 480px) {
+    .dps-progress-bar {
+        padding: 0 4px;
+    }
+
+    .dps-progress-bar__circle {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .dps-progress-bar__label {
+        font-size: 10px;
+        max-width: 60px;
+    }
+
+    .dps-progress-bar__connector {
+        min-width: 16px;
+    }
+
+    .dps-step-actions {
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+
+    .dps-step-actions__left,
+    .dps-step-actions__right {
+        width: 100%;
+    }
+
+    .dps-step-actions__left .button,
+    .dps-step-actions__right .button {
+        flex: 1;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .dps-step-panel {
+        animation: none;
+    }
+
+    .dps-progress-bar__circle,
+    .dps-progress-bar__connector {
+        transition: none;
+    }
+}
+
 /* Responsivo para Timeline e Modais */
 @media (max-width: 768px) {
     .dps-timeline-item {

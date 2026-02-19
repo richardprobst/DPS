@@ -1812,7 +1812,7 @@ window.DPSSkeleton = (function() {
     }
 
     /**
-     * Cria modal de pedido de agendamento
+     * Cria modal de pedido de agendamento com wizard multi-etapa (Phase 4.1)
      */
     function createRequestModal(type, appointmentId, petId, services) {
         var modal = document.createElement('div');
@@ -1824,6 +1824,10 @@ window.DPSSkeleton = (function() {
         };
         
         var title = titles[type] || 'Solicitar Agendamento';
+        var totalSteps = 3;
+        var currentStep = 1;
+
+        var stepLabels = ['Data', 'Detalhes', 'Confirmar'];
         
         var html = '<div class="dps-modal__overlay"></div>';
         html += '<div class="dps-modal__content">';
@@ -1832,38 +1836,191 @@ window.DPSSkeleton = (function() {
         html += '<button class="dps-modal__close" aria-label="Fechar">×</button>';
         html += '</div>';
         html += '<div class="dps-modal__body">';
-        html += '<p class="dps-modal__notice"><strong>⚠️ Importante:</strong> Este é um <strong>pedido de agendamento</strong>. A equipe do Banho e Tosa irá confirmar o horário final com você.</p>';
-        html += '<form class="dps-request-form" id="dps-request-form">';
+
+        // Progress bar
+        html += '<div class="dps-progress-bar" role="progressbar" aria-label="Progresso do agendamento" aria-valuenow="1" aria-valuemin="1" aria-valuemax="' + totalSteps + '">';
+        for (var s = 1; s <= totalSteps; s++) {
+            if (s > 1) {
+                html += '<div class="dps-progress-bar__connector' + (s <= currentStep ? ' dps-progress-bar__connector--completed' : '') + '" data-connector="' + s + '"></div>';
+            }
+            html += '<div class="dps-progress-bar__step' + (s === currentStep ? ' dps-progress-bar__step--active' : '') + '" data-step-indicator="' + s + '">';
+            html += '<div class="dps-progress-bar__step-wrapper">';
+            html += '<div class="dps-progress-bar__circle">' + s + '</div>';
+            html += '<span class="dps-progress-bar__label">' + stepLabels[s - 1] + '</span>';
+            html += '</div>';
+            html += '</div>';
+        }
+        html += '</div>';
+        html += '<div class="dps-progress-bar__status" aria-live="polite">Passo 1 de ' + totalSteps + '</div>';
+
+        html += '<form class="dps-request-form" id="dps-request-form" novalidate>';
         html += '<input type="hidden" name="request_type" value="' + type + '">';
         html += '<input type="hidden" name="original_appointment_id" value="' + (appointmentId || '') + '">';
         if (petId) {
             html += '<input type="hidden" name="pet_id" value="' + petId + '">';
         }
+
+        // Step 1: Date & Period
+        html += '<div class="dps-step-panel dps-step-panel--active" data-step="1">';
+        html += '<p class="dps-modal__notice"><strong>⚠️ Importante:</strong> Este é um <strong>pedido de agendamento</strong>. A equipe do Banho e Tosa irá confirmar o horário final com você.</p>';
         html += '<div class="dps-form-field">';
         html += '<label for="desired_date">Data Desejada <span class="required">*</span></label>';
-        html += '<input type="date" id="desired_date" name="desired_date" required min="' + getTomorrowDate() + '">';
+        html += '<input type="date" id="desired_date" name="desired_date" required min="' + getTomorrowDate() + '" aria-required="true">';
+        html += '<span class="dps-field-error" role="alert" id="desired_date_error"></span>';
         html += '</div>';
         html += '<div class="dps-form-field">';
         html += '<label for="desired_period">Período Desejado <span class="required">*</span></label>';
-        html += '<select id="desired_period" name="desired_period" required>';
+        html += '<select id="desired_period" name="desired_period" required aria-required="true">';
         html += '<option value="">Selecione...</option>';
         html += '<option value="morning">Manhã</option>';
         html += '<option value="afternoon">Tarde</option>';
         html += '</select>';
+        html += '<span class="dps-field-error" role="alert" id="desired_period_error"></span>';
         html += '</div>';
+        html += '<div class="dps-step-actions">';
+        html += '<div class="dps-step-actions__left"><button type="button" class="button dps-modal-cancel">Cancelar</button></div>';
+        html += '<div class="dps-step-actions__right"><button type="button" class="button button-primary dps-step-next" data-next="2">Próximo →</button></div>';
+        html += '</div>';
+        html += '</div>';
+
+        // Step 2: Notes
+        html += '<div class="dps-step-panel" data-step="2">';
         html += '<div class="dps-form-field">';
         html += '<label for="notes">Observações (opcional)</label>';
         html += '<textarea id="notes" name="notes" rows="3" placeholder="Alguma preferência ou observação?"></textarea>';
         html += '</div>';
-        html += '<div class="dps-form-actions">';
-        html += '<button type="button" class="button dps-modal-cancel">Cancelar</button>';
-        html += '<button type="submit" class="button button-primary">Enviar Solicitação</button>';
+        html += '<div class="dps-step-actions">';
+        html += '<div class="dps-step-actions__left"><button type="button" class="button dps-step-prev" data-prev="1">← Voltar</button></div>';
+        html += '<div class="dps-step-actions__right"><button type="button" class="button button-primary dps-step-next" data-next="3">Próximo →</button></div>';
         html += '</div>';
+        html += '</div>';
+
+        // Step 3: Review & confirm
+        html += '<div class="dps-step-panel" data-step="3">';
+        html += '<div class="dps-review-summary" id="dps-review-summary"></div>';
+        html += '<div class="dps-step-actions">';
+        html += '<div class="dps-step-actions__left"><button type="button" class="button dps-step-prev" data-prev="2">← Voltar</button></div>';
+        html += '<div class="dps-step-actions__right"><button type="submit" class="button button-primary">Enviar Solicitação ✓</button></div>';
+        html += '</div>';
+        html += '</div>';
+
         html += '</form>';
         html += '</div>';
         html += '</div>';
         
         modal.innerHTML = html;
+
+        // Render review summary
+        function updateReviewSummary() {
+            var dateInput = modal.querySelector('#desired_date');
+            var periodInput = modal.querySelector('#desired_period');
+            var notesInput = modal.querySelector('#notes');
+            var summary = modal.querySelector('#dps-review-summary');
+
+            var dateValue = dateInput.value;
+            var formattedDate = '';
+            if (dateValue) {
+                var parts = dateValue.split('-');
+                formattedDate = parts[2] + '/' + parts[1] + '/' + parts[0];
+            }
+
+            var periodMap = { morning: 'Manhã', afternoon: 'Tarde' };
+            var periodText = periodMap[periodInput.value] || periodInput.value;
+            var notesText = notesInput.value ? notesInput.value : '—';
+            var typeMap = { reschedule: 'Reagendamento', new: 'Novo agendamento', cancel: 'Cancelamento' };
+
+            var summaryHtml = '';
+            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">Tipo</span><span class="dps-review-summary__value">' + (typeMap[type] || type) + '</span></div>';
+            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">📅 Data</span><span class="dps-review-summary__value">' + formattedDate + '</span></div>';
+            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🕐 Período</span><span class="dps-review-summary__value">' + periodText + '</span></div>';
+            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">📝 Observações</span><span class="dps-review-summary__value">' + notesText + '</span></div>';
+            summary.innerHTML = summaryHtml;
+        }
+
+        // Step navigation
+        function goToStep(step) {
+            if (step < 1 || step > totalSteps) return;
+            currentStep = step;
+
+            // Update panels
+            var panels = modal.querySelectorAll('.dps-step-panel');
+            panels.forEach(function(panel) {
+                var panelStep = parseInt(panel.getAttribute('data-step'), 10);
+                if (panelStep === currentStep) {
+                    panel.classList.add('dps-step-panel--active');
+                } else {
+                    panel.classList.remove('dps-step-panel--active');
+                }
+            });
+
+            // Update progress indicators
+            for (var i = 1; i <= totalSteps; i++) {
+                var indicator = modal.querySelector('[data-step-indicator="' + i + '"]');
+                var circle = indicator.querySelector('.dps-progress-bar__circle');
+                indicator.classList.remove('dps-progress-bar__step--active', 'dps-progress-bar__step--completed');
+                if (i === currentStep) {
+                    indicator.classList.add('dps-progress-bar__step--active');
+                    circle.textContent = i;
+                } else if (i < currentStep) {
+                    indicator.classList.add('dps-progress-bar__step--completed');
+                    circle.textContent = '✓';
+                } else {
+                    circle.textContent = i;
+                }
+
+                if (i > 1) {
+                    var connector = modal.querySelector('[data-connector="' + i + '"]');
+                    if (i <= currentStep) {
+                        connector.classList.add('dps-progress-bar__connector--completed');
+                    } else {
+                        connector.classList.remove('dps-progress-bar__connector--completed');
+                    }
+                }
+            }
+
+            // Update aria and status text
+            var progressBar = modal.querySelector('.dps-progress-bar');
+            progressBar.setAttribute('aria-valuenow', currentStep);
+            modal.querySelector('.dps-progress-bar__status').textContent = 'Passo ' + currentStep + ' de ' + totalSteps;
+
+            // Populate review summary on step 3
+            if (currentStep === totalSteps) {
+                updateReviewSummary();
+            }
+        }
+
+        // Validate step before proceeding
+        function validateStep(step) {
+            if (step === 1) {
+                var dateInput = modal.querySelector('#desired_date');
+                var periodInput = modal.querySelector('#desired_period');
+                var dateError = modal.querySelector('#desired_date_error');
+                var periodError = modal.querySelector('#desired_period_error');
+                var valid = true;
+
+                dateError.textContent = '';
+                periodError.textContent = '';
+                dateInput.classList.remove('is-invalid');
+                periodInput.classList.remove('is-invalid');
+
+                if (!dateInput.value) {
+                    dateError.textContent = 'Selecione uma data para o agendamento.';
+                    dateInput.classList.add('is-invalid');
+                    dateInput.focus();
+                    valid = false;
+                }
+
+                if (!periodInput.value) {
+                    periodError.textContent = 'Selecione o período desejado.';
+                    periodInput.classList.add('is-invalid');
+                    if (valid) periodInput.focus();
+                    valid = false;
+                }
+
+                return valid;
+            }
+            return true;
+        }
         
         // Event listeners
         modal.querySelector('.dps-modal__close').addEventListener('click', function() {
@@ -1873,9 +2030,33 @@ window.DPSSkeleton = (function() {
         modal.querySelector('.dps-modal__overlay').addEventListener('click', function() {
             closeModal(modal);
         });
-        
-        modal.querySelector('.dps-modal-cancel').addEventListener('click', function() {
-            closeModal(modal);
+
+        // Cancel buttons
+        var cancelBtns = modal.querySelectorAll('.dps-modal-cancel');
+        cancelBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                closeModal(modal);
+            });
+        });
+
+        // Next buttons
+        var nextBtns = modal.querySelectorAll('.dps-step-next');
+        nextBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var nextStep = parseInt(this.getAttribute('data-next'), 10);
+                if (validateStep(currentStep)) {
+                    goToStep(nextStep);
+                }
+            });
+        });
+
+        // Prev buttons
+        var prevBtns = modal.querySelectorAll('.dps-step-prev');
+        prevBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var prevStep = parseInt(this.getAttribute('data-prev'), 10);
+                goToStep(prevStep);
+            });
         });
         
         modal.querySelector('#dps-request-form').addEventListener('submit', function(e) {
