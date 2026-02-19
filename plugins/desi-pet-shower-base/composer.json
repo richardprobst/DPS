@@ -1,0 +1,25 @@
+{
+    "name": "richardprobst/dps-base",
+    "description": "desi.pet by PRObst — WordPress plugin base",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=8.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6.33",
+        "yoast/phpunit-polyfills": "^1.0"
+    },
+    "autoload": {
+        "classmap": ["includes/"]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DPS\\Base\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-html coverage"
+    }
+}
