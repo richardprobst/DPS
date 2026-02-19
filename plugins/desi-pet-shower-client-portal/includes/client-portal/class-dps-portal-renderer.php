@@ -1647,6 +1647,10 @@ class DPS_Portal_Renderer {
         $pet_photo   = get_post_meta( $pet_id, 'pet_photo_id', true );
         $pet_species = get_post_meta( $pet_id, 'pet_species', true );
         $pet_breed   = get_post_meta( $pet_id, 'pet_breed', true );
+        $pet_size    = get_post_meta( $pet_id, 'pet_size', true );
+        $pet_weight  = get_post_meta( $pet_id, 'pet_weight', true );
+        $pet_birth   = get_post_meta( $pet_id, 'pet_birth', true );
+        $pet_sex     = get_post_meta( $pet_id, 'pet_sex', true );
 
         // Classes e atributos para tab panel
         $panel_class = 'dps-portal-section dps-portal-pet-timeline dps-pet-timeline-panel';
@@ -1677,6 +1681,50 @@ class DPS_Portal_Renderer {
             echo esc_html( trim( $pet_species . ' ' . ( $pet_breed ? '• ' . $pet_breed : '' ) ) );
             echo '</p>';
         }
+
+        // Detalhes adicionais do pet (Fase 4.5)
+        $pet_meta_items = [];
+        if ( $pet_size ) {
+            $size_labels = [
+                'pequeno' => __( 'Pequeno', 'dps-client-portal' ),
+                'medio'   => __( 'Médio', 'dps-client-portal' ),
+                'grande'  => __( 'Grande', 'dps-client-portal' ),
+                'gigante' => __( 'Gigante', 'dps-client-portal' ),
+            ];
+            $pet_meta_items[] = '<span class="dps-pet-info-card__meta-item" title="' . esc_attr__( 'Porte', 'dps-client-portal' ) . '">📏 ' . esc_html( $size_labels[ $pet_size ] ?? $pet_size ) . '</span>';
+        }
+        if ( $pet_weight && is_numeric( $pet_weight ) && (float) $pet_weight > 0 ) {
+            $pet_meta_items[] = '<span class="dps-pet-info-card__meta-item" title="' . esc_attr__( 'Peso', 'dps-client-portal' ) . '">⚖️ ' . esc_html( rtrim( rtrim( number_format( (float) $pet_weight, 1, ',', '' ), '0' ), ',' ) ) . ' kg</span>';
+        }
+        if ( $pet_sex ) {
+            $sex_labels = [
+                'macho' => __( 'Macho', 'dps-client-portal' ),
+                'femea' => __( 'Fêmea', 'dps-client-portal' ),
+            ];
+            $sex_icon = ( 'macho' === $pet_sex ) ? '♂️' : '♀️';
+            $pet_meta_items[] = '<span class="dps-pet-info-card__meta-item" title="' . esc_attr__( 'Sexo', 'dps-client-portal' ) . '">' . $sex_icon . ' ' . esc_html( $sex_labels[ $pet_sex ] ?? $pet_sex ) . '</span>';
+        }
+        if ( $pet_birth ) {
+            $birth_date = DateTime::createFromFormat( 'Y-m-d', $pet_birth );
+            if ( $birth_date ) {
+                $now  = new DateTime();
+                $diff = $now->diff( $birth_date );
+                if ( $diff->y > 0 ) {
+                    /* translators: %d: number of years */
+                    $age_text = sprintf( _n( '%d ano', '%d anos', $diff->y, 'dps-client-portal' ), $diff->y );
+                } else {
+                    /* translators: %d: number of months */
+                    $age_text = sprintf( _n( '%d mês', '%d meses', max( 1, $diff->m ), 'dps-client-portal' ), max( 1, $diff->m ) );
+                }
+                $pet_meta_items[] = '<span class="dps-pet-info-card__meta-item" title="' . esc_attr__( 'Idade', 'dps-client-portal' ) . '">🎂 ' . esc_html( $age_text ) . '</span>';
+            }
+        }
+        if ( ! empty( $pet_meta_items ) ) {
+            echo '<div class="dps-pet-info-card__meta">';
+            echo implode( '', $pet_meta_items ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Each item already escaped above
+            echo '</div>';
+        }
+
         echo '<span class="dps-pet-info-card__count">';
         /* translators: %d: number of services */
         echo esc_html( sprintf( _n( '%d serviço realizado', '%d serviços realizados', count( $services ), 'dps-client-portal' ), count( $services ) ) );
@@ -1694,6 +1742,23 @@ class DPS_Portal_Renderer {
         if ( empty( $services ) ) {
             $this->render_pet_timeline_empty_state( $pet_name );
         } else {
+            // Filtro de período (Fase 4.4)
+            echo '<div class="dps-timeline-filter" role="toolbar" aria-label="' . esc_attr__( 'Filtrar por período', 'dps-client-portal' ) . '">';
+            echo '<span class="dps-timeline-filter__label">' . esc_html__( 'Período:', 'dps-client-portal' ) . '</span>';
+            $periods = [
+                '30'  => __( '30 dias', 'dps-client-portal' ),
+                '60'  => __( '60 dias', 'dps-client-portal' ),
+                '90'  => __( '90 dias', 'dps-client-portal' ),
+                'all' => __( 'Todos', 'dps-client-portal' ),
+            ];
+            foreach ( $periods as $value => $label ) {
+                $is_default = ( 'all' === $value );
+                echo '<button type="button" class="dps-timeline-filter__btn' . ( $is_default ? ' dps-timeline-filter__btn--active' : '' ) . '" data-period="' . esc_attr( $value ) . '"' . ( $is_default ? ' aria-pressed="true"' : ' aria-pressed="false"' ) . '>';
+                echo esc_html( $label );
+                echo '</button>';
+            }
+            echo '</div>';
+
             $this->render_timeline_items( $services, $client_id, $pet_id );
             
             // Botão "Ver mais" se há mais serviços
@@ -2015,7 +2080,7 @@ class DPS_Portal_Renderer {
             $appointment_value = get_post_meta( $appointment_id, 'appointment_value', true );
         }
 
-        echo '<div class="dps-timeline-item">';
+        echo '<div class="dps-timeline-item" data-date="' . esc_attr( $service['date'] ?? '' ) . '">';
         echo '<div class="dps-timeline-marker"></div>';
         echo '<div class="dps-timeline-content">';
         

@@ -4852,6 +4852,24 @@ html {
     margin: 0 0 8px 0;
 }
 
+.dps-pet-info-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-bottom: 8px;
+}
+
+.dps-pet-info-card__meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--dps-gray-600);
+    padding: 2px 8px;
+    background: var(--dps-gray-50);
+    border-radius: var(--dps-shape-small);
+}
+
 .dps-pet-info-card__count {
     display: inline-flex;
     align-items: center;
@@ -4867,6 +4885,62 @@ html {
 
 .dps-pet-timeline-panel--hidden {
     display: none;
+}
+
+/* Filtro de período (Fase 4.4) */
+.dps-timeline-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--dps-gray-50);
+    border: 1px solid var(--dps-gray-200);
+    border-radius: var(--dps-shape-small);
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.dps-timeline-filter__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dps-gray-600);
+    margin-right: 4px;
+}
+
+.dps-timeline-filter__btn {
+    padding: 4px 14px;
+    border: 1px solid var(--dps-gray-300);
+    border-radius: var(--dps-shape-large);
+    background: var(--dps-white);
+    color: var(--dps-gray-600);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.dps-timeline-filter__btn:hover {
+    border-color: var(--dps-color-primary, var(--dps-primary));
+    color: var(--dps-color-primary, var(--dps-primary));
+}
+
+.dps-timeline-filter__btn:focus-visible {
+    outline: 2px solid var(--dps-color-primary, var(--dps-primary));
+    outline-offset: 2px;
+}
+
+.dps-timeline-filter__btn--active {
+    background: var(--dps-color-primary, var(--dps-primary));
+    border-color: var(--dps-color-primary, var(--dps-primary));
+    color: var(--dps-white);
+}
+
+.dps-timeline-filter-empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--dps-gray-500);
+    font-size: 14px;
+    font-style: italic;
 }
 
 .dps-pet-timelines-container {

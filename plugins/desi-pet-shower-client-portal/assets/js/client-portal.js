@@ -49,6 +49,7 @@
         handleRepeatService(); // Revisão Jan/2026: Botão repetir serviço via WhatsApp
         handleExportPdf(); // Funcionalidade 3: Export PDF
         handleLoadMorePetHistory(); // Load more pet history items
+        handleTimelinePeriodFilter(); // Fase 4.4: Filtro de período no histórico
     }
 
     /**
@@ -2397,6 +2398,88 @@ window.DPSSkeleton = (function() {
                     DPSToast.show('Erro de conexão. Tente novamente.', 'error');
                 }
             });
+        });
+    }
+
+    /**
+     * Filtra timeline de histórico por período (Fase 4.4).
+     * Filtragem client-side: esconde/mostra itens com base no data-date.
+     */
+    function handleTimelinePeriodFilter() {
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.dps-timeline-filter__btn');
+            if (!btn) {
+                return;
+            }
+
+            var toolbar = btn.closest('.dps-timeline-filter');
+            if (!toolbar) {
+                return;
+            }
+
+            // Atualiza estado ativo
+            var siblings = toolbar.querySelectorAll('.dps-timeline-filter__btn');
+            for (var i = 0; i < siblings.length; i++) {
+                siblings[i].classList.remove('dps-timeline-filter__btn--active');
+                siblings[i].setAttribute('aria-pressed', 'false');
+            }
+            btn.classList.add('dps-timeline-filter__btn--active');
+            btn.setAttribute('aria-pressed', 'true');
+
+            var period = btn.getAttribute('data-period');
+            var panel = btn.closest('.dps-portal-pet-timeline');
+            if (!panel) {
+                return;
+            }
+
+            var items = panel.querySelectorAll('.dps-timeline-item[data-date]');
+            if (!items.length) {
+                return;
+            }
+
+            var cutoffDate = null;
+            if (period !== 'all') {
+                var days = parseInt(period, 10);
+                if (!isNaN(days) && days > 0) {
+                    cutoffDate = new Date();
+                    cutoffDate.setDate(cutoffDate.getDate() - days);
+                    cutoffDate.setHours(0, 0, 0, 0);
+                }
+            }
+
+            var visibleCount = 0;
+            for (var j = 0; j < items.length; j++) {
+                var itemDate = items[j].getAttribute('data-date');
+                if (!cutoffDate || !itemDate) {
+                    items[j].style.display = '';
+                    visibleCount++;
+                } else {
+                    var d = new Date(itemDate + 'T00:00:00');
+                    if (d >= cutoffDate) {
+                        items[j].style.display = '';
+                        visibleCount++;
+                    } else {
+                        items[j].style.display = 'none';
+                    }
+                }
+            }
+
+            // Mostra/esconde mensagem de "nenhum resultado"
+            var timeline = panel.querySelector('.dps-timeline');
+            if (timeline) {
+                var emptyMsg = timeline.querySelector('.dps-timeline-filter-empty');
+                if (visibleCount === 0) {
+                    if (!emptyMsg) {
+                        emptyMsg = document.createElement('p');
+                        emptyMsg.className = 'dps-timeline-filter-empty';
+                        emptyMsg.textContent = 'Nenhum serviço encontrado neste período.';
+                        timeline.appendChild(emptyMsg);
+                    }
+                    emptyMsg.style.display = '';
+                } else if (emptyMsg) {
+                    emptyMsg.style.display = 'none';
+                }
+            }
         });
     }
 
