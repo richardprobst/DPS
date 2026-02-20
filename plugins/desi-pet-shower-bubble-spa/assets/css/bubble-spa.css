@@ -1,0 +1,89 @@
+/* ==========================================================================
+   Bubble Spa Deluxe — Styles
+   ========================================================================== */
+.dps-bubble-spa{position:relative;width:100%;max-width:480px;margin:0 auto;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;user-select:none;-webkit-user-select:none;touch-action:none}
+.dps-bs-wrapper{position:relative;width:100%;aspect-ratio:480/720;overflow:hidden;border-radius:16px;background:linear-gradient(180deg,#e0f7fa 0%,#b2ebf2 30%,#80deea 60%,#4dd0e1 100%);box-shadow:0 8px 32px rgba(0,150,136,.25)}
+.dps-bs-canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block}
+
+/* HUD */
+.dps-bs-hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:linear-gradient(180deg,rgba(0,77,64,.7) 0%,transparent 100%);z-index:10;pointer-events:none}
+.dps-bs-hud__item{display:flex;flex-direction:column;align-items:center;gap:2px}
+.dps-bs-hud__label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.8)}
+.dps-bs-hud__value{font-size:18px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+.dps-bs-hud__stars-box{flex-direction:row;gap:4px}
+.dps-bs-star{font-size:20px;color:rgba(255,255,255,.4);transition:color .3s,transform .3s}
+.dps-bs-star--active{color:#ffd54f;text-shadow:0 0 8px rgba(255,213,79,.6);transform:scale(1.2)}
+
+/* Progress bar */
+.dps-bs-progress{position:absolute;bottom:70px;left:16px;right:16px;z-index:10;pointer-events:none}
+.dps-bs-progress__track{position:relative;height:6px;background:rgba(0,0,0,.2);border-radius:3px;overflow:visible}
+.dps-bs-progress__fill{position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,#4caf50,#ff9800,#f44336);border-radius:3px;transition:width .3s ease;width:0}
+.dps-bs-progress__marker{position:absolute;top:-3px;width:2px;height:12px;background:rgba(255,255,255,.5);border-radius:1px}
+.dps-bs-progress__marker[data-pct="25"]{left:25%}
+.dps-bs-progress__marker[data-pct="50"]{left:50%}
+.dps-bs-progress__marker[data-pct="75"]{left:75%}
+
+/* Combo */
+.dps-bs-combo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:20;pointer-events:none;transition:opacity .3s}
+.dps-bs-combo--hidden{opacity:0}
+.dps-bs-combo__text{font-size:28px;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.5),0 0 20px rgba(255,213,79,.6)}
+
+/* Power-up indicator */
+.dps-bs-powerup-ind{position:absolute;top:52px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(0,0,0,.5);border-radius:12px;z-index:10;pointer-events:none;transition:opacity .3s}
+.dps-bs-powerup-ind--hidden{opacity:0}
+.dps-bs-powerup-ind__icon{font-size:18px}
+.dps-bs-powerup-ind__name{font-size:12px;font-weight:600;color:#fff}
+
+/* Swap bubble */
+.dps-bs-swap{position:absolute;bottom:16px;right:16px;display:flex;flex-direction:column;align-items:center;gap:4px;z-index:15;cursor:pointer}
+.dps-bs-swap__next{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.3);border:2px solid rgba(255,255,255,.5);transition:transform .2s}
+.dps-bs-swap:hover .dps-bs-swap__next,.dps-bs-swap:active .dps-bs-swap__next{transform:scale(1.15)}
+.dps-bs-swap__label{font-size:10px;font-weight:600;color:rgba(255,255,255,.8);text-shadow:0 1px 2px rgba(0,0,0,.5)}
+
+/* Pause button */
+.dps-bs-pause-btn{position:absolute;top:10px;right:10px;width:36px;height:36px;border:none;border-radius:50%;background:rgba(0,0,0,.3);color:#fff;font-size:16px;cursor:pointer;z-index:15;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.dps-bs-pause-btn:hover{background:rgba(0,0,0,.5)}
+.dps-bs-pause-btn--hidden{display:none}
+
+/* Overlays */
+.dps-bs-overlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,50,50,.85);backdrop-filter:blur(4px);z-index:50;animation:dps-bs-fi .3s ease}
+.dps-bs-overlay--hidden{display:none!important}
+@keyframes dps-bs-fi{from{opacity:0}to{opacity:1}}
+.dps-bs-overlay__content{text-align:center;padding:24px;max-width:380px;width:90%}
+.dps-bs-overlay__title{font-size:24px;font-weight:800;color:#fff;margin:0 0 12px;text-shadow:0 2px 4px rgba(0,0,0,.3)}
+.dps-bs-overlay__sub{font-size:14px;color:rgba(255,255,255,.8);margin:0 0 16px;line-height:1.4}
+.dps-bs-overlay__hs{font-size:13px;color:rgba(255,255,255,.6);margin:0 0 20px}
+.dps-bs-overlay__fscore{font-size:16px;color:#ffd54f;font-weight:700;margin:8px 0 16px}
+.dps-bs-victory-stars{display:flex;justify-content:center;gap:8px;margin:12px 0;font-size:36px}
+.dps-bs-victory-bonuses{margin:12px 0;font-size:12px;color:rgba(255,255,255,.7);line-height:1.6}
+
+/* Buttons */
+.dps-bs-btn{display:inline-block;padding:12px 32px;margin:6px;border:none;border-radius:24px;font-size:16px;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s;color:#fff;background:linear-gradient(135deg,#26a69a,#00897b);box-shadow:0 4px 12px rgba(0,137,123,.4)}
+.dps-bs-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,137,123,.5)}
+.dps-bs-btn:active{transform:translateY(0)}
+.dps-bs-btn--secondary{background:transparent;border:2px solid rgba(255,255,255,.4);box-shadow:none;font-size:14px;padding:8px 24px}
+.dps-bs-btn--secondary:hover{background:rgba(255,255,255,.1);box-shadow:none}
+
+/* Level grid */
+.dps-bs-level-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0}
+.dps-bs-level-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:54px;height:54px;margin:0 auto;border:2px solid rgba(255,255,255,.3);border-radius:12px;background:rgba(255,255,255,.1);color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:background .2s,transform .15s}
+.dps-bs-level-btn:hover{background:rgba(255,255,255,.2);transform:scale(1.05)}
+.dps-bs-level-btn--locked{opacity:.4;cursor:not-allowed}
+.dps-bs-level-btn--locked:hover{background:rgba(255,255,255,.1);transform:none}
+.dps-bs-level-btn__stars{font-size:10px;letter-spacing:1px;margin-top:2px}
+
+/* Portal card */
+.dps-game-portal-card .dps-bubble-spa{margin-top:16px}
+
+/* Responsive */
+@media(max-width:520px){
+.dps-bubble-spa{max-width:100%}
+.dps-bs-wrapper{border-radius:12px}
+.dps-bs-hud{padding:8px 12px}
+.dps-bs-hud__value{font-size:16px}
+.dps-bs-overlay__title{font-size:20px}
+.dps-bs-btn{padding:10px 24px;font-size:14px}
+}
+@media(prefers-reduced-motion:reduce){
+.dps-bs-combo__text,.dps-bs-overlay,.dps-bs-star,.dps-bs-btn{animation:none!important;transition:none!important}
+}
