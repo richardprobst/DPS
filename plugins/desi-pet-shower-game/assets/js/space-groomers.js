@@ -236,7 +236,14 @@
         this.rafId = null;
         this.lastTime = 0;
 
-        this.highscore = parseInt(localStorage.getItem(LS_KEY), 10) || 0;
+        var storedHighscore = 0;
+        try {
+            var rawHighscore = localStorage.getItem(LS_KEY);
+            storedHighscore = parseInt(rawHighscore, 10) || 0;
+        } catch (e) {
+            storedHighscore = 0;
+        }
+        this.highscore = storedHighscore;
         this.updateHighscoreDisplay();
 
         this.bindEvents();
@@ -782,16 +789,28 @@
     SpaceGroomers.prototype.bindEvents = function () {
         var self = this;
 
-        // Keyboard
-        document.addEventListener('keydown', function (e) {
-            self.keys[e.key] = true;
-            if (e.key === ' ' && self.state === 'playing') {
-                e.preventDefault();
-            }
-        });
-        document.addEventListener('keyup', function (e) {
-            self.keys[e.key] = false;
-        });
+        // Keyboard (single shared listener to avoid duplicates with multiple instances)
+        if (!SpaceGroomers._keyboardBound) {
+            SpaceGroomers._keyboardBound = true;
+            SpaceGroomers._instances = [];
+            document.addEventListener('keydown', function (e) {
+                SpaceGroomers._instances.forEach(function (inst) {
+                    inst.keys[e.key] = true;
+                });
+                var playing = SpaceGroomers._instances.some(function (inst) {
+                    return inst.state === 'playing';
+                });
+                if (playing && (e.key === ' ' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+                    e.preventDefault();
+                }
+            });
+            document.addEventListener('keyup', function (e) {
+                SpaceGroomers._instances.forEach(function (inst) {
+                    inst.keys[e.key] = false;
+                });
+            });
+        }
+        SpaceGroomers._instances.push(this);
 
         // Play buttons
         var playBtns = this.container.querySelectorAll('.dps-sg-btn--play');

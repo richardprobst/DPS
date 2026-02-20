@@ -60,7 +60,7 @@ class DPS_Game_Addon {
     }
 
     /**
-     * Enfileira assets do frontend quando o shortcode está presente.
+     * Registra assets do frontend.
      */
     public function enqueue_frontend_assets(): void {
         wp_register_style(
