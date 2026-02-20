@@ -88,7 +88,7 @@ class DPS_Game_Addon {
 
         ob_start();
         $this->render_game_container( 'shortcode' );
-        return ob_get_clean();
+        return (string) ob_get_clean();
     }
 
     /**
