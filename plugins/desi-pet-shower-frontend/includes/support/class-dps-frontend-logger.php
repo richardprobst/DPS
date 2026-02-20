@@ -34,6 +34,21 @@ final class DPS_Frontend_Logger {
      */
     private bool $shutdownRegistered = false;
 
+    /**
+     * Registra mensagem de debug (somente quando WP_DEBUG_LOG está ativo).
+     *
+     * Use para mensagens de diagnóstico que disparam a cada request
+     * (ex.: boot de módulos) e que não devem poluir o log de produção.
+     *
+     * @since 1.1.0
+     */
+    public function debug( string $message ): void {
+        if ( ! ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) ) {
+            return;
+        }
+        $this->write( 'DEBUG', $message );
+    }
+
     public function info( string $message ): void {
         $this->write( 'INFO', $message );
     }

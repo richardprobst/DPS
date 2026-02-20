@@ -27,7 +27,7 @@ abstract class DPS_Abstract_Module_V2 {
     public function boot(): void {
         add_shortcode( $this->shortcodeTag(), [ $this, 'renderShortcode' ] );
         add_action( 'wp_enqueue_scripts', [ $this, 'maybeEnqueueAssets' ] );
-        $this->logger->info( sprintf( 'Módulo V2 "%s" ativado.', static::class ) );
+        $this->logger->debug( sprintf( 'Módulo V2 "%s" ativado.', static::class ) );
     }
 
     /**

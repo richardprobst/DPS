@@ -32,6 +32,6 @@ final class DPS_Frontend_Addon {
 
         add_action( 'wp_enqueue_scripts', [ $this->assets, 'enqueue' ] );
 
-        $this->logger->info( 'Add-on Frontend inicializado.' );
+        $this->logger->debug( 'Add-on Frontend inicializado.' );
     }
 }

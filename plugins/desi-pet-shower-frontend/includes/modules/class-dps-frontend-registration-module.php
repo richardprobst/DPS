@@ -65,7 +65,7 @@ final class DPS_Frontend_Registration_Module {
         // Enfileira CSS extra do frontend add-on (sobre os assets do legado)
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueueFrontendCss' ] );
 
-        $this->logger->info( 'Módulo Registration ativado (dual-run com legado).' );
+        $this->logger->debug( 'Módulo Registration ativado (dual-run com legado).' );
     }
 
     /**
