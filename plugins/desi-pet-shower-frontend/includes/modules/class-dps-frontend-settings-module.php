@@ -71,7 +71,7 @@ final class DPS_Frontend_Settings_Module {
         // Registra handler de salvamento via hook dinâmico do settings
         add_action( 'dps_settings_save_save_frontend', [ $this, 'handleSave' ] );
 
-        $this->logger->info( 'Módulo Settings ativado (aba de configurações registrada).' );
+        $this->logger->debug( 'Módulo Settings ativado (aba de configurações registrada).' );
     }
 
     /**

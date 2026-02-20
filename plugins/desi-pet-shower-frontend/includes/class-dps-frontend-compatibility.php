@@ -51,7 +51,7 @@ final class DPS_Frontend_Compatibility {
             return;
         }
 
-        $this->logger->info( 'Bridge de compatibilidade do módulo Registration ativo.' );
+        $this->logger->debug( 'Bridge de compatibilidade do módulo Registration ativo.' );
     }
 
     /**
@@ -66,7 +66,7 @@ final class DPS_Frontend_Compatibility {
             return;
         }
 
-        $this->logger->info( 'Bridge de compatibilidade do módulo Booking ativo.' );
+        $this->logger->debug( 'Bridge de compatibilidade do módulo Booking ativo.' );
     }
 
     /**
@@ -80,6 +80,6 @@ final class DPS_Frontend_Compatibility {
             return;
         }
 
-        $this->logger->info( 'Bridge de compatibilidade do módulo Settings ativo.' );
+        $this->logger->debug( 'Bridge de compatibilidade do módulo Settings ativo.' );
     }
 }

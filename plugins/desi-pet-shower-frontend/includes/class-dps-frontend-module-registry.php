@@ -46,7 +46,7 @@ final class DPS_Frontend_Module_Registry {
             }
 
             $module->boot();
-            $this->logger->info( "Módulo '{$slug}' ativado." );
+            $this->logger->debug( "Módulo '{$slug}' ativado." );
         }
     }
 
