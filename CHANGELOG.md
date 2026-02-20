@@ -83,6 +83,16 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Space Groomers — Jogo Temático (Add-on)**
+
+- **Novo add-on `desi-pet-shower-game`**: jogo "Space Groomers: Invasão das Pulgas" estilo Space Invaders para engajamento de clientes no portal.
+- **Canvas + JS puro**: zero dependências pesadas, roda liso em desktop e mobile (touch controls).
+- **Mecânica MVP**: 3 tipos de inimigo (Pulga, Carrapato, Bolota de Pelo), 2 power-ups (Shampoo Turbo, Toalha), 10 waves com dificuldade crescente, combo system, especial "Banho de Espuma".
+- **Integração no portal**: card automático na aba Início via hook `dps_portal_after_inicio_content`.
+- **Shortcode**: `[dps_space_groomers]` para uso em qualquer página WordPress.
+- **Áudio**: SFX chiptune via Web Audio API (sem arquivos externos).
+- **Recorde local**: pontuação salva em `localStorage` do navegador.
+
 **Client Portal — Fase 4.1: Indicador de Progresso no Agendamento**
 
 - **Progress bar (stepper)**: modal de pedido de agendamento transformado em wizard de 3 etapas — Data/Pet → Detalhes → Revisão/Confirmar. Componente reutilizável `dps-progress-bar` com círculos numerados, conectores e labels.

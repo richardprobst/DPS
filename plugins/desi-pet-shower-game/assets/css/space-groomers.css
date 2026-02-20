@@ -1,0 +1,418 @@
+/**
+ * Space Groomers: Invasão das Pulgas
+ * Estilos do jogo temático desi.pet
+ *
+ * @version 1.0.0
+ */
+
+/* ─── Container ─── */
+.dps-space-groomers {
+    position: relative;
+    max-width: 480px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.dps-sg-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 480 / 640;
+    background: #0a0e27;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.dps-sg-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+/* ─── HUD ─── */
+.dps-sg-hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.dps-sg-hud__label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.dps-sg-hud__value {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+}
+
+.dps-sg-hud__lives .dps-sg-hud__value {
+    font-size: 16px;
+}
+
+/* ─── Combo indicator ─── */
+.dps-sg-combo {
+    position: absolute;
+    top: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.dps-sg-combo--hidden {
+    opacity: 0;
+}
+
+.dps-sg-combo__text {
+    display: inline-block;
+    padding: 4px 16px;
+    background: linear-gradient(135deg, #ff6b35, #f7c948);
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    animation: dps-sg-pulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes dps-sg-pulse {
+    from { transform: scale(1); }
+    to   { transform: scale(1.1); }
+}
+
+/* ─── Power-up indicator ─── */
+.dps-sg-powerup-indicator {
+    position: absolute;
+    top: 56px;
+    right: 12px;
+    z-index: 3;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+    transition: opacity 0.3s;
+}
+
+.dps-sg-powerup-indicator--hidden {
+    opacity: 0;
+}
+
+.dps-sg-powerup-indicator__icon {
+    font-size: 16px;
+}
+
+.dps-sg-powerup-indicator__name {
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.dps-sg-powerup-indicator__bar {
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.dps-sg-powerup-indicator__fill {
+    height: 100%;
+    background: #4fc3f7;
+    border-radius: 2px;
+    transition: width 0.2s linear;
+    width: 100%;
+}
+
+/* ─── Special bar ─── */
+.dps-sg-special-bar {
+    position: absolute;
+    bottom: 80px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.dps-sg-special-bar__label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+}
+
+.dps-sg-special-bar__track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.dps-sg-special-bar__fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #7c4dff, #e040fb);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+/* ─── Mobile controls ─── */
+.dps-sg-mobile-controls {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px;
+    gap: 8px;
+    z-index: 4;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, transparent 100%);
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .dps-sg-mobile-controls {
+        display: flex;
+    }
+
+    .dps-sg-special-bar {
+        bottom: 100px;
+    }
+}
+
+.dps-sg-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.1s, opacity 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.dps-sg-btn:active {
+    transform: scale(0.92);
+}
+
+.dps-sg-btn--left,
+.dps-sg-btn--right {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-size: 22px;
+    backdrop-filter: blur(4px);
+}
+
+.dps-sg-btn--fire {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4fc3f7, #0288d1);
+    color: #fff;
+    font-size: 28px;
+    box-shadow: 0 4px 16px rgba(79, 195, 247, 0.4);
+}
+
+.dps-sg-btn--special {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c4dff, #e040fb);
+    color: #fff;
+    font-size: 20px;
+    box-shadow: 0 4px 16px rgba(124, 77, 255, 0.4);
+}
+
+.dps-sg-btn--special:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+    opacity: 0.5;
+}
+
+/* ─── Overlays ─── */
+.dps-sg-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    background: rgba(10, 14, 39, 0.85);
+    backdrop-filter: blur(8px);
+    transition: opacity 0.3s;
+}
+
+.dps-sg-overlay--hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.dps-sg-overlay--wave {
+    background: rgba(10, 14, 39, 0.7);
+}
+
+.dps-sg-overlay__content {
+    text-align: center;
+    padding: 32px 24px;
+    max-width: 360px;
+}
+
+.dps-sg-overlay__title {
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    margin: 0 0 8px;
+    line-height: 1.2;
+}
+
+.dps-sg-overlay__subtitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #4fc3f7;
+    margin: 0 0 12px;
+}
+
+.dps-sg-overlay__desc {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 0 16px;
+    line-height: 1.5;
+}
+
+.dps-sg-overlay__highscore {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0 0 20px;
+}
+
+.dps-sg-overlay__highscore .dps-sg-highscore-value {
+    font-weight: 700;
+    color: #f7c948;
+}
+
+.dps-sg-overlay__final-score {
+    font-size: 20px;
+    color: #fff;
+    margin: 0 0 8px;
+}
+
+.dps-sg-overlay__final-score span {
+    font-weight: 800;
+    color: #f7c948;
+}
+
+.dps-sg-overlay__stats {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0 0 16px;
+    line-height: 1.6;
+}
+
+.dps-sg-overlay__controls-hint {
+    margin-top: 12px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.dps-sg-btn--play {
+    padding: 14px 36px;
+    border-radius: 28px;
+    background: linear-gradient(135deg, #4fc3f7, #0288d1);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    box-shadow: 0 6px 24px rgba(79, 195, 247, 0.4);
+    letter-spacing: 0.02em;
+}
+
+.dps-sg-btn--play:hover {
+    box-shadow: 0 8px 32px rgba(79, 195, 247, 0.6);
+    transform: scale(1.04);
+}
+
+/* ─── Portal card ─── */
+.dps-game-portal-card {
+    margin-top: 24px;
+    padding: 20px;
+    background: var(--dps-surface, #f8f9fa);
+    border-radius: 16px;
+    border: 1px solid var(--dps-border, #e0e0e0);
+}
+
+.dps-game-portal-card__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.dps-game-portal-card__icon {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.dps-game-portal-card__title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--dps-text-primary, #1a1a2e);
+}
+
+.dps-game-portal-card__desc {
+    font-size: 14px;
+    color: var(--dps-text-secondary, #666);
+    margin: 4px 0 0;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 520px) {
+    .dps-space-groomers {
+        max-width: 100%;
+    }
+
+    .dps-sg-wrapper {
+        border-radius: 12px;
+    }
+
+    .dps-sg-hud {
+        padding: 8px 12px;
+    }
+
+    .dps-sg-hud__value {
+        font-size: 15px;
+    }
+
+    .dps-sg-overlay__title {
+        font-size: 22px;
+    }
+}

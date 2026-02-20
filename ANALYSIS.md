@@ -2048,6 +2048,53 @@ $details = DPS_Services_API::get_services_details( $appointment_id );
 
 ---
 
+### Space Groomers (`desi-pet-shower-game`)
+
+**Diretório**: `plugins/desi-pet-shower-game`
+
+**Propósito e funcionalidades principais**:
+- Jogo temático "Space Groomers: Invasão das Pulgas" estilo Space Invaders para engajamento de clientes
+- Canvas + JavaScript puro, sem dependências externas pesadas
+- Partida curta (2–4 minutos), responsivo (desktop + mobile)
+- Integra automaticamente na aba Início do portal como card "Jogo do Dia"
+
+**Shortcodes expostos**:
+- `[dps_space_groomers]` — renderiza o jogo completo em qualquer página
+
+**CPTs, tabelas e opções**: Nenhum (pontuação armazenada em `localStorage` do navegador)
+
+**Mecânica do jogo (MVP)**:
+- **Jogador**: "Secador Turbo" (nave) controlado por teclado ou touch
+- **Inimigos**: Pulga (1 hit, 10pts), Carrapato (2 hits, 25pts), Bolota de Pelo (1 hit, 15pts)
+- **Power-ups**: Shampoo Turbo (tiro triplo, 8s) e Toalha (limpa linha inteira)
+- **Vidas**: 3 corações ("calmaria") — inimigo que passa da linha remove 1 calmaria
+- **Waves**: 10 ondas com dificuldade progressiva (mais inimigos, mais rápidos, gotinhas de lama)
+- **Combo**: 10 acertos seguidos = x2, 20 acertos = x3 (5s cada)
+- **Especial**: "Banho de Espuma" (carrega com pontos, limpa metade inferior)
+- **Bônus de wave perfeita**: +200 pontos quando nenhum inimigo passa
+- **Recorde**: salvo em `localStorage` (chave `dps_sg_highscore`)
+
+**Controles**:
+- Desktop: ← → mover, Espaço atirar, Shift especial
+- Mobile: botões touch (◀ ▶ para mover, 🫧 atirar, ⚡ especial)
+
+**Áudio**: SFX via Web Audio API (chiptune leve, sem arquivos externos)
+
+**Hooks consumidos**:
+- `dps_portal_after_inicio_content`: Renderiza card do jogo na aba Início do portal (prioridade 10)
+
+**Hooks disparados**: Nenhum
+
+**Dependências**:
+- **Obrigatória**: Plugin base DPS (verifica `DPS_Base_Plugin` na inicialização)
+- **Opcional**: Client Portal Add-on (para integração na aba Início)
+
+**Introduzido em**: v1.0.0
+
+**Versão atual**: 1.0.0
+
+---
+
 ## Mapa de hooks
 
 Esta seção consolida os principais hooks expostos pelo núcleo e pelos add-ons, facilitando a integração entre componentes.
