@@ -1,7 +1,7 @@
 /* ==========================================================================
    Bubble Spa Deluxe — Styles
    ========================================================================== */
-.dps-bubble-spa{position:relative;max-width:480px;margin:0 auto;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;user-select:none;-webkit-user-select:none;touch-action:none}
+.dps-bubble-spa{position:relative;width:100%;max-width:480px;margin:0 auto;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;user-select:none;-webkit-user-select:none;touch-action:none}
 .dps-bs-wrapper{position:relative;width:100%;aspect-ratio:480/720;overflow:hidden;border-radius:16px;background:linear-gradient(180deg,#e0f7fa 0%,#b2ebf2 30%,#80deea 60%,#4dd0e1 100%);box-shadow:0 8px 32px rgba(0,150,136,.25)}
 .dps-bs-canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block}
 

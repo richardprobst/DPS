@@ -36,16 +36,16 @@
        LEVEL DEFINITIONS
        ====================================================================== */
     var LEVELS = [
-        { name: 'Banho Básico',    desc: 'Aqueça os motores!',           speed: 0.25, colors: 3, total: 30, spawn: 2.8, stars: [500, 1200, 2500] },
-        { name: 'Espuma & Sabão',  desc: 'A espuma está subindo!',       speed: 0.30, colors: 3, total: 35, spawn: 2.5, stars: [800, 1800, 3500] },
-        { name: 'Banho Completo',  desc: 'Mais cores, mais diversão!',   speed: 0.33, colors: 4, total: 38, spawn: 2.2, stars: [1000, 2200, 4500] },
-        { name: 'Tosa Leve',       desc: 'Cuidado com os nós!',          speed: 0.36, colors: 4, total: 40, spawn: 2.0, stars: [1200, 2800, 5500] },
-        { name: 'Hidratação',      desc: 'O tratamento ficou sério!',    speed: 0.40, colors: 4, total: 42, spawn: 1.8, stars: [1500, 3200, 6500] },
-        { name: 'Banho Pesado',    desc: 'Velocidade máxima!',           speed: 0.44, colors: 4, total: 45, spawn: 1.6, stars: [2000, 4000, 8000] },
-        { name: 'Lama & Limpeza',  desc: 'A lama chegou!',               speed: 0.46, colors: 5, total: 45, spawn: 1.5, stars: [2500, 5000, 9500] },
-        { name: 'Tosa Perfeita',   desc: 'Bolhas travadas no caminho!',  speed: 0.50, colors: 5, total: 48, spawn: 1.3, stars: [3000, 6000, 11000] },
-        { name: 'SPA Premium',     desc: 'Só os melhores passam!',       speed: 0.54, colors: 5, total: 50, spawn: 1.2, stars: [3500, 7000, 13000] },
-        { name: 'Bubble Spa Deluxe', desc: 'O desafio final!',           speed: 0.58, colors: 5, total: 55, spawn: 1.0, stars: [4000, 8500, 16000] }
+        { name: 'Banho Básico',    desc: 'Aqueça os motores!',           speed: 0.12, colors: 3, total: 30, spawn: 3.0, stars: [500, 1200, 2500] },
+        { name: 'Espuma & Sabão',  desc: 'A espuma está subindo!',       speed: 0.14, colors: 3, total: 35, spawn: 2.8, stars: [800, 1800, 3500] },
+        { name: 'Banho Completo',  desc: 'Mais cores, mais diversão!',   speed: 0.16, colors: 4, total: 38, spawn: 2.5, stars: [1000, 2200, 4500] },
+        { name: 'Tosa Leve',       desc: 'Cuidado com os nós!',          speed: 0.18, colors: 4, total: 40, spawn: 2.2, stars: [1200, 2800, 5500] },
+        { name: 'Hidratação',      desc: 'O tratamento ficou sério!',    speed: 0.20, colors: 4, total: 42, spawn: 2.0, stars: [1500, 3200, 6500] },
+        { name: 'Banho Pesado',    desc: 'Velocidade máxima!',           speed: 0.22, colors: 4, total: 45, spawn: 1.8, stars: [2000, 4000, 8000] },
+        { name: 'Lama & Limpeza',  desc: 'A lama chegou!',               speed: 0.24, colors: 5, total: 45, spawn: 1.6, stars: [2500, 5000, 9500] },
+        { name: 'Tosa Perfeita',   desc: 'Bolhas travadas no caminho!',  speed: 0.26, colors: 5, total: 48, spawn: 1.5, stars: [3000, 6000, 11000] },
+        { name: 'SPA Premium',     desc: 'Só os melhores passam!',       speed: 0.28, colors: 5, total: 50, spawn: 1.3, stars: [3500, 7000, 13000] },
+        { name: 'Bubble Spa Deluxe', desc: 'O desafio final!',           speed: 0.30, colors: 5, total: 55, spawn: 1.2, stars: [4000, 8500, 16000] }
     ];
 
     /* ======================================================================
@@ -442,6 +442,7 @@
        LEVEL SELECT
        ------------------------------------------------------------------ */
     BubbleSpa.prototype.showLevelSelect = function () {
+        var self = this;
         this.stopLoop();
         this.hideAll();
         this.state = 'levelSelect';
@@ -542,14 +543,18 @@
     };
 
     BubbleSpa.prototype.spawnInitialChain = function (count) {
+        var spacing = Math.round(SPACING / 2);
+        var headStart = count * spacing;
+        if (headStart >= this.path.length) headStart = this.path.length - spacing;
         for (var i = 0; i < count; i++) {
-            var pIdx = i * Math.round(SPACING / 2);
-            if (pIdx >= this.path.length) break;
+            var pIdx = headStart - i * spacing;
+            if (pIdx < 0) pIdx = 0;
+            var pi = Math.min(Math.round(pIdx), this.path.length - 1);
             this.chain.push({
                 type: this.randomBubbleType(),
                 pathIdx: pIdx,
-                x: this.path[pIdx].x,
-                y: this.path[pIdx].y,
+                x: this.path[pi].x,
+                y: this.path[pi].y,
                 special: null,
                 popping: false
             });
@@ -631,10 +636,10 @@
             return; // pause chain/spawn during anim
         }
 
-        // advance chain
+        // advance chain (dt-based for consistent speed)
         if (!this.chainFrozen) {
             var speed = this.chainReversed ? -this.chainSpeed * 2 : this.chainSpeed;
-            this.advanceChain(speed);
+            this.advanceChain(speed * dt * 60);
         }
 
         // spawn new bubbles
@@ -646,10 +651,11 @@
             }
         }
 
-        // update bullet
+        // update bullet (dt-based)
         if (this.bullet) {
-            this.bullet.x += this.bullet.vx;
-            this.bullet.y += this.bullet.vy;
+            var bdt = dt * 60;
+            this.bullet.x += this.bullet.vx * bdt;
+            this.bullet.y += this.bullet.vy * bdt;
 
             // boundary check
             if (this.bullet.x < -BR || this.bullet.x > W + BR || this.bullet.y < -BR) {
@@ -688,10 +694,16 @@
         this.chain[0].y = this.path[hi].y;
 
         // position rest following head with proper spacing
+        var spacing = Math.round(SPACING / 2);
         for (var i = 1; i < this.chain.length; i++) {
-            var targetIdx = this.chain[i - 1].pathIdx - Math.round(SPACING / 2);
+            var targetIdx = this.chain[i - 1].pathIdx - spacing;
             if (targetIdx < 0) targetIdx = 0;
-            this.chain[i].pathIdx = targetIdx;
+            // Smoothly close gaps but don't push bubbles backward
+            if (this.chain[i].pathIdx < targetIdx) {
+                this.chain[i].pathIdx += Math.min(Math.abs(speed) * 3, targetIdx - this.chain[i].pathIdx);
+            } else {
+                this.chain[i].pathIdx = targetIdx;
+            }
             var pi = Math.round(this.chain[i].pathIdx);
             pi = Math.max(0, Math.min(pi, this.path.length - 1));
             this.chain[i].x = this.path[pi].x;
@@ -1401,7 +1413,8 @@
         for (var i = 0; i < containers.length; i++) {
             if (!containers[i].dataset.init) {
                 containers[i].dataset.init = '1';
-                new BubbleSpa(containers[i]);
+                var game = new BubbleSpa(containers[i]);
+                containers[i]._game = game;
             }
         }
     }
