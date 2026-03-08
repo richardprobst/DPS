@@ -125,6 +125,8 @@ Se um caminho citado não existir mais, atualize o apontamento na mesma entrega.
 Antes de finalizar qualquer tarefa, execute validações proporcionais ao impacto:
 - **Documentação apenas:** `git diff --check` + conferência dos caminhos citados.
 - **PHP alterado:** `php -l` nos arquivos modificados.
+- **Refatoração/auditoria ampla de PHP:** em `tools/php`, executar `composer run ci` (ou `composer run phpcs`, `composer run phpstan`, `composer run psalm` individualmente).
+- **Plugin com `composer.json` e testes:** no diretório do plugin alterado, executar `composer test` quando o script existir.
 - **Mudança funcional relevante:** validação local no WordPress dos fluxos afetados.
 - **Mudança visual/layout:** seguir `docs/visual/` (padrão M3) + registrar screenshots conforme `docs/screenshots/README.md`.
 

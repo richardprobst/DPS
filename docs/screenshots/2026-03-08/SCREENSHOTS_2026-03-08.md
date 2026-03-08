@@ -45,6 +45,14 @@ Melhoria geral da apresentacao visual do add-on `desi-pet-shower-game`, com foco
 - overlays de inicio/resultado mais premium;
 - player, inimigos, projeteis e power-ups com leitura melhor;
 - preservacao de performance mobile sem bibliotecas novas.
+## Registro desta entrega (Fase 4)
+### Contexto
+Mudancas de integracao do jogo com o ecossistema DPS:
+- nova aba `Space Groomers` no portal via hooks oficiais;
+- perfil do jogo conectado ao cliente autenticado;
+- pet em destaque com preferencia para o pet do proximo agendamento;
+- evento/status contextual ligado ao atendimento do pet;
+- resumo de recompensas conectado ao loyalty quando o modulo estiver ativo.
 
 ### Referencia de design aplicada
 - `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`
@@ -63,3 +71,41 @@ Melhoria geral da apresentacao visual do add-on `desi-pet-shower-game`, com foco
 ### Observacoes
 - O browser MCP da sessao nao acessou o servidor local do workspace, entao os PNGs foram gerados com Edge headless apontando para um preview HTTP local separado.
 - O preview foi montado para registrar explicitamente gameplay, inicio e resultado sem depender do WordPress do ambiente.
+- `docs/screenshots/2026-03-08/space-groomers-phase4-preview-desktop.png`
+  - Preview completo desktop do card do jogo na aba Inicio e do novo hub/aba do jogo no portal.
+- `docs/screenshots/2026-03-08/space-groomers-phase4-preview-mobile.png`
+  - Preview completo mobile da mesma composicao, validando a adaptacao responsiva.
+
+### Artefatos de suporte preparados
+- `docs/screenshots/2026-03-08/space-groomers-phase4-preview.html`
+  - Preview estatico usado para gerar os PNGs desta fase.
+
+### Observacoes
+- O registro continua sendo um preview estatico porque o WordPress local nao estava exposto ao navegador automatizado desta sessao.
+- Diferente da tentativa anterior, os PNGs desta fase foram gerados com Playwright a partir do preview isolado, entao ha imagens reais salvas no repositorio.
+## Registro desta entrega (rodada final de endurecimento)
+### Contexto
+Mudancas finais de estabilidade e medicao no add-on:
+- pausa manual dedicada e pausa segura por blur/aba oculta/orientacao;
+- overlay de pausa com `Retomar` e `Reiniciar run`;
+- status explicito de persistencia no overlay inicial;
+- telemetria leve via eventos frontend e hooks server-side;
+- refinamento de toque e feedback para QA humano.
+
+### Referencia de design aplicada
+- `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`
+- `docs/visual/VISUAL_STYLE_GUIDE.md`
+
+### Capturas realizadas
+- `docs/screenshots/2026-03-08/space-groomers-final-hardening-preview-desktop.png`
+  - Preview desktop com overlay inicial e overlay de pausa.
+- `docs/screenshots/2026-03-08/space-groomers-final-hardening-preview-mobile.png`
+  - Preview mobile do mesmo fluxo, validando legibilidade e empilhamento.
+
+### Artefatos de suporte preparados
+- `docs/screenshots/2026-03-08/space-groomers-final-hardening-preview.html`
+  - Preview estatico em HTML salvo no repositorio.
+
+### Observacoes
+- Os PNGs desta rodada foram gerados com Playwright a partir de preview inline equivalente ao HTML salvo, porque o servidor HTTP local do workspace nao ficou acessivel ao browser automatizado nesta sessao.
+- Mesmo assim, os artefatos visuais registram precisamente os novos estados de overlay inicial e pausa, que foram as superficies alteradas nesta rodada.
