@@ -1,6 +1,82 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Groomers Graphics Preview</title>
+<link rel="stylesheet" href="../../../plugins/desi-pet-shower-game/assets/css/space-groomers.css">
+<style>
+body{margin:0;padding:24px;background:linear-gradient(180deg,#eef5ff 0%,#dbe7f7 100%);font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;color:#10213a}
+.preview-shell{max-width:1280px;margin:0 auto;display:grid;gap:24px}
+.preview-head,.preview-card{padding:20px;border-radius:28px;background:rgba(255,255,255,.82);border:1px solid rgba(16,33,58,.08);box-shadow:0 22px 44px rgba(16,33,58,.12)}
+.preview-head h1,.preview-card h2{margin:0 0 8px;font-family:"Outfit","Segoe UI",system-ui,sans-serif;font-weight:500;line-height:1.1}.preview-head h1{font-size:clamp(28px,3vw,40px)}.preview-card h2{font-size:24px}
+.preview-head p,.preview-card p{margin:0;color:#516072;line-height:1.6}.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;align-items:start}
+.preview-card .dps-space-groomers,.preview-card .dps-sg-wrapper{max-width:420px;margin:0 auto}.preview-static{position:relative}.preview-force-visible{opacity:1!important;pointer-events:auto!important}
+.preview-static .dps-sg-overlay{position:absolute}.preview-tag{display:inline-flex;align-items:center;min-height:30px;width:fit-content;padding:0 14px;border-radius:999px;background:rgba(11,107,203,.1);color:#0b6bcb;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+@media(max-width:640px){body{padding:18px}.preview-head,.preview-card{padding:18px;border-radius:24px}}
+</style>
+</head>
+<body>
+<div class="preview-shell">
+<section class="preview-head">
+<span class="preview-tag">M3 + mobile-first</span>
+<h1>Space Groomers - melhoria visual geral</h1>
+<p>Preview da rodada de polimento visual do add-on, seguindo explicitamente <code>docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md</code> e <code>docs/visual/VISUAL_STYLE_GUIDE.md</code> como fonte de verdade do padr√£o M3.</p>
+</section>
+<div class="preview-grid">
+<section class="preview-card">
+<h2>Gameplay ao vivo</h2>
+<p>Inst√¢ncia real com CSS e JS atuais, avan√ßada alguns frames para registrar fundo, HUD, player, inimigos, proj√©teis e leitura do gameplay.</p>
+<div id="dps-space-groomers-preview-live" class="dps-space-groomers" data-context="preview-live">
+<div class="dps-sg-wrapper">
+<canvas class="dps-sg-canvas" width="480" height="640" role="img" aria-label="Area principal do jogo Space Groomers."></canvas>
+<p class="dps-sg-status-live" aria-live="polite" aria-atomic="true"></p>
+<div class="dps-sg-hud"><div class="dps-sg-hud__score"><span class="dps-sg-hud__label">Pontos</span><span class="dps-sg-hud__value dps-sg-score">0</span></div><div class="dps-sg-hud__wave"><span class="dps-sg-hud__label">Onda</span><span class="dps-sg-hud__value dps-sg-wave">1</span></div><div class="dps-sg-hud__lives"><span class="dps-sg-hud__label">Vida</span><span class="dps-sg-hud__value dps-sg-lives">??????</span></div><button type="button" class="dps-sg-btn dps-sg-btn--pause" aria-label="Pausar partida">||</button></div>
+<div class="dps-sg-combo dps-sg-combo--hidden"><span class="dps-sg-combo__text">x2</span><span class="dps-sg-combo__hint">boa sequencia</span><span class="dps-sg-combo__meter"><span class="dps-sg-combo__fill"></span></span></div>
+<div class="dps-sg-goal" aria-live="polite"><span class="dps-sg-goal__label">Missao de hoje</span><span class="dps-sg-goal__title"></span><span class="dps-sg-goal__progress"></span><span class="dps-sg-goal__meter"><span class="dps-sg-goal__fill"></span></span><span class="dps-sg-goal__remaining"></span></div>
+<div class="dps-sg-toast dps-sg-toast--hidden" aria-live="polite"><span class="dps-sg-toast__title"></span><span class="dps-sg-toast__desc"></span></div>
+<div class="dps-sg-powerup-indicator dps-sg-powerup-indicator--hidden"><span class="dps-sg-powerup-indicator__icon"></span><span class="dps-sg-powerup-indicator__copy"><span class="dps-sg-powerup-indicator__name"></span><span class="dps-sg-powerup-indicator__desc"></span></span><div class="dps-sg-powerup-indicator__bar"><div class="dps-sg-powerup-indicator__fill"></div></div></div>
+<div class="dps-sg-special-bar"><span class="dps-sg-special-bar__label">Especial</span><div class="dps-sg-special-bar__track"><div class="dps-sg-special-bar__fill"></div></div></div>
+<div class="dps-sg-mobile-controls"><p class="dps-sg-mobile-controls__hint">Arraste para mover. Toque no botao para especial ou pausa.</p><button type="button" class="dps-sg-btn dps-sg-btn--special" aria-label="Especial" disabled>?</button></div>
+<div class="dps-sg-overlay dps-sg-overlay--start"><div class="dps-sg-overlay__content"><p class="dps-sg-overlay__eyebrow">Arcade casual premium</p><h2 class="dps-sg-overlay__title">?? Space Groomers</h2><p class="dps-sg-overlay__subtitle">Invasao das Pulgas</p><p class="dps-sg-overlay__desc">Defenda o Pet-Planeta em runs curtas, responsivas e com vontade de tentar de novo.</p><p class="dps-sg-overlay__highscore">Seu recorde: <span class="dps-sg-highscore-value">0</span></p><div class="dps-sg-start-meta"><p class="dps-sg-start-meta__streak">Sequencia diaria: <span class="dps-sg-start-streak-value">0</span></p><p class="dps-sg-start-meta__mission-title"></p><p class="dps-sg-start-meta__mission-progress"></p><p class="dps-sg-start-meta__badges"></p><p class="dps-sg-start-meta__status"></p></div><button type="button" class="dps-sg-btn dps-sg-btn--play">Toque para comecar</button><div class="dps-sg-overlay__legend"><span class="dps-sg-overlay__legend-item"><strong>?? Shampoo Turbo</strong><small>3 tiros por disparo</small></span><span class="dps-sg-overlay__legend-item"><strong>?? Toalha Giratoria</strong><small>limpa a fileira mais baixa</small></span></div><p class="dps-sg-overlay__controls-hint"><small>Arraste para mover. Em 4 acertos seguidos voce entra em combo x2.</small></p></div></div>
+<div class="dps-sg-overlay dps-sg-overlay--gameover dps-sg-overlay--hidden"><div class="dps-sg-overlay__content"></div></div><div class="dps-sg-overlay dps-sg-overlay--victory dps-sg-overlay--hidden"><div class="dps-sg-overlay__content"></div></div><div class="dps-sg-overlay dps-sg-overlay--wave dps-sg-overlay--hidden"><div class="dps-sg-overlay__content"><h2 class="dps-sg-overlay__title dps-sg-wave-title"></h2><p class="dps-sg-overlay__subtitle dps-sg-wave-bonus"></p></div></div><div class="dps-sg-overlay dps-sg-overlay--pause dps-sg-overlay--hidden"><div class="dps-sg-overlay__content"></div></div>
+</div>
+</div>
+</section>
+<section class="preview-card">
+<h2>Overlay inicial</h2>
+<p>Estado estatico para registrar CTA, missao do dia, power-up ativo e hierarquia visual da introducao.</p>
+<div class="preview-static">
+<div class="dps-sg-wrapper">
+<canvas class="dps-sg-canvas" width="480" height="640"></canvas>
+<div class="dps-sg-hud"><div class="dps-sg-hud__score"><span class="dps-sg-hud__label">Pontos</span><span class="dps-sg-hud__value">0</span></div><div class="dps-sg-hud__wave"><span class="dps-sg-hud__label">Onda</span><span class="dps-sg-hud__value">1</span></div><div class="dps-sg-hud__lives"><span class="dps-sg-hud__label">Vida</span><span class="dps-sg-hud__value">??????</span></div><button type="button" class="dps-sg-btn dps-sg-btn--pause" aria-label="Pausar partida">||</button></div>
+<div class="dps-sg-goal"><span class="dps-sg-goal__label">Missao de hoje</span><span class="dps-sg-goal__title">?? Atinga combo 9</span><span class="dps-sg-goal__progress">4/9</span><span class="dps-sg-goal__meter"><span class="dps-sg-goal__fill" style="width:44%"></span></span><span class="dps-sg-goal__remaining">Falta 5</span></div>
+<div class="dps-sg-powerup-indicator preview-force-visible"><span class="dps-sg-powerup-indicator__icon">??</span><span class="dps-sg-powerup-indicator__copy"><span class="dps-sg-powerup-indicator__name">Shampoo Turbo</span><span class="dps-sg-powerup-indicator__desc">3 tiros por disparo</span></span><div class="dps-sg-powerup-indicator__bar"><div class="dps-sg-powerup-indicator__fill" style="height:84%"></div></div></div>
+<div class="dps-sg-mobile-controls"><p class="dps-sg-mobile-controls__hint">Arraste para mover. Toque no botao para especial ou pausa.</p><button type="button" class="dps-sg-btn dps-sg-btn--special dps-sg-btn--charged" aria-label="Especial">?</button></div>
+<div class="dps-sg-overlay dps-sg-overlay--start preview-force-visible"><div class="dps-sg-overlay__content"><p class="dps-sg-overlay__eyebrow">Arcade casual premium</p><h2 class="dps-sg-overlay__title">?? Space Groomers</h2><p class="dps-sg-overlay__subtitle">Invasao das Pulgas</p><p class="dps-sg-overlay__desc">Defenda o Pet-Planeta em runs curtas, responsivas e com vontade de tentar de novo.</p><p class="dps-sg-overlay__highscore">Seu recorde: <span class="dps-sg-highscore-value">8.420</span></p><div class="dps-sg-start-meta"><p class="dps-sg-start-meta__streak">Sequencia diaria: <span>3 dias</span></p><p class="dps-sg-start-meta__mission-title">?? Atinga combo 9</p><p class="dps-sg-start-meta__mission-progress">Progresso: 4/9 (faltam 5)</p><p class="dps-sg-start-meta__badges">Badges locais: 4</p><p class="dps-sg-start-meta__status">Progresso sincronizado com o portal.</p></div><button type="button" class="dps-sg-btn dps-sg-btn--play">Toque para comecar</button><div class="dps-sg-overlay__legend"><span class="dps-sg-overlay__legend-item"><strong>?? Shampoo Turbo</strong><small>3 tiros por disparo</small></span><span class="dps-sg-overlay__legend-item"><strong>?? Toalha Giratoria</strong><small>limpa a fileira mais baixa</small></span></div><p class="dps-sg-overlay__controls-hint"><small>Runs curtas, leitura clara e foco em mobile.</small></p></div></div>
+</div>
+</div>
+</section>
+<section class="preview-card">
+<h2>Resultado e retry</h2>
+<p>Estado estatico para registrar hierarquia da tela final, cards-resumo, CTA de replay e clareza da composicao em telas pequenas.</p>
+<div class="preview-static">
+<div class="dps-sg-wrapper">
+<canvas class="dps-sg-canvas" width="480" height="640"></canvas>
+<div class="dps-sg-overlay dps-sg-overlay--victory preview-force-visible"><div class="dps-sg-overlay__content"><p class="dps-sg-overlay__eyebrow">Run concluida</p><h2 class="dps-sg-overlay__title">?? Banho Completo!</h2><p class="dps-sg-overlay__final-score">Pontuacao: <span class="dps-sg-final-score">12.480</span></p><div class="dps-sg-overlay__result-grid"><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label">Melhor combo</span><strong>x9</strong></div><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label">Onda</span><strong>8</strong></div><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label">Tempo</span><strong>78s</strong></div></div><p class="dps-sg-overlay__stats">Pulgas 22 | Carrapatos 8 | Pelos 15 | Run 78s</p><p class="dps-sg-overlay__mission">?? Missao: Atinga combo 9 (concluida hoje).</p><p class="dps-sg-overlay__records">Streak: 4 dias (melhor 6) | recorde combo: 9 | melhor wave: 8</p><div class="dps-sg-overlay__unlocks"><p class="dps-sg-overlay__unlocks-title">Novos badges locais</p><p class="dps-sg-overlay__unlocks-list">?? Missao em Dia | ? Primeiro Banho</p></div><p class="dps-sg-overlay__highscore">Recorde: <span class="dps-sg-highscore-value">12.480</span></p><div class="dps-sg-overlay__actions"><button type="button" class="dps-sg-btn dps-sg-btn--play">Jogar de novo</button><button type="button" class="dps-sg-btn dps-sg-btn--play dps-sg-btn--play-secondary">Voltar ao hub</button></div></div></div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<script src="../../../plugins/desi-pet-shower-game/assets/js/space-groomers.js"></script>
+<script>
+(function(){function paintBackdrop(canvas){if(!canvas||!canvas.getContext){return}var ctx=canvas.getContext('2d');var g=ctx.createLinearGradient(0,0,0,canvas.height);g.addColorStop(0,'#051427');g.addColorStop(1,'#174163');ctx.fillStyle=g;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='rgba(120,194,255,.12)';ctx.beginPath();ctx.arc(canvas.width*.18,90,78,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,185,93,.08)';ctx.beginPath();ctx.arc(canvas.width*.78,138,52,0,Math.PI*2);ctx.fill();for(var i=0;i<42;i++){ctx.fillStyle=i%5===0?'#e8fbff':'#a5d4ff';ctx.globalAlpha=i%5===0?.86:.48;ctx.fillRect((i*37)%canvas.width,(i*53)%canvas.height,i%5===0?2:1.3,i%5===0?2:1.3)}ctx.globalAlpha=1;ctx.fillStyle='rgba(173,231,255,.22)';ctx.fillRect(0,canvas.height-34,canvas.width,2)}document.querySelectorAll('.preview-static .dps-sg-canvas').forEach(paintBackdrop);window.addEventListener('load',function(){var startButton=document.querySelector('#dps-space-groomers-preview-live .dps-sg-overlay--start .dps-sg-btn--play');if(startButton){startButton.click()}setTimeout(function(){if(typeof window.advanceTime==='function'){window.advanceTime(6200)}},220)})}());
+</script>
+</body>
+</html>
+
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Groomers - Graphics Enhancement Preview</title>
@@ -130,14 +206,14 @@
     <div class="preview-shell">
         <section class="preview-header">
             <span class="preview-eyebrow">M3 + mobile-first</span>
-            <h1>Space Groomers - melhoria geral de apresentaÁ„o visual</h1>
-            <p>Preview est·tico e funcional da rodada de polimento visual do add-on `desi-pet-shower-game`, seguindo `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do padr„o M3.</p>
+            <h1>Space Groomers - melhoria geral de apresenta√ß√£o visual</h1>
+            <p>Preview est√°tico e funcional da rodada de polimento visual do add-on `desi-pet-shower-game`, seguindo `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do padr√£o M3.</p>
         </section>
 
         <div class="preview-grid">
             <section class="preview-card">
                 <h2>Gameplay ao vivo</h2>
-                <p>Inst‚ncia real do jogo com CSS e JS atuais. A captura avanÁa alguns frames para registrar HUD, fundo, player, inimigos e leitura mobile-first.</p>
+                <p>Inst√¢ncia real do jogo com CSS e JS atuais. A captura avan√ßa alguns frames para registrar HUD, fundo, player, inimigos e leitura mobile-first.</p>
                 <div id="dps-space-groomers-preview-live" class="dps-space-groomers" data-context="preview-live">
                     <div class="dps-sg-wrapper">
                         <canvas class="dps-sg-canvas" width="480" height="640" role="img" aria-label="Area principal do jogo Space Groomers."></canvas>

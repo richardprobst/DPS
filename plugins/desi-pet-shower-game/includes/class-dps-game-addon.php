@@ -552,6 +552,7 @@ class DPS_Game_Addon {
                         <p class="dps-sg-overlay__eyebrow"><?php echo esc_html__( 'Nova tentativa', 'dps-game' ); ?></p>
                         <h2 class="dps-sg-overlay__title">&#128575; <?php echo esc_html__( 'Pet ficou estressado!', 'dps-game' ); ?></h2>
                         <p class="dps-sg-overlay__final-score"><?php echo esc_html__( 'Pontuacao:', 'dps-game' ); ?> <span class="dps-sg-final-score">0</span></p>
+                        <div class="dps-sg-overlay__result-grid"><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label"><?php echo esc_html__( 'Melhor combo', 'dps-game' ); ?></span><strong class="dps-sg-result-combo">0</strong></div><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label"><?php echo esc_html__( 'Onda', 'dps-game' ); ?></span><strong class="dps-sg-result-wave">1</strong></div><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label"><?php echo esc_html__( 'Tempo', 'dps-game' ); ?></span><strong class="dps-sg-result-time">0s</strong></div></div>
                         <div class="dps-sg-overlay__result-grid">
                             <div class="dps-sg-overlay__result-card">
                                 <span class="dps-sg-overlay__result-label"><?php echo esc_html__( 'Melhor combo', 'dps-game' ); ?></span>
@@ -583,6 +584,7 @@ class DPS_Game_Addon {
                         <p class="dps-sg-overlay__eyebrow"><?php echo esc_html__( 'Run concluida', 'dps-game' ); ?></p>
                         <h2 class="dps-sg-overlay__title">&#127881; <?php echo esc_html__( 'Banho Completo!', 'dps-game' ); ?></h2>
                         <p class="dps-sg-overlay__final-score"><?php echo esc_html__( 'Pontuacao:', 'dps-game' ); ?> <span class="dps-sg-final-score">0</span></p>
+                        <div class="dps-sg-overlay__result-grid"><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label"><?php echo esc_html__( 'Melhor combo', 'dps-game' ); ?></span><strong class="dps-sg-result-combo">0</strong></div><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label"><?php echo esc_html__( 'Onda', 'dps-game' ); ?></span><strong class="dps-sg-result-wave">1</strong></div><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label"><?php echo esc_html__( 'Tempo', 'dps-game' ); ?></span><strong class="dps-sg-result-time">0s</strong></div></div>
                         <div class="dps-sg-overlay__result-grid">
                             <div class="dps-sg-overlay__result-card">
                                 <span class="dps-sg-overlay__result-label"><?php echo esc_html__( 'Melhor combo', 'dps-game' ); ?></span>
@@ -632,6 +634,7 @@ class DPS_Game_Addon {
         </div>
         <?php
     }
+}
 }
 
 

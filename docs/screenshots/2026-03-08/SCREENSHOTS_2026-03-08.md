@@ -37,6 +37,14 @@ Mudancas de camada meta/retencao no jogo:
 - Como o WordPress local nao estava acessivel no navegador automatizado desta sessao, o registro visual do portal foi salvo como preview estatico e PNG renderizado localmente.
 - O card segue `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do padrao M3.
 
+## Registro desta entrega (graphics enhancement)
+### Contexto
+Melhoria geral da apresentacao visual do add-on `desi-pet-shower-game`, com foco em:
+- fundo mais bonito e coerente;
+- HUD mais limpa e legivel;
+- overlays de inicio/resultado mais premium;
+- player, inimigos, projeteis e power-ups com leitura melhor;
+- preservacao de performance mobile sem bibliotecas novas.
 ## Registro desta entrega (Fase 4)
 ### Contexto
 Mudancas de integracao do jogo com o ecossistema DPS:
@@ -51,6 +59,18 @@ Mudancas de integracao do jogo com o ecossistema DPS:
 - `docs/visual/VISUAL_STYLE_GUIDE.md`
 
 ### Capturas realizadas
+- `docs/screenshots/2026-03-08/space-groomers-graphics-enhancement-preview-desktop.png`
+  - Preview desktop com gameplay, overlay inicial e tela de resultado lado a lado.
+- `docs/screenshots/2026-03-08/space-groomers-graphics-enhancement-preview-mobile.png`
+  - Preview mobile com os mesmos estados empilhados, validando a leitura vertical e a hierarquia compacta.
+
+### Artefatos de suporte preparados
+- `docs/screenshots/2026-03-08/space-groomers-graphics-enhancement-preview.html`
+  - Preview local usado para renderizar os PNGs desta rodada.
+
+### Observacoes
+- O browser MCP da sessao nao acessou o servidor local do workspace, entao os PNGs foram gerados com Edge headless apontando para um preview HTTP local separado.
+- O preview foi montado para registrar explicitamente gameplay, inicio e resultado sem depender do WordPress do ambiente.
 - `docs/screenshots/2026-03-08/space-groomers-phase4-preview-desktop.png`
   - Preview completo desktop do card do jogo na aba Inicio e do novo hub/aba do jogo no portal.
 - `docs/screenshots/2026-03-08/space-groomers-phase4-preview-mobile.png`
