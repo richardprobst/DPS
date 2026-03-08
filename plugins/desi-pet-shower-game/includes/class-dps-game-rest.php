@@ -124,16 +124,23 @@ class DPS_Game_REST {
             );
         }
 
-        $payload = $request->get_json_params();
-        if ( isset( $payload['progress'] ) && is_array( $payload['progress'] ) ) {
-            $payload = $payload['progress'];
+        $raw_payload = $request->get_json_params();
+        $telemetry   = [];
+        $payload     = $raw_payload;
+
+        if ( isset( $raw_payload['telemetry'] ) && is_array( $raw_payload['telemetry'] ) ) {
+            $telemetry = $raw_payload['telemetry'];
+        }
+
+        if ( isset( $raw_payload['progress'] ) && is_array( $raw_payload['progress'] ) ) {
+            $payload = $raw_payload['progress'];
         }
 
         if ( ! is_array( $payload ) ) {
             $payload = [];
         }
 
-        $result = DPS_Game_Progress_Service::sync_progress( $client_id, $payload );
+        $result = DPS_Game_Progress_Service::sync_progress( $client_id, $payload, $telemetry );
 
         return new WP_REST_Response(
             [

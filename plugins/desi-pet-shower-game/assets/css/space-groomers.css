@@ -25,6 +25,18 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.dps-sg-status-live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .dps-sg-canvas {
     display: block;
     width: 100%;
@@ -41,6 +53,7 @@
     z-index: 2;
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     gap: 10px;
     padding: calc(10px + env(safe-area-inset-top, 0px)) 14px 10px;
     background: linear-gradient(180deg, rgba(5, 10, 24, 0.78) 0%, rgba(5, 10, 24, 0) 100%);
@@ -355,7 +368,9 @@
 
 .dps-sg-mobile-controls__hint {
     margin: 0;
+    max-width: 70%;
     font-size: 11px;
+    line-height: 1.35;
     color: rgba(255, 255, 255, 0.76);
 }
 
@@ -363,6 +378,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    min-width: 48px;
+    min-height: 48px;
     border: 0;
     cursor: pointer;
     font-family: inherit;
@@ -372,6 +389,28 @@
 
 .dps-sg-btn:active {
     transform: scale(0.96);
+}.dps-sg-btn--pause {
+    flex: 0 0 auto;
+    width: 48px;
+    height: 48px;
+    margin-left: auto;
+    border-radius: var(--dps-shape-full, 999px);
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    pointer-events: auto;
+}
+
+.dps-sg-btn--pause:disabled {
+    opacity: 0.45;
+    box-shadow: none;
+}
+
+.dps-sg-btn--pause-active {
+    background: rgba(79, 195, 247, 0.22);
+    box-shadow: 0 8px 20px rgba(79, 195, 247, 0.22);
 }
 
 .dps-sg-btn--special {
@@ -467,6 +506,12 @@
     margin-top: 5px;
 }
 
+.dps-sg-start-meta__status {
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(154, 212, 255, 0.92);
+}
+
 .dps-sg-start-meta__streak,
 .dps-sg-start-meta__mission-title {
     font-weight: 700;
@@ -547,6 +592,20 @@
 
 .dps-sg-btn--play:hover {
     box-shadow: 0 12px 32px rgba(79, 195, 247, 0.38);
+}
+
+.dps-sg-btn--play-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.dps-sg-overlay__actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
 }
 
 .dps-game-portal-card {
@@ -661,6 +720,15 @@
 
     .dps-sg-btn--play {
         width: min(280px, 100%);
+    }
+
+    .dps-sg-overlay__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dps-sg-mobile-controls__hint {
+        max-width: 62%;
     }
 }
 
