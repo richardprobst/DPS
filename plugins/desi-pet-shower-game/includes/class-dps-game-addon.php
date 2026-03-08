@@ -22,13 +22,6 @@ class DPS_Game_Addon {
      */
     private bool $script_localized = false;
 
-    /**
-     * Cache de payloads do portal por request.
-     *
-     * @var array<int, array>
-     */
-    private array $portal_payloads = [];
-
     public static function get_instance(): self {
         if ( null === self::$instance ) {
             self::$instance = new self();
@@ -354,14 +347,20 @@ class DPS_Game_Addon {
                     'sync'     => esc_url_raw( rest_url( DPS_Game_REST::API_NAMESPACE . '/progress/sync' ) ),
                 ],
                 'storage'       => [
-                    'progressKey'   => 'dps_sg_progress_v1',
+                    'progressKey'    => 'dps_sg_progress_v1',
                     'legacyScoreKey' => 'dps_sg_highscore',
                 ],
                 'i18n'          => [
-                    'syncReady'      => __( 'Progresso sincronizado com o portal.', 'dps-game' ),
-                    'syncFallback'   => __( 'Sem portal autenticado: usando progresso local.', 'dps-game' ),
-                    'syncError'      => __( 'Nao foi possivel sincronizar agora. O progresso local segue ativo.', 'dps-game' ),
-                    'rewardUnlocked' => __( 'Pontos de fidelidade recebidos no portal.', 'dps-game' ),
+                    'syncReady'        => __( 'Progresso sincronizado com o portal.', 'dps-game' ),
+                    'syncFallback'     => __( 'Sem portal autenticado: usando progresso local neste navegador.', 'dps-game' ),
+                    'syncVolatile'     => __( 'Sem portal e sem armazenamento local: o progresso vale apenas nesta aba.', 'dps-game' ),
+                    'syncError'        => __( 'Nao foi possivel sincronizar agora. O progresso local segue ativo.', 'dps-game' ),
+                    'rewardUnlocked'   => __( 'Pontos de fidelidade recebidos no portal.', 'dps-game' ),
+                    'pauseManual'      => __( 'Partida pausada. Retome quando estiver pronto.', 'dps-game' ),
+                    'pauseHidden'      => __( 'A partida foi pausada porque a aba ficou em segundo plano.', 'dps-game' ),
+                    'pauseBlur'        => __( 'A partida foi pausada porque a janela perdeu foco.', 'dps-game' ),
+                    'pauseOrientation' => __( 'A partida foi pausada apos mudanca de orientacao da tela.', 'dps-game' ),
+                    'resumeReady'      => __( 'Tudo pronto para retomar do mesmo ponto.', 'dps-game' ),
                 ],
             ]
         );
@@ -370,24 +369,17 @@ class DPS_Game_Addon {
     }
 
     /**
-     * Recupera payload do portal com cache local por request.
+     * Recupera payload do portal em tempo real.
      *
      * @param int $client_id ID do cliente.
      * @return array
      */
     private function get_portal_payload( int $client_id ): array {
-        if ( isset( $this->portal_payloads[ $client_id ] ) ) {
-            return $this->portal_payloads[ $client_id ];
-        }
-
         if ( $client_id <= 0 || ! class_exists( 'DPS_Game_Ecosystem_Service' ) ) {
-            $this->portal_payloads[ $client_id ] = [];
             return [];
         }
 
-        $this->portal_payloads[ $client_id ] = DPS_Game_Ecosystem_Service::get_portal_payload( $client_id );
-
-        return $this->portal_payloads[ $client_id ];
+        return DPS_Game_Ecosystem_Service::get_portal_payload( $client_id );
     }
 
     /**
@@ -467,7 +459,10 @@ class DPS_Game_Addon {
         ?>
         <div id="<?php echo esc_attr( $container_id ); ?>" class="dps-space-groomers" data-context="<?php echo esc_attr( $context ); ?>">
             <div class="dps-sg-wrapper">
-                <canvas class="dps-sg-canvas" width="480" height="640"></canvas>
+                <canvas class="dps-sg-canvas" width="480" height="640" role="img" aria-label="<?php echo esc_attr__( 'Area principal do jogo Space Groomers.', 'dps-game' ); ?>">
+                    <?php echo esc_html__( 'Seu navegador nao conseguiu exibir o canvas do jogo.', 'dps-game' ); ?>
+                </canvas>
+                <p class="dps-sg-status-live" aria-live="polite" aria-atomic="true"></p>
 
                 <div class="dps-sg-hud">
                     <div class="dps-sg-hud__score">
@@ -482,6 +477,7 @@ class DPS_Game_Addon {
                         <span class="dps-sg-hud__label"><?php echo esc_html__( 'Vida', 'dps-game' ); ?></span>
                         <span class="dps-sg-hud__value dps-sg-lives">&#10084;&#65039;&#10084;&#65039;&#10084;&#65039;</span>
                     </div>
+                    <button type="button" class="dps-sg-btn dps-sg-btn--pause" aria-label="<?php echo esc_attr__( 'Pausar partida', 'dps-game' ); ?>">&#10074;&#10074;</button>
                 </div>
 
                 <div class="dps-sg-combo dps-sg-combo--hidden">
@@ -518,7 +514,7 @@ class DPS_Game_Addon {
                 </div>
 
                 <div class="dps-sg-mobile-controls">
-                    <p class="dps-sg-mobile-controls__hint"><?php echo esc_html__( 'Arraste para mover - tiro automatico', 'dps-game' ); ?></p>
+                    <p class="dps-sg-mobile-controls__hint"><?php echo esc_html__( 'Arraste para mover. Toque no botao para especial ou pausa.', 'dps-game' ); ?></p>
                     <button type="button" class="dps-sg-btn dps-sg-btn--special" aria-label="<?php echo esc_attr__( 'Especial', 'dps-game' ); ?>" disabled>&#9889;</button>
                 </div>
 
@@ -533,6 +529,7 @@ class DPS_Game_Addon {
                             <p class="dps-sg-start-meta__mission-title"></p>
                             <p class="dps-sg-start-meta__mission-progress"></p>
                             <p class="dps-sg-start-meta__badges"></p>
+                            <p class="dps-sg-start-meta__status"></p>
                         </div>
                         <button type="button" class="dps-sg-btn dps-sg-btn--play"><?php echo esc_html__( 'Toque para comecar', 'dps-game' ); ?></button>
                         <div class="dps-sg-overlay__legend">
@@ -579,6 +576,18 @@ class DPS_Game_Addon {
                     <div class="dps-sg-overlay__content">
                         <h2 class="dps-sg-overlay__title dps-sg-wave-title"></h2>
                         <p class="dps-sg-overlay__subtitle dps-sg-wave-bonus"></p>
+                    </div>
+                </div>
+
+                <div class="dps-sg-overlay dps-sg-overlay--pause dps-sg-overlay--hidden">
+                    <div class="dps-sg-overlay__content">
+                        <h2 class="dps-sg-overlay__title"><?php echo esc_html__( 'Partida pausada', 'dps-game' ); ?></h2>
+                        <p class="dps-sg-overlay__desc dps-sg-overlay__pause-reason"></p>
+                        <p class="dps-sg-overlay__stats dps-sg-overlay__pause-stats"></p>
+                        <div class="dps-sg-overlay__actions">
+                            <button type="button" class="dps-sg-btn dps-sg-btn--play dps-sg-btn--resume"><?php echo esc_html__( 'Retomar', 'dps-game' ); ?></button>
+                            <button type="button" class="dps-sg-btn dps-sg-btn--play dps-sg-btn--play-secondary dps-sg-btn--retry"><?php echo esc_html__( 'Reiniciar run', 'dps-game' ); ?></button>
+                        </div>
                     </div>
                 </div>
             </div>

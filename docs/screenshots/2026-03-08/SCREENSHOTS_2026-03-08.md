@@ -63,3 +63,29 @@ Mudancas de integracao do jogo com o ecossistema DPS:
 ### Observacoes
 - O registro continua sendo um preview estatico porque o WordPress local nao estava exposto ao navegador automatizado desta sessao.
 - Diferente da tentativa anterior, os PNGs desta fase foram gerados com Playwright a partir do preview isolado, entao ha imagens reais salvas no repositorio.
+## Registro desta entrega (rodada final de endurecimento)
+### Contexto
+Mudancas finais de estabilidade e medicao no add-on:
+- pausa manual dedicada e pausa segura por blur/aba oculta/orientacao;
+- overlay de pausa com `Retomar` e `Reiniciar run`;
+- status explicito de persistencia no overlay inicial;
+- telemetria leve via eventos frontend e hooks server-side;
+- refinamento de toque e feedback para QA humano.
+
+### Referencia de design aplicada
+- `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`
+- `docs/visual/VISUAL_STYLE_GUIDE.md`
+
+### Capturas realizadas
+- `docs/screenshots/2026-03-08/space-groomers-final-hardening-preview-desktop.png`
+  - Preview desktop com overlay inicial e overlay de pausa.
+- `docs/screenshots/2026-03-08/space-groomers-final-hardening-preview-mobile.png`
+  - Preview mobile do mesmo fluxo, validando legibilidade e empilhamento.
+
+### Artefatos de suporte preparados
+- `docs/screenshots/2026-03-08/space-groomers-final-hardening-preview.html`
+  - Preview estatico em HTML salvo no repositorio.
+
+### Observacoes
+- Os PNGs desta rodada foram gerados com Playwright a partir de preview inline equivalente ao HTML salvo, porque o servidor HTTP local do workspace nao ficou acessivel ao browser automatizado nesta sessao.
+- Mesmo assim, os artefatos visuais registram precisamente os novos estados de overlay inicial e pausa, que foram as superficies alteradas nesta rodada.

@@ -83,9 +83,10 @@ class DPS_Game_Progress_Service {
      *
      * @param int   $client_id ID do cliente.
      * @param array $payload   Payload enviado pelo jogo.
+     * @param array $telemetry Telemetria leve opcional do frontend.
      * @return array
      */
-    public static function sync_progress( int $client_id, array $payload ): array {
+    public static function sync_progress( int $client_id, array $payload, array $telemetry = [] ): array {
         $existing = self::get_progress( $client_id );
         $incoming = self::normalize_state( $payload );
         $merged   = self::merge_state( $existing, $incoming );
@@ -96,9 +97,23 @@ class DPS_Game_Progress_Service {
 
         self::save_progress( $client_id, $merged );
 
+        $summary             = self::build_summary( $client_id, $merged );
+        $sanitized_telemetry = self::sanitize_run_telemetry( $telemetry );
+
+        do_action( 'dps_game_progress_synced', $client_id, $merged, $summary, $awarded_rewards, $sanitized_telemetry );
+
+        if ( ! empty( $sanitized_telemetry ) ) {
+            do_action( 'dps_game_telemetry_run_complete', $client_id, $sanitized_telemetry, $merged, $summary );
+
+            $should_log_telemetry = (bool) apply_filters( 'dps_game_should_log_telemetry', false, $client_id, $sanitized_telemetry, $merged, $summary );
+            if ( $should_log_telemetry && class_exists( 'DPS_Audit_Logger' ) ) {
+                DPS_Audit_Logger::log_portal_event( $client_id, 'game_run_complete', $sanitized_telemetry );
+            }
+        }
+
         return [
             'progress'       => $merged,
-            'summary'        => self::build_summary( $client_id, $merged ),
+            'summary'        => $summary,
             'awardedRewards' => $awarded_rewards,
             'loyalty'        => self::get_loyalty_summary( $client_id ),
         ];
@@ -133,6 +148,57 @@ class DPS_Game_Progress_Service {
         ];
     }
 
+
+    /**
+     * Sanitiza telemetria opcional da run sem persistir eventos brutos.
+     *
+     * @param array $telemetry Payload enviado pelo frontend.
+     * @return array
+     */
+    private static function sanitize_run_telemetry( array $telemetry ): array {
+        if ( empty( $telemetry ) || 'run_complete' !== (string) ( $telemetry['event'] ?? '' ) ) {
+            return [];
+        }
+
+        $allowed_results = [ 'gameover', 'victory' ];
+        $result          = sanitize_key( (string) ( $telemetry['result'] ?? 'gameover' ) );
+        if ( ! in_array( $result, $allowed_results, true ) ) {
+            $result = 'gameover';
+        }
+
+        $pause_reasons = [];
+        if ( isset( $telemetry['pauseReasons'] ) && is_array( $telemetry['pauseReasons'] ) ) {
+            foreach ( $telemetry['pauseReasons'] as $reason => $count ) {
+                $reason = sanitize_key( (string) $reason );
+                if ( '' === $reason ) {
+                    continue;
+                }
+
+                $pause_reasons[ $reason ] = max( 0, absint( $count ) );
+            }
+        }
+
+        return [
+            'event'             => 'run_complete',
+            'sessionId'         => substr( sanitize_text_field( (string) ( $telemetry['sessionId'] ?? '' ) ), 0, 64 ),
+            'context'           => sanitize_key( (string) ( $telemetry['context'] ?? '' ) ),
+            'result'            => $result,
+            'score'             => max( 0, absint( $telemetry['score'] ?? 0 ) ),
+            'durationSec'       => max( 0, absint( $telemetry['durationSec'] ?? 0 ) ),
+            'waveReached'       => max( 1, absint( $telemetry['waveReached'] ?? 1 ) ),
+            'bestCombo'         => max( 0, absint( $telemetry['bestCombo'] ?? 0 ) ),
+            'powerupsCollected' => max( 0, absint( $telemetry['powerupsCollected'] ?? 0 ) ),
+            'tickKills'         => max( 0, absint( $telemetry['tickKills'] ?? 0 ) ),
+            'missionCompleted'  => ! empty( $telemetry['missionCompleted'] ),
+            'missionId'         => sanitize_key( (string) ( $telemetry['missionId'] ?? '' ) ),
+            'retry'             => ! empty( $telemetry['retry'] ),
+            'pauseCount'        => max( 0, absint( $telemetry['pauseCount'] ?? 0 ) ),
+            'pauseReasons'      => $pause_reasons,
+            'progressMode'      => sanitize_key( (string) ( $telemetry['progressMode'] ?? '' ) ),
+            'startedAt'         => sanitize_text_field( (string) ( $telemetry['startedAt'] ?? '' ) ),
+            'endedAt'           => sanitize_text_field( (string) ( $telemetry['endedAt'] ?? '' ) ),
+        ];
+    }
     /**
      * Estado padrao.
      *
