@@ -2,7 +2,7 @@
  * Space Groomers: Invasao das Pulgas
  * Game engine - Canvas + vanilla JS, zero dependencias.
  *
- * @version 1.2.0
+ * @version 1.4.0
  */
 (function () {
     'use strict';
@@ -18,7 +18,10 @@
     var MUD_SIZE = 6;
     var FPS = 60;
     var FRAME_TIME = 1000 / FPS;
-    var LS_KEY = 'dps_sg_highscore';
+    var LEGACY_HIGHSCORE_KEY = 'dps_sg_highscore';
+    var PROGRESS_KEY = 'dps_sg_progress_v1';
+    var PROGRESS_VERSION = 1;
+    var RUN_HISTORY_LIMIT = 8;
 
     var BALANCE = {
         totalWaves: 8,
@@ -92,6 +95,777 @@
             duration: 0,
             color: '#f7c948'
         }
+    };
+
+    var MISSION_POOL = [
+        {
+            id: 'survive_60',
+            kind: 'survive_seconds',
+            target: 60,
+            icon: '\u23F1',
+            title: 'Sobreviva 60s',
+            hint: 'Jogue no seguro e preserve vidas.'
+        },
+        {
+            id: 'collect_3_powerups',
+            kind: 'collect_powerups',
+            target: 3,
+            icon: '\uD83E\uDDF4',
+            title: 'Colete 3 power-ups',
+            hint: 'Shampoo e toalha contam para a meta.'
+        },
+        {
+            id: 'combo_9',
+            kind: 'reach_combo',
+            target: 9,
+            icon: '\uD83D\uDD25',
+            title: 'Atinga combo 9',
+            hint: 'Mantenha a sequencia sem deixar tiro escapar.'
+        },
+        {
+            id: 'defeat_6_ticks',
+            kind: 'defeat_ticks',
+            target: 6,
+            icon: '\uD83D\uDEE1',
+            title: 'Derrote 6 carrapatos',
+            hint: 'Carrapatos valem mais e contam para a missao.'
+        }
+    ];
+
+    var BADGE_POOL = [
+        {
+            id: 'first_run',
+            icon: '\u2728',
+            name: 'Primeiro Banho',
+            desc: 'Concluiu a primeira run.',
+            check: function (state) {
+                return state.totals.runs >= 1;
+            }
+        },
+        {
+            id: 'combo_keeper',
+            icon: '\uD83D\uDD25',
+            name: 'Ritmo de Tesoura',
+            desc: 'Atingiu combo 9 em alguma partida.',
+            check: function (state) {
+                return state.records.bestCombo >= 9;
+            }
+        },
+        {
+            id: 'mission_regular',
+            icon: '\uD83C\uDFC5',
+            name: 'Missao em Dia',
+            desc: 'Completou 3 missoes diarias.',
+            check: function (state) {
+                return state.totals.totalMissionCompletions >= 3;
+            }
+        },
+        {
+            id: 'streak_3',
+            icon: '\uD83D\uDCC5',
+            name: 'Retorno em Serie',
+            desc: 'Manteve streak de 3 dias.',
+            check: function (state) {
+                return state.streak.best >= 3;
+            }
+        },
+        {
+            id: 'first_victory',
+            icon: '\uD83D\uDEBF',
+            name: 'Banho Completo',
+            desc: 'Venceu uma run completa.',
+            check: function (state) {
+                return state.totals.wins >= 1;
+            }
+        }
+    ];
+
+    function toNumber(value, fallback) {
+        var parsed = Number(value);
+        return isFinite(parsed) ? parsed : fallback;
+    }
+
+    function pad2(value) {
+        return value < 10 ? '0' + value : String(value);
+    }
+
+    function dateKeyFromDate(date) {
+        var source = date || new Date();
+        return source.getFullYear() + '-' + pad2(source.getMonth() + 1) + '-' + pad2(source.getDate());
+    }
+
+    function dayNumberFromDateKey(dateKey) {
+        if (!dateKey || typeof dateKey !== 'string') {
+            return 0;
+        }
+
+        var parts = dateKey.split('-');
+        if (parts.length !== 3) {
+            return 0;
+        }
+
+        var y = parseInt(parts[0], 10);
+        var m = parseInt(parts[1], 10) - 1;
+        var d = parseInt(parts[2], 10);
+        if (!isFinite(y) || !isFinite(m) || !isFinite(d)) {
+            return 0;
+        }
+
+        return Math.floor(new Date(y, m, d).getTime() / 86400000);
+    }
+
+        function createDefaultProgressState() {
+        return {
+            version: PROGRESS_VERSION,
+            highscore: 0,
+            totals: {
+                runs: 0,
+                wins: 0,
+                totalScore: 0,
+                totalPlayMs: 0,
+                totalPowerups: 0,
+                totalMissionCompletions: 0
+            },
+            records: {
+                bestCombo: 0,
+                longestRunSec: 0,
+                bestWave: 1
+            },
+            streak: {
+                current: 0,
+                best: 0,
+                lastDateKey: ''
+            },
+            mission: {
+                dateKey: '',
+                missionId: '',
+                progress: 0,
+                completed: false,
+                completedAt: ''
+            },
+            badges: {},
+            history: [],
+            rewardMarkers: {},
+            lastSyncedAt: ''
+        };
+    }
+
+    function getSpaceGroomersConfig() {
+        if (typeof window === 'undefined' || !window.dpsSpaceGroomersConfig || typeof window.dpsSpaceGroomersConfig !== 'object') {
+            return {};
+        }
+
+        return window.dpsSpaceGroomersConfig;
+    }
+
+    function cloneProgressState(state) {
+        try {
+            return JSON.parse(JSON.stringify(state || createDefaultProgressState()));
+        } catch (e) {
+            return createDefaultProgressState();
+        }
+    }
+
+    function hasMeaningfulProgress(state) {
+        if (!state || typeof state !== 'object') {
+            return false;
+        }
+
+        return !!(
+            (state.highscore && state.highscore > 0) ||
+            (state.totals && state.totals.runs > 0) ||
+            (state.history && state.history.length > 0)
+        );
+    }
+
+    function LocalProgressAdapter(config) {
+        this.config = config || {};
+        this.progressKey = (this.config.storage && this.config.storage.progressKey) || PROGRESS_KEY;
+        this.legacyHighscoreKey = (this.config.storage && this.config.storage.legacyScoreKey) || LEGACY_HIGHSCORE_KEY;
+        this.storageEnabled = false;
+
+        try {
+            this.storageEnabled = typeof window !== 'undefined' && !!window.localStorage;
+        } catch (e) {
+            this.storageEnabled = false;
+        }
+    }
+
+    LocalProgressAdapter.prototype.loadState = function () {
+        if (!this.storageEnabled) {
+            return null;
+        }
+
+        try {
+            return window.localStorage.getItem(this.progressKey);
+        } catch (e) {
+            return null;
+        }
+    };
+
+    LocalProgressAdapter.prototype.saveState = function (state) {
+        if (!this.storageEnabled) {
+            return;
+        }
+
+        try {
+            window.localStorage.setItem(this.progressKey, JSON.stringify(state));
+        } catch (e) {
+            return;
+        }
+    };
+
+    LocalProgressAdapter.prototype.loadLegacyHighscore = function () {
+        if (!this.storageEnabled) {
+            return 0;
+        }
+
+        try {
+            return Math.max(0, parseInt(window.localStorage.getItem(this.legacyHighscoreKey), 10) || 0);
+        } catch (e) {
+            return 0;
+        }
+    };
+
+    LocalProgressAdapter.prototype.syncLegacyHighscore = function (highscore) {
+        if (!this.storageEnabled) {
+            return;
+        }
+
+        try {
+            window.localStorage.setItem(this.legacyHighscoreKey, String(Math.max(0, Math.floor(toNumber(highscore, 0)))));
+        } catch (e) {
+            return;
+        }
+    };
+
+    function RemoteProgressAdapter(config, localAdapter) {
+        this.config = config || {};
+        this.localAdapter = localAdapter;
+        this.enabled = !!(
+            this.config &&
+            this.config.syncEnabled &&
+            this.config.endpoints &&
+            this.config.endpoints.progress &&
+            this.config.endpoints.sync &&
+            this.config.nonce
+        );
+    }
+
+    RemoteProgressAdapter.prototype.request = function (url, options) {
+        if (!this.enabled || !url || typeof fetch !== 'function') {
+            return Promise.resolve(null);
+        }
+
+        var requestOptions = options || {};
+        var headers = requestOptions.headers || {};
+        headers['Accept'] = 'application/json';
+        headers['X-DPS-Game-Nonce'] = this.config.nonce;
+        requestOptions.headers = headers;
+        requestOptions.credentials = 'same-origin';
+
+        return fetch(url, requestOptions).then(function (response) {
+            if (!response.ok) {
+                throw new Error('dps_sg_remote_request_failed');
+            }
+            return response.json();
+        });
+    };
+
+    RemoteProgressAdapter.prototype.fetchProgress = function () {
+        return this.request(this.config.endpoints.progress, {
+            method: 'GET'
+        });
+    };
+
+    RemoteProgressAdapter.prototype.syncState = function (state) {
+        return this.request(this.config.endpoints.sync, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                progress: state
+            })
+        });
+    };
+
+    RemoteProgressAdapter.prototype.bootstrapState = function (localState) {
+        var self = this;
+        if (!this.enabled) {
+            return Promise.resolve(null);
+        }
+
+        return this.fetchProgress().then(function (response) {
+            var remoteState = response && response.progress ? response.progress : null;
+
+            if (!remoteState) {
+                if (hasMeaningfulProgress(localState)) {
+                    return self.syncState(localState);
+                }
+                return response;
+            }
+
+            if (
+                hasMeaningfulProgress(localState) &&
+                localState &&
+                localState.totals && remoteState.totals && (
+                    localState.totals.runs > remoteState.totals.runs ||
+                    localState.highscore > remoteState.highscore ||
+                    localState.totals.totalMissionCompletions > remoteState.totals.totalMissionCompletions
+                )
+            ) {
+                return self.syncState(localState);
+            }
+
+            return response;
+        });
+    };
+
+    function ProgressAdapterFactory(config) {
+        var local = new LocalProgressAdapter(config);
+        return {
+            local: local,
+            remote: new RemoteProgressAdapter(config, local)
+        };
+    }
+
+    function SGProgression(options) {
+        this.options = options || {};
+        this.onStateChange = typeof this.options.onStateChange === 'function' ? this.options.onStateChange : function () {};
+        this.onSyncResult = typeof this.options.onSyncResult === 'function' ? this.options.onSyncResult : function () {};
+        this.config = getSpaceGroomersConfig();
+
+        var adapters = ProgressAdapterFactory(this.config);
+        this.localAdapter = adapters.local;
+        this.remoteAdapter = adapters.remote;
+        this.storageEnabled = this.localAdapter.storageEnabled;
+
+        this.state = this.loadState();
+        this.ensureDailyMission();
+        this.saveState({
+            skipRemoteSync: true,
+            silent: true
+        });
+        this.bootstrapRemoteState();
+    }
+
+    SGProgression.prototype.loadState = function () {
+        var fallbackState = createDefaultProgressState();
+        var rawState = this.localAdapter.loadState();
+
+        if (!rawState) {
+            fallbackState.highscore = this.localAdapter.loadLegacyHighscore();
+            return fallbackState;
+        }
+
+        try {
+            return this.normalizeState(JSON.parse(rawState));
+        } catch (e) {
+            fallbackState.highscore = this.localAdapter.loadLegacyHighscore();
+            return fallbackState;
+        }
+    };
+
+    SGProgression.prototype.normalizeState = function (raw) {
+        var state = createDefaultProgressState();
+        if (!raw || typeof raw !== 'object') {
+            state.highscore = this.localAdapter.loadLegacyHighscore();
+            return state;
+        }
+
+        state.highscore = Math.max(0, Math.floor(toNumber(raw.highscore, this.localAdapter.loadLegacyHighscore())));
+
+        if (raw.totals && typeof raw.totals === 'object') {
+            state.totals.runs = Math.max(0, Math.floor(toNumber(raw.totals.runs, 0)));
+            state.totals.wins = Math.max(0, Math.floor(toNumber(raw.totals.wins, 0)));
+            state.totals.totalScore = Math.max(0, Math.floor(toNumber(raw.totals.totalScore, 0)));
+            state.totals.totalPlayMs = Math.max(0, Math.floor(toNumber(raw.totals.totalPlayMs, 0)));
+            state.totals.totalPowerups = Math.max(0, Math.floor(toNumber(raw.totals.totalPowerups, 0)));
+            state.totals.totalMissionCompletions = Math.max(0, Math.floor(toNumber(raw.totals.totalMissionCompletions, 0)));
+        }
+
+        if (raw.records && typeof raw.records === 'object') {
+            state.records.bestCombo = Math.max(0, Math.floor(toNumber(raw.records.bestCombo, 0)));
+            state.records.longestRunSec = Math.max(0, Math.floor(toNumber(raw.records.longestRunSec, 0)));
+            state.records.bestWave = Math.max(1, Math.floor(toNumber(raw.records.bestWave, 1)));
+        }
+
+        if (raw.streak && typeof raw.streak === 'object') {
+            state.streak.current = Math.max(0, Math.floor(toNumber(raw.streak.current, 0)));
+            state.streak.best = Math.max(0, Math.floor(toNumber(raw.streak.best, 0)));
+            state.streak.lastDateKey = typeof raw.streak.lastDateKey === 'string' ? raw.streak.lastDateKey : '';
+        }
+
+        if (raw.mission && typeof raw.mission === 'object') {
+            state.mission.dateKey = typeof raw.mission.dateKey === 'string' ? raw.mission.dateKey : '';
+            state.mission.missionId = typeof raw.mission.missionId === 'string' ? raw.mission.missionId : '';
+            state.mission.progress = Math.max(0, Math.floor(toNumber(raw.mission.progress, 0)));
+            state.mission.completed = !!raw.mission.completed;
+            state.mission.completedAt = typeof raw.mission.completedAt === 'string' ? raw.mission.completedAt : '';
+        }
+
+        if (raw.badges && typeof raw.badges === 'object') {
+            state.badges = raw.badges;
+        }
+
+        if (Array.isArray(raw.history)) {
+            state.history = raw.history.slice(0, RUN_HISTORY_LIMIT);
+        }
+
+        if (raw.rewardMarkers && typeof raw.rewardMarkers === 'object') {
+            state.rewardMarkers = raw.rewardMarkers;
+        }
+
+        if (typeof raw.lastSyncedAt === 'string') {
+            state.lastSyncedAt = raw.lastSyncedAt;
+        }
+
+        return state;
+    };
+
+    SGProgression.prototype.applyRemoteResponse = function (response) {
+        if (!response || !response.progress) {
+            return null;
+        }
+
+        this.state = this.normalizeState(response.progress);
+        this.ensureDailyMission();
+        this.localAdapter.saveState(this.state);
+        this.localAdapter.syncLegacyHighscore(this.state.highscore);
+        this.onStateChange(this.getSnapshot(), response);
+
+        return response;
+    };
+
+    SGProgression.prototype.bootstrapRemoteState = function () {
+        var self = this;
+        if (!this.remoteAdapter.enabled) {
+            return Promise.resolve(null);
+        }
+
+        return this.remoteAdapter.bootstrapState(this.getSyncPayload()).then(function (response) {
+            if (response) {
+                self.applyRemoteResponse(response);
+                self.onSyncResult({
+                    ok: true,
+                    phase: 'bootstrap',
+                    response: response,
+                    summary: response.summary || null,
+                    rewards: response.awardedRewards || []
+                });
+            }
+            return response;
+        }).catch(function (error) {
+            self.onSyncResult({
+                ok: false,
+                phase: 'bootstrap',
+                error: error
+            });
+            return null;
+        });
+    };
+
+    SGProgression.prototype.syncRemoteState = function (meta) {
+        var self = this;
+        if (!this.remoteAdapter.enabled) {
+            return Promise.resolve(null);
+        }
+
+        return this.remoteAdapter.syncState(this.getSyncPayload()).then(function (response) {
+            self.applyRemoteResponse(response);
+            self.onSyncResult({
+                ok: true,
+                phase: meta && meta.phase ? meta.phase : 'sync',
+                response: response,
+                summary: response && response.summary ? response.summary : null,
+                rewards: response && response.awardedRewards ? response.awardedRewards : []
+            });
+            return response;
+        }).catch(function (error) {
+            self.onSyncResult({
+                ok: false,
+                phase: meta && meta.phase ? meta.phase : 'sync',
+                error: error
+            });
+            return null;
+        });
+    };
+
+    SGProgression.prototype.saveState = function (options) {
+        var opts = options || {};
+        this.localAdapter.saveState(this.state);
+        this.localAdapter.syncLegacyHighscore(this.state.highscore);
+
+        if (!opts.silent) {
+            this.onStateChange(this.getSnapshot(), null);
+        }
+
+        if (opts.skipRemoteSync) {
+            return Promise.resolve(null);
+        }
+
+        return this.syncRemoteState({
+            phase: opts.phase || 'save'
+        });
+    };
+
+    SGProgression.prototype.getMissionById = function (missionId) {
+        for (var i = 0; i < MISSION_POOL.length; i++) {
+            if (MISSION_POOL[i].id === missionId) {
+                return MISSION_POOL[i];
+            }
+        }
+        return MISSION_POOL[0];
+    };
+
+    SGProgression.prototype.getMissionForDate = function (dateKey) {
+        var dayIndex = Math.abs(dayNumberFromDateKey(dateKey));
+        return MISSION_POOL[dayIndex % MISSION_POOL.length];
+    };
+
+    SGProgression.prototype.ensureDailyMission = function () {
+        var todayKey = dateKeyFromDate(new Date());
+        var activeMission = this.getMissionForDate(todayKey);
+
+        if (this.state.mission.dateKey !== todayKey || this.state.mission.missionId !== activeMission.id) {
+            this.state.mission.dateKey = todayKey;
+            this.state.mission.missionId = activeMission.id;
+            this.state.mission.progress = 0;
+            this.state.mission.completed = false;
+            this.state.mission.completedAt = '';
+        }
+    };
+
+    SGProgression.prototype.getMissionProgressFromRun = function (mission, baseProgress, runSummary) {
+        var progress = baseProgress;
+        if (!runSummary) {
+            return progress;
+        }
+
+        if (mission.kind === 'survive_seconds') {
+            progress = Math.max(progress, Math.floor(toNumber(runSummary.durationSec, 0)));
+        } else if (mission.kind === 'collect_powerups') {
+            progress += Math.floor(toNumber(runSummary.powerupsCollected, 0));
+        } else if (mission.kind === 'reach_combo') {
+            progress = Math.max(progress, Math.floor(toNumber(runSummary.bestCombo, 0)));
+        } else if (mission.kind === 'defeat_ticks') {
+            progress += Math.floor(toNumber(runSummary.tickKills, 0));
+        }
+
+        return Math.min(mission.target, Math.max(0, progress));
+    };
+
+    SGProgression.prototype.getMissionPreview = function (runSummary) {
+        this.ensureDailyMission();
+
+        var missionDef = this.getMissionById(this.state.mission.missionId);
+        var baseProgress = this.state.mission.completed ? missionDef.target : this.state.mission.progress;
+        var previewProgress = this.state.mission.completed ? missionDef.target : this.getMissionProgressFromRun(missionDef, baseProgress, runSummary);
+        var completed = this.state.mission.completed || previewProgress >= missionDef.target;
+
+        return {
+            id: missionDef.id,
+            kind: missionDef.kind,
+            icon: missionDef.icon,
+            title: missionDef.title,
+            hint: missionDef.hint,
+            target: missionDef.target,
+            progress: Math.min(missionDef.target, previewProgress),
+            completed: completed,
+            remaining: completed ? 0 : Math.max(0, missionDef.target - previewProgress),
+            dateKey: this.state.mission.dateKey
+        };
+    };
+
+    SGProgression.prototype.updateStreak = function (todayKey) {
+        var lastDateKey = this.state.streak.lastDateKey;
+
+        if (!lastDateKey) {
+            this.state.streak.current = 1;
+        } else {
+            var delta = dayNumberFromDateKey(todayKey) - dayNumberFromDateKey(lastDateKey);
+            if (delta <= 0) {
+                this.state.streak.current = Math.max(1, this.state.streak.current);
+            } else if (delta === 1) {
+                this.state.streak.current += 1;
+            } else {
+                this.state.streak.current = 1;
+            }
+        }
+
+        this.state.streak.lastDateKey = todayKey;
+        this.state.streak.best = Math.max(this.state.streak.best, this.state.streak.current);
+    };
+
+    SGProgression.prototype.getUnlockedBadges = function () {
+        var badges = [];
+
+        for (var i = 0; i < BADGE_POOL.length; i++) {
+            var badgeDef = BADGE_POOL[i];
+            if (this.state.badges[badgeDef.id]) {
+                badges.push({
+                    id: badgeDef.id,
+                    icon: badgeDef.icon,
+                    name: badgeDef.name,
+                    desc: badgeDef.desc,
+                    unlockedAt: this.state.badges[badgeDef.id].unlockedAt
+                });
+            }
+        }
+
+        badges.sort(function (a, b) {
+            return String(b.unlockedAt).localeCompare(String(a.unlockedAt));
+        });
+
+        return badges;
+    };
+
+    SGProgression.prototype.unlockEligibleBadges = function () {
+        var unlocked = [];
+
+        for (var i = 0; i < BADGE_POOL.length; i++) {
+            var badgeDef = BADGE_POOL[i];
+            if (this.state.badges[badgeDef.id]) {
+                continue;
+            }
+
+            if (badgeDef.check(this.state)) {
+                var timestamp = new Date().toISOString();
+                this.state.badges[badgeDef.id] = {
+                    unlockedAt: timestamp
+                };
+                unlocked.push({
+                    id: badgeDef.id,
+                    icon: badgeDef.icon,
+                    name: badgeDef.name,
+                    desc: badgeDef.desc,
+                    unlockedAt: timestamp
+                });
+            }
+        }
+
+        return unlocked;
+    };
+
+    SGProgression.prototype.getSnapshot = function () {
+        var missionStatus = this.getMissionPreview(null);
+
+        return {
+            highscore: this.state.highscore,
+            totals: {
+                runs: this.state.totals.runs,
+                wins: this.state.totals.wins,
+                totalScore: this.state.totals.totalScore,
+                totalPlayMs: this.state.totals.totalPlayMs,
+                totalPowerups: this.state.totals.totalPowerups,
+                totalMissionCompletions: this.state.totals.totalMissionCompletions
+            },
+            records: {
+                bestCombo: this.state.records.bestCombo,
+                longestRunSec: this.state.records.longestRunSec,
+                bestWave: this.state.records.bestWave
+            },
+            streak: {
+                current: this.state.streak.current,
+                best: this.state.streak.best,
+                lastDateKey: this.state.streak.lastDateKey
+            },
+            mission: missionStatus,
+            badges: this.getUnlockedBadges(),
+            history: this.state.history.slice(0),
+            lastSyncedAt: this.state.lastSyncedAt
+        };
+    };
+
+    SGProgression.prototype.getSyncPayload = function () {
+        return cloneProgressState(this.state);
+    };
+
+    SGProgression.prototype.registerRun = function (runSummary) {
+        this.ensureDailyMission();
+
+        var todayKey = dateKeyFromDate(new Date());
+        var missionBefore = this.getMissionPreview(null);
+
+        this.updateStreak(todayKey);
+
+        this.state.totals.runs += 1;
+        if (runSummary.result === 'victory') {
+            this.state.totals.wins += 1;
+        }
+
+        this.state.totals.totalScore += Math.max(0, Math.floor(toNumber(runSummary.score, 0)));
+        this.state.totals.totalPlayMs += Math.max(0, Math.floor(toNumber(runSummary.durationSec, 0) * 1000));
+        this.state.totals.totalPowerups += Math.max(0, Math.floor(toNumber(runSummary.powerupsCollected, 0)));
+
+        this.state.records.bestCombo = Math.max(this.state.records.bestCombo, Math.floor(toNumber(runSummary.bestCombo, 0)));
+        this.state.records.longestRunSec = Math.max(this.state.records.longestRunSec, Math.floor(toNumber(runSummary.durationSec, 0)));
+        this.state.records.bestWave = Math.max(this.state.records.bestWave, Math.floor(toNumber(runSummary.waveReached, 1)));
+
+        var runScore = Math.max(0, Math.floor(toNumber(runSummary.score, 0)));
+        this.state.highscore = Math.max(this.state.highscore, runScore);
+
+        var missionAfterPreview = this.getMissionPreview(runSummary);
+        this.state.mission.progress = missionAfterPreview.progress;
+
+        var missionJustCompleted = false;
+        if (!this.state.mission.completed && missionAfterPreview.completed) {
+            missionJustCompleted = true;
+            this.state.mission.completed = true;
+            this.state.mission.completedAt = new Date().toISOString();
+            this.state.totals.totalMissionCompletions += 1;
+        }
+
+        this.state.history.unshift({
+            dateKey: todayKey,
+            score: runScore,
+            result: runSummary.result,
+            durationSec: Math.floor(toNumber(runSummary.durationSec, 0)),
+            bestCombo: Math.floor(toNumber(runSummary.bestCombo, 0)),
+            powerupsCollected: Math.floor(toNumber(runSummary.powerupsCollected, 0)),
+            tickKills: Math.floor(toNumber(runSummary.tickKills, 0)),
+            waveReached: Math.floor(toNumber(runSummary.waveReached, 1)),
+            timestamp: new Date().toISOString()
+        });
+
+        if (this.state.history.length > RUN_HISTORY_LIMIT) {
+            this.state.history = this.state.history.slice(0, RUN_HISTORY_LIMIT);
+        }
+
+        var unlockedBadges = this.unlockEligibleBadges();
+        var syncPromise = this.saveState({
+            phase: 'run_complete'
+        });
+
+        return {
+            mission: {
+                before: missionBefore,
+                after: this.getMissionPreview(null),
+                justCompleted: missionJustCompleted
+            },
+            unlockedBadges: unlockedBadges,
+            snapshot: this.getSnapshot(),
+            syncPromise: syncPromise
+        };
+    };
+
+    SGProgression.prototype.getIntegrationPayload = function () {
+        var snapshot = this.getSnapshot();
+
+        return {
+            schemaVersion: PROGRESS_VERSION,
+            exportedAt: new Date().toISOString(),
+            highscore: snapshot.highscore,
+            mission: snapshot.mission,
+            streak: snapshot.streak,
+            records: snapshot.records,
+            totals: snapshot.totals,
+            badges: snapshot.badges,
+            recentRuns: snapshot.history.slice(0, 5),
+            lastSyncedAt: snapshot.lastSyncedAt,
+            syncEnabled: !!this.remoteAdapter.enabled
+        };
     };
 
     var audioCtx = null;
@@ -401,31 +1175,83 @@
         this.elSpecialBar = container.querySelector('.dps-sg-special-bar');
         this.elSpecialFill = container.querySelector('.dps-sg-special-bar__fill');
         this.elSpecialBtn = container.querySelector('.dps-sg-btn--special');
+        this.elGoal = container.querySelector('.dps-sg-goal');
+        this.elGoalTitle = container.querySelector('.dps-sg-goal__title');
+        this.elGoalProgress = container.querySelector('.dps-sg-goal__progress');
+        this.elGoalFill = container.querySelector('.dps-sg-goal__fill');
+        this.elGoalRemaining = container.querySelector('.dps-sg-goal__remaining');
 
         this.overlayStart = container.querySelector('.dps-sg-overlay--start');
         this.overlayGameover = container.querySelector('.dps-sg-overlay--gameover');
         this.overlayVictory = container.querySelector('.dps-sg-overlay--victory');
         this.overlayWave = container.querySelector('.dps-sg-overlay--wave');
 
+        this.elStartStreak = container.querySelector('.dps-sg-start-streak-value');
+        this.elStartMissionTitle = container.querySelector('.dps-sg-start-meta__mission-title');
+        this.elStartMissionProgress = container.querySelector('.dps-sg-start-meta__mission-progress');
+        this.elStartBadges = container.querySelector('.dps-sg-start-meta__badges');
+
         this.state = 'idle';
         this.rafId = null;
         this.lastTime = 0;
         this.waveTimeout = null;
+        this.gameConfig = getSpaceGroomersConfig();
 
-        var storedHighscore = 0;
-        try {
-            storedHighscore = parseInt(localStorage.getItem(LS_KEY), 10) || 0;
-        } catch (e) {
-            storedHighscore = 0;
-        }
+        var self = this;
+        this.progression = new SGProgression({
+            onStateChange: function (snapshot) {
+                self.progressSnapshot = snapshot;
+                self.highscore = snapshot.highscore;
+                self.updateHighscoreDisplay();
+                self.updateMetaUI();
+            },
+            onSyncResult: function (result) {
+                self.handleSyncResult(result);
+            }
+        });
+        this.progressSnapshot = this.progression.getSnapshot();
+        this.lastRunMeta = null;
+        this.highscore = this.progressSnapshot.highscore;
 
-        this.highscore = storedHighscore;
         this.updateHighscoreDisplay();
         this.bindEvents();
         this.reset();
         this.draw();
         this.updateHUD();
+        this.updateMetaUI();
     }
+
+    SpaceGroomers.prototype.handleSyncResult = function (result) {
+        if (!result) {
+            return;
+        }
+
+        if (result.ok && result.summary && typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+            window.dispatchEvent(new CustomEvent('dps-space-groomers-progress', {
+                detail: {
+                    summary: result.summary,
+                    response: result.response || null,
+                    rewards: result.rewards || []
+                }
+            }));
+        }
+
+        if (!result.ok && result.phase === 'run_complete') {
+            this.showToast('Sync local ativo', (this.gameConfig.i18n && this.gameConfig.i18n.syncError) || 'Nao foi possivel sincronizar agora. O progresso local segue ativo.', 'warning', 1800);
+            return;
+        }
+
+        if (result.ok && result.phase === 'run_complete' && result.rewards && result.rewards.length) {
+            var points = 0;
+            for (var i = 0; i < result.rewards.length; i++) {
+                points += Math.max(0, Math.floor(toNumber(result.rewards[i].points, 0)));
+            }
+
+            if (points > 0) {
+                this.showToast('Portal atualizado', '+' + points + ' pts no loyalty', 'success', 2000);
+            }
+        }
+    };
 
     SpaceGroomers.prototype.reset = function () {
         this.score = 0;
@@ -473,6 +1299,10 @@
         this.particles = [];
         this.floatingTexts = [];
         this.stars = [];
+        this.runPowerupsCollected = 0;
+        this.runTickKills = 0;
+        this.runKills = 0;
+        this.missionPreviewCompleteAnnounced = false;
 
         for (var i = 0; i < 60; i++) {
             this.stars.push({
@@ -498,6 +1328,8 @@
         if (this.overlayStart) {
             this.overlayStart.classList.remove('dps-sg-overlay--hidden');
         }
+
+        this.updateMetaUI();
     };
 
     SpaceGroomers.prototype.hideAllOverlays = function () {
@@ -525,7 +1357,12 @@
         var bonusEl = this.container.querySelector('.dps-sg-wave-bonus');
         this.waveConfig = getWaveConfig(this.wave);
         titleEl.textContent = 'Onda ' + this.wave;
-        bonusEl.textContent = this.wave === 1 ? 'Comeco mais leve, combo rapido e power-ups mais claros.' : '';
+        if (this.wave === 1) {
+            var missionStart = this.progression.getMissionPreview(this.getLiveRunSummary());
+            bonusEl.textContent = 'Meta de hoje: ' + missionStart.title + ' (' + missionStart.progress + '/' + missionStart.target + ')';
+        } else {
+            bonusEl.textContent = '';
+        }
         this.overlayWave.classList.remove('dps-sg-overlay--hidden');
 
         this.waveTimeout = setTimeout(function () {
@@ -648,9 +1485,17 @@
         this.updateMud(dt);
         this.updateBulletEnemyCollisions();
         this.updatePowerups();
-        this.updatePowerupTimer(dtMs);
+                this.updatePowerupTimer(dtMs);
         this.updateComboTimer(dt);
         this.updateSpecialReadyState();
+
+        if (!this.missionPreviewCompleteAnnounced) {
+            var missionPreview = this.progression.getMissionPreview(this.getLiveRunSummary());
+            if (this.progressSnapshot && this.progressSnapshot.mission && !this.progressSnapshot.mission.completed && missionPreview.completed) {
+                this.missionPreviewCompleteAnnounced = true;
+                this.showToast('Missao pronta', 'Finalize a run para registrar a conclusao de hoje.', 'success', 1500);
+            }
+        }
 
         if (this.enemies.length === 0 && this.state === 'playing') {
             this.endWave();
@@ -867,6 +1712,10 @@
                         this.score += pts;
                         this.specialCharge = Math.min(BALANCE.specialCost, this.specialCharge + pts);
                         this.stats[enemy.type]++;
+                        this.runKills++;
+                        if (enemy.type === 'tick') {
+                            this.runTickKills++;
+                        }
                         this.advanceCombo();
                         this.bestComboCount = Math.max(this.bestComboCount, this.comboCount);
                         this.spawnFloatingText('+' + pts, enemy.x, enemy.y - 12, this.comboMultiplier > 1 ? '#ffd166' : '#ffffff', '700 14px "Segoe UI", system-ui, sans-serif');
@@ -975,6 +1824,10 @@
                 var pts = ENEMY_TYPES[enemy.type].pts;
                 this.score += pts;
                 this.stats[enemy.type]++;
+                this.runKills++;
+                if (enemy.type === 'tick') {
+                    this.runTickKills++;
+                }
                 this.emitParticles(enemy.x, enemy.y, '#e1f5fe', 8, 5);
                 this.spawnFloatingText('+' + pts, enemy.x, enemy.y - 8, '#b3e5fc', '700 13px "Segoe UI", system-ui, sans-serif');
                 this.enemies.splice(i, 1);
@@ -992,6 +1845,7 @@
         var powerup = POWERUP_TYPES[type];
         sfxPowerup();
         this.emitParticles(this.player.x, this.player.y - 10, powerup.color, 8, 5);
+        this.runPowerupsCollected++;
         this.shakeScreen(3, 90);
 
         if (type === 'towel') {
@@ -1007,6 +1861,10 @@
                     var enemy = this.enemies[j];
                     this.score += ENEMY_TYPES[enemy.type].pts;
                     this.stats[enemy.type]++;
+                    this.runKills++;
+                    if (enemy.type === 'tick') {
+                        this.runTickKills++;
+                    }
                     this.emitParticles(enemy.x, enemy.y, '#f7c948', 8, 5);
                     this.spawnFloatingText('limpo', enemy.x, enemy.y - 10, '#f7c948', '700 12px "Segoe UI", system-ui, sans-serif');
                     this.enemies.splice(j, 1);
@@ -1104,45 +1962,159 @@
         this.showWaveIntro();
     };
 
+    SpaceGroomers.prototype.getLiveRunSummary = function () {
+        return {
+            score: this.score,
+            durationSec: Math.max(0, Math.round(this.runTimeMs / 1000)),
+            bestCombo: Math.max(this.bestComboCount, this.comboCount),
+            powerupsCollected: this.runPowerupsCollected,
+            tickKills: this.runTickKills,
+            kills: this.runKills,
+            waveReached: this.wave,
+            result: this.state === 'victory' ? 'victory' : 'gameover'
+        };
+    };
+
+    SpaceGroomers.prototype.finalizeProgression = function (result) {
+        var runSummary = this.getLiveRunSummary();
+        runSummary.result = result;
+
+        var metaResult = this.progression.registerRun(runSummary);
+        this.lastRunMeta = metaResult;
+        this.progressSnapshot = metaResult.snapshot;
+        this.highscore = this.progressSnapshot.highscore;
+        this.updateHighscoreDisplay();
+        this.updateMetaUI();
+
+        return {
+            summary: runSummary,
+            meta: metaResult
+        };
+    };
+
+    SpaceGroomers.prototype.renderPostRunMeta = function (overlay, finalData) {
+        var missionEl = overlay.querySelector('.dps-sg-overlay__mission');
+        var recordsEl = overlay.querySelector('.dps-sg-overlay__records');
+        var unlockWrap = overlay.querySelector('.dps-sg-overlay__unlocks');
+        var unlockList = overlay.querySelector('.dps-sg-overlay__unlocks-list');
+        var mission = finalData.meta.mission.after;
+        var streak = finalData.meta.snapshot.streak;
+        var records = finalData.meta.snapshot.records;
+
+        if (missionEl) {
+            if (mission.completed) {
+                missionEl.textContent = mission.icon + ' Missao: ' + mission.title + ' (concluida hoje).';
+            } else {
+                missionEl.textContent = mission.icon + ' Missao: ' + mission.title + ' (' + mission.progress + '/' + mission.target + ') - faltam ' + mission.remaining + '.';
+            }
+        }
+
+        if (recordsEl) {
+            recordsEl.textContent = 'Streak: ' + streak.current + ' dias (melhor ' + streak.best + ') | recorde combo: ' + records.bestCombo + ' | melhor wave: ' + records.bestWave;
+        }
+
+        if (unlockWrap && unlockList) {
+            if (finalData.meta.unlockedBadges.length > 0) {
+                var badgeNames = [];
+                for (var i = 0; i < Math.min(3, finalData.meta.unlockedBadges.length); i++) {
+                    badgeNames.push(finalData.meta.unlockedBadges[i].icon + ' ' + finalData.meta.unlockedBadges[i].name);
+                }
+                unlockList.textContent = badgeNames.join(' | ');
+                unlockWrap.classList.remove('dps-sg-overlay__unlocks--hidden');
+            } else {
+                unlockList.textContent = '';
+                unlockWrap.classList.add('dps-sg-overlay__unlocks--hidden');
+            }
+        }
+    };
+
+    SpaceGroomers.prototype.updateMetaUI = function () {
+        this.progression.ensureDailyMission();
+        this.progressSnapshot = this.progression.getSnapshot();
+
+        if (this.elStartStreak) {
+            this.elStartStreak.textContent = this.progressSnapshot.streak.current + ' dias';
+        }
+
+        if (this.elStartMissionTitle) {
+            this.elStartMissionTitle.textContent = this.progressSnapshot.mission.icon + ' ' + this.progressSnapshot.mission.title;
+        }
+
+        if (this.elStartMissionProgress) {
+            if (this.progressSnapshot.mission.completed) {
+                this.elStartMissionProgress.textContent = 'Meta diaria completa. Volte amanha para a proxima.';
+            } else {
+                this.elStartMissionProgress.textContent = 'Progresso: ' + this.progressSnapshot.mission.progress + '/' + this.progressSnapshot.mission.target + ' (faltam ' + this.progressSnapshot.mission.remaining + ')';
+            }
+        }
+
+        if (this.elStartBadges) {
+            this.elStartBadges.textContent = 'Badges locais: ' + this.progressSnapshot.badges.length;
+        }
+
+        this.updateGoalHUD();
+    };
+
+    SpaceGroomers.prototype.updateGoalHUD = function () {
+        if (!this.elGoal || !this.elGoalTitle || !this.elGoalProgress || !this.elGoalFill || !this.elGoalRemaining) {
+            return;
+        }
+
+        var runSummary = (this.state === 'playing' || this.state === 'gameoverTransition') ? this.getLiveRunSummary() : null;
+        var mission = this.progression.getMissionPreview(runSummary);
+
+        this.elGoalTitle.textContent = mission.icon + ' ' + mission.title;
+        this.elGoalProgress.textContent = mission.progress + '/' + mission.target;
+        this.elGoalFill.style.width = Math.min(100, (mission.progress / mission.target) * 100) + '%';
+        this.elGoal.classList.toggle('dps-sg-goal--done', mission.completed);
+
+        if (mission.completed) {
+            this.elGoalRemaining.textContent = 'Concluida hoje';
+        } else {
+            this.elGoalRemaining.textContent = 'Falta ' + mission.remaining;
+        }
+    };
+
     SpaceGroomers.prototype.finishGameOver = function () {
         this.state = 'gameover';
         cancelAnimationFrame(this.rafId);
-        this.saveHighscore();
 
+        var finalData = this.finalizeProgression('gameover');
         var overlay = this.overlayGameover;
+
         overlay.querySelector('.dps-sg-final-score').textContent = this.score.toLocaleString();
         overlay.querySelector('.dps-sg-overlay__stats').textContent =
             this.stats.flea + ' pulgas | ' +
             this.stats.tick + ' carrapatos | ' +
-            this.stats.furball + ' pelos | melhor sequencia ' + this.bestComboCount + ' | ' + Math.round(this.runTimeMs / 1000) + 's';
-        this.updateHighscoreDisplay();
+            this.stats.furball + ' pelos | melhor sequencia ' + this.bestComboCount + ' | ' + finalData.summary.durationSec + 's';
+
+        this.renderPostRunMeta(overlay, finalData);
         overlay.classList.remove('dps-sg-overlay--hidden');
     };
 
     SpaceGroomers.prototype.victory = function () {
         this.state = 'victory';
         cancelAnimationFrame(this.rafId);
-        this.saveHighscore();
 
+        var finalData = this.finalizeProgression('victory');
         var overlay = this.overlayVictory;
+
         overlay.querySelector('.dps-sg-final-score').textContent = this.score.toLocaleString();
         overlay.querySelector('.dps-sg-overlay__stats').textContent =
             this.stats.flea + ' pulgas | ' +
             this.stats.tick + ' carrapatos | ' +
             this.stats.furball + ' pelos | ' +
-            Math.round(this.runTimeMs / 1000) + 's de run';
-        this.updateHighscoreDisplay();
+            finalData.summary.durationSec + 's de run';
+
+        this.renderPostRunMeta(overlay, finalData);
         overlay.classList.remove('dps-sg-overlay--hidden');
     };
 
     SpaceGroomers.prototype.saveHighscore = function () {
         if (this.score > this.highscore) {
             this.highscore = this.score;
-            try {
-                localStorage.setItem(LS_KEY, String(this.highscore));
-            } catch (e) {
-                return;
-            }
+            this.progression.state.highscore = this.score;
+            this.progression.saveState();
         }
     };
 
@@ -1259,6 +2231,8 @@
             this.elSpecialBtn.disabled = this.specialCharge < BALANCE.specialCost;
             this.elSpecialBtn.classList.toggle('dps-sg-btn--charged', this.specialCharge >= BALANCE.specialCost || this.specialReadyPulse > 0);
         }
+
+        this.updateGoalHUD();
     };
 
     SpaceGroomers.prototype.getComboProgressPercent = function () {
@@ -1532,6 +2506,15 @@
             specialReady: this.specialCharge >= BALANCE.specialCost,
             activePowerup: this.activePowerup,
             powerupTimer: Math.round(this.powerupTimer),
+            run: {
+                durationSec: Math.round(this.runTimeMs / 1000),
+                powerupsCollected: this.runPowerupsCollected,
+                tickKills: this.runTickKills,
+                kills: this.runKills
+            },
+            mission: this.progression.getMissionPreview(this.getLiveRunSummary()),
+            streak: this.progressSnapshot ? this.progressSnapshot.streak : null,
+            badgesUnlocked: this.progressSnapshot ? this.progressSnapshot.badges.length : 0,
             player: {
                 x: Math.round(this.player.x),
                 y: Math.round(this.player.y),
@@ -1577,6 +2560,14 @@
     window.render_game_to_text = function () {
         var instance = getActiveInstance();
         return JSON.stringify(instance ? instance.getTextState() : { mode: 'uninitialized' });
+    };
+
+    window.dps_sg_export_progress = function () {
+        var instance = getActiveInstance();
+        if (!instance || !instance.progression) {
+            return JSON.stringify({ schemaVersion: PROGRESS_VERSION, mode: 'uninitialized' });
+        }
+        return JSON.stringify(instance.progression.getIntegrationPayload());
     };
 
     window.advanceTime = function (ms) {

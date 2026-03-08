@@ -1,8 +1,8 @@
-/**
+﻿/**
  * Space Groomers: Invasao das Pulgas
  * Estilos do jogo tematico desi.pet
  *
- * @version 1.2.0
+ * @version 1.3.0
  */
 
 .dps-space-groomers {
@@ -133,6 +133,64 @@
     background: linear-gradient(90deg, #ffd166 0%, #ff8f3f 100%);
     border-radius: inherit;
     transition: width 0.12s linear;
+}
+
+.dps-sg-goal {
+    position: absolute;
+    top: 58px;
+    left: 12px;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: min(190px, calc(100% - 24px));
+    padding: 8px 10px;
+    border-radius: var(--dps-shape-medium, 12px);
+    background: rgba(6, 13, 29, 0.76);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+}
+
+.dps-sg-goal__label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.62);
+}
+
+.dps-sg-goal__title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.25;
+}
+
+.dps-sg-goal__progress,
+.dps-sg-goal__remaining {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.dps-sg-goal__meter {
+    width: 100%;
+    height: 5px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.dps-sg-goal__fill {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #9ad4ff 0%, #4fc3f7 100%);
+    transition: width 0.16s ease;
+}
+
+.dps-sg-goal--done .dps-sg-goal__fill {
+    background: linear-gradient(90deg, #9ae6b4 0%, #49d17d 100%);
 }
 
 .dps-sg-toast {
@@ -389,6 +447,65 @@
     line-height: 1.45;
 }
 
+.dps-sg-start-meta {
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border-radius: var(--dps-shape-medium, 12px);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: left;
+}
+
+.dps-sg-start-meta p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.dps-sg-start-meta p + p {
+    margin-top: 5px;
+}
+
+.dps-sg-start-meta__streak,
+.dps-sg-start-meta__mission-title {
+    font-weight: 700;
+}
+
+.dps-sg-overlay__mission,
+.dps-sg-overlay__records {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.dps-sg-overlay__unlocks {
+    margin: 0 0 14px;
+    padding: 8px 10px;
+    border-radius: var(--dps-shape-medium, 12px);
+    background: rgba(73, 209, 125, 0.14);
+    border: 1px solid rgba(154, 230, 180, 0.36);
+}
+
+.dps-sg-overlay__unlocks--hidden {
+    display: none;
+}
+
+.dps-sg-overlay__unlocks-title {
+    margin: 0 0 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(201, 248, 219, 0.94);
+}
+
+.dps-sg-overlay__unlocks-list {
+    margin: 0;
+    font-size: 12px;
+    color: #fff;
+}
+
 .dps-sg-overlay__highscore .dps-sg-highscore-value,
 .dps-sg-overlay__final-score span {
     color: #ffd166;
@@ -511,6 +628,12 @@
         padding: 6px 8px;
     }
 
+    .dps-sg-goal {
+        top: 50px;
+        left: 10px;
+        width: min(170px, calc(100% - 20px));
+    }
+
     .dps-sg-toast {
         top: 116px;
         max-width: calc(100% - 28px);
@@ -545,6 +668,7 @@
     .dps-sg-combo,
     .dps-sg-toast,
     .dps-sg-powerup-indicator,
+    .dps-sg-goal__fill,
     .dps-sg-btn,
     .dps-sg-special-bar__fill {
         transition: none;

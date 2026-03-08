@@ -1,15 +1,38 @@
-# Registro de screenshots — 2026-03-08
+# Registro de screenshots - 2026-03-08
 
-## Contexto
-Ajustes da Fase 1 do add-on `desi-pet-shower-game` com foco mobile-first (input por arrasto, CTA simplificado, HUD enxuto e controles com safe area).
+## Contexto geral
+Registros visuais do add-on `desi-pet-shower-game` no dia 2026-03-08.
 
-## Antes
-- Sem registro automatizado de captura nesta entrega.
+## Registro anterior (Fase 1)
+- Contexto: ajustes mobile-first (input por arrasto, CTA simplificado, HUD enxuto e safe area).
+- Captura da Fase 1: nao localizada no repositorio atual (registro preservado somente em texto).
+- Fixture de suporte: `docs/screenshots/2026-03-08/space-groomers-mobile-phase1.html`.
 
-## Depois
-- `docs/screenshots/2026-03-08/space-groomers-phase1-mobile.png`
-  - Viewport mobile (390x844)
-  - Tela inicial com CTA “Toque para começar”, tutorial mínimo e controles mobile revisados
+## Registro desta entrega (Fase 3)
+### Contexto
+Mudancas de camada meta/retencao no jogo:
+- missao diaria rotativa
+- streak simples
+- badges locais
+- resumo pos-run com progresso e faltante da missao
+- resumo sincronizado no portal com meta atual, streak, recorde, badges e ultima run
 
-## Arquivos de suporte do registro
-- `docs/screenshots/2026-03-08/space-groomers-mobile-phase1.html` (fixture para render da captura)
+### Capturas realizadas
+- `docs/screenshots/2026-03-08/space-groomers-capture-limitation.png`
+  - Resultado da tentativa de captura automatizada no ambiente atual.
+- `docs/screenshots/2026-03-08/portal-game-summary-preview-desktop.png`
+  - Render estatico em PNG do novo card de resumo do jogo no portal, usado para registrar a composicao visual desta entrega.
+
+### Limitacao do ambiente
+- O navegador automatizado desta sessao nao conseguiu acessar servidor local (`http://127.0.0.1:8766`) e tambem bloqueia `file://`.
+- Por isso, nao foi possivel gerar nesta execucao os prints funcionais completos da tela do jogo renderizada nem uma captura live do portal WordPress.
+
+### Artefatos de suporte preparados
+- `docs/screenshots/2026-03-08/space-groomers-preview.html`
+  - Harness local com markup atualizado da Fase 3, pronto para captura assim que houver servidor HTTP acessivel no mesmo contexto do navegador automatizado.
+- `docs/screenshots/2026-03-08/portal-game-summary-preview.html`
+  - Preview estatico do resumo sincronizado do portal, alinhado ao padrao M3 usado na implementacao.
+
+### Observacao especifica do portal
+- Como o WordPress local nao estava acessivel no navegador automatizado desta sessao, o registro visual do portal foi salvo como preview estatico e PNG renderizado localmente.
+- O card segue `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do padrao M3.

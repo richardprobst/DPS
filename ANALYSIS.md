@@ -2053,45 +2053,43 @@ $details = DPS_Services_API::get_services_details( $appointment_id );
 **Diretório**: `plugins/desi-pet-shower-game`
 
 **Propósito e funcionalidades principais**:
-- Jogo temático "Space Groomers: Invasão das Pulgas" estilo Space Invaders para engajamento de clientes
+- Jogo temático "Space Groomers: Invasão das Pulgas" para engajamento casual no portal
 - Canvas + JavaScript puro, sem dependências externas pesadas
-- Partida curta (2–4 minutos), responsivo (desktop + mobile)
-- Integra automaticamente na aba Início do portal como card "Jogo do Dia"
+- Partidas curtas com missão diária, streak leve, badges e resumo pós-run
+- Integra automaticamente na aba Início do portal com card jogável e resumo sincronizado
 
 **Shortcodes expostos**:
 - `[dps_space_groomers]` — renderiza o jogo completo em qualquer página
 
-**CPTs, tabelas e opções**: Nenhum (pontuação armazenada em `localStorage` do navegador)
+**Persistência, contratos e REST**:
+- `localStorage` continua como fallback local (`dps_sg_progress_v1` + `dps_sg_highscore`)
+- `post meta` do cliente vira a fonte canônica quando há portal autenticado (`dps_game_progress_v1`)
+- Serviço PHP: `DPS_Game_Progress_Service` (normaliza, faz merge, limita histórico e aplica idempotência)
+- REST controller: `DPS_Game_REST` (nonce custom + sessão do portal ou `manage_options`)
 
-**Mecânica do jogo (MVP)**:
-- **Jogador**: "Secador Turbo" (nave) controlado por teclado ou touch
-- **Inimigos**: Pulga (1 hit, 10pts), Carrapato (2 hits, 25pts), Bolota de Pelo (1 hit, 15pts)
-- **Power-ups**: Shampoo Turbo (tiro triplo, 8s) e Toalha (limpa linha inteira)
-- **Vidas**: 3 corações ("calmaria") — inimigo que passa da linha remove 1 calmaria
-- **Waves**: 10 ondas com dificuldade progressiva (mais inimigos, mais rápidos, gotinhas de lama)
-- **Combo**: 10 acertos seguidos = x2, 20 acertos = x3 (5s cada)
-- **Especial**: "Banho de Espuma" (carrega com pontos, limpa metade inferior)
-- **Bônus de wave perfeita**: +200 pontos quando nenhum inimigo passa
-- **Recorde**: salvo em `localStorage` (chave `dps_sg_highscore`)
+**Mecânicas meta atuais**:
+- 1 missão rotativa diária com pool enxuto
+- streak simples de retorno
+- badges locais desbloqueadas por recordes e marcos
+- resumo sincronizado para o portal com missão, streak, recorde, badges e última run
 
-**Controles**:
-- Desktop: ← → mover, Espaço atirar, Shift especial
-- Mobile: botões touch (◀ ▶ para mover, 🫧 atirar, ⚡ especial)
-
-**Áudio**: SFX via Web Audio API (chiptune leve, sem arquivos externos)
+**Integração com loyalty**:
+- Reaproveita `DPS_Loyalty_API::award_game_event_points()` e `dps_loyalty_add_points()`
+- Contextos expostos: `game_daily_mission`, `game_streak_3`, `game_streak_7`, `game_first_victory`
+- `rewardMarkers` no progresso evitam crédito duplicado de pontos
 
 **Hooks consumidos**:
-- `dps_portal_after_inicio_content`: Renderiza card do jogo na aba Início do portal (prioridade 10)
+- `dps_portal_after_inicio_content`: renderiza o card jogável na aba Início do portal
 
-**Hooks disparados**: Nenhum
+**Hooks disparados**:
+- evento frontend `dps-space-groomers-progress`: notifica outras superfícies do portal após sync bem-sucedido
 
 **Dependências**:
-- **Obrigatória**: Plugin base DPS (verifica `DPS_Base_Plugin` na inicialização)
-- **Opcional**: Client Portal Add-on (para integração na aba Início)
+- **Obrigatória**: Plugin base DPS
+- **Opcional**: Client Portal Add-on (sessão e render na aba Início)
+- **Opcional**: Loyalty Add-on (pontuação leve por missão/streak/vitória)
 
-**Introduzido em**: v1.0.0
-
-**Versão atual**: 1.0.0
+**Versão atual**: 1.4.0
 
 ---
 
@@ -3184,6 +3182,7 @@ if ( null !== $result ) {
 | Communications | `dps-communications/v1/*` (3 rotas) | `current_user_can('manage_options')` |
 | AI | `dps-ai/v1/whatsapp-webhook` | `__return_true` (webhook público com validação interna) |
 | Agenda | `dps/v1/google-calendar-webhook` | `__return_true` (webhook público com validação interna) |
+| Game | `dps-game/v1/*` (2 rotas) | sessao do portal + nonce custom ou `current_user_can('manage_options')` |
 
 ---
 

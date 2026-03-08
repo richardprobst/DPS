@@ -1,6 +1,6 @@
 /**
  * Client Portal JavaScript
- * Gerencia interações do Portal do Cliente DPS
+ * Gerencia interaÃ§Ãµes do Portal do Cliente DPS
  * 
  * @package DPS Client Portal
  * @version 2.0.0
@@ -9,7 +9,7 @@
 (function() {
     'use strict';
 
-    // Compatibilidade: mapeia dpsPortalChat para dpsPortal para código legado
+    // Compatibilidade: mapeia dpsPortalChat para dpsPortal para cÃ³digo legado
     window.dpsPortalChat = window.dpsPortal || {};
     if (window.dpsPortal && !window.dpsPortalChat.nonce) {
         window.dpsPortalChat.nonce = window.dpsPortal.chatNonce;
@@ -18,7 +18,7 @@
     }
 
     /**
-     * Configuração do chat
+     * ConfiguraÃ§Ã£o do chat
      */
     var chatConfig = {
         pollInterval: 10000, // 10 segundos
@@ -34,30 +34,31 @@
     function init() {
         cleanTokenFromURL();
         handleTabNavigation();
-        handleFormValidation(); // Fase 4.2: validação em tempo real
+        handleFormValidation(); // Fase 4.2: validaÃ§Ã£o em tempo real
         handleFormSubmits();
         handleFileUploadPreview();
         handleSmoothScroll();
         handleToggleDetails(); // Phase 2: toggle for financial details
-        handleCollapsibleSections(); // Seções colapsáveis (ex: Pagamentos Pendentes)
+        handleCollapsibleSections(); // SeÃ§Ãµes colapsÃ¡veis (ex: Pagamentos Pendentes)
         handlePortalMessages(); // Phase 2: feedback for actions
         handleLoyalty();
+        handleGameProgress();
         initChatWidget();
-        handleQuickActions(); // Fase 3: Quick Actions na aba Início
-        handleReviewForm(); // Fase 5: Formulário de avaliação interna
-        handlePetHistoryTabs(); // Revisão Jan/2026: Navegação por pet na aba Histórico
-        handleRepeatService(); // Revisão Jan/2026: Botão repetir serviço via WhatsApp
+        handleQuickActions(); // Fase 3: Quick Actions na aba InÃ­cio
+        handleReviewForm(); // Fase 5: FormulÃ¡rio de avaliaÃ§Ã£o interna
+        handlePetHistoryTabs(); // RevisÃ£o Jan/2026: NavegaÃ§Ã£o por pet na aba HistÃ³rico
+        handleRepeatService(); // RevisÃ£o Jan/2026: BotÃ£o repetir serviÃ§o via WhatsApp
         handleExportPdf(); // Funcionalidade 3: Export PDF
         handleLoadMorePetHistory(); // Load more pet history items
-        handleTimelinePeriodFilter(); // Fase 4.4: Filtro de período no histórico
+        handleTimelinePeriodFilter(); // Fase 4.4: Filtro de perÃ­odo no histÃ³rico
     }
 
     /**
-     * Gerencia ações rápidas (Quick Actions) na aba Início
-     * Permite abrir chat, navegar para tabs e outras ações rápidas
+     * Gerencia aÃ§Ãµes rÃ¡pidas (Quick Actions) na aba InÃ­cio
+     * Permite abrir chat, navegar para tabs e outras aÃ§Ãµes rÃ¡pidas
      */
     function handleQuickActions() {
-        // Botões de ação rápida que abrem o chat
+        // BotÃµes de aÃ§Ã£o rÃ¡pida que abrem o chat
         var chatButtons = document.querySelectorAll('[data-action="open-chat"]');
         chatButtons.forEach(function(btn) {
             btn.addEventListener('click', function(e) {
@@ -70,9 +71,9 @@
             });
         });
 
-        // Botões de ação rápida que navegam para tabs
+        // BotÃµes de aÃ§Ã£o rÃ¡pida que navegam para tabs
         var tabButtons = document.querySelectorAll('.dps-quick-action[data-tab], .dps-link-button[data-tab], .dps-pet-card__action-btn[data-tab], .dps-overview-card[data-tab]');
-        // Lista de tabs válidas para prevenir DOM-based XSS
+        // Lista de tabs vÃ¡lidas para prevenir DOM-based XSS
         var validTabs = ['inicio', 'fidelidade', 'avaliacoes', 'mensagens', 'agendamentos', 'pagamentos', 'historico-pets', 'galeria', 'dados'];
         
         tabButtons.forEach(function(btn) {
@@ -80,16 +81,16 @@
                 e.preventDefault();
                 var targetTab = this.getAttribute('data-tab');
                 
-                // Valida se a tab é uma das tabs conhecidas
+                // Valida se a tab Ã© uma das tabs conhecidas
                 if (!targetTab || validTabs.indexOf(targetTab) === -1) {
                     return;
                 }
 
-                // Encontra e clica na tab correspondente (selector seguro após validação)
+                // Encontra e clica na tab correspondente (selector seguro apÃ³s validaÃ§Ã£o)
                 var tabLink = document.querySelector('.dps-portal-tabs__link[data-tab="' + targetTab + '"]');
                 if (tabLink) {
                     tabLink.click();
-                    // Scroll suave para o topo do conteúdo
+                    // Scroll suave para o topo do conteÃºdo
                     var tabContent = document.querySelector('.dps-portal-tab-content');
                     if (tabContent) {
                         tabContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -110,19 +111,19 @@
     }
 
     /**
-     * Remove token de autenticação da URL por segurança
-     * Chamado após autenticação bem-sucedida para limpar o dps_token da URL
+     * Remove token de autenticaÃ§Ã£o da URL por seguranÃ§a
+     * Chamado apÃ³s autenticaÃ§Ã£o bem-sucedida para limpar o dps_token da URL
      */
     function cleanTokenFromURL() {
-        // Verifica se há dps_token na URL
+        // Verifica se hÃ¡ dps_token na URL
         if (window.location.search.indexOf('dps_token=') === -1) {
             return;
         }
 
-        // Remove o parâmetro dps_token da URL usando History API
+        // Remove o parÃ¢metro dps_token da URL usando History API
         if (window.history && window.history.replaceState) {
             try {
-                // Método moderno com URL API (navegadores atuais)
+                // MÃ©todo moderno com URL API (navegadores atuais)
                 if (typeof URL !== 'undefined') {
                     var url = new URL(window.location.href);
                     url.searchParams.delete('dps_token');
@@ -131,19 +132,19 @@
                     // Fallback para navegadores antigos (IE)
                     var currentUrl = window.location.href;
                     var cleanUrl = currentUrl.replace(/([?&])dps_token=[^&]+(&|$)/, function(match, prefix, suffix) {
-                        // Se era o único parâmetro (?dps_token=...), remove o ?
+                        // Se era o Ãºnico parÃ¢metro (?dps_token=...), remove o ?
                         if (prefix === '?' && suffix === '') {
                             return '';
                         }
-                        // Se era o primeiro parâmetro (?dps_token=...&), mantém o ?
+                        // Se era o primeiro parÃ¢metro (?dps_token=...&), mantÃ©m o ?
                         if (prefix === '?' && suffix === '&') {
                             return '?';
                         }
-                        // Se era um parâmetro intermediário (&dps_token=...&), remove completamente
+                        // Se era um parÃ¢metro intermediÃ¡rio (&dps_token=...&), remove completamente
                         if (prefix === '&' && suffix === '&') {
                             return '&';
                         }
-                        // Se era o último parâmetro (&dps_token=...), remove o &
+                        // Se era o Ãºltimo parÃ¢metro (&dps_token=...), remove o &
                         return '';
                     });
                     
@@ -153,17 +154,17 @@
                     window.history.replaceState({}, document.title, cleanUrl);
                 }
             } catch (e) {
-                // Em caso de erro, apenas loga sem quebrar a página
-                // O token ficará visível na URL mas a autenticação já foi feita
+                // Em caso de erro, apenas loga sem quebrar a pÃ¡gina
+                // O token ficarÃ¡ visÃ­vel na URL mas a autenticaÃ§Ã£o jÃ¡ foi feita
                 if (console && console.warn) {
-                    console.warn('Não foi possível limpar token da URL:', e);
+                    console.warn('NÃ£o foi possÃ­vel limpar token da URL:', e);
                 }
             }
         }
     }
 
     /**
-     * Gerencia navegação por tabs
+     * Gerencia navegaÃ§Ã£o por tabs
      */
     function handleTabNavigation() {
         var LOADING_INDICATOR_DURATION = 220;
@@ -215,7 +216,7 @@
             tabNav.classList.toggle('is-loading', isLoading);
             tabContent.classList.toggle('is-loading', isLoading);
             if (loadingEl) {
-                loadingEl.textContent = isLoading ? 'Carregando seção...' : '';
+                loadingEl.textContent = isLoading ? 'Carregando seÃ§Ã£o...' : '';
             }
         }
 
@@ -369,7 +370,7 @@
         var form = chatWidget.querySelector('.dps-chat-input__form');
         var input = chatWidget.querySelector('.dps-chat-input__field');
         
-        // Obtém client_id do data attribute
+        // ObtÃ©m client_id do data attribute
         chatConfig.clientId = parseInt(chatWidget.getAttribute('data-client-id')) || 0;
         
         // Toggle do chat
@@ -519,7 +520,7 @@
         
         if (!messages || !messages.length) {
             container.innerHTML = '<div class="dps-chat-empty">' +
-                '<div class="dps-chat-empty__icon">💬</div>' +
+                '<div class="dps-chat-empty__icon">ðŸ’¬</div>' +
                 '<div class="dps-chat-empty__text">Inicie uma conversa com nossa equipe!</div>' +
                 '</div>';
             return;
@@ -584,7 +585,7 @@
                 }
             } else {
                 if (window.DPSToast) {
-                    window.DPSToast.error('Erro de conexão. Tente novamente.');
+                    window.DPSToast.error('Erro de conexÃ£o. Tente novamente.');
                 }
             }
         };
@@ -593,7 +594,7 @@
             isSending = false;
             if (sendBtn) sendBtn.disabled = false;
             if (window.DPSToast) {
-                window.DPSToast.error('Falha na conexão. Verifique sua internet e tente novamente.');
+                window.DPSToast.error('Falha na conexÃ£o. Verifique sua internet e tente novamente.');
             }
         };
 
@@ -601,7 +602,7 @@
             isSending = false;
             if (sendBtn) sendBtn.disabled = false;
             if (window.DPSToast) {
-                window.DPSToast.error('A conexão demorou muito. Tente novamente.');
+                window.DPSToast.error('A conexÃ£o demorou muito. Tente novamente.');
             }
         };
         
@@ -614,7 +615,7 @@
     }
 
     /**
-     * Adiciona mensagem de forma otimista (antes da confirmação do servidor)
+     * Adiciona mensagem de forma otimista (antes da confirmaÃ§Ã£o do servidor)
      */
     function addOptimisticMessage(message) {
         var container = document.querySelector('.dps-chat-messages');
@@ -634,7 +635,7 @@
     }
 
     /**
-     * Atualiza badge de mensagens não lidas (chat + tab nav)
+     * Atualiza badge de mensagens nÃ£o lidas (chat + tab nav)
      */
     function updateUnreadBadge(count) {
         // Badge do chat flutuante
@@ -649,7 +650,7 @@
             }
         }
 
-        // Badge na aba de navegação do portal
+        // Badge na aba de navegaÃ§Ã£o do portal
         var tabBadge = document.querySelector('#dps-portal-tab-mensagens .dps-portal-tabs__badge');
         if (tabBadge) {
             if (count > 0) {
@@ -722,26 +723,26 @@
     }
 
     /**
-     * Fase 4.2: Validação em tempo real nos formulários do portal.
-     * Valida campos on blur/input e mostra mensagens inline acessíveis.
+     * Fase 4.2: ValidaÃ§Ã£o em tempo real nos formulÃ¡rios do portal.
+     * Valida campos on blur/input e mostra mensagens inline acessÃ­veis.
      */
     function handleFormValidation() {
         var forms = document.querySelectorAll('.dps-portal-form');
         if (!forms.length) return;
 
-        // Regras de validação por name do campo
+        // Regras de validaÃ§Ã£o por name do campo
         var rules = {
             'client_phone': {
                 pattern: /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/,
-                message: 'Informe um telefone válido. Ex: (11) 99999-9999'
+                message: 'Informe um telefone vÃ¡lido. Ex: (11) 99999-9999'
             },
             'client_email': {
                 pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: 'Informe um e-mail válido. Ex: nome@email.com'
+                message: 'Informe um e-mail vÃ¡lido. Ex: nome@email.com'
             },
             'client_zip': {
                 pattern: /^\d{5}-?\d{3}$/,
-                message: 'Informe um CEP válido. Ex: 01234-567'
+                message: 'Informe um CEP vÃ¡lido. Ex: 01234-567'
             },
             'client_state': {
                 pattern: /^[A-Za-z]{2}$/,
@@ -749,22 +750,22 @@
             },
             'pet_name': {
                 required: true,
-                message: 'O nome do pet é obrigatório.'
+                message: 'O nome do pet Ã© obrigatÃ³rio.'
             },
             'pet_weight': {
                 pattern: /^\d+([.,]\d{1,2})?$/,
-                message: 'Informe um peso válido. Ex: 8.5'
+                message: 'Informe um peso vÃ¡lido. Ex: 8.5'
             },
             'pet_birth': {
                 maxDate: new Date().toISOString().split('T')[0],
-                message: 'A data de nascimento não pode ser no futuro.'
+                message: 'A data de nascimento nÃ£o pode ser no futuro.'
             }
         };
 
         /**
          * Valida um campo individual.
          * @param {HTMLElement} field - O campo a validar.
-         * @returns {boolean} true se válido.
+         * @returns {boolean} true se vÃ¡lido.
          */
         function validateField(field) {
             var name = field.getAttribute('name');
@@ -772,17 +773,17 @@
             var rule = rules[name];
             var errorEl = field.parentNode.querySelector('.dps-field-error');
 
-            // Sem regra customizada — usa validação HTML5 nativa
+            // Sem regra customizada â€” usa validaÃ§Ã£o HTML5 nativa
             if (!rule) {
                 if (field.hasAttribute('required') && !value) {
-                    setInvalid(field, errorEl, 'Este campo é obrigatório.');
+                    setInvalid(field, errorEl, 'Este campo Ã© obrigatÃ³rio.');
                     return false;
                 }
                 setValid(field, errorEl);
                 return true;
             }
 
-            // Campo vazio: só erro se obrigatório
+            // Campo vazio: sÃ³ erro se obrigatÃ³rio
             if (!value) {
                 if (rule.required || field.hasAttribute('required')) {
                     setInvalid(field, errorEl, rule.message);
@@ -792,13 +793,13 @@
                 return true;
             }
 
-            // Validação de pattern
+            // ValidaÃ§Ã£o de pattern
             if (rule.pattern && !rule.pattern.test(value)) {
                 setInvalid(field, errorEl, rule.message);
                 return false;
             }
 
-            // Validação de data máxima
+            // ValidaÃ§Ã£o de data mÃ¡xima
             if (rule.maxDate && value > rule.maxDate) {
                 setInvalid(field, errorEl, rule.message);
                 return false;
@@ -843,7 +844,7 @@
             fields.forEach(function(field) {
                 // Validar ao sair do campo (blur)
                 field.addEventListener('blur', function() {
-                    // Só valida se o campo já foi tocado (tem valor ou perdeu foco)
+                    // SÃ³ valida se o campo jÃ¡ foi tocado (tem valor ou perdeu foco)
                     if (field.value.trim() || field.hasAttribute('required')) {
                         validateField(field);
                     }
@@ -881,14 +882,14 @@
     }
 
     /**
-     * Adiciona feedback visual durante submit de formulários
+     * Adiciona feedback visual durante submit de formulÃ¡rios
      */
     function handleFormSubmits() {
         var forms = document.querySelectorAll('.dps-portal-form');
         
         forms.forEach(function(form) {
             form.addEventListener('submit', function(e) {
-                // Se a validação customizada já preveniu o submit, não prosseguir
+                // Se a validaÃ§Ã£o customizada jÃ¡ preveniu o submit, nÃ£o prosseguir
                 if (e.defaultPrevented) return;
 
                 var submitBtn = form.querySelector('.dps-btn-submit, .dps-submit-btn');
@@ -897,12 +898,12 @@
                     // Salva texto original
                     var originalText = submitBtn.textContent;
                     
-                    // Desabilita botão e mostra "Salvando..."
+                    // Desabilita botÃ£o e mostra "Salvando..."
                     submitBtn.disabled = true;
                     submitBtn.classList.add('is-loading');
                     submitBtn.textContent = 'Salvando...';
                     
-                    // Se houver erro de validação HTML5, reabilita o botão
+                    // Se houver erro de validaÃ§Ã£o HTML5, reabilita o botÃ£o
                     setTimeout(function() {
                         if (!form.checkValidity()) {
                             submitBtn.disabled = false;
@@ -916,7 +917,7 @@
     }
 
     /**
-     * Interações da aba de fidelidade.
+     * InteraÃ§Ãµes da aba de fidelidade.
      */
     function handleLoyalty() {
         var section = document.querySelector('.dps-portal-loyalty');
@@ -1103,6 +1104,128 @@
     }
 
     /**
+     * Consome o resumo sincronizado do Space Groomers no portal.
+     */
+    function handleGameProgress() {
+        var section = document.querySelector('.dps-portal-game-summary');
+        if (!section || !window.dpsPortal || !window.dpsPortal.game || !window.dpsPortal.game.enabled) return;
+
+        var gameConfig = window.dpsPortal.game;
+        var statusEl = section.querySelector('.dps-portal-game-summary__status');
+
+        function field(name) {
+            return section.querySelector('[data-game-field="' + name + '"]');
+        }
+
+        function setState(state) {
+            section.setAttribute('data-game-summary-state', state);
+        }
+
+        function setText(name, value) {
+            var el = field(name);
+            if (el) {
+                el.textContent = value;
+            }
+        }
+
+        function formatNumber(value) {
+            return (parseInt(value, 10) || 0).toLocaleString('pt-BR');
+        }
+
+        function getLastRunLabel(lastRun) {
+            if (!lastRun) {
+                return gameConfig.i18n.empty || 'Jogue uma run para comecar seu historico sincronizado.';
+            }
+
+            var resultLabel = lastRun.result === 'victory' ? 'Vitoria' : 'Nova tentativa';
+            return resultLabel + ': ' + formatNumber(lastRun.score) + ' pts, onda ' + formatNumber(lastRun.waveReached);
+        }
+
+        function renderSummary(summary) {
+            if (!summary) {
+                setState('empty');
+                if (statusEl) {
+                    statusEl.textContent = gameConfig.i18n.empty || 'Jogue uma run para comecar seu historico sincronizado.';
+                }
+                return;
+            }
+
+            var mission = summary.mission || {};
+            var badges = Array.isArray(summary.badges) ? summary.badges : [];
+            var streak = summary.streak || {};
+            var records = summary.records || {};
+            var missionProgress = mission.completed
+                ? (gameConfig.i18n.missionDone || 'Missao concluida hoje.')
+                : ((mission.progress || 0) + '/' + (mission.target || 0) + ' - faltam ' + (mission.remaining || 0));
+            var missionStatus = mission.completed
+                ? (gameConfig.i18n.missionDone || 'Missao concluida hoje.')
+                : (gameConfig.i18n.missionPending || 'Falta pouco para concluir a meta.');
+            var badgeNames = badges.length ? badges.map(function(item) { return item.name; }).join(' - ') : 'Sem badges novas';
+
+            setState('ready');
+            if (statusEl) {
+                statusEl.textContent = missionStatus;
+            }
+
+            setText('mission-title', mission.title || 'Sem missao ativa');
+            setText('mission-progress', missionProgress);
+            setText('streak', formatNumber(streak.current || 0) + ' dias');
+            setText('streak-note', 'Melhor: ' + formatNumber(streak.best || 0) + ' dias');
+            setText('highscore', formatNumber(summary.highscore || 0));
+            setText('record-note', 'Combo ' + formatNumber(records.bestCombo || 0) + ' - onda ' + formatNumber(records.bestWave || 1));
+            setText('badges-count', formatNumber(summary.badgesCount || 0));
+            setText('badges-note', badgeNames);
+            setText('last-run', getLastRunLabel(summary.lastRun));
+        }
+
+        function renderError() {
+            setState('error');
+            if (statusEl) {
+                statusEl.textContent = gameConfig.i18n.error || 'Nao foi possivel carregar o progresso do jogo agora.';
+            }
+        }
+
+        function fetchSummary() {
+            setState('loading');
+            if (statusEl) {
+                statusEl.textContent = gameConfig.i18n.loading || 'Carregando progresso do jogo...';
+            }
+
+            fetch(gameConfig.endpoints.progress, {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-DPS-Game-Nonce': gameConfig.nonce
+                }
+            }).then(function(res) {
+                if (!res.ok) {
+                    throw new Error('game_progress_fetch_failed');
+                }
+                return res.json();
+            }).then(function(res) {
+                if (res && res.summary) {
+                    renderSummary(res.summary);
+                } else {
+                    renderSummary(null);
+                }
+            }).catch(function() {
+                renderError();
+            });
+        }
+
+        window.addEventListener('dps-space-groomers-progress', function(event) {
+            if (event && event.detail && event.detail.summary) {
+                renderSummary(event.detail.summary);
+                return;
+            }
+            fetchSummary();
+        });
+
+        fetchSummary();
+    }
+
+    /**
      * Preview de upload de foto
      */
     function handleFileUploadPreview() {
@@ -1132,8 +1255,8 @@
     }
 
     /**
-     * Implementa scroll suave para links de âncora
-     * (Alternativa caso scroll-behavior: smooth no CSS não funcione em todos os navegadores)
+     * Implementa scroll suave para links de Ã¢ncora
+     * (Alternativa caso scroll-behavior: smooth no CSS nÃ£o funcione em todos os navegadores)
      */
     function handleSmoothScroll() {
         var navLinks = document.querySelectorAll('.dps-portal-nav__link');
@@ -1142,7 +1265,7 @@
             link.addEventListener('click', function(e) {
                 var href = this.getAttribute('href');
                 
-                // Verifica se é uma âncora
+                // Verifica se Ã© uma Ã¢ncora
                 if (href && href.startsWith('#')) {
                     var target = document.querySelector(href);
                     
@@ -1194,7 +1317,7 @@
     }
 
     /**
-     * Gerencia seções colapsáveis (ex: Pagamentos Pendentes)
+     * Gerencia seÃ§Ãµes colapsÃ¡veis (ex: Pagamentos Pendentes)
      */
     function handleCollapsibleSections() {
         var collapsibleHeaders = document.querySelectorAll('.dps-collapsible__header');
@@ -1212,8 +1335,8 @@
     }
 
     /**
-     * Exibe toasts baseados em mensagens da URL (após ações do cliente)
-     * Phase 2: Feedback de ações
+     * Exibe toasts baseados em mensagens da URL (apÃ³s aÃ§Ãµes do cliente)
+     * Phase 2: Feedback de aÃ§Ãµes
      */
     function handlePortalMessages() {
         var urlParams = new URLSearchParams(window.location.search);
@@ -1223,7 +1346,7 @@
             return;
         }
         
-        // Remove o parâmetro da URL
+        // Remove o parÃ¢metro da URL
         if (window.history && window.history.replaceState) {
             var cleanUrl = window.location.pathname + window.location.hash;
             window.history.replaceState({}, document.title, cleanUrl);
@@ -1239,83 +1362,83 @@
             'pet_updated': {
                 type: 'success',
                 title: 'Pet Atualizado!',
-                message: 'As informações do pet foram salvas com sucesso.'
+                message: 'As informaÃ§Ãµes do pet foram salvas com sucesso.'
             },
             'preferences_updated': {
                 type: 'success',
-                title: 'Preferências Salvas',
-                message: 'Suas preferências foram atualizadas com sucesso.'
+                title: 'PreferÃªncias Salvas',
+                message: 'Suas preferÃªncias foram atualizadas com sucesso.'
             },
             'pet_preferences_updated': {
                 type: 'success',
-                title: 'Preferências do Pet Salvas',
-                message: 'As preferências de produtos do pet foram atualizadas.'
+                title: 'PreferÃªncias do Pet Salvas',
+                message: 'As preferÃªncias de produtos do pet foram atualizadas.'
             },
             'upload_error': {
                 type: 'error',
                 title: 'Erro no Upload',
-                message: 'Não foi possível enviar a foto. Verifique se o arquivo é uma imagem válida (JPG, PNG, GIF ou WebP) com até 5 MB.'
+                message: 'NÃ£o foi possÃ­vel enviar a foto. Verifique se o arquivo Ã© uma imagem vÃ¡lida (JPG, PNG, GIF ou WebP) com atÃ© 5 MB.'
             },
             'invalid_file_type': {
                 type: 'error',
-                title: 'Formato Não Aceito',
-                message: 'O arquivo enviado não é uma imagem válida. Use JPG, PNG, GIF ou WebP.'
+                title: 'Formato NÃ£o Aceito',
+                message: 'O arquivo enviado nÃ£o Ã© uma imagem vÃ¡lida. Use JPG, PNG, GIF ou WebP.'
             },
             'file_too_large': {
                 type: 'error',
                 title: 'Foto Grande Demais',
-                message: 'A foto deve ter no máximo 5 MB. Reduza o tamanho da imagem e tente novamente.'
+                message: 'A foto deve ter no mÃ¡ximo 5 MB. Reduza o tamanho da imagem e tente novamente.'
             },
             'session_expired': {
                 type: 'error',
-                title: 'Sessão Expirada',
-                message: 'Sua sessão expirou por segurança. Solicite um novo link de acesso para continuar.'
+                title: 'SessÃ£o Expirada',
+                message: 'Sua sessÃ£o expirou por seguranÃ§a. Solicite um novo link de acesso para continuar.'
             },
             'message_sent': {
                 type: 'success',
                 title: 'Mensagem Enviada!',
-                message: 'Sua mensagem foi enviada para a equipe. Responderemos o mais breve possível.'
+                message: 'Sua mensagem foi enviada para a equipe. Responderemos o mais breve possÃ­vel.'
             },
             'message_error': {
                 type: 'error',
                 title: 'Erro ao Enviar',
-                message: 'Não foi possível enviar sua mensagem. Verifique o conteúdo e tente novamente.'
+                message: 'NÃ£o foi possÃ­vel enviar sua mensagem. Verifique o conteÃºdo e tente novamente.'
             },
             'review_submitted': {
                 type: 'success',
-                title: 'Avaliação Enviada! 🎉',
-                message: 'Obrigado pela sua avaliação! Sua opinião é muito importante para nós.'
+                title: 'AvaliaÃ§Ã£o Enviada! ðŸŽ‰',
+                message: 'Obrigado pela sua avaliaÃ§Ã£o! Sua opiniÃ£o Ã© muito importante para nÃ³s.'
             },
             'review_already': {
                 type: 'info',
-                title: 'Avaliação Já Registrada',
-                message: 'Você já enviou uma avaliação anteriormente. Obrigado pelo feedback!'
+                title: 'AvaliaÃ§Ã£o JÃ¡ Registrada',
+                message: 'VocÃª jÃ¡ enviou uma avaliaÃ§Ã£o anteriormente. Obrigado pelo feedback!'
             },
             'review_invalid': {
                 type: 'error',
-                title: 'Avaliação Incompleta',
+                title: 'AvaliaÃ§Ã£o Incompleta',
                 message: 'Por favor, selecione uma nota de 1 a 5 estrelas antes de enviar.'
             },
             'review_error': {
                 type: 'error',
-                title: 'Erro na Avaliação',
-                message: 'Não foi possível registrar sua avaliação. Tente novamente em alguns instantes.'
+                title: 'Erro na AvaliaÃ§Ã£o',
+                message: 'NÃ£o foi possÃ­vel registrar sua avaliaÃ§Ã£o. Tente novamente em alguns instantes.'
             },
             'error': {
                 type: 'error',
                 title: 'Algo Deu Errado',
-                message: 'Não foi possível processar sua solicitação. Tente novamente ou entre em contato pelo chat.'
+                message: 'NÃ£o foi possÃ­vel processar sua solicitaÃ§Ã£o. Tente novamente ou entre em contato pelo chat.'
             },
             'unauthorized': {
                 type: 'error',
-                title: 'Acesso Não Autorizado',
+                title: 'Acesso NÃ£o Autorizado',
                 message: 'Seu link de acesso pode ter expirado. Solicite um novo link para continuar.'
             }
         };
         
         var toastData = messages[message] || messages.error;
         
-        // Aguarda DPSToast estar disponível
+        // Aguarda DPSToast estar disponÃ­vel
         setTimeout(function() {
             if (window.DPSToast) {
                 window.DPSToast.show(toastData.title, toastData.message, toastData.type, 5000);
@@ -1334,18 +1457,18 @@
 
 /* ========================================
    TOAST NOTIFICATIONS (Fase 1.5)
-   Sistema global de notificações
+   Sistema global de notificaÃ§Ãµes
    ======================================== */
 
 /**
- * DPS Toast - Sistema de notificações toast
+ * DPS Toast - Sistema de notificaÃ§Ãµes toast
  * 
  * Uso:
  * DPSToast.success('Dados salvos com sucesso!');
- * DPSToast.error('Erro ao processar solicitação');
- * DPSToast.warning('Atenção: link expira em 5 minutos');
+ * DPSToast.error('Erro ao processar solicitaÃ§Ã£o');
+ * DPSToast.warning('AtenÃ§Ã£o: link expira em 5 minutos');
  * DPSToast.info('Nova mensagem recebida');
- * DPSToast.show('Título', 'Mensagem', 'success', 5000);
+ * DPSToast.show('TÃ­tulo', 'Mensagem', 'success', 5000);
  */
 window.DPSToast = (function() {
     'use strict';
@@ -1368,14 +1491,14 @@ window.DPSToast = (function() {
     }
     
     /**
-     * Obtém ícone para tipo de toast
+     * ObtÃ©m Ã­cone para tipo de toast
      */
     function getIcon(type) {
         var icons = {
-            'success': '✓',
-            'error': '✕',
-            'warning': '⚠',
-            'info': 'ℹ'
+            'success': 'âœ“',
+            'error': 'âœ•',
+            'warning': 'âš ',
+            'info': 'â„¹'
         };
         return icons[type] || icons.info;
     }
@@ -1383,10 +1506,10 @@ window.DPSToast = (function() {
     /**
      * Mostra um toast
      * 
-     * @param {string} title - Título do toast
+     * @param {string} title - TÃ­tulo do toast
      * @param {string} message - Mensagem do toast
      * @param {string} type - Tipo: success, error, warning, info
-     * @param {number} duration - Duração em ms (0 = não fecha automaticamente)
+     * @param {number} duration - DuraÃ§Ã£o em ms (0 = nÃ£o fecha automaticamente)
      */
     function show(title, message, type, duration) {
         type = type || 'info';
@@ -1426,8 +1549,8 @@ window.DPSToast = (function() {
         var closeBtn = document.createElement('button');
         closeBtn.className = 'dps-toast__close';
         closeBtn.setAttribute('type', 'button');
-        closeBtn.setAttribute('aria-label', 'Fechar notificação');
-        closeBtn.textContent = '×';
+        closeBtn.setAttribute('aria-label', 'Fechar notificaÃ§Ã£o');
+        closeBtn.textContent = 'Ã—';
         closeBtn.onclick = function() {
             hide(id);
         };
@@ -1481,14 +1604,14 @@ window.DPSToast = (function() {
     }
     
     function warning(message, duration) {
-        return show('Atenção', message, 'warning', duration);
+        return show('AtenÃ§Ã£o', message, 'warning', duration);
     }
     
     function info(message, duration) {
         return show('', message, 'info', duration);
     }
     
-    // API pública
+    // API pÃºblica
     return {
         show: show,
         hide: hide,
@@ -1500,7 +1623,7 @@ window.DPSToast = (function() {
 })();
 
 /**
- * Substitui alertas padrão de mensagens por toasts
+ * Substitui alertas padrÃ£o de mensagens por toasts
  * Converte <div class="dps-alert"> em toasts
  */
 (function() {
@@ -1530,7 +1653,7 @@ window.DPSToast = (function() {
         });
     }
     
-    // Converte alerts existentes quando página carregar
+    // Converte alerts existentes quando pÃ¡gina carregar
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', convertAlertsToToasts);
     } else {
@@ -1563,13 +1686,13 @@ window.DPSToast = (function() {
 
 /**
  * DPS Skeleton - Sistema de skeleton loaders
- * Melhora a percepção de velocidade mostrando placeholders
+ * Melhora a percepÃ§Ã£o de velocidade mostrando placeholders
  */
 window.DPSSkeleton = (function() {
     'use strict';
     
     /**
-     * Cria skeleton para histórico
+     * Cria skeleton para histÃ³rico
      */
     function createHistorySkeleton() {
         return `
@@ -1599,7 +1722,7 @@ window.DPSSkeleton = (function() {
     }
     
     /**
-     * Cria skeleton genérico com múltiplas linhas de texto
+     * Cria skeleton genÃ©rico com mÃºltiplas linhas de texto
      */
     function createTextSkeleton(lines) {
         lines = lines || 3;
@@ -1652,7 +1775,7 @@ window.DPSSkeleton = (function() {
         
         container.classList.add('dps-content-loaded');
         
-        // Remove skeletons após animação
+        // Remove skeletons apÃ³s animaÃ§Ã£o
         setTimeout(function() {
             var skeletons = container.querySelectorAll('.dps-skeleton, .dps-portal-skeleton-history, .dps-portal-skeleton-gallery, .dps-skeleton-container');
             skeletons.forEach(function(el) {
@@ -1663,7 +1786,7 @@ window.DPSSkeleton = (function() {
         }, 300);
     }
     
-    // API pública
+    // API pÃºblica
     return {
         show: show,
         hide: hide,
@@ -1674,12 +1797,12 @@ window.DPSSkeleton = (function() {
 })();
 
 /**
- * Auto-aplica skeletons em tab panels durante navegação
+ * Auto-aplica skeletons em tab panels durante navegaÃ§Ã£o
  */
 (function() {
     'use strict';
     
-    // Aguarda navegação entre tabs
+    // Aguarda navegaÃ§Ã£o entre tabs
     document.addEventListener('click', function(e) {
         var tabLink = e.target.closest('.dps-portal-tabs__link');
         if (!tabLink) return;
@@ -1701,7 +1824,7 @@ window.DPSSkeleton = (function() {
                 DPSSkeleton.show(panel, 'text');
             }
             
-            // Remove skeleton após delay (simula carregamento)
+            // Remove skeleton apÃ³s delay (simula carregamento)
             setTimeout(function() {
                 DPSSkeleton.hide(panel);
             }, 500);
@@ -1712,7 +1835,7 @@ window.DPSSkeleton = (function() {
      * Fase 4: Handlers para pedidos de agendamento
      */
     
-    // Handler para botões de reagendamento
+    // Handler para botÃµes de reagendamento
     document.addEventListener('click', function(e) {
         if (e.target.closest('.dps-btn-reschedule')) {
             e.preventDefault();
@@ -1722,7 +1845,7 @@ window.DPSSkeleton = (function() {
         }
     });
 
-    // Handler para botões de cancelamento
+    // Handler para botÃµes de cancelamento
     document.addEventListener('click', function(e) {
         if (e.target.closest('.dps-btn-cancel')) {
             e.preventDefault();
@@ -1732,7 +1855,7 @@ window.DPSSkeleton = (function() {
         }
     });
 
-    // Handler para botões "Repetir serviço"
+    // Handler para botÃµes "Repetir serviÃ§o"
     document.addEventListener('click', function(e) {
         if (e.target.closest('.dps-btn-repeat-service')) {
             e.preventDefault();
@@ -1764,7 +1887,7 @@ window.DPSSkeleton = (function() {
         html += '<div class="dps-modal__content">';
         html += '<div class="dps-modal__header">';
         html += '<h3>Confirmar Cancelamento</h3>';
-        html += '<button class="dps-modal__close" aria-label="Fechar">×</button>';
+        html += '<button class="dps-modal__close" aria-label="Fechar">Ã—</button>';
         html += '</div>';
         html += '<div class="dps-modal__body">';
         html += '<p>Tem certeza que deseja solicitar o cancelamento deste agendamento?</p>';
@@ -1803,7 +1926,7 @@ window.DPSSkeleton = (function() {
     }
 
     /**
-     * Mostra modal para repetir serviço
+     * Mostra modal para repetir serviÃ§o
      */
     function showRepeatServiceModal(appointmentId, petId, services) {
         var modal = createRequestModal('new', appointmentId, petId, services);
@@ -1812,22 +1935,22 @@ window.DPSSkeleton = (function() {
     }
 
     /**
-     * Phase 8.1: Constrói HTML do banner de sugestão inteligente de agendamento.
+     * Phase 8.1: ConstrÃ³i HTML do banner de sugestÃ£o inteligente de agendamento.
      */
     function buildSuggestionBanner(suggestion) {
         if (!suggestion) return '';
         var html = '';
         var urgencyClass = '';
-        var urgencyIcon = '💡';
-        var urgencyLabel = 'Sugestão';
+        var urgencyIcon = 'ðŸ’¡';
+        var urgencyLabel = 'SugestÃ£o';
 
         if (suggestion.urgency === 'overdue') {
             urgencyClass = ' dps-suggestion-banner--overdue';
-            urgencyIcon = '⏰';
-            urgencyLabel = 'Atenção';
+            urgencyIcon = 'â°';
+            urgencyLabel = 'AtenÃ§Ã£o';
         } else if (suggestion.urgency === 'soon') {
             urgencyClass = ' dps-suggestion-banner--soon';
-            urgencyIcon = '📅';
+            urgencyIcon = 'ðŸ“…';
             urgencyLabel = 'Em breve';
         }
 
@@ -1836,19 +1959,19 @@ window.DPSSkeleton = (function() {
         html += '<span class="dps-suggestion-banner__icon">' + urgencyIcon + '</span>';
         html += '<strong>' + escapeHtml(urgencyLabel) + '</strong>';
         if (suggestion.pet_name) {
-            html += ' — ' + escapeHtml(suggestion.pet_name);
+            html += ' â€” ' + escapeHtml(suggestion.pet_name);
         }
         html += '</div>';
 
         var details = [];
         if (suggestion.days_since_last > 0) {
-            details.push('Último atendimento: <strong>' + suggestion.days_since_last + ' dias atrás</strong>');
+            details.push('Ãšltimo atendimento: <strong>' + suggestion.days_since_last + ' dias atrÃ¡s</strong>');
         }
         if (suggestion.avg_interval > 0) {
-            details.push('Frequência média: a cada <strong>' + suggestion.avg_interval + ' dias</strong>');
+            details.push('FrequÃªncia mÃ©dia: a cada <strong>' + suggestion.avg_interval + ' dias</strong>');
         }
         if (suggestion.top_services && suggestion.top_services.length > 0) {
-            details.push('Serviços frequentes: <strong>' + suggestion.top_services.map(escapeHtml).join(', ') + '</strong>');
+            details.push('ServiÃ§os frequentes: <strong>' + suggestion.top_services.map(escapeHtml).join(', ') + '</strong>');
         }
         if (suggestion.suggested_date) {
             var parts = suggestion.suggested_date.split('-');
@@ -1881,7 +2004,7 @@ window.DPSSkeleton = (function() {
         
         var titles = {
             reschedule: 'Solicitar Reagendamento',
-            new: 'Repetir Serviço'
+            new: 'Repetir ServiÃ§o'
         };
         
         var title = titles[type] || 'Solicitar Agendamento';
@@ -1894,7 +2017,7 @@ window.DPSSkeleton = (function() {
         html += '<div class="dps-modal__content">';
         html += '<div class="dps-modal__header">';
         html += '<h3>' + title + '</h3>';
-        html += '<button class="dps-modal__close" aria-label="Fechar">×</button>';
+        html += '<button class="dps-modal__close" aria-label="Fechar">Ã—</button>';
         html += '</div>';
         html += '<div class="dps-modal__body">';
 
@@ -1927,7 +2050,7 @@ window.DPSSkeleton = (function() {
 
         // Step 1: Date & Period (+ Pet selector when applicable)
         html += '<div class="dps-step-panel dps-step-panel--active" data-step="1">';
-        html += '<p class="dps-modal__notice"><strong>⚠️ Importante:</strong> Este é um <strong>pedido de agendamento</strong>. A equipe do Banho e Tosa irá confirmar o horário final com você.</p>';
+        html += '<p class="dps-modal__notice"><strong>âš ï¸ Importante:</strong> Este Ã© um <strong>pedido de agendamento</strong>. A equipe do Banho e Tosa irÃ¡ confirmar o horÃ¡rio final com vocÃª.</p>';
 
         // Pet selector for multi-pet clients
         if (showPetSelector) {
@@ -1965,29 +2088,29 @@ window.DPSSkeleton = (function() {
         html += '<span class="dps-field-error" role="alert" id="desired_date_error"></span>';
         html += '</div>';
         html += '<div class="dps-form-field">';
-        html += '<label for="desired_period">Período Desejado <span class="required">*</span></label>';
+        html += '<label for="desired_period">PerÃ­odo Desejado <span class="required">*</span></label>';
         html += '<select id="desired_period" name="desired_period" required aria-required="true">';
         html += '<option value="">Selecione...</option>';
-        html += '<option value="morning">Manhã</option>';
+        html += '<option value="morning">ManhÃ£</option>';
         html += '<option value="afternoon">Tarde</option>';
         html += '</select>';
         html += '<span class="dps-field-error" role="alert" id="desired_period_error"></span>';
         html += '</div>';
         html += '<div class="dps-step-actions">';
         html += '<div class="dps-step-actions__left"><button type="button" class="button dps-modal-cancel">Cancelar</button></div>';
-        html += '<div class="dps-step-actions__right"><button type="button" class="button button-primary dps-step-next" data-next="2">Próximo →</button></div>';
+        html += '<div class="dps-step-actions__right"><button type="button" class="button button-primary dps-step-next" data-next="2">PrÃ³ximo â†’</button></div>';
         html += '</div>';
         html += '</div>';
 
         // Step 2: Notes
         html += '<div class="dps-step-panel" data-step="2">';
         html += '<div class="dps-form-field">';
-        html += '<label for="notes">Observações (opcional)</label>';
-        html += '<textarea id="notes" name="notes" rows="3" placeholder="Alguma preferência ou observação?"></textarea>';
+        html += '<label for="notes">ObservaÃ§Ãµes (opcional)</label>';
+        html += '<textarea id="notes" name="notes" rows="3" placeholder="Alguma preferÃªncia ou observaÃ§Ã£o?"></textarea>';
         html += '</div>';
         html += '<div class="dps-step-actions">';
-        html += '<div class="dps-step-actions__left"><button type="button" class="button dps-step-prev" data-prev="1">← Voltar</button></div>';
-        html += '<div class="dps-step-actions__right"><button type="button" class="button button-primary dps-step-next" data-next="3">Próximo →</button></div>';
+        html += '<div class="dps-step-actions__left"><button type="button" class="button dps-step-prev" data-prev="1">â† Voltar</button></div>';
+        html += '<div class="dps-step-actions__right"><button type="button" class="button button-primary dps-step-next" data-next="3">PrÃ³ximo â†’</button></div>';
         html += '</div>';
         html += '</div>';
 
@@ -1995,8 +2118,8 @@ window.DPSSkeleton = (function() {
         html += '<div class="dps-step-panel" data-step="3">';
         html += '<div class="dps-review-summary" id="dps-review-summary"></div>';
         html += '<div class="dps-step-actions">';
-        html += '<div class="dps-step-actions__left"><button type="button" class="button dps-step-prev" data-prev="2">← Voltar</button></div>';
-        html += '<div class="dps-step-actions__right"><button type="submit" class="button button-primary">Enviar Solicitação ✓</button></div>';
+        html += '<div class="dps-step-actions__left"><button type="button" class="button dps-step-prev" data-prev="2">â† Voltar</button></div>';
+        html += '<div class="dps-step-actions__right"><button type="submit" class="button button-primary">Enviar SolicitaÃ§Ã£o âœ“</button></div>';
         html += '</div>';
         html += '</div>';
 
@@ -2021,9 +2144,9 @@ window.DPSSkeleton = (function() {
                 formattedDate = parts[2] + '/' + parts[1] + '/' + parts[0];
             }
 
-            var periodMap = { morning: 'Manhã', afternoon: 'Tarde' };
+            var periodMap = { morning: 'ManhÃ£', afternoon: 'Tarde' };
             var periodText = periodMap[periodInput.value] || periodInput.value;
-            var notesText = notesInput.value ? notesInput.value : '—';
+            var notesText = notesInput.value ? notesInput.value : 'â€”';
             var typeMap = { reschedule: 'Reagendamento', new: 'Novo agendamento', cancel: 'Cancelamento' };
 
             var summaryHtml = '';
@@ -2031,7 +2154,7 @@ window.DPSSkeleton = (function() {
 
             // Pet name in review (Phase 5.3)
             if (petSelect && petSelect.selectedIndex > 0) {
-                summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🐾 Pet</span><span class="dps-review-summary__value">' + escapeHtml(petSelect.options[petSelect.selectedIndex].text) + '</span></div>';
+                summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">ðŸ¾ Pet</span><span class="dps-review-summary__value">' + escapeHtml(petSelect.options[petSelect.selectedIndex].text) + '</span></div>';
             } else if (petId && clientPets.length > 0) {
                 var petName = '';
                 for (var pi = 0; pi < clientPets.length; pi++) {
@@ -2041,13 +2164,13 @@ window.DPSSkeleton = (function() {
                     }
                 }
                 if (petName) {
-                    summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🐾 Pet</span><span class="dps-review-summary__value">' + escapeHtml(petName) + '</span></div>';
+                    summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">ðŸ¾ Pet</span><span class="dps-review-summary__value">' + escapeHtml(petName) + '</span></div>';
                 }
             }
 
-            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">📅 Data</span><span class="dps-review-summary__value">' + escapeHtml(formattedDate) + '</span></div>';
-            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">🕐 Período</span><span class="dps-review-summary__value">' + escapeHtml(periodText) + '</span></div>';
-            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">📝 Observações</span><span class="dps-review-summary__value">' + escapeHtml(notesText) + '</span></div>';
+            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">ðŸ“… Data</span><span class="dps-review-summary__value">' + escapeHtml(formattedDate) + '</span></div>';
+            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">ðŸ• PerÃ­odo</span><span class="dps-review-summary__value">' + escapeHtml(periodText) + '</span></div>';
+            summaryHtml += '<div class="dps-review-summary__item"><span class="dps-review-summary__label">ðŸ“ ObservaÃ§Ãµes</span><span class="dps-review-summary__value">' + escapeHtml(notesText) + '</span></div>';
             summary.innerHTML = summaryHtml;
         }
 
@@ -2077,7 +2200,7 @@ window.DPSSkeleton = (function() {
                     circle.textContent = i;
                 } else if (i < currentStep) {
                     indicator.classList.add('dps-progress-bar__step--completed');
-                    circle.textContent = '✓';
+                    circle.textContent = 'âœ“';
                 } else {
                     circle.textContent = i;
                 }
@@ -2139,7 +2262,7 @@ window.DPSSkeleton = (function() {
                 }
 
                 if (!periodInput.value) {
-                    periodError.textContent = 'Selecione o período desejado.';
+                    periodError.textContent = 'Selecione o perÃ­odo desejado.';
                     periodInput.classList.add('is-invalid');
                     if (valid) periodInput.focus();
                     valid = false;
@@ -2205,7 +2328,7 @@ window.DPSSkeleton = (function() {
             }
         });
 
-        // Pet selector change → update suggestion banner
+        // Pet selector change â†’ update suggestion banner
         var petSelect = modal.querySelector('#pet_id');
         if (petSelect) {
             petSelect.addEventListener('change', function() {
@@ -2270,7 +2393,7 @@ window.DPSSkeleton = (function() {
     }
 
     /**
-     * Retorna data de amanhã no formato YYYY-MM-DD
+     * Retorna data de amanhÃ£ no formato YYYY-MM-DD
      */
     function getTomorrowDate() {
         var tomorrow = new Date();
@@ -2309,12 +2432,12 @@ window.DPSSkeleton = (function() {
                 } else {
                     showNotification(result.data.message, 'success');
                 }
-                // Recarrega a página após 2 segundos para mostrar o pedido
+                // Recarrega a pÃ¡gina apÃ³s 2 segundos para mostrar o pedido
                 setTimeout(function() {
                     location.reload();
                 }, 2000);
             } else {
-                var errMsg = result.data && result.data.message ? result.data.message : 'Erro ao enviar solicitação';
+                var errMsg = result.data && result.data.message ? result.data.message : 'Erro ao enviar solicitaÃ§Ã£o';
                 if (window.DPSToast) {
                     window.DPSToast.error(errMsg);
                 } else {
@@ -2322,25 +2445,25 @@ window.DPSSkeleton = (function() {
                 }
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Enviar Solicitação';
+                    submitBtn.textContent = 'Enviar SolicitaÃ§Ã£o';
                 }
             }
         })
         .catch(function() {
             if (window.DPSToast) {
-                window.DPSToast.error('Falha na conexão. Verifique sua internet e tente novamente.');
+                window.DPSToast.error('Falha na conexÃ£o. Verifique sua internet e tente novamente.');
             } else {
-                showNotification('Erro ao enviar solicitação. Tente novamente.', 'error');
+                showNotification('Erro ao enviar solicitaÃ§Ã£o. Tente novamente.', 'error');
             }
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Enviar Solicitação';
+                submitBtn.textContent = 'Enviar SolicitaÃ§Ã£o';
             }
         });
     }
 
     /**
-     * Mostra notificação na tela
+     * Mostra notificaÃ§Ã£o na tela
      */
     function showNotification(message, type) {
         var notification = document.createElement('div');
@@ -2356,10 +2479,10 @@ window.DPSSkeleton = (function() {
     }
 
     /**
-     * Gerencia o formulário de avaliação interna
-     * - Contador de caracteres para o comentário
-     * - Feedback visual na seleção de estrelas
-     * - Validação antes do envio
+     * Gerencia o formulÃ¡rio de avaliaÃ§Ã£o interna
+     * - Contador de caracteres para o comentÃ¡rio
+     * - Feedback visual na seleÃ§Ã£o de estrelas
+     * - ValidaÃ§Ã£o antes do envio
      */
     function handleReviewForm() {
         var form = document.getElementById('dps-review-internal-form');
@@ -2376,7 +2499,7 @@ window.DPSSkeleton = (function() {
                 var count = this.value.length;
                 charCount.textContent = count;
                 
-                // Cor de aviso quando próximo do limite
+                // Cor de aviso quando prÃ³ximo do limite
                 if (count >= 500) {
                     charCount.style.color = '#ef4444';
                 } else if (count > 450) {
@@ -2387,17 +2510,17 @@ window.DPSSkeleton = (function() {
             });
         }
 
-        // Feedback visual aprimorado para seleção de estrelas
+        // Feedback visual aprimorado para seleÃ§Ã£o de estrelas
         var starInputs = form.querySelectorAll('.dps-star-input');
         var starLabels = form.querySelectorAll('.dps-star-label');
         var ratingHint = form.querySelector('.dps-star-rating-hint');
         
         var ratingMessages = {
-            1: '😞 Pode melhorar',
-            2: '😕 Razoável',
-            3: '🙂 Bom',
-            4: '😊 Muito bom!',
-            5: '🤩 Excelente!'
+            1: 'ðŸ˜ž Pode melhorar',
+            2: 'ðŸ˜• RazoÃ¡vel',
+            3: 'ðŸ™‚ Bom',
+            4: 'ðŸ˜Š Muito bom!',
+            5: 'ðŸ¤© Excelente!'
         };
 
         starInputs.forEach(function(input, index) {
@@ -2411,7 +2534,7 @@ window.DPSSkeleton = (function() {
                     ratingHint.style.color = '#374151';
                 }
                 
-                // Animação de confirmação
+                // AnimaÃ§Ã£o de confirmaÃ§Ã£o
                 starLabels.forEach(function(label, labelIndex) {
                     if (labelIndex >= (5 - rating)) {
                         label.style.transform = 'scale(1.15)';
@@ -2423,12 +2546,12 @@ window.DPSSkeleton = (function() {
             });
         });
 
-        // Prevenção de duplo envio
+        // PrevenÃ§Ã£o de duplo envio
         var isSubmitting = false;
 
-        // Validação antes do envio
+        // ValidaÃ§Ã£o antes do envio
         form.addEventListener('submit', function(e) {
-            // Prevenção de duplo envio
+            // PrevenÃ§Ã£o de duplo envio
             if (isSubmitting) {
                 e.preventDefault();
                 return false;
@@ -2449,7 +2572,7 @@ window.DPSSkeleton = (function() {
                 }
                 
                 if (ratingHint) {
-                    ratingHint.textContent = '⚠️ Por favor, selecione uma nota';
+                    ratingHint.textContent = 'âš ï¸ Por favor, selecione uma nota';
                     ratingHint.style.color = '#ef4444';
                 }
                 
@@ -2463,14 +2586,14 @@ window.DPSSkeleton = (function() {
             var submitBtn = form.querySelector('.dps-btn-submit-review');
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="dps-btn-icon">⏳</span><span class="dps-btn-text">Enviando...</span>';
+                submitBtn.innerHTML = '<span class="dps-btn-icon">â³</span><span class="dps-btn-text">Enviando...</span>';
             }
         });
     }
 
     /**
-     * Gerencia navegação por tabs de pets na aba Histórico dos Pets
-     * Revisão de layout: Janeiro 2026
+     * Gerencia navegaÃ§Ã£o por tabs de pets na aba HistÃ³rico dos Pets
+     * RevisÃ£o de layout: Janeiro 2026
      */
     function handlePetHistoryTabs() {
         var petTabs = document.querySelectorAll('.dps-pet-tab');
@@ -2481,8 +2604,8 @@ window.DPSSkeleton = (function() {
         }
 
         /**
-         * Ativa uma tab de pet específica pelo índice.
-         * @param {number} index Índice da tab a ativar.
+         * Ativa uma tab de pet especÃ­fica pelo Ã­ndice.
+         * @param {number} index Ãndice da tab a ativar.
          */
         function activateTab(index) {
             if (index < 0 || index >= petTabs.length) {
@@ -2501,13 +2624,13 @@ window.DPSSkeleton = (function() {
                 t.setAttribute('tabindex', '-1');
             });
 
-            // Adiciona classe ativa à tab selecionada
+            // Adiciona classe ativa Ã  tab selecionada
             petTabs[index].classList.add('dps-pet-tab--active');
             petTabs[index].setAttribute('aria-selected', 'true');
             petTabs[index].setAttribute('tabindex', '0');
             petTabs[index].focus();
 
-            // Esconde todos os painéis
+            // Esconde todos os painÃ©is
             petPanels.forEach(function(panel) {
                 panel.classList.add('dps-pet-timeline-panel--hidden');
                 panel.setAttribute('aria-hidden', 'true');
@@ -2572,11 +2695,11 @@ window.DPSSkeleton = (function() {
     }
 
     /**
-     * Gerencia botão "Repetir Serviço" para abrir WhatsApp
-     * Revisão de layout: Janeiro 2026
+     * Gerencia botÃ£o "Repetir ServiÃ§o" para abrir WhatsApp
+     * RevisÃ£o de layout: Janeiro 2026
      */
     function handleRepeatService() {
-        // Handler para botões que não são links diretos (fallback)
+        // Handler para botÃµes que nÃ£o sÃ£o links diretos (fallback)
         var repeatButtons = document.querySelectorAll('button.dps-btn-repeat-service');
 
         repeatButtons.forEach(function(btn) {
@@ -2584,27 +2707,27 @@ window.DPSSkeleton = (function() {
                 var services = this.getAttribute('data-services');
                 var petId = this.getAttribute('data-pet-id');
                 
-                // Tenta parsear serviços
-                var servicesText = 'serviços';
+                // Tenta parsear serviÃ§os
+                var servicesText = 'serviÃ§os';
                 try {
                     var servicesArray = JSON.parse(services);
                     if (Array.isArray(servicesArray) && servicesArray.length > 0) {
                         servicesText = servicesArray.join(', ');
                     }
                 } catch (e) {
-                    // Mantém texto genérico
+                    // MantÃ©m texto genÃ©rico
                 }
 
                 // Monta mensagem
-                var message = 'Olá! Gostaria de agendar novamente os serviços: ' + servicesText + ' para meu pet.';
+                var message = 'OlÃ¡! Gostaria de agendar novamente os serviÃ§os: ' + servicesText + ' para meu pet.';
                 
-                // Obtém número do WhatsApp (usa valor padrão se não encontrado)
-                var whatsappNumber = '5515991606299'; // Valor padrão
+                // ObtÃ©m nÃºmero do WhatsApp (usa valor padrÃ£o se nÃ£o encontrado)
+                var whatsappNumber = '5515991606299'; // Valor padrÃ£o
                 if (typeof dpsPortal !== 'undefined' && dpsPortal.whatsappNumber) {
                     whatsappNumber = dpsPortal.whatsappNumber;
                 }
 
-                // Valida que o número contém apenas dígitos e + (previne URL manipulation)
+                // Valida que o nÃºmero contÃ©m apenas dÃ­gitos e + (previne URL manipulation)
                 if (!/^[\d+]+$/.test(whatsappNumber)) {
                     console.warn('WhatsApp number contains invalid characters');
                     return;
@@ -2618,7 +2741,7 @@ window.DPSSkeleton = (function() {
     }
 
     /**
-     * Gerencia botão "Exportar Histórico (PDF)"
+     * Gerencia botÃ£o "Exportar HistÃ³rico (PDF)"
      * Funcionalidade 3: Export para PDF
      */
     function handleExportPdf() {
@@ -2633,13 +2756,13 @@ window.DPSSkeleton = (function() {
                 var petId = this.getAttribute('data-pet-id');
                 var petName = this.getAttribute('data-pet-name');
 
-                // Valida que petId é um número
+                // Valida que petId Ã© um nÃºmero
                 if (!petId || !/^\d+$/.test(petId)) {
                     console.warn('Invalid pet ID for export');
                     return;
                 }
 
-                // Obtém dados do portal
+                // ObtÃ©m dados do portal
                 var clientId = '';
                 var nonce = '';
 
@@ -2653,7 +2776,7 @@ window.DPSSkeleton = (function() {
                     return;
                 }
 
-                // Monta URL para a página de impressão
+                // Monta URL para a pÃ¡gina de impressÃ£o
                 var printUrl = dpsPortal.ajaxUrl + 
                     '?action=dps_export_pet_history_pdf' +
                     '&pet_id=' + encodeURIComponent(petId) +
@@ -2667,7 +2790,7 @@ window.DPSSkeleton = (function() {
     }
 
     /**
-     * Gerencia botão "Ver mais serviços" na timeline de pets
+     * Gerencia botÃ£o "Ver mais serviÃ§os" na timeline de pets
      * Carrega mais itens via AJAX e os insere na timeline
      */
     function handleLoadMorePetHistory() {
@@ -2696,7 +2819,7 @@ window.DPSSkeleton = (function() {
             // Estado de carregamento
             btn.disabled = true;
             var originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ ' + (dpsPortal.i18n && dpsPortal.i18n.loading ? dpsPortal.i18n.loading : 'Carregando...');
+            btn.innerHTML = 'â³ ' + (dpsPortal.i18n && dpsPortal.i18n.loading ? dpsPortal.i18n.loading : 'Carregando...');
 
             var formData = new FormData();
             formData.append('action', 'dps_load_more_pet_history');
@@ -2714,7 +2837,7 @@ window.DPSSkeleton = (function() {
             })
             .then(function(data) {
                 if (data.success && data.data.html) {
-                    // Insere os novos itens antes do botão "Ver mais"
+                    // Insere os novos itens antes do botÃ£o "Ver mais"
                     var timeline = btn.closest('.dps-portal-pet-timeline').querySelector('.dps-timeline');
                     if (timeline) {
                         var temp = document.createElement('div');
@@ -2729,7 +2852,7 @@ window.DPSSkeleton = (function() {
                         btn.disabled = false;
                         btn.innerHTML = originalText;
                     } else {
-                        // Sem mais itens - remove o botão
+                        // Sem mais itens - remove o botÃ£o
                         var loadMoreContainer = btn.closest('.dps-timeline-load-more');
                         if (loadMoreContainer) {
                             loadMoreContainer.remove();
@@ -2739,7 +2862,7 @@ window.DPSSkeleton = (function() {
                     btn.disabled = false;
                     btn.innerHTML = originalText;
                     if (typeof DPSToast !== 'undefined') {
-                        DPSToast.show(data.data && data.data.message ? data.data.message : 'Erro ao carregar mais serviços.', 'error');
+                        DPSToast.show(data.data && data.data.message ? data.data.message : 'Erro ao carregar mais serviÃ§os.', 'error');
                     }
                 }
             })
@@ -2747,14 +2870,14 @@ window.DPSSkeleton = (function() {
                 btn.disabled = false;
                 btn.innerHTML = originalText;
                 if (typeof DPSToast !== 'undefined') {
-                    DPSToast.show('Erro de conexão. Tente novamente.', 'error');
+                    DPSToast.show('Erro de conexÃ£o. Tente novamente.', 'error');
                 }
             });
         });
     }
 
     /**
-     * Filtra timeline de histórico por período (Fase 4.4).
+     * Filtra timeline de histÃ³rico por perÃ­odo (Fase 4.4).
      * Filtragem client-side: esconde/mostra itens com base no data-date.
      */
     function handleTimelinePeriodFilter() {
@@ -2824,7 +2947,7 @@ window.DPSSkeleton = (function() {
                     if (!emptyMsg) {
                         emptyMsg = document.createElement('p');
                         emptyMsg.className = 'dps-timeline-filter-empty';
-                        emptyMsg.textContent = 'Nenhum serviço encontrado neste período.';
+                        emptyMsg.textContent = 'Nenhum serviÃ§o encontrado neste perÃ­odo.';
                         timeline.appendChild(emptyMsg);
                     }
                     emptyMsg.style.display = '';
@@ -2837,7 +2960,7 @@ window.DPSSkeleton = (function() {
 
     /**
      * Gerencia filtro de pets na galeria de fotos
-     * Revisão de layout: Janeiro 2026
+     * RevisÃ£o de layout: Janeiro 2026
      */
     function handleGalleryFilter() {
         var filterButtons = document.querySelectorAll('.dps-gallery-filter__btn');
@@ -2856,12 +2979,12 @@ window.DPSSkeleton = (function() {
                     return;
                 }
 
-                // Remove classe ativa de todos os botões
+                // Remove classe ativa de todos os botÃµes
                 filterButtons.forEach(function(b) {
                     b.classList.remove('is-active');
                 });
 
-                // Adiciona classe ativa ao botão clicado
+                // Adiciona classe ativa ao botÃ£o clicado
                 this.classList.add('is-active');
 
                 // Filtra cards
@@ -2871,12 +2994,12 @@ window.DPSSkeleton = (function() {
                         card.style.display = '';
                     });
                 } else {
-                    // Valida que filterValue segue o padrão esperado (pet-123)
+                    // Valida que filterValue segue o padrÃ£o esperado (pet-123)
                     if (!/^pet-\d+$/.test(filterValue)) {
                         return;
                     }
 
-                    // Filtra por pet específico
+                    // Filtra por pet especÃ­fico
                     petCards.forEach(function(card) {
                         var cardPetId = card.getAttribute('data-pet-id');
                         if (cardPetId === filterValue) {
@@ -2892,7 +3015,7 @@ window.DPSSkeleton = (function() {
 
     /**
      * Lightbox simples para galeria de fotos
-     * Revisão de layout: Fevereiro 2026
+     * RevisÃ£o de layout: Fevereiro 2026
      * Acessibilidade: ARIA dialog, focus trap, focus restore, broken image fallback
      */
     function handleGalleryLightbox() {
@@ -2912,7 +3035,7 @@ window.DPSSkeleton = (function() {
             galleries[gallery].push(link);
         });
 
-        // Cria o container do lightbox com navegação
+        // Cria o container do lightbox com navegaÃ§Ã£o
         var lightbox = document.createElement('div');
         lightbox.className = 'dps-lightbox';
         lightbox.setAttribute('role', 'dialog');
@@ -2924,11 +3047,11 @@ window.DPSSkeleton = (function() {
                 '<button class="dps-lightbox__close" aria-label="Fechar">&times;</button>' +
                 '<button class="dps-lightbox__nav dps-lightbox__nav--prev" aria-label="Foto anterior">&#10094;</button>' +
                 '<img class="dps-lightbox__img" src="" alt="">' +
-                '<button class="dps-lightbox__nav dps-lightbox__nav--next" aria-label="Próxima foto">&#10095;</button>' +
+                '<button class="dps-lightbox__nav dps-lightbox__nav--next" aria-label="PrÃ³xima foto">&#10095;</button>' +
                 '<div class="dps-lightbox__caption"></div>' +
                 '<div class="dps-lightbox__actions">' +
                     '<span class="dps-lightbox__counter"></span>' +
-                    '<a href="" class="dps-lightbox__btn dps-lightbox__btn--download" download>⬇️ Baixar</a>' +
+                    '<a href="" class="dps-lightbox__btn dps-lightbox__btn--download" download>â¬‡ï¸ Baixar</a>' +
                 '</div>' +
             '</div>';
 
@@ -2948,8 +3071,8 @@ window.DPSSkeleton = (function() {
 
         // Broken image fallback
         lightboxImg.addEventListener('error', function() {
-            this.alt = 'Imagem indisponível';
-            lightboxCaption.textContent = 'Imagem indisponível';
+            this.alt = 'Imagem indisponÃ­vel';
+            lightboxCaption.textContent = 'Imagem indisponÃ­vel';
             lightboxDownload.style.display = 'none';
         });
 
@@ -2972,7 +3095,7 @@ window.DPSSkeleton = (function() {
             lightboxDownload.href = imgUrl;
             lightboxDownload.style.display = '';
 
-            // Navegação: mostra/oculta botões
+            // NavegaÃ§Ã£o: mostra/oculta botÃµes
             var hasMultiple = links.length > 1;
             lightboxPrev.style.display = hasMultiple ? '' : 'none';
             lightboxNext.style.display = hasMultiple ? '' : 'none';
@@ -3003,7 +3126,7 @@ window.DPSSkeleton = (function() {
             });
         });
 
-        // Navegação
+        // NavegaÃ§Ã£o
         lightboxPrev.addEventListener('click', function() {
             showPhoto(currentIndex - 1);
         });
@@ -3082,7 +3205,7 @@ window.DPSSkeleton = (function() {
                 if (parent) {
                     var overlay = parent.querySelector('.dps-gallery-photo__overlay');
                     if (overlay) {
-                        overlay.innerHTML = '<span class="dps-gallery-photo__zoom">⚠️</span>';
+                        overlay.innerHTML = '<span class="dps-gallery-photo__zoom">âš ï¸</span>';
                         overlay.style.opacity = '1';
                         overlay.style.backgroundColor = 'var(--dps-gray-100)';
                     }
@@ -3091,8 +3214,8 @@ window.DPSSkeleton = (function() {
         });
     }
 
-    // Chama os handlers de galeria na inicialização do DOM
-    // Apenas se a galeria existir na página (otimização de performance)
+    // Chama os handlers de galeria na inicializaÃ§Ã£o do DOM
+    // Apenas se a galeria existir na pÃ¡gina (otimizaÃ§Ã£o de performance)
     document.addEventListener('DOMContentLoaded', function() {
         var gallerySection = document.querySelector('.dps-portal-gallery');
         if (gallerySection) {

@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Portal Game Summary Preview</title>
+  <style>
+    :root {
+      --bg: #f4efe5;
+      --surface: #fff9f1;
+      --surface-strong: rgba(255,255,255,0.92);
+      --ink: #1f1a17;
+      --muted: #6e6259;
+      --line: rgba(113, 91, 74, 0.16);
+      --accent: #cf6a32;
+      --accent-soft: rgba(207, 106, 50, 0.14);
+      --success: #2f7a47;
+      --shadow: 0 24px 60px rgba(39, 28, 19, 0.14);
+      --radius: 28px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 40px 20px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(232, 184, 129, 0.45), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(175, 216, 187, 0.38), transparent 28%),
+        linear-gradient(180deg, #f8f3eb 0%, var(--bg) 100%);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    .shell {
+      width: min(1080px, 100%);
+      padding: 30px;
+      border-radius: 36px;
+      background: rgba(255,255,255,0.48);
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .dps-portal-game-summary {
+      padding: 28px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,249,241,0.92)),
+        var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 40px rgba(54, 35, 20, 0.08);
+    }
+
+    .dps-portal-game-summary__header,
+    .dps-portal-game-summary__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .dps-portal-game-summary__header h2 {
+      margin: 0;
+      font-size: clamp(28px, 3.3vw, 40px);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .dps-portal-game-summary__intro,
+    .dps-portal-game-summary__status,
+    .dps-portal-game-summary__card small,
+    .dps-portal-game-summary__footer {
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    }
+
+    .dps-portal-game-summary__intro,
+    .dps-portal-game-summary__status,
+    .dps-portal-game-summary__card small,
+    .dps-portal-game-summary__footer span {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .dps-portal-game-summary__pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font: 700 13px/1 "Trebuchet MS", "Segoe UI", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .dps-portal-game-summary__status {
+      margin: 18px 0 0;
+      padding: 14px 18px;
+      border-radius: 18px;
+      background: rgba(47, 122, 71, 0.09);
+      color: var(--success);
+    }
+
+    .dps-portal-game-summary__grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .dps-portal-game-summary__card {
+      min-height: 150px;
+      padding: 18px;
+      border-radius: 22px;
+      background: var(--surface-strong);
+      border: 1px solid rgba(113, 91, 74, 0.12);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .dps-portal-game-summary__label {
+      color: var(--muted);
+      font: 700 12px/1.2 "Trebuchet MS", "Segoe UI", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .dps-portal-game-summary__value {
+      font-size: clamp(24px, 3vw, 36px);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .dps-portal-game-summary__footer {
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .dps-portal-game-summary__cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      background: #1f1a17;
+      color: #fff9f1;
+      font: 700 14px/1 "Trebuchet MS", "Segoe UI", sans-serif;
+      letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 900px) {
+      .dps-portal-game-summary__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 20px 12px; }
+      .shell { padding: 14px; border-radius: 28px; }
+      .dps-portal-game-summary { padding: 20px; }
+      .dps-portal-game-summary__header,
+      .dps-portal-game-summary__footer { align-items: flex-start; flex-direction: column; }
+      .dps-portal-game-summary__grid { grid-template-columns: 1fr; }
+      .dps-portal-game-summary__card { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="dps-portal-game-summary" data-game-summary-state="ready">
+      <div class="dps-portal-game-summary__header">
+        <div>
+          <h2>Space Groomers</h2>
+          <p class="dps-portal-game-summary__intro">Seu progresso sincronizado aparece aqui entre uma run e outra.</p>
+        </div>
+        <span class="dps-portal-game-summary__pill">Sync ativo</span>
+      </div>
+      <div class="dps-portal-game-summary__status">Missao concluida hoje. O resumo no portal reflete a ultima sincronizacao.</div>
+      <div class="dps-portal-game-summary__grid">
+        <article class="dps-portal-game-summary__card">
+          <span class="dps-portal-game-summary__label">Missao atual</span>
+          <strong class="dps-portal-game-summary__value">Colete 3 power-ups</strong>
+          <small>3/3 - concluida nesta janela</small>
+        </article>
+        <article class="dps-portal-game-summary__card">
+          <span class="dps-portal-game-summary__label">Streak</span>
+          <strong class="dps-portal-game-summary__value">4 dias</strong>
+          <small>Melhor marca: 7 dias</small>
+        </article>
+        <article class="dps-portal-game-summary__card">
+          <span class="dps-portal-game-summary__label">Recorde</span>
+          <strong class="dps-portal-game-summary__value">12.450</strong>
+          <small>Combo 11 - onda 9</small>
+        </article>
+        <article class="dps-portal-game-summary__card">
+          <span class="dps-portal-game-summary__label">Badges</span>
+          <strong class="dps-portal-game-summary__value">3</strong>
+          <small>Primeiro Banho - Missao em Dia - Banho Completo</small>
+        </article>
+      </div>
+      <div class="dps-portal-game-summary__footer">
+        <span>Ultima run: vitoria com 12.450 pts na onda 10</span>
+        <a class="dps-portal-game-summary__cta" href="#">Voltar ao jogo</a>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

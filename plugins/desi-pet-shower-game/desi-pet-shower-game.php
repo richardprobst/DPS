@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst - Space Groomers
  * Plugin URI:        https://www.probst.pro
  * Description:       Joguinho tematico "Space Groomers: Invasao das Pulgas" para engajar clientes no portal. Canvas + JS puro, sem dependencias pesadas.
- * Version:           1.2.0
+ * Version:           1.4.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-game
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'DPS_GAME_VERSION', '1.2.0' );
+define( 'DPS_GAME_VERSION', '1.4.0' );
 define( 'DPS_GAME_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_GAME_URL', plugin_dir_url( __FILE__ ) );
 
@@ -57,6 +57,8 @@ function dps_game_init() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         return;
     }
+    require_once DPS_GAME_DIR . 'includes/class-dps-game-progress-service.php';
+    require_once DPS_GAME_DIR . 'includes/class-dps-game-rest.php';
     require_once DPS_GAME_DIR . 'includes/class-dps-game-addon.php';
     DPS_Game_Addon::get_instance();
 }

@@ -3,21 +3,21 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-// Carrega a classe somente se ainda não existir.
+// Carrega a classe somente se ainda nÃ£o existir.
 if ( ! class_exists( 'DPS_Client_Portal' ) ) :
 
 /**
- * Classe responsável por fornecer o portal do cliente.  Implementa:
- * - Criação automática de usuário WordPress ao cadastrar cliente.
- * - Shortcode para renderizar a área do cliente com histórico, fotos, pendências e formulários.
- * - Geração de links de pagamento para pendências usando a API do Mercado Pago.
- * - Atualização de dados do cliente e dos pets a partir do portal.
+ * Classe responsÃ¡vel por fornecer o portal do cliente.  Implementa:
+ * - CriaÃ§Ã£o automÃ¡tica de usuÃ¡rio WordPress ao cadastrar cliente.
+ * - Shortcode para renderizar a Ã¡rea do cliente com histÃ³rico, fotos, pendÃªncias e formulÃ¡rios.
+ * - GeraÃ§Ã£o de links de pagamento para pendÃªncias usando a API do MercadoÂ Pago.
+ * - AtualizaÃ§Ã£o de dados do cliente e dos pets a partir do portal.
  */
 final class DPS_Client_Portal {
 
     /**
      * Status que indicam agendamento finalizado ou cancelado.
-     * Usado para separar próximos agendamentos do histórico.
+     * Usado para separar prÃ³ximos agendamentos do histÃ³rico.
      *
      * @since 3.1.0
      * @var array
@@ -30,15 +30,15 @@ final class DPS_Client_Portal {
     ];
 
     /**
-     * Única instância da classe.
+     * Ãšnica instÃ¢ncia da classe.
      *
      * @var DPS_Client_Portal|null
      */
     private static $instance = null;
 
     /**
-     * ID do cliente autenticado na requisição atual via token.
-     * Usado para disponibilizar autenticação imediatamente sem depender de cookies.
+     * ID do cliente autenticado na requisiÃ§Ã£o atual via token.
+     * Usado para disponibilizar autenticaÃ§Ã£o imediatamente sem depender de cookies.
      *
      * @since 2.3.1
      * @var int
@@ -46,7 +46,7 @@ final class DPS_Client_Portal {
     private $current_request_client_id = 0;
 
     /**
-     * Chave da sessão pendente de 2FA (quando 2FA está ativo).
+     * Chave da sessÃ£o pendente de 2FA (quando 2FA estÃ¡ ativo).
      *
      * @since 3.2.0
      * @var string
@@ -62,7 +62,7 @@ final class DPS_Client_Portal {
     private $pending_2fa_client_id = 0;
 
     /**
-     * Recupera a instância única (singleton).
+     * Recupera a instÃ¢ncia Ãºnica (singleton).
      *
      * @return DPS_Client_Portal
      */
@@ -74,10 +74,10 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Construtor. Registra ganchos necessários para o funcionamento do portal.
+     * Construtor. Registra ganchos necessÃ¡rios para o funcionamento do portal.
      */
     private function __construct() {
-        // Processa autenticação por token
+        // Processa autenticaÃ§Ã£o por token
         if ( did_action( 'init' ) ) {
             $this->handle_token_authentication();
             $this->handle_logout_request();
@@ -103,10 +103,10 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Processa autenticação por token na URL
+     * Processa autenticaÃ§Ã£o por token na URL
      */
     public function handle_token_authentication() {
-        // Verifica se há um token na URL
+        // Verifica se hÃ¡ um token na URL
         if ( ! isset( $_GET['dps_token'] ) ) {
             return;
         }
@@ -117,7 +117,7 @@ final class DPS_Client_Portal {
             return;
         }
 
-        // Obtém IP para logging
+        // ObtÃ©m IP para logging
         $ip_address = $this->get_client_ip();
 
         // Valida o token
@@ -125,7 +125,7 @@ final class DPS_Client_Portal {
         $token_data    = $token_manager->validate_token( $token_plain );
 
         if ( false === $token_data ) {
-            // Token inválido - registra tentativa e redireciona
+            // Token invÃ¡lido - registra tentativa e redireciona
             $this->log_security_event( 'token_invalid', [
                 'ip' => $ip_address,
             ] );
@@ -138,28 +138,28 @@ final class DPS_Client_Portal {
         }
 
         // F6.4: FASE 6 - 2FA via e-mail
-        // Se 2FA habilitado, interrompe fluxo normal e exige verificação por código
+        // Se 2FA habilitado, interrompe fluxo normal e exige verificaÃ§Ã£o por cÃ³digo
         $twofa = DPS_Portal_2FA::get_instance();
         if ( $twofa->is_enabled() ) {
-            // Marca token como usado para evitar reutilização
+            // Marca token como usado para evitar reutilizaÃ§Ã£o
             if ( ! isset( $token_data['type'] ) || 'permanent' !== $token_data['type'] ) {
                 $token_manager->mark_as_used( $token_data['id'] );
             }
 
-            // Gera código e envia por e-mail
+            // Gera cÃ³digo e envia por e-mail
             $code = $twofa->generate_code( $token_data['client_id'] );
             $twofa->send_code_email( $token_data['client_id'], $code );
 
-            // Cria sessão pendente (2FA não concluído)
+            // Cria sessÃ£o pendente (2FA nÃ£o concluÃ­do)
             $session_key = wp_generate_password( 32, false );
             $twofa->set_pending_2fa( $token_data['client_id'], $session_key );
 
-            // Armazena remember flag para aplicar após 2FA
+            // Armazena remember flag para aplicar apÃ³s 2FA
             if ( isset( $_GET['dps_remember'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['dps_remember'] ) ) ) {
                 set_transient( 'dps_2fa_remember_' . $session_key, '1', 600 );
             }
 
-            // Sinaliza 2FA pendente para o shortcode renderizar o formulário
+            // Sinaliza 2FA pendente para o shortcode renderizar o formulÃ¡rio
             $this->pending_2fa_session_key = $session_key;
             $this->pending_2fa_client_id   = $token_data['client_id'];
 
@@ -168,10 +168,10 @@ final class DPS_Client_Portal {
                 DPS_Audit_Logger::log_portal_event( '2fa_code_sent', $token_data['client_id'], [ 'ip' => $ip_address ] );
             }
 
-            return; // Interrompe — shortcode exibirá formulário 2FA
+            return; // Interrompe â€” shortcode exibirÃ¡ formulÃ¡rio 2FA
         }
 
-        // Token válido - autentica o cliente
+        // Token vÃ¡lido - autentica o cliente
         $session_manager = DPS_Portal_Session_Manager::get_instance();
         $authenticated   = $session_manager->authenticate_client( $token_data['client_id'] );
 
@@ -184,13 +184,13 @@ final class DPS_Client_Portal {
             return;
         }
 
-        // Marca token como usado apenas para tokens temporários
+        // Marca token como usado apenas para tokens temporÃ¡rios
         if ( ! isset( $token_data['type'] ) || 'permanent' !== $token_data['type'] ) {
             $token_manager->mark_as_used( $token_data['id'] );
         }
 
         // F4.6: FASE 4 - "Manter acesso neste dispositivo"
-        // Se dps_remember=1 na URL, cria token permanente e cookie de longa duração
+        // Se dps_remember=1 na URL, cria token permanente e cookie de longa duraÃ§Ã£o
         $remember = isset( $_GET['dps_remember'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['dps_remember'] ) );
         if ( $remember ) {
             $permanent_token = $token_manager->generate_token( $token_data['client_id'], 'permanent' );
@@ -232,39 +232,39 @@ final class DPS_Client_Portal {
             DPS_Audit_Logger::log_portal_event( 'login_success', $token_data['client_id'], [ 'ip' => $ip_address ] );
         }
         
-        // Registra acesso no histórico para auditoria
+        // Registra acesso no histÃ³rico para auditoria
         $user_agent = '';
         if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && is_string( $_SERVER['HTTP_USER_AGENT'] ) ) {
             $user_agent = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
         }
         $token_manager->log_access( $token_data['client_id'], $token_data['id'], $ip_address, $user_agent );
 
-        // Armazena client_id para disponibilizar autenticação imediatamente
-        // sem depender de cookies que só estarão disponíveis na próxima requisição
+        // Armazena client_id para disponibilizar autenticaÃ§Ã£o imediatamente
+        // sem depender de cookies que sÃ³ estarÃ£o disponÃ­veis na prÃ³xima requisiÃ§Ã£o
         $this->current_request_client_id = $token_data['client_id'];
 
-        // Envia notificação de acesso ao cliente (Fase 1.3 - Segurança)
+        // Envia notificaÃ§Ã£o de acesso ao cliente (Fase 1.3 - SeguranÃ§a)
         $this->send_access_notification( $token_data['client_id'], $ip_address );
 
-        // NÃO redireciona - permite que a página atual carregue com o cliente autenticado
-        // O JavaScript limpará o token da URL por segurança (ver assets/js/client-portal.js)
+        // NÃƒO redireciona - permite que a pÃ¡gina atual carregue com o cliente autenticado
+        // O JavaScript limparÃ¡ o token da URL por seguranÃ§a (ver assets/js/client-portal.js)
     }
 
     /**
-     * F4.6: FASE 4 - Verifica cookie "manter acesso" para auto-autenticação.
+     * F4.6: FASE 4 - Verifica cookie "manter acesso" para auto-autenticaÃ§Ã£o.
      *
-     * Se o cliente não tem sessão ativa mas tem um cookie dps_portal_remember com
-     * um token permanente válido, re-autentica automaticamente.
+     * Se o cliente nÃ£o tem sessÃ£o ativa mas tem um cookie dps_portal_remember com
+     * um token permanente vÃ¡lido, re-autentica automaticamente.
      *
      * @since 2.6.0
      */
     public function handle_remember_cookie() {
-        // Ignora se já existe token na URL (handle_token_authentication cuida)
+        // Ignora se jÃ¡ existe token na URL (handle_token_authentication cuida)
         if ( isset( $_GET['dps_token'] ) ) {
             return;
         }
 
-        // Ignora se já existe sessão ativa
+        // Ignora se jÃ¡ existe sessÃ£o ativa
         $session_manager = DPS_Portal_Session_Manager::get_instance();
         if ( $session_manager->get_authenticated_client_id() ) {
             return;
@@ -285,12 +285,12 @@ final class DPS_Client_Portal {
         $token_data    = $token_manager->validate_token( $remember_token );
 
         if ( false === $token_data || ! isset( $token_data['type'] ) || 'permanent' !== $token_data['type'] ) {
-            // Token inválido ou não permanente — remove cookie
+            // Token invÃ¡lido ou nÃ£o permanente â€” remove cookie
             setcookie( 'dps_portal_remember', '', time() - 3600, COOKIEPATH, COOKIE_DOMAIN );
             return;
         }
 
-        // Token permanente válido — autentica o cliente
+        // Token permanente vÃ¡lido â€” autentica o cliente
         $authenticated = $session_manager->authenticate_client( $token_data['client_id'] );
         if ( ! $authenticated ) {
             return;
@@ -314,7 +314,7 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Processa requisição de logout
+     * Processa requisiÃ§Ã£o de logout
      */
     public function handle_logout_request() {
         $session_manager = DPS_Portal_Session_Manager::get_instance();
@@ -347,19 +347,19 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Retorna o ID do cliente autenticado via sessão ou usuário WP (compatibilidade)
+     * Retorna o ID do cliente autenticado via sessÃ£o ou usuÃ¡rio WP (compatibilidade)
      *
      * @return int
      */
     private function get_authenticated_client_id() {
-        // PRIORITY 1: Cliente autenticado na requisição atual via token
-        // Isso permite autenticação imediata sem depender de cookies que só estarão
-        // disponíveis na próxima requisição
+        // PRIORITY 1: Cliente autenticado na requisiÃ§Ã£o atual via token
+        // Isso permite autenticaÃ§Ã£o imediata sem depender de cookies que sÃ³ estarÃ£o
+        // disponÃ­veis na prÃ³xima requisiÃ§Ã£o
         if ( $this->current_request_client_id > 0 ) {
             return $this->current_request_client_id;
         }
 
-        // PRIORITY 2: Tenta obter do sistema novo de sessão (cookies + transients)
+        // PRIORITY 2: Tenta obter do sistema novo de sessÃ£o (cookies + transients)
         $session_manager = DPS_Portal_Session_Manager::get_instance();
         $client_id       = $session_manager->get_authenticated_client_id();
 
@@ -367,22 +367,22 @@ final class DPS_Client_Portal {
             return $client_id;
         }
 
-        // PRIORITY 3: Fallback para o sistema antigo de usuários WP
+        // PRIORITY 3: Fallback para o sistema antigo de usuÃ¡rios WP
         return $this->get_client_id_for_current_user();
     }
 
     /**
-     * Método público para obter o ID do cliente autenticado.
+     * MÃ©todo pÃºblico para obter o ID do cliente autenticado.
      * Permite que add-ons acessem o cliente logado no portal.
      *
-     * @return int ID do cliente autenticado ou 0 se não autenticado
+     * @return int ID do cliente autenticado ou 0 se nÃ£o autenticado
      */
     public function get_current_client_id() {
         return $this->get_authenticated_client_id();
     }
 
     /**
-     * Retorna o ID do cliente associado ao usuário logado.
+     * Retorna o ID do cliente associado ao usuÃ¡rio logado.
      *
      * @return int
      */
@@ -429,23 +429,23 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Cria um usuário WordPress para um cliente recém-cadastrado, se ainda não existir.
-     * Este usuário é do tipo "assinante" e recebe login e senha enviados por email.
+     * Cria um usuÃ¡rio WordPress para um cliente recÃ©m-cadastrado, se ainda nÃ£o existir.
+     * Este usuÃ¡rio Ã© do tipo "assinante" e recebe login e senha enviados por email.
      *
      * @param int     $post_id ID do post do cliente.
      * @param WP_Post $post    Objeto de post.
-     * @param bool    $update  Indica se é atualização (true) ou criação (false).
+     * @param bool    $update  Indica se Ã© atualizaÃ§Ã£o (true) ou criaÃ§Ã£o (false).
      */
     /**
-     * Gera um login próprio para o cliente baseado no telefone informado no cadastro.
-     * Ao criar um cliente (não atualização), se o cliente tiver telefone, é criada
-     * uma senha aleatória, armazenada como hash no meta 'client_password_hash'.
-     * Esta senha não é enviada automaticamente, mas pode ser consultada ou redefinida
-     * pela administração. Também marca uma flag para indicar que o login já foi criado.
+     * Gera um login prÃ³prio para o cliente baseado no telefone informado no cadastro.
+     * Ao criar um cliente (nÃ£o atualizaÃ§Ã£o), se o cliente tiver telefone, Ã© criada
+     * uma senha aleatÃ³ria, armazenada como hash no meta 'client_password_hash'.
+     * Esta senha nÃ£o Ã© enviada automaticamente, mas pode ser consultada ou redefinida
+     * pela administraÃ§Ã£o. TambÃ©m marca uma flag para indicar que o login jÃ¡ foi criado.
      *
      * @param int     $post_id ID do post do cliente.
      * @param WP_Post $post    Objeto de post.
-     * @param bool    $update  Indica se é atualização (true) ou criação (false).
+     * @param bool    $update  Indica se Ã© atualizaÃ§Ã£o (true) ou criaÃ§Ã£o (false).
      */
     public function maybe_create_login_for_client( $post_id, $post, $update ) {
         if ( $update ) {
@@ -498,12 +498,12 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Processa requisições de formulários enviados pelo portal do cliente.
-     * Utiliza nonce para proteção CSRF e atualiza metas conforme necessário.
+     * Processa requisiÃ§Ãµes de formulÃ¡rios enviados pelo portal do cliente.
+     * Utiliza nonce para proteÃ§Ã£o CSRF e atualiza metas conforme necessÃ¡rio.
      *
-     * Suporta autenticação via:
-     * - Sistema de tokens/sessão (preferencial para clientes via magic link)
-     * - Usuários WordPress logados (retrocompatibilidade)
+     * Suporta autenticaÃ§Ã£o via:
+     * - Sistema de tokens/sessÃ£o (preferencial para clientes via magic link)
+     * - UsuÃ¡rios WordPress logados (retrocompatibilidade)
      */
     public function handle_portal_actions() {
         $client_id = $this->get_authenticated_client_id();
@@ -614,12 +614,12 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Renderiza a página do portal para o shortcode. Mostra tela de acesso se não autenticado.
+     * Renderiza a pÃ¡gina do portal para o shortcode. Mostra tela de acesso se nÃ£o autenticado.
      *
-     * @return string Conteúdo HTML renderizado.
+     * @return string ConteÃºdo HTML renderizado.
      */
     public function render_portal_shortcode() {
-        // Desabilita cache da página para garantir dados sempre atualizados
+        // Desabilita cache da pÃ¡gina para garantir dados sempre atualizados
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();
         }
@@ -630,7 +630,7 @@ final class DPS_Client_Portal {
         wp_enqueue_style( 'dps-client-portal' );
         wp_enqueue_script( 'dps-client-portal' );
         
-        // Verifica se é uma ação de atualização de perfil via token (Fase 5)
+        // Verifica se Ã© uma aÃ§Ã£o de atualizaÃ§Ã£o de perfil via token (Fase 5)
         $action = isset( $_GET['dps_action'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_action'] ) ) : '';
         if ( 'profile_update' === $action && isset( $_GET['token'] ) ) {
             if ( class_exists( 'DPS_Portal_Profile_Update' ) ) {
@@ -638,20 +638,20 @@ final class DPS_Client_Portal {
             }
         }
         
-        // Verifica autenticação pelo novo sistema
+        // Verifica autenticaÃ§Ã£o pelo novo sistema
         $client_id = $this->get_authenticated_client_id();
         
-        // F6.4: Se há 2FA pendente, renderiza formulário de verificação
+        // F6.4: Se hÃ¡ 2FA pendente, renderiza formulÃ¡rio de verificaÃ§Ã£o
         if ( ! $client_id && ! empty( $this->pending_2fa_session_key ) ) {
             $email = get_post_meta( $this->pending_2fa_client_id, 'client_email', true );
             $twofa = DPS_Portal_2FA::get_instance();
             return $twofa->render_verification_form( $this->pending_2fa_session_key, $email );
         }
         
-        // Hook: Após verificar autenticação (Fase 2.3)
+        // Hook: ApÃ³s verificar autenticaÃ§Ã£o (Fase 2.3)
         do_action( 'dps_portal_after_auth_check', $client_id );
         
-        // Se não autenticado, exibe tela de acesso
+        // Se nÃ£o autenticado, exibe tela de acesso
         if ( ! $client_id ) {
             // Hook: Antes de renderizar tela de login (Fase 2.3)
             do_action( 'dps_portal_before_login_screen' );
@@ -668,11 +668,11 @@ final class DPS_Client_Portal {
                 return apply_filters( 'dps_portal_login_screen', $output );
             }
             
-            // Fallback se template não existir
+            // Fallback se template nÃ£o existir
             ob_start();
             echo '<div class="dps-client-portal-login">';
             echo '<h3>' . esc_html__( 'Acesso ao Portal do Cliente', 'dps-client-portal' ) . '</h3>';
-            echo '<p>' . esc_html__( 'Para acessar o portal, solicite seu link exclusivo à nossa equipe.', 'dps-client-portal' ) . '</p>';
+            echo '<p>' . esc_html__( 'Para acessar o portal, solicite seu link exclusivo Ã  nossa equipe.', 'dps-client-portal' ) . '</p>';
             echo '</div>';
             return ob_get_clean();
         }
@@ -681,25 +681,25 @@ final class DPS_Client_Portal {
         do_action( 'dps_portal_client_authenticated', $client_id );
         
         // Localiza script com dados do chat e appointment requests (Fase 4)
-        // Phase 5.3: Incluir lista de pets do cliente para seletor rápido no modal
+        // Phase 5.3: Incluir lista de pets do cliente para seletor rÃ¡pido no modal
         $client_pets_data = [];
         $pet_repo = DPS_Pet_Repository::get_instance();
         $client_pets = $pet_repo->get_pets_by_client( $client_id );
         foreach ( $client_pets as $pet ) {
             $species = get_post_meta( $pet->ID, 'pet_species', true );
             $species_icons = [
-                'Cachorro' => '🐶',
-                'Gato'     => '🐱',
+                'Cachorro' => 'ðŸ¶',
+                'Gato'     => 'ðŸ±',
             ];
             $client_pets_data[] = [
                 'id'      => $pet->ID,
                 'name'    => $pet->post_title,
                 'species' => $species,
-                'icon'    => isset( $species_icons[ $species ] ) ? $species_icons[ $species ] : '🐾',
+                'icon'    => isset( $species_icons[ $species ] ) ? $species_icons[ $species ] : 'ðŸ¾',
             ];
         }
 
-        // Phase 8.1: Gera sugestões inteligentes de agendamento baseadas no histórico
+        // Phase 8.1: Gera sugestÃµes inteligentes de agendamento baseadas no histÃ³rico
         $scheduling_suggestions = [];
         if ( ! empty( $client_pets ) ) {
             $suggestions_service = DPS_Scheduling_Suggestions::get_instance();
@@ -721,7 +721,21 @@ final class DPS_Client_Portal {
                 'i18n' => [
                     'loading' => __( 'Carregando...', 'dps-client-portal' ),
                     'redeemSuccess' => __( 'Resgate realizado com sucesso!', 'dps-client-portal' ),
-                    'redeemError' => __( 'Não foi possível concluir o resgate.', 'dps-client-portal' ),
+                    'redeemError' => __( 'NÃ£o foi possÃ­vel concluir o resgate.', 'dps-client-portal' ),
+                ],
+            ],
+            'game' => [
+                'enabled' => class_exists( 'DPS_Game_Progress_Service' ),
+                'nonce' => wp_create_nonce( 'dps_game_progress' ),
+                'endpoints' => [
+                    'progress' => esc_url_raw( rest_url( 'dps-game/v1/progress' ) ),
+                ],
+                'i18n' => [
+                    'loading' => __( 'Carregando progresso do jogo...', 'dps-client-portal' ),
+                    'empty' => __( 'Jogue uma run para comecar seu historico sincronizado.', 'dps-client-portal' ),
+                    'error' => __( 'Nao foi possivel carregar o progresso do jogo agora.', 'dps-client-portal' ),
+                    'missionDone' => __( 'Missao concluida hoje.', 'dps-client-portal' ),
+                    'missionPending' => __( 'Falta pouco para concluir a meta.', 'dps-client-portal' ),
                 ],
             ],
         ] );
@@ -733,53 +747,53 @@ final class DPS_Client_Portal {
             if ( 'updated' === $msg ) {
                 echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( 'Dados atualizados com sucesso.', 'dps-client-portal' ) . '</div>';
             } elseif ( 'error' === $msg ) {
-                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'Ocorreu um erro ao processar sua solicitação.', 'dps-client-portal' ) . '</div>';
+                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'Ocorreu um erro ao processar sua solicitaÃ§Ã£o.', 'dps-client-portal' ) . '</div>';
             } elseif ( 'message_sent' === $msg ) {
                 echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( 'Mensagem enviada para a equipe. Responderemos em breve!', 'dps-client-portal' ) . '</div>';
             } elseif ( 'message_error' === $msg ) {
-                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'Não foi possível enviar sua mensagem. Verifique o conteúdo e tente novamente.', 'dps-client-portal' ) . '</div>';
+                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'NÃ£o foi possÃ­vel enviar sua mensagem. Verifique o conteÃºdo e tente novamente.', 'dps-client-portal' ) . '</div>';
             } elseif ( 'invalid_file_type' === $msg ) {
-                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'Tipo de arquivo não permitido. Apenas imagens JPG, PNG, GIF e WebP são aceitas.', 'dps-client-portal' ) . '</div>';
+                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'Tipo de arquivo nÃ£o permitido. Apenas imagens JPG, PNG, GIF e WebP sÃ£o aceitas.', 'dps-client-portal' ) . '</div>';
             } elseif ( 'file_too_large' === $msg ) {
-                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'O arquivo é muito grande. O tamanho máximo permitido é 5MB.', 'dps-client-portal' ) . '</div>';
+                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'O arquivo Ã© muito grande. O tamanho mÃ¡ximo permitido Ã© 5MB.', 'dps-client-portal' ) . '</div>';
             } elseif ( 'session_expired' === $msg ) {
-                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'Sua sessão expirou ou é inválida. Por favor, atualize a página e tente novamente.', 'dps-client-portal' ) . '</div>';
+                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'Sua sessÃ£o expirou ou Ã© invÃ¡lida. Por favor, atualize a pÃ¡gina e tente novamente.', 'dps-client-portal' ) . '</div>';
             } elseif ( 'pet_updated' === $msg ) {
                 echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( 'Dados do pet atualizados com sucesso.', 'dps-client-portal' ) . '</div>';
             } elseif ( 'preferences_updated' === $msg ) {
-                echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( 'Preferências atualizadas com sucesso.', 'dps-client-portal' ) . '</div>';
+                echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( 'PreferÃªncias atualizadas com sucesso.', 'dps-client-portal' ) . '</div>';
             } elseif ( 'pet_preferences_updated' === $msg ) {
-                echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( 'Preferências do pet atualizadas com sucesso.', 'dps-client-portal' ) . '</div>';
+                echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( 'PreferÃªncias do pet atualizadas com sucesso.', 'dps-client-portal' ) . '</div>';
             } elseif ( 'review_submitted' === $msg ) {
-                echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( '🎉 Obrigado pela sua avaliação! Sua opinião é muito importante para nós.', 'dps-client-portal' ) . '</div>';
+                echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( 'ðŸŽ‰ Obrigado pela sua avaliaÃ§Ã£o! Sua opiniÃ£o Ã© muito importante para nÃ³s.', 'dps-client-portal' ) . '</div>';
             } elseif ( 'review_already' === $msg ) {
-                echo '<div class="dps-portal-notice dps-portal-notice--info">' . esc_html__( 'Você já fez uma avaliação. Obrigado pelo feedback!', 'dps-client-portal' ) . '</div>';
+                echo '<div class="dps-portal-notice dps-portal-notice--info">' . esc_html__( 'VocÃª jÃ¡ fez uma avaliaÃ§Ã£o. Obrigado pelo feedback!', 'dps-client-portal' ) . '</div>';
             } elseif ( 'review_invalid' === $msg ) {
                 echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'Por favor, selecione uma nota de 1 a 5 estrelas.', 'dps-client-portal' ) . '</div>';
             } elseif ( 'review_error' === $msg ) {
-                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'Não foi possível registrar sua avaliação. Tente novamente.', 'dps-client-portal' ) . '</div>';
+                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'NÃ£o foi possÃ­vel registrar sua avaliaÃ§Ã£o. Tente novamente.', 'dps-client-portal' ) . '</div>';
             }
         }
         
-        // Fase 4 - Branding: buscar configurações
+        // Fase 4 - Branding: buscar configuraÃ§Ãµes
         $logo_id       = get_option( 'dps_portal_logo_id', '' );
         $primary_color = get_option( 'dps_portal_primary_color', '#0ea5e9' );
         $hero_id       = get_option( 'dps_portal_hero_id', '' );
         
-        // Aplica classe de branding se houver customizações
+        // Aplica classe de branding se houver customizaÃ§Ãµes
         $portal_classes = [ 'dps-client-portal' ];
         if ( $logo_id || $primary_color !== '#0ea5e9' || $hero_id ) {
             $portal_classes[] = 'dps-portal-branded';
         }
         
-        // Inline CSS para cor primária customizada
+        // Inline CSS para cor primÃ¡ria customizada
         if ( $primary_color && $primary_color !== '#0ea5e9' ) {
             echo '<style>.dps-portal-branded { --dps-custom-primary: ' . esc_attr( $primary_color ) . '; --dps-custom-primary-hover: ' . esc_attr( $this->adjust_brightness( $primary_color, -20 ) ) . '; }</style>';
         }
         
         echo '<div class="' . esc_attr( implode( ' ', $portal_classes ) ) . '">';
         
-        // Header com título e botão de logout
+        // Header com tÃ­tulo e botÃ£o de logout
         echo '<div class="dps-portal-header dps-portal-header--branded">';
         echo '<div class="dps-portal-header__main">';
         
@@ -799,11 +813,11 @@ final class DPS_Client_Portal {
             }
         }
         
-        // Saudação personalizada com nome do cliente
+        // SaudaÃ§Ã£o personalizada com nome do cliente
         $client_name = get_the_title( $client_id );
         if ( $client_name ) {
             echo '<h1 class="dps-portal-title">';
-            echo esc_html( sprintf( __( 'Olá, %s 👋', 'dps-client-portal' ), $client_name ) );
+            echo esc_html( sprintf( __( 'OlÃ¡, %s ðŸ‘‹', 'dps-client-portal' ), $client_name ) );
             echo '</h1>';
         } else {
             echo '<h1 class="dps-portal-title">' . esc_html__( 'Portal do Cliente', 'dps-client-portal' ) . '</h1>';
@@ -812,34 +826,34 @@ final class DPS_Client_Portal {
         echo '</div>';
         echo '<div class="dps-portal-header__actions">';
 
-        // Link de avaliação discreto no topo do portal
+        // Link de avaliaÃ§Ã£o discreto no topo do portal
         $review_url = $this->get_review_url();
         if ( $review_url ) {
-            echo '<a href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener" class="dps-portal-review-link" title="' . esc_attr__( 'Avalie nosso serviço', 'dps-client-portal' ) . '">';
-            echo '<span class="dps-portal-review-icon">⭐</span>';
+            echo '<a href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener" class="dps-portal-review-link" title="' . esc_attr__( 'Avalie nosso serviÃ§o', 'dps-client-portal' ) . '">';
+            echo '<span class="dps-portal-review-icon">â­</span>';
             echo '<span class="dps-portal-review-text">' . esc_html__( 'Avalie-nos', 'dps-client-portal' ) . '</span>';
             echo '</a>';
         }
 
-        // Botão de logout
+        // BotÃ£o de logout
         $session_manager = DPS_Portal_Session_Manager::get_instance();
         $logout_url      = $session_manager->get_logout_url();
         echo '<a href="' . esc_url( $logout_url ) . '" class="dps-portal-logout">' . esc_html__( 'Sair', 'dps-client-portal' ) . '</a>';
         echo '</div>';
         echo '</div>';
         
-        // Hook para add-ons adicionarem conteúdo no topo do portal (ex: AI Assistant)
+        // Hook para add-ons adicionarem conteÃºdo no topo do portal (ex: AI Assistant)
         do_action( 'dps_client_portal_before_content', $client_id );
         
         // Breadcrumb simples para contexto
-        echo '<nav class="dps-portal-breadcrumb" aria-label="' . esc_attr__( 'Navegação', 'dps-client-portal' ) . '">';
+        echo '<nav class="dps-portal-breadcrumb" aria-label="' . esc_attr__( 'NavegaÃ§Ã£o', 'dps-client-portal' ) . '">';
         echo '<span class="dps-portal-breadcrumb__item">' . esc_html__( 'Portal do Cliente', 'dps-client-portal' ) . '</span>';
-        echo '<span class="dps-portal-breadcrumb__separator" aria-hidden="true">›</span>';
-        echo '<span class="dps-portal-breadcrumb__item dps-portal-breadcrumb__item--active" data-breadcrumb-active>' . esc_html__( 'Início', 'dps-client-portal' ) . '</span>';
+        echo '<span class="dps-portal-breadcrumb__separator" aria-hidden="true">â€º</span>';
+        echo '<span class="dps-portal-breadcrumb__item dps-portal-breadcrumb__item--active" data-breadcrumb-active>' . esc_html__( 'InÃ­cio', 'dps-client-portal' ) . '</span>';
         
         echo '</nav>';
         
-        // Define tabs padrão (Fase 2.3)
+        // Define tabs padrÃ£o (Fase 2.3)
         // Busca pontos de fidelidade para badge
         $loyalty_badge = 0;
         if ( function_exists( 'dps_loyalty_get_points' ) ) {
@@ -851,55 +865,55 @@ final class DPS_Client_Portal {
 
         $default_tabs = [
             'inicio' => [
-                'icon'  => '🏠',
-                'label' => __( 'Início', 'dps-client-portal' ),
+                'icon'  => 'ðŸ ',
+                'label' => __( 'InÃ­cio', 'dps-client-portal' ),
                 'active' => true,
                 'badge' => 0,
             ],
             'fidelidade' => [
-                'icon'  => '🏆',
+                'icon'  => 'ðŸ†',
                 'label' => __( 'Fidelidade', 'dps-client-portal' ),
                 'active' => false,
                 'badge' => $loyalty_badge,
             ],
             'avaliacoes' => [
-                'icon'  => '⭐',
-                'label' => __( 'Avaliações', 'dps-client-portal' ),
+                'icon'  => 'â­',
+                'label' => __( 'AvaliaÃ§Ãµes', 'dps-client-portal' ),
                 'active' => false,
                 'badge' => 0,
             ],
             'mensagens' => [
-                'icon'  => '💬',
+                'icon'  => 'ðŸ’¬',
                 'label' => __( 'Mensagens', 'dps-client-portal' ),
                 'active' => false,
                 'badge' => DPS_Portal_Data_Provider::get_instance()->get_unread_messages_count( $client_id ),
             ],
             'agendamentos' => [
-                'icon'  => '📅',
+                'icon'  => 'ðŸ“…',
                 'label' => __( 'Agendamentos', 'dps-client-portal' ),
                 'active' => false,
                 'badge' => DPS_Portal_Data_Provider::get_instance()->count_upcoming_appointments( $client_id ),
             ],
             'pagamentos' => [
-                'icon'  => '💳',
+                'icon'  => 'ðŸ’³',
                 'label' => __( 'Pagamentos', 'dps-client-portal' ),
                 'active' => false,
                 'badge' => DPS_Finance_Repository::get_instance()->count_pending_transactions( $client_id ),
             ],
             'historico-pets' => [
-                'icon'  => '🐾',
-                'label' => __( 'Histórico dos Pets', 'dps-client-portal' ),
+                'icon'  => 'ðŸ¾',
+                'label' => __( 'HistÃ³rico dos Pets', 'dps-client-portal' ),
                 'active' => false,
                 'badge' => 0,
             ],
             'galeria' => [
-                'icon'  => '📸',
+                'icon'  => 'ðŸ“¸',
                 'label' => __( 'Galeria', 'dps-client-portal' ),
                 'active' => false,
                 'badge' => 0,
             ],
             'dados' => [
-                'icon'  => '⚙️',
+                'icon'  => 'âš™ï¸',
                 'label' => __( 'Meus Dados', 'dps-client-portal' ),
                 'active' => false,
                 'badge' => 0,
@@ -909,9 +923,9 @@ final class DPS_Client_Portal {
         // Filtro: Permite add-ons modificarem tabs (Fase 2.3)
         $tabs = apply_filters( 'dps_portal_tabs', $default_tabs, $client_id );
         
-        // Navegação por Tabs com badges
+        // NavegaÃ§Ã£o por Tabs com badges
         echo '<div class="dps-portal-tabs-wrapper">';
-        echo '<nav class="dps-portal-tabs" role="tablist" aria-label="' . esc_attr__( 'Seções do portal', 'dps-client-portal' ) . '">';
+        echo '<nav class="dps-portal-tabs" role="tablist" aria-label="' . esc_attr__( 'SeÃ§Ãµes do portal', 'dps-client-portal' ) . '">';
         foreach ( $tabs as $tab_id => $tab ) {
             $is_active   = isset( $tab['active'] ) && $tab['active'];
             $is_disabled = ! empty( $tab['disabled'] );
@@ -929,7 +943,7 @@ final class DPS_Client_Portal {
             }
             echo '<span class="dps-portal-tabs__text">' . esc_html( $tab['label'] ) . '</span>';
             
-            // Badge de notificação
+            // Badge de notificaÃ§Ã£o
             if ( $badge_count > 0 ) {
                 $badge_class = 'dps-portal-tabs__badge';
                 $badge_text  = $badge_count > 9 ? '9+' : (string) $badge_count;
@@ -957,38 +971,61 @@ final class DPS_Client_Portal {
         echo '</nav>';
         echo '</div>'; // .dps-portal-tabs-wrapper
         
-        // Hook: Antes de renderizar conteúdo das tabs (Fase 2.3)
+        // Hook: Antes de renderizar conteÃºdo das tabs (Fase 2.3)
         do_action( 'dps_portal_before_tab_content', $client_id );
         
-        // Container de conteúdo das tabs
+        // Container de conteÃºdo das tabs
         echo '<div class="dps-portal-tab-content">';
         
-        // Panel: Início (Layout modernizado)
+        // Panel: InÃ­cio (Layout modernizado)
         echo '<div id="panel-inicio" class="dps-portal-tab-panel is-active" role="tabpanel" aria-labelledby="dps-portal-tab-inicio" aria-hidden="false" tabindex="-1">';
         do_action( 'dps_portal_before_inicio_content', $client_id ); // Fase 2.3
         
-        // Novo: Dashboard com métricas rápidas
+        // Novo: Dashboard com mÃ©tricas rÃ¡pidas
         $this->render_quick_overview( $client_id );
+
+        if ( class_exists( 'DPS_Game_Progress_Service' ) ) {
+            echo '<section class="dps-portal-section dps-portal-game-summary" data-game-summary-state="idle">';
+            echo '<div class="dps-portal-game-summary__header">';
+            echo '<div>';
+            echo '<h2>' . esc_html__( 'Space Groomers', 'dps-client-portal' ) . '</h2>';
+            echo '<p class="dps-portal-game-summary__intro">' . esc_html__( 'Seu progresso sincronizado aparece aqui entre uma run e outra.', 'dps-client-portal' ) . '</p>';
+            echo '</div>';
+            echo '<span class="dps-portal-game-summary__pill">' . esc_html__( 'Sync ativo', 'dps-client-portal' ) . '</span>';
+            echo '</div>';
+            echo '<div class="dps-portal-game-summary__status">' . esc_html__( 'Carregando progresso do jogo...','dps-client-portal' ) . '</div>';
+            echo '<div class="dps-portal-game-summary__grid">';
+            echo '<article class="dps-portal-game-summary__card"><span class="dps-portal-game-summary__label">' . esc_html__( 'Missao atual', 'dps-client-portal' ) . '</span><strong class="dps-portal-game-summary__value" data-game-field="mission-title">-</strong><small data-game-field="mission-progress">-</small></article>';
+            echo '<article class="dps-portal-game-summary__card"><span class="dps-portal-game-summary__label">' . esc_html__( 'Streak', 'dps-client-portal' ) . '</span><strong class="dps-portal-game-summary__value" data-game-field="streak">0</strong><small data-game-field="streak-note">-</small></article>';
+            echo '<article class="dps-portal-game-summary__card"><span class="dps-portal-game-summary__label">' . esc_html__( 'Recorde', 'dps-client-portal' ) . '</span><strong class="dps-portal-game-summary__value" data-game-field="highscore">0</strong><small data-game-field="record-note">-</small></article>';
+            echo '<article class="dps-portal-game-summary__card"><span class="dps-portal-game-summary__label">' . esc_html__( 'Badges', 'dps-client-portal' ) . '</span><strong class="dps-portal-game-summary__value" data-game-field="badges-count">0</strong><small data-game-field="badges-note">-</small></article>';
+            echo '</div>';
+            echo '<div class="dps-portal-game-summary__footer">';
+            echo '<span data-game-field="last-run">-</span>';
+            echo '<a href="#" class="dps-portal-game-summary__cta dps-link-button" data-tab="inicio">' . esc_html__( 'Voltar ao jogo', 'dps-client-portal' ) . '</a>';
+            echo '</div>';
+            echo '</section>';
+        }
         
-        // Novo: Ações rápidas
+        // Novo: AÃ§Ãµes rÃ¡pidas
         $this->render_quick_actions( $client_id );
         
-        // Conteúdo principal — layout vertical empilhado (single-column)
+        // ConteÃºdo principal â€” layout vertical empilhado (single-column)
         echo '<div class="dps-inicio-stack">';
         
-        // Próximo agendamento (prioridade máxima)
+        // PrÃ³ximo agendamento (prioridade mÃ¡xima)
         DPS_Portal_Renderer::get_instance()->render_next_appointment( $client_id );
         
-        // Pendências financeiras (ação necessária)
+        // PendÃªncias financeiras (aÃ§Ã£o necessÃ¡ria)
         DPS_Portal_Renderer::get_instance()->render_financial_pending( $client_id );
         
-        // Solicitações recentes
+        // SolicitaÃ§Ãµes recentes
         DPS_Portal_Renderer::get_instance()->render_recent_requests( $client_id );
         
         // Pets do cliente
         $this->render_pets_summary( $client_id );
         
-        // Sugestões contextuais
+        // SugestÃµes contextuais
         DPS_Portal_Renderer::get_instance()->render_contextual_suggestions( $client_id );
         
         echo '</div>'; // .dps-inicio-stack
@@ -1003,21 +1040,21 @@ final class DPS_Client_Portal {
         do_action( 'dps_portal_after_fidelidade_content', $client_id );
         echo '</div>';
 
-        // Panel: Avaliações (CTA + prova social)
+        // Panel: AvaliaÃ§Ãµes (CTA + prova social)
         echo '<div id="panel-avaliacoes" class="dps-portal-tab-panel" role="tabpanel" aria-labelledby="dps-portal-tab-avaliacoes" aria-hidden="true" tabindex="-1">';
         do_action( 'dps_portal_before_reviews_content', $client_id );
         $this->render_reviews_hub( $client_id );
         do_action( 'dps_portal_after_reviews_content', $client_id );
         echo '</div>';
         
-        // Panel: Mensagens (Fase 4 - continuação)
+        // Panel: Mensagens (Fase 4 - continuaÃ§Ã£o)
         echo '<div id="panel-mensagens" class="dps-portal-tab-panel" role="tabpanel" aria-labelledby="dps-portal-tab-mensagens" aria-hidden="true" tabindex="-1">';
         do_action( 'dps_portal_before_mensagens_content', $client_id );
         DPS_Portal_Renderer::get_instance()->render_message_center( $client_id );
         do_action( 'dps_portal_after_mensagens_content', $client_id );
         echo '</div>';
         
-        // Panel: Agendamentos (Histórico completo)
+        // Panel: Agendamentos (HistÃ³rico completo)
         echo '<div id="panel-agendamentos" class="dps-portal-tab-panel" role="tabpanel" aria-labelledby="dps-portal-tab-agendamentos" aria-hidden="true" tabindex="-1">';
         do_action( 'dps_portal_before_agendamentos_content', $client_id ); // Fase 2.3
         DPS_Portal_Renderer::get_instance()->render_appointment_history( $client_id );
@@ -1031,7 +1068,7 @@ final class DPS_Client_Portal {
         do_action( 'dps_portal_after_pagamentos_content', $client_id );
         echo '</div>';
         
-        // Panel: Histórico dos Pets (Fase 4)
+        // Panel: HistÃ³rico dos Pets (Fase 4)
         echo '<div id="panel-historico-pets" class="dps-portal-tab-panel" role="tabpanel" aria-labelledby="dps-portal-tab-historico-pets" aria-hidden="true" tabindex="-1">';
         do_action( 'dps_portal_before_pet_history_content', $client_id );
         $this->render_pets_timeline( $client_id );
@@ -1058,7 +1095,7 @@ final class DPS_Client_Portal {
         
         echo '</div>'; // .dps-portal-tab-content
 
-        // Hook para add-ons adicionarem conteúdo ao final do portal (ex: AI Assistant)
+        // Hook para add-ons adicionarem conteÃºdo ao final do portal (ex: AI Assistant)
         do_action( 'dps_client_portal_after_content', $client_id );
 
         echo '</div>'; // .dps-client-portal
@@ -1070,7 +1107,7 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Obtém a URL configurada para avaliações no Google.
+     * ObtÃ©m a URL configurada para avaliaÃ§Ãµes no Google.
      *
      * @return string
      */
@@ -1079,7 +1116,7 @@ final class DPS_Client_Portal {
         $review_url         = get_option( 'dps_portal_review_url', $default_review_url );
 
         /**
-         * Permite customizar o link de avaliação exibido no portal.
+         * Permite customizar o link de avaliaÃ§Ã£o exibido no portal.
          *
          * @param string $review_url URL configurada.
          */
@@ -1089,9 +1126,9 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Busca avaliações internas para exibir prova social no portal.
+     * Busca avaliaÃ§Ãµes internas para exibir prova social no portal.
      *
-     * @param int $limit Quantidade de avaliações a exibir.
+     * @param int $limit Quantidade de avaliaÃ§Ãµes a exibir.
      * @return array
      */
     private function get_reviews_summary( $limit = 3 ) {
@@ -1103,7 +1140,7 @@ final class DPS_Client_Portal {
             ];
         }
 
-        // Busca contagem e média reais de todas as avaliações
+        // Busca contagem e mÃ©dia reais de todas as avaliaÃ§Ãµes
         $all_ids = get_posts( [
             'post_type'      => 'dps_groomer_review',
             'post_status'    => 'publish',
@@ -1125,7 +1162,7 @@ final class DPS_Client_Portal {
 
         $average = $rated_count > 0 ? round( $total_rating / $rated_count, 1 ) : 0;
 
-        // Busca os itens mais recentes para exibição
+        // Busca os itens mais recentes para exibiÃ§Ã£o
         $reviews = get_posts( [
             'post_type'      => 'dps_groomer_review',
             'post_status'    => 'publish',
@@ -1156,7 +1193,7 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Retorna marcação de estrelas acessível.
+     * Retorna marcaÃ§Ã£o de estrelas acessÃ­vel.
      *
      * @param float  $rating     Nota de 0 a 5.
      * @param string $aria_label Texto descritivo para leitores de tela.
@@ -1164,23 +1201,23 @@ final class DPS_Client_Portal {
      */
     private function render_star_icons( $rating, $aria_label = '' ) {
         $rounded = max( 0, min( 5, (int) round( $rating ) ) );
-        $filled  = str_repeat( '★', $rounded );
-        $empty   = str_repeat( '☆', 5 - $rounded );
+        $filled  = str_repeat( 'â˜…', $rounded );
+        $empty   = str_repeat( 'â˜†', 5 - $rounded );
         $label   = $aria_label ? ' aria-label="' . esc_attr( $aria_label ) . '"' : '';
 
         return '<span class="dps-stars"' . $label . '>' . esc_html( $filled . $empty ) . '</span>';
     }
 
     /**
-     * Conta mensagens não lidas do cliente.
-     * Fase 4 - continuação: Central de mensagens
+     * Conta mensagens nÃ£o lidas do cliente.
+     * Fase 4 - continuaÃ§Ã£o: Central de mensagens
      *
      * @param int $client_id ID do cliente.
-     * @return int Número de mensagens não lidas.
+     * @return int NÃºmero de mensagens nÃ£o lidas.
      */
     /**
-     * Renderiza uma visão rápida (dashboard) com métricas do cliente.
-     * Mostra resumo visual de agendamentos, pendências e fidelidade.
+     * Renderiza uma visÃ£o rÃ¡pida (dashboard) com mÃ©tricas do cliente.
+     * Mostra resumo visual de agendamentos, pendÃªncias e fidelidade.
      *
      * @since 3.0.0
      * @param int $client_id ID do cliente.
@@ -1200,23 +1237,23 @@ final class DPS_Client_Portal {
         ] );
         $pets_count = count( $pets );
         
-        // Conta mensagens não lidas
+        // Conta mensagens nÃ£o lidas
         $unread = DPS_Portal_Data_Provider::get_instance()->get_unread_messages_count( $client_id );
         
-        // Pontos de fidelidade (se disponível)
+        // Pontos de fidelidade (se disponÃ­vel)
         $points = 0;
         if ( function_exists( 'dps_loyalty_get_points' ) ) {
             $points = dps_loyalty_get_points( $client_id );
         }
         
         echo '<section class="dps-portal-overview">';
-        echo '<h2 class="sr-only">' . esc_html__( 'Resumo Rápido', 'dps-client-portal' ) . '</h2>';
+        echo '<h2 class="sr-only">' . esc_html__( 'Resumo RÃ¡pido', 'dps-client-portal' ) . '</h2>';
         
         echo '<div class="dps-overview-cards">';
         
         // Card: Agendamentos
         echo '<div class="dps-overview-card dps-overview-card--appointments">';
-        echo '<div class="dps-overview-card__icon">📅</div>';
+        echo '<div class="dps-overview-card__icon">ðŸ“…</div>';
         echo '<div class="dps-overview-card__content">';
         echo '<span class="dps-overview-card__value">' . esc_html( $upcoming ) . '</span>';
         echo '<span class="dps-overview-card__label">' . esc_html( _n( 'Agendamento', 'Agendamentos', $upcoming, 'dps-client-portal' ) ) . '</span>';
@@ -1225,7 +1262,7 @@ final class DPS_Client_Portal {
         
         // Card: Pets
         echo '<div class="dps-overview-card dps-overview-card--pets">';
-        echo '<div class="dps-overview-card__icon">🐾</div>';
+        echo '<div class="dps-overview-card__icon">ðŸ¾</div>';
         echo '<div class="dps-overview-card__content">';
         echo '<span class="dps-overview-card__value">' . esc_html( $pets_count ) . '</span>';
         echo '<span class="dps-overview-card__label">' . esc_html( _n( 'Pet', 'Pets', $pets_count, 'dps-client-portal' ) ) . '</span>';
@@ -1234,17 +1271,17 @@ final class DPS_Client_Portal {
         
         // Card: Mensagens
         echo '<div class="dps-overview-card dps-overview-card--messages' . ( $unread > 0 ? ' dps-overview-card--has-badge' : '' ) . '">';
-        echo '<div class="dps-overview-card__icon">💬</div>';
+        echo '<div class="dps-overview-card__icon">ðŸ’¬</div>';
         echo '<div class="dps-overview-card__content">';
         echo '<span class="dps-overview-card__value">' . esc_html( $unread ) . '</span>';
         echo '<span class="dps-overview-card__label">' . esc_html( _n( 'Nova Mensagem', 'Novas Mensagens', $unread, 'dps-client-portal' ) ) . '</span>';
         echo '</div>';
         echo '</div>';
         
-        // Card: Pontos (se fidelidade ativo) — destaque especial para engajamento
+        // Card: Pontos (se fidelidade ativo) â€” destaque especial para engajamento
         if ( function_exists( 'dps_loyalty_get_points' ) ) {
             echo '<div class="dps-overview-card dps-overview-card--loyalty" role="button" tabindex="0" data-tab="fidelidade" style="cursor:pointer" aria-label="' . esc_attr__( 'Ver programa de fidelidade', 'dps-client-portal' ) . '">';
-            echo '<div class="dps-overview-card__icon">🏆</div>';
+            echo '<div class="dps-overview-card__icon">ðŸ†</div>';
             echo '<div class="dps-overview-card__content">';
             echo '<span class="dps-overview-card__value">' . esc_html( number_format( $points, 0, ',', '.' ) ) . '</span>';
             echo '<span class="dps-overview-card__label">' . esc_html__( 'Pontos de Fidelidade', 'dps-client-portal' ) . '</span>';
@@ -1257,8 +1294,8 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Renderiza ações rápidas para o cliente.
-     * Atalhos para as ações mais comuns do portal.
+     * Renderiza aÃ§Ãµes rÃ¡pidas para o cliente.
+     * Atalhos para as aÃ§Ãµes mais comuns do portal.
      *
      * @since 3.0.0
      * @param int $client_id ID do cliente.
@@ -1266,10 +1303,10 @@ final class DPS_Client_Portal {
     private function render_quick_actions( $client_id ) {
         // Gera link de agendamento via WhatsApp
         if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
-            $whatsapp_message = __( 'Olá! Gostaria de agendar um serviço.', 'dps-client-portal' );
+            $whatsapp_message = __( 'OlÃ¡! Gostaria de agendar um serviÃ§o.', 'dps-client-portal' );
             $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( $whatsapp_message );
         } else {
-            // Usa número configurado nas opções do sistema (sem fallback hardcoded)
+            // Usa nÃºmero configurado nas opÃ§Ãµes do sistema (sem fallback hardcoded)
             $whatsapp_number = get_option( 'dps_whatsapp_number', '' );
             if ( empty( $whatsapp_number ) ) {
                 $whatsapp_url = '';
@@ -1277,52 +1314,52 @@ final class DPS_Client_Portal {
                 if ( class_exists( 'DPS_Phone_Helper' ) ) {
                     $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
                 }
-                $whatsapp_text = urlencode( __( 'Olá! Gostaria de agendar um serviço.', 'dps-client-portal' ) );
+                $whatsapp_text = urlencode( __( 'OlÃ¡! Gostaria de agendar um serviÃ§o.', 'dps-client-portal' ) );
                 $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . $whatsapp_text;
             }
         }
         
-        // Link de avaliação
+        // Link de avaliaÃ§Ã£o
         $review_url = $this->get_review_url();
         
         echo '<section class="dps-portal-quick-actions">';
-        echo '<h2 class="sr-only">' . esc_html__( 'Ações Rápidas', 'dps-client-portal' ) . '</h2>';
+        echo '<h2 class="sr-only">' . esc_html__( 'AÃ§Ãµes RÃ¡pidas', 'dps-client-portal' ) . '</h2>';
         
         echo '<div class="dps-quick-actions">';
         
-        // Botão: Agendar Serviço (apenas se WhatsApp configurado)
+        // BotÃ£o: Agendar ServiÃ§o (apenas se WhatsApp configurado)
         if ( ! empty( $whatsapp_url ) ) {
             echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" rel="noopener noreferrer" class="dps-quick-action dps-quick-action--primary">';
-            echo '<span class="dps-quick-action__icon">📅</span>';
-            echo '<span class="dps-quick-action__text">' . esc_html__( 'Agendar Serviço', 'dps-client-portal' ) . '</span>';
+            echo '<span class="dps-quick-action__icon">ðŸ“…</span>';
+            echo '<span class="dps-quick-action__text">' . esc_html__( 'Agendar ServiÃ§o', 'dps-client-portal' ) . '</span>';
             echo '</a>';
         }
         
-        // Botão: Falar Conosco
+        // BotÃ£o: Falar Conosco
         echo '<button type="button" class="dps-quick-action dps-quick-action--chat" data-action="open-chat">';
-        echo '<span class="dps-quick-action__icon">💬</span>';
+        echo '<span class="dps-quick-action__icon">ðŸ’¬</span>';
         echo '<span class="dps-quick-action__text">' . esc_html__( 'Falar Conosco', 'dps-client-portal' ) . '</span>';
         echo '</button>';
         
-        // Botão: Avaliar (se configurado)
+        // BotÃ£o: Avaliar (se configurado)
         if ( $review_url ) {
             echo '<a href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener noreferrer" class="dps-quick-action">';
-            echo '<span class="dps-quick-action__icon">⭐</span>';
+            echo '<span class="dps-quick-action__icon">â­</span>';
             echo '<span class="dps-quick-action__text">' . esc_html__( 'Avaliar Atendimento', 'dps-client-portal' ) . '</span>';
             echo '</a>';
         }
         
-        // Botão: Indique e Ganhe (se fidelidade ativo)
+        // BotÃ£o: Indique e Ganhe (se fidelidade ativo)
         if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
             echo '<button type="button" class="dps-quick-action dps-quick-action--referral" data-tab="fidelidade">';
-            echo '<span class="dps-quick-action__icon">🎁</span>';
+            echo '<span class="dps-quick-action__icon">ðŸŽ</span>';
             echo '<span class="dps-quick-action__text">' . esc_html__( 'Indique e Ganhe', 'dps-client-portal' ) . '</span>';
             echo '</button>';
         }
 
-        // Botão: Meus Dados
+        // BotÃ£o: Meus Dados
         echo '<button type="button" class="dps-quick-action" data-tab="dados">';
-        echo '<span class="dps-quick-action__icon">⚙️</span>';
+        echo '<span class="dps-quick-action__icon">âš™ï¸</span>';
         echo '<span class="dps-quick-action__text">' . esc_html__( 'Meus Dados', 'dps-client-portal' ) . '</span>';
         echo '</button>';
         
@@ -1331,7 +1368,7 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Número máximo de pets exibidos no resumo da aba Início.
+     * NÃºmero mÃ¡ximo de pets exibidos no resumo da aba InÃ­cio.
      *
      * @var int
      */
@@ -1339,7 +1376,7 @@ final class DPS_Client_Portal {
 
     /**
      * Renderiza um resumo visual dos pets do cliente.
-     * Mostra foto, nome e próximo agendamento de cada pet.
+     * Mostra foto, nome e prÃ³ximo agendamento de cada pet.
      *
      * @since 3.0.0
      * @param int $client_id ID do cliente.
@@ -1362,7 +1399,7 @@ final class DPS_Client_Portal {
         $pet_ids = wp_list_pluck( $pets, 'ID' );
         update_meta_cache( 'post', $pet_ids );
         
-        // Pre-fetch próximos agendamentos de todos os pets em uma única query
+        // Pre-fetch prÃ³ximos agendamentos de todos os pets em uma Ãºnica query
         $today = current_time( 'Y-m-d' );
         $all_future_appts = get_posts( [
             'post_type'      => 'dps_agendamento',
@@ -1387,7 +1424,7 @@ final class DPS_Client_Portal {
             'order'    => 'ASC',
         ] );
         
-        // Pre-fetch últimos agendamentos finalizados de todos os pets
+        // Pre-fetch Ãºltimos agendamentos finalizados de todos os pets
         $all_past_appts = get_posts( [
             'post_type'      => 'dps_agendamento',
             'post_status'    => 'publish',
@@ -1410,7 +1447,7 @@ final class DPS_Client_Portal {
             'order'    => 'DESC',
         ] );
         
-        // Indexar por pet_id para acesso rápido
+        // Indexar por pet_id para acesso rÃ¡pido
         $next_by_pet = [];
         $cancelled = [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ];
         foreach ( $all_future_appts as $appt ) {
@@ -1431,8 +1468,8 @@ final class DPS_Client_Portal {
         
         echo '<section class="dps-portal-section dps-portal-pets-summary">';
         echo '<div class="dps-section-header">';
-        echo '<h2>🐾 ' . esc_html__( 'Meus Pets', 'dps-client-portal' ) . '</h2>';
-        echo '<button type="button" class="dps-link-button" data-tab="historico-pets">' . esc_html__( 'Ver Histórico Completo →', 'dps-client-portal' ) . '</button>';
+        echo '<h2>ðŸ¾ ' . esc_html__( 'Meus Pets', 'dps-client-portal' ) . '</h2>';
+        echo '<button type="button" class="dps-link-button" data-tab="historico-pets">' . esc_html__( 'Ver HistÃ³rico Completo â†’', 'dps-client-portal' ) . '</button>';
         echo '</div>';
         
         echo '<div class="dps-pets-cards">';
@@ -1442,13 +1479,13 @@ final class DPS_Client_Portal {
             $species  = get_post_meta( $pet->ID, 'pet_species', true );
             $breed    = get_post_meta( $pet->ID, 'pet_breed', true );
             
-            // Usa dados pré-carregados
+            // Usa dados prÃ©-carregados
             $next_date = isset( $next_by_pet[ $pet->ID ] ) ? $next_by_pet[ $pet->ID ] : '';
             $last_date = isset( $last_by_pet[ $pet->ID ] ) ? $last_by_pet[ $pet->ID ] : '';
             
             echo '<div class="dps-pet-card">';
             
-            // Foto do pet (só renderiza se houver foto)
+            // Foto do pet (sÃ³ renderiza se houver foto)
             if ( $photo_id ) {
                 $photo_url = wp_get_attachment_image_url( $photo_id, 'thumbnail' );
                 if ( $photo_url ) {
@@ -1458,7 +1495,7 @@ final class DPS_Client_Portal {
                 }
             }
             
-            // Informações do pet
+            // InformaÃ§Ãµes do pet
             echo '<div class="dps-pet-card__info">';
             echo '<h3 class="dps-pet-card__name">' . esc_html( $pet->post_title ) . '</h3>';
             
@@ -1468,7 +1505,7 @@ final class DPS_Client_Portal {
                     echo esc_html( $breed );
                 }
                 if ( $breed && $species ) {
-                    echo ' • ';
+                    echo ' â€¢ ';
                 }
                 if ( $species ) {
                     echo esc_html( ucfirst( $species ) );
@@ -1476,42 +1513,42 @@ final class DPS_Client_Portal {
                 echo '</span>';
             }
             
-            // Próximo agendamento do pet
+            // PrÃ³ximo agendamento do pet
             if ( $next_date ) {
-                echo '<span class="dps-pet-card__next-appointment">📅 ';
+                echo '<span class="dps-pet-card__next-appointment">ðŸ“… ';
                 echo esc_html( sprintf(
                     /* translators: %s: formatted date */
-                    __( 'Próximo: %s', 'dps-client-portal' ),
+                    __( 'PrÃ³ximo: %s', 'dps-client-portal' ),
                     date_i18n( 'd/m', strtotime( $next_date ) )
                 ) );
                 echo '</span>';
             } elseif ( $last_date ) {
                 $days_ago = floor( ( time() - strtotime( $last_date ) ) / DAY_IN_SECONDS );
                 if ( $days_ago <= 1 ) {
-                    $date_text = __( 'Último: Hoje', 'dps-client-portal' );
+                    $date_text = __( 'Ãšltimo: Hoje', 'dps-client-portal' );
                 } elseif ( $days_ago <= 7 ) {
                     $date_text = sprintf(
                         /* translators: %d: number of days */
-                        _n( 'Último: %d dia atrás', 'Último: %d dias atrás', $days_ago, 'dps-client-portal' ),
+                        _n( 'Ãšltimo: %d dia atrÃ¡s', 'Ãšltimo: %d dias atrÃ¡s', $days_ago, 'dps-client-portal' ),
                         $days_ago
                     );
                 } else {
                     $date_text = sprintf(
                         /* translators: %s: formatted date */
-                        __( 'Último: %s', 'dps-client-portal' ),
+                        __( 'Ãšltimo: %s', 'dps-client-portal' ),
                         date_i18n( 'd/m', strtotime( $last_date ) )
                     );
                 }
                 echo '<span class="dps-pet-card__last-service">' . esc_html( $date_text ) . '</span>';
             } else {
-                echo '<span class="dps-pet-card__last-service dps-pet-card__last-service--empty">' . esc_html__( 'Ainda não atendido', 'dps-client-portal' ) . '</span>';
+                echo '<span class="dps-pet-card__last-service dps-pet-card__last-service--empty">' . esc_html__( 'Ainda nÃ£o atendido', 'dps-client-portal' ) . '</span>';
             }
             
             echo '</div>'; // .dps-pet-card__info
             
-            // Ações rápidas do pet
+            // AÃ§Ãµes rÃ¡pidas do pet
             echo '<div class="dps-pet-card__actions">';
-            echo '<button type="button" class="dps-pet-card__action-btn" data-tab="historico-pets" aria-label="' . esc_attr__( 'Ver histórico', 'dps-client-portal' ) . '" title="' . esc_attr__( 'Ver histórico', 'dps-client-portal' ) . '"><span aria-hidden="true">📋</span></button>';
+            echo '<button type="button" class="dps-pet-card__action-btn" data-tab="historico-pets" aria-label="' . esc_attr__( 'Ver histÃ³rico', 'dps-client-portal' ) . '" title="' . esc_attr__( 'Ver histÃ³rico', 'dps-client-portal' ) . '"><span aria-hidden="true">ðŸ“‹</span></button>';
             echo '</div>';
             
             echo '</div>'; // .dps-pet-card
@@ -1522,13 +1559,13 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Renderiza a central de avaliações (CTA + prova social).
+     * Renderiza a central de avaliaÃ§Ãµes (CTA + prova social).
      *
      * Layout moderno com:
-     * - Seção de destaque com métricas visuais
-     * - Formulário de avaliação rápida interna
+     * - SeÃ§Ã£o de destaque com mÃ©tricas visuais
+     * - FormulÃ¡rio de avaliaÃ§Ã£o rÃ¡pida interna
      * - CTA para Google Reviews
-     * - Galeria de avaliações com prova social
+     * - Galeria de avaliaÃ§Ãµes com prova social
      *
      * @param int $client_id ID do cliente autenticado.
      */
@@ -1539,32 +1576,32 @@ final class DPS_Client_Portal {
         $client_name     = get_the_title( $client_id );
 
         echo '<section class="dps-portal-section dps-portal-reviews">';
-        echo '<h2 class="dps-section-title"><span class="dps-section-title__icon">⭐</span>' . esc_html__( 'Central de Avaliações', 'dps-client-portal' ) . '</h2>';
-        echo '<p class="dps-section-subtitle">' . esc_html__( 'Sua opinião nos ajuda a melhorar cada vez mais!', 'dps-client-portal' ) . '</p>';
+        echo '<h2 class="dps-section-title"><span class="dps-section-title__icon">â­</span>' . esc_html__( 'Central de AvaliaÃ§Ãµes', 'dps-client-portal' ) . '</h2>';
+        echo '<p class="dps-section-subtitle">' . esc_html__( 'Sua opiniÃ£o nos ajuda a melhorar cada vez mais!', 'dps-client-portal' ) . '</p>';
 
-        // Card de métricas resumidas
+        // Card de mÃ©tricas resumidas
         echo '<div class="dps-reviews-metrics">';
         $this->render_reviews_metrics_cards( $summary );
         echo '</div>';
 
-        // Layout em duas colunas: formulário + CTA Google
+        // Layout em duas colunas: formulÃ¡rio + CTA Google
         echo '<div class="dps-reviews-grid">';
 
-        // Coluna 1: Formulário de avaliação rápida interna
+        // Coluna 1: FormulÃ¡rio de avaliaÃ§Ã£o rÃ¡pida interna
         echo '<div class="dps-review-form-card">';
         echo '<div class="dps-review-form-card__header">';
-        echo '<div class="dps-review-form-card__icon">💬</div>';
+        echo '<div class="dps-review-form-card__icon">ðŸ’¬</div>';
         echo '<div>';
-        echo '<h3 class="dps-review-form-card__title">' . esc_html__( 'Avaliação Rápida', 'dps-client-portal' ) . '</h3>';
-        echo '<p class="dps-review-form-card__subtitle">' . esc_html__( 'Conte como foi a experiência do seu pet', 'dps-client-portal' ) . '</p>';
+        echo '<h3 class="dps-review-form-card__title">' . esc_html__( 'AvaliaÃ§Ã£o RÃ¡pida', 'dps-client-portal' ) . '</h3>';
+        echo '<p class="dps-review-form-card__subtitle">' . esc_html__( 'Conte como foi a experiÃªncia do seu pet', 'dps-client-portal' ) . '</p>';
         echo '</div>';
         echo '</div>';
 
         if ( $client_reviewed ) {
             echo '<div class="dps-review-form-card__thanks">';
-            echo '<div class="dps-review-form-card__thanks-icon">🎉</div>';
-            echo '<p class="dps-review-form-card__thanks-text">' . esc_html__( 'Obrigado por sua avaliação!', 'dps-client-portal' ) . '</p>';
-            echo '<p class="dps-review-form-card__thanks-hint">' . esc_html__( 'Sua opinião é muito importante para nós.', 'dps-client-portal' ) . '</p>';
+            echo '<div class="dps-review-form-card__thanks-icon">ðŸŽ‰</div>';
+            echo '<p class="dps-review-form-card__thanks-text">' . esc_html__( 'Obrigado por sua avaliaÃ§Ã£o!', 'dps-client-portal' ) . '</p>';
+            echo '<p class="dps-review-form-card__thanks-hint">' . esc_html__( 'Sua opiniÃ£o Ã© muito importante para nÃ³s.', 'dps-client-portal' ) . '</p>';
             echo '</div>';
         } else {
             $this->render_internal_review_form( $client_id, $client_name );
@@ -1585,10 +1622,10 @@ final class DPS_Client_Portal {
         echo '</div>';
 
         echo '<div class="dps-review-google-card__content">';
-        echo '<p class="dps-review-google-card__text">' . esc_html__( 'Suas 5 estrelas no Google ajudam outros clientes a confiar em nós e nos mostram onde podemos melhorar.', 'dps-client-portal' ) . '</p>';
+        echo '<p class="dps-review-google-card__text">' . esc_html__( 'Suas 5 estrelas no Google ajudam outros clientes a confiar em nÃ³s e nos mostram onde podemos melhorar.', 'dps-client-portal' ) . '</p>';
 
         echo '<div class="dps-review-google-card__steps">';
-        echo '<div class="dps-review-google-card__step"><span class="dps-step-num">1</span>' . esc_html__( 'Clique no botão', 'dps-client-portal' ) . '</div>';
+        echo '<div class="dps-review-google-card__step"><span class="dps-step-num">1</span>' . esc_html__( 'Clique no botÃ£o', 'dps-client-portal' ) . '</div>';
         echo '<div class="dps-review-google-card__step"><span class="dps-step-num">2</span>' . esc_html__( 'Escolha 1-5 estrelas', 'dps-client-portal' ) . '</div>';
         echo '<div class="dps-review-google-card__step"><span class="dps-step-num">3</span>' . esc_html__( 'Comente (opcional)', 'dps-client-portal' ) . '</div>';
         echo '</div>';
@@ -1597,13 +1634,13 @@ final class DPS_Client_Portal {
         echo '<div class="dps-review-google-card__actions">';
         if ( $review_url ) {
             echo '<a class="dps-review-google-btn" href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener noreferrer">';
-            echo '<span class="dps-review-google-btn__icon">⭐</span>';
+            echo '<span class="dps-review-google-btn__icon">â­</span>';
             echo '<span class="dps-review-google-btn__text">' . esc_html__( 'Avaliar no Google', 'dps-client-portal' ) . '</span>';
             echo '</a>';
-            echo '<p class="dps-review-google-card__hint">' . esc_html__( 'Abre em nova aba • Leva menos de 1 minuto', 'dps-client-portal' ) . '</p>';
+            echo '<p class="dps-review-google-card__hint">' . esc_html__( 'Abre em nova aba â€¢ Leva menos de 1 minuto', 'dps-client-portal' ) . '</p>';
         } else {
             echo '<div class="dps-portal-notice dps-portal-notice--info">';
-            echo '<p>' . esc_html__( 'Em breve você poderá nos avaliar no Google também!', 'dps-client-portal' ) . '</p>';
+            echo '<p>' . esc_html__( 'Em breve vocÃª poderÃ¡ nos avaliar no Google tambÃ©m!', 'dps-client-portal' ) . '</p>';
             echo '</div>';
         }
         echo '</div>';
@@ -1611,7 +1648,7 @@ final class DPS_Client_Portal {
 
         echo '</div>'; // .dps-reviews-grid
 
-        // Seção de prova social - o que outros clientes dizem
+        // SeÃ§Ã£o de prova social - o que outros clientes dizem
         echo '<div class="dps-review-social">';
         echo '<div class="dps-review-social__header">';
         echo '<h3 class="dps-review-social__title">' . esc_html__( 'O que nossos clientes dizem', 'dps-client-portal' ) . '</h3>';
@@ -1654,9 +1691,9 @@ final class DPS_Client_Portal {
             echo '</div>';
         } else {
             echo '<div class="dps-empty-state dps-empty-state--compact">';
-            echo '<div class="dps-empty-state__icon">💭</div>';
-            echo '<div class="dps-empty-state__message">' . esc_html__( 'Seja o primeiro a deixar uma avaliação!', 'dps-client-portal' ) . '</div>';
-            echo '<p class="dps-empty-state__hint">' . esc_html__( 'Sua opinião vai ajudar outros tutores a conhecer nosso trabalho.', 'dps-client-portal' ) . '</p>';
+            echo '<div class="dps-empty-state__icon">ðŸ’­</div>';
+            echo '<div class="dps-empty-state__message">' . esc_html__( 'Seja o primeiro a deixar uma avaliaÃ§Ã£o!', 'dps-client-portal' ) . '</div>';
+            echo '<p class="dps-empty-state__hint">' . esc_html__( 'Sua opiniÃ£o vai ajudar outros tutores a conhecer nosso trabalho.', 'dps-client-portal' ) . '</p>';
             echo '</div>';
         }
 
@@ -1665,9 +1702,9 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Renderiza cards de métricas das avaliações.
+     * Renderiza cards de mÃ©tricas das avaliaÃ§Ãµes.
      *
-     * @param array $summary Dados resumidos das avaliações.
+     * @param array $summary Dados resumidos das avaliaÃ§Ãµes.
      */
     private function render_reviews_metrics_cards( $summary ) {
         $average = $summary['average'];
@@ -1675,31 +1712,31 @@ final class DPS_Client_Portal {
 
         echo '<div class="dps-metrics-grid">';
 
-        // Card: Nota Média
+        // Card: Nota MÃ©dia
         echo '<div class="dps-metric-card dps-metric-card--highlight">';
-        echo '<div class="dps-metric-card__icon">⭐</div>';
+        echo '<div class="dps-metric-card__icon">â­</div>';
         echo '<div class="dps-metric-card__content">';
-        echo '<span class="dps-metric-card__value">' . esc_html( $count > 0 ? number_format_i18n( $average, 1 ) : '—' ) . '</span>';
-        echo '<span class="dps-metric-card__label">' . esc_html__( 'Nota Média', 'dps-client-portal' ) . '</span>';
+        echo '<span class="dps-metric-card__value">' . esc_html( $count > 0 ? number_format_i18n( $average, 1 ) : 'â€”' ) . '</span>';
+        echo '<span class="dps-metric-card__label">' . esc_html__( 'Nota MÃ©dia', 'dps-client-portal' ) . '</span>';
         echo '</div>';
         echo '</div>';
 
-        // Card: Total de Avaliações
+        // Card: Total de AvaliaÃ§Ãµes
         echo '<div class="dps-metric-card">';
-        echo '<div class="dps-metric-card__icon">📝</div>';
+        echo '<div class="dps-metric-card__icon">ðŸ“</div>';
         echo '<div class="dps-metric-card__content">';
         echo '<span class="dps-metric-card__value">' . esc_html( number_format_i18n( $count ) ) . '</span>';
-        echo '<span class="dps-metric-card__label">' . esc_html( _n( 'Avaliação', 'Avaliações', $count, 'dps-client-portal' ) ) . '</span>';
+        echo '<span class="dps-metric-card__label">' . esc_html( _n( 'AvaliaÃ§Ã£o', 'AvaliaÃ§Ãµes', $count, 'dps-client-portal' ) ) . '</span>';
         echo '</div>';
         echo '</div>';
 
-        // Card: Satisfação (baseado em avaliações 4-5 estrelas)
+        // Card: SatisfaÃ§Ã£o (baseado em avaliaÃ§Ãµes 4-5 estrelas)
         $satisfaction = $this->calculate_satisfaction_rate();
         echo '<div class="dps-metric-card">';
-        echo '<div class="dps-metric-card__icon">😊</div>';
+        echo '<div class="dps-metric-card__icon">ðŸ˜Š</div>';
         echo '<div class="dps-metric-card__content">';
-        echo '<span class="dps-metric-card__value">' . esc_html( $satisfaction > 0 ? $satisfaction . '%' : '—' ) . '</span>';
-        echo '<span class="dps-metric-card__label">' . esc_html__( 'Satisfação', 'dps-client-portal' ) . '</span>';
+        echo '<span class="dps-metric-card__value">' . esc_html( $satisfaction > 0 ? $satisfaction . '%' : 'â€”' ) . '</span>';
+        echo '<span class="dps-metric-card__label">' . esc_html__( 'SatisfaÃ§Ã£o', 'dps-client-portal' ) . '</span>';
         echo '</div>';
         echo '</div>';
 
@@ -1707,7 +1744,7 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Renderiza formulário de avaliação interna rápida.
+     * Renderiza formulÃ¡rio de avaliaÃ§Ã£o interna rÃ¡pida.
      *
      * @param int    $client_id   ID do cliente.
      * @param string $client_name Nome do cliente.
@@ -1719,36 +1756,36 @@ final class DPS_Client_Portal {
 
         // Seletor de estrelas interativo
         echo '<div class="dps-star-rating-input">';
-        echo '<label class="dps-star-rating-label">' . esc_html__( 'Como foi a experiência?', 'dps-client-portal' ) . '</label>';
+        echo '<label class="dps-star-rating-label">' . esc_html__( 'Como foi a experiÃªncia?', 'dps-client-portal' ) . '</label>';
         echo '<div class="dps-star-rating-selector" role="radiogroup" aria-label="' . esc_attr__( 'Selecione uma nota de 1 a 5 estrelas', 'dps-client-portal' ) . '">';
         for ( $i = 1; $i <= 5; $i++ ) {
             echo '<input type="radio" name="review_rating" value="' . esc_attr( $i ) . '" id="star-' . esc_attr( $i ) . '" class="dps-star-input" required>';
-            echo '<label for="star-' . esc_attr( $i ) . '" class="dps-star-label" title="' . esc_attr( sprintf( __( '%d estrela(s)', 'dps-client-portal' ), $i ) ) . '">★</label>';
+            echo '<label for="star-' . esc_attr( $i ) . '" class="dps-star-label" title="' . esc_attr( sprintf( __( '%d estrela(s)', 'dps-client-portal' ), $i ) ) . '">â˜…</label>';
         }
         echo '</div>';
         echo '<div class="dps-star-rating-hint">' . esc_html__( 'Clique nas estrelas para avaliar', 'dps-client-portal' ) . '</div>';
         echo '</div>';
 
-        // Campo de comentário (opcional)
+        // Campo de comentÃ¡rio (opcional)
         echo '<div class="dps-review-comment-field">';
-        echo '<label for="review_comment">' . esc_html__( 'Comentário (opcional)', 'dps-client-portal' ) . '</label>';
-        echo '<textarea name="review_comment" id="review_comment" rows="3" placeholder="' . esc_attr__( 'Conte como foi a experiência do seu pet...', 'dps-client-portal' ) . '" maxlength="500" class="dps-form-control"></textarea>';
+        echo '<label for="review_comment">' . esc_html__( 'ComentÃ¡rio (opcional)', 'dps-client-portal' ) . '</label>';
+        echo '<textarea name="review_comment" id="review_comment" rows="3" placeholder="' . esc_attr__( 'Conte como foi a experiÃªncia do seu pet...', 'dps-client-portal' ) . '" maxlength="500" class="dps-form-control"></textarea>';
         echo '<span class="dps-char-counter"><span id="char-count">0</span>/500</span>';
         echo '</div>';
 
-        // Botão de envio
+        // BotÃ£o de envio
         echo '<button type="submit" class="dps-btn-submit-review">';
-        echo '<span class="dps-btn-icon">✓</span>';
-        echo '<span class="dps-btn-text">' . esc_html__( 'Enviar Avaliação', 'dps-client-portal' ) . '</span>';
+        echo '<span class="dps-btn-icon">âœ“</span>';
+        echo '<span class="dps-btn-text">' . esc_html__( 'Enviar AvaliaÃ§Ã£o', 'dps-client-portal' ) . '</span>';
         echo '</button>';
 
         echo '</form>';
     }
 
     /**
-     * Calcula taxa de satisfação (avaliações 4-5 estrelas).
+     * Calcula taxa de satisfaÃ§Ã£o (avaliaÃ§Ãµes 4-5 estrelas).
      *
-     * @return int Percentual de satisfação (0-100).
+     * @return int Percentual de satisfaÃ§Ã£o (0-100).
      */
     private function calculate_satisfaction_rate() {
         if ( ! post_type_exists( 'dps_groomer_review' ) ) {
@@ -1779,10 +1816,10 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Verifica se o cliente já realizou uma avaliação interna.
+     * Verifica se o cliente jÃ¡ realizou uma avaliaÃ§Ã£o interna.
      *
      * @param int $client_id ID do cliente.
-     * @return bool True se já avaliou.
+     * @return bool True se jÃ¡ avaliou.
      */
     private function has_client_reviewed( $client_id ) {
         if ( ! post_type_exists( 'dps_groomer_review' ) ) {
@@ -1813,14 +1850,14 @@ final class DPS_Client_Portal {
     private function render_loyalty_panel( $client_id ) {
         echo '<section class="dps-portal-section dps-portal-loyalty">';
 
-        // Título da seção com ícone para consistência visual
-        echo '<h2>🏆 ' . esc_html__( 'Programa de Fidelidade', 'dps-client-portal' ) . '</h2>';
+        // TÃ­tulo da seÃ§Ã£o com Ã­cone para consistÃªncia visual
+        echo '<h2>ðŸ† ' . esc_html__( 'Programa de Fidelidade', 'dps-client-portal' ) . '</h2>';
 
         if ( ! class_exists( 'DPS_Loyalty_API' ) ) {
             echo '<div class="dps-loyalty-inactive">';
-            echo '<div class="dps-loyalty-inactive__icon">🎁</div>';
-            echo '<p class="dps-loyalty-inactive__message">' . esc_html__( 'O programa de fidelidade não está ativo no momento.', 'dps-client-portal' ) . '</p>';
-            echo '<p class="dps-loyalty-inactive__hint">' . esc_html__( 'Em breve você poderá acumular pontos e ganhar recompensas!', 'dps-client-portal' ) . '</p>';
+            echo '<div class="dps-loyalty-inactive__icon">ðŸŽ</div>';
+            echo '<p class="dps-loyalty-inactive__message">' . esc_html__( 'O programa de fidelidade nÃ£o estÃ¡ ativo no momento.', 'dps-client-portal' ) . '</p>';
+            echo '<p class="dps-loyalty-inactive__hint">' . esc_html__( 'Em breve vocÃª poderÃ¡ acumular pontos e ganhar recompensas!', 'dps-client-portal' ) . '</p>';
             echo '</div>';
             echo '</section>';
             return;
@@ -1857,9 +1894,9 @@ final class DPS_Client_Portal {
         echo '<div class="dps-loyalty-hero" data-loyalty-nonce="' . esc_attr( $loyalty_nonce ) . '" data-history-limit="' . esc_attr( $history_limit ) . '">';
         echo '<div class="dps-loyalty-hero__content">';
         echo '<div class="dps-loyalty-tier">';
-        echo '<span class="dps-loyalty-tier__icon">' . esc_html( $tier['icon'] ?? '🏆' ) . '</span>';
+        echo '<span class="dps-loyalty-tier__icon">' . esc_html( $tier['icon'] ?? 'ðŸ†' ) . '</span>';
         echo '<div class="dps-loyalty-tier__labels">';
-        echo '<span class="dps-loyalty-tier__level">' . esc_html__( 'Seu nível atual', 'dps-client-portal' ) . '</span>';
+        echo '<span class="dps-loyalty-tier__level">' . esc_html__( 'Seu nÃ­vel atual', 'dps-client-portal' ) . '</span>';
         echo '<span class="dps-loyalty-tier__name">' . esc_html( $tier['label'] ?? __( 'Bronze', 'dps-client-portal' ) ) . '</span>';
         echo '</div>';
         echo '</div>';
@@ -1871,119 +1908,119 @@ final class DPS_Client_Portal {
             echo '<span class="dps-loyalty-progress__current">' . esc_html( number_format( $points, 0, ',', '.' ) ) . ' pts</span>';
             echo '<span class="dps-loyalty-progress__next">' . esc_html( number_format( $next_points, 0, ',', '.' ) ) . ' pts</span>';
             echo '</div>';
-            echo '<div class="dps-loyalty-progress__bar" role="progressbar" aria-valuenow="' . esc_attr( $progress ) . '" aria-valuemin="0" aria-valuemax="100" aria-label="' . esc_attr__( 'Progresso do nível', 'dps-client-portal' ) . '"><span style="width: ' . esc_attr( $progress ) . '%"></span></div>';
-            echo '<p class="dps-loyalty-progress__hint">' . esc_html( sprintf( __( 'Faltam %s pontos para o próximo nível! 🚀', 'dps-client-portal' ), number_format( $remaining, 0, ',', '.' ) ) ) . '</p>';
+            echo '<div class="dps-loyalty-progress__bar" role="progressbar" aria-valuenow="' . esc_attr( $progress ) . '" aria-valuemin="0" aria-valuemax="100" aria-label="' . esc_attr__( 'Progresso do nÃ­vel', 'dps-client-portal' ) . '"><span style="width: ' . esc_attr( $progress ) . '%"></span></div>';
+            echo '<p class="dps-loyalty-progress__hint">' . esc_html( sprintf( __( 'Faltam %s pontos para o prÃ³ximo nÃ­vel! ðŸš€', 'dps-client-portal' ), number_format( $remaining, 0, ',', '.' ) ) ) . '</p>';
         } else {
             echo '<div class="dps-loyalty-progress__info">';
             echo '<span class="dps-loyalty-progress__current">' . esc_html( number_format( $points, 0, ',', '.' ) ) . ' pts</span>';
             echo '</div>';
-            echo '<div class="dps-loyalty-progress__bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="' . esc_attr__( 'Progresso do nível', 'dps-client-portal' ) . '"><span style="width: 100%"></span></div>';
-            echo '<p class="dps-loyalty-progress__hint">' . esc_html__( 'Você está no nível máximo! 🎉', 'dps-client-portal' ) . '</p>';
+            echo '<div class="dps-loyalty-progress__bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="' . esc_attr__( 'Progresso do nÃ­vel', 'dps-client-portal' ) . '"><span style="width: 100%"></span></div>';
+            echo '<p class="dps-loyalty-progress__hint">' . esc_html__( 'VocÃª estÃ¡ no nÃ­vel mÃ¡ximo! ðŸŽ‰', 'dps-client-portal' ) . '</p>';
         }
         echo '</div>';
         echo '</div>';
         echo '</div>';
 
-        // Cards de Estatísticas
+        // Cards de EstatÃ­sticas
         echo '<div class="dps-loyalty-stats">';
         
         // Card: Pontos
         echo '<div class="dps-loyalty-card dps-loyalty-card--points">';
         echo '<div class="dps-loyalty-card__header">';
-        echo '<span class="dps-loyalty-card__icon">🎯</span>';
+        echo '<span class="dps-loyalty-card__icon">ðŸŽ¯</span>';
         echo '<p class="dps-loyalty-card__label">' . esc_html__( 'Meus Pontos', 'dps-client-portal' ) . '</p>';
         echo '</div>';
         echo '<p class="dps-loyalty-card__value" data-loyalty-points>' . esc_html( number_format( $points, 0, ',', '.' ) ) . '</p>';
-        echo '<button class="dps-button-link dps-loyalty-history-trigger" type="button">' . esc_html__( '📋 Ver histórico', 'dps-client-portal' ) . '</button>';
+        echo '<button class="dps-button-link dps-loyalty-history-trigger" type="button">' . esc_html__( 'ðŸ“‹ Ver histÃ³rico', 'dps-client-portal' ) . '</button>';
         echo '</div>';
 
-        // Card: Créditos
+        // Card: CrÃ©ditos
         echo '<div class="dps-loyalty-card dps-loyalty-card--credits">';
         echo '<div class="dps-loyalty-card__header">';
-        echo '<span class="dps-loyalty-card__icon">💰</span>';
-        echo '<p class="dps-loyalty-card__label">' . esc_html__( 'Créditos Disponíveis', 'dps-client-portal' ) . '</p>';
+        echo '<span class="dps-loyalty-card__icon">ðŸ’°</span>';
+        echo '<p class="dps-loyalty-card__label">' . esc_html__( 'CrÃ©ditos DisponÃ­veis', 'dps-client-portal' ) . '</p>';
         echo '</div>';
         echo '<p class="dps-loyalty-card__value" data-loyalty-credit>' . esc_html( $credit_display ) . '</p>';
-        echo '<small class="dps-loyalty-card__hint">' . esc_html__( 'Use para descontos no próximo atendimento', 'dps-client-portal' ) . '</small>';
+        echo '<small class="dps-loyalty-card__hint">' . esc_html__( 'Use para descontos no prÃ³ximo atendimento', 'dps-client-portal' ) . '</small>';
         echo '</div>';
 
         // Card: Indique e Ganhe
         echo '<div class="dps-loyalty-card dps-loyalty-card--referral">';
         echo '<div class="dps-loyalty-card__header">';
-        echo '<span class="dps-loyalty-card__icon">🎁</span>';
+        echo '<span class="dps-loyalty-card__icon">ðŸŽ</span>';
         echo '<p class="dps-loyalty-card__label">' . esc_html__( 'Indique e Ganhe', 'dps-client-portal' ) . '</p>';
         echo '</div>';
         echo '<p class="dps-loyalty-card__code">' . esc_html( $referral_code ) . '</p>';
         if ( $referral_url ) {
             echo '<div class="dps-loyalty-card__actions">';
-            echo '<input type="text" readonly value="' . esc_attr( $referral_url ) . '" class="dps-loyalty-referral-input" aria-label="' . esc_attr__( 'Link de indicação', 'dps-client-portal' ) . '" />';
-            echo '<button class="dps-button-link dps-portal-copy" type="button" data-copy-target="' . esc_attr( $referral_url ) . '">📋 ' . esc_html__( 'Copiar', 'dps-client-portal' ) . '</button>';
+            echo '<input type="text" readonly value="' . esc_attr( $referral_url ) . '" class="dps-loyalty-referral-input" aria-label="' . esc_attr__( 'Link de indicaÃ§Ã£o', 'dps-client-portal' ) . '" />';
+            echo '<button class="dps-button-link dps-portal-copy" type="button" data-copy-target="' . esc_attr( $referral_url ) . '">ðŸ“‹ ' . esc_html__( 'Copiar', 'dps-client-portal' ) . '</button>';
             echo '</div>';
             echo '<small class="dps-loyalty-card__hint">' . esc_html__( 'Compartilhe e ganhe pontos quando indicados agendarem!', 'dps-client-portal' ) . '</small>';
         }
         echo '</div>';
         echo '</div>';
 
-        // Seção: Como Funciona (educacional)
+        // SeÃ§Ã£o: Como Funciona (educacional)
         echo '<div class="dps-loyalty-how-it-works">';
-        echo '<h3>💡 ' . esc_html__( 'Como Funciona', 'dps-client-portal' ) . '</h3>';
+        echo '<h3>ðŸ’¡ ' . esc_html__( 'Como Funciona', 'dps-client-portal' ) . '</h3>';
         echo '<div class="dps-loyalty-how-it-works__grid">';
         
         echo '<div class="dps-loyalty-step">';
         echo '<span class="dps-loyalty-step__number">1</span>';
         echo '<div class="dps-loyalty-step__content">';
-        echo '<strong>' . esc_html__( 'Agende Serviços', 'dps-client-portal' ) . '</strong>';
-        echo '<p>' . esc_html__( 'A cada banho ou tosa você acumula pontos automaticamente.', 'dps-client-portal' ) . '</p>';
+        echo '<strong>' . esc_html__( 'Agende ServiÃ§os', 'dps-client-portal' ) . '</strong>';
+        echo '<p>' . esc_html__( 'A cada banho ou tosa vocÃª acumula pontos automaticamente.', 'dps-client-portal' ) . '</p>';
         echo '</div>';
         echo '</div>';
         
         echo '<div class="dps-loyalty-step">';
         echo '<span class="dps-loyalty-step__number">2</span>';
         echo '<div class="dps-loyalty-step__content">';
-        echo '<strong>' . esc_html__( 'Suba de Nível', 'dps-client-portal' ) . '</strong>';
-        echo '<p>' . esc_html__( 'Quanto mais pontos, maior seu nível e multiplicador de bônus.', 'dps-client-portal' ) . '</p>';
+        echo '<strong>' . esc_html__( 'Suba de NÃ­vel', 'dps-client-portal' ) . '</strong>';
+        echo '<p>' . esc_html__( 'Quanto mais pontos, maior seu nÃ­vel e multiplicador de bÃ´nus.', 'dps-client-portal' ) . '</p>';
         echo '</div>';
         echo '</div>';
         
         echo '<div class="dps-loyalty-step">';
         echo '<span class="dps-loyalty-step__number">3</span>';
         echo '<div class="dps-loyalty-step__content">';
-        echo '<strong>' . esc_html__( 'Troque por Créditos', 'dps-client-portal' ) . '</strong>';
-        echo '<p>' . esc_html__( 'Converta pontos em créditos e use como desconto.', 'dps-client-portal' ) . '</p>';
+        echo '<strong>' . esc_html__( 'Troque por CrÃ©ditos', 'dps-client-portal' ) . '</strong>';
+        echo '<p>' . esc_html__( 'Converta pontos em crÃ©ditos e use como desconto.', 'dps-client-portal' ) . '</p>';
         echo '</div>';
         echo '</div>';
         
         echo '</div>';
         echo '</div>';
 
-        // Seção: Conquistas
+        // SeÃ§Ã£o: Conquistas
         echo '<div class="dps-loyalty-achievements">';
-        echo '<h3>🏅 ' . esc_html__( 'Minhas Conquistas', 'dps-client-portal' ) . '</h3>';
+        echo '<h3>ðŸ… ' . esc_html__( 'Minhas Conquistas', 'dps-client-portal' ) . '</h3>';
         $unlocked_count = count( $unlocked_achievements );
         $total_achievements = count( $achievement_definitions );
         echo '<p class="dps-loyalty-achievements__summary">';
-        echo esc_html( sprintf( __( 'Você desbloqueou %d de %d conquistas', 'dps-client-portal' ), $unlocked_count, $total_achievements ) );
+        echo esc_html( sprintf( __( 'VocÃª desbloqueou %d de %d conquistas', 'dps-client-portal' ), $unlocked_count, $total_achievements ) );
         echo '</p>';
         echo '<div class="dps-loyalty-achievements__grid">';
         foreach ( $achievement_definitions as $key => $achievement ) {
             $unlocked = in_array( $key, $unlocked_achievements, true );
             $card_class = $unlocked ? 'is-unlocked' : 'is-locked';
             echo '<div class="dps-loyalty-achievement ' . esc_attr( $card_class ) . '">';
-            echo '<div class="dps-loyalty-achievement__icon">' . ( $unlocked ? '🏅' : '🔒' ) . '</div>';
+            echo '<div class="dps-loyalty-achievement__icon">' . ( $unlocked ? 'ðŸ…' : 'ðŸ”’' ) . '</div>';
             echo '<div class="dps-loyalty-achievement__text">';
             echo '<p class="dps-loyalty-achievement__title">' . esc_html( $achievement['label'] ) . '</p>';
             echo '<p class="dps-loyalty-achievement__desc">' . esc_html( $achievement['description'] ) . '</p>';
-            echo '<span class="dps-loyalty-achievement__status">' . esc_html( $unlocked ? __( 'Conquistado ✓', 'dps-client-portal' ) : __( 'Em progresso...', 'dps-client-portal' ) ) . '</span>';
+            echo '<span class="dps-loyalty-achievement__status">' . esc_html( $unlocked ? __( 'Conquistado âœ“', 'dps-client-portal' ) : __( 'Em progresso...', 'dps-client-portal' ) ) . '</span>';
             echo '</div>';
             echo '</div>';
         }
         echo '</div>';
         echo '</div>';
 
-        // Seção: Histórico de Movimentações
+        // SeÃ§Ã£o: HistÃ³rico de MovimentaÃ§Ãµes
         echo '<div class="dps-loyalty-history" data-total="' . esc_attr( $total_logs ) . '" data-limit="' . esc_attr( $history_limit ) . '">';
         echo '<div class="dps-loyalty-history__header">';
-        echo '<h3>📊 ' . esc_html__( 'Histórico de Movimentações', 'dps-client-portal' ) . '</h3>';
+        echo '<h3>ðŸ“Š ' . esc_html__( 'HistÃ³rico de MovimentaÃ§Ãµes', 'dps-client-portal' ) . '</h3>';
         echo '</div>';
         if ( ! empty( $history ) ) {
             echo '<ul class="dps-loyalty-history__list">';
@@ -2003,8 +2040,8 @@ final class DPS_Client_Portal {
             echo '</ul>';
         } else {
             echo '<div class="dps-loyalty-history__empty">';
-            echo '<span class="dps-loyalty-history__empty-icon">📭</span>';
-            echo '<p>' . esc_html__( 'Nenhuma movimentação ainda. Agende um serviço para começar a acumular pontos!', 'dps-client-portal' ) . '</p>';
+            echo '<span class="dps-loyalty-history__empty-icon">ðŸ“­</span>';
+            echo '<p>' . esc_html__( 'Nenhuma movimentaÃ§Ã£o ainda. Agende um serviÃ§o para comeÃ§ar a acumular pontos!', 'dps-client-portal' ) . '</p>';
             echo '</div>';
         }
 
@@ -2013,21 +2050,21 @@ final class DPS_Client_Portal {
         }
         echo '</div>';
 
-        // Seção: Resgatar Pontos
+        // SeÃ§Ã£o: Resgatar Pontos
         if ( $portal_enabled ) {
             echo '<div class="dps-loyalty-redemption">';
-            echo '<h3>🎁 ' . esc_html__( 'Resgatar Pontos', 'dps-client-portal' ) . '</h3>';
+            echo '<h3>ðŸŽ ' . esc_html__( 'Resgatar Pontos', 'dps-client-portal' ) . '</h3>';
             echo '<p class="dps-loyalty-redemption__info">';
-            echo esc_html( sprintf( __( 'Conversão: %d pontos = R$ 1,00', 'dps-client-portal' ), $points_per_real ) );
+            echo esc_html( sprintf( __( 'ConversÃ£o: %d pontos = R$ 1,00', 'dps-client-portal' ), $points_per_real ) );
             if ( $max_discount_cents > 0 ) {
-                echo ' • ' . esc_html( sprintf( __( 'Máximo por resgate: R$ %s', 'dps-client-portal' ), $max_discount_display ) );
+                echo ' â€¢ ' . esc_html( sprintf( __( 'MÃ¡ximo por resgate: R$ %s', 'dps-client-portal' ), $max_discount_display ) );
             }
             echo '</p>';
 
             if ( $max_points_available < max( $portal_min_points, 1 ) ) {
                 echo '<div class="dps-loyalty-redemption__unavailable">';
-                echo '<span class="dps-loyalty-redemption__unavailable-icon">⏳</span>';
-                echo '<p>' . esc_html( sprintf( __( 'Você precisa de pelo menos %d pontos para resgatar. Continue acumulando!', 'dps-client-portal' ), $portal_min_points ) ) . '</p>';
+                echo '<span class="dps-loyalty-redemption__unavailable-icon">â³</span>';
+                echo '<p>' . esc_html( sprintf( __( 'VocÃª precisa de pelo menos %d pontos para resgatar. Continue acumulando!', 'dps-client-portal' ), $portal_min_points ) ) . '</p>';
                 echo '</div>';
             } else {
                 $default_value = max( $portal_min_points, 1 );
@@ -2036,17 +2073,17 @@ final class DPS_Client_Portal {
                 echo '<div class="dps-loyalty-redemption__form-group">';
                 echo '<label for="dps-loyalty-points-input">' . esc_html__( 'Quantidade de pontos para converter', 'dps-client-portal' ) . '</label>';
                 echo '<input type="number" id="dps-loyalty-points-input" name="points_to_redeem" min="' . esc_attr( max( $portal_min_points, 1 ) ) . '" max="' . esc_attr( $max_points_available ) . '" step="1" value="' . esc_attr( $default_value ) . '" />';
-                echo '<small class="dps-loyalty-redemption__balance">' . esc_html__( 'Saldo disponível: ', 'dps-client-portal' ) . '<strong data-loyalty-points>' . esc_html( number_format( $points, 0, ',', '.' ) ) . '</strong> ' . esc_html__( 'pontos', 'dps-client-portal' ) . '</small>';
+                echo '<small class="dps-loyalty-redemption__balance">' . esc_html__( 'Saldo disponÃ­vel: ', 'dps-client-portal' ) . '<strong data-loyalty-points>' . esc_html( number_format( $points, 0, ',', '.' ) ) . '</strong> ' . esc_html__( 'pontos', 'dps-client-portal' ) . '</small>';
                 echo '</div>';
-                echo '<button type="submit" class="dps-button-primary dps-loyalty-redeem-btn">🎁 ' . esc_html__( 'Resgatar Agora', 'dps-client-portal' ) . '</button>';
+                echo '<button type="submit" class="dps-button-primary dps-loyalty-redeem-btn">ðŸŽ ' . esc_html__( 'Resgatar Agora', 'dps-client-portal' ) . '</button>';
                 echo '<div class="dps-loyalty-redemption__feedback" aria-live="polite"></div>';
                 echo '</form>';
             }
             echo '</div>';
         } else {
             echo '<div class="dps-loyalty-redemption--disabled">';
-            echo '<span class="dps-loyalty-redemption--disabled-icon">ℹ️</span>';
-            echo '<p>' . esc_html__( 'O resgate de pontos pelo portal está temporariamente indisponível. Entre em contato com nossa equipe para utilizar seus pontos.', 'dps-client-portal' ) . '</p>';
+            echo '<span class="dps-loyalty-redemption--disabled-icon">â„¹ï¸</span>';
+            echo '<p>' . esc_html__( 'O resgate de pontos pelo portal estÃ¡ temporariamente indisponÃ­vel. Entre em contato com nossa equipe para utilizar seus pontos.', 'dps-client-portal' ) . '</p>';
             echo '</div>';
         }
 
@@ -2056,28 +2093,28 @@ final class DPS_Client_Portal {
     /**
      * Renderiza o shortcode de login do portal do cliente.
      *
-     * @return string Conteúdo HTML renderizado.
+     * @return string ConteÃºdo HTML renderizado.
      */
     /**
      * Renderiza shortcode de login (DEPRECIADO)
      * 
      * ESTE SHORTCODE FOI DESCONTINUADO EM FAVOR DO LOGIN EXCLUSIVO POR TOKEN (MAGIC LINK)
      * 
-     * O login por usuário/senha do Cliente Portal foi removido por questões de segurança
-     * e usabilidade. O sistema agora utiliza EXCLUSIVAMENTE autenticação por token via
-     * link único (magic link) enviado por WhatsApp ou e-mail.
+     * O login por usuÃ¡rio/senha do Cliente Portal foi removido por questÃµes de seguranÃ§a
+     * e usabilidade. O sistema agora utiliza EXCLUSIVAMENTE autenticaÃ§Ã£o por token via
+     * link Ãºnico (magic link) enviado por WhatsApp ou e-mail.
      * 
      * Para obter acesso ao portal, o cliente deve:
-     * 1. Acessar a página do portal
+     * 1. Acessar a pÃ¡gina do portal
      * 2. Clicar em "Quero acesso ao meu portal"
      * 3. Aguardar a equipe enviar o link de acesso
      * 4. Clicar no link recebido para autenticar
      * 
-     * @deprecated 2.4.0 Use apenas autenticação por token via [dps_client_portal]
-     * @return string Mensagem de depreciação
+     * @deprecated 2.4.0 Use apenas autenticaÃ§Ã£o por token via [dps_client_portal]
+     * @return string Mensagem de depreciaÃ§Ã£o
      */
     public function render_login_shortcode() {
-        // Desabilita cache da página para garantir dados sempre atualizados
+        // Desabilita cache da pÃ¡gina para garantir dados sempre atualizados
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();
         }
@@ -2092,17 +2129,17 @@ final class DPS_Client_Portal {
         ?>
         <div class="dps-deprecated-notice" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #856404;">
-                <?php esc_html_e( 'Método de Login Descontinuado', 'dps-client-portal' ); ?>
+                <?php esc_html_e( 'MÃ©todo de Login Descontinuado', 'dps-client-portal' ); ?>
             </h3>
             <p style="margin-bottom: 15px;">
-                <?php esc_html_e( 'O login por usuário e senha não está mais disponível no Portal do Cliente.', 'dps-client-portal' ); ?>
+                <?php esc_html_e( 'O login por usuÃ¡rio e senha nÃ£o estÃ¡ mais disponÃ­vel no Portal do Cliente.', 'dps-client-portal' ); ?>
             </p>
             <p style="margin-bottom: 15px;">
                 <strong><?php esc_html_e( 'Como acessar o portal agora:', 'dps-client-portal' ); ?></strong>
             </p>
             <ol style="margin-left: 20px;">
-                <li><?php esc_html_e( 'Acesse a página do Portal do Cliente', 'dps-client-portal' ); ?></li>
-                <li><?php esc_html_e( 'Clique no botão "Quero acesso ao meu portal"', 'dps-client-portal' ); ?></li>
+                <li><?php esc_html_e( 'Acesse a pÃ¡gina do Portal do Cliente', 'dps-client-portal' ); ?></li>
+                <li><?php esc_html_e( 'Clique no botÃ£o "Quero acesso ao meu portal"', 'dps-client-portal' ); ?></li>
                 <li><?php esc_html_e( 'Aguarde nossa equipe enviar seu link exclusivo de acesso', 'dps-client-portal' ); ?></li>
                 <li><?php esc_html_e( 'Clique no link recebido para acessar automaticamente', 'dps-client-portal' ); ?></li>
             </ol>
@@ -2122,9 +2159,9 @@ final class DPS_Client_Portal {
     }
     
     /**
-     * Processa salvamento das configurações do portal.
+     * Processa salvamento das configuraÃ§Ãµes do portal.
      *
-     * Verifica nonce, capability e salva as opções do portal.
+     * Verifica nonce, capability e salva as opÃ§Ãµes do portal.
      *
      * @since 2.1.0
      */
@@ -2142,17 +2179,17 @@ final class DPS_Client_Portal {
             return;
         }
         
-        // Salva ID da página do portal
+        // Salva ID da pÃ¡gina do portal
         if ( isset( $_POST['dps_portal_page_id'] ) ) {
             $page_id = absint( wp_unslash( $_POST['dps_portal_page_id'] ) );
             update_option( 'dps_portal_page_id', $page_id );
         }
         
-        // Salva configuração de notificação de acesso (Fase 1.3)
+        // Salva configuraÃ§Ã£o de notificaÃ§Ã£o de acesso (Fase 1.3)
         $access_notification = isset( $_POST['dps_portal_access_notification_enabled'] ) ? 1 : 0;
         update_option( 'dps_portal_access_notification_enabled', $access_notification );
         
-        // Salva configuração de 2FA (Fase 6.4)
+        // Salva configuraÃ§Ã£o de 2FA (Fase 6.4)
         $twofa_enabled = isset( $_POST['dps_portal_2fa_enabled'] ) ? 1 : 0;
         update_option( 'dps_portal_2fa_enabled', $twofa_enabled );
         
@@ -2167,12 +2204,12 @@ final class DPS_Client_Portal {
     }
     
     /**
-     * Obtém o endereço IP do cliente de forma segura.
+     * ObtÃ©m o endereÃ§o IP do cliente de forma segura.
      *
      * @since 2.2.0
      * @deprecated 2.5.0 Use DPS_IP_Helper::get_ip() diretamente.
      *
-     * @return string Endereço IP sanitizado ou 'unknown' se não disponível.
+     * @return string EndereÃ§o IP sanitizado ou 'unknown' se nÃ£o disponÃ­vel.
      */
     private function get_client_ip() {
         if ( class_exists( 'DPS_IP_Helper' ) ) {
@@ -2186,19 +2223,19 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Registra evento de segurança no sistema de logs.
+     * Registra evento de seguranÃ§a no sistema de logs.
      *
-     * Utiliza DPS_Logger para registrar eventos relacionados a autenticação,
-     * tentativas de login e outras ações de segurança do portal.
+     * Utiliza DPS_Logger para registrar eventos relacionados a autenticaÃ§Ã£o,
+     * tentativas de login e outras aÃ§Ãµes de seguranÃ§a do portal.
      *
      * IMPORTANTE: Nunca registra senhas ou tokens completos para evitar
-     * exposição de dados sensíveis. Usa allowlist de campos seguros.
+     * exposiÃ§Ã£o de dados sensÃ­veis. Usa allowlist de campos seguros.
      *
      * @since 2.2.0
      *
      * @param string $event   Nome do evento (ex: 'login_failed', 'token_auth_success').
-     * @param array  $context Dados do contexto (IP, client_id, etc.). Não incluir senhas.
-     * @param string $level   Nível do log (padrão: warning). Use DPS_Logger::LEVEL_* constants.
+     * @param array  $context Dados do contexto (IP, client_id, etc.). NÃ£o incluir senhas.
+     * @param string $level   NÃ­vel do log (padrÃ£o: warning). Use DPS_Logger::LEVEL_* constants.
      */
     private function log_security_event( $event, $context = [], $level = null ) {
         // Verifica se DPS_Logger existe (plugin base ativo)
@@ -2206,12 +2243,12 @@ final class DPS_Client_Portal {
             return;
         }
 
-        // Define nível padrão como warning para eventos de segurança
+        // Define nÃ­vel padrÃ£o como warning para eventos de seguranÃ§a
         if ( null === $level ) {
             $level = DPS_Logger::LEVEL_WARNING;
         }
 
-        // Allowlist de campos seguros para evitar exposição de dados sensíveis
+        // Allowlist de campos seguros para evitar exposiÃ§Ã£o de dados sensÃ­veis
         $allowed_fields = [ 'ip', 'client_id', 'user_id', 'attempts', 'event_type', 'timestamp' ];
         $safe_context   = array_intersect_key( $context, array_flip( $allowed_fields ) );
 
@@ -2220,19 +2257,19 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Envia notificação de acesso ao portal para o cliente
+     * Envia notificaÃ§Ã£o de acesso ao portal para o cliente
      * 
      * Notifica o cliente via e-mail quando ocorre um acesso bem-sucedido ao portal.
-     * Aumenta a segurança e transparência, permitindo que o cliente identifique
-     * acessos não autorizados.
+     * Aumenta a seguranÃ§a e transparÃªncia, permitindo que o cliente identifique
+     * acessos nÃ£o autorizados.
      * 
-     * CONFIGURAÇÃO:
-     * A notificação pode ser ativada/desativada via option 'dps_portal_access_notification_enabled'
+     * CONFIGURAÃ‡ÃƒO:
+     * A notificaÃ§Ã£o pode ser ativada/desativada via option 'dps_portal_access_notification_enabled'
      * 
-     * CONTEÚDO DO E-MAIL:
+     * CONTEÃšDO DO E-MAIL:
      * - Data e hora do acesso
-     * - Endereço IP (primeiros 3 octetos ofuscados para privacidade)
-     * - Mensagem de segurança: "Se não foi você, entre em contato imediatamente"
+     * - EndereÃ§o IP (primeiros 3 octetos ofuscados para privacidade)
+     * - Mensagem de seguranÃ§a: "Se nÃ£o foi vocÃª, entre em contato imediatamente"
      * 
      * @param int    $client_id  ID do cliente que acessou o portal
      * @param string $ip_address IP do acesso
@@ -2241,7 +2278,7 @@ final class DPS_Client_Portal {
      * @since 2.4.0
      */
     private function send_access_notification( $client_id, $ip_address ) {
-        // Verifica se notificações estão habilitadas
+        // Verifica se notificaÃ§Ãµes estÃ£o habilitadas
         $notifications_enabled = get_option( 'dps_portal_access_notification_enabled', false );
         
         // Permite filtro para controle por add-ons
@@ -2251,12 +2288,12 @@ final class DPS_Client_Portal {
             return;
         }
         
-        // Obtém dados do cliente
+        // ObtÃ©m dados do cliente
         $client_email = get_post_meta( $client_id, 'client_email', true );
         $client_name  = get_the_title( $client_id );
         
         if ( empty( $client_email ) || ! is_email( $client_email ) ) {
-            DPS_Logger::log( 'warning', 'Portal: notificação de acesso não enviada - e-mail inválido', [
+            DPS_Logger::log( 'warning', 'Portal: notificaÃ§Ã£o de acesso nÃ£o enviada - e-mail invÃ¡lido', [
                 'client_id' => $client_id,
             ] );
             return;
@@ -2266,8 +2303,8 @@ final class DPS_Client_Portal {
         $access_time = current_time( 'mysql' );
         $access_date = date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $access_time ) );
         
-        // Ofusca IP parcialmente para privacidade (mantém apenas primeiros 2 octetos)
-        // Nota: Implementação atual suporta apenas IPv4
+        // Ofusca IP parcialmente para privacidade (mantÃ©m apenas primeiros 2 octetos)
+        // Nota: ImplementaÃ§Ã£o atual suporta apenas IPv4
         $ip_parts      = explode( '.', $ip_address );
         $ip_obfuscated = isset( $ip_parts[0], $ip_parts[1] ) && count( $ip_parts ) === 4
             ? $ip_parts[0] . '.' . $ip_parts[1] . '.***' 
@@ -2282,16 +2319,16 @@ final class DPS_Client_Portal {
         
         $body = sprintf(
             /* translators: 1: Nome do cliente, 2: Data/hora do acesso, 3: IP ofuscado */
-            __( 'Olá %1$s,
+            __( 'OlÃ¡ %1$s,
 
 Detectamos um acesso ao seu Portal do Cliente.
 
 Data/Hora: %2$s
 IP: %3$s
 
-Se você reconhece este acesso, pode ignorar esta mensagem. Ela é apenas uma notificação de segurança para mantê-lo informado.
+Se vocÃª reconhece este acesso, pode ignorar esta mensagem. Ela Ã© apenas uma notificaÃ§Ã£o de seguranÃ§a para mantÃª-lo informado.
 
-⚠️ IMPORTANTE: Se você NÃO realizou este acesso, entre em contato com nossa equipe IMEDIATAMENTE. Pode ser que alguém tenha obtido seu link de acesso indevidamente.
+âš ï¸ IMPORTANTE: Se vocÃª NÃƒO realizou este acesso, entre em contato com nossa equipe IMEDIATAMENTE. Pode ser que alguÃ©m tenha obtido seu link de acesso indevidamente.
 
 Atenciosamente,
 Equipe %4$s', 'dps-client-portal' ),
@@ -2305,7 +2342,7 @@ Equipe %4$s', 'dps-client-portal' ),
         $subject = apply_filters( 'dps_portal_access_notification_subject', $subject, $client_id );
         $body    = apply_filters( 'dps_portal_access_notification_body', $body, $client_id, $access_date, $ip_obfuscated );
         
-        // Tenta usar Communications API se disponível
+        // Tenta usar Communications API se disponÃ­vel
         if ( class_exists( 'DPS_Communications_API' ) ) {
             $comm_api = DPS_Communications_API::get_instance();
             $sent     = $comm_api->send_email( 
@@ -2323,29 +2360,29 @@ Equipe %4$s', 'dps-client-portal' ),
         }
         
         if ( ! $sent ) {
-            DPS_Logger::log( 'error', 'Portal: falha ao enviar notificação de acesso', [
+            DPS_Logger::log( 'error', 'Portal: falha ao enviar notificaÃ§Ã£o de acesso', [
                 'client_id' => $client_id,
                 'email'     => $client_email,
             ] );
         }
         
-        // Hook para extensões (ex: enviar também via WhatsApp)
+        // Hook para extensÃµes (ex: enviar tambÃ©m via WhatsApp)
         do_action( 'dps_portal_access_notification_sent', $client_id, $sent, $access_date, $ip_address );
     }
 
     /**
-     * Renderiza seção de preferências do cliente.
-     * Fase 4 - continuação: Preferências
+     * Renderiza seÃ§Ã£o de preferÃªncias do cliente.
+     * Fase 4 - continuaÃ§Ã£o: PreferÃªncias
      *
      * @since 2.4.0
      * @param int $client_id ID do cliente.
      */
     private function render_client_preferences( $client_id ) {
-        // Busca preferências salvas
+        // Busca preferÃªncias salvas
         $contact_preference = get_post_meta( $client_id, 'client_contact_preference', true );
         $period_preference  = get_post_meta( $client_id, 'client_period_preference', true );
 
-        // Preferências de notificação
+        // PreferÃªncias de notificaÃ§Ã£o
         $notif_reminders  = get_post_meta( $client_id, 'client_notification_reminders', true );
         $notif_payments   = get_post_meta( $client_id, 'client_notification_payments', true );
         $notif_promotions = get_post_meta( $client_id, 'client_notification_promotions', true );
@@ -2361,8 +2398,8 @@ Equipe %4$s', 'dps-client-portal' ),
 
         echo '<div class="dps-surface dps-surface--neutral dps-meus-dados-card dps-preferences-section">';
         echo '<div class="dps-surface__title">';
-        echo '<span>⚙️</span>';
-        echo esc_html__( 'Minhas Preferências', 'dps-client-portal' );
+        echo '<span>âš™ï¸</span>';
+        echo esc_html__( 'Minhas PreferÃªncias', 'dps-client-portal' );
         echo '</div>';
         echo '<p class="dps-surface__description">' . esc_html__( 'Personalize como e quando prefere ser atendido.', 'dps-client-portal' ) . '</p>';
         
@@ -2371,7 +2408,7 @@ Equipe %4$s', 'dps-client-portal' ),
         echo '<input type="hidden" name="dps_client_portal_action" value="update_client_preferences">';
         
         echo '<fieldset class="dps-fieldset">';
-        echo '<legend class="dps-fieldset__legend">' . esc_html__( '📞 Comunicação', 'dps-client-portal' ) . '</legend>';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'ðŸ“ž ComunicaÃ§Ã£o', 'dps-client-portal' ) . '</legend>';
         
         echo '<div class="dps-form-row dps-form-row--2col">';
         
@@ -2381,21 +2418,21 @@ Equipe %4$s', 'dps-client-portal' ),
         echo esc_html__( 'Como prefere ser contatado?', 'dps-client-portal' );
         echo '</label>';
         echo '<select id="contact_preference" name="contact_preference" class="dps-form-control">';
-        echo '<option value="">' . esc_html__( 'Sem preferência', 'dps-client-portal' ) . '</option>';
+        echo '<option value="">' . esc_html__( 'Sem preferÃªncia', 'dps-client-portal' ) . '</option>';
         echo '<option value="whatsapp"' . selected( $contact_preference, 'whatsapp', false ) . '>' . esc_html__( 'WhatsApp', 'dps-client-portal' ) . '</option>';
         echo '<option value="phone"' . selected( $contact_preference, 'phone', false ) . '>' . esc_html__( 'Telefone', 'dps-client-portal' ) . '</option>';
         echo '<option value="email"' . selected( $contact_preference, 'email', false ) . '>' . esc_html__( 'E-mail', 'dps-client-portal' ) . '</option>';
         echo '</select>';
         echo '</div>';
         
-        // Período preferido
+        // PerÃ­odo preferido
         echo '<div class="dps-form-col">';
         echo '<label class="dps-form-label" for="period_preference">';
-        echo esc_html__( 'Período preferido para banho/tosa', 'dps-client-portal' );
+        echo esc_html__( 'PerÃ­odo preferido para banho/tosa', 'dps-client-portal' );
         echo '</label>';
         echo '<select id="period_preference" name="period_preference" class="dps-form-control">';
-        echo '<option value="">' . esc_html__( 'Sem preferência', 'dps-client-portal' ) . '</option>';
-        echo '<option value="morning"' . selected( $period_preference, 'morning', false ) . '>' . esc_html__( 'Manhã', 'dps-client-portal' ) . '</option>';
+        echo '<option value="">' . esc_html__( 'Sem preferÃªncia', 'dps-client-portal' ) . '</option>';
+        echo '<option value="morning"' . selected( $period_preference, 'morning', false ) . '>' . esc_html__( 'ManhÃ£', 'dps-client-portal' ) . '</option>';
         echo '<option value="afternoon"' . selected( $period_preference, 'afternoon', false ) . '>' . esc_html__( 'Tarde', 'dps-client-portal' ) . '</option>';
         echo '<option value="flexible"' . selected( $period_preference, 'flexible', false ) . '>' . esc_html__( 'Indiferente', 'dps-client-portal' ) . '</option>';
         echo '</select>';
@@ -2404,42 +2441,42 @@ Equipe %4$s', 'dps-client-portal' ),
         echo '</div>'; // .dps-form-row
         echo '</fieldset>';
 
-        // Preferências de notificação
+        // PreferÃªncias de notificaÃ§Ã£o
         echo '<fieldset class="dps-fieldset">';
-        echo '<legend class="dps-fieldset__legend">' . esc_html__( '🔔 Notificações', 'dps-client-portal' ) . '</legend>';
-        echo '<p class="dps-fieldset__description">' . esc_html__( 'Escolha quais notificações deseja receber.', 'dps-client-portal' ) . '</p>';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'ðŸ”” NotificaÃ§Ãµes', 'dps-client-portal' ) . '</legend>';
+        echo '<p class="dps-fieldset__description">' . esc_html__( 'Escolha quais notificaÃ§Ãµes deseja receber.', 'dps-client-portal' ) . '</p>';
 
         echo '<div class="dps-notification-toggles">';
 
         // Lembretes de agendamento
         echo '<label class="dps-toggle-row">';
         echo '<span class="dps-toggle-row__label">';
-        echo '<span class="dps-toggle-row__icon">📅</span>';
+        echo '<span class="dps-toggle-row__icon">ðŸ“…</span>';
         echo esc_html__( 'Lembretes de agendamento', 'dps-client-portal' );
         echo '</span>';
-        echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Receba avisos antes do horário marcado', 'dps-client-portal' ) . '</span>';
+        echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Receba avisos antes do horÃ¡rio marcado', 'dps-client-portal' ) . '</span>';
         echo '<input type="hidden" name="notification_reminders" value="0">';
         echo '<input type="checkbox" name="notification_reminders" value="1" class="dps-toggle-input"' . checked( $notif_reminders, '1', false ) . '>';
         echo '<span class="dps-toggle-switch" aria-hidden="true"></span>';
         echo '</label>';
 
-        // Notificações de pagamento
+        // NotificaÃ§Ãµes de pagamento
         echo '<label class="dps-toggle-row">';
         echo '<span class="dps-toggle-row__label">';
-        echo '<span class="dps-toggle-row__icon">💰</span>';
+        echo '<span class="dps-toggle-row__icon">ðŸ’°</span>';
         echo esc_html__( 'Avisos de pagamento', 'dps-client-portal' );
         echo '</span>';
-        echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Receba lembretes de parcelas e cobranças', 'dps-client-portal' ) . '</span>';
+        echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Receba lembretes de parcelas e cobranÃ§as', 'dps-client-portal' ) . '</span>';
         echo '<input type="hidden" name="notification_payments" value="0">';
         echo '<input type="checkbox" name="notification_payments" value="1" class="dps-toggle-input"' . checked( $notif_payments, '1', false ) . '>';
         echo '<span class="dps-toggle-switch" aria-hidden="true"></span>';
         echo '</label>';
 
-        // Promoções
+        // PromoÃ§Ãµes
         echo '<label class="dps-toggle-row">';
         echo '<span class="dps-toggle-row__label">';
-        echo '<span class="dps-toggle-row__icon">🎁</span>';
-        echo esc_html__( 'Promoções e ofertas', 'dps-client-portal' );
+        echo '<span class="dps-toggle-row__icon">ðŸŽ</span>';
+        echo esc_html__( 'PromoÃ§Ãµes e ofertas', 'dps-client-portal' );
         echo '</span>';
         echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Fique por dentro de descontos e novidades', 'dps-client-portal' ) . '</span>';
         echo '<input type="hidden" name="notification_promotions" value="0">';
@@ -2447,13 +2484,13 @@ Equipe %4$s', 'dps-client-portal' ),
         echo '<span class="dps-toggle-switch" aria-hidden="true"></span>';
         echo '</label>';
 
-        // Atualizações do pet
+        // AtualizaÃ§Ãµes do pet
         echo '<label class="dps-toggle-row">';
         echo '<span class="dps-toggle-row__label">';
-        echo '<span class="dps-toggle-row__icon">🐾</span>';
-        echo esc_html__( 'Atualizações do pet', 'dps-client-portal' );
+        echo '<span class="dps-toggle-row__icon">ðŸ¾</span>';
+        echo esc_html__( 'AtualizaÃ§Ãµes do pet', 'dps-client-portal' );
         echo '</span>';
-        echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Novas fotos, observações e relatórios', 'dps-client-portal' ) . '</span>';
+        echo '<span class="dps-toggle-row__hint">' . esc_html__( 'Novas fotos, observaÃ§Ãµes e relatÃ³rios', 'dps-client-portal' ) . '</span>';
         echo '<input type="hidden" name="notification_updates" value="0">';
         echo '<input type="checkbox" name="notification_updates" value="1" class="dps-toggle-input"' . checked( $notif_updates, '1', false ) . '>';
         echo '<span class="dps-toggle-switch" aria-hidden="true"></span>';
@@ -2464,7 +2501,7 @@ Equipe %4$s', 'dps-client-portal' ),
         
         echo '<div class="dps-form-actions">';
         echo '<button type="submit" class="button button-primary dps-btn-submit">';
-        echo '<span>💾</span> ' . esc_html__( 'Salvar Preferências', 'dps-client-portal' );
+        echo '<span>ðŸ’¾</span> ' . esc_html__( 'Salvar PreferÃªncias', 'dps-client-portal' );
         echo '</button>';
         echo '</div>';
         
@@ -2474,9 +2511,9 @@ Equipe %4$s', 'dps-client-portal' ),
 
 
     /**
-     * Renderiza timeline de serviços por pet.
-     * Fase 4: Timeline de Serviços
-     * Revisão completa do layout: Janeiro 2026
+     * Renderiza timeline de serviÃ§os por pet.
+     * Fase 4: Timeline de ServiÃ§os
+     * RevisÃ£o completa do layout: Janeiro 2026
      *
      * @since 2.4.0
      * @param int $client_id ID do cliente.
@@ -2486,34 +2523,34 @@ Equipe %4$s', 'dps-client-portal' ),
         $pets     = $pet_repo->get_pets_by_client( $client_id );
         $renderer = DPS_Portal_Renderer::get_instance();
 
-        // Renderiza cabeçalho da aba com métricas globais
+        // Renderiza cabeÃ§alho da aba com mÃ©tricas globais
         $renderer->render_pet_history_header( $client_id, $pets );
 
         if ( empty( $pets ) ) {
             echo '<section class="dps-portal-section dps-portal-pet-history-empty">';
             echo '<div class="dps-empty-state dps-empty-state--large">';
-            echo '<div class="dps-empty-state__illustration">🐾</div>';
+            echo '<div class="dps-empty-state__illustration">ðŸ¾</div>';
             echo '<h3 class="dps-empty-state__title">' . esc_html__( 'Nenhum pet cadastrado ainda', 'dps-client-portal' ) . '</h3>';
-            echo '<p class="dps-empty-state__message">' . esc_html__( 'Cadastre seus pets para acompanhar o histórico de serviços realizados.', 'dps-client-portal' ) . '</p>';
+            echo '<p class="dps-empty-state__message">' . esc_html__( 'Cadastre seus pets para acompanhar o histÃ³rico de serviÃ§os realizados.', 'dps-client-portal' ) . '</p>';
             // CTA para contato
             if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
-                $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( __( 'Olá! Gostaria de cadastrar meu pet.', 'dps-client-portal' ) );
+                $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( __( 'OlÃ¡! Gostaria de cadastrar meu pet.', 'dps-client-portal' ) );
             } else {
                 $whatsapp_number = get_option( 'dps_whatsapp_number', '5515991606299' );
                 if ( class_exists( 'DPS_Phone_Helper' ) ) {
                     $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
                 }
-                $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . urlencode( 'Olá! Gostaria de cadastrar meu pet.' );
+                $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . urlencode( 'OlÃ¡! Gostaria de cadastrar meu pet.' );
             }
             echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" class="dps-empty-state__action button button-primary">';
-            echo '💬 ' . esc_html__( 'Falar com a Equipe', 'dps-client-portal' );
+            echo 'ðŸ’¬ ' . esc_html__( 'Falar com a Equipe', 'dps-client-portal' );
             echo '</a>';
             echo '</div>';
             echo '</section>';
             return;
         }
 
-        // Renderiza navegação por abas quando há múltiplos pets
+        // Renderiza navegaÃ§Ã£o por abas quando hÃ¡ mÃºltiplos pets
         if ( count( $pets ) > 1 ) {
             $renderer->render_pet_tabs_navigation( $pets );
         }

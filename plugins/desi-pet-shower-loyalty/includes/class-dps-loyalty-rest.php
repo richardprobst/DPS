@@ -81,7 +81,7 @@ class DPS_Loyalty_REST {
     }
 
     /**
-     * Checa permissão.
+     * Checa permissÃ£o.
      */
     public static function can_access() {
         return current_user_can( 'manage_options' );
@@ -95,7 +95,7 @@ class DPS_Loyalty_REST {
 
         $client = get_post( $client_id );
         if ( ! $client || 'dps_cliente' !== $client->post_type ) {
-            return new WP_Error( 'not_found', __( 'Cliente não encontrado.', 'dps-loyalty-addon' ), [ 'status' => 404 ] );
+            return new WP_Error( 'not_found', __( 'Cliente nÃ£o encontrado.', 'dps-loyalty-addon' ), [ 'status' => 404 ] );
         }
 
         $tier         = DPS_Loyalty_API::get_loyalty_tier( $client_id );
@@ -109,17 +109,18 @@ class DPS_Loyalty_REST {
                 'credit_cents'  => DPS_Loyalty_API::get_credit( $client_id ),
                 'tier'          => $tier,
                 'achievements'  => self::format_achievements_response( $achievements ),
+                'game_rewards'  => method_exists( 'DPS_Loyalty_API', 'get_game_reward_definitions' ) ? array_values( DPS_Loyalty_API::get_game_reward_definitions() ) : [],
             ]
         );
     }
 
     /**
-     * Retorna cliente pelo código de indicação.
+     * Retorna cliente pelo cÃ³digo de indicaÃ§Ã£o.
      */
     public static function get_client_by_ref( WP_REST_Request $request ) {
         $code = sanitize_text_field( $request['code'] );
         if ( ! $code ) {
-            return new WP_Error( 'invalid_code', __( 'Código inválido.', 'dps-loyalty-addon' ), [ 'status' => 400 ] );
+            return new WP_Error( 'invalid_code', __( 'CÃ³digo invÃ¡lido.', 'dps-loyalty-addon' ), [ 'status' => 400 ] );
         }
 
         $client = get_posts( [
@@ -135,7 +136,7 @@ class DPS_Loyalty_REST {
         ] );
 
         if ( empty( $client ) ) {
-            return new WP_Error( 'not_found', __( 'Cliente não encontrado.', 'dps-loyalty-addon' ), [ 'status' => 404 ] );
+            return new WP_Error( 'not_found', __( 'Cliente nÃ£o encontrado.', 'dps-loyalty-addon' ), [ 'status' => 404 ] );
         }
 
         $request->set_param( 'id', (int) $client[0] );

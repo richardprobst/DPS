@@ -92,6 +92,11 @@ Antes de criar uma nova versão oficial:
 - **Shortcode**: `[dps_space_groomers]` para uso em qualquer página WordPress.
 - **Áudio**: SFX chiptune via Web Audio API (sem arquivos externos).
 - **Recorde local**: pontuação salva em `localStorage` do navegador.
+- **Persistencia sincronizada do Space Groomers**: progresso passa a ser salvo em `post meta` do cliente (`dps_game_progress_v1`) quando ha portal autenticado, mantendo fallback local fora do portal.
+- **REST do jogo**: adicionadas rotas `dps-game/v1/progress` e `dps-game/v1/progress/sync` para leitura e merge seguro do progresso.
+- **Resumo do jogo no portal**: aba Inicio agora mostra missao atual, streak, recorde, badges e ultima run usando dados sincronizados.
+- **Recompensas leves no loyalty**: missao diaria, streak 3, streak 7 e primeira vitoria agora podem render pontos com idempotencia via `rewardMarkers`.
+
 
 **Client Portal — Fase 4.1: Indicador de Progresso no Agendamento**
 

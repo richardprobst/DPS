@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name:       desi.pet by PRObst – Client Portal Add-on
+ * Plugin Name:       desi.pet by PRObst â€“ Client Portal Add-on
  * Plugin URI:        https://www.probst.pro
- * Description:       Portal de autoatendimento para clientes. Navegação por tabs, chat em tempo real, histórico, galeria de fotos, pendências financeiras e atualização de dados.
- * Version:           2.4.3
+ * Description:       Portal de autoatendimento para clientes. NavegaÃ§Ã£o por tabs, chat em tempo real, histÃ³rico, galeria de fotos, pendÃªncias financeiras e atualizaÃ§Ã£o de dados.
+ * Version:           2.4.4
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-client-portal
@@ -13,13 +13,13 @@
  * Update URI:        https://github.com/richardprobst/DPS
  *
  * Este add-on cria um portal de autoatendimento para clientes.  Ele registra
- * automaticamente um usuário WordPress para cada cliente cadastrado (quando
- * ainda não existir), associa o usuário ao cadastro de cliente e oferece um
- * shortcode [dps_client_portal] que renderiza a página com histórico, fotos,
- * pendências financeiras e formulários de atualização de dados.  O portal
- * utiliza apenas o login padrão do WordPress (usuário e senha), dispensando
- * CPF como credencial.  Pendências podem ser pagas via link de pagamento do
- * Mercado Pago, gerado na hora.
+ * automaticamente um usuÃ¡rio WordPress para cada cliente cadastrado (quando
+ * ainda nÃ£o existir), associa o usuÃ¡rio ao cadastro de cliente e oferece um
+ * shortcode [dps_client_portal] que renderiza a pÃ¡gina com histÃ³rico, fotos,
+ * pendÃªncias financeiras e formulÃ¡rios de atualizaÃ§Ã£o de dados.  O portal
+ * utiliza apenas o login padrÃ£o do WordPress (usuÃ¡rio e senha), dispensando
+ * CPF como credencial.  PendÃªncias podem ser pagas via link de pagamento do
+ * MercadoÂ Pago, gerado na hora.
  */
 
 // Bloqueia acesso direto aos arquivos.
@@ -28,8 +28,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base desi.pet by PRObst está ativo.
- * Se não estiver, exibe aviso e interrompe carregamento do add-on.
+ * Verifica se o plugin base desi.pet by PRObst estÃ¡ ativo.
+ * Se nÃ£o estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_client_portal_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
@@ -48,7 +48,7 @@ add_action( 'plugins_loaded', function() {
     }
 }, 1 );
 
-// Define constantes úteis do plugin.
+// Define constantes Ãºteis do plugin.
 if ( ! defined( 'DPS_CLIENT_PORTAL_ADDON_DIR' ) ) {
     define( 'DPS_CLIENT_PORTAL_ADDON_DIR', plugin_dir_path( __FILE__ ) );
 }
@@ -57,21 +57,21 @@ if ( ! defined( 'DPS_CLIENT_PORTAL_ADDON_URL' ) ) {
     define( 'DPS_CLIENT_PORTAL_ADDON_URL', plugin_dir_url( __FILE__ ) );
 }
 
-// Define título padrão da página do portal (tradução deve ser feita ao usar a constante)
+// Define tÃ­tulo padrÃ£o da pÃ¡gina do portal (traduÃ§Ã£o deve ser feita ao usar a constante)
 if ( ! defined( 'DPS_CLIENT_PORTAL_PAGE_TITLE' ) ) {
     define( 'DPS_CLIENT_PORTAL_PAGE_TITLE', 'Portal do Cliente' );
 }
 
 /**
  * Carrega o text domain do Client Portal Add-on.
- * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 5).
+ * Usa prioridade 1 para garantir que rode antes da inicializaÃ§Ã£o da classe (prioridade 5).
  */
 function dps_client_portal_load_textdomain() {
     load_plugin_textdomain( 'dps-client-portal', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 add_action( 'init', 'dps_client_portal_load_textdomain', 1 );
 
-// Inclui funções auxiliares
+// Inclui funÃ§Ãµes auxiliares
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/functions-portal-helpers.php';
 
 // Inclui interfaces (Fase 3.1 - Dependency Injection)
@@ -84,10 +84,10 @@ require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-session-ma
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-admin-actions.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-cache-helper.php'; // Fase 2.2
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-calendar-helper.php'; // Fase 2.8
-require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-profile-update.php'; // Fase 5 - Atualização de perfil via link
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-profile-update.php'; // Fase 5 - AtualizaÃ§Ã£o de perfil via link
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-2fa.php'; // Fase 6.4 - 2FA via e-mail
 
-// Inclui repositórios (Fase 3.1 - Repository Pattern)
+// Inclui repositÃ³rios (Fase 3.1 - Repository Pattern)
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/class-dps-client-repository.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/class-dps-pet-repository.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/class-dps-appointment-repository.php';
@@ -103,18 +103,18 @@ require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-por
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-portal-admin.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-portal-pet-history.php'; // Fase 4
 
-// Hub centralizado do Portal (Fase 2 - Reorganização de Menus)
+// Hub centralizado do Portal (Fase 2 - ReorganizaÃ§Ã£o de Menus)
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-hub.php';
 
-// Sugestões inteligentes de agendamento (Fase 8.1)
+// SugestÃµes inteligentes de agendamento (Fase 8.1)
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-scheduling-suggestions.php';
 
 // Inclui classe principal (coordenador)
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-client-portal.php';
 
 /**
- * Inicializa o Client Portal Add-on após o hook 'init' para garantir que o text domain seja carregado primeiro.
- * Usa prioridade 5 para rodar após o carregamento do text domain (prioridade 1) mas antes
+ * Inicializa o Client Portal Add-on apÃ³s o hook 'init' para garantir que o text domain seja carregado primeiro.
+ * Usa prioridade 5 para rodar apÃ³s o carregamento do text domain (prioridade 1) mas antes
  * de outros registros (prioridade 10).
  */
 function dps_client_portal_init_addon() {
@@ -122,7 +122,7 @@ function dps_client_portal_init_addon() {
         DPS_Client_Portal::get_instance();
     }
     
-    // Inicializa gerenciadores de token e sessão
+    // Inicializa gerenciadores de token e sessÃ£o
     if ( class_exists( 'DPS_Portal_Token_Manager' ) ) {
         DPS_Portal_Token_Manager::get_instance();
     }
@@ -131,12 +131,12 @@ function dps_client_portal_init_addon() {
         DPS_Portal_Session_Manager::get_instance();
     }
     
-    // Inicializa gerenciador de ações administrativas
+    // Inicializa gerenciador de aÃ§Ãµes administrativas
     if ( class_exists( 'DPS_Portal_Admin_Actions' ) ) {
         DPS_Portal_Admin_Actions::get_instance();
     }
     
-    // Inicializa administração do portal (CPT dps_portal_message, menus, etc.)
+    // Inicializa administraÃ§Ã£o do portal (CPT dps_portal_message, menus, etc.)
     if ( class_exists( 'DPS_Portal_Admin' ) ) {
         DPS_Portal_Admin::get_instance();
     }
@@ -146,12 +146,12 @@ function dps_client_portal_init_addon() {
         DPS_Portal_AJAX_Handler::get_instance();
     }
     
-    // Inicializa o Hub centralizado do Portal (Fase 2 - Reorganização de Menus)
+    // Inicializa o Hub centralizado do Portal (Fase 2 - ReorganizaÃ§Ã£o de Menus)
     if ( class_exists( 'DPS_Portal_Hub' ) ) {
         DPS_Portal_Hub::get_instance();
     }
     
-    // Inicializa gerenciador de atualização de perfil via link (Fase 5)
+    // Inicializa gerenciador de atualizaÃ§Ã£o de perfil via link (Fase 5)
     if ( class_exists( 'DPS_Portal_Profile_Update' ) ) {
         DPS_Portal_Profile_Update::get_instance();
     }
@@ -160,9 +160,9 @@ function dps_client_portal_init_addon() {
 add_action( 'init', 'dps_client_portal_init_addon', 5 );
 
 /**
- * Invalidação automática de cache (Fase 2.2)
+ * InvalidaÃ§Ã£o automÃ¡tica de cache (Fase 2.2)
  * 
- * Invalida cache quando dados relevantes são atualizados
+ * Invalida cache quando dados relevantes sÃ£o atualizados
  * 
  * @since 2.5.0
  */
@@ -192,7 +192,7 @@ function dps_client_portal_setup_cache_invalidation() {
         }
     }, 10, 1 );
 
-    // Invalida cache ao salvar transação (Finance Add-on)
+    // Invalida cache ao salvar transaÃ§Ã£o (Finance Add-on)
     add_action( 'dps_finance_transaction_saved', function( $transaction_id, $client_id ) {
         if ( $client_id ) {
             DPS_Portal_Cache_Helper::invalidate_client_cache( $client_id, [ 'pending' ] );
@@ -202,22 +202,22 @@ function dps_client_portal_setup_cache_invalidation() {
 add_action( 'init', 'dps_client_portal_setup_cache_invalidation', 20 );
 
 /**
- * Verifica a integridade da configuração do portal no admin.
+ * Verifica a integridade da configuraÃ§Ã£o do portal no admin.
  * 
  * Exibe avisos no admin se:
- * - A página do portal não existir
- * - A página configurada não tiver o shortcode [dps_client_portal]
- * - A página configurada estiver em rascunho ou lixeira
+ * - A pÃ¡gina do portal nÃ£o existir
+ * - A pÃ¡gina configurada nÃ£o tiver o shortcode [dps_client_portal]
+ * - A pÃ¡gina configurada estiver em rascunho ou lixeira
  * 
  * @since 2.4.1
  */
 function dps_client_portal_check_configuration() {
-    // Só executa no admin
+    // SÃ³ executa no admin
     if ( ! is_admin() ) {
         return;
     }
     
-    // Só executa para usuários com permissão
+    // SÃ³ executa para usuÃ¡rios com permissÃ£o
     if ( ! current_user_can( 'manage_options' ) ) {
         return;
     }
@@ -225,51 +225,51 @@ function dps_client_portal_check_configuration() {
     $page_id = get_option( 'dps_portal_page_id', 0 );
     $messages = [];
     
-    // Verifica se tem página configurada
+    // Verifica se tem pÃ¡gina configurada
     if ( ! $page_id ) {
         $messages[] = [
             'type'    => 'warning',
             'message' => sprintf(
-                /* translators: %s: link para configurações */
-                __( 'Portal do Cliente: Nenhuma página configurada. <a href="%s">Configure agora</a> ou crie uma página com o shortcode [dps_client_portal].', 'dps-client-portal' ),
+                /* translators: %s: link para configuraÃ§Ãµes */
+                __( 'Portal do Cliente: Nenhuma pÃ¡gina configurada. <a href="%s">Configure agora</a> ou crie uma pÃ¡gina com o shortcode [dps_client_portal].', 'dps-client-portal' ),
                 admin_url( 'admin.php?page=dps-client-portal-settings' )
             ),
         ];
     } else {
         $page = get_post( $page_id );
         
-        // Verifica se a página existe
+        // Verifica se a pÃ¡gina existe
         if ( ! $page ) {
             $messages[] = [
                 'type'    => 'error',
                 'message' => sprintf(
-                    /* translators: %s: link para configurações */
-                    __( 'Portal do Cliente: A página configurada (ID #%d) não existe mais. <a href="%s">Configure uma nova página</a>.', 'dps-client-portal' ),
+                    /* translators: %s: link para configuraÃ§Ãµes */
+                    __( 'Portal do Cliente: A pÃ¡gina configurada (ID #%d) nÃ£o existe mais. <a href="%s">Configure uma nova pÃ¡gina</a>.', 'dps-client-portal' ),
                     $page_id,
                     admin_url( 'admin.php?page=dps-client-portal-settings' )
                 ),
             ];
         } else {
-            // Verifica se a página está publicada
+            // Verifica se a pÃ¡gina estÃ¡ publicada
             if ( 'publish' !== $page->post_status ) {
                 $messages[] = [
                     'type'    => 'warning',
                     'message' => sprintf(
-                        /* translators: 1: título da página, 2: link para editar */
-                        __( 'Portal do Cliente: A página "%1$s" não está publicada. <a href="%2$s">Publicar agora</a>.', 'dps-client-portal' ),
+                        /* translators: 1: tÃ­tulo da pÃ¡gina, 2: link para editar */
+                        __( 'Portal do Cliente: A pÃ¡gina "%1$s" nÃ£o estÃ¡ publicada. <a href="%2$s">Publicar agora</a>.', 'dps-client-portal' ),
                         esc_html( $page->post_title ),
                         get_edit_post_link( $page_id )
                     ),
                 ];
             }
             
-            // Verifica se a página tem o shortcode
+            // Verifica se a pÃ¡gina tem o shortcode
             if ( ! has_shortcode( (string) $page->post_content, 'dps_client_portal' ) ) {
                 $messages[] = [
                     'type'    => 'error',
                     'message' => sprintf(
-                        /* translators: 1: título da página, 2: link para editar */
-                        __( 'Portal do Cliente: A página "%1$s" não contém o shortcode [dps_client_portal]. <a href="%2$s">Adicionar shortcode agora</a>.', 'dps-client-portal' ),
+                        /* translators: 1: tÃ­tulo da pÃ¡gina, 2: link para editar */
+                        __( 'Portal do Cliente: A pÃ¡gina "%1$s" nÃ£o contÃ©m o shortcode [dps_client_portal]. <a href="%2$s">Adicionar shortcode agora</a>.', 'dps-client-portal' ),
                         esc_html( $page->post_title ),
                         get_edit_post_link( $page_id )
                     ),
@@ -293,7 +293,7 @@ add_action( 'admin_init', 'dps_client_portal_check_configuration' );
 /**
  * Handler para download de arquivos .ics (Fase 2.8)
  * 
- * Permite clientes exportarem agendamentos para calendários
+ * Permite clientes exportarem agendamentos para calendÃ¡rios
  * 
  * @since 2.5.0
  */
@@ -307,21 +307,21 @@ function dps_client_portal_handle_ics_download() {
     // Verifica nonce
     $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
     if ( ! wp_verify_nonce( $nonce, 'dps_download_ics_' . $appointment_id ) ) {
-        wp_die( esc_html__( 'Link inválido ou expirado.', 'dps-client-portal' ) );
+        wp_die( esc_html__( 'Link invÃ¡lido ou expirado.', 'dps-client-portal' ) );
     }
 
-    // Verifica se cliente está autenticado e se o agendamento pertence a ele
+    // Verifica se cliente estÃ¡ autenticado e se o agendamento pertence a ele
     if ( class_exists( 'DPS_Portal_Session_Manager' ) ) {
         $session    = DPS_Portal_Session_Manager::get_instance();
         $client_id  = $session->get_authenticated_client_id();
         
         if ( ! $client_id ) {
-            wp_die( esc_html__( 'Você precisa estar autenticado para baixar este arquivo.', 'dps-client-portal' ) );
+            wp_die( esc_html__( 'VocÃª precisa estar autenticado para baixar este arquivo.', 'dps-client-portal' ) );
         }
 
-        // Usa helper centralizado de validação de ownership (Fase 1.4)
+        // Usa helper centralizado de validaÃ§Ã£o de ownership (Fase 1.4)
         if ( ! dps_portal_assert_client_owns_resource( $client_id, $appointment_id, 'appointment' ) ) {
-            wp_die( esc_html__( 'Você não tem permissão para baixar este arquivo.', 'dps-client-portal' ) );
+            wp_die( esc_html__( 'VocÃª nÃ£o tem permissÃ£o para baixar este arquivo.', 'dps-client-portal' ) );
         }
     }
 
@@ -372,10 +372,10 @@ function dps_client_portal_register_appointment_request_cpt() {
 add_action( 'init', 'dps_client_portal_register_appointment_request_cpt' );
 
 /**
- * Hook de ativação para criar tabela de tokens e página do portal.
+ * Hook de ativaÃ§Ã£o para criar tabela de tokens e pÃ¡gina do portal.
  *
  * @since 2.0.0
- * @since 2.4.1 Adicionada criação automática da página do portal
+ * @since 2.4.1 Adicionada criaÃ§Ã£o automÃ¡tica da pÃ¡gina do portal
  */
 function dps_client_portal_activate() {
     // Cria tabela de tokens
@@ -384,37 +384,37 @@ function dps_client_portal_activate() {
         $token_manager->maybe_create_table();
     }
     
-    // Cria página do portal se não existir
+    // Cria pÃ¡gina do portal se nÃ£o existir
     dps_client_portal_maybe_create_page();
 }
 register_activation_hook( __FILE__, 'dps_client_portal_activate' );
 
 /**
- * Cria a página do Portal do Cliente automaticamente se não existir.
+ * Cria a pÃ¡gina do Portal do Cliente automaticamente se nÃ£o existir.
  * 
- * Esta função verifica se já existe uma página configurada ou com o título
- * "Portal do Cliente". Se não existir, cria uma nova página com:
- * - Título: "Portal do Cliente"
+ * Esta funÃ§Ã£o verifica se jÃ¡ existe uma pÃ¡gina configurada ou com o tÃ­tulo
+ * "Portal do Cliente". Se nÃ£o existir, cria uma nova pÃ¡gina com:
+ * - TÃ­tulo: "Portal do Cliente"
  * - Slug: "portal-do-cliente"
- * - Conteúdo: shortcode [dps_client_portal]
+ * - ConteÃºdo: shortcode [dps_client_portal]
  * - Status: publicada
  * 
- * Após criar a página, armazena o ID em dps_portal_page_id para referência futura.
+ * ApÃ³s criar a pÃ¡gina, armazena o ID em dps_portal_page_id para referÃªncia futura.
  * 
  * @since 2.4.1
- * @return int|false ID da página criada ou existente, ou false em caso de erro
+ * @return int|false ID da pÃ¡gina criada ou existente, ou false em caso de erro
  */
 function dps_client_portal_maybe_create_page() {
-    // Verifica se já existe uma página configurada
+    // Verifica se jÃ¡ existe uma pÃ¡gina configurada
     $existing_page_id = get_option( 'dps_portal_page_id', 0 );
     if ( $existing_page_id && get_post_status( $existing_page_id ) === 'publish' ) {
-        // Verifica se a página tem o shortcode
+        // Verifica se a pÃ¡gina tem o shortcode
         $page = get_post( $existing_page_id );
         if ( $page && has_shortcode( (string) $page->post_content, 'dps_client_portal' ) ) {
             return $existing_page_id;
         }
         
-        // Página existe mas não tem o shortcode - adiciona o shortcode
+        // PÃ¡gina existe mas nÃ£o tem o shortcode - adiciona o shortcode
         if ( $page ) {
             wp_update_post( [
                 'ID'           => $existing_page_id,
@@ -424,13 +424,13 @@ function dps_client_portal_maybe_create_page() {
         }
     }
     
-    // Busca página existente por título (usa título não traduzido para consistência entre idiomas)
+    // Busca pÃ¡gina existente por tÃ­tulo (usa tÃ­tulo nÃ£o traduzido para consistÃªncia entre idiomas)
     $page_title = DPS_CLIENT_PORTAL_PAGE_TITLE;
     
     if ( function_exists( 'dps_get_page_by_title_compat' ) ) {
         $portal_page = dps_get_page_by_title_compat( $page_title );
     } else {
-        // Fallback se helper não estiver carregado ainda
+        // Fallback se helper nÃ£o estiver carregado ainda
         global $wpdb;
         $post_id = $wpdb->get_var(
             $wpdb->prepare(
@@ -442,21 +442,21 @@ function dps_client_portal_maybe_create_page() {
     }
     
     if ( $portal_page ) {
-        // Página existe - verifica se tem o shortcode
+        // PÃ¡gina existe - verifica se tem o shortcode
         if ( ! has_shortcode( (string) $portal_page->post_content, 'dps_client_portal' ) ) {
-            // Adiciona o shortcode ao conteúdo existente
+            // Adiciona o shortcode ao conteÃºdo existente
             wp_update_post( [
                 'ID'           => $portal_page->ID,
                 'post_content' => $portal_page->post_content . "\n\n[dps_client_portal]",
             ] );
         }
         
-        // Armazena o ID da página
+        // Armazena o ID da pÃ¡gina
         update_option( 'dps_portal_page_id', $portal_page->ID );
         return $portal_page->ID;
     }
     
-    // Nenhuma página encontrada - cria uma nova (usa título traduzido se disponível)
+    // Nenhuma pÃ¡gina encontrada - cria uma nova (usa tÃ­tulo traduzido se disponÃ­vel)
     $translated_title = __( DPS_CLIENT_PORTAL_PAGE_TITLE, 'dps-client-portal' );
     $page_id = wp_insert_post( [
         'post_title'     => $translated_title,
@@ -470,7 +470,7 @@ function dps_client_portal_maybe_create_page() {
     ] );
     
     if ( ! is_wp_error( $page_id ) && $page_id > 0 ) {
-        // Armazena o ID da página criada
+        // Armazena o ID da pÃ¡gina criada
         update_option( 'dps_portal_page_id', $page_id );
         return $page_id;
     }
@@ -479,7 +479,7 @@ function dps_client_portal_maybe_create_page() {
 }
 
 /**
- * Hook de desativação para limpar cron jobs.
+ * Hook de desativaÃ§Ã£o para limpar cron jobs.
  *
  * @since 2.0.0
  */

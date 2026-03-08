@@ -1,8 +1,8 @@
 <?php
 /**
- * API pública do Loyalty Add-on.
+ * API pÃºblica do Loyalty Add-on.
  *
- * Centraliza todas as funções públicas para uso por outros add-ons.
+ * Centraliza todas as funÃ§Ãµes pÃºblicas para uso por outros add-ons.
  *
  * @package Desi_Pet_Shower_Loyalty
  * @since   1.1.0
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Classe DPS_Loyalty_API
  *
- * Fornece métodos estáticos para manipulação de pontos, créditos e indicações.
+ * Fornece mÃ©todos estÃ¡ticos para manipulaÃ§Ã£o de pontos, crÃ©ditos e indicaÃ§Ãµes.
  */
 class DPS_Loyalty_API {
 
@@ -32,7 +32,7 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Obtém saldo de pontos do cliente.
+     * ObtÃ©m saldo de pontos do cliente.
      *
      * @param int $client_id ID do cliente.
      * @return int Saldo de pontos (nunca negativo).
@@ -54,19 +54,19 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Adiciona crédito ao cliente.
+     * Adiciona crÃ©dito ao cliente.
      *
      * @param int    $client_id       ID do cliente.
      * @param int    $amount_in_cents Valor em centavos.
-     * @param string $context         Contexto do crédito.
-     * @return int Novo saldo de crédito.
+     * @param string $context         Contexto do crÃ©dito.
+     * @return int Novo saldo de crÃ©dito.
      */
     public static function add_credit( $client_id, $amount_in_cents, $context = '' ) {
         return dps_loyalty_add_credit( $client_id, $amount_in_cents, $context );
     }
 
     /**
-     * Obtém saldo de crédito do cliente.
+     * ObtÃ©m saldo de crÃ©dito do cliente.
      *
      * @param int $client_id ID do cliente.
      * @return int Saldo em centavos.
@@ -76,7 +76,7 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Usa crédito do cliente.
+     * Usa crÃ©dito do cliente.
      *
      * @param int    $client_id       ID do cliente.
      * @param int    $amount_in_cents Valor a usar em centavos.
@@ -88,20 +88,20 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Obtém código de indicação do cliente.
+     * ObtÃ©m cÃ³digo de indicaÃ§Ã£o do cliente.
      *
      * @param int $client_id ID do cliente.
-     * @return string Código de indicação.
+     * @return string CÃ³digo de indicaÃ§Ã£o.
      */
     public static function get_referral_code( $client_id ) {
         return dps_loyalty_get_referral_code( $client_id );
     }
 
     /**
-     * Obtém URL de indicação do cliente.
+     * ObtÃ©m URL de indicaÃ§Ã£o do cliente.
      *
      * @param int $client_id ID do cliente.
-     * @return string URL com código de indicação.
+     * @return string URL com cÃ³digo de indicaÃ§Ã£o.
      */
     public static function get_referral_url( $client_id ) {
         $code = self::get_referral_code( $client_id );
@@ -109,11 +109,11 @@ class DPS_Loyalty_API {
             return '';
         }
 
-        // Obtém URL base da configuração de fidelidade ou da página de cadastro
+        // ObtÃ©m URL base da configuraÃ§Ã£o de fidelidade ou da pÃ¡gina de cadastro
         $settings = get_option( 'dps_loyalty_settings', [] );
         $base_url = '';
 
-        // 1. Verifica se há página configurada nas configurações de fidelidade
+        // 1. Verifica se hÃ¡ pÃ¡gina configurada nas configuraÃ§Ãµes de fidelidade
         if ( ! empty( $settings['referral_page_id'] ) ) {
             $page_id = (int) $settings['referral_page_id'];
             if ( $page_id > 0 ) {
@@ -124,7 +124,7 @@ class DPS_Loyalty_API {
             }
         }
 
-        // 2. Fallback: tenta usar a página de cadastro do Registration Add-on
+        // 2. Fallback: tenta usar a pÃ¡gina de cadastro do Registration Add-on
         if ( empty( $base_url ) ) {
             $registration_page_id = (int) get_option( 'dps_registration_page_id', 0 );
             if ( $registration_page_id > 0 ) {
@@ -135,22 +135,22 @@ class DPS_Loyalty_API {
             }
         }
 
-        // 3. Fallback final: usa home com /cadastro/ como convenção
+        // 3. Fallback final: usa home com /cadastro/ como convenÃ§Ã£o
         if ( empty( $base_url ) ) {
             $base_url = site_url( '/cadastro/' );
         }
 
-        // Filtro para customizar URL base de indicação
+        // Filtro para customizar URL base de indicaÃ§Ã£o
         $base_url = apply_filters( 'dps_loyalty_referral_base_url', $base_url );
         
         return add_query_arg( 'ref', $code, $base_url );
     }
 
     /**
-     * Obtém estatísticas de indicações do cliente.
+     * ObtÃ©m estatÃ­sticas de indicaÃ§Ãµes do cliente.
      *
      * @param int $client_id ID do cliente.
-     * @return array Estatísticas com total, recompensadas e pendentes.
+     * @return array EstatÃ­sticas com total, recompensadas e pendentes.
      */
     public static function get_referral_stats( $client_id ) {
         global $wpdb;
@@ -174,14 +174,14 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Obtém histórico de pontos do cliente.
+     * ObtÃ©m histÃ³rico de pontos do cliente.
      *
      * @param int   $client_id ID do cliente.
      * @param array $args      Argumentos opcionais: limit (int), offset (int).
      * @return array Lista de eventos.
      */
     public static function get_points_history( $client_id, $args = [] ) {
-        // Compatibilidade: se o segundo parâmetro for inteiro, trata como limit.
+        // Compatibilidade: se o segundo parÃ¢metro for inteiro, trata como limit.
         if ( ! is_array( $args ) ) {
             $args = [ 'limit' => (int) $args ];
         }
@@ -190,27 +190,100 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Converte contexto técnico em rótulo amigável.
+     * Converte contexto tÃ©cnico em rÃ³tulo amigÃ¡vel.
      *
      * @param string $context Contexto salvo no log.
-     * @return string Rótulo traduzido.
+     * @return string RÃ³tulo traduzido.
      */
     public static function get_context_label( $context ) {
         $labels = [
             'appointment_payment' => __( 'Pagamento de atendimento', 'dps-loyalty-addon' ),
-            'referral_reward'     => __( 'Recompensa de indicação', 'dps-loyalty-addon' ),
-            'credit_add'          => __( 'Crédito adicionado', 'dps-loyalty-addon' ),
-            'credit_use'          => __( 'Crédito utilizado', 'dps-loyalty-addon' ),
+            'referral_reward'     => __( 'Recompensa de indicaÃ§Ã£o', 'dps-loyalty-addon' ),
+            'credit_add'          => __( 'CrÃ©dito adicionado', 'dps-loyalty-addon' ),
+            'credit_use'          => __( 'CrÃ©dito utilizado', 'dps-loyalty-addon' ),
             'manual_adjustment'   => __( 'Ajuste manual', 'dps-loyalty-addon' ),
             'points_expired'      => __( 'Pontos expirados', 'dps-loyalty-addon' ),
             'redeem'              => __( 'Resgate de pontos', 'dps-loyalty-addon' ),
             'portal_redemption'   => __( 'Resgate no Portal', 'dps-loyalty-addon' ),
-            'expiration_warning'  => __( 'Aviso de expiração de pontos', 'dps-loyalty-addon' ),
+            'game_daily_mission' => __( 'Missao diaria do Space Groomers', 'dps-loyalty-addon' ),
+            'game_streak_3'      => __( 'Streak 3 do Space Groomers', 'dps-loyalty-addon' ),
+            'game_streak_7'      => __( 'Streak 7 do Space Groomers', 'dps-loyalty-addon' ),
+            'game_first_victory' => __( 'Primeira vitoria no Space Groomers', 'dps-loyalty-addon' ),
+            'expiration_warning'  => __( 'Aviso de expiraÃ§Ã£o de pontos', 'dps-loyalty-addon' ),
         ];
 
         $label = isset( $labels[ $context ] ) ? $labels[ $context ] : $context;
 
         return apply_filters( 'dps_loyalty_context_label', $label, $context );
+    }
+
+    /**
+     * Retorna definicoes simples de recompensa para eventos do jogo.
+     *
+     * @return array
+     */
+    public static function get_game_reward_definitions() {
+        $definitions = [
+            'daily_mission' => [
+                'event'   => 'daily_mission',
+                'points'  => 15,
+                'context' => 'game_daily_mission',
+                'label'   => __( 'Missao diaria do Space Groomers', 'dps-loyalty-addon' ),
+            ],
+            'streak_3' => [
+                'event'   => 'streak_3',
+                'points'  => 25,
+                'context' => 'game_streak_3',
+                'label'   => __( 'Streak 3 do Space Groomers', 'dps-loyalty-addon' ),
+            ],
+            'streak_7' => [
+                'event'   => 'streak_7',
+                'points'  => 40,
+                'context' => 'game_streak_7',
+                'label'   => __( 'Streak 7 do Space Groomers', 'dps-loyalty-addon' ),
+            ],
+            'first_victory' => [
+                'event'   => 'first_victory',
+                'points'  => 30,
+                'context' => 'game_first_victory',
+                'label'   => __( 'Primeira vitoria no Space Groomers', 'dps-loyalty-addon' ),
+            ],
+        ];
+
+        return apply_filters( 'dps_loyalty_game_reward_definitions', $definitions );
+    }
+
+    /**
+     * Credita pontos para um evento do jogo usando configuracao centralizada.
+     *
+     * @param int    $client_id ID do cliente.
+     * @param string $event_key Chave do evento do jogo.
+     * @return array
+     */
+    public static function award_game_event_points( $client_id, $event_key ) {
+        $definitions = self::get_game_reward_definitions();
+        $event_key   = sanitize_key( (string) $event_key );
+
+        if ( $client_id <= 0 || ! isset( $definitions[ $event_key ] ) ) {
+            return [];
+        }
+
+        $reward  = $definitions[ $event_key ];
+        $points  = isset( $reward['points'] ) ? absint( $reward['points'] ) : 0;
+        $context = isset( $reward['context'] ) ? sanitize_text_field( (string) $reward['context'] ) : '';
+
+        if ( $points <= 0 || '' === $context ) {
+            return [];
+        }
+
+        self::add_points( $client_id, $points, $context );
+
+        return [
+            'event'   => $event_key,
+            'points'  => $points,
+            'context' => $context,
+            'label'   => isset( $reward['label'] ) ? sanitize_text_field( (string) $reward['label'] ) : $event_key,
+        ];
     }
 
     /**
@@ -224,9 +297,9 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Obtém a configuração de níveis (personalizada ou padrão).
+     * ObtÃ©m a configuraÃ§Ã£o de nÃ­veis (personalizada ou padrÃ£o).
      *
-     * @return array Lista ordenada de níveis.
+     * @return array Lista ordenada de nÃ­veis.
      */
     public static function get_tiers_config() {
         $settings = get_option( 'dps_loyalty_settings', [] );
@@ -254,7 +327,7 @@ class DPS_Loyalty_API {
                 'label'      => isset( $tier['label'] ) ? sanitize_text_field( $tier['label'] ) : strtoupper( $slug ),
                 'min_points' => isset( $tier['min_points'] ) ? (int) $tier['min_points'] : 0,
                 'multiplier' => isset( $tier['multiplier'] ) ? (float) $tier['multiplier'] : 1.0,
-                'icon'       => isset( $tier['icon'] ) ? sanitize_text_field( $tier['icon'] ) : '⭐',
+                'icon'       => isset( $tier['icon'] ) ? sanitize_text_field( $tier['icon'] ) : 'â­',
                 'color'      => isset( $tier['color'] ) ? sanitize_hex_color( $tier['color'] ) : '',
             ];
         }
@@ -274,7 +347,7 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Recalcula o nível do cliente e registra mudança se necessário.
+     * Recalcula o nÃ­vel do cliente e registra mudanÃ§a se necessÃ¡rio.
      *
      * @param int $client_id Cliente.
      * @return array
@@ -298,7 +371,7 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Calcula nível com base no saldo de pontos.
+     * Calcula nÃ­vel com base no saldo de pontos.
      *
      * @param int $points Pontos atuais.
      * @return array
@@ -336,9 +409,9 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Recupera multiplicador para um nível.
+     * Recupera multiplicador para um nÃ­vel.
      *
-     * @param string $tier_slug Slug do nível.
+     * @param string $tier_slug Slug do nÃ­vel.
      * @return float
      */
     public static function get_tier_multiplier( $tier_slug ) {
@@ -353,7 +426,7 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Retorna slug do nível máximo configurado.
+     * Retorna slug do nÃ­vel mÃ¡ximo configurado.
      *
      * @return string
      */
@@ -368,9 +441,9 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Retorna níveis de fidelidade padrão.
+     * Retorna nÃ­veis de fidelidade padrÃ£o.
      *
-     * @return array Configuração de níveis.
+     * @return array ConfiguraÃ§Ã£o de nÃ­veis.
      */
     public static function get_default_tiers() {
         return [
@@ -379,7 +452,7 @@ class DPS_Loyalty_API {
                 'min_points' => 0,
                 'multiplier' => 1.0,
                 'label'      => __( 'Bronze', 'dps-loyalty-addon' ),
-                'icon'       => '🥉',
+                'icon'       => 'ðŸ¥‰',
                 'color'      => '#b45309',
             ],
             [
@@ -387,7 +460,7 @@ class DPS_Loyalty_API {
                 'min_points' => 500,
                 'multiplier' => 1.5,
                 'label'      => __( 'Prata', 'dps-loyalty-addon' ),
-                'icon'       => '🥈',
+                'icon'       => 'ðŸ¥ˆ',
                 'color'      => '#6b7280',
             ],
             [
@@ -395,14 +468,14 @@ class DPS_Loyalty_API {
                 'min_points' => 1000,
                 'multiplier' => 2.0,
                 'label'      => __( 'Ouro', 'dps-loyalty-addon' ),
-                'icon'       => '🥇',
+                'icon'       => 'ðŸ¥‡',
                 'color'      => '#d97706',
             ],
         ];
     }
 
     /**
-     * Verifica se array é associativo.
+     * Verifica se array Ã© associativo.
      *
      * @param array $array Array a verificar.
      * @return bool
@@ -416,9 +489,9 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Normaliza configuração antiga em formato associativo.
+     * Normaliza configuraÃ§Ã£o antiga em formato associativo.
      *
-     * @param array $tiers Configuração legada.
+     * @param array $tiers ConfiguraÃ§Ã£o legada.
      * @return array
      */
     private static function normalize_legacy_tiers( $tiers ) {
@@ -429,7 +502,7 @@ class DPS_Loyalty_API {
                 'label'      => isset( $data['label'] ) ? $data['label'] : strtoupper( $slug ),
                 'min_points' => isset( $data['min_points'] ) ? (int) $data['min_points'] : 0,
                 'multiplier' => isset( $data['multiplier'] ) ? (float) $data['multiplier'] : 1.0,
-                'icon'       => isset( $data['icon'] ) ? $data['icon'] : '⭐',
+                'icon'       => isset( $data['icon'] ) ? $data['icon'] : 'â­',
                 'color'      => isset( $data['color'] ) ? $data['color'] : '',
             ];
         }
@@ -535,11 +608,11 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Obtém dados agregados de pontos concedidos e resgatados por mês.
+     * ObtÃ©m dados agregados de pontos concedidos e resgatados por mÃªs.
      *
      * @since 1.4.0
      *
-     * @param int $months Número de meses para buscar (retroativo a partir do mês atual).
+     * @param int $months NÃºmero de meses para buscar (retroativo a partir do mÃªs atual).
      * @return array
      */
     public static function get_points_timeseries( $months = 6 ) {
@@ -618,7 +691,7 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Retorna distribuição de clientes por nível.
+     * Retorna distribuiÃ§Ã£o de clientes por nÃ­vel.
      *
      * @since 1.4.0
      *
@@ -637,7 +710,7 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Obtém ranking de clientes considerando pontos, resgates, indicações e atendimentos.
+     * ObtÃ©m ranking de clientes considerando pontos, resgates, indicaÃ§Ãµes e atendimentos.
      *
      * @since 1.4.0
      *
@@ -729,7 +802,7 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Obtém métricas de eficácia por campanha.
+     * ObtÃ©m mÃ©tricas de eficÃ¡cia por campanha.
      *
      * @since 1.4.0
      *
@@ -832,7 +905,7 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Calcula pontos elegíveis para expiração baseados na data de concessão.
+     * Calcula pontos elegÃ­veis para expiraÃ§Ã£o baseados na data de concessÃ£o.
      *
      * @since 1.4.0
      *
@@ -982,17 +1055,17 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Obtém métricas globais de fidelidade.
+     * ObtÃ©m mÃ©tricas globais de fidelidade.
      *
      * Utiliza cache via transient para melhor performance.
      *
-     * @param bool $force_refresh Forçar atualização do cache.
-     * @return array Métricas do programa.
+     * @param bool $force_refresh ForÃ§ar atualizaÃ§Ã£o do cache.
+     * @return array MÃ©tricas do programa.
      */
     public static function get_global_metrics( $force_refresh = false ) {
         $cache_key = 'dps_loyalty_global_metrics';
         
-        // Tenta obter do cache (se não estiver desabilitado)
+        // Tenta obter do cache (se nÃ£o estiver desabilitado)
         if ( ! $force_refresh && ! dps_is_cache_disabled() ) {
             $cached = get_transient( $cache_key );
             if ( false !== $cached ) {
@@ -1010,14 +1083,14 @@ class DPS_Loyalty_API {
             AND meta_value > 0
         " );
 
-        // Total de pontos em circulação
+        // Total de pontos em circulaÃ§Ã£o
         $total_points = $wpdb->get_var( "
             SELECT COALESCE(SUM(meta_value), 0)
             FROM {$wpdb->postmeta} 
             WHERE meta_key = 'dps_loyalty_points'
         " );
 
-        // Indicações do mês
+        // IndicaÃ§Ãµes do mÃªs
         $referrals_table = $wpdb->prefix . 'dps_referrals';
         $first_day_of_month = gmdate( 'Y-m-01 00:00:00' );
         
@@ -1026,14 +1099,14 @@ class DPS_Loyalty_API {
             WHERE created_at >= %s
         ", $first_day_of_month ) );
 
-        // Indicações recompensadas do mês
+        // IndicaÃ§Ãµes recompensadas do mÃªs
         $rewarded_this_month = $wpdb->get_var( $wpdb->prepare( "
             SELECT COUNT(*) FROM {$referrals_table} 
             WHERE status = 'rewarded' 
             AND created_at >= %s
         ", $first_day_of_month ) );
 
-        // Total de créditos em circulação
+        // Total de crÃ©ditos em circulaÃ§Ã£o
         $total_credits = $wpdb->get_var( "
             SELECT COALESCE(SUM(meta_value), 0)
             FROM {$wpdb->postmeta} 
@@ -1048,7 +1121,7 @@ class DPS_Loyalty_API {
             'total_credits'        => (int) $total_credits,
         ];
 
-        // Armazena no cache por 5 minutos (se não estiver desabilitado)
+        // Armazena no cache por 5 minutos (se nÃ£o estiver desabilitado)
         if ( ! dps_is_cache_disabled() ) {
             set_transient( $cache_key, $metrics, 5 * MINUTE_IN_SECONDS );
         }
@@ -1057,10 +1130,10 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Obtém lista de indicações com paginação.
+     * ObtÃ©m lista de indicaÃ§Ãµes com paginaÃ§Ã£o.
      *
      * @param array $args Argumentos de filtro.
-     * @return array Lista de indicações e total.
+     * @return array Lista de indicaÃ§Ãµes e total.
      */
     public static function get_referrals( $args = [] ) {
         global $wpdb;
@@ -1133,7 +1206,7 @@ class DPS_Loyalty_API {
             __( 'ID', 'dps-loyalty-addon' ),
             __( 'Indicador', 'dps-loyalty-addon' ),
             __( 'Indicado', 'dps-loyalty-addon' ),
-            __( 'Código', 'dps-loyalty-addon' ),
+            __( 'CÃ³digo', 'dps-loyalty-addon' ),
             __( 'Data', 'dps-loyalty-addon' ),
             __( 'Status', 'dps-loyalty-addon' ),
             __( 'Recompensa Indicador', 'dps-loyalty-addon' ),

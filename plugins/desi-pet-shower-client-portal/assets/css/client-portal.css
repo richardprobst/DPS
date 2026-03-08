@@ -8894,3 +8894,112 @@ html {
         transition: none;
     }
 }
+
+.dps-portal-game-summary {
+    display: grid;
+    gap: var(--dps-space-4);
+    background: var(--dps-color-surface-container-low, #f2f3fa);
+    border: 1px solid var(--dps-color-outline-variant, #c3c6cf);
+    border-radius: var(--dps-shape-medium, 12px);
+    box-shadow: var(--dps-elevation-1, 0 4px 12px rgba(0, 0, 0, 0.08));
+}
+
+.dps-portal-game-summary__header,
+.dps-portal-game-summary__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dps-space-3);
+    flex-wrap: wrap;
+}
+
+.dps-portal-game-summary__intro,
+.dps-portal-game-summary__status,
+.dps-portal-game-summary__card small,
+.dps-portal-game-summary__footer {
+    color: var(--dps-color-on-surface-variant, #43474e);
+}
+
+.dps-portal-game-summary__intro,
+.dps-portal-game-summary__status,
+.dps-portal-game-summary__card small,
+.dps-portal-game-summary__footer span {
+    font-size: var(--dps-typescale-body-small-size, 12px);
+    line-height: 1.5;
+}
+
+.dps-portal-game-summary__pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--dps-shape-full, 999px);
+    background: var(--dps-color-primary-container, #d4e4ff);
+    color: var(--dps-color-on-primary-container, #001c3a);
+    font-size: var(--dps-typescale-label-large-size, 14px);
+    font-weight: 500;
+}
+
+.dps-portal-game-summary__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--dps-space-3);
+}
+
+.dps-portal-game-summary__card {
+    display: grid;
+    gap: 0.4rem;
+    padding: var(--dps-space-4);
+    border-radius: var(--dps-shape-medium, 12px);
+    background: var(--dps-color-surface-container-lowest, #ffffff);
+    border: 1px solid var(--dps-color-outline-variant, #c3c6cf);
+    min-height: 126px;
+}
+
+.dps-portal-game-summary__label {
+    font-size: var(--dps-typescale-label-large-size, 14px);
+    font-weight: 500;
+    color: var(--dps-color-on-surface-variant, #43474e);
+}
+
+.dps-portal-game-summary__value {
+    font-size: var(--dps-typescale-title-large-size, 22px);
+    line-height: 1.2;
+    color: var(--dps-color-on-surface, #191c20);
+}
+
+.dps-portal-game-summary__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0.65rem 1rem;
+    border-radius: var(--dps-shape-full, 999px);
+    background: var(--dps-color-tertiary-container, #f5d9ff);
+    color: var(--dps-color-on-tertiary-container, #271432);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.dps-portal-game-summary[data-game-summary-state="loading"] .dps-portal-game-summary__status {
+    color: var(--dps-color-primary, #0b6bcb);
+}
+
+.dps-portal-game-summary[data-game-summary-state="error"] .dps-portal-game-summary__status {
+    color: var(--dps-color-error, #ba1a1a);
+}
+
+@media (max-width: 900px) {
+    .dps-portal-game-summary__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .dps-portal-game-summary__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-portal-game-summary__card {
+        min-height: 0;
+    }
+}
