@@ -2,7 +2,7 @@
  * Space Groomers: Invasão das Pulgas
  * Game engine — Canvas + vanilla JS, zero dependências.
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 (function () {
     'use strict';
@@ -288,8 +288,10 @@
         // Input
         this.keys = {};
         this.shootCooldown = 0;
-        this.touchMoving = 0; // -1 left, 0 none, 1 right
-        this.touchFiring = false;
+        this.isPointerDown = false;
+        this.pointerId = null;
+        this.pointerOffsetX = 0;
+        this.mobileDragActive = false;
 
         this.enemyDir = 1;
         this.enemyDropTimer = 0;
@@ -346,7 +348,7 @@
         var self = this;
         var titleEl = this.container.querySelector('.dps-sg-wave-title');
         var bonusEl = this.container.querySelector('.dps-sg-wave-bonus');
-        titleEl.textContent = 'Wave ' + this.wave;
+        titleEl.textContent = 'Onda ' + this.wave;
         bonusEl.textContent = '';
         this.overlayWave.classList.remove('dps-sg-overlay--hidden');
 
@@ -356,7 +358,7 @@
             self.state = 'playing';
             self.lastTime = performance.now();
             self.loop(self.lastTime);
-        }, 1200);
+        }, 450);
     };
 
     /* ─── Main Loop ─── */
@@ -387,21 +389,23 @@
             }
         }
 
-        // Player movement
+        // Player movement (mobile-first drag + desktop fallback)
         var moveDir = 0;
-        if (this.keys['ArrowLeft'] || this.keys['a'] || this.touchMoving < 0) moveDir = -1;
-        if (this.keys['ArrowRight'] || this.keys['d'] || this.touchMoving > 0) moveDir = 1;
-        this.player.x += moveDir * this.player.speed;
+        if (!this.mobileDragActive) {
+            if (this.keys['ArrowLeft'] || this.keys['a']) moveDir = -1;
+            if (this.keys['ArrowRight'] || this.keys['d']) moveDir = 1;
+            this.player.x += moveDir * this.player.speed;
+        }
         this.player.x = Math.max(PLAYER_W / 2 + 4, Math.min(W - PLAYER_W / 2 - 4, this.player.x));
 
-        // Shooting
+        // Shooting (auto-fire)
         this.shootCooldown -= dt;
-        if ((this.keys[' '] || this.keys['Space'] || this.touchFiring) && this.shootCooldown <= 0) {
+        if (this.shootCooldown <= 0) {
             this.shoot();
-            this.shootCooldown = 0.18;
+            this.shootCooldown = 0.2;
         }
 
-        // Special
+        // Special (desktop fallback)
         if (this.keys['Shift'] || this.keys['Control']) {
             this.fireSpecial();
         }
@@ -750,7 +754,7 @@
         for (var j = this.lives; j < 3; j++) hearts += '🖤';
         this.elLives.textContent = hearts;
 
-        // Combo
+        // Combo (feedback discreto no mobile)
         if (this.comboMultiplier > 1) {
             this.elCombo.classList.remove('dps-sg-combo--hidden');
             this.elComboText.textContent = 'x' + this.comboMultiplier;
@@ -821,29 +825,110 @@
             });
         }
 
-        // Mobile controls
-        var btnLeft = this.container.querySelector('.dps-sg-btn--left');
-        var btnRight = this.container.querySelector('.dps-sg-btn--right');
-        var btnFire = this.container.querySelector('.dps-sg-btn--fire');
-        var btnSpecial = this.container.querySelector('.dps-sg-btn--special');
+        if (this.overlayStart) {
+            this.overlayStart.addEventListener('click', function (e) {
+                if (e.target.closest('.dps-sg-btn--play')) return;
+                ensureAudio();
+                self.start();
+            });
+        }
 
-        if (btnLeft) {
-            btnLeft.addEventListener('touchstart', function (e) { e.preventDefault(); self.touchMoving = -1; });
-            btnLeft.addEventListener('touchend', function () { self.touchMoving = 0; });
-            btnLeft.addEventListener('touchcancel', function () { self.touchMoving = 0; });
-        }
-        if (btnRight) {
-            btnRight.addEventListener('touchstart', function (e) { e.preventDefault(); self.touchMoving = 1; });
-            btnRight.addEventListener('touchend', function () { self.touchMoving = 0; });
-            btnRight.addEventListener('touchcancel', function () { self.touchMoving = 0; });
-        }
-        if (btnFire) {
-            btnFire.addEventListener('touchstart', function (e) { e.preventDefault(); self.touchFiring = true; });
-            btnFire.addEventListener('touchend', function () { self.touchFiring = false; });
-            btnFire.addEventListener('touchcancel', function () { self.touchFiring = false; });
-        }
+        // Mobile-first pointer controls (drag to move)
+        var btnSpecial = this.container.querySelector('.dps-sg-btn--special');
+        var pointerSurface = this.container.querySelector('.dps-sg-wrapper');
+
         if (btnSpecial) {
             btnSpecial.addEventListener('click', function () { self.fireSpecial(); });
+        }
+
+        if (pointerSurface) {
+            pointerSurface.style.touchAction = 'none';
+
+            var updatePointerX = function (clientX) {
+                var rect = self.canvas.getBoundingClientRect();
+                if (!rect.width) return;
+                var canvasX = (clientX - rect.left) * (W / rect.width);
+                self.player.x = canvasX - self.pointerOffsetX;
+                self.player.x = Math.max(PLAYER_W / 2 + 4, Math.min(W - PLAYER_W / 2 - 4, self.player.x));
+            };
+
+            pointerSurface.addEventListener('pointerdown', function (e) {
+                if (self.state !== 'playing') return;
+                if (self.pointerId !== null && self.pointerId !== e.pointerId) return;
+                self.pointerId = e.pointerId;
+                self.mobileDragActive = true;
+                self.isPointerDown = true;
+
+                var rect = self.canvas.getBoundingClientRect();
+                var currentPlayerX = rect.left + (self.player.x * rect.width / W);
+                self.pointerOffsetX = ((e.clientX - currentPlayerX) * (W / rect.width));
+                updatePointerX(e.clientX);
+                if (pointerSurface.setPointerCapture) {
+                    try { pointerSurface.setPointerCapture(e.pointerId); } catch (err) { /* noop */ }
+                }
+            }, { passive: true });
+
+            pointerSurface.addEventListener('pointermove', function (e) {
+                if (!self.mobileDragActive || self.pointerId !== e.pointerId || self.state !== 'playing') return;
+                updatePointerX(e.clientX);
+            }, { passive: true });
+
+            var releasePointer = function (e) {
+                if (self.pointerId !== e.pointerId) return;
+                self.isPointerDown = false;
+                self.mobileDragActive = false;
+                self.pointerId = null;
+                self.pointerOffsetX = 0;
+            };
+
+            pointerSurface.addEventListener('pointerup', releasePointer, { passive: true });
+            pointerSurface.addEventListener('pointercancel', releasePointer, { passive: true });
+            pointerSurface.addEventListener('pointerleave', function (e) {
+                if (e.pointerType === 'mouse') return;
+                releasePointer(e);
+            }, { passive: true });
+        }
+
+        // Pausa segura ao perder foco (listeners globais únicos)
+        if (!SpaceGroomers._focusBound) {
+            SpaceGroomers._focusBound = true;
+
+            SpaceGroomers._pauseAllPlaying = function () {
+                SpaceGroomers._instances.forEach(function (inst) {
+                    if (inst.state === 'playing') {
+                        inst.state = 'paused';
+                        cancelAnimationFrame(inst.rafId);
+                    }
+                });
+            };
+
+            SpaceGroomers._resumeAllPaused = function () {
+                SpaceGroomers._instances.forEach(function (inst) {
+                    if (inst.state === 'paused') {
+                        inst.state = 'playing';
+                        inst.lastTime = performance.now();
+                        inst.loop(inst.lastTime);
+                    }
+                });
+            };
+
+            document.addEventListener('visibilitychange', function () {
+                if (document.hidden) {
+                    SpaceGroomers._pauseAllPlaying();
+                } else {
+                    SpaceGroomers._resumeAllPaused();
+                }
+            });
+
+            window.addEventListener('blur', function () {
+                SpaceGroomers._pauseAllPlaying();
+            });
+
+            window.addEventListener('focus', function () {
+                if (!document.hidden) {
+                    SpaceGroomers._resumeAllPaused();
+                }
+            });
         }
     };
 

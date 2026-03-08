@@ -124,15 +124,15 @@ class DPS_Game_Addon {
 
                 <div class="dps-sg-hud">
                     <div class="dps-sg-hud__score">
-                        <span class="dps-sg-hud__label"><?php echo esc_html__( 'Score', 'dps-game' ); ?></span>
+                        <span class="dps-sg-hud__label"><?php echo esc_html__( 'Pontos', 'dps-game' ); ?></span>
                         <span class="dps-sg-hud__value dps-sg-score">0</span>
                     </div>
                     <div class="dps-sg-hud__wave">
-                        <span class="dps-sg-hud__label"><?php echo esc_html__( 'Wave', 'dps-game' ); ?></span>
+                        <span class="dps-sg-hud__label"><?php echo esc_html__( 'Onda', 'dps-game' ); ?></span>
                         <span class="dps-sg-hud__value dps-sg-wave">1</span>
                     </div>
                     <div class="dps-sg-hud__lives">
-                        <span class="dps-sg-hud__label"><?php echo esc_html__( 'Calmaria', 'dps-game' ); ?></span>
+                        <span class="dps-sg-hud__label"><?php echo esc_html__( 'Vida', 'dps-game' ); ?></span>
                         <span class="dps-sg-hud__value dps-sg-lives">❤️❤️❤️</span>
                     </div>
                 </div>
@@ -153,22 +153,18 @@ class DPS_Game_Addon {
                 </div>
 
                 <div class="dps-sg-mobile-controls">
-                    <button type="button" class="dps-sg-btn dps-sg-btn--left" aria-label="<?php echo esc_attr__( 'Mover esquerda', 'dps-game' ); ?>">◀</button>
-                    <button type="button" class="dps-sg-btn dps-sg-btn--fire" aria-label="<?php echo esc_attr__( 'Atirar', 'dps-game' ); ?>">🫧</button>
+                    <p class="dps-sg-mobile-controls__hint"><?php echo esc_html__( 'Arraste para mover · tiro automático', 'dps-game' ); ?></p>
                     <button type="button" class="dps-sg-btn dps-sg-btn--special" aria-label="<?php echo esc_attr__( 'Especial', 'dps-game' ); ?>" disabled>⚡</button>
-                    <button type="button" class="dps-sg-btn dps-sg-btn--right" aria-label="<?php echo esc_attr__( 'Mover direita', 'dps-game' ); ?>">▶</button>
                 </div>
 
                 <div class="dps-sg-overlay dps-sg-overlay--start">
                     <div class="dps-sg-overlay__content">
                         <h2 class="dps-sg-overlay__title">🚀 Space Groomers</h2>
                         <p class="dps-sg-overlay__subtitle"><?php echo esc_html__( 'Invasão das Pulgas', 'dps-game' ); ?></p>
-                        <p class="dps-sg-overlay__desc"><?php echo esc_html__( 'Defenda o Pet-Planeta dos invasores!', 'dps-game' ); ?></p>
+                        <p class="dps-sg-overlay__desc"><?php echo esc_html__( 'Defenda o Pet-Planeta dos invasores em partidas rápidas!', 'dps-game' ); ?></p>
                         <p class="dps-sg-overlay__highscore"><?php echo esc_html__( 'Seu recorde:', 'dps-game' ); ?> <span class="dps-sg-highscore-value">0</span></p>
-                        <button type="button" class="dps-sg-btn dps-sg-btn--play"><?php echo esc_html__( 'Jogar', 'dps-game' ); ?> 🫧</button>
-                        <p class="dps-sg-overlay__controls-hint">
-                            <small><?php echo esc_html__( '← → mover · Espaço atirar · Shift especial', 'dps-game' ); ?></small>
-                        </p>
+                        <button type="button" class="dps-sg-btn dps-sg-btn--play"><?php echo esc_html__( 'Toque para começar', 'dps-game' ); ?> 🫧</button>
+                        <p class="dps-sg-overlay__controls-hint"><small><?php echo esc_html__( 'Tutorial rápido: arraste para mover. O secador atira sozinho.', 'dps-game' ); ?></small></p>
                     </div>
                 </div>
 
@@ -178,7 +174,7 @@ class DPS_Game_Addon {
                         <p class="dps-sg-overlay__final-score"><?php echo esc_html__( 'Pontuação:', 'dps-game' ); ?> <span class="dps-sg-final-score">0</span></p>
                         <p class="dps-sg-overlay__stats"></p>
                         <p class="dps-sg-overlay__highscore"><?php echo esc_html__( 'Recorde:', 'dps-game' ); ?> <span class="dps-sg-highscore-value">0</span></p>
-                        <button type="button" class="dps-sg-btn dps-sg-btn--play"><?php echo esc_html__( 'Jogar Novamente', 'dps-game' ); ?> 🔄</button>
+                        <button type="button" class="dps-sg-btn dps-sg-btn--play"><?php echo esc_html__( 'Tentar de novo', 'dps-game' ); ?> 🔄</button>
                     </div>
                 </div>
 
@@ -188,7 +184,7 @@ class DPS_Game_Addon {
                         <p class="dps-sg-overlay__final-score"><?php echo esc_html__( 'Pontuação:', 'dps-game' ); ?> <span class="dps-sg-final-score">0</span></p>
                         <p class="dps-sg-overlay__stats"></p>
                         <p class="dps-sg-overlay__highscore"><?php echo esc_html__( 'Recorde:', 'dps-game' ); ?> <span class="dps-sg-highscore-value">0</span></p>
-                        <button type="button" class="dps-sg-btn dps-sg-btn--play"><?php echo esc_html__( 'Jogar Novamente', 'dps-game' ); ?> 🔄</button>
+                        <button type="button" class="dps-sg-btn dps-sg-btn--play"><?php echo esc_html__( 'Jogar de novo', 'dps-game' ); ?> 🔄</button>
                     </div>
                 </div>
 
