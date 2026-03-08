@@ -71,6 +71,14 @@ Mudancas de integracao do jogo com o ecossistema DPS:
 ### Observacoes
 - O browser MCP da sessao nao acessou o servidor local do workspace, entao os PNGs foram gerados com Edge headless apontando para um preview HTTP local separado.
 - O preview foi montado para registrar explicitamente gameplay, inicio e resultado sem depender do WordPress do ambiente.
+
+## Registro desta entrega (branding oficial)
+### Contexto
+Personalizacao do add-on `desi-pet-shower-game` para leitura clara de jogo oficial da Desi Pet Shower, com foco em:
+- nome do jogo e textos mais ligados a marca;
+- HUD e overlays com linguagem de banho e tosa;
+- paleta e detalhes visuais mais coerentes com o DPS;
+- reforco tematico no gameplay sem quebrar compatibilidade.
 - `docs/screenshots/2026-03-08/space-groomers-phase4-preview-desktop.png`
   - Preview completo desktop do card do jogo na aba Inicio e do novo hub/aba do jogo no portal.
 - `docs/screenshots/2026-03-08/space-groomers-phase4-preview-mobile.png`
@@ -97,6 +105,20 @@ Mudancas finais de estabilidade e medicao no add-on:
 - `docs/visual/VISUAL_STYLE_GUIDE.md`
 
 ### Capturas realizadas
+- `docs/screenshots/2026-03-08/space-groomers-branding-preview-desktop.png`
+  - Preview desktop com gameplay ao vivo, overlay inicial e tela final da rodada ja alinhados a Desi Pet Shower.
+- `docs/screenshots/2026-03-08/space-groomers-branding-preview-mobile.png`
+  - Preview mobile com a mesma composicao, validando a leitura compacta e a hierarquia dos textos.
+
+### Artefatos de suporte preparados
+- `docs/screenshots/2026-03-08/space-groomers-branding-preview.html`
+  - Preview local usado para renderizar os PNGs desta rodada.
+- `plugins/desi-pet-shower-game/BRANDING_CUSTOMIZATION_NOTES.md`
+  - Documento tecnico com textos alterados, decisoes de branding e pontos para futuros assets oficiais.
+
+### Observacoes
+- O branding foi aplicado com presenca clara da marca, mas sem repetir logo/nome em excesso dentro da HUD.
+- O tema espacial existente foi mantido por baixo risco, com reforcos visuais e textuais de banho, espuma, cuidado pet e limpeza.
 - `docs/screenshots/2026-03-08/space-groomers-final-hardening-preview-desktop.png`
   - Preview desktop com overlay inicial e overlay de pausa.
 - `docs/screenshots/2026-03-08/space-groomers-final-hardening-preview-mobile.png`

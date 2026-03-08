@@ -74,24 +74,24 @@
             pts: 16,
             color: '#d2b48c',
             speed: 1.3,
-            label: 'pelos'
+            label: 'bolos de pelo'
         }
     };
 
     var POWERUP_TYPES = {
         shampoo: {
             icon: '\uD83E\uDDF4',
-            name: 'Shampoo Turbo',
+            name: 'Espuma Turbo',
             shortLabel: '3 jatos',
-            desc: '3 tiros por disparo',
+            desc: 'triplica os jatos de limpeza',
             duration: 8000,
             color: '#4fc3f7'
         },
         towel: {
             icon: '\uD83E\uDDF9',
-            name: 'Toalha Giratoria',
-            shortLabel: 'limpa fileira',
-            desc: 'remove a fileira mais baixa',
+            name: 'Toalha Relampago',
+            shortLabel: 'limpa a faixa',
+            desc: 'varre a faixa mais suja',
             duration: 0,
             color: '#f7c948'
         }
@@ -103,32 +103,32 @@
             kind: 'survive_seconds',
             target: 60,
             icon: '\u23F1',
-            title: 'Sobreviva 60s',
-            hint: 'Jogue no seguro e preserve vidas.'
+            title: 'Mantenha o pet calmo por 60s',
+            hint: 'Segure o ritmo e proteja o conforto do banho.'
         },
         {
             id: 'collect_3_powerups',
             kind: 'collect_powerups',
             target: 3,
             icon: '\uD83E\uDDF4',
-            title: 'Colete 3 power-ups',
-            hint: 'Shampoo e toalha contam para a meta.'
+            title: 'Pegue 3 cuidados especiais',
+            hint: 'Espuma e toalha contam para a meta.'
         },
         {
             id: 'combo_9',
             kind: 'reach_combo',
             target: 9,
             icon: '\uD83D\uDD25',
-            title: 'Atinga combo 9',
-            hint: 'Mantenha a sequencia sem deixar tiro escapar.'
+            title: 'Embale 9 acertos',
+            hint: 'Nao deixe a bagunca respirar entre um cuidado e outro.'
         },
         {
             id: 'defeat_6_ticks',
             kind: 'defeat_ticks',
             target: 6,
             icon: '\uD83D\uDEE1',
-            title: 'Derrote 6 carrapatos',
-            hint: 'Carrapatos valem mais e contam para a missao.'
+            title: 'Tire 6 carrapatos do banho',
+            hint: 'Carrapatos pedem mais cuidado e valem mais brilho.'
         }
     ];
 
@@ -136,8 +136,8 @@
         {
             id: 'first_run',
             icon: '\u2728',
-            name: 'Primeiro Banho',
-            desc: 'Concluiu a primeira run.',
+            name: 'Primeiro cuidado',
+            desc: 'Fez a primeira rodada oficial da Desi Pet Shower.',
             check: function (state) {
                 return state.totals.runs >= 1;
             }
@@ -145,8 +145,8 @@
         {
             id: 'combo_keeper',
             icon: '\uD83D\uDD25',
-            name: 'Ritmo de Tesoura',
-            desc: 'Atingiu combo 9 em alguma partida.',
+            name: 'Ritmo de cuidado',
+            desc: 'Atingiu combo 9 em alguma rodada.',
             check: function (state) {
                 return state.records.bestCombo >= 9;
             }
@@ -154,8 +154,8 @@
         {
             id: 'mission_regular',
             icon: '\uD83C\uDFC5',
-            name: 'Missao em Dia',
-            desc: 'Completou 3 missoes diarias.',
+            name: 'Rotina em dia',
+            desc: 'Completou 3 cuidados do dia.',
             check: function (state) {
                 return state.totals.totalMissionCompletions >= 3;
             }
@@ -163,8 +163,8 @@
         {
             id: 'streak_3',
             icon: '\uD83D\uDCC5',
-            name: 'Retorno em Serie',
-            desc: 'Manteve streak de 3 dias.',
+            name: 'Cliente da casa',
+            desc: 'Voltou por 3 dias seguidos para cuidar do banho.',
             check: function (state) {
                 return state.streak.best >= 3;
             }
@@ -172,8 +172,8 @@
         {
             id: 'first_victory',
             icon: '\uD83D\uDEBF',
-            name: 'Banho Completo',
-            desc: 'Venceu uma run completa.',
+            name: 'Banho entregue',
+            desc: 'Fechou uma rodada completa sem deixar a bagunca vencer.',
             check: function (state) {
                 return state.totals.wins >= 1;
             }
@@ -256,6 +256,30 @@
         }
 
         return window.dpsSpaceGroomersConfig;
+    }
+    function getBrandingConfigSafe(config) {
+        var branding = config && config.branding && typeof config.branding === 'object' ? config.branding : {};
+
+        return {
+            brandName: branding.brandName || 'Desi Pet Shower',
+            gameName: branding.gameName || 'Desi Pet Shower: Space Groomers',
+            tagline: branding.tagline || 'Banho em ordem, pet brilhando.'
+        };
+    }
+
+    function formatRunBreakdown(game, durationSec, includeCombo) {
+        var parts = [
+            'Pulgas ' + game.stats.flea,
+            'Carrapatos ' + game.stats.tick,
+            'Bolos de pelo ' + game.stats.furball
+        ];
+
+        if (includeCombo) {
+            parts.push('Melhor embalo ' + game.bestComboCount);
+        }
+
+        parts.push('Banho ' + durationSec + 's');
+        return parts.join(' | ');
     }
 
     function cloneProgressState(state) {
@@ -1212,6 +1236,7 @@
         this.runSession = null;
         this.lastCompletedTelemetry = null;
         this.gameConfig = getSpaceGroomersConfig();
+        this.branding = getBrandingConfigSafe(this.gameConfig);
 
         var self = this;
         this.progression = new SGProgression({
@@ -1257,10 +1282,7 @@
         }
 
         if (!result.ok && result.phase === 'run_complete') {
-            this.emitTelemetry('sync_error', {
-                phase: result.phase
-            });
-            this.showToast('Sync local ativo', (this.gameConfig.i18n && this.gameConfig.i18n.syncError) || 'Nao foi possivel sincronizar agora. O progresso local segue ativo.', 'warning', 1800);
+            this.showToast('Modo local ativo', (this.gameConfig.i18n && this.gameConfig.i18n.syncError) || 'Nao foi possivel sincronizar agora. O progresso local segue ativo.', 'warning', 1800);
             return;
         }
 
@@ -1278,7 +1300,7 @@
             }
 
             if (points > 0) {
-                this.showToast('Portal atualizado', '+' + points + ' pts no loyalty', 'success', 2000);
+                this.showToast('Portal da ' + this.branding.brandName, '+' + points + ' pontos de fidelidade confirmados', 'success', 2000);
             }
         }
     };
@@ -1624,10 +1646,10 @@
         var bonusEl = this.container.querySelector('.dps-sg-wave-bonus');
         var introDelay = typeof delayMs === 'number' ? Math.max(0, Math.floor(delayMs)) : BALANCE.waveIntroMs;
         this.waveConfig = getWaveConfig(this.wave);
-        titleEl.textContent = 'Onda ' + this.wave;
+        titleEl.textContent = 'Etapa ' + this.wave;
         if (this.wave === 1) {
             var missionStart = this.progression.getMissionPreview(this.getLiveRunSummary());
-            bonusEl.textContent = 'Meta de hoje: ' + missionStart.title + ' (' + missionStart.progress + '/' + missionStart.target + ')';
+            bonusEl.textContent = 'Cuidado do dia: ' + missionStart.title + ' (' + missionStart.progress + '/' + missionStart.target + ')';
         } else {
             bonusEl.textContent = '';
         }
@@ -1690,7 +1712,7 @@
         this.mudCooldown = config.mudInterval;
         this.diveCooldown = config.diveInterval;
         this.wavePerfect = true;
-        this.showToast('Onda ' + wave, wave >= BALANCE.diveStartWave ? 'Pulgas em mergulho podem aparecer.' : 'Foque em manter a sequencia viva.', wave >= BALANCE.diveStartWave ? 'warning' : 'neutral', 1600);
+        this.showToast('Etapa ' + wave, wave >= BALANCE.diveStartWave ? 'As pulgas mais agitadas vao mergulhar na bagunca.' : 'Mantenha o banho calmo e o ritmo firme.', wave >= BALANCE.diveStartWave ? 'warning' : 'neutral', 1600);
     };
 
     SpaceGroomers.prototype.loop = function (now) {
@@ -1770,7 +1792,7 @@
             var missionPreview = this.progression.getMissionPreview(this.getLiveRunSummary());
             if (this.progressSnapshot && this.progressSnapshot.mission && !this.progressSnapshot.mission.completed && missionPreview.completed) {
                 this.missionPreviewCompleteAnnounced = true;
-                this.showToast('Missao pronta', 'Finalize a run para registrar a conclusao de hoje.', 'success', 1500);
+                this.showToast('Cuidado do dia pronto', 'Feche a rodada para registrar a entrega de hoje.', 'success', 1500);
             }
         }
 
@@ -1934,7 +1956,7 @@
 
         if (!this.firstDiveAnnounced) {
             this.firstDiveAnnounced = true;
-            this.showToast('Novo padrao', 'Algumas pulgas fazem mergulho rapido. Reaja para os lados.', 'warning', 1800);
+            this.showToast('Novo caos no banho', 'Algumas pulgas mergulham rapido. Abra espaco para os lados.', 'warning', 1800);
         }
     };
 
@@ -2042,7 +2064,7 @@
             if (this.powerupTimer <= 0) {
                 this.activePowerup = null;
                 this.powerupTimer = 0;
-                this.showToast('Fim do boost', 'O shampoo turbo acabou. Volte para a linha segura.', 'neutral', 1200);
+                this.showToast('Fim da espuma turbo', 'O reforco acabou. Volte para a linha de cuidado.', 'neutral', 1200);
             }
         }
     };
@@ -2062,7 +2084,7 @@
             if (!this.specialReadyPlayed) {
                 this.specialReadyPlayed = true;
                 sfxReady();
-                this.showToast('Especial pronto', 'Toque no raio para limpar a metade de baixo.', 'success', 1500);
+                this.showToast('Espuma total pronta', 'Toque no botao para limpar a metade mais baguncada.', 'success', 1500);
             }
         } else {
             this.specialReadyPlayed = false;
@@ -2115,7 +2137,7 @@
             this.emitParticles(Math.random() * W, H / 2 + Math.random() * (H / 2), '#e1f5fe', 1, 5);
         }
 
-        this.showToast('Banho de espuma', 'A metade inferior foi limpa. Aproveite para respirar.', 'success', 1300);
+        this.showToast('Espuma total', 'A faixa mais baguncada foi limpa. Aproveite para respirar.', 'success', 1300);
     };
 
     SpaceGroomers.prototype.collectPowerup = function (type) {
@@ -2172,10 +2194,10 @@
             this.comboPulse = 700;
             sfxComboTier();
             this.emitParticles(this.player.x, this.player.y - 24, this.comboMultiplier === 3 ? '#ffb703' : '#ff8f3f', 10, 4);
-            this.spawnFloatingText(this.comboMultiplier === 3 ? 'NO EMBALO' : 'BOA SEQUENCIA', this.player.x, this.player.y - 52, '#ffffff', '700 12px "Segoe UI", system-ui, sans-serif');
+            this.spawnFloatingText(this.comboMultiplier === 3 ? 'BANHO LISO' : 'NO EMBALO', this.player.x, this.player.y - 52, '#ffffff', '700 12px "Segoe UI", system-ui, sans-serif');
             this.showToast(
                 this.comboMultiplier === 3 ? 'Combo x3' : 'Combo x2',
-                this.comboMultiplier === 3 ? 'Pontuacao alta enquanto a sequencia durar.' : 'Mantenha o ritmo para chegar ao x3.',
+                this.comboMultiplier === 3 ? 'O brilho rende mais enquanto o ritmo estiver firme.' : 'Segure a calma do banho para chegar ao x3.',
                 'success',
                 1300
             );
@@ -2206,9 +2228,9 @@
         if (this.lives <= 0) {
             this.startGameOverSequence();
         } else if (this.lives === 1) {
-            this.showToast('Ultima vida', 'Segure o centro e guarde o especial para escapar.', 'warning', 1600);
+            this.showToast('Ultimo cuidado', 'Segure o centro e guarde a espuma total para escapar.', 'warning', 1600);
         } else {
-            this.showToast('Dano recebido', 'Respire, reposicione e retome a sequencia.', 'warning', 1200);
+            this.showToast('Bagunca encostou', 'Respire, reposicione e retome o embalo.', 'warning', 1200);
         }
     };
 
@@ -2246,7 +2268,7 @@
         cancelAnimationFrame(this.rafId);
 
         var bonusEl = this.container.querySelector('.dps-sg-wave-bonus');
-        bonusEl.textContent = this.wavePerfect ? 'Perfeito! Bonus garantido.' : 'Agora os inimigos apertam um pouco mais.';
+        bonusEl.textContent = this.wavePerfect ? 'Capricho perfeito! Bonus garantido.' : 'Agora a bagunca aperta um pouco mais.';
         this.showWaveIntro();
     };
 
@@ -2310,14 +2332,14 @@
 
         if (missionEl) {
             if (mission.completed) {
-                missionEl.textContent = mission.icon + ' Missao: ' + mission.title + ' (concluida hoje).';
+                missionEl.textContent = mission.icon + ' Cuidado do dia: ' + mission.title + ' (concluido hoje).';
             } else {
-                missionEl.textContent = mission.icon + ' Missao: ' + mission.title + ' (' + mission.progress + '/' + mission.target + ') - faltam ' + mission.remaining + '.';
+                missionEl.textContent = mission.icon + ' Cuidado do dia: ' + mission.title + ' (' + mission.progress + '/' + mission.target + ') - faltam ' + mission.remaining + '.';
             }
         }
 
         if (recordsEl) {
-            recordsEl.textContent = 'Streak: ' + streak.current + ' dias (melhor ' + streak.best + ') | recorde combo: ' + records.bestCombo + ' | melhor wave: ' + records.bestWave;
+            recordsEl.textContent = 'Rotina: ' + streak.current + ' dias (melhor ' + streak.best + ') | melhor embalo: ' + records.bestCombo + ' | melhor etapa: ' + records.bestWave;
         }
 
         if (unlockWrap && unlockList) {
@@ -2349,14 +2371,14 @@
 
         if (this.elStartMissionProgress) {
             if (this.progressSnapshot.mission.completed) {
-                this.elStartMissionProgress.textContent = 'Meta diaria completa. Volte amanha para a proxima.';
+                this.elStartMissionProgress.textContent = 'Cuidado do dia completo. Volte amanha para o proximo.';
             } else {
-                this.elStartMissionProgress.textContent = 'Progresso: ' + this.progressSnapshot.mission.progress + '/' + this.progressSnapshot.mission.target + ' (faltam ' + this.progressSnapshot.mission.remaining + ')';
+                this.elStartMissionProgress.textContent = 'Andamento: ' + this.progressSnapshot.mission.progress + '/' + this.progressSnapshot.mission.target + ' (faltam ' + this.progressSnapshot.mission.remaining + ')';
             }
         }
 
         if (this.elStartBadges) {
-            this.elStartBadges.textContent = 'Badges locais: ' + this.progressSnapshot.badges.length;
+            this.elStartBadges.textContent = 'Mimos liberados: ' + this.progressSnapshot.badges.length;
         }
 
         if (this.elStartStatus) {
@@ -2386,9 +2408,9 @@
         this.elGoal.classList.toggle('dps-sg-goal--done', mission.completed);
 
         if (mission.completed) {
-            this.elGoalRemaining.textContent = 'Concluida hoje';
+            this.elGoalRemaining.textContent = 'Concluido hoje';
         } else {
-            this.elGoalRemaining.textContent = 'Falta ' + mission.remaining;
+            this.elGoalRemaining.textContent = 'Faltam ' + mission.remaining;
         }
     };
 
@@ -2403,7 +2425,7 @@
         overlay.querySelector('.dps-sg-overlay__stats').textContent =
             this.stats.flea + ' pulgas | ' +
             this.stats.tick + ' carrapatos | ' +
-            this.stats.furball + ' pelos | melhor sequencia ' + this.bestComboCount + ' | ' + finalData.summary.durationSec + 's';
+            this.stats.furball + ' bolos de pelo | melhor embalo ' + this.bestComboCount + ' | banho ' + finalData.summary.durationSec + 's';
 
         this.renderPostRunMeta(overlay, finalData);
         overlay.classList.remove('dps-sg-overlay--hidden');
@@ -2421,8 +2443,7 @@
         overlay.querySelector('.dps-sg-overlay__stats').textContent =
             this.stats.flea + ' pulgas | ' +
             this.stats.tick + ' carrapatos | ' +
-            this.stats.furball + ' pelos | ' +
-            finalData.summary.durationSec + 's de run';
+            this.stats.furball + ' bolos de pelo | banho ' + finalData.summary.durationSec + 's';
 
         this.renderPostRunMeta(overlay, finalData);
         overlay.classList.remove('dps-sg-overlay--hidden');
@@ -2434,6 +2455,13 @@
         for (var i = 0; i < els.length; i++) {
             els[i].textContent = this.highscore.toLocaleString();
         }
+    };
+    SpaceGroomers.prototype.announceStatus = function (message) {
+        if (!this.elStatusLive) {
+            return;
+        }
+
+        this.elStatusLive.textContent = message || '';
     };
 
     SpaceGroomers.prototype.draw = function () {
@@ -2563,12 +2591,12 @@
 
     SpaceGroomers.prototype.getComboHint = function () {
         if (this.comboMultiplier >= 3) {
-            return 'voce esta voando';
+            return 'banho em ritmo premium';
         }
         if (this.comboMultiplier === 2) {
-            return 'mais ' + (BALANCE.comboTier3 - this.comboCount) + ' para x3';
+            return 'mais ' + (BALANCE.comboTier3 - this.comboCount) + ' cuidados para x3';
         }
-        return this.comboCount + ' acertos seguidos';
+        return this.comboCount + ' cuidados seguidos';
     };
 
     SpaceGroomers.prototype.showToast = function (title, desc, tone, durationMs) {
@@ -2919,41 +2947,80 @@
 
     function drawBackdrop(ctx, runTimeMs, stars) {
         var sky = ctx.createLinearGradient(0, 0, 0, H);
-        sky.addColorStop(0, '#041224');
-        sky.addColorStop(0.56, '#0a2442');
-        sky.addColorStop(1, '#15395d');
+        sky.addColorStop(0, '#071a31');
+        sky.addColorStop(0.54, '#0b315a');
+        sky.addColorStop(1, '#13618d');
         ctx.fillStyle = sky;
         ctx.fillRect(0, 0, W, H);
 
-        ctx.fillStyle = 'rgba(120, 194, 255, 0.11)';
+        ctx.fillStyle = 'rgba(177, 231, 255, 0.12)';
         ctx.beginPath();
-        ctx.ellipse(W * 0.19, 100, 86, 72, -0.18, 0, Math.PI * 2);
+        ctx.ellipse(W * 0.2, 104, 92, 74, -0.16, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = 'rgba(255, 181, 120, 0.06)';
+        ctx.fillStyle = 'rgba(255, 212, 145, 0.09)';
         ctx.beginPath();
-        ctx.ellipse(W * 0.78, 138, 74, 54, 0.22, 0, Math.PI * 2);
+        ctx.ellipse(W * 0.78, 148, 76, 58, 0.22, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.strokeStyle = 'rgba(170, 223, 255, 0.08)';
+        drawStars(ctx, stars, runTimeMs);
+
+        for (var bubble = 0; bubble < 8; bubble++) {
+            var orbit = runTimeMs / 980 + bubble * 0.8;
+            var bubbleX = 50 + bubble * 54 + Math.sin(orbit) * 10;
+            var bubbleY = 132 + ((bubble * 57) % 220) + Math.cos(orbit * 1.12) * 12;
+            var bubbleR = 8 + (bubble % 3) * 4;
+            ctx.strokeStyle = bubble % 2 === 0 ? 'rgba(236, 251, 255, 0.22)' : 'rgba(159, 224, 255, 0.18)';
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.arc(bubbleX, bubbleY, bubbleR, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        var pawMarks = [
+            { x: 84, y: H - 172, size: 0.7, alpha: 0.08 },
+            { x: W - 88, y: H - 208, size: 0.8, alpha: 0.07 }
+        ];
+        for (var paw = 0; paw < pawMarks.length; paw++) {
+            var mark = pawMarks[paw];
+            ctx.fillStyle = 'rgba(232, 249, 255, ' + mark.alpha + ')';
+            ctx.beginPath();
+            ctx.ellipse(mark.x, mark.y, 10 * mark.size, 8 * mark.size, 0, 0, Math.PI * 2);
+            ctx.ellipse(mark.x - 8 * mark.size, mark.y - 9 * mark.size, 4 * mark.size, 5 * mark.size, -0.35, 0, Math.PI * 2);
+            ctx.ellipse(mark.x - 2 * mark.size, mark.y - 12 * mark.size, 4 * mark.size, 5 * mark.size, -0.1, 0, Math.PI * 2);
+            ctx.ellipse(mark.x + 4 * mark.size, mark.y - 11 * mark.size, 4 * mark.size, 5 * mark.size, 0.18, 0, Math.PI * 2);
+            ctx.ellipse(mark.x + 10 * mark.size, mark.y - 7 * mark.size, 4 * mark.size, 5 * mark.size, 0.38, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.strokeStyle = 'rgba(207, 241, 255, 0.08)';
         ctx.lineWidth = 1;
         for (var line = 0; line < 3; line++) {
-            var y = H - 118 + line * 16;
+            var y = H - 124 + line * 16;
             ctx.beginPath();
-            ctx.moveTo(18, y + Math.sin(runTimeMs / 900 + line) * 2);
+            ctx.moveTo(18, y + Math.sin(runTimeMs / 820 + line) * 2.4);
             ctx.lineTo(W - 18, y);
             ctx.stroke();
         }
 
-        drawStars(ctx, stars, runTimeMs);
-
-        var floor = ctx.createLinearGradient(0, H - 88, 0, H);
-        floor.addColorStop(0, 'rgba(79, 195, 247, 0)');
-        floor.addColorStop(1, 'rgba(79, 195, 247, 0.14)');
+        var floor = ctx.createLinearGradient(0, H - 96, 0, H);
+        floor.addColorStop(0, 'rgba(143, 229, 255, 0)');
+        floor.addColorStop(1, 'rgba(238, 251, 255, 0.16)');
         ctx.fillStyle = floor;
-        ctx.fillRect(0, H - 88, W, 88);
-        ctx.fillStyle = 'rgba(173, 231, 255, 0.22)';
+        ctx.fillRect(0, H - 96, W, 96);
+        ctx.fillStyle = 'rgba(236, 251, 255, 0.34)';
         ctx.fillRect(0, H - 34, W, 2);
+
+        for (var foam = 0; foam < 10; foam++) {
+            var foamX = foam * 52 + ((foam % 2) * 10);
+            var foamY = H - 22 + Math.sin(runTimeMs / 460 + foam) * 2;
+            ctx.fillStyle = foam % 3 === 0 ? 'rgba(255, 255, 255, 0.28)' : 'rgba(231, 249, 255, 0.2)';
+            ctx.beginPath();
+            ctx.arc(foamX, foamY, 9, 0, Math.PI * 2);
+            ctx.arc(foamX + 12, foamY - 4, 7, 0, Math.PI * 2);
+            ctx.arc(foamX + 22, foamY + 1, 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
 
     function drawPlayer(ctx, game) {
@@ -3312,19 +3379,10 @@
     function drawMud(ctx, mud) {
         ctx.save();
         ctx.translate(mud.x, mud.y);
-        ctx.fillStyle = '#7d5638';
-        ctx.beginPath(); ctx.arc(0, 0, MUD_SIZE, 0, Math.PI * 2); ctx.arc(-4, 2, MUD_SIZE * 0.65, 0, Math.PI * 2); ctx.arc(4, 2, MUD_SIZE * 0.55, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = 'rgba(255, 224, 193, 0.45)'; ctx.beginPath(); ctx.arc(-2, -2, 2, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath();
-        ctx.arc(0, 0, MUD_SIZE, 0, Math.PI * 2);
-        ctx.arc(-4, 2, MUD_SIZE * 0.65, 0, Math.PI * 2);
-        ctx.arc(4, 2, MUD_SIZE * 0.55, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = 'rgba(255, 224, 193, 0.45)';
-        ctx.beginPath();
-        ctx.arc(-2, -2, 2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillStyle = '#7f5538';
+        ctx.beginPath(); ctx.arc(0, 0, MUD_SIZE, 0, Math.PI * 2); ctx.arc(-4, 2, MUD_SIZE * 0.7, 0, Math.PI * 2); ctx.arc(4, 2, MUD_SIZE * 0.55, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255, 233, 214, 0.34)'; ctx.beginPath(); ctx.arc(-2, -2, 2, 0, Math.PI * 2); ctx.arc(3, -1, 1.4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(238, 251, 255, 0.2)'; ctx.beginPath(); ctx.arc(1, 3, 1.4, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
     }
 
@@ -3490,22 +3548,11 @@
         var finalData = this.finalizeProgression('gameover');
         var overlay = this.overlayGameover;
         overlay.querySelector('.dps-sg-final-score').textContent = this.score.toLocaleString();
-        overlay.querySelector('.dps-sg-overlay__stats').textContent = 'Pulgas ' + this.stats.flea + ' | Carrapatos ' + this.stats.tick + ' | Pelos ' + this.stats.furball + ' | Run ' + finalData.summary.durationSec + 's';
-
-        var finalData = this.finalizeProgression('gameover');
-        var overlay = this.overlayGameover;
-
-        overlay.querySelector('.dps-sg-final-score').textContent = this.score.toLocaleString();
-        overlay.querySelector('.dps-sg-overlay__stats').textContent =
-            'Pulgas ' + this.stats.flea + ' | ' +
-            'Carrapatos ' + this.stats.tick + ' | ' +
-            'Pelos ' + this.stats.furball + ' | ' +
-            'Run ' + finalData.summary.durationSec + 's';
-
+        overlay.querySelector('.dps-sg-overlay__stats').textContent = formatRunBreakdown(this, finalData.summary.durationSec, true);
         this.updateResultOverlay(overlay, finalData);
         this.renderPostRunMeta(overlay, finalData);
         overlay.classList.remove('dps-sg-overlay--hidden');
-        this.announceStatus('Run encerrada em game over.');
+        this.announceStatus('Rodada encerrada em bagunca.');
     };
 
     SpaceGroomers.prototype.victory = function () {
@@ -3514,22 +3561,11 @@
         var finalData = this.finalizeProgression('victory');
         var overlay = this.overlayVictory;
         overlay.querySelector('.dps-sg-final-score').textContent = this.score.toLocaleString();
-        overlay.querySelector('.dps-sg-overlay__stats').textContent = 'Pulgas ' + this.stats.flea + ' | Carrapatos ' + this.stats.tick + ' | Pelos ' + this.stats.furball + ' | Run ' + finalData.summary.durationSec + 's';
-
-        var finalData = this.finalizeProgression('victory');
-        var overlay = this.overlayVictory;
-
-        overlay.querySelector('.dps-sg-final-score').textContent = this.score.toLocaleString();
-        overlay.querySelector('.dps-sg-overlay__stats').textContent =
-            'Pulgas ' + this.stats.flea + ' | ' +
-            'Carrapatos ' + this.stats.tick + ' | ' +
-            'Pelos ' + this.stats.furball + ' | ' +
-            'Run ' + finalData.summary.durationSec + 's';
-
+        overlay.querySelector('.dps-sg-overlay__stats').textContent = formatRunBreakdown(this, finalData.summary.durationSec, false);
         this.updateResultOverlay(overlay, finalData);
         this.renderPostRunMeta(overlay, finalData);
         overlay.classList.remove('dps-sg-overlay--hidden');
-        this.announceStatus('Run concluida com vitoria.');
+        this.announceStatus('Rodada concluida com banho entregue.');
     };
 
     SpaceGroomers.prototype.draw = function () {

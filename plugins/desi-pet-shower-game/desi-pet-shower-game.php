@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Plugin Name:       desi.pet by PRObst - Space Groomers
  * Plugin URI:        https://www.probst.pro
@@ -20,6 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'DPS_GAME_VERSION', '1.5.0' );
 define( 'DPS_GAME_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_GAME_URL', plugin_dir_url( __FILE__ ) );
+define( 'DPS_GAME_BRAND_NAME', 'Desi Pet Shower' );
+define( 'DPS_GAME_DISPLAY_NAME', 'Desi Pet Shower: Space Groomers' );
+define( 'DPS_GAME_TAGLINE', 'Banho em ordem, pet brilhando.' );
 
 /**
  * Verifica se o plugin base esta ativo.

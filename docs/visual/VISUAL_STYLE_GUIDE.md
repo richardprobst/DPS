@@ -969,6 +969,8 @@ O Material 3 Expressive recomenda **Material Symbols** (Google Fonts) no estilo 
 4. **Navegação** — tabs → dropdown/accordion em compact
 5. **Touch targets** — mínimo `48×48px` para elementos interativos em mobile
 6. **Zoom iOS** — inputs com `font-size: 16px` em mobile
+7. **Validação obrigatória** — revisar no mínimo em `375px`, `600px`, `840px`, `1200px` e `1920px` antes de considerar a UI pronta
+8. **Defeitos bloqueadores** — scroll horizontal, conteúdo cortado, CTA fora da viewport, modal maior que a tela e tabela sem estratégia mobile bloqueiam aceite
 
 ---
 
@@ -1080,6 +1082,10 @@ O Material 3 Expressive recomenda **Material Symbols** (Google Fonts) no estilo 
 
 ### Validação
 - [ ] Testado em 375px, 600px, 840px, 1200px, 1920px
+- [ ] Sem scroll horizontal ou conteúdo cortado em nenhum breakpoint validado
+- [ ] CTA primária e ações críticas acessíveis sem bloqueio visual em compact e medium
+- [ ] Tabelas/listagens com estratégia explícita para compact (`overflow-x`, cards, colapso ou priorização)
+- [ ] Modais, drawers e popovers cabem na viewport com rolagem interna quando necessário
 - [ ] Contraste WCAG AA verificado
 - [ ] Navegação por teclado funcional
 - [ ] Focus visible em elementos interativos

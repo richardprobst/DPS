@@ -381,6 +381,9 @@ O admin usa **cards empilhados verticalmente** (`.dps-surface`). Padrão M3 Expr
 - **Container** — `max-width: 1200px` em páginas públicas
 - **Espaço negativo** — portal usa padding `32px` vs. admin `20px`
 - **Touch targets** — `48×48px` mínimo em mobile (M3 Expressive recomenda 48px)
+- **Responsividade como critério de aceite** — toda UI deve funcionar de forma intencional em telas pequenas, médias e grandes; não deixar ajustes de layout para “depois”
+- **Baseline de validação** — revisar no mínimo em `375px`, `600px`, `840px`, `1200px` e `1920px`, mesmo quando a tarefa parecer “desktop-first”
+- **Falhas bloqueadoras** — scroll horizontal, conteúdo cortado, CTA fora da viewport, modal maior que a tela, tabela sem estratégia mobile e alvo de toque insuficiente devem ser tratados como defeito
 
 ---
 
@@ -518,6 +521,10 @@ border: 1px solid var(--dps-color-outline-variant);
 
 ### Validação
 - [ ] Testado em 375px, 600px, 840px, 1200px, 1920px
+- [ ] Sem scroll horizontal ou conteúdo cortado em nenhum breakpoint validado
+- [ ] CTA primária e ações críticas acessíveis sem bloqueio visual em compact e medium
+- [ ] Tabelas/listagens com estratégia explícita para compact (`overflow-x`, cards, colapso ou priorização)
+- [ ] Modais, drawers e popovers cabem na viewport com rolagem interna quando necessário
 - [ ] Contraste WCAG AA verificado (sistema de pareamento M3)
 - [ ] Navegação por teclado funcional
 - [ ] Focus visible em elementos interativos
