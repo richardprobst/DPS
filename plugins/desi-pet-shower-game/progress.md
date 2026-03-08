@@ -15,3 +15,8 @@ Original prompt: Implementar a Fase 2 no add-on plugins/desi-pet-shower-game, as
 - HUD e overlays retrabalhados com melhor hierarquia visual, CTA inicial mais forte e cards-resumo nas telas finais.
 - Registro visual salvo em `docs/screenshots/2026-03-08/space-groomers-graphics-enhancement-preview.html` e PNGs desktop/mobile correspondentes.
 - Observacao operacional: o `apply_patch` falhou nesta sessao sem diagnostico util, entao as edicoes foram feitas por substituicoes controladas via shell e validadas depois com diff/check.
+- Rodada nova focada em branding oficial da Desi Pet Shower no add-on do jogo.
+- PHP atualizado com constantes simples de marca (`brand name`, `display name`, `tagline`) e novos textos no admin, portal e overlays.
+- JS revisado com tom mais amigavel de banho e tosa, missoes/badges mais coerentes e correcoes no fluxo final (helper `announceStatus` ausente passou a existir).
+- Canvas e CSS ganharam detalhes de espuma, bolhas, marcas de pata e acentos mais proximos da paleta DPS, seguindo `docs/visual/` como fonte de verdade do padrao M3.
+- Documentacao criada em `plugins/desi-pet-shower-game/BRANDING_CUSTOMIZATION_NOTES.md` e preview visual novo preparado em `docs/screenshots/2026-03-08/space-groomers-branding-preview.html`.

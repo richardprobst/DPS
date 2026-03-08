@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desi Pet Shower Space Groomers Branding Preview</title>
+<link rel="stylesheet" href="../../../plugins/desi-pet-shower-game/assets/css/space-groomers.css">
+<style>
+body{margin:0;padding:24px;background:linear-gradient(180deg,#eef5ff 0%,#dbe7f7 100%);font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;color:#10213a}
+.preview-shell{max-width:1280px;margin:0 auto;display:grid;gap:24px}.preview-head,.preview-card{padding:20px;border-radius:28px;background:rgba(255,255,255,.84);border:1px solid rgba(16,33,58,.08);box-shadow:0 22px 44px rgba(16,33,58,.12)}
+.preview-head h1,.preview-card h2{margin:0 0 8px;font-family:"Outfit","Segoe UI",system-ui,sans-serif;font-weight:500;line-height:1.1}.preview-head h1{font-size:clamp(28px,3vw,40px)}.preview-card h2{font-size:24px}
+.preview-head p,.preview-card p{margin:0;color:#516072;line-height:1.6}.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;align-items:start}
+.preview-card .dps-space-groomers,.preview-card .dps-sg-wrapper{max-width:420px;margin:0 auto}.preview-static{position:relative}.preview-force-visible{opacity:1!important;pointer-events:auto!important}
+.preview-static .dps-sg-overlay{position:absolute}.preview-tag{display:inline-flex;align-items:center;min-height:30px;width:fit-content;padding:0 14px;border-radius:999px;background:rgba(11,107,203,.1);color:#0b6bcb;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+@media(max-width:640px){body{padding:18px}.preview-head,.preview-card{padding:18px;border-radius:24px}}
+</style>
+</head>
+<body>
+<div class="preview-shell">
+<section class="preview-head">
+<span class="preview-tag">M3 + branding oficial</span>
+<h1>Desi Pet Shower: Space Groomers</h1>
+<p>Preview da personalizacao do add-on para que ele pareca um jogo oficial da Desi Pet Shower, mantendo o padrao M3 definido em <code>docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md</code> e <code>docs/visual/VISUAL_STYLE_GUIDE.md</code>.</p>
+</section>
+<div class="preview-grid">
+<section class="preview-card preview-live">
+<h2>Gameplay ao vivo</h2>
+<p>Instancia real com JS atual, avancada alguns frames para registrar fundo tematico, HUD, leitura mobile-first e o novo clima de banho e tosa.</p>
+<div id="dps-space-groomers-preview-live" class="dps-space-groomers" data-context="preview-live">
+<div class="dps-sg-wrapper">
+<canvas class="dps-sg-canvas" width="480" height="640"></canvas>
+<p class="dps-sg-status-live" aria-live="polite" aria-atomic="true"></p>
+<div class="dps-sg-hud"><div class="dps-sg-hud__score"><span class="dps-sg-hud__label">Brilho</span><span class="dps-sg-hud__value dps-sg-score">0</span></div><div class="dps-sg-hud__wave"><span class="dps-sg-hud__label">Etapa</span><span class="dps-sg-hud__value dps-sg-wave">1</span></div><div class="dps-sg-hud__lives"><span class="dps-sg-hud__label">Cuidado</span><span class="dps-sg-hud__value dps-sg-lives">&#10084;&#65039;&#10084;&#65039;&#10084;&#65039;</span></div></div>
+<div class="dps-sg-combo dps-sg-combo--hidden"><span class="dps-sg-combo__text">x2</span><span class="dps-sg-combo__hint">ritmo do cuidado</span><span class="dps-sg-combo__meter"><span class="dps-sg-combo__fill"></span></span></div>
+<div class="dps-sg-goal" aria-live="polite"><span class="dps-sg-goal__label">Cuidado do dia</span><span class="dps-sg-goal__title"></span><span class="dps-sg-goal__progress"></span><span class="dps-sg-goal__meter"><span class="dps-sg-goal__fill"></span></span><span class="dps-sg-goal__remaining"></span></div>
+<div class="dps-sg-toast dps-sg-toast--hidden" aria-live="polite"><span class="dps-sg-toast__title"></span><span class="dps-sg-toast__desc"></span></div>
+<div class="dps-sg-powerup-indicator dps-sg-powerup-indicator--hidden"><span class="dps-sg-powerup-indicator__icon"></span><span class="dps-sg-powerup-indicator__copy"><span class="dps-sg-powerup-indicator__name"></span><span class="dps-sg-powerup-indicator__desc"></span></span><div class="dps-sg-powerup-indicator__bar"><div class="dps-sg-powerup-indicator__fill"></div></div></div>
+<div class="dps-sg-special-bar"><span class="dps-sg-special-bar__label">Espuma total</span><div class="dps-sg-special-bar__track"><div class="dps-sg-special-bar__fill"></div></div></div>
+<div class="dps-sg-mobile-controls"><p class="dps-sg-mobile-controls__hint">Arraste para cuidar. O jato sai sozinho.</p><button type="button" class="dps-sg-btn dps-sg-btn--special" aria-label="Espuma total" disabled>&#9889;</button></div>
+<div class="dps-sg-overlay dps-sg-overlay--start"><div class="dps-sg-overlay__content"><p class="dps-sg-overlay__eyebrow">Jogo oficial da Desi Pet Shower</p><h2 class="dps-sg-overlay__title">Desi Pet Shower: Space Groomers</h2><p class="dps-sg-overlay__subtitle">Banho em ordem, pet brilhando.</p><p class="dps-sg-overlay__desc">Limpe pulgas, bolos de pelo e bagunca do banho em uma missao rapida da Desi Pet Shower.</p><p class="dps-sg-overlay__highscore">Melhor brilho: <span class="dps-sg-highscore-value">0</span></p><div class="dps-sg-start-meta"><p class="dps-sg-start-meta__streak">Rotina do dia: <span class="dps-sg-start-streak-value">0</span></p><p class="dps-sg-start-meta__mission-title"></p><p class="dps-sg-start-meta__mission-progress"></p><p class="dps-sg-start-meta__badges"></p></div><button type="button" class="dps-sg-btn dps-sg-btn--play">Comecar cuidado</button><div class="dps-sg-overlay__legend"><span class="dps-sg-overlay__legend-item"><strong>&#129532; Espuma Turbo</strong><small>triplica os jatos de limpeza</small></span><span class="dps-sg-overlay__legend-item"><strong>&#129529; Toalha Relampago</strong><small>varre a faixa mais suja</small></span></div><p class="dps-sg-overlay__controls-hint"><small>Arraste para mover. Com 4 acertos seguidos o cuidado entra no embalo.</small></p></div></div>
+<div class="dps-sg-overlay dps-sg-overlay--gameover dps-sg-overlay--hidden"><div class="dps-sg-overlay__content"></div></div>
+<div class="dps-sg-overlay dps-sg-overlay--victory dps-sg-overlay--hidden"><div class="dps-sg-overlay__content"></div></div>
+<div class="dps-sg-overlay dps-sg-overlay--wave dps-sg-overlay--hidden"><div class="dps-sg-overlay__content"><h2 class="dps-sg-overlay__title dps-sg-wave-title"></h2><p class="dps-sg-overlay__subtitle dps-sg-wave-bonus"></p></div></div>
+</div>
+</div>
+</section>
+<section class="preview-card">
+<h2>Overlay inicial</h2>
+<p>Estado estatico para registrar o nome do jogo, tagline, CTA e os reforcos visuais de banho e tosa no universo da marca.</p>
+<div class="preview-static">
+<div class="dps-sg-wrapper">
+<canvas class="dps-sg-canvas" width="480" height="640"></canvas>
+<div class="dps-sg-hud"><div class="dps-sg-hud__score"><span class="dps-sg-hud__label">Brilho</span><span class="dps-sg-hud__value">0</span></div><div class="dps-sg-hud__wave"><span class="dps-sg-hud__label">Etapa</span><span class="dps-sg-hud__value">1</span></div><div class="dps-sg-hud__lives"><span class="dps-sg-hud__label">Cuidado</span><span class="dps-sg-hud__value">&#10084;&#65039;&#10084;&#65039;&#10084;&#65039;</span></div></div>
+<div class="dps-sg-goal"><span class="dps-sg-goal__label">Cuidado do dia</span><span class="dps-sg-goal__title">&#128293; Embale 9 acertos</span><span class="dps-sg-goal__progress">4/9</span><span class="dps-sg-goal__meter"><span class="dps-sg-goal__fill" style="width:44%"></span></span><span class="dps-sg-goal__remaining">Faltam 5</span></div>
+<div class="dps-sg-powerup-indicator preview-force-visible"><span class="dps-sg-powerup-indicator__icon">&#129532;</span><span class="dps-sg-powerup-indicator__copy"><span class="dps-sg-powerup-indicator__name">Espuma Turbo</span><span class="dps-sg-powerup-indicator__desc">triplica os jatos de limpeza</span></span><div class="dps-sg-powerup-indicator__bar"><div class="dps-sg-powerup-indicator__fill" style="height:84%"></div></div></div>
+<div class="dps-sg-mobile-controls"><p class="dps-sg-mobile-controls__hint">Arraste para cuidar. O jato sai sozinho.</p><button type="button" class="dps-sg-btn dps-sg-btn--special dps-sg-btn--charged" aria-label="Espuma total">&#9889;</button></div>
+<div class="dps-sg-overlay dps-sg-overlay--start preview-force-visible"><div class="dps-sg-overlay__content"><p class="dps-sg-overlay__eyebrow">Jogo oficial da Desi Pet Shower</p><h2 class="dps-sg-overlay__title">Desi Pet Shower: Space Groomers</h2><p class="dps-sg-overlay__subtitle">Banho em ordem, pet brilhando.</p><p class="dps-sg-overlay__desc">Limpe pulgas, bolos de pelo e bagunca do banho em uma missao rapida da Desi Pet Shower.</p><p class="dps-sg-overlay__highscore">Melhor brilho: <span class="dps-sg-highscore-value">8.420</span></p><div class="dps-sg-start-meta"><p class="dps-sg-start-meta__streak">Rotina do dia: <span>3 dias</span></p><p class="dps-sg-start-meta__mission-title">&#128293; Embale 9 acertos</p><p class="dps-sg-start-meta__mission-progress">Andamento: 4/9 (faltam 5)</p><p class="dps-sg-start-meta__badges">Mimos liberados: 4</p></div><button type="button" class="dps-sg-btn dps-sg-btn--play">Comecar cuidado</button><div class="dps-sg-overlay__legend"><span class="dps-sg-overlay__legend-item"><strong>&#129532; Espuma Turbo</strong><small>triplica os jatos de limpeza</small></span><span class="dps-sg-overlay__legend-item"><strong>&#129529; Toalha Relampago</strong><small>varre a faixa mais suja</small></span></div><p class="dps-sg-overlay__controls-hint"><small>Runs curtas, leitura limpa e foco em mobile.</small></p></div></div>
+</div>
+</div>
+</section>
+<section class="preview-card">
+<h2>Resultado e replay</h2>
+<p>Estado estatico da tela final para registrar o tom mais amigavel, os cards-resumo e o texto de retorno mais alinhado a cuidado pet.</p>
+<div class="preview-static">
+<div class="dps-sg-wrapper">
+<canvas class="dps-sg-canvas" width="480" height="640"></canvas>
+<div class="dps-sg-overlay dps-sg-overlay--victory preview-force-visible"><div class="dps-sg-overlay__content"><p class="dps-sg-overlay__eyebrow">Cuidado concluido</p><h2 class="dps-sg-overlay__title">Banho entregue!</h2><p class="dps-sg-overlay__final-score">Brilho final: <span class="dps-sg-final-score">12.480</span></p><div class="dps-sg-overlay__result-grid"><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label">Melhor embalo</span><strong>x9</strong></div><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label">Etapa</span><strong>8</strong></div><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label">Tempo</span><strong>78s</strong></div></div><p class="dps-sg-overlay__stats">Pulgas 22 | Carrapatos 8 | Bolos de pelo 15 | Banho 78s</p><p class="dps-sg-overlay__mission">&#128293; Cuidado do dia: Embale 9 acertos (concluido hoje).</p><p class="dps-sg-overlay__records">Rotina: 4 dias (melhor 6) | melhor embalo: 9 | melhor etapa: 8</p><div class="dps-sg-overlay__unlocks"><p class="dps-sg-overlay__unlocks-title">Mimos liberados</p><p class="dps-sg-overlay__unlocks-list">&#127942; Rotina em dia | &#10024; Primeiro cuidado</p></div><p class="dps-sg-overlay__highscore">Melhor brilho: <span class="dps-sg-highscore-value">12.480</span></p><button type="button" class="dps-sg-btn dps-sg-btn--play">Jogar outra rodada</button></div></div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<script src="../../../plugins/desi-pet-shower-game/assets/js/space-groomers.js"></script>
+<script>
+(function(){function paintBackdrop(canvas){if(!canvas||!canvas.getContext){return}var ctx=canvas.getContext('2d');var g=ctx.createLinearGradient(0,0,0,canvas.height);g.addColorStop(0,'#07223f');g.addColorStop(.54,'#0a4b7f');g.addColorStop(1,'#1180aa');ctx.fillStyle=g;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='rgba(164,224,255,.14)';ctx.beginPath();ctx.ellipse(canvas.width*.2,100,88,72,-.16,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,211,142,.1)';ctx.beginPath();ctx.ellipse(canvas.width*.78,148,74,56,.22,0,Math.PI*2);ctx.fill();for(var i=0;i<42;i++){ctx.fillStyle=i%5===0?'#eefbff':'#a5d4ff';ctx.globalAlpha=i%5===0?.86:.48;ctx.fillRect((i*37)%canvas.width,(i*53)%canvas.height,i%5===0?2:1.3,i%5===0?2:1.3)}for(var b=0;b<6;b++){ctx.globalAlpha=.24;ctx.strokeStyle=b%2===0?'#eefbff':'#9fe0ff';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(48+b*58,134+(b*53)%220,8+(b%3)*4,0,Math.PI*2);ctx.stroke()}ctx.globalAlpha=1;ctx.fillStyle='rgba(236,251,255,.26)';ctx.fillRect(0,canvas.height-34,canvas.width,2);for(var f=0;f<9;f++){var x=f*56;var y=canvas.height-22;ctx.fillStyle=f%3===0?'rgba(255,255,255,.28)':'rgba(231,249,255,.2)';ctx.beginPath();ctx.arc(x,y,9,0,Math.PI*2);ctx.arc(x+12,y-4,7,0,Math.PI*2);ctx.arc(x+22,y+1,8,0,Math.PI*2);ctx.fill()}}document.querySelectorAll('.preview-static .dps-sg-canvas').forEach(paintBackdrop);window.addEventListener('load',function(){var startButton=document.querySelector('#dps-space-groomers-preview-live .dps-sg-btn--play');if(startButton){startButton.click()}setTimeout(function(){if(typeof window.advanceTime==='function'){window.advanceTime(6500)}},220)})}());
+</script>
+</body>
+</html>
