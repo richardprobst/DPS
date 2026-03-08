@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Space Groomers - Fase 4 Preview</title>
+<style>
+:root {
+    --dps-color-primary: #0b6bcb;
+    --dps-color-on-primary: #ffffff;
+    --dps-color-primary-container: #d4e4ff;
+    --dps-color-secondary-container: #d8e3f8;
+    --dps-color-tertiary-container: #f5d9ff;
+    --dps-color-success-container: #a8f5b5;
+    --dps-color-surface: #f8f9ff;
+    --dps-color-surface-container-lowest: #ffffff;
+    --dps-color-surface-container-low: #f2f3fa;
+    --dps-color-surface-container-highest: #e1e2e9;
+    --dps-color-on-surface: #191c20;
+    --dps-color-on-surface-variant: #43474e;
+    --dps-color-outline-variant: #c3c6cf;
+    --dps-font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --dps-font-display: "Outfit", var(--dps-font-system);
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    background:
+        radial-gradient(circle at top right, rgba(11, 107, 203, 0.12), transparent 25%),
+        linear-gradient(180deg, #f8f9ff 0%, #edf2ff 100%);
+    color: var(--dps-color-on-surface);
+    font-family: var(--dps-font-system);
+}
+main {
+    margin: 0 auto;
+    max-width: 1240px;
+    padding: 40px 24px 72px;
+}
+.page-title {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 28px;
+}
+.page-title h1 {
+    font-family: var(--dps-font-display);
+    font-size: 34px;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 0;
+}
+.page-title p {
+    color: var(--dps-color-on-surface-variant);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
+    max-width: 760px;
+}
+.preview-stack {
+    display: grid;
+    gap: 24px;
+}
+.card,
+.hub,
+.canvas {
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: 28px;
+    box-shadow: 0 16px 40px rgba(11, 107, 203, 0.08);
+}
+.card {
+    padding: 24px;
+}
+.card-header,
+.card-footer,
+.hub-hero,
+.hub-actions,
+.hub-columns {
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+.card-header,
+.hub-hero,
+.hub-columns {
+    align-items: flex-start;
+}
+.eyebrow,
+.metric-label,
+.panel-label,
+.event-label,
+.mini-label {
+    color: var(--dps-color-on-surface-variant);
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+.card-icon {
+    align-items: center;
+    background: linear-gradient(135deg, #0b6bcb, #61b6ff);
+    border-radius: 22px;
+    color: white;
+    display: inline-flex;
+    font-size: 24px;
+    height: 56px;
+    justify-content: center;
+    width: 56px;
+}
+.card-copy,
+.hero-copy {
+    display: grid;
+    gap: 6px;
+}
+.card-copy h2,
+.hero-copy h2,
+.event h3,
+.panel h3 {
+    font-family: var(--dps-font-display);
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin: 0;
+}
+.card-copy p,
+.hero-copy p,
+.event p,
+.panel p,
+.card-footer,
+.mini-card small {
+    color: var(--dps-color-on-surface-variant);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+}
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+.chip,
+.event-meta {
+    background: var(--dps-color-surface-container-highest);
+    border-radius: 999px;
+    color: var(--dps-color-on-surface);
+    display: inline-flex;
+    font-size: 13px;
+    line-height: 1.3;
+    padding: 8px 12px;
+}
+.btn {
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid var(--dps-color-outline-variant);
+    color: var(--dps-color-primary);
+    display: inline-flex;
+    font-size: 14px;
+    font-weight: 600;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 18px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.btn-primary {
+    background: var(--dps-color-primary);
+    border-color: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+}
+.summary-grid,
+.metrics {
+    display: grid;
+    gap: 12px;
+    margin: 18px 0 22px;
+}
+.summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 24px;
+}
+.mini-card,
+.metric,
+.panel,
+.event {
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: 22px;
+    padding: 16px;
+}
+.mini-card,
+.metric {
+    display: grid;
+    gap: 6px;
+}
+.mini-value,
+.metric-value {
+    color: var(--dps-color-on-surface);
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.15;
+}
+.canvas {
+    align-items: center;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18), transparent 18%),
+        linear-gradient(180deg, #0a1735 0%, #112a60 65%, #091326 100%);
+    display: flex;
+    justify-content: center;
+    min-height: 260px;
+    overflow: hidden;
+    position: relative;
+}
+.canvas::before,
+.canvas::after {
+    background: rgba(255,255,255,0.82);
+    border-radius: 999px;
+    content: "";
+    position: absolute;
+}
+.canvas::before { box-shadow: 120px 60px 0 rgba(255,255,255,0.75), 300px 24px 0 rgba(255,255,255,0.58), -210px 130px 0 rgba(255,255,255,0.7); height: 4px; width: 4px; }
+.canvas::after { box-shadow: -140px -40px 0 rgba(255,255,255,0.5), 220px -80px 0 rgba(255,255,255,0.62), 340px 120px 0 rgba(255,255,255,0.4); height: 3px; width: 3px; }
+.canvas-inner {
+    align-items: center;
+    background: rgba(8, 17, 40, 0.55);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 24px;
+    display: grid;
+    gap: 10px;
+    justify-items: center;
+    padding: 28px;
+    text-align: center;
+    width: min(92%, 520px);
+}
+.canvas-inner strong {
+    color: #ffffff;
+    font-family: var(--dps-font-display);
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+}
+.canvas-inner span {
+    color: rgba(255,255,255,0.82);
+    font-size: 14px;
+    line-height: 1.6;
+}
+.hub {
+    background: linear-gradient(180deg, rgba(212,228,255,0.78) 0%, var(--dps-color-surface) 100%);
+    display: grid;
+    gap: 20px;
+    padding: 24px;
+}
+.event {
+    display: grid;
+    gap: 8px;
+}
+.event-primary {
+    background: var(--dps-color-primary-container);
+}
+.panel {
+    display: grid;
+    flex: 1 1 0;
+    gap: 10px;
+}
+.badge-list {
+    display: grid;
+    gap: 10px;
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+}
+.badge-list li {
+    background: var(--dps-color-surface-container-low);
+    border-radius: 16px;
+    display: grid;
+    gap: 4px;
+    padding: 12px 14px;
+}
+.badge-list strong {
+    font-size: 14px;
+    font-weight: 600;
+}
+@media (max-width: 980px) {
+    .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .hub-columns,
+    .hub-hero,
+    .card-header,
+    .card-footer { flex-direction: column; }
+}
+@media (max-width: 640px) {
+    main { padding: 24px 16px 48px; }
+    .summary-grid,
+    .metrics { grid-template-columns: 1fr; }
+    .card,
+    .hub { border-radius: 22px; padding: 18px; }
+    .card-copy h2,
+    .hero-copy h2,
+    .event h3,
+    .panel h3 { font-size: 22px; }
+    .btn { width: 100%; }
+}
+</style>
+</head>
+<body>
+<main>
+    <section class="page-title">
+        <span class="eyebrow">Registro visual da Fase 4</span>
+        <h1>Space Groomers conectado ao portal, ao pet e ao loyalty</h1>
+        <p>Preview estatico da interface implementada no add-on `desi-pet-shower-game`, seguindo `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do padrao M3.</p>
+    </section>
+
+    <div class="preview-stack">
+        <section class="card">
+            <div class="card-header">
+                <div style="display:flex; gap:16px; align-items:flex-start;">
+                    <span class="card-icon">SG</span>
+                    <div class="card-copy">
+                        <span class="eyebrow">Space Groomers no portal</span>
+                        <h2>Preparacao de Bolota</h2>
+                        <p>O proximo atendimento de Bolota esta marcado para 14/03/2026. Uma run curta ajuda a entrar no clima do banho.</p>
+                    </div>
+                </div>
+                <a class="btn" href="#">Ver perfil do jogo</a>
+            </div>
+
+            <div class="chips">
+                <span class="chip">Tutor: Marina</span>
+                <span class="chip">Pet: Bolota</span>
+                <span class="chip">Proximo banho: 14/03/2026</span>
+                <span class="chip">Loyalty: Prata</span>
+            </div>
+
+            <div class="summary-grid">
+                <article class="mini-card">
+                    <span class="mini-label">Recorde</span>
+                    <strong class="mini-value">12.450</strong>
+                    <small>Fonte canonica no portal</small>
+                </article>
+                <article class="mini-card">
+                    <span class="mini-label">Streak</span>
+                    <strong class="mini-value">4 dias</strong>
+                    <small>Cliente autenticado</small>
+                </article>
+                <article class="mini-card">
+                    <span class="mini-label">Badges</span>
+                    <strong class="mini-value">3</strong>
+                    <small>Conquistas prontas para expandir</small>
+                </article>
+            </div>
+
+            <div class="canvas">
+                <div class="canvas-inner">
+                    <strong>Space Groomers</strong>
+                    <span>Canvas do jogo embutido na aba Inicio do portal, mantendo o progresso sincronizado no cliente autenticado.</span>
+                </div>
+            </div>
+
+            <div class="card-footer" style="margin-top:16px;">
+                <span>O progresso continua salvo no cliente autenticado do portal.</span>
+                <a class="btn" href="#">Abrir hub do jogo</a>
+            </div>
+        </section>
+
+        <section class="hub">
+            <div class="hub-hero">
+                <div class="hero-copy">
+                    <span class="eyebrow">Padrao M3 aplicado via docs/visual</span>
+                    <h2>Marina no comando da nave</h2>
+                    <p>Este perfil conecta recorde, rotina do pet, status do portal e recompensas simbolicas do jogo em uma unica superficie.</p>
+                </div>
+                <div class="hub-actions">
+                    <a class="btn btn-primary" href="#">Jogar agora</a>
+                    <a class="btn" href="#">Ver agendamento</a>
+                </div>
+            </div>
+
+            <div class="chips">
+                <span class="chip">Tutor: Marina</span>
+                <span class="chip">Pet: Bolota</span>
+                <span class="chip">Proximo banho: 14/03/2026</span>
+                <span class="chip">Loyalty: Prata</span>
+            </div>
+
+            <div class="metrics">
+                <article class="metric">
+                    <span class="metric-label">Recorde sincronizado</span>
+                    <strong class="metric-value">12.450</strong>
+                    <small>Fonte canonica: progresso do cliente no portal.</small>
+                </article>
+                <article class="metric">
+                    <span class="metric-label">Streak atual</span>
+                    <strong class="metric-value">4 dias</strong>
+                    <small>Retorno leve conectado ao cliente autenticado.</small>
+                </article>
+                <article class="metric">
+                    <span class="metric-label">Missao do dia</span>
+                    <strong class="metric-value">Colete 3 power-ups</strong>
+                    <small>2/3 de progresso hoje.</small>
+                </article>
+                <article class="metric">
+                    <span class="metric-label">Badges locais</span>
+                    <strong class="metric-value">3</strong>
+                    <small>Conquistas do jogo prontas para futuras expansoes.</small>
+                </article>
+            </div>
+
+            <article class="event event-primary">
+                <span class="event-label">Ecossistema DPS</span>
+                <h3>Preparacao de Bolota</h3>
+                <p>O proximo atendimento de Bolota esta marcado para 14/03/2026. O jogo reaproveita esse contexto sem criar dependencia dura de outros modulos.</p>
+                <span class="event-meta">Confirmado</span>
+            </article>
+
+            <div class="hub-columns">
+                <section class="panel">
+                    <span class="panel-label">Pet em destaque</span>
+                    <h3>Bolota</h3>
+                    <p>Cachorro / Spitz Alemao / Porte pequeno</p>
+                    <p>Proximo atendimento: 14/03/2026 (Confirmado).</p>
+                    <p>O perfil do pet ja pode ser reutilizado em eventos futuros do jogo.</p>
+                </section>
+                <section class="panel">
+                    <span class="panel-label">Recompensas conectadas</span>
+                    <h3>380 pts no loyalty</h3>
+                    <p>O jogo ja gerou 55 pts em 3 eventos sincronizados.</p>
+                    <p>Nivel atual de fidelidade: Prata.</p>
+                    <p>Ultima recompensa do jogo: Missao diaria do Space Groomers em 08/03/2026.</p>
+                    <ul class="badge-list">
+                        <li>
+                            <strong>Banho Completo</strong>
+                            <span>Venceu uma run completa.</span>
+                        </li>
+                        <li>
+                            <strong>Ritmo de Tesoura</strong>
+                            <span>Atingiu combo 9 em alguma partida.</span>
+                        </li>
+                        <li>
+                            <strong>Missao em Dia</strong>
+                            <span>Completou 3 missoes diarias.</span>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

@@ -36,3 +36,30 @@ Mudancas de camada meta/retencao no jogo:
 ### Observacao especifica do portal
 - Como o WordPress local nao estava acessivel no navegador automatizado desta sessao, o registro visual do portal foi salvo como preview estatico e PNG renderizado localmente.
 - O card segue `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do padrao M3.
+
+## Registro desta entrega (Fase 4)
+### Contexto
+Mudancas de integracao do jogo com o ecossistema DPS:
+- nova aba `Space Groomers` no portal via hooks oficiais;
+- perfil do jogo conectado ao cliente autenticado;
+- pet em destaque com preferencia para o pet do proximo agendamento;
+- evento/status contextual ligado ao atendimento do pet;
+- resumo de recompensas conectado ao loyalty quando o modulo estiver ativo.
+
+### Referencia de design aplicada
+- `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`
+- `docs/visual/VISUAL_STYLE_GUIDE.md`
+
+### Capturas realizadas
+- `docs/screenshots/2026-03-08/space-groomers-phase4-preview-desktop.png`
+  - Preview completo desktop do card do jogo na aba Inicio e do novo hub/aba do jogo no portal.
+- `docs/screenshots/2026-03-08/space-groomers-phase4-preview-mobile.png`
+  - Preview completo mobile da mesma composicao, validando a adaptacao responsiva.
+
+### Artefatos de suporte preparados
+- `docs/screenshots/2026-03-08/space-groomers-phase4-preview.html`
+  - Preview estatico usado para gerar os PNGs desta fase.
+
+### Observacoes
+- O registro continua sendo um preview estatico porque o WordPress local nao estava exposto ao navegador automatizado desta sessao.
+- Diferente da tentativa anterior, os PNGs desta fase foram gerados com Playwright a partir do preview isolado, entao ha imagens reais salvas no repositorio.
