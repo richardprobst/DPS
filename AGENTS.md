@@ -126,7 +126,7 @@ Antes de finalizar qualquer tarefa, execute validações proporcionais ao impact
 - **Documentação apenas:** `git diff --check` + conferência dos caminhos citados.
 - **PHP alterado:** `php -l` nos arquivos modificados.
 - **Mudança funcional relevante:** validação local no WordPress dos fluxos afetados.
-- **Mudança visual/layout:** seguir `docs/visual/` (padrão M3) + registrar screenshots conforme `docs/screenshots/README.md`.
+- **Mudança visual/layout:** seguir `docs/visual/` (padrão M3) + validar responsividade nos breakpoints definidos pelo sistema + registrar screenshots conforme `docs/screenshots/README.md`.
 
 Sempre registrar no fechamento os comandos executados e o status (passou/falhou/limitação de ambiente).
 
@@ -209,7 +209,9 @@ Todos os plugins/add-ons DEVEM declarar:
 - Use cores com propósito (status/alertas/ação).
 - Mantenha hierarquia semântica (H1 único, H2 seções, H3 subseções).
 - Feedback consistente: use `DPS_Message_Helper` para sucesso/erro/aviso.
-- Responsividade básica quando necessário (480/768/1024).
+- **Responsividade é obrigatória** em toda entrega visual/frontend: o agente deve projetar, implementar e revisar a interface para uso real em telas pequenas, médias e grandes, evitando depender de ajustes posteriores.
+- Validar layouts, navegação, densidade, legibilidade e áreas de toque nos breakpoints de referência do sistema: **375px, 600px, 840px, 1200px e 1920px**.
+- Em mudanças visuais, tratar como defeito: overflow horizontal, conteúdo cortado, CTA inacessível, tabela sem estratégia mobile, modal que excede a viewport, targets de toque insuficientes e hierarquia comprometida entre breakpoints.
 - **Obrigatório:** qualquer tarefa de **layout/design/frontend** (criar, recriar, corrigir ou ajustar UI) **DEVE** seguir as especificações de `docs/visual/` (ver referências abaixo).
 
 Referências de design e layout (padrão visual **M3** do sistema):
@@ -227,10 +229,10 @@ Sempre orientar e confirmar no fechamento/PR onde os prints e o documento de reg
 
 ### Fluxo obrigatório para mudanças visuais (M3)
 1. Consultar `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` antes de implementar.
-2. Implementar a mudança mantendo coerência com o padrão M3.
+2. Implementar a mudança mantendo coerência com o padrão M3 e com responsividade real para small/medium/large screens.
 3. Gerar capturas completas das telas alteradas.
 4. Salvar artefatos em `docs/screenshots/YYYY-MM-DD/`.
-5. Criar/atualizar o documento do dia (`SCREENSHOTS_YYYY-MM-DD.md`) com contexto, antes/depois e lista dos arquivos.
+5. Criar/atualizar o documento do dia (`SCREENSHOTS_YYYY-MM-DD.md`) com contexto, antes/depois, breakpoints validados e lista dos arquivos.
 6. Citar no fechamento/PR os caminhos dos registros e prints salvos.
 
 ---
