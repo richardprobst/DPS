@@ -240,6 +240,7 @@ class DPS_Game_Addon {
 
                 <div class="dps-sg-overlay dps-sg-overlay--start">
                     <div class="dps-sg-overlay__content">
+                        <p class="dps-sg-overlay__eyebrow"><?php echo esc_html__( 'Arcade casual premium', 'dps-game' ); ?></p>
                         <h2 class="dps-sg-overlay__title">&#128640; Space Groomers</h2>
                         <p class="dps-sg-overlay__subtitle"><?php echo esc_html__( 'Invasao das Pulgas', 'dps-game' ); ?></p>
                         <p class="dps-sg-overlay__desc"><?php echo esc_html__( 'Defenda o Pet-Planeta em runs curtas, responsivas e com vontade de tentar de novo.', 'dps-game' ); ?></p>
@@ -252,8 +253,14 @@ class DPS_Game_Addon {
                         </div>
                         <button type="button" class="dps-sg-btn dps-sg-btn--play"><?php echo esc_html__( 'Toque para comecar', 'dps-game' ); ?></button>
                         <div class="dps-sg-overlay__legend">
-                            <span class="dps-sg-overlay__legend-item">&#129532; <?php echo esc_html__( 'Shampoo Turbo: 3 tiros por disparo', 'dps-game' ); ?></span>
-                            <span class="dps-sg-overlay__legend-item">&#129529; <?php echo esc_html__( 'Toalha: limpa a fileira mais baixa', 'dps-game' ); ?></span>
+                            <span class="dps-sg-overlay__legend-item">
+                                <strong>&#129532; <?php echo esc_html__( 'Shampoo Turbo', 'dps-game' ); ?></strong>
+                                <small><?php echo esc_html__( '3 tiros por disparo', 'dps-game' ); ?></small>
+                            </span>
+                            <span class="dps-sg-overlay__legend-item">
+                                <strong>&#129529; <?php echo esc_html__( 'Toalha Giratoria', 'dps-game' ); ?></strong>
+                                <small><?php echo esc_html__( 'limpa a fileira mais baixa', 'dps-game' ); ?></small>
+                            </span>
                         </div>
                         <p class="dps-sg-overlay__controls-hint"><small><?php echo esc_html__( 'Arraste para mover. Em 4 acertos seguidos voce entra em combo x2.', 'dps-game' ); ?></small></p>
                     </div>
@@ -261,8 +268,10 @@ class DPS_Game_Addon {
 
                 <div class="dps-sg-overlay dps-sg-overlay--gameover dps-sg-overlay--hidden">
                     <div class="dps-sg-overlay__content">
+                        <p class="dps-sg-overlay__eyebrow"><?php echo esc_html__( 'Nova tentativa', 'dps-game' ); ?></p>
                         <h2 class="dps-sg-overlay__title">&#128575; <?php echo esc_html__( 'Pet ficou estressado!', 'dps-game' ); ?></h2>
                         <p class="dps-sg-overlay__final-score"><?php echo esc_html__( 'Pontuacao:', 'dps-game' ); ?> <span class="dps-sg-final-score">0</span></p>
+                        <div class="dps-sg-overlay__result-grid"><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label"><?php echo esc_html__( 'Melhor combo', 'dps-game' ); ?></span><strong class="dps-sg-result-combo">0</strong></div><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label"><?php echo esc_html__( 'Onda', 'dps-game' ); ?></span><strong class="dps-sg-result-wave">1</strong></div><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label"><?php echo esc_html__( 'Tempo', 'dps-game' ); ?></span><strong class="dps-sg-result-time">0s</strong></div></div>
                         <p class="dps-sg-overlay__stats"></p>
                         <p class="dps-sg-overlay__mission"></p>
                         <p class="dps-sg-overlay__records"></p>
@@ -277,8 +286,10 @@ class DPS_Game_Addon {
 
                 <div class="dps-sg-overlay dps-sg-overlay--victory dps-sg-overlay--hidden">
                     <div class="dps-sg-overlay__content">
+                        <p class="dps-sg-overlay__eyebrow"><?php echo esc_html__( 'Run concluida', 'dps-game' ); ?></p>
                         <h2 class="dps-sg-overlay__title">&#127881; <?php echo esc_html__( 'Banho Completo!', 'dps-game' ); ?></h2>
                         <p class="dps-sg-overlay__final-score"><?php echo esc_html__( 'Pontuacao:', 'dps-game' ); ?> <span class="dps-sg-final-score">0</span></p>
+                        <div class="dps-sg-overlay__result-grid"><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label"><?php echo esc_html__( 'Melhor combo', 'dps-game' ); ?></span><strong class="dps-sg-result-combo">0</strong></div><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label"><?php echo esc_html__( 'Onda', 'dps-game' ); ?></span><strong class="dps-sg-result-wave">1</strong></div><div class="dps-sg-overlay__result-card"><span class="dps-sg-overlay__result-label"><?php echo esc_html__( 'Tempo', 'dps-game' ); ?></span><strong class="dps-sg-result-time">0s</strong></div></div>
                         <p class="dps-sg-overlay__stats"></p>
                         <p class="dps-sg-overlay__mission"></p>
                         <p class="dps-sg-overlay__records"></p>
