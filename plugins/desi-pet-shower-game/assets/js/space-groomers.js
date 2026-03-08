@@ -1,15 +1,12 @@
 /**
- * Space Groomers: Invasão das Pulgas
- * Game engine — Canvas + vanilla JS, zero dependências.
+ * Space Groomers: Invasao das Pulgas
+ * Game engine - Canvas + vanilla JS, zero dependencias.
  *
- * @version 1.1.0
+ * @version 1.2.0
  */
 (function () {
     'use strict';
 
-    /* ═══════════════════════════════════════════
-       CONSTANTS
-       ═══════════════════════════════════════════ */
     var W = 480;
     var H = 640;
     var PLAYER_W = 40;
@@ -19,184 +16,332 @@
     var ENEMY_SIZE = 28;
     var POWERUP_SIZE = 22;
     var MUD_SIZE = 6;
-    var TOTAL_WAVES = 10;
-    var SPECIAL_COST = 500;
     var FPS = 60;
     var FRAME_TIME = 1000 / FPS;
+    var LS_KEY = 'dps_sg_highscore';
+
+    var BALANCE = {
+        totalWaves: 8,
+        waveIntroMs: 420,
+        perfectBonusBase: 120,
+        perfectBonusStep: 20,
+        autoFireInterval: 0.22,
+        pickupRadius: 34,
+        playerSpeed: 5.2,
+        playerInvulnMs: 850,
+        comboTier2: 4,
+        comboTier3: 9,
+        comboWindow: 3.8,
+        specialCost: 420,
+        powerupBaseChance: 0.00125,
+        mudStartWave: 3,
+        mudBaseInterval: 3.1,
+        mudMinInterval: 1.05,
+        diveStartWave: 4,
+        diveBaseInterval: 7.5,
+        diveMinInterval: 3.4,
+        particleCap: 96,
+        floatingTextCap: 10,
+        hitFreezeMs: 22,
+        killFreezeMs: 34,
+        shakeHit: 2,
+        shakeDamage: 7,
+        shakeSpecial: 8,
+        shakeGameOver: 10,
+        gameOverDelayMs: 620
+    };
 
     var ENEMY_TYPES = {
-        flea:    { hp: 1, pts: 10, color: '#a0522d', speed: 1, label: 'pulgas' },
-        tick:    { hp: 2, pts: 25, color: '#556b2f', speed: 0.6, label: 'carrapatos' },
-        furball: { hp: 1, pts: 15, color: '#d2b48c', speed: 1.4, label: 'pelos' }
+        flea: {
+            hp: 1,
+            pts: 10,
+            color: '#a0522d',
+            speed: 1,
+            label: 'pulgas'
+        },
+        tick: {
+            hp: 2,
+            pts: 24,
+            color: '#556b2f',
+            speed: 0.62,
+            label: 'carrapatos'
+        },
+        furball: {
+            hp: 1,
+            pts: 16,
+            color: '#d2b48c',
+            speed: 1.3,
+            label: 'pelos'
+        }
     };
 
     var POWERUP_TYPES = {
-        shampoo: { icon: '🧴', name: 'Shampoo Turbo', duration: 8000, color: '#4fc3f7' },
-        towel:   { icon: '🧹', name: 'Toalha',        duration: 0,    color: '#f7c948' }
+        shampoo: {
+            icon: '\uD83E\uDDF4',
+            name: 'Shampoo Turbo',
+            shortLabel: '3 jatos',
+            desc: '3 tiros por disparo',
+            duration: 8000,
+            color: '#4fc3f7'
+        },
+        towel: {
+            icon: '\uD83E\uDDF9',
+            name: 'Toalha Giratoria',
+            shortLabel: 'limpa fileira',
+            desc: 'remove a fileira mais baixa',
+            duration: 0,
+            color: '#f7c948'
+        }
     };
 
-    var LS_KEY = 'dps_sg_highscore';
-
-    /* ═══════════════════════════════════════════
-       AUDIO (Web Audio API — tiny chiptune SFX)
-       ═══════════════════════════════════════════ */
     var audioCtx = null;
+
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
 
     function ensureAudio() {
         if (!audioCtx) {
-            try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { /* silent */ }
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                audioCtx = null;
+            }
         }
     }
 
     function playTone(freq, dur, type, vol) {
         ensureAudio();
-        if (!audioCtx) return;
+        if (!audioCtx) {
+            return;
+        }
+
         try {
-            var o = audioCtx.createOscillator();
-            var g = audioCtx.createGain();
-            o.type = type || 'square';
-            o.frequency.value = freq;
-            g.gain.value = vol || 0.08;
-            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-            o.connect(g);
-            g.connect(audioCtx.destination);
-            o.start();
-            o.stop(audioCtx.currentTime + dur);
-        } catch (e) { /* silent */ }
-    }
-
-    function sfxShoot()   { playTone(880, 0.06, 'square', 0.06); }
-    function sfxHit()     { playTone(220, 0.10, 'triangle', 0.08); }
-    function sfxPowerup() { playTone(660, 0.08, 'sine', 0.07); playTone(990, 0.12, 'sine', 0.07); }
-    function sfxLoseLife() { playTone(150, 0.25, 'sawtooth', 0.06); }
-    function sfxSpecial() { playTone(440, 0.15, 'sine', 0.08); playTone(880, 0.2, 'sine', 0.06); }
-
-    /* ═══════════════════════════════════════════
-       PARTICLES
-       ═══════════════════════════════════════════ */
-    function createParticles(arr, x, y, color, count) {
-        for (var i = 0; i < count; i++) {
-            arr.push({
-                x: x,
-                y: y,
-                vx: (Math.random() - 0.5) * 4,
-                vy: (Math.random() - 0.5) * 4,
-                life: 0.5 + Math.random() * 0.3,
-                color: color,
-                size: 2 + Math.random() * 3
-            });
+            var oscillator = audioCtx.createOscillator();
+            var gain = audioCtx.createGain();
+            oscillator.type = type || 'square';
+            oscillator.frequency.value = freq;
+            gain.gain.value = vol || 0.08;
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+            oscillator.connect(gain);
+            gain.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + dur);
+        } catch (e) {
+            return;
         }
     }
 
-    function updateParticles(arr, dt) {
-        for (var i = arr.length - 1; i >= 0; i--) {
-            var p = arr[i];
-            p.x += p.vx;
-            p.y += p.vy;
-            p.life -= dt;
-            if (p.life <= 0) arr.splice(i, 1);
-        }
+    function sfxShoot() {
+        playTone(880, 0.05, 'square', 0.05);
     }
 
-    function drawParticles(ctx, arr) {
-        for (var i = 0; i < arr.length; i++) {
-            var p = arr[i];
-            ctx.globalAlpha = Math.max(0, p.life * 2);
-            ctx.fillStyle = p.color;
-            ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
-        }
-        ctx.globalAlpha = 1;
+    function sfxHit() {
+        playTone(240, 0.08, 'triangle', 0.07);
     }
 
-    /* ═══════════════════════════════════════════
-       SPRITE DRAWING (pixel-art via canvas)
-       ═══════════════════════════════════════════ */
-    function drawPlayer(ctx, x, y) {
-        // Secador turbo — simple pixel ship
-        ctx.fillStyle = '#4fc3f7';
-        ctx.fillRect(x - 4, y - 14, 8, 28);    // body
-        ctx.fillRect(x - 16, y, 32, 10);        // wings
-        ctx.fillRect(x - 20, y + 4, 8, 8);      // left thruster
-        ctx.fillRect(x + 12, y + 4, 8, 8);      // right thruster
+    function sfxKill() {
+        playTone(410, 0.07, 'triangle', 0.06);
+        playTone(610, 0.08, 'triangle', 0.04);
+    }
+
+    function sfxPowerup() {
+        playTone(660, 0.08, 'sine', 0.07);
+        playTone(990, 0.10, 'sine', 0.06);
+    }
+
+    function sfxLoseLife() {
+        playTone(150, 0.20, 'sawtooth', 0.06);
+    }
+
+    function sfxSpecial() {
+        playTone(440, 0.15, 'sine', 0.08);
+        playTone(880, 0.20, 'sine', 0.06);
+    }
+
+    function sfxComboTier() {
+        playTone(540, 0.08, 'sine', 0.06);
+        playTone(720, 0.08, 'sine', 0.05);
+    }
+
+    function sfxReady() {
+        playTone(520, 0.06, 'triangle', 0.05);
+        playTone(780, 0.08, 'triangle', 0.04);
+    }
+
+    function getWaveConfig(wave) {
+        return {
+            cols: Math.min(5 + Math.floor((wave - 1) / 2), 7),
+            rows: Math.min(2 + Math.floor((wave - 1) / 3), 4),
+            tickChance: wave >= 4 ? Math.min(0.12 + (wave - 4) * 0.05, 0.28) : 0,
+            furballChance: wave >= 2 ? Math.min(0.18 + wave * 0.025, 0.38) : 0,
+            speedMultiplier: 0.92 + wave * 0.06,
+            mudInterval: wave < BALANCE.mudStartWave ? 999 : Math.max(BALANCE.mudMinInterval, BALANCE.mudBaseInterval - wave * 0.18),
+            powerupChance: BALANCE.powerupBaseChance + wave * 0.00008,
+            diveInterval: wave < BALANCE.diveStartWave ? 999 : Math.max(BALANCE.diveMinInterval, BALANCE.diveBaseInterval - wave * 0.45),
+            perfectBonus: BALANCE.perfectBonusBase + (wave - 1) * BALANCE.perfectBonusStep
+        };
+    }
+
+    function drawPlayer(ctx, game) {
+        var x = game.player.x;
+        var y = game.player.y + Math.sin(game.runTimeMs / 180) * 1.5;
+        var hitFlash = game.playerHitTimer > 0;
+        var blink = game.playerInvulnTimer > 0 && Math.floor(game.playerInvulnTimer / 70) % 2 === 0;
+        var enginePulse = 0.9 + Math.sin(game.runTimeMs / 75) * 0.1;
+
+        if (blink && !hitFlash && game.state !== 'gameoverTransition') {
+            return;
+        }
+
+        ctx.save();
+        ctx.translate(x, y);
+        if (hitFlash) {
+            ctx.scale(0.95, 1.08);
+        }
+
+        ctx.fillStyle = hitFlash ? '#ffd7d7' : '#4fc3f7';
+        ctx.fillRect(-4, -14, 8, 28);
+        ctx.fillRect(-16, 0, 32, 10);
+        ctx.fillRect(-20, 4, 8, 8);
+        ctx.fillRect(12, 4, 8, 8);
+
         ctx.fillStyle = '#e1f5fe';
-        ctx.fillRect(x - 2, y - 14, 4, 8);      // nozzle
-        ctx.fillStyle = '#0288d1';
-        ctx.fillRect(x - 12, y + 2, 24, 4);     // detail
+        ctx.fillRect(-2, -14, 4, 8);
+
+        ctx.fillStyle = hitFlash ? '#ff8a80' : '#0288d1';
+        ctx.fillRect(-12, 2, 24, 4);
+
+        ctx.fillStyle = hitFlash ? '#ff7043' : 'rgba(255, 183, 77, 0.9)';
+        ctx.fillRect(-18, 12, 6, 8 * enginePulse);
+        ctx.fillRect(12, 12, 6, 8 * enginePulse);
+
+        ctx.restore();
     }
 
-    function drawEnemy(ctx, type, x, y, hp) {
+    function drawEnemy(ctx, enemy, runTimeMs) {
+        var type = enemy.type;
         var et = ENEMY_TYPES[type];
         var s = ENEMY_SIZE;
         var hs = s / 2;
+        var bobOffset = enemy.pattern === 'dive' ? 0 : Math.sin(runTimeMs / 220 + enemy.animSeed) * 1.2;
+
+        ctx.save();
+        ctx.translate(enemy.x, enemy.y + bobOffset);
+
+        if (enemy.pattern === 'dive' && enemy.telegraph > 0) {
+            var ringSize = hs + 4 + (1 - enemy.telegraph / enemy.telegraphMax) * 8;
+            ctx.strokeStyle = 'rgba(255, 120, 120, 0.75)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(0, 0, ringSize, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        if (enemy.pattern === 'dive' && enemy.telegraph <= 0) {
+            ctx.rotate(clamp(enemy.vx * 0.12, -0.25, 0.25));
+        }
+
+        if (enemy.hurtTimer > 0) {
+            ctx.globalAlpha = 0.88;
+        }
 
         if (type === 'flea') {
-            // Pulga — round body + legs
-            ctx.fillStyle = et.color;
+            ctx.fillStyle = enemy.hurtTimer > 0 ? '#fff1e8' : et.color;
             ctx.beginPath();
-            ctx.arc(x, y, hs * 0.7, 0, Math.PI * 2);
+            ctx.arc(0, 0, hs * 0.7, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillRect(x - hs, y + hs * 0.3, 4, 8);
-            ctx.fillRect(x + hs - 4, y + hs * 0.3, 4, 8);
+            ctx.fillRect(-hs, hs * 0.3, 4, 8);
+            ctx.fillRect(hs - 4, hs * 0.3, 4, 8);
             ctx.fillStyle = '#fff';
-            ctx.fillRect(x - 4, y - 4, 3, 3);
-            ctx.fillRect(x + 2, y - 4, 3, 3);
+            ctx.fillRect(-4, -4, 3, 3);
+            ctx.fillRect(2, -4, 3, 3);
         } else if (type === 'tick') {
-            // Carrapato — larger, darker, armored
-            ctx.fillStyle = hp > 1 ? et.color : '#8b4513';
-            ctx.fillRect(x - hs, y - hs, s, s);
+            ctx.fillStyle = enemy.hurtTimer > 0 ? '#f3f6d8' : (enemy.hp > 1 ? et.color : '#8b4513');
+            ctx.fillRect(-hs, -hs, s, s);
             ctx.fillStyle = '#3e5902';
-            ctx.fillRect(x - hs + 3, y - hs + 3, s - 6, s - 6);
+            ctx.fillRect(-hs + 3, -hs + 3, s - 6, s - 6);
             ctx.fillStyle = '#fff';
-            ctx.fillRect(x - 4, y - 3, 3, 3);
-            ctx.fillRect(x + 2, y - 3, 3, 3);
-            if (hp > 1) {
-                ctx.fillStyle = 'rgba(255,255,255,0.3)';
-                ctx.fillRect(x - hs + 2, y - hs + 2, s - 4, 3);
+            ctx.fillRect(-4, -3, 3, 3);
+            ctx.fillRect(2, -3, 3, 3);
+            if (enemy.hp > 1) {
+                ctx.fillStyle = 'rgba(255,255,255,0.28)';
+                ctx.fillRect(-hs + 2, -hs + 2, s - 4, 3);
             }
         } else {
-            // Bolota de pelo — fluffy circle
-            ctx.fillStyle = et.color;
+            ctx.fillStyle = enemy.hurtTimer > 0 ? '#fff7ea' : et.color;
             ctx.beginPath();
-            ctx.arc(x, y, hs * 0.8, 0, Math.PI * 2);
+            ctx.arc(0, 0, hs * 0.8, 0, Math.PI * 2);
             ctx.fill();
-            // fur strands
             ctx.strokeStyle = '#c4a882';
             ctx.lineWidth = 1;
             for (var i = 0; i < 6; i++) {
-                var a = (i / 6) * Math.PI * 2;
+                var angle = (i / 6) * Math.PI * 2;
                 ctx.beginPath();
-                ctx.moveTo(x + Math.cos(a) * hs * 0.5, y + Math.sin(a) * hs * 0.5);
-                ctx.lineTo(x + Math.cos(a) * hs, y + Math.sin(a) * hs);
+                ctx.moveTo(Math.cos(angle) * hs * 0.5, Math.sin(angle) * hs * 0.5);
+                ctx.lineTo(Math.cos(angle) * hs, Math.sin(angle) * hs);
                 ctx.stroke();
             }
         }
+
+        if (enemy.pattern === 'dive' && enemy.telegraph <= 0) {
+            ctx.strokeStyle = 'rgba(255, 191, 128, 0.55)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, hs * 0.5);
+            ctx.lineTo(0, hs + 10);
+            ctx.stroke();
+        }
+
+        ctx.restore();
     }
 
-    function drawBullet(ctx, x, y) {
+    function drawBullet(ctx, bullet) {
         ctx.fillStyle = '#e1f5fe';
-        ctx.fillRect(x - BULLET_W / 2, y - BULLET_H / 2, BULLET_W, BULLET_H);
+        ctx.fillRect(bullet.x - BULLET_W / 2, bullet.y - BULLET_H / 2, BULLET_W, BULLET_H);
         ctx.fillStyle = 'rgba(79,195,247,0.4)';
-        ctx.fillRect(x - BULLET_W, y, BULLET_W * 2, BULLET_H / 2);
+        ctx.fillRect(bullet.x - BULLET_W, bullet.y, BULLET_W * 2, BULLET_H / 2);
     }
 
-    function drawMud(ctx, x, y) {
+    function drawMud(ctx, mud) {
         ctx.fillStyle = '#795548';
         ctx.beginPath();
-        ctx.arc(x, y, MUD_SIZE, 0, Math.PI * 2);
+        ctx.arc(mud.x, mud.y, MUD_SIZE, 0, Math.PI * 2);
         ctx.fill();
     }
 
-    function drawPowerup(ctx, type, x, y) {
-        var pt = POWERUP_TYPES[type];
+    function drawPowerup(ctx, powerup, runTimeMs) {
+        var pt = POWERUP_TYPES[powerup.type];
+        var bob = Math.sin(runTimeMs / 180 + powerup.animSeed) * 4;
+        var y = powerup.y + bob;
+
+        ctx.save();
+        ctx.translate(powerup.x, y);
+
         ctx.fillStyle = pt.color;
         ctx.beginPath();
-        ctx.arc(x, y, POWERUP_SIZE / 2 + 2, 0, Math.PI * 2);
+        ctx.arc(0, 0, POWERUP_SIZE / 2 + 2, 0, Math.PI * 2);
         ctx.fill();
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, POWERUP_SIZE / 2 + 7 + Math.sin(runTimeMs / 170 + powerup.animSeed) * 2, 0, Math.PI * 2);
+        ctx.stroke();
+
         ctx.fillStyle = '#fff';
         ctx.font = '14px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(pt.icon, x, y);
+        ctx.fillText(pt.icon, 0, 0);
+
+        ctx.fillStyle = 'rgba(8, 14, 39, 0.85)';
+        ctx.fillRect(-38, -28, 76, 16);
+
+        ctx.fillStyle = '#fff';
+        ctx.font = '600 10px "Segoe UI", system-ui, sans-serif';
+        ctx.fillText(pt.shortLabel, 0, -20);
+        ctx.restore();
     }
 
     function drawStars(ctx, stars) {
@@ -206,24 +351,54 @@
         }
     }
 
-    /* ═══════════════════════════════════════════
-       GAME CLASS
-       ═══════════════════════════════════════════ */
+    function drawParticles(ctx, arr) {
+        for (var i = 0; i < arr.length; i++) {
+            var particle = arr[i];
+            ctx.globalAlpha = clamp(particle.life / particle.maxLife, 0, 1);
+            ctx.fillStyle = particle.color;
+            ctx.fillRect(particle.x - particle.size / 2, particle.y - particle.size / 2, particle.size, particle.size);
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    function drawFloatingTexts(ctx, arr) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        for (var i = 0; i < arr.length; i++) {
+            var item = arr[i];
+            ctx.globalAlpha = clamp(item.life / item.maxLife, 0, 1);
+            ctx.fillStyle = item.color;
+            ctx.font = item.font;
+            ctx.fillText(item.text, item.x, item.y);
+        }
+
+        ctx.restore();
+        ctx.globalAlpha = 1;
+    }
+
     function SpaceGroomers(container) {
         this.container = container;
         this.canvas = container.querySelector('.dps-sg-canvas');
         this.ctx = this.canvas.getContext('2d');
 
-        // UI refs
         this.elScore = container.querySelector('.dps-sg-score');
         this.elWave = container.querySelector('.dps-sg-wave');
         this.elLives = container.querySelector('.dps-sg-lives');
         this.elCombo = container.querySelector('.dps-sg-combo');
         this.elComboText = container.querySelector('.dps-sg-combo__text');
+        this.elComboHint = container.querySelector('.dps-sg-combo__hint');
+        this.elComboFill = container.querySelector('.dps-sg-combo__fill');
+        this.elToast = container.querySelector('.dps-sg-toast');
+        this.elToastTitle = container.querySelector('.dps-sg-toast__title');
+        this.elToastDesc = container.querySelector('.dps-sg-toast__desc');
         this.elPowerup = container.querySelector('.dps-sg-powerup-indicator');
         this.elPowerupIcon = container.querySelector('.dps-sg-powerup-indicator__icon');
         this.elPowerupName = container.querySelector('.dps-sg-powerup-indicator__name');
+        this.elPowerupDesc = container.querySelector('.dps-sg-powerup-indicator__desc');
         this.elPowerupFill = container.querySelector('.dps-sg-powerup-indicator__fill');
+        this.elSpecialBar = container.querySelector('.dps-sg-special-bar');
         this.elSpecialFill = container.querySelector('.dps-sg-special-bar__fill');
         this.elSpecialBtn = container.querySelector('.dps-sg-btn--special');
 
@@ -232,111 +407,111 @@
         this.overlayVictory = container.querySelector('.dps-sg-overlay--victory');
         this.overlayWave = container.querySelector('.dps-sg-overlay--wave');
 
-        this.state = 'idle'; // idle | playing | paused | gameover | victory | waveIntro
+        this.state = 'idle';
         this.rafId = null;
         this.lastTime = 0;
+        this.waveTimeout = null;
 
         var storedHighscore = 0;
         try {
-            var rawHighscore = localStorage.getItem(LS_KEY);
-            storedHighscore = parseInt(rawHighscore, 10) || 0;
+            storedHighscore = parseInt(localStorage.getItem(LS_KEY), 10) || 0;
         } catch (e) {
             storedHighscore = 0;
         }
+
         this.highscore = storedHighscore;
         this.updateHighscoreDisplay();
-
         this.bindEvents();
+        this.reset();
+        this.draw();
+        this.updateHUD();
     }
 
     SpaceGroomers.prototype.reset = function () {
         this.score = 0;
         this.wave = 1;
+        this.waveConfig = getWaveConfig(this.wave);
         this.lives = 3;
         this.comboCount = 0;
         this.comboMultiplier = 1;
         this.comboTimer = 0;
+        this.bestComboCount = 0;
         this.specialCharge = 0;
         this.activePowerup = null;
         this.powerupTimer = 0;
-        this.waveTimer = 0;
         this.wavePerfect = true;
+        this.runTimeMs = 0;
+        this.playerHitTimer = 0;
+        this.playerInvulnTimer = 0;
+        this.screenShakeTimer = 0;
+        this.screenShakeForce = 0;
+        this.freezeTimer = 0;
+        this.toastTimer = 0;
+        this.toastTone = 'neutral';
+        this.gameOverTimer = 0;
+        this.specialReadyPlayed = false;
+        this.specialReadyPulse = 0;
+        this.comboPulse = 0;
+        this.firstDiveAnnounced = false;
 
-        this.stats = { flea: 0, tick: 0, furball: 0 };
+        this.stats = {
+            flea: 0,
+            tick: 0,
+            furball: 0
+        };
 
-        // Player
-        this.player = { x: W / 2, y: H - 60, speed: 5 };
+        this.player = {
+            x: W / 2,
+            y: H - 60,
+            speed: BALANCE.playerSpeed
+        };
 
-        // Collections
         this.bullets = [];
         this.enemies = [];
         this.muds = [];
         this.powerups = [];
         this.particles = [];
-
-        // Stars (background)
+        this.floatingTexts = [];
         this.stars = [];
+
         for (var i = 0; i < 60; i++) {
             this.stars.push({
                 x: Math.random() * W,
                 y: Math.random() * H,
-                s: Math.random() < 0.3 ? 2 : 1,
-                vy: 0.2 + Math.random() * 0.3
+                s: Math.random() < 0.25 ? 2 : 1,
+                vy: 0.2 + Math.random() * 0.35
             });
         }
 
-        // Input
         this.keys = {};
         this.shootCooldown = 0;
         this.isPointerDown = false;
         this.pointerId = null;
         this.pointerOffsetX = 0;
         this.mobileDragActive = false;
-
         this.enemyDir = 1;
-        this.enemyDropTimer = 0;
-        this.mudCooldown = 0;
+        this.mudCooldown = this.waveConfig.mudInterval;
+        this.diveCooldown = this.waveConfig.diveInterval;
+
+        this.clearToast();
+        this.hideAllOverlays();
+        if (this.overlayStart) {
+            this.overlayStart.classList.remove('dps-sg-overlay--hidden');
+        }
     };
 
-    /* ─── Wave spawning ─── */
-    SpaceGroomers.prototype.spawnWave = function () {
-        var w = this.wave;
-        var cols = Math.min(6 + Math.floor(w / 3), 10);
-        var rows = Math.min(2 + Math.floor(w / 2), 5);
-        var types = ['flea'];
-        if (w >= 2) types.push('furball');
-        if (w >= 3) types.push('tick');
-
-        this.enemies = [];
-        var startX = (W - cols * 44) / 2 + 22;
-
-        for (var r = 0; r < rows; r++) {
-            for (var c = 0; c < cols; c++) {
-                var t;
-                if (w >= 3 && r === 0 && Math.random() < 0.15 + w * 0.03) {
-                    t = 'tick';
-                } else if (w >= 2 && Math.random() < 0.25) {
-                    t = 'furball';
-                } else {
-                    t = 'flea';
-                }
-                var et = ENEMY_TYPES[t];
-                this.enemies.push({
-                    type: t,
-                    x: startX + c * 44,
-                    y: 60 + r * 40,
-                    hp: et.hp,
-                    baseSpeed: et.speed * (1 + w * 0.08)
-                });
-            }
+    SpaceGroomers.prototype.hideAllOverlays = function () {
+        if (this.waveTimeout) {
+            clearTimeout(this.waveTimeout);
+            this.waveTimeout = null;
         }
 
-        this.enemyDir = 1;
-        this.mudCooldown = 2;
-        this.wavePerfect = true;
+        this.overlayStart.classList.add('dps-sg-overlay--hidden');
+        this.overlayGameover.classList.add('dps-sg-overlay--hidden');
+        this.overlayVictory.classList.add('dps-sg-overlay--hidden');
+        this.overlayWave.classList.add('dps-sg-overlay--hidden');
     };
 
-    /* ─── Start / Restart ─── */
     SpaceGroomers.prototype.start = function () {
         this.reset();
         this.hideAllOverlays();
@@ -348,205 +523,426 @@
         var self = this;
         var titleEl = this.container.querySelector('.dps-sg-wave-title');
         var bonusEl = this.container.querySelector('.dps-sg-wave-bonus');
+        this.waveConfig = getWaveConfig(this.wave);
         titleEl.textContent = 'Onda ' + this.wave;
-        bonusEl.textContent = '';
+        bonusEl.textContent = this.wave === 1 ? 'Comeco mais leve, combo rapido e power-ups mais claros.' : '';
         this.overlayWave.classList.remove('dps-sg-overlay--hidden');
 
-        setTimeout(function () {
+        this.waveTimeout = setTimeout(function () {
             self.overlayWave.classList.add('dps-sg-overlay--hidden');
             self.spawnWave();
             self.state = 'playing';
             self.lastTime = performance.now();
             self.loop(self.lastTime);
-        }, 450);
+        }, BALANCE.waveIntroMs);
     };
 
-    /* ─── Main Loop ─── */
-    SpaceGroomers.prototype.loop = function (now) {
-        if (this.state !== 'playing') return;
+    SpaceGroomers.prototype.spawnWave = function () {
+        var wave = this.wave;
+        var config = this.waveConfig;
+        var cols = config.cols;
+        var rows = config.rows;
+        var startX = (W - cols * 44) / 2 + 22;
+        this.enemies = [];
 
-        var dt = Math.min((now - this.lastTime) / 1000, 0.05);
-        this.lastTime = now;
+        for (var row = 0; row < rows; row++) {
+            for (var col = 0; col < cols; col++) {
+                var type = 'flea';
+                if (wave >= 4 && row === 0 && Math.random() < config.tickChance) {
+                    type = 'tick';
+                } else if (wave >= 2 && Math.random() < config.furballChance) {
+                    type = 'furball';
+                }
 
-        this.update(dt);
-        this.draw();
-        this.updateHUD();
-
-        var self = this;
-        this.rafId = requestAnimationFrame(function (t) { self.loop(t); });
-    };
-
-    /* ─── Update ─── */
-    SpaceGroomers.prototype.update = function (dt) {
-        var self = this;
-
-        // Stars scroll
-        for (var si = 0; si < this.stars.length; si++) {
-            this.stars[si].y += this.stars[si].vy;
-            if (this.stars[si].y > H) {
-                this.stars[si].y = 0;
-                this.stars[si].x = Math.random() * W;
+                var enemyType = ENEMY_TYPES[type];
+                this.enemies.push({
+                    type: type,
+                    x: startX + col * 44,
+                    y: 64 + row * 40,
+                    hp: enemyType.hp,
+                    baseSpeed: enemyType.speed * config.speedMultiplier,
+                    pattern: 'formation',
+                    telegraph: 0,
+                    telegraphMax: 0.36,
+                    vx: 0,
+                    vy: 0,
+                    hurtTimer: 0,
+                    animSeed: Math.random() * Math.PI * 2
+                });
             }
         }
 
-        // Player movement (mobile-first drag + desktop fallback)
+        this.enemyDir = 1;
+        this.mudCooldown = config.mudInterval;
+        this.diveCooldown = config.diveInterval;
+        this.wavePerfect = true;
+        this.showToast('Onda ' + wave, wave >= BALANCE.diveStartWave ? 'Pulgas em mergulho podem aparecer.' : 'Foque em manter a sequencia viva.', wave >= BALANCE.diveStartWave ? 'warning' : 'neutral', 1600);
+    };
+
+    SpaceGroomers.prototype.loop = function (now) {
+        if (this.state !== 'playing' && this.state !== 'gameoverTransition') {
+            return;
+        }
+
+        var elapsed = Math.min(now - this.lastTime, 50);
+        this.lastTime = now;
+
+        if (this.freezeTimer > 0) {
+            this.freezeTimer = Math.max(0, this.freezeTimer - elapsed);
+            this.draw();
+            this.updateHUD();
+        } else {
+            this.update(elapsed / 1000);
+            this.draw();
+            this.updateHUD();
+        }
+
+        var self = this;
+        this.rafId = requestAnimationFrame(function (time) {
+            self.loop(time);
+        });
+    };
+
+    SpaceGroomers.prototype.update = function (dt) {
+        var dtMs = dt * 1000;
+        this.updateAmbient(dt, dtMs);
+
+        if (this.state === 'gameoverTransition') {
+            this.gameOverTimer -= dtMs;
+            if (this.gameOverTimer <= 0) {
+                this.finishGameOver();
+            }
+            return;
+        }
+
+        if (this.state !== 'playing') {
+            return;
+        }
+
+        this.runTimeMs += dtMs;
+
         var moveDir = 0;
         if (!this.mobileDragActive) {
-            if (this.keys['ArrowLeft'] || this.keys['a']) moveDir = -1;
-            if (this.keys['ArrowRight'] || this.keys['d']) moveDir = 1;
+            if (this.keys.ArrowLeft || this.keys.a) {
+                moveDir = -1;
+            }
+            if (this.keys.ArrowRight || this.keys.d) {
+                moveDir = 1;
+            }
             this.player.x += moveDir * this.player.speed;
         }
-        this.player.x = Math.max(PLAYER_W / 2 + 4, Math.min(W - PLAYER_W / 2 - 4, this.player.x));
+        this.player.x = clamp(this.player.x, PLAYER_W / 2 + 4, W - PLAYER_W / 2 - 4);
 
-        // Shooting (auto-fire)
         this.shootCooldown -= dt;
         if (this.shootCooldown <= 0) {
             this.shoot();
-            this.shootCooldown = 0.2;
+            this.shootCooldown = BALANCE.autoFireInterval;
         }
 
-        // Special (desktop fallback)
-        if (this.keys['Shift'] || this.keys['Control']) {
+        if (this.keys.Shift || this.keys.Control) {
             this.fireSpecial();
         }
 
-        // Bullets
-        for (var bi = this.bullets.length - 1; bi >= 0; bi--) {
-            this.bullets[bi].y -= 8;
-            if (this.bullets[bi].y < -10) {
-                this.bullets.splice(bi, 1);
-                this.resetCombo();
-            }
-        }
+        this.updateBullets();
+        this.updateEnemies(dt);
+        this.updateMud(dt);
+        this.updateBulletEnemyCollisions();
+        this.updatePowerups();
+        this.updatePowerupTimer(dtMs);
+        this.updateComboTimer(dt);
+        this.updateSpecialReadyState();
 
-        // Enemies movement (invaders pattern)
-        var minX = W, maxX = 0;
-        for (var ei = 0; ei < this.enemies.length; ei++) {
-            var e = this.enemies[ei];
-            if (e.x < minX) minX = e.x;
-            if (e.x > maxX) maxX = e.x;
-        }
-        var edgeHit = (this.enemyDir > 0 && maxX > W - 30) || (this.enemyDir < 0 && minX < 30);
-        if (edgeHit) {
-            this.enemyDir *= -1;
-            for (var ej = 0; ej < this.enemies.length; ej++) {
-                this.enemies[ej].y += 12;
-            }
-        }
-        for (var ek = 0; ek < this.enemies.length; ek++) {
-            this.enemies[ek].x += this.enemyDir * this.enemies[ek].baseSpeed;
-        }
-
-        // Enemy passed line
-        for (var el = this.enemies.length - 1; el >= 0; el--) {
-            if (this.enemies[el].y > H - 50) {
-                this.enemies.splice(el, 1);
-                this.loseLife();
-                this.wavePerfect = false;
-            }
-        }
-
-        // Mud drops
-        this.mudCooldown -= dt;
-        if (this.mudCooldown <= 0 && this.enemies.length > 0 && this.wave >= 2) {
-            var mudInterval = Math.max(0.8, 2.5 - this.wave * 0.15);
-            this.mudCooldown = mudInterval;
-            var src = this.enemies[Math.floor(Math.random() * this.enemies.length)];
-            this.muds.push({ x: src.x, y: src.y + ENEMY_SIZE / 2 });
-        }
-        for (var mi = this.muds.length - 1; mi >= 0; mi--) {
-            this.muds[mi].y += 3;
-            if (this.muds[mi].y > H + 10) {
-                this.muds.splice(mi, 1);
-                continue;
-            }
-            // Hit player?
-            if (Math.abs(this.muds[mi].x - this.player.x) < PLAYER_W / 2 &&
-                Math.abs(this.muds[mi].y - this.player.y) < PLAYER_H / 2) {
-                createParticles(this.particles, this.muds[mi].x, this.muds[mi].y, '#795548', 6);
-                this.muds.splice(mi, 1);
-                this.loseLife();
-            }
-        }
-
-        // Bullet–enemy collision
-        for (var bj = this.bullets.length - 1; bj >= 0; bj--) {
-            var b = this.bullets[bj];
-            for (var em = this.enemies.length - 1; em >= 0; em--) {
-                var en = this.enemies[em];
-                var hitbox = this.activePowerup === 'shampoo' ? ENEMY_SIZE * 0.8 : ENEMY_SIZE / 2;
-                if (Math.abs(b.x - en.x) < hitbox && Math.abs(b.y - en.y) < hitbox) {
-                    en.hp--;
-                    this.bullets.splice(bj, 1);
-                    sfxHit();
-                    createParticles(this.particles, en.x, en.y, '#e1f5fe', 5);
-                    if (en.hp <= 0) {
-                        var pts = ENEMY_TYPES[en.type].pts * this.comboMultiplier;
-                        this.score += pts;
-                        this.specialCharge = Math.min(SPECIAL_COST, this.specialCharge + pts);
-                        this.stats[en.type]++;
-                        this.advanceCombo();
-                        createParticles(this.particles, en.x, en.y, ENEMY_TYPES[en.type].color, 10);
-                        this.enemies.splice(em, 1);
-                    }
-                    break;
-                }
-            }
-        }
-
-        // Powerups spawning
-        if (Math.random() < 0.002 && this.enemies.length > 0) {
-            var ptypes = Object.keys(POWERUP_TYPES);
-            var ptype = ptypes[Math.floor(Math.random() * ptypes.length)];
-            this.powerups.push({
-                type: ptype,
-                x: 40 + Math.random() * (W - 80),
-                y: -20
-            });
-        }
-
-        // Powerups falling + collection
-        for (var pi = this.powerups.length - 1; pi >= 0; pi--) {
-            this.powerups[pi].y += 1.5;
-            if (this.powerups[pi].y > H + 20) {
-                this.powerups.splice(pi, 1);
-                continue;
-            }
-            if (Math.abs(this.powerups[pi].x - this.player.x) < 30 &&
-                Math.abs(this.powerups[pi].y - this.player.y) < 30) {
-                this.collectPowerup(this.powerups[pi].type);
-                this.powerups.splice(pi, 1);
-            }
-        }
-
-        // Powerup timer
-        if (this.activePowerup && this.powerupTimer > 0) {
-            this.powerupTimer -= dt * 1000;
-            if (this.powerupTimer <= 0) {
-                this.activePowerup = null;
-                this.powerupTimer = 0;
-            }
-        }
-
-        // Combo timer
-        if (this.comboTimer > 0) {
-            this.comboTimer -= dt;
-            if (this.comboTimer <= 0) {
-                this.comboMultiplier = 1;
-                this.comboCount = 0;
-            }
-        }
-
-        // Particles
-        updateParticles(this.particles, dt);
-
-        // Wave complete?
         if (this.enemies.length === 0 && this.state === 'playing') {
             this.endWave();
         }
     };
 
-    /* ─── Shooting ─── */
+    SpaceGroomers.prototype.updateAmbient = function (dt, dtMs) {
+        for (var i = 0; i < this.stars.length; i++) {
+            this.stars[i].y += this.stars[i].vy;
+            if (this.stars[i].y > H) {
+                this.stars[i].y = 0;
+                this.stars[i].x = Math.random() * W;
+            }
+        }
+
+        if (this.playerHitTimer > 0) {
+            this.playerHitTimer = Math.max(0, this.playerHitTimer - dtMs);
+        }
+        if (this.playerInvulnTimer > 0) {
+            this.playerInvulnTimer = Math.max(0, this.playerInvulnTimer - dtMs);
+        }
+        if (this.screenShakeTimer > 0) {
+            this.screenShakeTimer = Math.max(0, this.screenShakeTimer - dtMs);
+            if (this.screenShakeTimer === 0) {
+                this.screenShakeForce = 0;
+            }
+        }
+        if (this.specialReadyPulse > 0) {
+            this.specialReadyPulse = Math.max(0, this.specialReadyPulse - dtMs);
+        }
+        if (this.comboPulse > 0) {
+            this.comboPulse = Math.max(0, this.comboPulse - dtMs);
+        }
+        if (this.toastTimer > 0) {
+            this.toastTimer = Math.max(0, this.toastTimer - dtMs);
+            if (this.toastTimer === 0) {
+                this.clearToast();
+            }
+        }
+
+        for (var p = this.particles.length - 1; p >= 0; p--) {
+            var particle = this.particles[p];
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            particle.life -= dtMs;
+            if (particle.life <= 0) {
+                this.particles.splice(p, 1);
+            }
+        }
+
+        for (var t = this.floatingTexts.length - 1; t >= 0; t--) {
+            var text = this.floatingTexts[t];
+            text.x += text.vx;
+            text.y += text.vy;
+            text.life -= dtMs;
+            if (text.life <= 0) {
+                this.floatingTexts.splice(t, 1);
+            }
+        }
+
+        for (var e = 0; e < this.enemies.length; e++) {
+            if (this.enemies[e].hurtTimer > 0) {
+                this.enemies[e].hurtTimer = Math.max(0, this.enemies[e].hurtTimer - dtMs);
+            }
+        }
+    };
+
+    SpaceGroomers.prototype.updateBullets = function () {
+        for (var i = this.bullets.length - 1; i >= 0; i--) {
+            this.bullets[i].y -= 8;
+            if (this.bullets[i].y < -10) {
+                this.bullets.splice(i, 1);
+                this.resetCombo();
+            }
+        }
+    };
+
+    SpaceGroomers.prototype.updateEnemies = function (dt) {
+        var minX = W;
+        var maxX = 0;
+        var hasFormationEnemies = false;
+
+        for (var i = 0; i < this.enemies.length; i++) {
+            var enemy = this.enemies[i];
+            if (enemy.pattern === 'formation') {
+                hasFormationEnemies = true;
+                if (enemy.x < minX) {
+                    minX = enemy.x;
+                }
+                if (enemy.x > maxX) {
+                    maxX = enemy.x;
+                }
+            }
+        }
+
+        var edgeHit = hasFormationEnemies && (
+            (this.enemyDir > 0 && maxX > W - 30) ||
+            (this.enemyDir < 0 && minX < 30)
+        );
+
+        if (edgeHit) {
+            this.enemyDir *= -1;
+            for (var j = 0; j < this.enemies.length; j++) {
+                if (this.enemies[j].pattern === 'formation') {
+                    this.enemies[j].y += 10;
+                }
+            }
+        }
+
+        this.diveCooldown -= dt;
+        if (this.diveCooldown <= 0) {
+            this.triggerDiveAttack();
+            this.diveCooldown = this.waveConfig.diveInterval;
+        }
+
+        for (var k = this.enemies.length - 1; k >= 0; k--) {
+            var current = this.enemies[k];
+            if (current.pattern === 'dive') {
+                if (current.telegraph > 0) {
+                    current.telegraph -= dt;
+                } else {
+                    current.x += current.vx;
+                    current.y += current.vy;
+                    current.vy = Math.min(current.vy + 0.02, 4.4);
+                }
+            } else {
+                current.x += this.enemyDir * current.baseSpeed;
+            }
+
+            if (current.y > H - 50) {
+                this.enemies.splice(k, 1);
+                this.loseLife(current.x, current.y);
+                this.wavePerfect = false;
+            }
+        }
+    };
+
+    SpaceGroomers.prototype.triggerDiveAttack = function () {
+        if (this.wave < BALANCE.diveStartWave) {
+            return;
+        }
+
+        var candidates = [];
+        for (var i = 0; i < this.enemies.length; i++) {
+            if (this.enemies[i].pattern === 'formation' && this.enemies[i].type !== 'tick') {
+                candidates.push(this.enemies[i]);
+            }
+        }
+
+        if (!candidates.length) {
+            return;
+        }
+
+        var diver = candidates[Math.floor(Math.random() * candidates.length)];
+        diver.pattern = 'dive';
+        diver.telegraph = diver.telegraphMax;
+        diver.vx = clamp((this.player.x - diver.x) * 0.015, -2.4, 2.4);
+        diver.vy = 2.1 + this.wave * 0.12;
+
+        if (!this.firstDiveAnnounced) {
+            this.firstDiveAnnounced = true;
+            this.showToast('Novo padrao', 'Algumas pulgas fazem mergulho rapido. Reaja para os lados.', 'warning', 1800);
+        }
+    };
+
+    SpaceGroomers.prototype.updateMud = function (dt) {
+        this.mudCooldown -= dt;
+        if (this.mudCooldown <= 0 && this.enemies.length > 0 && this.wave >= BALANCE.mudStartWave) {
+            this.mudCooldown = this.waveConfig.mudInterval;
+            var source = this.enemies[Math.floor(Math.random() * this.enemies.length)];
+            this.muds.push({
+                x: source.x,
+                y: source.y + ENEMY_SIZE / 2
+            });
+        }
+
+        for (var i = this.muds.length - 1; i >= 0; i--) {
+            this.muds[i].y += 3;
+            if (this.muds[i].y > H + 10) {
+                this.muds.splice(i, 1);
+                continue;
+            }
+
+            if (
+                Math.abs(this.muds[i].x - this.player.x) < PLAYER_W / 2 &&
+                Math.abs(this.muds[i].y - this.player.y) < PLAYER_H / 2
+            ) {
+                this.emitParticles(this.muds[i].x, this.muds[i].y, '#795548', 6, 4);
+                this.muds.splice(i, 1);
+                this.loseLife(this.player.x, this.player.y);
+            }
+        }
+    };
+
+    SpaceGroomers.prototype.updateBulletEnemyCollisions = function () {
+        for (var bulletIndex = this.bullets.length - 1; bulletIndex >= 0; bulletIndex--) {
+            var bullet = this.bullets[bulletIndex];
+
+            for (var enemyIndex = this.enemies.length - 1; enemyIndex >= 0; enemyIndex--) {
+                var enemy = this.enemies[enemyIndex];
+                var hitbox = this.activePowerup === 'shampoo' ? ENEMY_SIZE * 0.8 : ENEMY_SIZE / 2;
+
+                if (Math.abs(bullet.x - enemy.x) < hitbox && Math.abs(bullet.y - enemy.y) < hitbox) {
+                    enemy.hp--;
+                    enemy.hurtTimer = 90;
+                    this.bullets.splice(bulletIndex, 1);
+                    sfxHit();
+                    this.freezeFor(enemy.hp <= 0 ? BALANCE.killFreezeMs : BALANCE.hitFreezeMs);
+                    this.shakeScreen(enemy.hp <= 0 ? BALANCE.shakeHit + 1 : BALANCE.shakeHit, 70);
+                    this.emitParticles(enemy.x, enemy.y, '#e1f5fe', enemy.hp <= 0 ? 7 : 4, 4);
+
+                    if (enemy.hp <= 0) {
+                        var pts = ENEMY_TYPES[enemy.type].pts * this.comboMultiplier;
+                        this.score += pts;
+                        this.specialCharge = Math.min(BALANCE.specialCost, this.specialCharge + pts);
+                        this.stats[enemy.type]++;
+                        this.advanceCombo();
+                        this.bestComboCount = Math.max(this.bestComboCount, this.comboCount);
+                        this.spawnFloatingText('+' + pts, enemy.x, enemy.y - 12, this.comboMultiplier > 1 ? '#ffd166' : '#ffffff', '700 14px "Segoe UI", system-ui, sans-serif');
+                        this.emitParticles(enemy.x, enemy.y, ENEMY_TYPES[enemy.type].color, 9, 5);
+                        sfxKill();
+                        this.enemies.splice(enemyIndex, 1);
+                    }
+
+                    break;
+                }
+            }
+        }
+    };
+
+    SpaceGroomers.prototype.updatePowerups = function () {
+        if (Math.random() < this.waveConfig.powerupChance && this.enemies.length > 0 && this.powerups.length < 2) {
+            var powerupKeys = Object.keys(POWERUP_TYPES);
+            var selectedKey = powerupKeys[Math.floor(Math.random() * powerupKeys.length)];
+            this.powerups.push({
+                type: selectedKey,
+                x: 40 + Math.random() * (W - 80),
+                y: -20,
+                animSeed: Math.random() * Math.PI * 2
+            });
+        }
+
+        for (var i = this.powerups.length - 1; i >= 0; i--) {
+            this.powerups[i].y += 1.5;
+            if (this.powerups[i].y > H + 20) {
+                this.powerups.splice(i, 1);
+                continue;
+            }
+
+            if (
+                Math.abs(this.powerups[i].x - this.player.x) < BALANCE.pickupRadius &&
+                Math.abs(this.powerups[i].y - this.player.y) < BALANCE.pickupRadius
+            ) {
+                this.collectPowerup(this.powerups[i].type);
+                this.powerups.splice(i, 1);
+            }
+        }
+    };
+
+    SpaceGroomers.prototype.updatePowerupTimer = function (dtMs) {
+        if (this.activePowerup && this.powerupTimer > 0) {
+            this.powerupTimer -= dtMs;
+            if (this.powerupTimer <= 0) {
+                this.activePowerup = null;
+                this.powerupTimer = 0;
+                this.showToast('Fim do boost', 'O shampoo turbo acabou. Volte para a linha segura.', 'neutral', 1200);
+            }
+        }
+    };
+
+    SpaceGroomers.prototype.updateComboTimer = function (dt) {
+        if (this.comboTimer > 0) {
+            this.comboTimer -= dt;
+            if (this.comboTimer <= 0) {
+                this.resetCombo();
+            }
+        }
+    };
+
+    SpaceGroomers.prototype.updateSpecialReadyState = function () {
+        if (this.specialCharge >= BALANCE.specialCost) {
+            this.specialReadyPulse = 650;
+            if (!this.specialReadyPlayed) {
+                this.specialReadyPlayed = true;
+                sfxReady();
+                this.showToast('Especial pronto', 'Toque no raio para limpar a metade de baixo.', 'success', 1500);
+            }
+        } else {
+            this.specialReadyPlayed = false;
+        }
+    };
+
     SpaceGroomers.prototype.shoot = function () {
         sfxShoot();
         var px = this.player.x;
@@ -561,62 +957,93 @@
         }
     };
 
-    /* ─── Special ─── */
     SpaceGroomers.prototype.fireSpecial = function () {
-        if (this.specialCharge < SPECIAL_COST) return;
-        this.specialCharge = 0;
-        sfxSpecial();
+        if (this.specialCharge < BALANCE.specialCost || this.state !== 'playing') {
+            return;
+        }
 
-        // Clear bottom half enemies
+        this.specialCharge = 0;
+        this.specialReadyPlayed = false;
+        this.specialReadyPulse = 700;
+        sfxSpecial();
+        this.shakeScreen(BALANCE.shakeSpecial, 180);
+        this.freezeFor(46);
+
         for (var i = this.enemies.length - 1; i >= 0; i--) {
             if (this.enemies[i].y > H / 2) {
-                var en = this.enemies[i];
-                this.score += ENEMY_TYPES[en.type].pts;
-                this.stats[en.type]++;
-                createParticles(this.particles, en.x, en.y, '#e1f5fe', 8);
+                var enemy = this.enemies[i];
+                var pts = ENEMY_TYPES[enemy.type].pts;
+                this.score += pts;
+                this.stats[enemy.type]++;
+                this.emitParticles(enemy.x, enemy.y, '#e1f5fe', 8, 5);
+                this.spawnFloatingText('+' + pts, enemy.x, enemy.y - 8, '#b3e5fc', '700 13px "Segoe UI", system-ui, sans-serif');
                 this.enemies.splice(i, 1);
             }
         }
 
-        // Big foam effect
-        for (var j = 0; j < 30; j++) {
-            createParticles(this.particles, Math.random() * W, H / 2 + Math.random() * (H / 2), '#e1f5fe', 1);
+        for (var j = 0; j < 28; j++) {
+            this.emitParticles(Math.random() * W, H / 2 + Math.random() * (H / 2), '#e1f5fe', 1, 5);
         }
+
+        this.showToast('Banho de espuma', 'A metade inferior foi limpa. Aproveite para respirar.', 'success', 1300);
     };
 
-    /* ─── Power-ups ─── */
     SpaceGroomers.prototype.collectPowerup = function (type) {
+        var powerup = POWERUP_TYPES[type];
         sfxPowerup();
+        this.emitParticles(this.player.x, this.player.y - 10, powerup.color, 8, 5);
+        this.shakeScreen(3, 90);
+
         if (type === 'towel') {
-            // Screen clear: remove all enemies in a row (highest Y row)
             var maxY = 0;
             for (var i = 0; i < this.enemies.length; i++) {
-                if (this.enemies[i].y > maxY) maxY = this.enemies[i].y;
+                if (this.enemies[i].y > maxY) {
+                    maxY = this.enemies[i].y;
+                }
             }
+
             for (var j = this.enemies.length - 1; j >= 0; j--) {
                 if (Math.abs(this.enemies[j].y - maxY) < 20) {
-                    var en = this.enemies[j];
-                    this.score += ENEMY_TYPES[en.type].pts;
-                    this.stats[en.type]++;
-                    createParticles(this.particles, en.x, en.y, '#f7c948', 8);
+                    var enemy = this.enemies[j];
+                    this.score += ENEMY_TYPES[enemy.type].pts;
+                    this.stats[enemy.type]++;
+                    this.emitParticles(enemy.x, enemy.y, '#f7c948', 8, 5);
+                    this.spawnFloatingText('limpo', enemy.x, enemy.y - 10, '#f7c948', '700 12px "Segoe UI", system-ui, sans-serif');
                     this.enemies.splice(j, 1);
                 }
             }
         } else {
             this.activePowerup = type;
-            this.powerupTimer = POWERUP_TYPES[type].duration;
+            this.powerupTimer = powerup.duration;
         }
+
+        this.showToast(powerup.name, powerup.desc, 'success', 1700);
     };
 
-    /* ─── Combo ─── */
     SpaceGroomers.prototype.advanceCombo = function () {
+        var previousMultiplier = this.comboMultiplier;
         this.comboCount++;
-        if (this.comboCount >= 20) {
+        this.comboTimer = BALANCE.comboWindow;
+
+        if (this.comboCount >= BALANCE.comboTier3) {
             this.comboMultiplier = 3;
-            this.comboTimer = 5;
-        } else if (this.comboCount >= 10) {
+        } else if (this.comboCount >= BALANCE.comboTier2) {
             this.comboMultiplier = 2;
-            this.comboTimer = 5;
+        } else {
+            this.comboMultiplier = 1;
+        }
+
+        if (this.comboMultiplier !== previousMultiplier) {
+            this.comboPulse = 700;
+            sfxComboTier();
+            this.emitParticles(this.player.x, this.player.y - 24, this.comboMultiplier === 3 ? '#ffb703' : '#ff8f3f', 10, 4);
+            this.spawnFloatingText(this.comboMultiplier === 3 ? 'NO EMBALO' : 'BOA SEQUENCIA', this.player.x, this.player.y - 52, '#ffffff', '700 12px "Segoe UI", system-ui, sans-serif');
+            this.showToast(
+                this.comboMultiplier === 3 ? 'Combo x3' : 'Combo x2',
+                this.comboMultiplier === 3 ? 'Pontuacao alta enquanto a sequencia durar.' : 'Mantenha o ritmo para chegar ao x3.',
+                'success',
+                1300
+            );
         }
     };
 
@@ -626,23 +1053,44 @@
         this.comboTimer = 0;
     };
 
-    /* ─── Lives ─── */
-    SpaceGroomers.prototype.loseLife = function () {
+    SpaceGroomers.prototype.loseLife = function (sourceX, sourceY) {
+        if (this.playerInvulnTimer > 0 || (this.state !== 'playing' && this.state !== 'gameoverTransition')) {
+            return;
+        }
+
         this.lives--;
+        this.playerHitTimer = 220;
+        this.playerInvulnTimer = this.lives > 0 ? BALANCE.playerInvulnMs : 0;
+        this.wavePerfect = false;
+        this.resetCombo();
         sfxLoseLife();
+        this.freezeFor(40);
+        this.shakeScreen(this.lives > 0 ? BALANCE.shakeDamage : BALANCE.shakeGameOver, 160);
+        this.emitParticles(sourceX || this.player.x, sourceY || this.player.y, '#ff6b6b', 12, 5);
+
         if (this.lives <= 0) {
-            this.gameOver();
+            this.startGameOverSequence();
+        } else if (this.lives === 1) {
+            this.showToast('Ultima vida', 'Segure o centro e guarde o especial para escapar.', 'warning', 1600);
+        } else {
+            this.showToast('Dano recebido', 'Respire, reposicione e retome a sequencia.', 'warning', 1200);
         }
     };
 
-    /* ─── Wave end ─── */
+    SpaceGroomers.prototype.startGameOverSequence = function () {
+        this.state = 'gameoverTransition';
+        this.gameOverTimer = BALANCE.gameOverDelayMs;
+        this.showToast('Fim da run', 'Mais uma tentativa costuma render melhor que a anterior.', 'warning', 1800);
+    };
+
     SpaceGroomers.prototype.endWave = function () {
-        // Bonus
         if (this.wavePerfect) {
-            this.score += 200;
+            var perfectBonus = this.waveConfig.perfectBonus;
+            this.score += perfectBonus;
+            this.spawnFloatingText('Perfeito +' + perfectBonus, W / 2, H / 2, '#9ae6b4', '700 16px "Segoe UI", system-ui, sans-serif');
         }
 
-        if (this.wave >= TOTAL_WAVES) {
+        if (this.wave >= BALANCE.totalWaves) {
             this.victory();
             return;
         }
@@ -652,43 +1100,49 @@
         cancelAnimationFrame(this.rafId);
 
         var bonusEl = this.container.querySelector('.dps-sg-wave-bonus');
-        bonusEl.textContent = this.wavePerfect ? 'Perfeito! +200' : '';
+        bonusEl.textContent = this.wavePerfect ? 'Perfeito! Bonus garantido.' : 'Agora os inimigos apertam um pouco mais.';
         this.showWaveIntro();
     };
 
-    /* ─── Game Over ─── */
-    SpaceGroomers.prototype.gameOver = function () {
+    SpaceGroomers.prototype.finishGameOver = function () {
         this.state = 'gameover';
         cancelAnimationFrame(this.rafId);
         this.saveHighscore();
 
-        var el = this.overlayGameover;
-        el.querySelector('.dps-sg-final-score').textContent = this.score.toLocaleString();
-        el.querySelector('.dps-sg-overlay__stats').textContent =
-            this.stats.flea + ' pulgas · ' + this.stats.tick + ' carrapatos · ' + this.stats.furball + ' pelos';
+        var overlay = this.overlayGameover;
+        overlay.querySelector('.dps-sg-final-score').textContent = this.score.toLocaleString();
+        overlay.querySelector('.dps-sg-overlay__stats').textContent =
+            this.stats.flea + ' pulgas | ' +
+            this.stats.tick + ' carrapatos | ' +
+            this.stats.furball + ' pelos | melhor sequencia ' + this.bestComboCount + ' | ' + Math.round(this.runTimeMs / 1000) + 's';
         this.updateHighscoreDisplay();
-        el.classList.remove('dps-sg-overlay--hidden');
+        overlay.classList.remove('dps-sg-overlay--hidden');
     };
 
-    /* ─── Victory ─── */
     SpaceGroomers.prototype.victory = function () {
         this.state = 'victory';
         cancelAnimationFrame(this.rafId);
         this.saveHighscore();
 
-        var el = this.overlayVictory;
-        el.querySelector('.dps-sg-final-score').textContent = this.score.toLocaleString();
-        el.querySelector('.dps-sg-overlay__stats').textContent =
-            this.stats.flea + ' pulgas · ' + this.stats.tick + ' carrapatos · ' + this.stats.furball + ' pelos';
+        var overlay = this.overlayVictory;
+        overlay.querySelector('.dps-sg-final-score').textContent = this.score.toLocaleString();
+        overlay.querySelector('.dps-sg-overlay__stats').textContent =
+            this.stats.flea + ' pulgas | ' +
+            this.stats.tick + ' carrapatos | ' +
+            this.stats.furball + ' pelos | ' +
+            Math.round(this.runTimeMs / 1000) + 's de run';
         this.updateHighscoreDisplay();
-        el.classList.remove('dps-sg-overlay--hidden');
+        overlay.classList.remove('dps-sg-overlay--hidden');
     };
 
-    /* ─── Highscore ─── */
     SpaceGroomers.prototype.saveHighscore = function () {
         if (this.score > this.highscore) {
             this.highscore = this.score;
-            try { localStorage.setItem(LS_KEY, String(this.highscore)); } catch (e) { /* quota */ }
+            try {
+                localStorage.setItem(LS_KEY, String(this.highscore));
+            } catch (e) {
+                return;
+            }
         }
     };
 
@@ -699,146 +1153,260 @@
         }
     };
 
-    /* ─── Draw ─── */
     SpaceGroomers.prototype.draw = function () {
         var ctx = this.ctx;
         ctx.clearRect(0, 0, W, H);
+        ctx.save();
 
-        // Background
-        ctx.fillStyle = '#0a0e27';
+        if (this.screenShakeTimer > 0 && this.screenShakeForce > 0) {
+            ctx.translate(
+                (Math.random() - 0.5) * this.screenShakeForce,
+                (Math.random() - 0.5) * this.screenShakeForce
+            );
+        }
+
+        var background = ctx.createLinearGradient(0, 0, 0, H);
+        background.addColorStop(0, '#081226');
+        background.addColorStop(1, '#132347');
+        ctx.fillStyle = background;
         ctx.fillRect(0, 0, W, H);
+
+        ctx.fillStyle = 'rgba(111, 177, 255, 0.12)';
+        ctx.beginPath();
+        ctx.arc(W * 0.18, 90, 70, 0, Math.PI * 2);
+        ctx.fill();
 
         drawStars(ctx, this.stars);
 
-        // Pet-planeta (decorative bottom line)
         ctx.fillStyle = 'rgba(79,195,247,0.08)';
         ctx.fillRect(0, H - 40, W, 40);
         ctx.fillStyle = 'rgba(79,195,247,0.2)';
         ctx.fillRect(0, H - 40, W, 2);
 
-        // Enemies
         for (var i = 0; i < this.enemies.length; i++) {
-            var e = this.enemies[i];
-            drawEnemy(ctx, e.type, e.x, e.y, e.hp);
+            drawEnemy(ctx, this.enemies[i], this.runTimeMs);
         }
 
-        // Bullets
         for (var j = 0; j < this.bullets.length; j++) {
-            drawBullet(ctx, this.bullets[j].x, this.bullets[j].y);
+            drawBullet(ctx, this.bullets[j]);
         }
 
-        // Muds
         for (var k = 0; k < this.muds.length; k++) {
-            drawMud(ctx, this.muds[k].x, this.muds[k].y);
+            drawMud(ctx, this.muds[k]);
         }
 
-        // Powerups
         for (var l = 0; l < this.powerups.length; l++) {
-            drawPowerup(ctx, this.powerups[l].type, this.powerups[l].x, this.powerups[l].y);
+            drawPowerup(ctx, this.powerups[l], this.runTimeMs);
         }
 
-        // Player
-        drawPlayer(ctx, this.player.x, this.player.y);
+        if (this.state !== 'gameoverTransition' || this.gameOverTimer > BALANCE.gameOverDelayMs / 3) {
+            drawPlayer(ctx, this);
+        }
 
-        // Particles
         drawParticles(ctx, this.particles);
+        drawFloatingTexts(ctx, this.floatingTexts);
+
+        if (this.playerHitTimer > 0) {
+            ctx.fillStyle = 'rgba(255, 107, 107, 0.12)';
+            ctx.fillRect(0, 0, W, H);
+        }
+
+        ctx.restore();
     };
 
-    /* ─── HUD Update ─── */
     SpaceGroomers.prototype.updateHUD = function () {
         this.elScore.textContent = this.score.toLocaleString();
         this.elWave.textContent = this.wave;
 
         var hearts = '';
-        for (var i = 0; i < this.lives; i++) hearts += '❤️';
-        for (var j = this.lives; j < 3; j++) hearts += '🖤';
+        for (var i = 0; i < this.lives; i++) {
+            hearts += '\u2764\uFE0F';
+        }
+        for (var j = this.lives; j < 3; j++) {
+            hearts += '\uD83D\uDDA4';
+        }
         this.elLives.textContent = hearts;
 
-        // Combo (feedback discreto no mobile)
-        if (this.comboMultiplier > 1) {
+        if (this.comboCount > 1 || this.comboMultiplier > 1) {
+            var comboProgress = this.getComboProgressPercent();
             this.elCombo.classList.remove('dps-sg-combo--hidden');
+            this.elCombo.classList.toggle('dps-sg-combo--pulse', this.comboPulse > 0);
             this.elComboText.textContent = 'x' + this.comboMultiplier;
+            this.elComboHint.textContent = this.getComboHint();
+            this.elComboFill.style.width = comboProgress + '%';
         } else {
             this.elCombo.classList.add('dps-sg-combo--hidden');
+            this.elCombo.classList.remove('dps-sg-combo--pulse');
+            this.elComboFill.style.width = '0%';
         }
 
-        // Power-up indicator
         if (this.activePowerup) {
-            var pt = POWERUP_TYPES[this.activePowerup];
+            var powerup = POWERUP_TYPES[this.activePowerup];
             this.elPowerup.classList.remove('dps-sg-powerup-indicator--hidden');
-            this.elPowerupIcon.textContent = pt.icon;
-            this.elPowerupName.textContent = pt.name;
-            this.elPowerupFill.style.width = (this.powerupTimer / pt.duration * 100) + '%';
+            this.elPowerupIcon.textContent = powerup.icon;
+            this.elPowerupName.textContent = powerup.name;
+            this.elPowerupDesc.textContent = powerup.desc;
+            this.elPowerupFill.style.width = (this.powerupTimer / powerup.duration * 100) + '%';
         } else {
             this.elPowerup.classList.add('dps-sg-powerup-indicator--hidden');
+            this.elPowerupFill.style.width = '0%';
         }
 
-        // Special bar
-        var pct = Math.min(100, (this.specialCharge / SPECIAL_COST) * 100);
+        var pct = Math.min(100, (this.specialCharge / BALANCE.specialCost) * 100);
         this.elSpecialFill.style.width = pct + '%';
+        this.elSpecialBar.classList.toggle('dps-sg-special-bar--ready', this.specialCharge >= BALANCE.specialCost || this.specialReadyPulse > 0);
         if (this.elSpecialBtn) {
-            this.elSpecialBtn.disabled = this.specialCharge < SPECIAL_COST;
+            this.elSpecialBtn.disabled = this.specialCharge < BALANCE.specialCost;
+            this.elSpecialBtn.classList.toggle('dps-sg-btn--charged', this.specialCharge >= BALANCE.specialCost || this.specialReadyPulse > 0);
         }
     };
 
-    /* ─── Overlays ─── */
-    SpaceGroomers.prototype.hideAllOverlays = function () {
-        this.overlayStart.classList.add('dps-sg-overlay--hidden');
-        this.overlayGameover.classList.add('dps-sg-overlay--hidden');
-        this.overlayVictory.classList.add('dps-sg-overlay--hidden');
-        this.overlayWave.classList.add('dps-sg-overlay--hidden');
+    SpaceGroomers.prototype.getComboProgressPercent = function () {
+        if (this.comboMultiplier >= 3) {
+            return clamp((this.comboTimer / BALANCE.comboWindow) * 100, 0, 100);
+        }
+        if (this.comboCount < BALANCE.comboTier2) {
+            return clamp((this.comboCount / BALANCE.comboTier2) * 100, 0, 100);
+        }
+        return clamp(((this.comboCount - BALANCE.comboTier2) / (BALANCE.comboTier3 - BALANCE.comboTier2)) * 100, 0, 100);
     };
 
-    /* ─── Input Binding ─── */
+    SpaceGroomers.prototype.getComboHint = function () {
+        if (this.comboMultiplier >= 3) {
+            return 'voce esta voando';
+        }
+        if (this.comboMultiplier === 2) {
+            return 'mais ' + (BALANCE.comboTier3 - this.comboCount) + ' para x3';
+        }
+        return this.comboCount + ' acertos seguidos';
+    };
+
+    SpaceGroomers.prototype.showToast = function (title, desc, tone, durationMs) {
+        if (!this.elToast) {
+            return;
+        }
+        this.toastTimer = durationMs || 1200;
+        this.toastTone = tone || 'neutral';
+        this.elToastTitle.textContent = title;
+        this.elToastDesc.textContent = desc || '';
+        this.elToast.classList.remove('dps-sg-toast--hidden', 'dps-sg-toast--warning', 'dps-sg-toast--success');
+        if (this.toastTone === 'warning') {
+            this.elToast.classList.add('dps-sg-toast--warning');
+        } else if (this.toastTone === 'success') {
+            this.elToast.classList.add('dps-sg-toast--success');
+        }
+    };
+
+    SpaceGroomers.prototype.clearToast = function () {
+        if (!this.elToast) {
+            return;
+        }
+        this.elToast.classList.add('dps-sg-toast--hidden');
+        this.elToast.classList.remove('dps-sg-toast--warning', 'dps-sg-toast--success');
+    };
+
+    SpaceGroomers.prototype.emitParticles = function (x, y, color, count, speed) {
+        var total = Math.min(count, BALANCE.particleCap);
+        while (this.particles.length > BALANCE.particleCap - total) {
+            this.particles.shift();
+        }
+
+        for (var i = 0; i < total; i++) {
+            this.particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * (speed || 4),
+                vy: (Math.random() - 0.5) * (speed || 4),
+                life: 260 + Math.random() * 220,
+                maxLife: 420,
+                color: color,
+                size: 2 + Math.random() * 3
+            });
+        }
+    };
+
+    SpaceGroomers.prototype.spawnFloatingText = function (text, x, y, color, font) {
+        while (this.floatingTexts.length >= BALANCE.floatingTextCap) {
+            this.floatingTexts.shift();
+        }
+
+        this.floatingTexts.push({
+            text: text,
+            x: x,
+            y: y,
+            vx: 0,
+            vy: -0.35,
+            life: 720,
+            maxLife: 720,
+            color: color || '#fff',
+            font: font || '700 14px "Segoe UI", system-ui, sans-serif'
+        });
+    };
+
+    SpaceGroomers.prototype.shakeScreen = function (force, durationMs) {
+        this.screenShakeForce = Math.max(this.screenShakeForce, force);
+        this.screenShakeTimer = Math.max(this.screenShakeTimer, durationMs || 100);
+    };
+
+    SpaceGroomers.prototype.freezeFor = function (durationMs) {
+        this.freezeTimer = Math.max(this.freezeTimer, durationMs || 20);
+    };
+
     SpaceGroomers.prototype.bindEvents = function () {
         var self = this;
 
-        // Keyboard (single shared listener to avoid duplicates with multiple instances)
         if (!SpaceGroomers._keyboardBound) {
             SpaceGroomers._keyboardBound = true;
             SpaceGroomers._instances = [];
-            document.addEventListener('keydown', function (e) {
-                SpaceGroomers._instances.forEach(function (inst) {
-                    inst.keys[e.key] = true;
+
+            document.addEventListener('keydown', function (event) {
+                SpaceGroomers._instances.forEach(function (instance) {
+                    instance.keys[event.key] = true;
                 });
-                var playing = SpaceGroomers._instances.some(function (inst) {
-                    return inst.state === 'playing';
+
+                var playing = SpaceGroomers._instances.some(function (instance) {
+                    return instance.state === 'playing';
                 });
-                if (playing && (e.key === ' ' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
-                    e.preventDefault();
+
+                if (playing && (event.key === ' ' || event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+                    event.preventDefault();
                 }
             });
-            document.addEventListener('keyup', function (e) {
-                SpaceGroomers._instances.forEach(function (inst) {
-                    inst.keys[e.key] = false;
+
+            document.addEventListener('keyup', function (event) {
+                SpaceGroomers._instances.forEach(function (instance) {
+                    instance.keys[event.key] = false;
                 });
             });
         }
+
         SpaceGroomers._instances.push(this);
 
-        // Play buttons
-        var playBtns = this.container.querySelectorAll('.dps-sg-btn--play');
-        for (var i = 0; i < playBtns.length; i++) {
-            playBtns[i].addEventListener('click', function () {
+        var playButtons = this.container.querySelectorAll('.dps-sg-btn--play');
+        for (var i = 0; i < playButtons.length; i++) {
+            playButtons[i].addEventListener('click', function () {
                 ensureAudio();
                 self.start();
             });
         }
 
         if (this.overlayStart) {
-            this.overlayStart.addEventListener('click', function (e) {
-                if (e.target.closest('.dps-sg-btn--play')) return;
+            this.overlayStart.addEventListener('click', function (event) {
+                if (event.target.closest('.dps-sg-btn--play')) {
+                    return;
+                }
                 ensureAudio();
                 self.start();
             });
         }
 
-        // Mobile-first pointer controls (drag to move)
-        var btnSpecial = this.container.querySelector('.dps-sg-btn--special');
+        var specialButton = this.container.querySelector('.dps-sg-btn--special');
         var pointerSurface = this.container.querySelector('.dps-sg-wrapper');
 
-        if (btnSpecial) {
-            btnSpecial.addEventListener('click', function () { self.fireSpecial(); });
+        if (specialButton) {
+            specialButton.addEventListener('click', function () {
+                self.fireSpecial();
+            });
         }
 
         if (pointerSurface) {
@@ -846,35 +1414,52 @@
 
             var updatePointerX = function (clientX) {
                 var rect = self.canvas.getBoundingClientRect();
-                if (!rect.width) return;
+                if (!rect.width) {
+                    return;
+                }
+
                 var canvasX = (clientX - rect.left) * (W / rect.width);
                 self.player.x = canvasX - self.pointerOffsetX;
-                self.player.x = Math.max(PLAYER_W / 2 + 4, Math.min(W - PLAYER_W / 2 - 4, self.player.x));
+                self.player.x = clamp(self.player.x, PLAYER_W / 2 + 4, W - PLAYER_W / 2 - 4);
             };
 
-            pointerSurface.addEventListener('pointerdown', function (e) {
-                if (self.state !== 'playing') return;
-                if (self.pointerId !== null && self.pointerId !== e.pointerId) return;
-                self.pointerId = e.pointerId;
+            pointerSurface.addEventListener('pointerdown', function (event) {
+                if (self.state !== 'playing') {
+                    return;
+                }
+                if (self.pointerId !== null && self.pointerId !== event.pointerId) {
+                    return;
+                }
+
+                self.pointerId = event.pointerId;
                 self.mobileDragActive = true;
                 self.isPointerDown = true;
 
                 var rect = self.canvas.getBoundingClientRect();
                 var currentPlayerX = rect.left + (self.player.x * rect.width / W);
-                self.pointerOffsetX = ((e.clientX - currentPlayerX) * (W / rect.width));
-                updatePointerX(e.clientX);
+                self.pointerOffsetX = (event.clientX - currentPlayerX) * (W / rect.width);
+                updatePointerX(event.clientX);
+
                 if (pointerSurface.setPointerCapture) {
-                    try { pointerSurface.setPointerCapture(e.pointerId); } catch (err) { /* noop */ }
+                    try {
+                        pointerSurface.setPointerCapture(event.pointerId);
+                    } catch (e) {
+                        return;
+                    }
                 }
             }, { passive: true });
 
-            pointerSurface.addEventListener('pointermove', function (e) {
-                if (!self.mobileDragActive || self.pointerId !== e.pointerId || self.state !== 'playing') return;
-                updatePointerX(e.clientX);
+            pointerSurface.addEventListener('pointermove', function (event) {
+                if (!self.mobileDragActive || self.pointerId !== event.pointerId || self.state !== 'playing') {
+                    return;
+                }
+                updatePointerX(event.clientX);
             }, { passive: true });
 
-            var releasePointer = function (e) {
-                if (self.pointerId !== e.pointerId) return;
+            var releasePointer = function (event) {
+                if (self.pointerId !== event.pointerId) {
+                    return;
+                }
                 self.isPointerDown = false;
                 self.mobileDragActive = false;
                 self.pointerId = null;
@@ -883,31 +1468,32 @@
 
             pointerSurface.addEventListener('pointerup', releasePointer, { passive: true });
             pointerSurface.addEventListener('pointercancel', releasePointer, { passive: true });
-            pointerSurface.addEventListener('pointerleave', function (e) {
-                if (e.pointerType === 'mouse') return;
-                releasePointer(e);
+            pointerSurface.addEventListener('pointerleave', function (event) {
+                if (event.pointerType === 'mouse') {
+                    return;
+                }
+                releasePointer(event);
             }, { passive: true });
         }
 
-        // Pausa segura ao perder foco (listeners globais únicos)
         if (!SpaceGroomers._focusBound) {
             SpaceGroomers._focusBound = true;
 
             SpaceGroomers._pauseAllPlaying = function () {
-                SpaceGroomers._instances.forEach(function (inst) {
-                    if (inst.state === 'playing') {
-                        inst.state = 'paused';
-                        cancelAnimationFrame(inst.rafId);
+                SpaceGroomers._instances.forEach(function (instance) {
+                    if (instance.state === 'playing') {
+                        instance.state = 'paused';
+                        cancelAnimationFrame(instance.rafId);
                     }
                 });
             };
 
             SpaceGroomers._resumeAllPaused = function () {
-                SpaceGroomers._instances.forEach(function (inst) {
-                    if (inst.state === 'paused') {
-                        inst.state = 'playing';
-                        inst.lastTime = performance.now();
-                        inst.loop(inst.lastTime);
+                SpaceGroomers._instances.forEach(function (instance) {
+                    if (instance.state === 'paused') {
+                        instance.state = 'playing';
+                        instance.lastTime = performance.now();
+                        instance.loop(instance.lastTime);
                     }
                 });
             };
@@ -932,9 +1518,91 @@
         }
     };
 
-    /* ═══════════════════════════════════════════
-       AUTO-INIT: find all game containers
-       ═══════════════════════════════════════════ */
+    SpaceGroomers.prototype.getTextState = function () {
+        return {
+            coordinateSystem: 'origin top-left, +x right, +y down',
+            mode: this.state,
+            wave: this.wave,
+            score: this.score,
+            lives: this.lives,
+            comboCount: this.comboCount,
+            comboMultiplier: this.comboMultiplier,
+            comboTimer: Number(this.comboTimer.toFixed(2)),
+            specialCharge: this.specialCharge,
+            specialReady: this.specialCharge >= BALANCE.specialCost,
+            activePowerup: this.activePowerup,
+            powerupTimer: Math.round(this.powerupTimer),
+            player: {
+                x: Math.round(this.player.x),
+                y: Math.round(this.player.y),
+                invulnMs: Math.round(this.playerInvulnTimer)
+            },
+            enemies: this.enemies.map(function (enemy) {
+                return {
+                    type: enemy.type,
+                    x: Math.round(enemy.x),
+                    y: Math.round(enemy.y),
+                    hp: enemy.hp,
+                    pattern: enemy.pattern,
+                    telegraph: Number(Math.max(0, enemy.telegraph).toFixed(2))
+                };
+            }),
+            muds: this.muds.map(function (mud) {
+                return { x: Math.round(mud.x), y: Math.round(mud.y) };
+            }),
+            powerups: this.powerups.map(function (powerup) {
+                return { type: powerup.type, x: Math.round(powerup.x), y: Math.round(powerup.y) };
+            }),
+            toast: this.elToast && !this.elToast.classList.contains('dps-sg-toast--hidden') ? {
+                title: this.elToastTitle.textContent,
+                desc: this.elToastDesc.textContent
+            } : null
+        };
+    };
+
+    function getActiveInstance() {
+        if (!SpaceGroomers._instances || !SpaceGroomers._instances.length) {
+            return null;
+        }
+
+        for (var i = 0; i < SpaceGroomers._instances.length; i++) {
+            if (SpaceGroomers._instances[i].state === 'playing' || SpaceGroomers._instances[i].state === 'gameoverTransition') {
+                return SpaceGroomers._instances[i];
+            }
+        }
+
+        return SpaceGroomers._instances[0];
+    }
+
+    window.render_game_to_text = function () {
+        var instance = getActiveInstance();
+        return JSON.stringify(instance ? instance.getTextState() : { mode: 'uninitialized' });
+    };
+
+    window.advanceTime = function (ms) {
+        var instance = getActiveInstance();
+        if (!instance) {
+            return;
+        }
+
+        var steps = Math.max(1, Math.round(ms / FRAME_TIME));
+        var dt = FRAME_TIME / 1000;
+
+        for (var i = 0; i < steps; i++) {
+            if (instance.state === 'playing' || instance.state === 'gameoverTransition') {
+                if (instance.freezeTimer > 0) {
+                    instance.freezeTimer = Math.max(0, instance.freezeTimer - FRAME_TIME);
+                    instance.updateAmbient(dt, FRAME_TIME);
+                } else {
+                    instance.update(dt);
+                }
+            }
+        }
+
+        instance.draw();
+        instance.updateHUD();
+    };
+
     function initAll() {
         var containers = document.querySelectorAll('.dps-space-groomers');
         for (var i = 0; i < containers.length; i++) {
