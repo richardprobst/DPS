@@ -80,6 +80,8 @@ class DPS_Portal_AJAX_Handler {
         // AJAX handler para auto-envio de link de acesso por email
         add_action( 'wp_ajax_dps_request_access_link_by_email', [ $this, 'ajax_request_access_link_by_email' ] );
         add_action( 'wp_ajax_nopriv_dps_request_access_link_by_email', [ $this, 'ajax_request_access_link_by_email' ] );
+        add_action( 'wp_ajax_dps_request_portal_password_access', [ $this, 'ajax_request_portal_password_access' ] );
+        add_action( 'wp_ajax_nopriv_dps_request_portal_password_access', [ $this, 'ajax_request_portal_password_access' ] );
 
         // AJAX handler para export PDF do histórico do pet
         add_action( 'wp_ajax_dps_export_pet_history_pdf', [ $this, 'ajax_export_pet_history_pdf' ] );
@@ -597,127 +599,93 @@ class DPS_Portal_AJAX_Handler {
      * @since 2.4.3
      */
     public function ajax_request_access_link_by_email() {
-        // Verifica nonce para proteção CSRF
         $nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
         if ( ! wp_verify_nonce( $nonce, 'dps_request_access_link' ) ) {
-            wp_send_json_error( [ 
-                'message' => __( 'Sessão expirada. Por favor, recarregue a página e tente novamente.', 'dps-client-portal' ) 
-            ] );
+            wp_send_json_error(
+                [
+                    'message' => __( 'Sessao expirada. Por favor, recarregue a pagina e tente novamente.', 'dps-client-portal' ),
+                ]
+            );
         }
-        
-        // Captura e valida email
+
         $email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
-        
         if ( empty( $email ) || ! is_email( $email ) ) {
-            wp_send_json_error( [ 
-                'message' => __( 'Por favor, informe um e-mail válido.', 'dps-client-portal' ) 
-            ] );
+            wp_send_json_error(
+                [
+                    'message' => __( 'Por favor, informe um e-mail valido.', 'dps-client-portal' ),
+                ]
+            );
         }
-        
-        // Rate limiting por IP (usa helper ou fallback)
+
         $ip = class_exists( 'DPS_IP_Helper' )
             ? DPS_IP_Helper::get_ip_with_proxy_support()
             : ( isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '0.0.0.0' );
 
-        $rate_key_ip = 'dps_access_link_ip_' . md5( $ip );
-        $rate_key_email = 'dps_access_link_email_' . md5( $email );
-        
-        // Verifica rate limit por IP (3 solicitações por hora)
-        $ip_count = get_transient( $rate_key_ip );
-        if ( false === $ip_count ) {
-            $ip_count = 0;
-        }
-        
-        if ( $ip_count >= 3 ) {
-            // F6.3: FASE 6 - Audit log de rate limit atingido
+        $rate_limiter = DPS_Portal_Rate_Limiter::get_instance();
+        if ( $rate_limiter->is_limited( 'portal_access_link_ip', $ip, 3 ) ) {
             if ( class_exists( 'DPS_Audit_Logger' ) ) {
-                DPS_Audit_Logger::log_portal_event( 'rate_limit_ip', 0, [ 'ip' => $ip, 'count' => $ip_count ] );
+                DPS_Audit_Logger::log_portal_event( 'rate_limit_ip', 0, [ 'ip' => $ip ] );
             }
-            wp_send_json_error( [ 
-                'message' => __( 'Você já solicitou o link várias vezes. Aguarde alguns minutos antes de tentar novamente.', 'dps-client-portal' ) 
-            ] );
-        }
-        
-        // Verifica rate limit por email (3 solicitações por hora)
-        $email_count = get_transient( $rate_key_email );
-        if ( false === $email_count ) {
-            $email_count = 0;
-        }
-        
-        if ( $email_count >= 3 ) {
-            wp_send_json_error( [ 
-                'message' => __( 'Você já solicitou o link várias vezes para este e-mail. Verifique sua caixa de entrada (e spam).', 'dps-client-portal' ) 
-            ] );
-        }
-        
-        // Busca cliente pelo email
-        $clients = get_posts( [
-            'post_type'      => 'dps_cliente',
-            'post_status'    => 'publish',
-            'posts_per_page' => 1,
-            'fields'         => 'ids',
-            'meta_query'     => [
+
+            wp_send_json_error(
                 [
-                    'key'     => 'client_email',
-                    'value'   => $email,
-                    'compare' => '=',
-                ],
-            ],
-        ] );
-        
-        // Incrementa contadores de rate limit antes de verificar resultado
-        // (evita brute force para descobrir emails cadastrados)
-        set_transient( $rate_key_ip, $ip_count + 1, HOUR_IN_SECONDS );
-        set_transient( $rate_key_email, $email_count + 1, HOUR_IN_SECONDS );
-        
-        if ( empty( $clients ) ) {
-            wp_send_json_error( [ 
-                'message' => __( 'Não encontramos um cadastro com este e-mail. Por favor, entre em contato via WhatsApp para solicitar acesso.', 'dps-client-portal' ),
-                'show_whatsapp' => true
-            ] );
+                    'message' => __( 'Voce ja solicitou o link varias vezes. Aguarde alguns minutos antes de tentar novamente.', 'dps-client-portal' ),
+                ]
+            );
         }
-        
-        $client_id = $clients[0];
-        $client_name = get_the_title( $client_id );
-        
-        // F4.6: FASE 4 - Verifica se cliente quer manter acesso permanente
-        $remember_me = isset( $_POST['remember_me'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['remember_me'] ) );
-        
-        // Gera token de acesso
+
+        if ( $rate_limiter->is_limited( 'portal_access_link_email', $email, 3 ) ) {
+            wp_send_json_error(
+                [
+                    'message' => __( 'Voce ja solicitou o link varias vezes para este e-mail. Verifique sua caixa de entrada e spam.', 'dps-client-portal' ),
+                ]
+            );
+        }
+
+        $rate_limiter->hit( 'portal_access_link_ip', $ip, HOUR_IN_SECONDS );
+        $rate_limiter->hit( 'portal_access_link_email', $email, HOUR_IN_SECONDS );
+
+        $user_manager = DPS_Portal_User_Manager::get_instance();
+        $client_id    = $user_manager->find_client_id_by_email( $email );
+
+        if ( ! $client_id ) {
+            wp_send_json_error(
+                [
+                    'message'       => __( 'Nao encontramos um cadastro com este e-mail. Entre em contato com a equipe para revisar seus dados.', 'dps-client-portal' ),
+                    'show_whatsapp' => true,
+                ]
+            );
+        }
+
+        $remember_me   = isset( $_POST['remember_me'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['remember_me'] ) );
         $token_manager = DPS_Portal_Token_Manager::get_instance();
         $token_plain   = $token_manager->generate_token( $client_id, 'login' );
-        
+
         if ( false === $token_plain ) {
-            wp_send_json_error( [ 
-                'message' => __( 'Não foi possível gerar o link de acesso. Por favor, tente novamente ou entre em contato via WhatsApp.', 'dps-client-portal' ),
-                'show_whatsapp' => true
-            ] );
+            wp_send_json_error(
+                [
+                    'message'       => __( 'Nao foi possivel gerar o link de acesso agora. Tente novamente em alguns instantes.', 'dps-client-portal' ),
+                    'show_whatsapp' => true,
+                ]
+            );
         }
-        
-        // Gera URL de acesso (com flag remember se solicitado)
+
         $access_url = $token_manager->generate_access_url( $token_plain );
         if ( $remember_me ) {
             $access_url = add_query_arg( 'dps_remember', '1', $access_url );
         }
-        
-        // Monta email HTML moderno
-        $safe_client_name = wp_strip_all_tags( $client_name );
-        $subject = __( 'Seu link de acesso ao Portal do Cliente - desi.pet by PRObst', 'dps-client-portal' );
-        
-        $site_name = get_bloginfo( 'name' );
-        
-        // Template HTML do email
-        $body = $this->get_access_link_email_html( $safe_client_name, $access_url, $site_name );
-        
-        // Envia email
-        $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
-        
+
+        $client_name = get_the_title( $client_id );
+        $subject     = __( 'Seu link de acesso ao Portal do Cliente - desi.pet by PRObst', 'dps-client-portal' );
+        $body        = $this->get_access_link_email_html( wp_strip_all_tags( $client_name ), $access_url, get_bloginfo( 'name' ) );
+        $headers     = [ 'Content-Type: text/html; charset=UTF-8' ];
+
         if ( class_exists( 'DPS_Communications_API' ) ) {
             $comm_api = DPS_Communications_API::get_instance();
-            $sent     = $comm_api->send_email( 
-                $email, 
-                $subject, 
-                $body, 
+            $sent     = $comm_api->send_email(
+                $email,
+                $subject,
+                $body,
                 [
                     'type'      => 'portal_access_link',
                     'client_id' => $client_id,
@@ -726,27 +694,102 @@ class DPS_Portal_AJAX_Handler {
         } else {
             $sent = wp_mail( $email, $subject, $body, $headers );
         }
-        
-        // Registra em log
+
         if ( function_exists( 'dps_log' ) ) {
-            dps_log( 'Portal access link sent via email', [
-                'client_id' => $client_id,
-                'email'     => $email,
-                'ip'        => $ip,
-                'sent'      => $sent,
-            ], 'info', 'client-portal' );
+            dps_log(
+                'Portal access link sent via email',
+                [
+                    'client_id' => $client_id,
+                    'email'     => $email,
+                    'ip'        => $ip,
+                    'sent'      => $sent,
+                ],
+                'info',
+                'client-portal'
+            );
         }
-        
+
         if ( ! $sent ) {
-            wp_send_json_error( [ 
-                'message' => __( 'Não foi possível enviar o e-mail. Por favor, tente novamente ou entre em contato via WhatsApp.', 'dps-client-portal' ),
-                'show_whatsapp' => true
-            ] );
+            wp_send_json_error(
+                [
+                    'message'       => __( 'Nao foi possivel enviar o e-mail agora. Tente novamente em alguns instantes.', 'dps-client-portal' ),
+                    'show_whatsapp' => true,
+                ]
+            );
         }
-        
-        wp_send_json_success( [ 
-            'message' => __( 'Link enviado com sucesso! Verifique sua caixa de entrada (e a pasta de spam).', 'dps-client-portal' ) 
-        ] );
+
+        wp_send_json_success(
+            [
+                'message' => __( 'Link enviado com sucesso. Verifique sua caixa de entrada e spam.', 'dps-client-portal' ),
+            ]
+        );
+    }
+
+    /**
+     * AJAX handler para criar ou redefinir o acesso por e-mail e senha.
+     *
+     * @return void
+     */
+    public function ajax_request_portal_password_access() {
+        $nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+        if ( ! wp_verify_nonce( $nonce, 'dps_request_password_access' ) ) {
+            wp_send_json_error(
+                [
+                    'message' => __( 'Sessao expirada. Recarregue a pagina para continuar.', 'dps-client-portal' ),
+                ]
+            );
+        }
+
+        $email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+        if ( empty( $email ) || ! is_email( $email ) ) {
+            wp_send_json_error(
+                [
+                    'message' => __( 'Informe um e-mail valido para continuar.', 'dps-client-portal' ),
+                ]
+            );
+        }
+
+        $ip = class_exists( 'DPS_IP_Helper' )
+            ? DPS_IP_Helper::get_ip_with_proxy_support()
+            : ( isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '0.0.0.0' );
+
+        $rate_limiter = DPS_Portal_Rate_Limiter::get_instance();
+        if ( $rate_limiter->is_limited( 'portal_password_access_ip', $ip, 3 ) || $rate_limiter->is_limited( 'portal_password_access_email', $email, 3 ) ) {
+            wp_send_json_error(
+                [
+                    'message' => __( 'Voce ja solicitou esse acesso varias vezes. Aguarde alguns minutos antes de tentar novamente.', 'dps-client-portal' ),
+                ]
+            );
+        }
+
+        $rate_limiter->hit( 'portal_password_access_ip', $ip, HOUR_IN_SECONDS );
+        $rate_limiter->hit( 'portal_password_access_email', $email, HOUR_IN_SECONDS );
+
+        $user_manager = DPS_Portal_User_Manager::get_instance();
+        $client_id    = $user_manager->find_client_id_by_email( $email );
+
+        if ( $client_id ) {
+            $result = $user_manager->send_password_access_email( $client_id, 'self_service' );
+            if ( is_wp_error( $result ) && function_exists( 'dps_log' ) ) {
+                dps_log(
+                    'Portal password access request failed',
+                    [
+                        'client_id' => $client_id,
+                        'email'     => $email,
+                        'ip'        => $ip,
+                        'reason'    => $result->get_error_code(),
+                    ],
+                    'warning',
+                    'client-portal'
+                );
+            }
+        }
+
+        wp_send_json_success(
+            [
+                'message' => __( 'Se este e-mail estiver cadastrado no portal, voce recebera as instrucoes para criar ou redefinir a senha.', 'dps-client-portal' ),
+            ]
+        );
     }
 
     /**

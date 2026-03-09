@@ -83,6 +83,13 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Client Portal ? Login h?brido e acesso recorrente**
+
+- **Login por e-mail e senha no Portal do Cliente**: mantido o acesso por magic link e adicionado fluxo recorrente com usu?rio WordPress vinculado ao e-mail cadastrado no cliente.
+- **Cria??o/redefini??o de senha por e-mail**: nova jornada para o cliente receber um link de configura??o de senha sem sair da tela inicial do portal.
+- **Provisionamento e sincroniza??o de usu?rio do portal**: novo gerenciador `DPS_Portal_User_Manager` para vincular o cadastro do cliente ao usu?rio WordPress correto.
+- **Rate limiting para solicita??es de acesso**: novo gerenciador `DPS_Portal_Rate_Limiter` aplicado aos pedidos de magic link e de senha.
+
 **Space Groomers — Jogo Temático (Add-on)**
 
 - **Novo add-on `desi-pet-shower-game`**: jogo "Space Groomers: Invasão das Pulgas" estilo Space Invaders para engajamento de clientes no portal.
@@ -161,6 +168,13 @@ Antes de criar uma nova versão oficial:
 - **Table of Contents**: atualizada com novos links para DPS_Portal_2FA, DPS_Scheduling_Suggestions, DPS_Finance_Repository, DPS_Base_Template_Engine, DPS_Audit_Logger.
 
 #### Changed (Alterado)
+
+**Client Portal ? Tela inicial e administra??o de logins**
+
+- **Landing p?blica refeita no padr?o M3**: a p?gina inicial do portal agora apresenta lado a lado as op??es de link direto e e-mail com senha, com suporte contextual para WhatsApp quando o e-mail n?o estiver cadastrado.
+- **Reset de senha dentro do portal**: nova tela dedicada para cria??o/redefini??o de senha, mantendo o mesmo contexto visual do acesso p?blico.
+- **Admin de logins revisado**: a ?rea administrativa passou a exibir estado de magic link, estado do acesso por senha, ?ltimo login, atividade recente e a??es de sincroniza??o/envio de acesso por senha.
+- **Sess?o h?brida unificada**: logins por magic link e por senha agora compartilham restaura??o de sess?o, remember-me e registro de ?ltimo acesso.
 
 **AI Add-on — Assistente Virtual no Portal do Cliente**
 

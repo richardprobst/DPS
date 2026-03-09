@@ -1,334 +1,108 @@
 <?php
 /**
- * Template para configurações do Portal do Cliente
- * 
- * Variáveis disponíveis:
- * @var int    $portal_page_id      ID da página configurada do portal
- * @var string $portal_url          URL atual do portal
- * @var array  $pages               Lista de páginas disponíveis
- * @var string $base_url            URL base da página de configurações
- * @var array  $feedback_messages   Mensagens de feedback
- * 
+ * Template das configuracoes do Portal do Cliente.
+ *
  * @package DPS_Client_Portal
- * @since 2.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
-
-echo '<div class="dps-portal-settings">';
-echo '<h2 class="dps-portal-settings__title">' . esc_html__( 'Portal do Cliente → Configurações', 'dps-client-portal' ) . '</h2>';
-
-// Mensagens de feedback
-if ( ! empty( $feedback_messages ) ) {
-    echo '<div class="dps-portal-settings__feedback">';
-    foreach ( $feedback_messages as $feedback ) {
-        $notice_class = 'success' === $feedback['type'] ? 'notice-success' : 'notice-error';
-        echo '<div class="notice ' . esc_attr( $notice_class ) . '"><p>' . esc_html( $feedback['text'] ) . '</p></div>';
-    }
-    echo '</div>';
-}
-
-// Descrição
-echo '<p class="dps-portal-settings__description">';
-echo esc_html__( 'Configure a página do Portal do Cliente e gerencie os links de acesso que serão enviados aos clientes.', 'dps-client-portal' );
-echo '</p>';
-
-// Formulário de configurações
-echo '<form method="post" action="" class="dps-portal-settings__form">';
-wp_nonce_field( 'dps_save_portal_settings', '_dps_portal_settings_nonce' );
-
-echo '<fieldset class="dps-fieldset">';
-echo '<legend>' . esc_html__( 'Configuração da Página do Portal', 'dps-client-portal' ) . '</legend>';
-
-// Campo: Página do Portal
-echo '<div class="dps-form-field">';
-echo '<label for="dps_portal_page_id">' . esc_html__( 'Página do Portal do Cliente:', 'dps-client-portal' ) . '</label>';
-echo '<select name="dps_portal_page_id" id="dps_portal_page_id" class="dps-select">';
-echo '<option value="0">' . esc_html__( '— Selecione uma página —', 'dps-client-portal' ) . '</option>';
-
-foreach ( $pages as $page ) {
-    $selected = selected( $portal_page_id, $page->ID, false );
-    echo '<option value="' . esc_attr( $page->ID ) . '" ' . $selected . '>';
-    echo esc_html( $page->post_title );
-    echo '</option>';
-}
-
-echo '</select>';
-echo '<p class="dps-field-description">';
-echo esc_html__( 'Selecione a página onde o shortcode [dps_client_portal] está inserido.', 'dps-client-portal' );
-echo '</p>';
-echo '</div>';
-
-echo '</fieldset>';
-
-// Seção: Link do Portal
-echo '<fieldset class="dps-fieldset">';
-echo '<legend>' . esc_html__( 'Link de Acesso ao Portal', 'dps-client-portal' ) . '</legend>';
-
-echo '<div class="dps-form-field">';
-echo '<label>' . esc_html__( 'URL do Portal:', 'dps-client-portal' ) . '</label>';
-echo '<div class="dps-portal-url-display">';
-echo '<input type="text" readonly value="' . esc_attr( $portal_url ) . '" onclick="this.select();" class="dps-input-url" />';
-echo '<button type="button" class="button button-secondary dps-copy-url" data-url="' . esc_attr( $portal_url ) . '">';
-echo esc_html__( 'Copiar Link', 'dps-client-portal' );
-echo '</button>';
-echo '</div>';
-echo '<p class="dps-field-description">';
-echo esc_html__( 'Este é o link base do portal. Os clientes acessarão através de links personalizados com token gerados na aba "Logins de Clientes".', 'dps-client-portal' );
-echo '</p>';
-echo '</div>';
-
-echo '</fieldset>';
-
-// Seção: Notificações de Segurança (Fase 1.3)
-echo '<fieldset class="dps-fieldset">';
-echo '<legend>' . esc_html__( 'Notificações de Segurança', 'dps-client-portal' ) . '</legend>';
-
-$access_notification_enabled = get_option( 'dps_portal_access_notification_enabled', false );
-
-echo '<div class="dps-form-field">';
-echo '<label>';
-echo '<input type="checkbox" name="dps_portal_access_notification_enabled" id="dps_portal_access_notification_enabled" value="1" ' . checked( $access_notification_enabled, 1, false ) . ' />';
-echo ' ' . esc_html__( 'Enviar e-mail ao cliente quando o portal for acessado', 'dps-client-portal' );
-echo '</label>';
-echo '<p class="dps-field-description">';
-echo esc_html__( 'Quando ativado, o cliente receberá um e-mail sempre que alguém acessar o portal usando seu link. O e-mail inclui data/hora do acesso e endereço IP (parcialmente ofuscado). Isso aumenta a segurança, permitindo que o cliente identifique acessos não autorizados.', 'dps-client-portal' );
-echo '</p>';
-echo '</div>';
-
-echo '</fieldset>';
-
-// Seção: Verificação em Duas Etapas (Fase 6.4)
-echo '<fieldset class="dps-fieldset">';
-echo '<legend>' . esc_html__( 'Verificação em Duas Etapas (2FA)', 'dps-client-portal' ) . '</legend>';
-
-$twofa_enabled = get_option( 'dps_portal_2fa_enabled', false );
-
-echo '<div class="dps-form-field">';
-echo '<label>';
-echo '<input type="checkbox" name="dps_portal_2fa_enabled" id="dps_portal_2fa_enabled" value="1" ' . checked( $twofa_enabled, 1, false ) . ' />';
-echo ' ' . esc_html__( 'Exigir código de verificação por e-mail ao acessar o portal', 'dps-client-portal' );
-echo '</label>';
-echo '<p class="dps-field-description">';
-echo esc_html__( 'Quando ativado, após clicar no link de acesso, o cliente receberá um código de 6 dígitos por e-mail que deve ser informado para completar o login. O código expira em 10 minutos e permite até 5 tentativas. Requer que o cliente tenha e-mail cadastrado.', 'dps-client-portal' );
-echo '</p>';
-echo '</div>';
-
-echo '</fieldset>';
-
-// Seção: Instruções
-echo '<fieldset class="dps-fieldset">';
-echo '<legend>' . esc_html__( 'Como Usar', 'dps-client-portal' ) . '</legend>';
-
-echo '<div class="dps-instructions">';
-echo '<ol class="dps-instructions-list">';
-echo '<li>' . esc_html__( 'Crie uma página no WordPress (ex: "Portal do Cliente")', 'dps-client-portal' ) . '</li>';
-echo '<li>' . esc_html__( 'Adicione o shortcode [dps_client_portal] no conteúdo da página', 'dps-client-portal' ) . '</li>';
-echo '<li>' . esc_html__( 'Selecione essa página no campo acima e salve', 'dps-client-portal' ) . '</li>';
-echo '<li>' . esc_html__( 'Acesse a aba "Logins de Clientes" para gerar links de acesso personalizados', 'dps-client-portal' ) . '</li>';
-echo '<li>' . esc_html__( 'Envie os links por WhatsApp ou e-mail para seus clientes', 'dps-client-portal' ) . '</li>';
-echo '</ol>';
-
-echo '<div class="dps-instructions-note">';
-echo '<strong>' . esc_html__( 'Importante:', 'dps-client-portal' ) . '</strong> ';
-echo esc_html__( 'Os clientes acessam o portal através de links com token único e temporário (válido por 30 minutos). Não é necessário criar senhas manualmente.', 'dps-client-portal' );
-echo '</div>';
-echo '</div>';
-
-echo '</fieldset>';
-
-// Botão salvar
-echo '<div class="dps-form-actions">';
-echo '<button type="submit" name="dps_save_portal_settings" class="button button-primary">';
-echo esc_html__( 'Salvar Configurações', 'dps-client-portal' );
-echo '</button>';
-echo '</div>';
-
-echo '</form>';
-
-echo '</div>'; // .dps-portal-settings
 ?>
+<div class="dps-portal-admin-shell dps-portal-settings-screen">
+    <header class="dps-portal-admin-shell__header">
+        <h2 class="dps-portal-admin-shell__title"><?php esc_html_e( 'Portal do Cliente: Configuracoes', 'dps-client-portal' ); ?></h2>
+        <p class="dps-portal-admin-shell__description"><?php esc_html_e( 'Defina a pagina oficial do portal e revise o modelo de acesso hibrido: magic link mais login por e-mail e senha.', 'dps-client-portal' ); ?></p>
+    </header>
 
-<style>
-/* Estilos para a página de configurações do portal */
-.dps-portal-settings {
-    max-width: 800px;
-}
+    <?php if ( ! empty( $feedback_messages ) ) : ?>
+        <div class="dps-portal-admin-shell__feedback">
+            <?php foreach ( $feedback_messages as $feedback ) : ?>
+                <div class="dps-portal-admin-shell__notice dps-portal-admin-shell__notice--<?php echo esc_attr( 'success' === $feedback['type'] ? 'success' : 'error' ); ?>">
+                    <?php echo esc_html( $feedback['text'] ); ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
 
-.dps-portal-settings__title {
-    margin-bottom: 20px;
-}
+    <section class="dps-portal-admin-shell__summary" aria-label="<?php esc_attr_e( 'Resumo do portal', 'dps-client-portal' ); ?>">
+        <article class="dps-admin-summary-card">
+            <span class="dps-admin-summary-card__label"><?php esc_html_e( 'Pagina configurada', 'dps-client-portal' ); ?></span>
+            <strong class="dps-admin-summary-card__value"><?php echo $portal_page_id > 0 ? esc_html( get_the_title( $portal_page_id ) ) : esc_html__( 'Nao definida', 'dps-client-portal' ); ?></strong>
+        </article>
+        <article class="dps-admin-summary-card">
+            <span class="dps-admin-summary-card__label"><?php esc_html_e( 'Modo de acesso', 'dps-client-portal' ); ?></span>
+            <strong class="dps-admin-summary-card__value"><?php esc_html_e( 'Link direto + E-mail e senha', 'dps-client-portal' ); ?></strong>
+        </article>
+        <article class="dps-admin-summary-card">
+            <span class="dps-admin-summary-card__label"><?php esc_html_e( 'URL atual do portal', 'dps-client-portal' ); ?></span>
+            <strong class="dps-admin-summary-card__value dps-admin-summary-card__value--small"><?php echo $portal_url ? esc_html( $portal_url ) : esc_html__( 'Aguardando configuracao', 'dps-client-portal' ); ?></strong>
+        </article>
+    </section>
 
-.dps-portal-settings__description {
-    font-size: 14px;
-    color: #6b7280;
-    margin-bottom: 20px;
-}
+    <form method="post" action="" class="dps-portal-settings-form">
+        <?php wp_nonce_field( 'dps_save_portal_settings', '_dps_portal_settings_nonce' ); ?>
 
-.dps-portal-settings__form {
-    background: #fff;
-}
+        <section class="dps-portal-settings-card">
+            <div class="dps-portal-settings-card__header">
+                <h3><?php esc_html_e( 'Pagina oficial do portal', 'dps-client-portal' ); ?></h3>
+                <p><?php esc_html_e( 'Selecione a pagina que possui o shortcode [dps_client_portal]. Ela sera usada para magic link, login por senha e redefinicao de senha.', 'dps-client-portal' ); ?></p>
+            </div>
+            <div class="dps-admin-field">
+                <label for="dps_portal_page_id"><?php esc_html_e( 'Pagina do Portal do Cliente', 'dps-client-portal' ); ?></label>
+                <select name="dps_portal_page_id" id="dps_portal_page_id" class="widefat">
+                    <option value="0"><?php esc_html_e( 'Selecione uma pagina', 'dps-client-portal' ); ?></option>
+                    <?php foreach ( $pages as $page ) : ?>
+                        <option value="<?php echo esc_attr( $page->ID ); ?>" <?php selected( $portal_page_id, $page->ID ); ?>><?php echo esc_html( $page->post_title ); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="dps-admin-field">
+                <label for="dps-portal-current-url"><?php esc_html_e( 'URL atual do portal', 'dps-client-portal' ); ?></label>
+                <div class="dps-admin-copy-field">
+                    <input id="dps-portal-current-url" type="text" class="widefat" readonly value="<?php echo esc_attr( $portal_url ); ?>" />
+                    <button type="button" class="button button-secondary" data-copy-text="<?php echo esc_attr( $portal_url ); ?>"><?php esc_html_e( 'Copiar URL', 'dps-client-portal' ); ?></button>
+                </div>
+            </div>
+        </section>
 
-.dps-fieldset {
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
+        <section class="dps-portal-settings-card">
+            <div class="dps-portal-settings-card__header">
+                <h3><?php esc_html_e( 'Seguranca do acesso', 'dps-client-portal' ); ?></h3>
+                <p><?php esc_html_e( 'As opcoes abaixo se aplicam aos acessos por magic link e ajudam a fortalecer o uso recorrente do portal.', 'dps-client-portal' ); ?></p>
+            </div>
+            <label class="dps-admin-toggle">
+                <input type="checkbox" name="dps_portal_access_notification_enabled" value="1" <?php checked( (int) get_option( 'dps_portal_access_notification_enabled', 0 ), 1 ); ?> />
+                <span>
+                    <strong><?php esc_html_e( 'Notificar o cliente a cada acesso', 'dps-client-portal' ); ?></strong>
+                    <small><?php esc_html_e( 'Envia um e-mail quando o portal e acessado por link direto.', 'dps-client-portal' ); ?></small>
+                </span>
+            </label>
+            <label class="dps-admin-toggle">
+                <input type="checkbox" name="dps_portal_2fa_enabled" value="1" <?php checked( (int) get_option( 'dps_portal_2fa_enabled', 0 ), 1 ); ?> />
+                <span>
+                    <strong><?php esc_html_e( 'Exigir codigo por e-mail no magic link', 'dps-client-portal' ); ?></strong>
+                    <small><?php esc_html_e( 'Ativa a verificacao em duas etapas para quem entra por link.', 'dps-client-portal' ); ?></small>
+                </span>
+            </label>
+        </section>
 
-.dps-fieldset legend {
-    font-size: 16px;
-    font-weight: 600;
-    color: #374151;
-    padding: 0 8px;
-}
+        <section class="dps-portal-settings-card">
+            <div class="dps-portal-settings-card__header">
+                <h3><?php esc_html_e( 'Como usar o acesso hibrido', 'dps-client-portal' ); ?></h3>
+                <p><?php esc_html_e( 'Fluxo recomendado para a equipe e para os clientes.', 'dps-client-portal' ); ?></p>
+            </div>
+            <ol class="dps-portal-settings-card__steps">
+                <li><?php esc_html_e( 'Mantenha a pagina do portal publicada com o shortcode [dps_client_portal].', 'dps-client-portal' ); ?></li>
+                <li><?php esc_html_e( 'Cadastre um e-mail valido em cada cliente para liberar magic link por e-mail e login por senha.', 'dps-client-portal' ); ?></li>
+                <li><?php esc_html_e( 'Na tela de Logins, gere links quando precisar enviar acesso imediato ou recorrente.', 'dps-client-portal' ); ?></li>
+                <li><?php esc_html_e( 'Use a acao de envio de senha para permitir que o proprio cliente crie ou redefina o acesso recorrente.', 'dps-client-portal' ); ?></li>
+                <li><?php esc_html_e( 'Se houver clientes antigos sem usuario sincronizado, use a acao de sincronizacao no admin.', 'dps-client-portal' ); ?></li>
+            </ol>
+        </section>
 
-.dps-form-field {
-    margin-bottom: 16px;
-}
-
-.dps-form-field:last-child {
-    margin-bottom: 0;
-}
-
-.dps-form-field label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #374151;
-}
-
-.dps-field-description {
-    margin-top: 8px;
-    font-size: 13px;
-    color: #6b7280;
-    font-style: italic;
-}
-
-.dps-select {
-    width: 100%;
-    max-width: 500px;
-    padding: 8px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.dps-portal-url-display {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.dps-input-url {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    font-family: monospace;
-    font-size: 13px;
-    background: #f9fafb;
-}
-
-.dps-copy-url {
-    white-space: nowrap;
-}
-
-.dps-instructions {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    padding: 16px;
-}
-
-.dps-instructions-list {
-    margin: 0 0 16px 20px;
-    padding: 0;
-}
-
-.dps-instructions-list li {
-    margin-bottom: 8px;
-    color: #374151;
-}
-
-.dps-instructions-note {
-    background: #fef3c7;
-    border-left: 4px solid #f59e0b;
-    padding: 12px;
-    border-radius: 4px;
-    font-size: 13px;
-    color: #92400e;
-}
-
-.dps-form-actions {
-    margin-top: 24px;
-    padding-top: 24px;
-    border-top: 1px solid #e5e7eb;
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-    .dps-portal-url-display {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .dps-copy-url {
-        width: 100%;
-    }
-}
-</style>
-
-<script>
-// Script para copiar URL
-(function() {
-    document.addEventListener('DOMContentLoaded', function() {
-        const copyButtons = document.querySelectorAll('.dps-copy-url');
-        
-        copyButtons.forEach(function(button) {
-            button.addEventListener('click', function() {
-                // Find the input in the parent container
-                const container = this.closest('.dps-portal-url-display');
-                const input = container ? container.querySelector('.dps-input-url') : null;
-                const url = this.dataset.url || (input ? input.value : '');
-                
-                if (!url) {
-                    return;
-                }
-                
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(url).then(function() {
-                        const originalText = button.textContent;
-                        button.textContent = '✓ Copiado!';
-                        button.style.background = '#10b981';
-                        button.style.color = '#fff';
-                        
-                        setTimeout(function() {
-                            button.textContent = originalText;
-                            button.style.background = '';
-                            button.style.color = '';
-                        }, 2000);
-                    }).catch(function(err) {
-                        console.error('Erro ao copiar:', err);
-                        alert('Erro ao copiar. Selecione e copie manualmente.');
-                    });
-                } else {
-                    // Fallback para navegadores antigos
-                    if (input) {
-                        input.select();
-                        document.execCommand('copy');
-                        
-                        const originalText = button.textContent;
-                        button.textContent = '✓ Copiado!';
-                        setTimeout(function() {
-                            button.textContent = originalText;
-                        }, 2000);
-                    }
-                }
-            });
-        });
-    });
-})();
-</script>
+        <div class="dps-portal-settings-form__actions">
+            <button type="submit" name="dps_save_portal_settings" class="button button-primary"><?php esc_html_e( 'Salvar configuracoes', 'dps-client-portal' ); ?></button>
+        </div>
+    </form>
+</div>

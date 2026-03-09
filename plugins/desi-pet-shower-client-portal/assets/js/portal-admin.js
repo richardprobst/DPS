@@ -1,335 +1,385 @@
-/**
- * Script para a interface administrativa de logins do Portal do Cliente
- *
- * @package DPS_Client_Portal
- * @since 2.0.0
- */
-
 (function($) {
     'use strict';
 
-    /**
-     * Gerenciador de modais
-     */
-    const ModalManager = {
-        /**
-         * Abre um modal
-         */
-        open: function(modalId) {
-            const $modal = $('#' + modalId);
-            if ($modal.length) {
-                $modal.fadeIn(200);
-                $('body').addClass('dps-modal-open');
-            }
-        },
-
-        /**
-         * Fecha um modal
-         */
-        close: function(modalId) {
-            const $modal = $('#' + modalId);
-            if ($modal.length) {
-                $modal.fadeOut(200);
-                $('body').removeClass('dps-modal-open');
-            }
-        },
-
-        /**
-         * Fecha todos os modais
-         */
-        closeAll: function() {
-            $('.dps-modal').fadeOut(200);
-            $('body').removeClass('dps-modal-open');
-        }
+    var state = {
+        selectedClientId: 0,
+        selectedRow: null,
+        emailModalClientId: 0,
+        emailModalAccessUrl: ''
     };
 
-    /**
-     * Gerenciador de tokens admin
-     */
-    const TokenAdmin = {
-        /**
-         * Inicializa eventos
-         */
-        init: function() {
-            this.bindCopyButtons();
-            this.bindEmailPreviewButtons();
-            this.bindModalCloseButtons();
-            this.bindEmailSendButton();
-            this.bindGenerateTokenButtons();
-            this.bindConfirmGenerateButton();
-        },
+    function getConfig() {
+        return window.dpsPortalAdmin || { ajaxUrl: window.ajaxurl || '', nonce: '', i18n: {} };
+    }
 
-        /**
-         * Bind para botões de gerar token
-         */
-        bindGenerateTokenButtons: function() {
-            $(document).on('click', '.dps-generate-token-btn', function(e) {
-                e.preventDefault();
-                
-                const $button = $(this);
-                const clientId = $button.data('client-id');
-                const clientName = $button.data('client-name');
-                const urlTemporary = $button.data('url-temporary');
-                const urlPermanent = $button.data('url-permanent');
-                
-                if (!clientId || !urlTemporary || !urlPermanent) {
-                    console.error('Missing data attributes:', { clientId, urlTemporary, urlPermanent });
-                    alert('Erro: dados do cliente não encontrados. Recarregue a página e tente novamente.');
-                    return;
-                }
-                
-                // Armazena dados no modal
-                const $modal = $('#dps-token-type-modal');
-                $modal.data('url-temporary', urlTemporary);
-                $modal.data('url-permanent', urlPermanent);
-                
-                // Atualiza nome do cliente no modal
-                $modal.find('#dps-token-client-name').text('Cliente: ' + clientName);
-                
-                // Reseta seleção para temporário
-                $modal.find('input[name="dps_token_type"][value="login"]').prop('checked', true);
-                
-                // Atualiza classes visuais para fallback do :has() selector
-                TokenAdmin.updateRadioStyles($modal);
-                
-                // Abre modal
-                ModalManager.open('dps-token-type-modal');
-            });
-            
-            // Bind para atualizar estilos quando radio é alterado (fallback para :has())
-            $(document).on('change', '#dps-token-type-modal input[name="dps_token_type"]', function() {
-                const $modal = $('#dps-token-type-modal');
-                TokenAdmin.updateRadioStyles($modal);
-            });
-        },
-        
-        /**
-         * Atualiza estilos visuais dos radio buttons (fallback para :has())
-         */
-        updateRadioStyles: function($modal) {
-            $modal.find('label').removeClass('dps-radio-checked');
-            $modal.find('input[name="dps_token_type"]:checked').closest('label').addClass('dps-radio-checked');
-        },
+    function getMessage(key, fallback) {
+        var config = getConfig();
+        return config.i18n && config.i18n[key] ? config.i18n[key] : fallback;
+    }
 
-        /**
-         * Bind para botão de confirmar geração
-         */
-        bindConfirmGenerateButton: function() {
-            $(document).on('click', '#dps-confirm-generate-token', function(e) {
-                e.preventDefault();
-                
-                const $modal = $('#dps-token-type-modal');
-                const tokenType = $modal.find('input[name="dps_token_type"]:checked').val();
-                const urlTemporary = $modal.data('url-temporary');
-                const urlPermanent = $modal.data('url-permanent');
-                
-                if (!tokenType || !urlTemporary || !urlPermanent) {
-                    console.error('Missing modal data:', { tokenType, urlTemporary, urlPermanent });
-                    alert('Erro ao processar solicitação. Por favor, feche o modal e tente novamente.');
-                    return;
-                }
-                
-                // Seleciona URL apropriada
-                const targetUrl = (tokenType === 'permanent') ? urlPermanent : urlTemporary;
-                
-                // Redireciona para gerar o token
-                window.location.href = targetUrl;
-            });
-        },
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
 
-        /**
-         * Bind para botões de copiar
-         */
-        bindCopyButtons: function() {
-            $(document).on('click', '.dps-copy-token', function(e) {
-                e.preventDefault();
-                
-                const $button = $(this);
-                const url = $button.data('url');
-                
-                if (!url) {
-                    return;
-                }
+    function openModal(selector) {
+        $(selector).prop('hidden', false).addClass('is-open');
+        $('body').addClass('dps-admin-modal-open');
+    }
 
-                // Tenta copiar para clipboard
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(url)
-                        .then(function() {
-                            TokenAdmin.showCopyFeedback($button, true);
-                        })
-                        .catch(function() {
-                            TokenAdmin.showCopyFeedback($button, false);
-                        });
-                } else {
-                    // Fallback para navegadores antigos
-                    const $temp = $('<input>');
-                    $('body').append($temp);
-                    $temp.val(url).select();
-                    const success = document.execCommand('copy');
-                    $temp.remove();
-                    TokenAdmin.showCopyFeedback($button, success);
-                }
-            });
-        },
+    function closeModals() {
+        $('.dps-admin-modal').prop('hidden', true).removeClass('is-open');
+        $('body').removeClass('dps-admin-modal-open');
+    }
 
-        /**
-         * Mostra feedback visual de cópia
-         */
-        showCopyFeedback: function($button, success) {
-            const originalText = $button.text();
-            const newText = success ? '✓ Copiado!' : '✗ Erro';
-            
-            $button.text(newText);
-            
-            setTimeout(function() {
-                $button.text(originalText);
-            }, 2000);
-        },
-
-        /**
-         * Bind para botões de pré-visualização de e-mail
-         */
-        bindEmailPreviewButtons: function() {
-            $(document).on('click', '.dps-preview-email', function(e) {
-                e.preventDefault();
-                
-                const $button = $(this);
-                const clientId = $button.data('client-id');
-                const accessUrl = $button.data('url');
-                
-                if (!clientId || !accessUrl) {
-                    alert('Dados incompletos para pré-visualizar e-mail.');
-                    return;
-                }
-
-                TokenAdmin.loadEmailPreview(clientId, accessUrl);
-            });
-        },
-
-        /**
-         * Carrega pré-visualização de e-mail
-         */
-        loadEmailPreview: function(clientId, accessUrl) {
-            // Mostra loading
-            const $modal = $('#dps-email-preview-modal');
-            $modal.find('#dps-email-subject').val('Carregando...');
-            $modal.find('#dps-email-body').val('Carregando...');
-            $modal.data('client-id', clientId);
-            $modal.data('access-url', accessUrl);
-            
-            ModalManager.open('dps-email-preview-modal');
-
-            // Faz requisição AJAX
-            $.ajax({
-                url: ajaxurl,
-                type: 'POST',
-                data: {
-                    action: 'dps_preview_email',
-                    nonce: dpsPortalAdmin.nonce,
-                    client_id: clientId,
-                    access_url: accessUrl
+    function ajaxPost(action, data) {
+        var config = getConfig();
+        return $.ajax({
+            url: config.ajaxUrl,
+            type: 'POST',
+            dataType: 'json',
+            data: $.extend(
+                {
+                    action: action,
+                    nonce: config.nonce
                 },
-                success: function(response) {
-                    if (response.success && response.data) {
-                        $modal.find('#dps-email-subject').val(response.data.subject || '');
-                        $modal.find('#dps-email-body').val(response.data.body || '');
-                    } else {
-                        alert('Não foi possível carregar a pré-visualização: ' + (response.data.message || 'Erro desconhecido'));
-                        ModalManager.close('dps-email-preview-modal');
-                    }
-                },
-                error: function() {
-                    alert('Erro ao conectar com o servidor.');
-                    ModalManager.close('dps-email-preview-modal');
-                }
-            });
-        },
+                data || {}
+            )
+        });
+    }
 
-        /**
-         * Bind para botões de fechar modal
-         */
-        bindModalCloseButtons: function() {
-            $(document).on('click', '.dps-modal__close', function(e) {
-                e.preventDefault();
-                ModalManager.closeAll();
-            });
-
-            $(document).on('click', '.dps-modal__overlay', function(e) {
-                ModalManager.closeAll();
-            });
-
-            // ESC para fechar
-            $(document).on('keyup', function(e) {
-                if (e.key === 'Escape' || e.keyCode === 27) {
-                    ModalManager.closeAll();
-                }
-            });
-        },
-
-        /**
-         * Bind para botão de enviar e-mail
-         */
-        bindEmailSendButton: function() {
-            $(document).on('click', '#dps-confirm-send-email', function(e) {
-                e.preventDefault();
-                
-                const $button = $(this);
-                const $modal = $('#dps-email-preview-modal');
-                const clientId = $modal.data('client-id');
-                const subject = $modal.find('#dps-email-subject').val();
-                const body = $modal.find('#dps-email-body').val();
-
-                if (!clientId || !subject || !body) {
-                    alert('Preencha todos os campos do e-mail.');
-                    return;
-                }
-
-                // Confirma envio
-                if (!confirm('Confirma o envio do e-mail com essas informações?')) {
-                    return;
-                }
-
-                // Desabilita botão
-                $button.prop('disabled', true).text('Enviando...');
-
-                // Envia e-mail
-                $.ajax({
-                    url: ajaxurl,
-                    type: 'POST',
-                    data: {
-                        action: 'dps_send_email_with_token',
-                        nonce: dpsPortalAdmin.nonce,
-                        client_id: clientId,
-                        subject: subject,
-                        body: body
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            alert('E-mail enviado com sucesso!');
-                            ModalManager.close('dps-email-preview-modal');
-                            location.reload(); // Recarrega para limpar token temporário
-                        } else {
-                            alert('Erro ao enviar e-mail: ' + (response.data.message || 'Erro desconhecido'));
-                            $button.prop('disabled', false).text('Confirmar Envio');
-                        }
-                    },
-                    error: function() {
-                        alert('Erro ao conectar com o servidor.');
-                        $button.prop('disabled', false).text('Confirmar Envio');
-                    }
-                });
-            });
+    function setRowFeedback($row, type, message) {
+        var $target = $row.find('[data-row-feedback]').first();
+        if (!$target.length) {
+            return;
         }
-    };
 
-    /**
-     * Inicializa quando o DOM estiver pronto
-     */
+        $target.removeClass('is-success is-error').empty();
+
+        if (!message) {
+            return;
+        }
+
+        $target.addClass(type === 'success' ? 'is-success' : 'is-error').text(message);
+    }
+
+    function withButtonLoading($button, loadingText) {
+        var originalText = $button.data('original-text') || $button.text();
+        $button.data('original-text', originalText);
+        $button.prop('disabled', true).text(loadingText);
+
+        return function restore() {
+            $button.prop('disabled', false).text(originalText);
+        };
+    }
+
+    function copyText(text, onSuccess, onError) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(onSuccess).catch(onError);
+            return;
+        }
+
+        var $temp = $('<input type="text" />').val(text).appendTo('body');
+        $temp[0].select();
+
+        try {
+            var copied = document.execCommand('copy');
+            $temp.remove();
+            if (copied) {
+                onSuccess();
+                return;
+            }
+        } catch (error) {
+            $temp.remove();
+        }
+
+        onError();
+    }
+
+    function renderGeneratedToken($row, payload) {
+        var phone = $row.data('client-phone') || '';
+        var email = $row.data('client-email') || '';
+        var $target = $row.find('[data-generated-token]').first();
+
+        if (!$target.length || !payload || !payload.url) {
+            return;
+        }
+
+        var buttons = [
+            '<button type="button" class="button button-small dps-copy-token" data-copy-text="' + escapeHtml(payload.url) + '">Copiar</button>'
+        ];
+
+        if (phone) {
+            buttons.push('<button type="button" class="button button-small dps-open-whatsapp" data-access-url="' + escapeHtml(payload.url) + '">WhatsApp</button>');
+        }
+
+        if (email) {
+            buttons.push('<button type="button" class="button button-small dps-preview-email" data-access-url="' + escapeHtml(payload.url) + '">Preparar e-mail</button>');
+        }
+
+        $target.html(
+            '<div class="dps-generated-token__card">' +
+                '<label class="dps-generated-token__label">Link gerado agora</label>' +
+                '<div class="dps-generated-token__field">' +
+                    '<input type="text" readonly value="' + escapeHtml(payload.url) + '" />' +
+                '</div>' +
+                '<div class="dps-generated-token__actions">' + buttons.join('') + '</div>' +
+                '<small class="dps-generated-token__note">' + escapeHtml(payload.validityLabel || '') + '</small>' +
+            '</div>'
+        );
+    }
+
+    function openWhatsApp($row, accessUrl) {
+        var phone = (($row.data('client-phone') || '') + '').replace(/\D+/g, '');
+        if (!phone) {
+            setRowFeedback($row, 'error', getMessage('whatsappMissing', 'Este cliente nao possui telefone cadastrado para WhatsApp.'));
+            return;
+        }
+
+        ajaxPost('dps_get_whatsapp_message', {
+            client_id: $row.data('client-id'),
+            access_url: accessUrl
+        }).done(function(response) {
+            if (!response || !response.success || !response.data || !response.data.message) {
+                setRowFeedback($row, 'error', getMessage('genericError', 'Nao foi possivel concluir esta acao agora.'));
+                return;
+            }
+
+            window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(response.data.message), '_blank', 'noopener');
+        }).fail(function() {
+            setRowFeedback($row, 'error', getMessage('genericError', 'Nao foi possivel concluir esta acao agora.'));
+        });
+    }
+
+    function bindCopyButtons() {
+        $(document).on('click', '[data-copy-text]', function(event) {
+            event.preventDefault();
+
+            var $button = $(this);
+            var restore = withButtonLoading($button, getMessage('copySuccess', 'Copiado!'));
+            var text = $button.data('copy-text') || '';
+
+            copyText(
+                text,
+                function() {
+                    setTimeout(restore, 900);
+                },
+                function() {
+                    $button.text(getMessage('copyError', 'Nao foi possivel copiar.'));
+                    setTimeout(restore, 1200);
+                }
+            );
+        });
+    }
+
+    function bindGenerateTokenFlow() {
+        $(document).on('click', '.dps-generate-token-btn', function() {
+            state.selectedRow = $(this).closest('[data-client-row]');
+            state.selectedClientId = $(this).data('client-id');
+            $('#dps-token-client-name').text('Cliente: ' + ($(this).data('client-name') || ''));
+            $('#dps-token-type-modal input[name="dps_token_type"][value="login"]').prop('checked', true);
+            openModal('#dps-token-type-modal');
+        });
+
+        $(document).on('click', '#dps-confirm-generate-token', function() {
+            if (!state.selectedClientId || !state.selectedRow || !state.selectedRow.length) {
+                closeModals();
+                return;
+            }
+
+            var $button = $(this);
+            var restore = withButtonLoading($button, getMessage('generating', 'Gerando link...'));
+            var type = $('#dps-token-type-modal input[name="dps_token_type"]:checked').val() || 'login';
+
+            ajaxPost('dps_generate_client_token', {
+                client_id: state.selectedClientId,
+                type: type
+            }).done(function(response) {
+                if (!response || !response.success) {
+                    setRowFeedback(state.selectedRow, 'error', response && response.data && response.data.message ? response.data.message : getMessage('genericError', 'Nao foi possivel concluir esta acao agora.'));
+                    return;
+                }
+
+                renderGeneratedToken(state.selectedRow, response.data);
+                setRowFeedback(state.selectedRow, 'success', 'Link gerado com sucesso.');
+                closeModals();
+            }).fail(function() {
+                setRowFeedback(state.selectedRow, 'error', getMessage('genericError', 'Nao foi possivel concluir esta acao agora.'));
+            }).always(function() {
+                restore();
+            });
+        });
+    }
+
+    function bindRevokeFlow() {
+        $(document).on('click', '.dps-revoke-token-btn', function() {
+            var $button = $(this);
+            var $row = $button.closest('[data-client-row]');
+
+            if (!window.confirm(getMessage('confirmRevoke', 'Tem certeza que deseja revogar todos os links ativos deste cliente?'))) {
+                return;
+            }
+
+            var restore = withButtonLoading($button, getMessage('revoking', 'Revogando links...'));
+
+            ajaxPost('dps_revoke_client_tokens', {
+                client_id: $button.data('client-id')
+            }).done(function(response) {
+                if (!response || !response.success) {
+                    setRowFeedback($row, 'error', response && response.data && response.data.message ? response.data.message : getMessage('genericError', 'Nao foi possivel concluir esta acao agora.'));
+                    return;
+                }
+
+                setRowFeedback($row, 'success', response.data.message || 'Links revogados com sucesso.');
+                window.setTimeout(function() {
+                    window.location.reload();
+                }, 600);
+            }).fail(function() {
+                setRowFeedback($row, 'error', getMessage('genericError', 'Nao foi possivel concluir esta acao agora.'));
+            }).always(function() {
+                restore();
+            });
+        });
+    }
+
+    function bindPasswordAccessFlow() {
+        $(document).on('click', '.dps-send-password-access-btn', function() {
+            var $button = $(this);
+            var $row = $button.closest('[data-client-row]');
+            var restore = withButtonLoading($button, getMessage('sendingPasswordMail', 'Enviando acesso por senha...'));
+
+            ajaxPost('dps_send_password_access_email', {
+                client_id: $button.data('client-id')
+            }).done(function(response) {
+                if (!response || !response.success) {
+                    setRowFeedback($row, 'error', response && response.data && response.data.message ? response.data.message : getMessage('genericError', 'Nao foi possivel concluir esta acao agora.'));
+                    return;
+                }
+
+                setRowFeedback($row, 'success', response.data.message || 'As instrucoes de senha foram enviadas.');
+                window.setTimeout(function() {
+                    window.location.reload();
+                }, 600);
+            }).fail(function() {
+                setRowFeedback($row, 'error', getMessage('genericError', 'Nao foi possivel concluir esta acao agora.'));
+            }).always(function() {
+                restore();
+            });
+        });
+    }
+
+    function bindSyncUserFlow() {
+        $(document).on('click', '.dps-sync-portal-user-btn', function() {
+            var $button = $(this);
+            var $row = $button.closest('[data-client-row]');
+            var restore = withButtonLoading($button, getMessage('syncingUser', 'Sincronizando usuario...'));
+
+            ajaxPost('dps_sync_portal_user', {
+                client_id: $button.data('client-id')
+            }).done(function(response) {
+                if (!response || !response.success) {
+                    setRowFeedback($row, 'error', response && response.data && response.data.message ? response.data.message : getMessage('genericError', 'Nao foi possivel concluir esta acao agora.'));
+                    return;
+                }
+
+                setRowFeedback($row, 'success', response.data.message || 'Usuario do portal sincronizado com sucesso.');
+                window.setTimeout(function() {
+                    window.location.reload();
+                }, 600);
+            }).fail(function() {
+                setRowFeedback($row, 'error', getMessage('genericError', 'Nao foi possivel concluir esta acao agora.'));
+            }).always(function() {
+                restore();
+            });
+        });
+    }
+
+    function bindGeneratedTokenActions() {
+        $(document).on('click', '.dps-open-whatsapp', function() {
+            var $button = $(this);
+            var $row = $button.closest('[data-client-row]');
+            openWhatsApp($row, $button.data('access-url'));
+        });
+
+        $(document).on('click', '.dps-preview-email', function() {
+            var $button = $(this);
+            var $row = $button.closest('[data-client-row]');
+            state.emailModalClientId = $row.data('client-id');
+            state.emailModalAccessUrl = $button.data('access-url') || '';
+
+            $('#dps-email-subject').val('Carregando...');
+            $('#dps-email-body').val('Carregando...');
+            openModal('#dps-email-preview-modal');
+
+            ajaxPost('dps_preview_email', {
+                client_id: state.emailModalClientId,
+                access_url: state.emailModalAccessUrl
+            }).done(function(response) {
+                if (!response || !response.success || !response.data) {
+                    closeModals();
+                    setRowFeedback($row, 'error', response && response.data && response.data.message ? response.data.message : getMessage('genericError', 'Nao foi possivel concluir esta acao agora.'));
+                    return;
+                }
+
+                $('#dps-email-subject').val(response.data.subject || '');
+                $('#dps-email-body').val(response.data.body || '');
+            }).fail(function() {
+                closeModals();
+                setRowFeedback($row, 'error', getMessage('genericError', 'Nao foi possivel concluir esta acao agora.'));
+            });
+        });
+    }
+
+    function bindSendEmailFlow() {
+        $(document).on('click', '#dps-confirm-send-email', function() {
+            var $button = $(this);
+            var restore = withButtonLoading($button, getMessage('sendingEmail', 'Enviando e-mail...'));
+            var $row = $('[data-client-row][data-client-id="' + state.emailModalClientId + '"]');
+
+            ajaxPost('dps_send_email_with_token', {
+                client_id: state.emailModalClientId,
+                subject: $('#dps-email-subject').val(),
+                body: $('#dps-email-body').val()
+            }).done(function(response) {
+                if (!response || !response.success) {
+                    setRowFeedback($row, 'error', response && response.data && response.data.message ? response.data.message : getMessage('genericError', 'Nao foi possivel concluir esta acao agora.'));
+                    return;
+                }
+
+                closeModals();
+                setRowFeedback($row, 'success', response.data.message || 'E-mail enviado com sucesso.');
+            }).fail(function() {
+                setRowFeedback($row, 'error', getMessage('genericError', 'Nao foi possivel concluir esta acao agora.'));
+            }).always(function() {
+                restore();
+            });
+        });
+    }
+
+    function bindModalClose() {
+        $(document).on('click', '[data-modal-close]', function() {
+            closeModals();
+        });
+
+        $(document).on('keyup', function(event) {
+            if (event.key === 'Escape') {
+                closeModals();
+            }
+        });
+    }
+
     $(document).ready(function() {
-        // Verifica se estamos na página de logins
-        if ($('.dps-portal-logins').length) {
-            TokenAdmin.init();
-        }
+        bindCopyButtons();
+        bindGenerateTokenFlow();
+        bindRevokeFlow();
+        bindPasswordAccessFlow();
+        bindSyncUserFlow();
+        bindGeneratedTokenActions();
+        bindSendEmailFlow();
+        bindModalClose();
     });
-
 })(jQuery);

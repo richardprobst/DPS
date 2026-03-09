@@ -223,37 +223,56 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
      * Faz logout do cliente
      */
     public function logout() {
-        // Remove transient se existir cookie
+        $should_logout_wp_user = false;
+        if ( is_user_logged_in() && ! current_user_can( 'manage_options' ) ) {
+            $current_user = wp_get_current_user();
+            if ( ! class_exists( 'DPS_Portal_User_Manager' ) || DPS_Portal_User_Manager::get_instance()->is_client_portal_user( $current_user ) ) {
+                $should_logout_wp_user = true;
+            }
+        }
+
         if ( isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
             $session_token = sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) );
             delete_transient( self::TRANSIENT_PREFIX . $session_token );
         }
-        
-        // Remove cookie do navegador
-        if ( isset( $_SERVER['HTTP_HOST'] ) ) {
-            $expires  = time() - 3600;
-            $path     = COOKIEPATH;
-            $domain   = COOKIE_DOMAIN;
-            $secure   = is_ssl();
-            $httponly = true;
-            
-            // Usa sintaxe de parâmetros individuais para compatibilidade com PHP <7.3
-            setcookie( 
-                self::COOKIE_NAME, 
-                '',
-                $expires,
-                $path,
-                $domain,
-                $secure,
-                $httponly
+
+        $expires  = time() - 3600;
+        $path     = COOKIEPATH;
+        $domain   = COOKIE_DOMAIN;
+        $secure   = is_ssl();
+        $httponly = true;
+
+        setcookie(
+            self::COOKIE_NAME,
+            '',
+            $expires,
+            $path,
+            $domain,
+            $secure,
+            $httponly
+        );
+
+        if ( ! headers_sent() ) {
+            header(
+                sprintf(
+                    'Set-Cookie: %s=; Expires=%s; Path=%s; Domain=%s%s%s; SameSite=Strict',
+                    self::COOKIE_NAME,
+                    gmdate( 'D, d M Y H:i:s T', $expires ),
+                    $path,
+                    $domain,
+                    $secure ? '; Secure' : '',
+                    $httponly ? '; HttpOnly' : ''
+                ),
+                false
             );
-            
-            // SameSite=Strict via header (PHP <7.3 compatibility)
+        }
+
+        if ( isset( $_COOKIE['dps_portal_remember'] ) ) {
+            setcookie( 'dps_portal_remember', '', $expires, $path, $domain, $secure, $httponly );
             if ( ! headers_sent() ) {
-                header( 
+                header(
                     sprintf(
-                        'Set-Cookie: %s=; Expires=%s; Path=%s; Domain=%s%s%s; SameSite=Strict',
-                        self::COOKIE_NAME,
+                        'Set-Cookie: dps_portal_remember=; Expires=%s; Path=%s; Domain=%s%s%s; SameSite=Strict',
                         gmdate( 'D, d M Y H:i:s T', $expires ),
                         $path,
                         $domain,
@@ -263,11 +282,10 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
                     false
                 );
             }
+        }
 
-            // F4.6: FASE 4 - Remove cookie "manter acesso" no logout
-            if ( isset( $_COOKIE['dps_portal_remember'] ) ) {
-                setcookie( 'dps_portal_remember', '', $expires, $path, $domain, $secure, $httponly );
-            }
+        if ( $should_logout_wp_user ) {
+            wp_logout();
         }
     }
 

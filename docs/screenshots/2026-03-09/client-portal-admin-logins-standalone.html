@@ -1,0 +1,788 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview - Admin de Logins do Portal</title>
+    <style>
+        :root {
+            --dps-color-primary: #1a7a5c;
+            --dps-color-primary-hover: #155f48;
+            --dps-color-primary-pressed: #0f4b39;
+            --dps-color-primary-container: #dff2e7;
+            --dps-color-on-primary: #ffffff;
+            --dps-color-surface-bright: #f7faf8;
+            --dps-color-surface-container-lowest: #ffffff;
+            --dps-color-surface-container-low: #f2f7f4;
+            --dps-color-surface-container: #eaf1ed;
+            --dps-color-surface-container-high: #dde7e2;
+            --dps-color-on-surface: #18322c;
+            --dps-color-on-surface-variant: #587069;
+            --dps-color-outline: #7d918a;
+            --dps-color-outline-variant: #cad7d1;
+            --dps-color-success: #1a7a3a;
+            --dps-color-success-container: #dbf4df;
+            --dps-color-warning: #8a5a00;
+            --dps-color-warning-container: #fff2d2;
+            --dps-color-on-warning-container: #6d4a00;
+            --dps-color-error: #b42318;
+            --dps-color-error-container: #ffe3de;
+            --dps-font-body: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+            --dps-font-display: 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
+            --dps-font-mono: 'Cascadia Code', 'Consolas', monospace;
+            --dps-shape-extra-large: 28px;
+            --dps-shape-large: 24px;
+            --dps-shape-medium: 18px;
+            --dps-shape-small: 14px;
+            --dps-shape-extra-small: 10px;
+            --dps-shape-full: 999px;
+            --dps-shape-button: 999px;
+            --dps-space-1: 4px;
+            --dps-space-2: 8px;
+            --dps-space-3: 12px;
+            --dps-space-4: 16px;
+            --dps-space-5: 20px;
+            --dps-space-6: 24px;
+            --dps-space-7: 28px;
+            --dps-space-8: 32px;
+            --dps-space-9: 40px;
+            --dps-space-10: 48px;
+            --dps-motion-hover: 160ms ease;
+            --dps-motion-enter: 220ms ease;
+            --dps-motion-duration-medium-2: 280ms;
+            --dps-motion-duration-short-4: 160ms;
+            --dps-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+            --dps-elevation-1: 0 4px 12px rgba(24, 50, 44, 0.06);
+            --dps-elevation-2: 0 12px 24px rgba(24, 50, 44, 0.08);
+            --dps-elevation-3: 0 18px 30px rgba(24, 50, 44, 0.12);
+            --dps-elevation-4: 0 24px 40px rgba(24, 50, 44, 0.14);
+            --dps-elevation-button: 0 10px 18px rgba(24, 50, 44, 0.12);
+            --dps-typescale-headline-small-size: 2rem;
+            --dps-typescale-headline-small-weight: 650;
+            --dps-typescale-headline-small-line: 1.1;
+            --dps-typescale-title-large-size: 1.5rem;
+            --dps-typescale-title-medium-size: 1.125rem;
+            --dps-typescale-title-medium-weight: 650;
+            --dps-typescale-title-medium-line: 1.2;
+            --dps-typescale-body-large-size: 1rem;
+            --dps-typescale-body-large-line: 1.6;
+            --dps-typescale-body-medium-size: 0.95rem;
+            --dps-typescale-body-medium-line: 1.6;
+            --dps-typescale-body-small-size: 0.84rem;
+            --dps-typescale-label-large-size: 0.95rem;
+            --dps-typescale-label-large-weight: 650;
+            --dps-typescale-label-small-size: 0.82rem;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: var(--dps-font-body); background: linear-gradient(180deg, #edf4f0 0%, #f9f7f2 100%); color: #18322c; }
+        main { padding: 24px; }
+        .button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 0 16px; border-radius: 999px; border: 1px solid #c7d4ce; background: #ffffff; color: #18322c; font: inherit; text-decoration: none; }
+        .button-primary { background: linear-gradient(135deg, #1a7a5c 0%, #0f5a4d 100%); border-color: #1a7a5c; color: #ffffff; }
+        .button-secondary { background: #f5faf7; }
+        .widefat { width: 100%; }
+    </style>
+    <style>
+/* ========================================
+   PORTAL ADMIN REFRESH (2026-03)
+   ======================================== */
+.dps-portal-admin-shell {
+    --dps-admin-surface: var(--dps-color-surface-container-lowest, #ffffff);
+    --dps-admin-surface-soft: var(--dps-color-surface-container-low, #f4f7f5);
+    --dps-admin-surface-strong: var(--dps-color-surface-container, #edf3ef);
+    --dps-admin-border: var(--dps-color-outline-variant, #ccd8d2);
+    --dps-admin-text: var(--dps-color-on-surface, #17322c);
+    --dps-admin-muted: var(--dps-color-on-surface-variant, #5c726c);
+    --dps-admin-primary: var(--dps-color-primary, #1a7a5c);
+    --dps-admin-primary-strong: #0f5a4d;
+    --dps-admin-success: #17643d;
+    --dps-admin-success-bg: #dbf4e4;
+    --dps-admin-warning: #8a5a00;
+    --dps-admin-warning-bg: #fff2d2;
+    --dps-admin-danger: #b42318;
+    --dps-admin-danger-bg: #ffe3de;
+    --dps-admin-shadow: 0 18px 42px rgba(16, 45, 39, 0.08);
+    display: grid;
+    gap: 24px;
+    margin: 20px 0 32px;
+    color: var(--dps-admin-text);
+}
+
+.dps-portal-admin-shell__header,
+.dps-portal-admin-shell__summary,
+.dps-portal-admin-shell__filters,
+.dps-portal-table-wrap,
+.dps-portal-admin-shell__empty,
+.dps-portal-settings-card,
+.dps-portal-admin-shell__feedback,
+.dps-portal-logins-restricted,
+.dps-portal-settings-restricted {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 251, 249, 0.96) 100%);
+    border: 1px solid var(--dps-admin-border);
+    border-radius: 24px;
+    box-shadow: var(--dps-admin-shadow);
+}
+
+.dps-portal-admin-shell__header {
+    position: relative;
+    overflow: hidden;
+    padding: 28px 30px;
+    background: linear-gradient(135deg, rgba(26, 122, 92, 0.14) 0%, rgba(26, 122, 92, 0.04) 48%, rgba(255, 223, 182, 0.18) 100%), var(--dps-admin-surface);
+}
+
+.dps-portal-admin-shell__header::after {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -32px;
+    width: 220px;
+    height: 220px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(26, 122, 92, 0.18) 0%, rgba(26, 122, 92, 0) 72%);
+    pointer-events: none;
+}
+
+.dps-portal-admin-shell__title {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 10px;
+    font-size: clamp(1.7rem, 2.4vw, 2.4rem);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    color: var(--dps-admin-text);
+}
+
+.dps-portal-admin-shell__description {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0;
+    color: var(--dps-admin-muted);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.dps-portal-admin-shell__feedback {
+    display: grid;
+    gap: 12px;
+    padding: 18px;
+}
+
+.dps-portal-admin-shell__notice {
+    padding: 14px 16px;
+    border-radius: 16px;
+    font-weight: 600;
+}
+
+.dps-portal-admin-shell__notice--success {
+    background: var(--dps-admin-success-bg);
+    color: var(--dps-admin-success);
+}
+
+.dps-portal-admin-shell__notice--error {
+    background: var(--dps-admin-danger-bg);
+    color: var(--dps-admin-danger);
+}
+
+.dps-portal-admin-shell__summary {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 16px;
+    padding: 18px;
+}
+
+.dps-admin-summary-card {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+    padding: 18px;
+    background: var(--dps-admin-surface-soft);
+    border: 1px solid rgba(26, 122, 92, 0.08);
+    border-radius: 18px;
+}
+
+.dps-admin-summary-card__label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dps-admin-muted);
+}
+
+.dps-admin-summary-card__value {
+    font-size: clamp(1.2rem, 1.9vw, 1.7rem);
+    line-height: 1.2;
+    color: var(--dps-admin-text);
+    word-break: break-word;
+}
+
+.dps-admin-summary-card__value--small {
+    font-size: 0.98rem;
+    line-height: 1.5;
+}
+
+.dps-portal-admin-shell__filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 18px;
+}
+
+.dps-portal-admin-shell__filters input[type="search"] {
+    flex: 1 1 320px;
+    min-height: 46px;
+    margin: 0;
+    border: 1px solid var(--dps-admin-border);
+    border-radius: 999px;
+    padding: 0 16px;
+    background: var(--dps-admin-surface);
+}
+
+.dps-portal-admin-shell__filters .button,
+.dps-portal-logins-table .button,
+.dps-portal-settings-form__actions .button,
+.dps-admin-copy-field .button,
+.dps-admin-modal__footer .button {
+    min-height: 42px;
+    border-radius: 999px;
+    padding: 0 16px;
+    box-shadow: none;
+}
+
+.dps-portal-logins-table .button-primary,
+.dps-portal-settings-form__actions .button-primary,
+.dps-admin-modal__footer .button-primary {
+    border-color: var(--dps-admin-primary);
+    background: linear-gradient(135deg, var(--dps-admin-primary) 0%, var(--dps-admin-primary-strong) 100%);
+}
+
+.dps-portal-table-wrap {
+    overflow: hidden;
+}
+
+.dps-portal-logins-table {
+    width: 100%;
+    border: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.dps-portal-logins-table th,
+.dps-portal-logins-table td {
+    padding: 18px;
+    vertical-align: top;
+    border-bottom: 1px solid rgba(23, 50, 44, 0.08);
+}
+
+.dps-portal-logins-table thead th {
+    background: var(--dps-admin-surface-soft);
+    color: var(--dps-admin-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.dps-portal-logins-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.dps-portal-logins-table__client-name {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 1rem;
+}
+
+.dps-portal-logins-table__meta,
+.dps-portal-logins-table__stack,
+.dps-portal-logins-table__last-login {
+    display: grid;
+    gap: 6px;
+    color: var(--dps-admin-muted);
+}
+
+.dps-portal-logins-table__meta {
+    font-size: 0.88rem;
+}
+
+.dps-portal-status-list,
+.dps-portal-logins-table__actions,
+.dps-portal-logins-table__activity {
+    display: grid;
+    gap: 12px;
+}
+
+.dps-portal-logins-table__actions {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.dps-portal-status-item {
+    display: grid;
+    gap: 6px;
+    padding: 14px;
+    background: var(--dps-admin-surface-soft);
+    border: 1px solid rgba(23, 50, 44, 0.08);
+    border-radius: 16px;
+}
+
+.dps-portal-status-item p,
+.dps-portal-status-item small,
+.dps-portal-logins-table__activity li span,
+.dps-portal-logins-table__activity li small,
+.dps-portal-logins-table__last-login span {
+    margin: 0;
+    color: var(--dps-admin-muted);
+    line-height: 1.5;
+}
+
+.dps-portal-logins-table__activity {
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dps-portal-logins-table__activity li {
+    display: grid;
+    gap: 3px;
+    padding: 10px 12px;
+    background: var(--dps-admin-surface-soft);
+    border-radius: 14px;
+}
+
+.dps-status-pill {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.dps-status-pill--success {
+    background: var(--dps-admin-success-bg);
+    color: var(--dps-admin-success);
+}
+
+.dps-status-pill--warning {
+    background: var(--dps-admin-warning-bg);
+    color: var(--dps-admin-warning);
+}
+
+.dps-status-pill--danger,
+.dps-status-pill--conflict {
+    background: var(--dps-admin-danger-bg);
+    color: var(--dps-admin-danger);
+}
+
+.dps-status-pill--neutral,
+.dps-status-pill--idle {
+    background: var(--dps-admin-surface-strong);
+    color: var(--dps-admin-muted);
+}
+
+.dps-portal-logins-table__feedback {
+    min-height: 20px;
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+.dps-portal-logins-table__feedback.is-success {
+    color: var(--dps-admin-success);
+}
+
+.dps-portal-logins-table__feedback.is-error {
+    color: var(--dps-admin-danger);
+}
+
+.dps-generated-token__card {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 16px;
+    background: linear-gradient(180deg, rgba(26, 122, 92, 0.08) 0%, rgba(26, 122, 92, 0.03) 100%);
+    border: 1px solid rgba(26, 122, 92, 0.14);
+    border-radius: 18px;
+}
+
+.dps-generated-token__label,
+.dps-generated-token__note {
+    color: var(--dps-admin-muted);
+}
+
+.dps-generated-token__field input {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid var(--dps-admin-border);
+    border-radius: 14px;
+    padding: 0 14px;
+    background: var(--dps-admin-surface);
+}
+
+.dps-generated-token__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.dps-admin-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+}
+
+.dps-admin-modal[hidden] {
+    display: none;
+}
+
+.dps-admin-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(9, 20, 18, 0.58);
+}
+
+.dps-admin-modal__dialog {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 6vh auto 0;
+    background: var(--dps-admin-surface);
+    border: 1px solid var(--dps-admin-border);
+    border-radius: 26px;
+    box-shadow: 0 28px 56px rgba(9, 20, 18, 0.22);
+    overflow: hidden;
+}
+
+.dps-admin-modal__header,
+.dps-admin-modal__body,
+.dps-admin-modal__footer {
+    padding: 20px 24px;
+}
+
+.dps-admin-modal__header,
+.dps-admin-modal__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.dps-admin-modal__header {
+    border-bottom: 1px solid rgba(23, 50, 44, 0.08);
+}
+
+.dps-admin-modal__footer {
+    border-top: 1px solid rgba(23, 50, 44, 0.08);
+    justify-content: flex-end;
+}
+
+.dps-admin-modal__close {
+    border: 0;
+    background: transparent;
+    color: var(--dps-admin-muted);
+    font-size: 1.8rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.dps-admin-modal__lead {
+    margin: 0 0 16px;
+    color: var(--dps-admin-muted);
+}
+
+.dps-admin-choice,
+.dps-admin-toggle {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: start;
+    padding: 16px;
+    background: var(--dps-admin-surface-soft);
+    border: 1px solid rgba(23, 50, 44, 0.08);
+    border-radius: 18px;
+}
+
+.dps-admin-choice + .dps-admin-choice,
+.dps-admin-toggle + .dps-admin-toggle {
+    margin-top: 12px;
+}
+
+.dps-admin-choice input,
+.dps-admin-toggle input {
+    margin-top: 4px;
+}
+
+.dps-admin-choice strong,
+.dps-admin-toggle strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.dps-admin-choice small,
+.dps-admin-toggle small {
+    color: var(--dps-admin-muted);
+    line-height: 1.6;
+}
+
+.dps-admin-field {
+    display: grid;
+    gap: 8px;
+}
+
+.dps-admin-copy-field {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.dps-admin-copy-field input,
+.dps-admin-field input,
+.dps-admin-field textarea,
+.dps-admin-field select {
+    width: 100%;
+    min-height: 46px;
+    border: 1px solid var(--dps-admin-border);
+    border-radius: 16px;
+    padding: 10px 14px;
+    background: var(--dps-admin-surface);
+}
+
+.dps-admin-field textarea {
+    min-height: 180px;
+    resize: vertical;
+}
+
+.dps-portal-settings-form {
+    display: grid;
+    gap: 20px;
+}
+
+.dps-portal-settings-card {
+    display: grid;
+    gap: 18px;
+    padding: 24px;
+}
+
+.dps-portal-settings-card__header h3 {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+}
+
+.dps-portal-settings-card__header p,
+.dps-portal-settings-card__steps {
+    margin: 0;
+    color: var(--dps-admin-muted);
+    line-height: 1.7;
+}
+
+.dps-portal-settings-card__steps {
+    padding-left: 20px;
+}
+
+.dps-portal-settings-form__actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+body.dps-admin-modal-open {
+    overflow: hidden;
+}
+
+@media (max-width: 1200px) {
+    .dps-portal-admin-shell__summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .dps-portal-admin-shell__summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dps-portal-logins-table,
+    .dps-portal-logins-table thead,
+    .dps-portal-logins-table tbody,
+    .dps-portal-logins-table th,
+    .dps-portal-logins-table td,
+    .dps-portal-logins-table tr {
+        display: block;
+        width: 100%;
+    }
+
+    .dps-portal-logins-table thead {
+        display: none;
+    }
+
+    .dps-portal-logins-table tbody {
+        display: grid;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .dps-portal-logins-table__row {
+        border: 1px solid var(--dps-admin-border);
+        border-radius: 20px;
+        overflow: hidden;
+        background: var(--dps-admin-surface);
+        box-shadow: 0 16px 32px rgba(16, 45, 39, 0.06);
+    }
+
+    .dps-portal-logins-table td {
+        border-bottom: 1px solid rgba(23, 50, 44, 0.08);
+        padding-top: 12px;
+    }
+
+    .dps-portal-logins-table td:last-child {
+        border-bottom: 0;
+    }
+
+    .dps-portal-logins-table td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--dps-admin-muted);
+    }
+
+    .dps-admin-modal__dialog {
+        margin: 3vh 12px 0;
+        max-width: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .dps-portal-admin-shell {
+        gap: 16px;
+    }
+
+    .dps-portal-admin-shell__header,
+    .dps-portal-settings-card,
+    .dps-portal-admin-shell__filters,
+    .dps-portal-admin-shell__feedback {
+        padding: 18px;
+    }
+
+    .dps-portal-admin-shell__summary {
+        grid-template-columns: 1fr;
+        padding: 14px;
+    }
+
+    .dps-portal-logins-table__actions,
+    .dps-admin-copy-field,
+    .dps-portal-settings-form__actions {
+        grid-template-columns: 1fr;
+        display: grid;
+    }
+
+    .dps-admin-modal__header,
+    .dps-admin-modal__body,
+    .dps-admin-modal__footer {
+        padding: 16px;
+    }
+
+    .dps-admin-modal__footer {
+        flex-direction: column-reverse;
+    }
+}
+
+</style>
+</head>
+<body>
+<main>
+
+<div class="dps-portal-admin-shell dps-portal-logins-screen">
+    <header class="dps-portal-admin-shell__header">
+        <h1 class="dps-portal-admin-shell__title">Portal do Cliente: Logins</h1>
+        <p class="dps-portal-admin-shell__description">Visao administrativa para magic link, senha por e-mail e sincronizacao de usuarios WordPress vinculados ao cliente.</p>
+    </header>
+
+    <section class="dps-portal-admin-shell__summary">
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">Clientes listados</span><strong class="dps-admin-summary-card__value">128</strong></article>
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">Com e-mail valido</span><strong class="dps-admin-summary-card__value">109</strong></article>
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">Prontos para senha</span><strong class="dps-admin-summary-card__value">76</strong></article>
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">Links ativos</span><strong class="dps-admin-summary-card__value">18</strong></article>
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">Cadastros para sincronizar</span><strong class="dps-admin-summary-card__value">11</strong></article>
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">Conflitos de e-mail</span><strong class="dps-admin-summary-card__value">2</strong></article>
+    </section>
+
+    <form class="dps-portal-admin-shell__filters">
+        <input type="search" value="Maria" aria-label="Buscar clientes">
+        <button type="button" class="button button-secondary">Buscar</button>
+    </form>
+
+    <div class="dps-portal-table-wrap">
+        <table class="widefat striped dps-portal-logins-table">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Contato</th>
+                    <th>Estado do acesso</th>
+                    <th>Ultimo login</th>
+                    <th>Operacoes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="dps-portal-logins-table__row">
+                    <td data-label="Cliente">
+                        <strong class="dps-portal-logins-table__client-name">Maria Probst</strong>
+                        <div class="dps-portal-logins-table__meta"><span>#451</span><a href="#">Abrir cadastro</a></div>
+                    </td>
+                    <td data-label="Contato">
+                        <div class="dps-portal-logins-table__stack"><span>maria@desipet.com.br</span><span>(15) 99160-6299</span></div>
+                    </td>
+                    <td data-label="Estado do acesso">
+                        <div class="dps-portal-status-list">
+                            <div class="dps-portal-status-item">
+                                <span class="dps-status-pill dps-status-pill--success">Magic link</span>
+                                <p>2 links ativos e um permanente em uso recorrente.</p>
+                                <small>Ultimo link gerado ha 12 minutos.</small>
+                            </div>
+                            <div class="dps-portal-status-item">
+                                <span class="dps-status-pill dps-status-pill--success">E-mail e senha</span>
+                                <p>Ativo por e-mail.</p>
+                                <small>Usuario WP #920: maria@desipet.com.br</small>
+                                <small>Ultimo e-mail de senha: hoje, 09:12.</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td data-label="Ultimo login">
+                        <div class="dps-portal-logins-table__last-login"><strong>E-mail e senha</strong><span>Hoje, 08:54</span></div>
+                        <ul class="dps-portal-logins-table__activity">
+                            <li><strong>E-mail e senha</strong><span>Hoje, 08:54</span><small>Login autenticado no WordPress</small></li>
+                            <li><strong>Link direto</strong><span>Ontem, 19:20</span><small>IP 191.22.44.10</small></li>
+                        </ul>
+                    </td>
+                    <td data-label="Operacoes">
+                        <div class="dps-portal-logins-table__actions">
+                            <button type="button" class="button button-primary">Gerar link</button>
+                            <button type="button" class="button button-secondary">Revogar links</button>
+                            <button type="button" class="button">Enviar acesso por senha</button>
+                            <button type="button" class="button">Sincronizar usuario</button>
+                        </div>
+                        <div class="dps-portal-logins-table__feedback is-success">Link gerado com sucesso.</div>
+                        <div class="dps-generated-token__card">
+                            <label class="dps-generated-token__label">Link gerado agora</label>
+                            <div class="dps-generated-token__field"><input type="text" value="https://portal.desi.pet/?dps_token=abc123" readonly></div>
+                            <div class="dps-generated-token__actions">
+                                <button type="button" class="button button-secondary">Copiar</button>
+                                <button type="button" class="button button-secondary">WhatsApp</button>
+                                <button type="button" class="button button-secondary">Preparar e-mail</button>
+                            </div>
+                            <small class="dps-generated-token__note">Link valido por 30 minutos.</small>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</main>
+</body>
+</html>

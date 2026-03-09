@@ -1222,7 +1222,8 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Permitir atualização de dados pessoais e de pets
 - Exibir histórico de atendimentos e pendências financeiras
 - Integrar com módulo "Indique e Ganhe" quando ativo
-- Sistema de autenticação via tokens (magic links) sem necessidade de senhas
+- Sistema hibrido de autenticacao com magic links e login por e-mail e senha
+- O usuario do portal usa o e-mail cadastrado no cliente como identificador de acesso
 - Link de atualização de perfil para clientes atualizarem seus dados sem login
 - Coleta de consentimento de tosa com máquina via link tokenizado
 - Aba de pagamentos com resumo financeiro, pendências e histórico de parcelas (Fase 5.5)
@@ -1247,6 +1248,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Sessões PHP próprias para autenticação independente do WordPress
 - Option `dps_portal_page_id`: armazena ID da página configurada do portal
 - Option `dps_portal_2fa_enabled`: habilita/desabilita 2FA via e-mail (padrão: desabilitado)
+- Option `dps_portal_rate_limits`: controle simples de tentativas para pedidos de link e cria??o/redefini??o de senha
 - Tipos de mensagem customizados para notificações
 
 **Abas do portal**:
@@ -1262,12 +1264,14 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Hook `dps_portal_tabs` (filter): permite add-ons adicionarem abas customizadas
 
 **Menus administrativos**:
-- **Portal do Cliente** (`dps-client-portal-settings`): configurações gerais do portal, toggle 2FA
+- **Portal do Cliente** (`dps-client-portal-settings`): configura??es gerais do portal, toggle 2FA e resumo operacional do acesso h?brido
 - **Logins de Clientes** (`dps-client-logins`): gerenciamento de tokens de acesso
-  - Interface para gerar tokens temporários ou permanentes
-  - Revogação manual de tokens ativos
+  - Interface para gerar tokens tempor?rios ou permanentes
+  - Revoga??o manual de tokens ativos
   - Envio de links por WhatsApp ou e-mail
-  - Histórico de acessos por cliente
+  - Envio de e-mail para criar ou redefinir senha do portal
+  - Sincroniza??o de usu?rios WordPress vinculados ao cliente
+  - Hist?rico de acessos por cliente com distin??o entre link direto e login por senha
 
 **Classes principais**:
 
@@ -1281,6 +1285,8 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 | `DPS_Portal_Ajax_Handler` | `includes/client-portal/class-dps-portal-ajax-handler.php` | Handlers de requisições AJAX |
 | `DPS_Portal_Session_Manager` | `includes/class-dps-portal-session-manager.php` | Gerenciamento de sessões PHP |
 | `DPS_Portal_Token_Manager` | `includes/class-dps-portal-token-manager.php` | CRUD de tokens com suporte a permanentes e temporários |
+| `DPS_Portal_User_Manager` | `includes/class-dps-portal-user-manager.php` | Provisiona/sincroniza usu?rio WordPress pelo e-mail do cliente e envia acesso por senha |
+| `DPS_Portal_Rate_Limiter` | `includes/class-dps-portal-rate-limiter.php` | Limita tentativas de solicita??o de link e de cria??o/redefini??o de senha |
 | `DPS_Finance_Repository` | `includes/client-portal/repositories/class-dps-finance-repository.php` | Acesso a dados financeiros (transações, parcelas, resumos) |
 | `DPS_Pet_Repository` | `includes/client-portal/repositories/class-dps-pet-repository.php` | Acesso a dados de pets do cliente |
 | `DPS_Appointment_Repository` | `includes/client-portal/repositories/class-dps-appointment-repository.php` | Acesso a dados de agendamentos do cliente |
