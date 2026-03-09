@@ -1,12 +1,9 @@
 <?php
 /**
- * Gerenciador de ações administrativas para tokens do portal
- *
- * Esta classe processa todas as ações administrativas relacionadas aos tokens
- * de acesso do portal: geração, revogação, envio por WhatsApp e e-mail.
+ * Gerenciador de acoes administrativas para logins do portal.
  *
  * @package DPS_Client_Portal
- * @since 2.0.0
+ * @since 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,20 +12,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! class_exists( 'DPS_Portal_Admin_Actions' ) ) :
 
-/**
- * Classe responsável pelas ações administrativas de tokens
- */
 final class DPS_Portal_Admin_Actions {
 
     /**
-     * Única instância da classe
+     * Instancia unica.
      *
      * @var DPS_Portal_Admin_Actions|null
      */
     private static $instance = null;
 
     /**
-     * Recupera a instância única (singleton)
+     * Recupera a instancia unica.
      *
      * @return DPS_Portal_Admin_Actions
      */
@@ -36,276 +30,110 @@ final class DPS_Portal_Admin_Actions {
         if ( null === self::$instance ) {
             self::$instance = new self();
         }
+
         return self::$instance;
     }
 
     /**
-     * Construtor privado para singleton
+     * Construtor privado para singleton.
      */
     private function __construct() {
-        // Processa ações de token via query params
-        // NOTA: Se o hook 'init' já executou, chamamos diretamente
-        if ( did_action( 'init' ) ) {
-            $this->handle_token_actions();
-        } else {
-            add_action( 'init', [ $this, 'handle_token_actions' ], 10 );
-        }
-        
-        // Registra endpoints AJAX
         add_action( 'wp_ajax_dps_generate_client_token', [ $this, 'ajax_generate_token' ] );
         add_action( 'wp_ajax_dps_revoke_client_tokens', [ $this, 'ajax_revoke_tokens' ] );
         add_action( 'wp_ajax_dps_get_whatsapp_message', [ $this, 'ajax_get_whatsapp_message' ] );
         add_action( 'wp_ajax_dps_preview_email', [ $this, 'ajax_preview_email' ] );
         add_action( 'wp_ajax_dps_send_email_with_token', [ $this, 'ajax_send_email' ] );
+        add_action( 'wp_ajax_dps_send_password_access_email', [ $this, 'ajax_send_password_access_email' ] );
+        add_action( 'wp_ajax_dps_sync_portal_user', [ $this, 'ajax_sync_portal_user' ] );
     }
 
     /**
-     * Processa ações de token via GET
-     */
-    public function handle_token_actions() {
-        // Somente usuários com permissão podem executar ações
-        if ( ! current_user_can( 'manage_options' ) ) {
-            return;
-        }
-
-        // Gerar token
-        if ( isset( $_GET['dps_action'], $_GET['client_id'], $_GET['_wpnonce'] ) && 'generate_token' === $_GET['dps_action'] ) {
-            $this->handle_generate_token();
-            return;
-        }
-
-        // Revogar tokens
-        if ( isset( $_GET['dps_action'], $_GET['client_id'], $_GET['_wpnonce'] ) && 'revoke_tokens' === $_GET['dps_action'] ) {
-            $this->handle_revoke_tokens();
-            return;
-        }
-
-        // Copiar link para WhatsApp
-        if ( isset( $_GET['dps_action'], $_GET['client_id'], $_GET['_wpnonce'] ) && 'whatsapp_link' === $_GET['dps_action'] ) {
-            $this->handle_whatsapp_link();
-            return;
-        }
-    }
-
-    /**
-     * Gera um novo token para o cliente
+     * AJAX: gera um token de acesso para o cliente.
      *
-     * @since 2.0.0
-     */
-    private function handle_generate_token() {
-        $client_id = isset( $_GET['client_id'] ) ? absint( wp_unslash( $_GET['client_id'] ) ) : 0;
-        $type      = isset( $_GET['token_type'] ) ? sanitize_text_field( wp_unslash( $_GET['token_type'] ) ) : 'login';
-
-        // Usa helper para verificar nonce dinâmico
-        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_generate_token_', $client_id, '_wpnonce', 'GET' ) ) {
-            wp_die( esc_html__( 'Falha na verificação de segurança.', 'dps-client-portal' ) );
-        }
-
-        // Valida client_id
-        if ( ! $client_id || 'dps_cliente' !== get_post_type( $client_id ) ) {
-            wp_die( esc_html__( 'Cliente inválido.', 'dps-client-portal' ) );
-        }
-
-        $token_manager = DPS_Portal_Token_Manager::get_instance();
-        
-        // Se for regeneração, revoga tokens antigos
-        if ( 'regenerate' === $type ) {
-            $token_manager->revoke_tokens( $client_id );
-            $token_type = 'login';
-        } else {
-            $token_type = $type;
-        }
-
-        // Gera novo token
-        $token_plain = $token_manager->generate_token( $client_id, $token_type );
-
-        if ( false === $token_plain ) {
-            wp_die( esc_html__( 'Não foi possível gerar o token.', 'dps-client-portal' ) );
-        }
-
-        // Gera URL de acesso
-        $access_url = $token_manager->generate_access_url( $token_plain );
-
-        // Armazena temporariamente para exibição
-        set_transient( 'dps_portal_generated_token_' . $client_id, [
-            'token' => $token_plain,
-            'url'   => $access_url,
-            'type'  => $token_type,
-        ], 5 * MINUTE_IN_SECONDS );
-
-        // Redireciona de volta
-        $redirect_url = $this->get_redirect_url();
-        $redirect_url = add_query_arg( [
-            'dps_token_generated' => '1',
-            'client_id'           => $client_id,
-        ], $redirect_url );
-
-        wp_safe_redirect( $redirect_url );
-        exit;
-    }
-
-    /**
-     * Revoga todos os tokens ativos do cliente
-     *
-     * @since 2.0.0
-     */
-    private function handle_revoke_tokens() {
-        $client_id = isset( $_GET['client_id'] ) ? absint( wp_unslash( $_GET['client_id'] ) ) : 0;
-
-        // Usa helper para verificar nonce dinâmico
-        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_revoke_tokens_', $client_id, '_wpnonce', 'GET' ) ) {
-            wp_die( esc_html__( 'Falha na verificação de segurança.', 'dps-client-portal' ) );
-        }
-
-        $token_manager = DPS_Portal_Token_Manager::get_instance();
-        $revoked_count = $token_manager->revoke_tokens( $client_id );
-
-        // Redireciona de volta
-        $redirect_url = $this->get_redirect_url();
-        $redirect_url = add_query_arg( [
-            'dps_tokens_revoked' => $revoked_count !== false ? $revoked_count : 0,
-            'client_id'          => $client_id,
-        ], $redirect_url );
-
-        wp_safe_redirect( $redirect_url );
-        exit;
-    }
-
-    /**
-     * Prepara link para WhatsApp
-     *
-     * @since 2.0.0
-     */
-    private function handle_whatsapp_link() {
-        $client_id = isset( $_GET['client_id'] ) ? absint( wp_unslash( $_GET['client_id'] ) ) : 0;
-
-        // Usa helper para verificar nonce dinâmico
-        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_whatsapp_link_', $client_id, '_wpnonce', 'GET' ) ) {
-            wp_die( esc_html__( 'Falha na verificação de segurança.', 'dps-client-portal' ) );
-        }
-
-        // Recupera token gerado
-        $token_data = get_transient( 'dps_portal_generated_token_' . $client_id );
-        if ( ! $token_data || ! isset( $token_data['url'] ) ) {
-            wp_die( esc_html__( 'Token não encontrado. Gere um novo token primeiro.', 'dps-client-portal' ) );
-        }
-
-        // Monta mensagem
-        $client_name = get_the_title( $client_id );
-        $phone       = get_post_meta( $client_id, 'client_phone', true );
-        $access_url  = $token_data['url'];
-
-        // Busca primeiro pet do cliente para personalizar
-        $pets = get_posts( [
-            'post_type'      => 'dps_pet',
-            'posts_per_page' => 1,
-            'meta_query'     => [
-                [
-                    'key'   => 'owner_id',
-                    'value' => $client_id,
-                ],
-            ],
-        ] );
-
-        $pet_name = $pets ? get_the_title( $pets[0]->ID ) : '';
-
-        $message = $this->get_whatsapp_message_template( $client_name, $pet_name, $access_url );
-
-        // Gera link do WhatsApp usando helper centralizado
-        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
-            $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_client( $phone, $message );
-        } else {
-            // Fallback para compatibilidade
-            if ( class_exists( 'DPS_Phone_Helper' ) ) {
-                $phone_clean = DPS_Phone_Helper::format_for_whatsapp( $phone );
-            } else {
-                $phone_clean = preg_replace( '/\D/', '', $phone );
-            }
-            $whatsapp_url = 'https://wa.me/' . $phone_clean . '?text=' . rawurlencode( $message );
-        }
-
-        // Redireciona para WhatsApp
-        wp_safe_redirect( $whatsapp_url );
-        exit;
-    }
-
-    /**
-     * AJAX: Gera token
+     * @return void
      */
     public function ajax_generate_token() {
         check_ajax_referer( 'dps_portal_admin_actions', 'nonce' );
 
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-client-portal' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Permissao negada.', 'dps-client-portal' ) ] );
         }
 
-        $client_id = isset( $_POST['client_id'] ) ? absint( $_POST['client_id'] ) : 0;
-        $type      = isset( $_POST['type'] ) ? sanitize_text_field( wp_unslash( $_POST['type'] ) ) : 'login';
+        $client_id = isset( $_POST['client_id'] ) ? absint( wp_unslash( $_POST['client_id'] ) ) : 0;
+        $type      = isset( $_POST['type'] ) ? sanitize_key( wp_unslash( $_POST['type'] ) ) : 'login';
 
         if ( ! $client_id || 'dps_cliente' !== get_post_type( $client_id ) ) {
-            wp_send_json_error( [ 'message' => __( 'Cliente inválido.', 'dps-client-portal' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Cliente invalido.', 'dps-client-portal' ) ] );
+        }
+
+        if ( ! in_array( $type, [ 'login', 'permanent', 'regenerate' ], true ) ) {
+            $type = 'login';
         }
 
         $token_manager = DPS_Portal_Token_Manager::get_instance();
-        
-        // Se for regeneração, revoga tokens antigos
+        $token_type    = 'permanent' === $type ? 'permanent' : 'login';
+
         if ( 'regenerate' === $type ) {
             $token_manager->revoke_tokens( $client_id );
-            $token_type = 'login';
-        } else {
-            $token_type = $type;
         }
 
         $token_plain = $token_manager->generate_token( $client_id, $token_type );
-
         if ( false === $token_plain ) {
-            wp_send_json_error( [ 'message' => __( 'Não foi possível gerar o token.', 'dps-client-portal' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Nao foi possivel gerar o link.', 'dps-client-portal' ) ] );
         }
 
-        $access_url = $token_manager->generate_access_url( $token_plain );
-
-        wp_send_json_success( [
-            'token' => $token_plain,
-            'url'   => $access_url,
-            'type'  => $token_type,
-        ] );
+        wp_send_json_success(
+            [
+                'token'         => $token_plain,
+                'url'           => $token_manager->generate_access_url( $token_plain ),
+                'type'          => $token_type,
+                'validityLabel' => 'permanent' === $token_type
+                    ? __( 'Link permanente - valido ate revogar manualmente.', 'dps-client-portal' )
+                    : __( 'Link valido por 30 minutos.', 'dps-client-portal' ),
+            ]
+        );
     }
 
     /**
-     * AJAX: Revoga tokens
+     * AJAX: revoga tokens ativos do cliente.
+     *
+     * @return void
      */
     public function ajax_revoke_tokens() {
         check_ajax_referer( 'dps_portal_admin_actions', 'nonce' );
 
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-client-portal' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Permissao negada.', 'dps-client-portal' ) ] );
         }
 
-        $client_id = isset( $_POST['client_id'] ) ? absint( $_POST['client_id'] ) : 0;
-
-        if ( ! $client_id ) {
-            wp_send_json_error( [ 'message' => __( 'Cliente inválido.', 'dps-client-portal' ) ] );
+        $client_id = isset( $_POST['client_id'] ) ? absint( wp_unslash( $_POST['client_id'] ) ) : 0;
+        if ( ! $client_id || 'dps_cliente' !== get_post_type( $client_id ) ) {
+            wp_send_json_error( [ 'message' => __( 'Cliente invalido.', 'dps-client-portal' ) ] );
         }
 
-        $token_manager = DPS_Portal_Token_Manager::get_instance();
-        $revoked_count = $token_manager->revoke_tokens( $client_id );
+        $revoked_count = DPS_Portal_Token_Manager::get_instance()->revoke_tokens( $client_id );
 
-        wp_send_json_success( [
-            'revoked_count' => $revoked_count !== false ? $revoked_count : 0,
-        ] );
+        wp_send_json_success(
+            [
+                'message'       => __( 'Links revogados com sucesso.', 'dps-client-portal' ),
+                'revoked_count' => false !== $revoked_count ? absint( $revoked_count ) : 0,
+            ]
+        );
     }
 
     /**
-     * AJAX: Retorna mensagem formatada para WhatsApp
+     * AJAX: monta mensagem para WhatsApp.
+     *
+     * @return void
      */
     public function ajax_get_whatsapp_message() {
         check_ajax_referer( 'dps_portal_admin_actions', 'nonce' );
 
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-client-portal' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Permissao negada.', 'dps-client-portal' ) ] );
         }
 
-        $client_id  = isset( $_POST['client_id'] ) ? absint( $_POST['client_id'] ) : 0;
+        $client_id  = isset( $_POST['client_id'] ) ? absint( wp_unslash( $_POST['client_id'] ) ) : 0;
         $access_url = isset( $_POST['access_url'] ) ? esc_url_raw( wp_unslash( $_POST['access_url'] ) ) : '';
 
         if ( ! $client_id || ! $access_url ) {
@@ -313,177 +141,197 @@ final class DPS_Portal_Admin_Actions {
         }
 
         $client_name = get_the_title( $client_id );
-        
-        // Busca primeiro pet
-        $pets = get_posts( [
-            'post_type'      => 'dps_pet',
-            'posts_per_page' => 1,
-            'meta_query'     => [
-                [
-                    'key'   => 'owner_id',
-                    'value' => $client_id,
-                ],
-            ],
-        ] );
+        $pet_name    = $this->get_first_pet_name( $client_id );
 
-        $pet_name = $pets ? get_the_title( $pets[0]->ID ) : '';
-
-        $message = $this->get_whatsapp_message_template( $client_name, $pet_name, $access_url );
-
-        wp_send_json_success( [ 'message' => $message ] );
+        wp_send_json_success(
+            [
+                'message' => $this->get_whatsapp_message_template( $client_name, $pet_name, $access_url ),
+            ]
+        );
     }
 
     /**
-     * AJAX: Pré-visualiza e-mail
+     * AJAX: prepara o conteudo do e-mail com magic link.
+     *
+     * @return void
      */
     public function ajax_preview_email() {
         check_ajax_referer( 'dps_portal_admin_actions', 'nonce' );
 
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-client-portal' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Permissao negada.', 'dps-client-portal' ) ] );
         }
 
-        $client_id  = isset( $_POST['client_id'] ) ? absint( $_POST['client_id'] ) : 0;
+        $client_id  = isset( $_POST['client_id'] ) ? absint( wp_unslash( $_POST['client_id'] ) ) : 0;
         $access_url = isset( $_POST['access_url'] ) ? esc_url_raw( wp_unslash( $_POST['access_url'] ) ) : '';
 
         if ( ! $client_id || ! $access_url ) {
             wp_send_json_error( [ 'message' => __( 'Dados incompletos.', 'dps-client-portal' ) ] );
         }
 
-        $client_name = get_the_title( $client_id );
-        $email_data  = $this->get_email_template( $client_name, $access_url );
-
-        wp_send_json_success( $email_data );
+        wp_send_json_success( $this->get_email_template( get_the_title( $client_id ), $access_url ) );
     }
 
     /**
-     * AJAX: Envia e-mail com token
+     * AJAX: envia e-mail com magic link.
+     *
+     * @return void
      */
     public function ajax_send_email() {
         check_ajax_referer( 'dps_portal_admin_actions', 'nonce' );
 
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-client-portal' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Permissao negada.', 'dps-client-portal' ) ] );
         }
 
-        $client_id = isset( $_POST['client_id'] ) ? absint( $_POST['client_id'] ) : 0;
+        $client_id = isset( $_POST['client_id'] ) ? absint( wp_unslash( $_POST['client_id'] ) ) : 0;
         $subject   = isset( $_POST['subject'] ) ? sanitize_text_field( wp_unslash( $_POST['subject'] ) ) : '';
         $body      = isset( $_POST['body'] ) ? sanitize_textarea_field( wp_unslash( $_POST['body'] ) ) : '';
 
-        if ( ! $client_id || ! $subject || ! $body ) {
+        if ( ! $client_id || '' === $subject || '' === $body ) {
             wp_send_json_error( [ 'message' => __( 'Dados incompletos.', 'dps-client-portal' ) ] );
         }
 
-        $client_email = get_post_meta( $client_id, 'client_email', true );
-
-        if ( ! $client_email || ! is_email( $client_email ) ) {
-            wp_send_json_error( [ 'message' => __( 'E-mail do cliente não encontrado ou inválido.', 'dps-client-portal' ) ] );
+        $client_email = sanitize_email( get_post_meta( $client_id, 'client_email', true ) );
+        if ( ! is_email( $client_email ) ) {
+            wp_send_json_error( [ 'message' => __( 'E-mail do cliente nao encontrado ou invalido.', 'dps-client-portal' ) ] );
         }
 
-        // Envia e-mail (formato plain text para segurança)
         $headers = [ 'Content-Type: text/plain; charset=UTF-8' ];
-        $sent = wp_mail( $client_email, $subject, $body, $headers );
+        $sent    = wp_mail( $client_email, $subject, $body, $headers );
 
-        if ( $sent ) {
-            wp_send_json_success( [ 'message' => __( 'E-mail enviado com sucesso!', 'dps-client-portal' ) ] );
-        } else {
-            wp_send_json_error( [ 'message' => __( 'Falha ao enviar e-mail.', 'dps-client-portal' ) ] );
+        if ( ! $sent ) {
+            wp_send_json_error( [ 'message' => __( 'Falha ao enviar o e-mail.', 'dps-client-portal' ) ] );
         }
+
+        wp_send_json_success( [ 'message' => __( 'E-mail enviado com sucesso!', 'dps-client-portal' ) ] );
     }
 
     /**
-     * Retorna template de mensagem para WhatsApp
+     * AJAX: envia e-mail para criar ou redefinir senha.
      *
-     * @param string $client_name Nome do cliente
-     * @param string $pet_name    Nome do pet
-     * @param string $access_url  URL de acesso
-     * @return string Mensagem formatada
+     * @return void
+     */
+    public function ajax_send_password_access_email() {
+        check_ajax_referer( 'dps_portal_admin_actions', 'nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissao negada.', 'dps-client-portal' ) ] );
+        }
+
+        $client_id = isset( $_POST['client_id'] ) ? absint( wp_unslash( $_POST['client_id'] ) ) : 0;
+        if ( ! $client_id || 'dps_cliente' !== get_post_type( $client_id ) ) {
+            wp_send_json_error( [ 'message' => __( 'Cliente invalido.', 'dps-client-portal' ) ] );
+        }
+
+        $result = DPS_Portal_User_Manager::get_instance()->send_password_access_email( $client_id, 'admin' );
+        if ( is_wp_error( $result ) ) {
+            wp_send_json_error( [ 'message' => $result->get_error_message() ] );
+        }
+
+        wp_send_json_success(
+            [
+                'message' => __( 'As instrucoes de senha foram enviadas para o e-mail cadastrado.', 'dps-client-portal' ),
+                'summary' => DPS_Portal_User_Manager::get_instance()->get_access_summary( $client_id ),
+            ]
+        );
+    }
+
+    /**
+     * AJAX: sincroniza ou cria o usuario WordPress vinculado ao cliente.
+     *
+     * @return void
+     */
+    public function ajax_sync_portal_user() {
+        check_ajax_referer( 'dps_portal_admin_actions', 'nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissao negada.', 'dps-client-portal' ) ] );
+        }
+
+        $client_id = isset( $_POST['client_id'] ) ? absint( wp_unslash( $_POST['client_id'] ) ) : 0;
+        if ( ! $client_id || 'dps_cliente' !== get_post_type( $client_id ) ) {
+            wp_send_json_error( [ 'message' => __( 'Cliente invalido.', 'dps-client-portal' ) ] );
+        }
+
+        $user = DPS_Portal_User_Manager::get_instance()->ensure_user_for_client( $client_id );
+        if ( is_wp_error( $user ) ) {
+            wp_send_json_error( [ 'message' => $user->get_error_message() ] );
+        }
+
+        wp_send_json_success(
+            [
+                'message' => __( 'Usuario do portal sincronizado com sucesso.', 'dps-client-portal' ),
+                'summary' => DPS_Portal_User_Manager::get_instance()->get_access_summary( $client_id ),
+            ]
+        );
+    }
+
+    /**
+     * Busca o primeiro pet do cliente para contextualizar as mensagens.
+     *
+     * @param int $client_id ID do cliente.
+     * @return string
+     */
+    private function get_first_pet_name( $client_id ) {
+        $pets = get_posts(
+            [
+                'post_type'      => 'dps_pet',
+                'posts_per_page' => 1,
+                'fields'         => 'ids',
+                'meta_query'     => [
+                    [
+                        'key'   => 'owner_id',
+                        'value' => absint( $client_id ),
+                    ],
+                ],
+            ]
+        );
+
+        return ! empty( $pets ) ? get_the_title( (int) $pets[0] ) : '';
+    }
+
+    /**
+     * Retorna template de mensagem para WhatsApp.
+     *
+     * @param string $client_name Nome do cliente.
+     * @param string $pet_name Nome do pet.
+     * @param string $access_url URL de acesso.
+     * @return string
      */
     private function get_whatsapp_message_template( $client_name, $pet_name, $access_url ) {
         if ( $pet_name ) {
-            $message = sprintf(
-                __( "Oi, %s! Aqui está seu link de acesso ao Portal do Cliente para acompanhar os agendamentos e histórico do %s:\n\n%s\n\nO link é válido por 30 minutos.", 'dps-client-portal' ),
+            return sprintf(
+                __( "Oi, %1$s! Aqui esta seu link de acesso ao Portal do Cliente para acompanhar os agendamentos e historico do %2$s:\n\n%3$s\n\nO link e valido por 30 minutos.", 'dps-client-portal' ),
                 $client_name,
                 $pet_name,
                 $access_url
             );
-        } else {
-            $message = sprintf(
-                __( "Oi, %s! Aqui está seu link de acesso ao Portal do Cliente:\n\n%s\n\nO link é válido por 30 minutos.", 'dps-client-portal' ),
-                $client_name,
-                $access_url
-            );
         }
 
-        return $message;
-    }
-
-    /**
-     * Retorna template de e-mail
-     *
-     * @param string $client_name Nome do cliente
-     * @param string $access_url  URL de acesso
-     * @return array Array com 'subject' e 'body'
-     */
-    private function get_email_template( $client_name, $access_url ) {
-        $subject = sprintf(
-            __( 'Seu acesso ao Portal do Cliente - desi.pet by PRObst', 'dps-client-portal' )
-        );
-
-        $body = sprintf(
-            __( "Olá, %s!\n\nAqui está seu link de acesso ao Portal do Cliente da desi.pet by PRObst.\n\nNo portal você pode:\n- Consultar seus agendamentos\n- Ver o histórico de atendimentos\n- Visualizar fotos do seu pet\n- Atualizar seus dados\n\nClique no link abaixo para acessar:\n%s\n\nO link é válido por 30 minutos.\n\nQualquer dúvida, estamos à disposição!\n\nEquipe desi.pet by PRObst", 'dps-client-portal' ),
+        return sprintf(
+            __( "Oi, %1$s! Aqui esta seu link de acesso ao Portal do Cliente:\n\n%2$s\n\nO link e valido por 30 minutos.", 'dps-client-portal' ),
             $client_name,
             $access_url
         );
-
-        return [
-            'subject' => $subject,
-            'body'    => $body,
-        ];
     }
 
     /**
-     * Retorna URL de redirecionamento
+     * Retorna template de e-mail para magic link.
      *
-     * @return string URL base
+     * @param string $client_name Nome do cliente.
+     * @param string $access_url URL de acesso.
+     * @return array<string, string>
      */
-    private function get_redirect_url() {
-        $referer = wp_get_referer();
-        
-        if ( $referer ) {
-            return remove_query_arg( 
-                [ 'dps_action', 'client_id', 'token_type', '_wpnonce', 'dps_token_generated', 'dps_tokens_revoked' ],
-                $referer
-            );
-        }
-
-        // Fallback: use current page permalink
-        $page_id = get_queried_object_id();
-        if ( $page_id ) {
-            $permalink = get_permalink( $page_id );
-            if ( $permalink && is_string( $permalink ) ) {
-                return add_query_arg( 'tab', 'logins', $permalink );
-            }
-        }
-
-        // Secondary fallback: use global $post
-        global $post;
-        if ( isset( $post->ID ) ) {
-            $permalink = get_permalink( $post->ID );
-            if ( $permalink && is_string( $permalink ) ) {
-                return add_query_arg( 'tab', 'logins', $permalink );
-            }
-        }
-
-        // Tertiary fallback: construct URL from REQUEST_URI
-        if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-            $request_uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
-            if ( ! empty( $request_uri ) ) {
-                return esc_url_raw( home_url( $request_uri ) );
-            }
-        }
-
-        return home_url();
+    private function get_email_template( $client_name, $access_url ) {
+        return [
+            'subject' => __( 'Seu acesso ao Portal do Cliente - desi.pet by PRObst', 'dps-client-portal' ),
+            'body'    => sprintf(
+                __( "Ola, %1$s!\n\nAqui esta seu link de acesso ao Portal do Cliente da desi.pet by PRObst.\n\nNo portal voce pode:\n- Consultar seus agendamentos\n- Ver o historico de atendimentos\n- Visualizar fotos do seu pet\n- Atualizar seus dados\n\nClique no link abaixo para acessar:\n%2$s\n\nO link e valido por 30 minutos.\n\nQualquer duvida, estamos a disposicao!\n\nEquipe desi.pet by PRObst", 'dps-client-portal' ),
+                $client_name,
+                $access_url
+            ),
+        ];
     }
 }
 

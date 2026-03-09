@@ -77,28 +77,39 @@ final class DPS_Client_Portal {
      * Construtor. Registra ganchos necessÃ¡rios para o funcionamento do portal.
      */
     private function __construct() {
-        // Processa autenticaÃ§Ã£o por token
+        // Processa autenticacao do portal.
         if ( did_action( 'init' ) ) {
             $this->handle_token_authentication();
+            $this->handle_remember_cookie();
+            $this->restore_portal_session_from_wordpress_user();
+            $this->handle_password_login_request();
+            $this->handle_password_reset_request();
             $this->handle_logout_request();
             $this->handle_portal_actions();
             $this->handle_portal_settings_save();
         } else {
             add_action( 'init', [ $this, 'handle_token_authentication' ], 5 );
             add_action( 'init', [ $this, 'handle_remember_cookie' ], 5 );
-            add_action( 'init', [ $this, 'handle_logout_request' ], 6 );
+            add_action( 'init', [ $this, 'restore_portal_session_from_wordpress_user' ], 6 );
+            add_action( 'init', [ $this, 'handle_password_login_request' ], 6 );
+            add_action( 'init', [ $this, 'handle_password_reset_request' ], 6 );
+            add_action( 'init', [ $this, 'handle_logout_request' ], 7 );
             add_action( 'init', [ $this, 'handle_portal_actions' ] );
             add_action( 'init', [ $this, 'handle_portal_settings_save' ] );
         }
 
-        // Cria login para novo cliente ao salvar post do tipo dps_cliente
+        // Mantem o usuario WordPress do cliente sincronizado com o e-mail cadastrado.
         add_action( 'save_post_dps_cliente', [ $this, 'maybe_create_login_for_client' ], 10, 3 );
+        add_action( 'wp_login', [ $this, 'handle_wordpress_user_login' ], 10, 2 );
+        add_action( 'admin_init', [ $this, 'redirect_portal_clients_from_admin' ], 5 );
+        add_filter( 'show_admin_bar', [ $this, 'filter_portal_client_admin_bar' ], 20 );
+        add_filter( 'login_redirect', [ $this, 'filter_portal_login_redirect' ], 10, 3 );
 
-        // Shortcodes do portal
+        // Shortcodes do portal.
         add_shortcode( 'dps_client_portal', [ $this, 'render_portal_shortcode' ] );
         add_shortcode( 'dps_client_login', [ $this, 'render_login_shortcode' ] );
 
-        // Assets do frontend
+        // Assets do frontend.
         add_action( 'wp_enqueue_scripts', [ $this, 'register_assets' ] );
     }
 
@@ -238,6 +249,7 @@ final class DPS_Client_Portal {
             $user_agent = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
         }
         $token_manager->log_access( $token_data['client_id'], $token_data['id'], $ip_address, $user_agent );
+        $this->record_magic_link_login( $token_data['client_id'] );
 
         // Armazena client_id para disponibilizar autenticaÃ§Ã£o imediatamente
         // sem depender de cookies que sÃ³ estarÃ£o disponÃ­veis na prÃ³xima requisiÃ§Ã£o
@@ -309,6 +321,7 @@ final class DPS_Client_Portal {
             $user_agent = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
         }
         $token_manager->log_access( $token_data['client_id'], $token_data['id'], $ip_address, $user_agent );
+        $this->record_magic_link_login( $token_data['client_id'], 'remember_cookie' );
 
         $this->current_request_client_id = $token_data['client_id'];
     }
@@ -326,40 +339,30 @@ final class DPS_Client_Portal {
      *
      * @param string $error_type Tipo do erro (invalid, expired, used)
      */
-    private function redirect_to_access_screen( $error_type = 'invalid' ) {
-        $portal_page_id = dps_get_portal_page_id();
-        
-        $redirect_url = '';
-        if ( $portal_page_id ) {
-            $permalink = get_permalink( $portal_page_id );
-            if ( $permalink && is_string( $permalink ) ) {
-                $redirect_url = $permalink;
-            }
-        }
-        
-        if ( empty( $redirect_url ) ) {
+    private function redirect_to_access_screen( $error_type = 'invalid', $query_arg = 'token_error' ) {
+        $redirect_url = dps_get_portal_page_url();
+
+        if ( ! $redirect_url || ! is_string( $redirect_url ) ) {
             $redirect_url = home_url( '/portal-cliente/' );
         }
 
-        $redirect_url = add_query_arg( 'token_error', $error_type, $redirect_url );
+        $redirect_url = remove_query_arg( [ 'token_error', 'portal_auth_error', 'portal_notice', 'dps_action', 'key', 'login' ], $redirect_url );
+        $redirect_url = add_query_arg( sanitize_key( $query_arg ), sanitize_key( $error_type ), $redirect_url );
+
         wp_safe_redirect( $redirect_url );
         exit;
     }
 
     /**
-     * Retorna o ID do cliente autenticado via sessÃ£o ou usuÃ¡rio WP (compatibilidade)
+     * Retorna o ID do cliente autenticado via sessao ou usuario WP (compatibilidade)
      *
      * @return int
      */
     private function get_authenticated_client_id() {
-        // PRIORITY 1: Cliente autenticado na requisiÃ§Ã£o atual via token
-        // Isso permite autenticaÃ§Ã£o imediata sem depender de cookies que sÃ³ estarÃ£o
-        // disponÃ­veis na prÃ³xima requisiÃ§Ã£o
         if ( $this->current_request_client_id > 0 ) {
             return $this->current_request_client_id;
         }
 
-        // PRIORITY 2: Tenta obter do sistema novo de sessÃ£o (cookies + transients)
         $session_manager = DPS_Portal_Session_Manager::get_instance();
         $client_id       = $session_manager->get_authenticated_client_id();
 
@@ -367,143 +370,379 @@ final class DPS_Client_Portal {
             return $client_id;
         }
 
-        // PRIORITY 3: Fallback para o sistema antigo de usuÃ¡rios WP
         return $this->get_client_id_for_current_user();
     }
 
     /**
-     * MÃ©todo pÃºblico para obter o ID do cliente autenticado.
-     * Permite que add-ons acessem o cliente logado no portal.
+     * Metodo publico para obter o ID do cliente autenticado.
      *
-     * @return int ID do cliente autenticado ou 0 se nÃ£o autenticado
+     * @return int
      */
     public function get_current_client_id() {
         return $this->get_authenticated_client_id();
     }
 
     /**
-     * Retorna o ID do cliente associado ao usuÃ¡rio logado.
+     * Retorna o ID do cliente associado ao usuario logado.
      *
      * @return int
      */
     private function get_client_id_for_current_user() {
-        $user_id = get_current_user_id();
-
-        if ( ! $user_id ) {
+        $current_user = wp_get_current_user();
+        if ( ! $current_user instanceof WP_User || ! $current_user->exists() ) {
             return 0;
         }
 
-        $client_id = absint( get_user_meta( $user_id, 'dps_client_id', true ) );
-
-        if ( $client_id && 'dps_cliente' === get_post_type( $client_id ) ) {
-            update_post_meta( $client_id, 'client_user_id', $user_id );
-            return $client_id;
+        if ( current_user_can( 'manage_options' ) ) {
+            return 0;
         }
 
-        $user = get_userdata( $user_id );
+        $user_manager = DPS_Portal_User_Manager::get_instance();
+        $client_id    = $user_manager->get_client_id_for_user( $current_user );
 
-        if ( $user && $user->user_email ) {
-            $client_query = new WP_Query( [
-                'post_type'      => 'dps_cliente',
-                'post_status'    => 'publish',
-                'posts_per_page' => 1,
-                'meta_query'     => [
-                    [
-                        'key'     => 'client_email',
-                        'value'   => $user->user_email,
-                        'compare' => '=',
-                    ],
-                ],
-            ] );
-
-            if ( $client_query->have_posts() ) {
-                $client_id = absint( $client_query->posts[0]->ID );
-                update_user_meta( $user_id, 'dps_client_id', $client_id );
-                update_post_meta( $client_id, 'client_user_id', $user_id );
-            }
-
-            wp_reset_postdata();
+        if ( $client_id > 0 ) {
+            update_user_meta( $current_user->ID, 'dps_client_id', $client_id );
+            update_post_meta( $client_id, 'client_user_id', $current_user->ID );
         }
 
-        return $client_id ? $client_id : 0;
+        return $client_id;
     }
 
     /**
-     * Cria um usuÃ¡rio WordPress para um cliente recÃ©m-cadastrado, se ainda nÃ£o existir.
-     * Este usuÃ¡rio Ã© do tipo "assinante" e recebe login e senha enviados por email.
+     * Reidrata a sessao customizada do portal quando o cliente ja esta autenticado no WordPress.
      *
-     * @param int     $post_id ID do post do cliente.
-     * @param WP_Post $post    Objeto de post.
-     * @param bool    $update  Indica se Ã© atualizaÃ§Ã£o (true) ou criaÃ§Ã£o (false).
+     * @return void
      */
-    /**
-     * Gera um login prÃ³prio para o cliente baseado no telefone informado no cadastro.
-     * Ao criar um cliente (nÃ£o atualizaÃ§Ã£o), se o cliente tiver telefone, Ã© criada
-     * uma senha aleatÃ³ria, armazenada como hash no meta 'client_password_hash'.
-     * Esta senha nÃ£o Ã© enviada automaticamente, mas pode ser consultada ou redefinida
-     * pela administraÃ§Ã£o. TambÃ©m marca uma flag para indicar que o login jÃ¡ foi criado.
-     *
-     * @param int     $post_id ID do post do cliente.
-     * @param WP_Post $post    Objeto de post.
-     * @param bool    $update  Indica se Ã© atualizaÃ§Ã£o (true) ou criaÃ§Ã£o (false).
-     */
-    public function maybe_create_login_for_client( $post_id, $post, $update ) {
-        if ( $update ) {
+    public function restore_portal_session_from_wordpress_user() {
+        if ( $this->current_request_client_id > 0 ) {
             return;
         }
 
+        $current_user = wp_get_current_user();
+        if ( ! $current_user instanceof WP_User || ! $current_user->exists() ) {
+            return;
+        }
+
+        if ( current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        $user_manager = DPS_Portal_User_Manager::get_instance();
+        if ( ! $user_manager->is_client_portal_user( $current_user ) ) {
+            return;
+        }
+
+        $session_manager = DPS_Portal_Session_Manager::get_instance();
+        if ( $session_manager->get_authenticated_client_id() ) {
+            return;
+        }
+
+        $client_id = $user_manager->get_client_id_for_user( $current_user );
+        if ( $client_id > 0 && $session_manager->authenticate_client( $client_id ) ) {
+            $this->current_request_client_id = $client_id;
+        }
+    }
+
+    /**
+     * Processa login por e-mail e senha dentro do portal.
+     *
+     * @return void
+     */
+    public function handle_password_login_request() {
+        if ( empty( $_POST['dps_portal_password_login'] ) ) {
+            return;
+        }
+
+        $nonce = isset( $_POST['_dps_portal_password_login_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_dps_portal_password_login_nonce'] ) ) : '';
+        if ( ! wp_verify_nonce( $nonce, 'dps_portal_password_login' ) ) {
+            $this->redirect_to_access_screen( 'session_expired', 'portal_auth_error' );
+        }
+
+        $email    = isset( $_POST['dps_portal_email'] ) ? sanitize_email( wp_unslash( $_POST['dps_portal_email'] ) ) : '';
+        $password = isset( $_POST['dps_portal_password'] ) ? (string) wp_unslash( $_POST['dps_portal_password'] ) : '';
+        $remember = isset( $_POST['dps_portal_remember'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['dps_portal_remember'] ) );
+
+        if ( ! is_email( $email ) || '' === trim( $password ) ) {
+            $this->redirect_to_access_screen( 'invalid_credentials', 'portal_auth_error' );
+        }
+
+        $rate_limiter = DPS_Portal_Rate_Limiter::get_instance();
+        $ip_address   = $this->get_client_ip();
+
+        if ( $rate_limiter->is_limited( 'portal_password_login_ip', $ip_address, 5 ) || $rate_limiter->is_limited( 'portal_password_login_email', $email, 5 ) ) {
+            $this->redirect_to_access_screen( 'too_many_attempts', 'portal_auth_error' );
+        }
+
+        $user_manager = DPS_Portal_User_Manager::get_instance();
+        $wp_user      = get_user_by( 'email', $email );
+
+        if ( $wp_user instanceof WP_User && ! $user_manager->is_client_portal_user( $wp_user ) ) {
+            $rate_limiter->hit( 'portal_password_login_ip', $ip_address, 15 * MINUTE_IN_SECONDS );
+            $this->redirect_to_access_screen( 'invalid_credentials', 'portal_auth_error' );
+        }
+
+        $authenticated_user = wp_signon(
+            [
+                'user_login'    => $email,
+                'user_password' => $password,
+                'remember'      => $remember,
+            ],
+            is_ssl()
+        );
+
+        if ( is_wp_error( $authenticated_user ) || ! $authenticated_user instanceof WP_User || ! $user_manager->is_client_portal_user( $authenticated_user ) ) {
+            $rate_limiter->hit( 'portal_password_login_ip', $ip_address, 15 * MINUTE_IN_SECONDS );
+            $rate_limiter->hit( 'portal_password_login_email', $email, 15 * MINUTE_IN_SECONDS );
+            $this->log_security_event(
+                'password_login_failed',
+                [
+                    'email' => $email,
+                    'ip'    => $ip_address,
+                ]
+            );
+            $this->redirect_to_access_screen( 'invalid_credentials', 'portal_auth_error' );
+        }
+
+        $rate_limiter->clear( 'portal_password_login_ip', $ip_address );
+        $rate_limiter->clear( 'portal_password_login_email', $email );
+
+        $portal_url = dps_get_portal_page_url();
+        if ( ! $portal_url || ! is_string( $portal_url ) ) {
+            $portal_url = home_url( '/portal-cliente/' );
+        }
+
+        wp_safe_redirect( remove_query_arg( [ 'portal_auth_error', 'token_error', 'portal_notice', 'dps_action', 'key', 'login' ], $portal_url ) );
+        exit;
+    }
+
+    /**
+     * Processa redefinicao de senha dentro do portal.
+     *
+     * @return void
+     */
+    public function handle_password_reset_request() {
+        if ( empty( $_POST['dps_portal_password_reset_submit'] ) ) {
+            return;
+        }
+
+        $nonce = isset( $_POST['_dps_portal_password_reset_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_dps_portal_password_reset_nonce'] ) ) : '';
+        if ( ! wp_verify_nonce( $nonce, 'dps_portal_password_reset' ) ) {
+            $this->redirect_to_access_screen( 'reset_link_invalid', 'portal_auth_error' );
+        }
+
+        $login    = isset( $_POST['rp_login'] ) ? sanitize_text_field( wp_unslash( $_POST['rp_login'] ) ) : '';
+        $key      = isset( $_POST['rp_key'] ) ? sanitize_text_field( wp_unslash( $_POST['rp_key'] ) ) : '';
+        $password = isset( $_POST['dps_portal_new_password'] ) ? (string) wp_unslash( $_POST['dps_portal_new_password'] ) : '';
+        $confirm  = isset( $_POST['dps_portal_confirm_password'] ) ? (string) wp_unslash( $_POST['dps_portal_confirm_password'] ) : '';
+        $remember = isset( $_POST['dps_portal_remember'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['dps_portal_remember'] ) );
+
+        $portal_url = dps_get_portal_page_url();
+        if ( ! $portal_url || ! is_string( $portal_url ) ) {
+            $portal_url = home_url( '/portal-cliente/' );
+        }
+
+        $reset_redirect = add_query_arg(
+            [
+                'dps_action' => 'portal_password_reset',
+                'login'      => rawurlencode( $login ),
+                'key'        => rawurlencode( $key ),
+            ],
+            $portal_url
+        );
+
+        $user = check_password_reset_key( $key, $login );
+        if ( is_wp_error( $user ) || ! $user instanceof WP_User ) {
+            wp_safe_redirect( add_query_arg( 'portal_auth_error', 'reset_link_invalid', $portal_url ) );
+            exit;
+        }
+
+        if ( '' === trim( $password ) || '' === trim( $confirm ) ) {
+            wp_safe_redirect( add_query_arg( 'portal_auth_error', 'password_required', $reset_redirect ) );
+            exit;
+        }
+
+        if ( $password !== $confirm ) {
+            wp_safe_redirect( add_query_arg( 'portal_auth_error', 'password_mismatch', $reset_redirect ) );
+            exit;
+        }
+
+        if ( strlen( $password ) < 8 ) {
+            wp_safe_redirect( add_query_arg( 'portal_auth_error', 'password_short', $reset_redirect ) );
+            exit;
+        }
+
+        reset_password( $user, $password );
+        wp_set_current_user( $user->ID );
+        wp_set_auth_cookie( $user->ID, $remember, is_ssl() );
+        do_action( 'wp_login', $user->user_login, $user );
+
+        wp_safe_redirect( add_query_arg( 'portal_notice', 'password_reset_success', $portal_url ) );
+        exit;
+    }
+
+    /**
+     * Mantem a sessao customizada sincronizada quando o cliente faz login WordPress.
+     *
+     * @param string  $user_login Login do usuario.
+     * @param WP_User $user Usuario autenticado.
+     * @return void
+     */
+    public function handle_wordpress_user_login( $user_login, $user ) {
+        if ( ! $user instanceof WP_User ) {
+            return;
+        }
+
+        $user_manager = DPS_Portal_User_Manager::get_instance();
+        if ( ! $user_manager->is_client_portal_user( $user ) ) {
+            return;
+        }
+
+        $client_id = $user_manager->get_client_id_for_user( $user );
+        if ( ! $client_id ) {
+            return;
+        }
+
+        update_user_meta( $user->ID, 'dps_client_id', $client_id );
+        update_post_meta( $client_id, 'client_user_id', $user->ID );
+
+        if ( DPS_Portal_Session_Manager::get_instance()->authenticate_client( $client_id ) ) {
+            $this->current_request_client_id = $client_id;
+        }
+
+        $user_manager->record_password_login( $user );
+    }
+
+    /**
+     * Redireciona clientes do portal para fora do wp-admin.
+     *
+     * @return void
+     */
+    public function redirect_portal_clients_from_admin() {
+        if ( ! is_admin() || wp_doing_ajax() || current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        $current_user = wp_get_current_user();
+        if ( ! $current_user instanceof WP_User || ! $current_user->exists() ) {
+            return;
+        }
+
+        $user_manager = DPS_Portal_User_Manager::get_instance();
+        if ( ! $user_manager->is_client_portal_user( $current_user ) ) {
+            return;
+        }
+
+        $portal_url = dps_get_portal_page_url();
+        if ( ! $portal_url || ! is_string( $portal_url ) ) {
+            $portal_url = home_url( '/portal-cliente/' );
+        }
+
+        wp_safe_redirect( $portal_url );
+        exit;
+    }
+
+    /**
+     * Oculta a admin bar para clientes do portal.
+     *
+     * @param bool $show_admin_bar Estado atual.
+     * @return bool
+     */
+    public function filter_portal_client_admin_bar( $show_admin_bar ) {
+        if ( current_user_can( 'manage_options' ) ) {
+            return $show_admin_bar;
+        }
+
+        $current_user = wp_get_current_user();
+        if ( ! $current_user instanceof WP_User || ! $current_user->exists() ) {
+            return $show_admin_bar;
+        }
+
+        return DPS_Portal_User_Manager::get_instance()->is_client_portal_user( $current_user ) ? false : $show_admin_bar;
+    }
+
+    /**
+     * Redireciona logins do WordPress para o portal quando o usuario e cliente.
+     *
+     * @param string           $redirect_to URL final.
+     * @param string           $requested_redirect_to URL solicitada.
+     * @param WP_User|WP_Error $user Usuario autenticado.
+     * @return string
+     */
+    public function filter_portal_login_redirect( $redirect_to, $requested_redirect_to, $user ) {
+        if ( is_wp_error( $user ) || ! $user instanceof WP_User ) {
+            return $redirect_to;
+        }
+
+        if ( user_can( $user, 'manage_options' ) ) {
+            return $redirect_to;
+        }
+
+        $portal_url = dps_get_portal_page_url();
+        if ( ! $portal_url || ! is_string( $portal_url ) ) {
+            $portal_url = home_url( '/portal-cliente/' );
+        }
+
+        return DPS_Portal_User_Manager::get_instance()->is_client_portal_user( $user ) ? $portal_url : $redirect_to;
+    }
+
+    /**
+     * Atualiza metadados do ultimo login via magic link.
+     *
+     * @param int    $client_id ID do cliente.
+     * @param string $method Metodo registrado.
+     * @return void
+     */
+    private function record_magic_link_login( $client_id, $method = 'magic_link' ) {
+        $client_id = absint( $client_id );
+        if ( ! $client_id ) {
+            return;
+        }
+
+        update_post_meta( $client_id, 'dps_portal_last_magic_link_login_at', current_time( 'mysql' ) );
+        update_post_meta( $client_id, 'dps_portal_last_login_method', sanitize_key( $method ) );
+    }
+
+    /**
+     * Sincroniza a conta WordPress vinculada ao cliente usando o e-mail cadastrado.
+     *
+     * @param int     $post_id ID do post do cliente.
+     * @param WP_Post $post Objeto do post salvo.
+     * @param bool    $update Indica se a operacao e atualizacao.
+     * @return void
+     */
+    public function maybe_create_login_for_client( $post_id, $post, $update ) {
         if ( wp_is_post_revision( $post_id ) || ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) ) {
             return;
         }
 
-        $existing_user = absint( get_post_meta( $post_id, 'client_user_id', true ) );
-        if ( $existing_user && get_userdata( $existing_user ) ) {
+        if ( ! $post instanceof WP_Post || 'dps_cliente' !== $post->post_type ) {
             return;
         }
 
-        $phone = sanitize_text_field( get_post_meta( $post_id, 'client_phone', true ) );
-        $email = sanitize_email( get_post_meta( $post_id, 'client_email', true ) );
-
-        if ( ! $phone && ! $email ) {
+        $email = DPS_Portal_User_Manager::get_instance()->get_client_email( $post_id );
+        if ( ! $email ) {
             return;
         }
 
-        $username = $phone ? 'dps_cliente_' . preg_replace( '/\D+/', '', $phone ) : 'dps_cliente_' . $post_id;
-        if ( username_exists( $username ) ) {
-            $username .= '_' . $post_id;
+        $result = DPS_Portal_User_Manager::get_instance()->ensure_user_for_client( $post_id );
+        if ( is_wp_error( $result ) ) {
+            $this->log_security_event(
+                'client_user_sync_failed',
+                [
+                    'client_id' => $post_id,
+                    'reason'    => $result->get_error_code(),
+                ]
+            );
         }
-
-        $safe_email = $email && is_email( $email ) ? $email : $username . '@example.com';
-        $password   = wp_generate_password( 12, true );
-
-        $user_data = [
-            'user_login'   => sanitize_user( $username, true ),
-            'user_email'   => $safe_email,
-            'user_pass'    => $password,
-            'display_name' => get_the_title( $post_id ),
-            'role'         => 'subscriber',
-        ];
-
-        $user_id = wp_insert_user( $user_data );
-
-        if ( is_wp_error( $user_id ) ) {
-            return;
-        }
-
-        update_user_meta( $user_id, 'dps_client_id', $post_id );
-        update_post_meta( $post_id, 'client_user_id', $user_id );
-        update_post_meta( $post_id, 'client_login_created_at', current_time( 'mysql' ) );
-
-        set_transient( 'dps_client_pass_' . $post_id, $password, 30 * MINUTE_IN_SECONDS );
     }
 
     /**
-     * Processa requisiÃ§Ãµes de formulÃ¡rios enviados pelo portal do cliente.
-     * Utiliza nonce para proteÃ§Ã£o CSRF e atualiza metas conforme necessÃ¡rio.
+     * Processa requisicoes de formularios enviados pelo portal do cliente.
+     * Utiliza nonce para protecao CSRF e atualiza metas conforme necessario.
      *
-     * Suporta autenticaÃ§Ã£o via:
-     * - Sistema de tokens/sessÃ£o (preferencial para clientes via magic link)
-     * - UsuÃ¡rios WordPress logados (retrocompatibilidade)
+     * Suporta autenticacao via:
+     * - Sistema de tokens/sessao (preferencial para clientes via magic link)
+     * - Usuarios WordPress logados (retrocompatibilidade)
      */
     public function handle_portal_actions() {
         $client_id = $this->get_authenticated_client_id();
@@ -614,9 +853,208 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Renderiza a pÃ¡gina do portal para o shortcode. Mostra tela de acesso se nÃ£o autenticado.
+     * Localiza o script publico do portal para telas autenticadas e nao autenticadas.
      *
-     * @return string ConteÃºdo HTML renderizado.
+     * @param int   $client_id ID do cliente autenticado.
+     * @param array $client_pets_data Lista de pets do cliente.
+     * @param array $scheduling_suggestions Sugestoes de agendamento.
+     * @return void
+     */
+    private function localize_portal_script( $client_id = 0, array $client_pets_data = [], array $scheduling_suggestions = [] ) {
+        $data = [
+            'ajaxUrl'         => admin_url( 'admin-ajax.php' ),
+            'clientId'        => absint( $client_id ),
+            'isAuthenticated' => $client_id > 0,
+            'access'          => [
+                'magicLinkAction' => 'dps_request_access_link_by_email',
+                'passwordAction'  => 'dps_request_portal_password_access',
+                'requestNonce'    => wp_create_nonce( 'dps_request_access_link' ),
+                'passwordNonce'   => wp_create_nonce( 'dps_request_password_access' ),
+                'i18n'            => [
+                    'requestingLink'     => __( 'Enviando link...', 'dps-client-portal' ),
+                    'requestingPassword' => __( 'Enviando instrucoes...', 'dps-client-portal' ),
+                    'genericError'       => __( 'Nao foi possivel concluir sua solicitacao agora. Tente novamente em alguns instantes.', 'dps-client-portal' ),
+                    'emailRequired'      => __( 'Informe um e-mail valido para continuar.', 'dps-client-portal' ),
+                    'copySuccess'        => __( 'Link copiado com sucesso.', 'dps-client-portal' ),
+                ],
+            ],
+        ];
+
+        if ( $client_id > 0 ) {
+            $data['chatNonce']             = wp_create_nonce( 'dps_portal_chat' );
+            $data['requestNonce']          = wp_create_nonce( 'dps_portal_appointment_request' );
+            $data['exportPdfNonce']        = wp_create_nonce( 'dps_portal_export_pdf' );
+            $data['petHistoryNonce']       = wp_create_nonce( 'dps_portal_pet_history' );
+            $data['clientPets']            = $client_pets_data;
+            $data['schedulingSuggestions'] = $scheduling_suggestions;
+            $data['loyalty']               = [
+                'nonce'        => wp_create_nonce( 'dps_portal_loyalty' ),
+                'historyLimit' => 5,
+                'i18n'         => [
+                    'loading'       => __( 'Carregando...', 'dps-client-portal' ),
+                    'redeemSuccess' => __( 'Resgate realizado com sucesso!', 'dps-client-portal' ),
+                    'redeemError'   => __( 'Nao foi possivel concluir o resgate.', 'dps-client-portal' ),
+                ],
+            ];
+            $data['game']                  = [
+                'enabled'   => class_exists( 'DPS_Game_Progress_Service' ),
+                'nonce'     => wp_create_nonce( 'dps_game_progress' ),
+                'endpoints' => [
+                    'progress' => esc_url_raw( rest_url( 'dps-game/v1/progress' ) ),
+                ],
+                'i18n'      => [
+                    'loading'        => __( 'Carregando progresso do jogo...', 'dps-client-portal' ),
+                    'empty'          => __( 'Jogue uma run para comecar seu historico sincronizado.', 'dps-client-portal' ),
+                    'error'          => __( 'Nao foi possivel carregar o progresso do jogo agora.', 'dps-client-portal' ),
+                    'missionDone'    => __( 'Missao concluida hoje.', 'dps-client-portal' ),
+                    'missionPending' => __( 'Falta pouco para concluir a meta.', 'dps-client-portal' ),
+                ],
+            ];
+        }
+
+        wp_localize_script( 'dps-client-portal', 'dpsPortal', $data );
+    }
+
+    /**
+     * Retorna o link de WhatsApp para o cliente falar com a equipe.
+     *
+     * @return string
+     */
+    private function get_portal_whatsapp_url() {
+        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+            $message = DPS_WhatsApp_Helper::get_portal_access_request_message();
+            return (string) DPS_WhatsApp_Helper::get_link_to_team( $message );
+        }
+
+        $whatsapp_number = get_option( 'dps_whatsapp_number', '' );
+        if ( ! $whatsapp_number ) {
+            return '';
+        }
+
+        if ( class_exists( 'DPS_Phone_Helper' ) ) {
+            $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+        } else {
+            $whatsapp_number = preg_replace( '/\D+/', '', (string) $whatsapp_number );
+        }
+
+        if ( ! $whatsapp_number ) {
+            return '';
+        }
+
+        $message = __( 'Ola! Gostaria de receber acesso ao Portal do Cliente.', 'dps-client-portal' );
+
+        return 'https://wa.me/' . $whatsapp_number . '?text=' . rawurlencode( $message );
+    }
+
+    /**
+     * Monta o contexto usado pela tela de acesso.
+     *
+     * @return array<string, mixed>
+     */
+    private function get_access_screen_context() {
+        $message_map = [
+            'token_error' => [
+                'invalid'        => [ 'type' => 'error', 'title' => __( 'Link invalido', 'dps-client-portal' ), 'description' => __( 'Esse link nao e mais valido. Solicite um novo acesso.', 'dps-client-portal' ) ],
+                'expired'        => [ 'type' => 'warning', 'title' => __( 'Link expirado', 'dps-client-portal' ), 'description' => __( 'Esse link expirou. Solicite um novo link direto de acesso.', 'dps-client-portal' ) ],
+                'used'           => [ 'type' => 'warning', 'title' => __( 'Link ja utilizado', 'dps-client-portal' ), 'description' => __( 'Esse link ja foi usado. Gere ou solicite outro para entrar novamente.', 'dps-client-portal' ) ],
+                'page_not_found' => [ 'type' => 'error', 'title' => __( 'Portal nao configurado', 'dps-client-portal' ), 'description' => __( 'A pagina do portal ainda nao foi configurada corretamente.', 'dps-client-portal' ) ],
+            ],
+            'portal_auth_error' => [
+                'invalid_credentials' => [ 'type' => 'error', 'title' => __( 'E-mail ou senha incorretos', 'dps-client-portal' ), 'description' => __( 'Use o e-mail cadastrado no cliente e confira a senha informada.', 'dps-client-portal' ) ],
+                'too_many_attempts'   => [ 'type' => 'warning', 'title' => __( 'Muitas tentativas', 'dps-client-portal' ), 'description' => __( 'Aguarde alguns minutos antes de tentar novamente.', 'dps-client-portal' ) ],
+                'session_expired'     => [ 'type' => 'warning', 'title' => __( 'Sessao expirada', 'dps-client-portal' ), 'description' => __( 'Atualize a pagina e tente novamente.', 'dps-client-portal' ) ],
+                'reset_link_invalid'  => [ 'type' => 'error', 'title' => __( 'Link de senha invalido', 'dps-client-portal' ), 'description' => __( 'Solicite um novo link para criar ou redefinir sua senha.', 'dps-client-portal' ) ],
+                'password_required'   => [ 'type' => 'warning', 'title' => __( 'Informe uma senha', 'dps-client-portal' ), 'description' => __( 'Preencha a nova senha e a confirmacao para continuar.', 'dps-client-portal' ) ],
+                'password_mismatch'   => [ 'type' => 'warning', 'title' => __( 'As senhas nao conferem', 'dps-client-portal' ), 'description' => __( 'Digite a mesma senha nos dois campos.', 'dps-client-portal' ) ],
+                'password_short'      => [ 'type' => 'warning', 'title' => __( 'Senha muito curta', 'dps-client-portal' ), 'description' => __( 'Use pelo menos 8 caracteres na nova senha.', 'dps-client-portal' ) ],
+            ],
+            'portal_notice' => [
+                'password_reset_success' => [ 'type' => 'success', 'title' => __( 'Senha atualizada', 'dps-client-portal' ), 'description' => __( 'Sua senha foi criada com sucesso. Voce ja pode entrar no portal.', 'dps-client-portal' ) ],
+                'password_email_sent'    => [ 'type' => 'success', 'title' => __( 'Instrucoes enviadas', 'dps-client-portal' ), 'description' => __( 'Verifique seu e-mail para criar ou redefinir a senha.', 'dps-client-portal' ) ],
+            ],
+        ];
+
+        $messages = [];
+        foreach ( $message_map as $query_arg => $options ) {
+            $value = isset( $_GET[ $query_arg ] ) ? sanitize_key( wp_unslash( $_GET[ $query_arg ] ) ) : '';
+            if ( $value && isset( $options[ $value ] ) ) {
+                $messages[] = $options[ $value ];
+            }
+        }
+
+        $portal_url = dps_get_portal_page_url();
+        if ( ! $portal_url || ! is_string( $portal_url ) ) {
+            $portal_url = home_url( '/portal-cliente/' );
+        }
+
+        return [
+            'messages'     => $messages,
+            'portal_url'   => $portal_url,
+            'whatsapp_url' => $this->get_portal_whatsapp_url(),
+        ];
+    }
+
+    /**
+     * Renderiza a tela principal de acesso do portal.
+     *
+     * @return string
+     */
+    private function render_access_screen() {
+        do_action( 'dps_portal_before_login_screen' );
+
+        $portal_access_context = $this->get_access_screen_context();
+        $template_path         = DPS_CLIENT_PORTAL_ADDON_DIR . 'templates/portal-access.php';
+
+        if ( file_exists( $template_path ) ) {
+            ob_start();
+            include $template_path;
+            $output = ob_get_clean();
+
+            return apply_filters( 'dps_portal_login_screen', $output, $portal_access_context );
+        }
+
+        ob_start();
+        echo '<div class="dps-client-portal-login">';
+        echo '<h3>' . esc_html__( 'Acesso ao Portal do Cliente', 'dps-client-portal' ) . '</h3>';
+        echo '<p>' . esc_html__( 'Solicite um link direto ou entre com o e-mail cadastrado e sua senha.', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+        return ob_get_clean();
+    }
+
+    /**
+     * Renderiza a tela de criacao ou redefinicao de senha.
+     *
+     * @return string
+     */
+    private function render_password_reset_screen() {
+        $portal_access_context = $this->get_access_screen_context();
+        $portal_password_login = isset( $_GET['login'] ) ? sanitize_text_field( wp_unslash( $_GET['login'] ) ) : '';
+        $portal_password_key   = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
+        $portal_reset_user     = ( $portal_password_login && $portal_password_key ) ? check_password_reset_key( $portal_password_key, $portal_password_login ) : new WP_Error( 'invalid_key', __( 'Link invalido.', 'dps-client-portal' ) );
+        $portal_reset_valid    = $portal_reset_user instanceof WP_User && ! is_wp_error( $portal_reset_user );
+
+        if ( ! $portal_reset_valid ) {
+            $portal_access_context['messages'][] = [
+                'type'        => 'error',
+                'title'       => __( 'Link de senha invalido', 'dps-client-portal' ),
+                'description' => __( 'Solicite um novo e-mail para criar ou redefinir sua senha.', 'dps-client-portal' ),
+            ];
+        }
+
+        $template_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'templates/portal-password-reset.php';
+        if ( file_exists( $template_path ) ) {
+            ob_start();
+            include $template_path;
+            return ob_get_clean();
+        }
+
+        return $this->render_access_screen();
+    }
+
+    /**
+     * Renderiza a pagina do portal para o shortcode. Mostra tela de acesso se nao autenticado.
+     *
+     * @return string Conteudo HTML renderizado.
      */
     public function render_portal_shortcode() {
         // Desabilita cache da pÃ¡gina para garantir dados sempre atualizados
@@ -630,53 +1068,38 @@ final class DPS_Client_Portal {
         wp_enqueue_style( 'dps-client-portal' );
         wp_enqueue_script( 'dps-client-portal' );
         
-        // Verifica se Ã© uma aÃ§Ã£o de atualizaÃ§Ã£o de perfil via token (Fase 5)
+        // Verifica se ? uma a??o de atualiza??o de perfil via token (Fase 5)
         $action = isset( $_GET['dps_action'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_action'] ) ) : '';
         if ( 'profile_update' === $action && isset( $_GET['token'] ) ) {
             if ( class_exists( 'DPS_Portal_Profile_Update' ) ) {
                 return DPS_Portal_Profile_Update::get_instance()->render_profile_update_shortcode( [] );
             }
         }
-        
-        // Verifica autenticaÃ§Ã£o pelo novo sistema
+
+        if ( 'portal_password_reset' === $action ) {
+            $this->localize_portal_script();
+            return $this->render_password_reset_screen();
+        }
+
+        // Verifica autentica??o pelo novo sistema
         $client_id = $this->get_authenticated_client_id();
-        
-        // F6.4: Se hÃ¡ 2FA pendente, renderiza formulÃ¡rio de verificaÃ§Ã£o
+
+        // F6.4: Se h? 2FA pendente, renderiza formul?rio de verifica??o
         if ( ! $client_id && ! empty( $this->pending_2fa_session_key ) ) {
             $email = get_post_meta( $this->pending_2fa_client_id, 'client_email', true );
             $twofa = DPS_Portal_2FA::get_instance();
             return $twofa->render_verification_form( $this->pending_2fa_session_key, $email );
         }
-        
-        // Hook: ApÃ³s verificar autenticaÃ§Ã£o (Fase 2.3)
+
+        // Hook: Ap?s verificar autentica??o (Fase 2.3)
         do_action( 'dps_portal_after_auth_check', $client_id );
-        
-        // Se nÃ£o autenticado, exibe tela de acesso
+
+        // Se n?o autenticado, exibe tela de acesso
         if ( ! $client_id ) {
-            // Hook: Antes de renderizar tela de login (Fase 2.3)
-            do_action( 'dps_portal_before_login_screen' );
-            
-            // Carrega template de acesso
-            $template_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'templates/portal-access.php';
-            
-            if ( file_exists( $template_path ) ) {
-                ob_start();
-                include $template_path;
-                $output = ob_get_clean();
-                
-                // Filtro: Permite modificar tela de login (Fase 2.3)
-                return apply_filters( 'dps_portal_login_screen', $output );
-            }
-            
-            // Fallback se template nÃ£o existir
-            ob_start();
-            echo '<div class="dps-client-portal-login">';
-            echo '<h3>' . esc_html__( 'Acesso ao Portal do Cliente', 'dps-client-portal' ) . '</h3>';
-            echo '<p>' . esc_html__( 'Para acessar o portal, solicite seu link exclusivo Ã  nossa equipe.', 'dps-client-portal' ) . '</p>';
-            echo '</div>';
-            return ob_get_clean();
+            $this->localize_portal_script();
+            return $this->render_access_screen();
         }
-        
+
         // Hook: Cliente autenticado (Fase 2.3)
         do_action( 'dps_portal_client_authenticated', $client_id );
         
@@ -706,39 +1129,7 @@ final class DPS_Client_Portal {
             $scheduling_suggestions = $suggestions_service->get_suggestions_for_client( $client_id, $client_pets );
         }
 
-        wp_localize_script( 'dps-client-portal', 'dpsPortal', [
-            'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
-            'chatNonce' => wp_create_nonce( 'dps_portal_chat' ),
-            'requestNonce' => wp_create_nonce( 'dps_portal_appointment_request' ),
-            'exportPdfNonce' => wp_create_nonce( 'dps_portal_export_pdf' ),
-            'petHistoryNonce' => wp_create_nonce( 'dps_portal_pet_history' ),
-            'clientId' => $client_id,
-            'clientPets' => $client_pets_data,
-            'schedulingSuggestions' => $scheduling_suggestions,
-            'loyalty' => [
-                'nonce' => wp_create_nonce( 'dps_portal_loyalty' ),
-                'historyLimit' => 5,
-                'i18n' => [
-                    'loading' => __( 'Carregando...', 'dps-client-portal' ),
-                    'redeemSuccess' => __( 'Resgate realizado com sucesso!', 'dps-client-portal' ),
-                    'redeemError' => __( 'NÃ£o foi possÃ­vel concluir o resgate.', 'dps-client-portal' ),
-                ],
-            ],
-            'game' => [
-                'enabled' => class_exists( 'DPS_Game_Progress_Service' ),
-                'nonce' => wp_create_nonce( 'dps_game_progress' ),
-                'endpoints' => [
-                    'progress' => esc_url_raw( rest_url( 'dps-game/v1/progress' ) ),
-                ],
-                'i18n' => [
-                    'loading' => __( 'Carregando progresso do jogo...', 'dps-client-portal' ),
-                    'empty' => __( 'Jogue uma run para comecar seu historico sincronizado.', 'dps-client-portal' ),
-                    'error' => __( 'Nao foi possivel carregar o progresso do jogo agora.', 'dps-client-portal' ),
-                    'missionDone' => __( 'Missao concluida hoje.', 'dps-client-portal' ),
-                    'missionPending' => __( 'Falta pouco para concluir a meta.', 'dps-client-portal' ),
-                ],
-            ],
-        ] );
+        $this->localize_portal_script( $client_id, $client_pets_data, $scheduling_suggestions );
         
         ob_start();
         // Filtro de mensagens de retorno
@@ -2091,73 +2482,22 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Renderiza o shortcode de login do portal do cliente.
+     * Renderiza o shortcode de acesso do portal.
      *
-     * @return string ConteÃºdo HTML renderizado.
-     */
-    /**
-     * Renderiza shortcode de login (DEPRECIADO)
-     * 
-     * ESTE SHORTCODE FOI DESCONTINUADO EM FAVOR DO LOGIN EXCLUSIVO POR TOKEN (MAGIC LINK)
-     * 
-     * O login por usuÃ¡rio/senha do Cliente Portal foi removido por questÃµes de seguranÃ§a
-     * e usabilidade. O sistema agora utiliza EXCLUSIVAMENTE autenticaÃ§Ã£o por token via
-     * link Ãºnico (magic link) enviado por WhatsApp ou e-mail.
-     * 
-     * Para obter acesso ao portal, o cliente deve:
-     * 1. Acessar a pÃ¡gina do portal
-     * 2. Clicar em "Quero acesso ao meu portal"
-     * 3. Aguardar a equipe enviar o link de acesso
-     * 4. Clicar no link recebido para autenticar
-     * 
-     * @deprecated 2.4.0 Use apenas autenticaÃ§Ã£o por token via [dps_client_portal]
-     * @return string Mensagem de depreciaÃ§Ã£o
+     * @return string
      */
     public function render_login_shortcode() {
-        // Desabilita cache da pÃ¡gina para garantir dados sempre atualizados
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();
         }
 
-        // Log de uso do shortcode depreciado
-        $this->log_security_event( 'deprecated_login_shortcode_used', [
-            'ip'  => $this->get_client_ip(),
-            'url' => isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '',
-        ] );
-        
-        ob_start();
-        ?>
-        <div class="dps-deprecated-notice" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #856404;">
-                <?php esc_html_e( 'MÃ©todo de Login Descontinuado', 'dps-client-portal' ); ?>
-            </h3>
-            <p style="margin-bottom: 15px;">
-                <?php esc_html_e( 'O login por usuÃ¡rio e senha nÃ£o estÃ¡ mais disponÃ­vel no Portal do Cliente.', 'dps-client-portal' ); ?>
-            </p>
-            <p style="margin-bottom: 15px;">
-                <strong><?php esc_html_e( 'Como acessar o portal agora:', 'dps-client-portal' ); ?></strong>
-            </p>
-            <ol style="margin-left: 20px;">
-                <li><?php esc_html_e( 'Acesse a pÃ¡gina do Portal do Cliente', 'dps-client-portal' ); ?></li>
-                <li><?php esc_html_e( 'Clique no botÃ£o "Quero acesso ao meu portal"', 'dps-client-portal' ); ?></li>
-                <li><?php esc_html_e( 'Aguarde nossa equipe enviar seu link exclusivo de acesso', 'dps-client-portal' ); ?></li>
-                <li><?php esc_html_e( 'Clique no link recebido para acessar automaticamente', 'dps-client-portal' ); ?></li>
-            </ol>
-            <?php 
-            $portal_url = dps_get_portal_page_url();
-            if ( $portal_url ) : 
-            ?>
-                <p style="margin-top: 20px;">
-                    <a href="<?php echo esc_url( $portal_url ); ?>" class="button button-primary">
-                        <?php esc_html_e( 'Ir para o Portal do Cliente', 'dps-client-portal' ); ?>
-                    </a>
-                </p>
-            <?php endif; ?>
-        </div>
-        <?php
-        return ob_get_clean();
+        wp_enqueue_style( 'dps-client-portal' );
+        wp_enqueue_script( 'dps-client-portal' );
+        $this->localize_portal_script();
+
+        return $this->render_access_screen();
     }
-    
+
     /**
      * Processa salvamento das configuraÃ§Ãµes do portal.
      *

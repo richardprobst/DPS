@@ -33,6 +33,7 @@
      */
     function init() {
         cleanTokenFromURL();
+        handlePortalAccess();
         handleTabNavigation();
         handleFormValidation(); // Fase 4.2: validaÃ§Ã£o em tempo real
         handleFormSubmits();
@@ -54,8 +55,156 @@
     }
 
     /**
-     * Gerencia aÃ§Ãµes rÃ¡pidas (Quick Actions) na aba InÃ­cio
-     * Permite abrir chat, navegar para tabs e outras aÃ§Ãµes rÃ¡pidas
+     * Controla a tela publica de acesso do portal.
+     */
+    function handlePortalAccess() {
+        var accessRoot = document.querySelector('.dps-portal-entry');
+        var portalConfig = window.dpsPortal || {};
+        var accessConfig = portalConfig.access || null;
+
+        if (!accessRoot || !accessConfig || !portalConfig.ajaxUrl) {
+            return;
+        }
+
+        function setFeedback(target, type, message) {
+            if (!target) {
+                return;
+            }
+
+            target.textContent = message || '';
+            target.classList.remove('is-success', 'is-error');
+
+            if (!message) {
+                target.hidden = true;
+                return;
+            }
+
+            target.hidden = false;
+            target.classList.add(type === 'is-success' ? 'is-success' : 'is-error');
+        }
+
+        function requestAccess(actionName, payload, feedbackTarget, triggerButton) {
+            var originalLabel = triggerButton ? (triggerButton.getAttribute('data-original-label') || triggerButton.textContent) : '';
+            var loadingLabel = triggerButton ? (triggerButton.getAttribute('data-loading-label') || originalLabel) : '';
+            var nonce = actionName === accessConfig.magicLinkAction ? accessConfig.requestNonce : accessConfig.passwordNonce;
+
+            if (triggerButton) {
+                triggerButton.setAttribute('data-original-label', originalLabel);
+                triggerButton.disabled = true;
+                triggerButton.textContent = loadingLabel;
+            }
+
+            payload = payload || {};
+            payload.action = actionName;
+            payload._wpnonce = nonce;
+
+            fetch(portalConfig.ajaxUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: new URLSearchParams(payload).toString()
+            })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(response) {
+                    if (response && response.success) {
+                        setFeedback(feedbackTarget, 'is-success', response.data && response.data.message ? response.data.message : '');
+                        return;
+                    }
+
+                    if (response && response.data && response.data.show_whatsapp) {
+                        var whatsappCard = accessRoot.querySelector('[data-dps-whatsapp-card]');
+                        if (whatsappCard) {
+                            whatsappCard.classList.add('is-highlighted');
+                        }
+                    }
+
+                    setFeedback(
+                        feedbackTarget,
+                        'is-error',
+                        response && response.data && response.data.message
+                            ? response.data.message
+                            : (accessConfig.i18n && accessConfig.i18n.genericError ? accessConfig.i18n.genericError : 'Erro ao processar a solicitacao.')
+                    );
+                })
+                .catch(function() {
+                    setFeedback(
+                        feedbackTarget,
+                        'is-error',
+                        accessConfig.i18n && accessConfig.i18n.genericError ? accessConfig.i18n.genericError : 'Erro ao processar a solicitacao.'
+                    );
+                })
+                .finally(function() {
+                    if (triggerButton) {
+                        triggerButton.disabled = false;
+                        triggerButton.textContent = originalLabel;
+                    }
+                });
+        }
+
+        accessRoot.querySelectorAll('[data-dps-access-form="magic-link"]').forEach(function(form) {
+            var emailInput = form.querySelector('input[name="email"]');
+            var feedback = form.querySelector('[data-dps-form-feedback]');
+            var submitButton = form.querySelector('button[type="submit"]');
+            var rememberInput = form.querySelector('input[name="remember_me"]');
+
+            if (!emailInput || !submitButton) {
+                return;
+            }
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                var email = emailInput.value.trim();
+                if (!email) {
+                    setFeedback(feedback, 'is-error', accessConfig.i18n && accessConfig.i18n.emailRequired ? accessConfig.i18n.emailRequired : 'Informe um e-mail valido.');
+                    return;
+                }
+
+                requestAccess(
+                    accessConfig.magicLinkAction,
+                    {
+                        email: email,
+                        remember_me: rememberInput && rememberInput.checked ? '1' : '0'
+                    },
+                    feedback,
+                    submitButton
+                );
+            });
+        });
+
+        accessRoot.querySelectorAll('[data-dps-password-access-trigger]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var panel = button.closest('.dps-portal-entry__panel');
+                var form = panel ? panel.querySelector('[data-dps-password-login-form]') : null;
+                var emailInput = form ? form.querySelector('input[name="dps_portal_email"]') : null;
+                var feedback = panel ? panel.querySelector('[data-dps-password-feedback]') : null;
+                var email = emailInput ? emailInput.value.trim() : '';
+
+                if (!email) {
+                    setFeedback(feedback, 'is-error', accessConfig.i18n && accessConfig.i18n.emailRequired ? accessConfig.i18n.emailRequired : 'Informe um e-mail valido.');
+                    if (emailInput) {
+                        emailInput.focus();
+                    }
+                    return;
+                }
+
+                requestAccess(
+                    accessConfig.passwordAction,
+                    {
+                        email: email
+                    },
+                    feedback,
+                    button
+                );
+            });
+        });
+    }
+
+    /**
+     * Gerencia acoes rapidas (Quick Actions) na aba inicial.
      */
     function handleQuickActions() {
         // BotÃµes de aÃ§Ã£o rÃ¡pida que abrem o chat

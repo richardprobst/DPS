@@ -1215,17 +1215,18 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 ### Portal do Cliente (`desi-pet-shower-client-portal_addon`)
 
-**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-client-portal`
+**Diretório**: `plugins/desi-pet-shower-client-portal`
 
-**PropÃƒÂ³sito e funcionalidades principais**:
-- Fornecer ÃƒÂ¡rea autenticada para clientes
-- Permitir atualizaÃƒÂ§ÃƒÂ£o de dados pessoais e de pets
-- Exibir histÃƒÂ³rico de atendimentos e pendÃƒÂªncias financeiras
-- Integrar com mÃƒÂ³dulo "Indique e Ganhe" quando ativo
-- Sistema de autenticaÃƒÂ§ÃƒÂ£o via tokens (magic links) sem necessidade de senhas
-- Link de atualizaÃƒÂ§ÃƒÂ£o de perfil para clientes atualizarem seus dados sem login
-- Coleta de consentimento de tosa com mÃƒÂ¡quina via link tokenizado
-- Aba de pagamentos com resumo financeiro, pendÃƒÂªncias e histÃƒÂ³rico de parcelas (Fase 5.5)
+**Propósito e funcionalidades principais**:
+- Fornecer área autenticada para clientes
+- Permitir atualização de dados pessoais e de pets
+- Exibir histórico de atendimentos e pendências financeiras
+- Integrar com módulo "Indique e Ganhe" quando ativo
+- Sistema hibrido de autenticacao com magic links e login por e-mail e senha
+- O usuario do portal usa o e-mail cadastrado no cliente como identificador de acesso
+- Link de atualização de perfil para clientes atualizarem seus dados sem login
+- Coleta de consentimento de tosa com máquina via link tokenizado
+- Aba de pagamentos com resumo financeiro, pendências e histórico de parcelas (Fase 5.5)
 - Galeria multi-fotos por pet com lightbox (Fase 5.1)
 - PreferÃƒÂªncias de notificaÃƒÂ§ÃƒÂ£o configurÃƒÂ¡veis pelo cliente (Fase 5.2)
 - Seletor de pet no modal de agendamento para clientes com mÃƒÂºltiplos pets (Fase 5.3)
@@ -1243,11 +1244,12 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 **CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
 - NÃƒÂ£o cria CPTs prÃƒÂ³prios
 - Tabela customizada `wp_dps_portal_tokens` para gerenciar tokens de acesso
-  - Suporta 5 tipos de token: `login` (temporÃƒÂ¡rio 30min), `first_access` (temporÃƒÂ¡rio 30min), `permanent` (vÃƒÂ¡lido atÃƒÂ© revogaÃƒÂ§ÃƒÂ£o), `profile_update` (7 dias), `tosa_consent` (7 dias)
-- SessÃƒÂµes PHP prÃƒÂ³prias para autenticaÃƒÂ§ÃƒÂ£o independente do WordPress
-- Option `dps_portal_page_id`: armazena ID da pÃƒÂ¡gina configurada do portal
-- Option `dps_portal_2fa_enabled`: habilita/desabilita 2FA via e-mail (padrÃƒÂ£o: desabilitado)
-- Tipos de mensagem customizados para notificaÃƒÂ§ÃƒÂµes
+  - Suporta 5 tipos de token: `login` (temporário 30min), `first_access` (temporário 30min), `permanent` (válido até revogação), `profile_update` (7 dias), `tosa_consent` (7 dias)
+- Sessões PHP próprias para autenticação independente do WordPress
+- Option `dps_portal_page_id`: armazena ID da página configurada do portal
+- Option `dps_portal_2fa_enabled`: habilita/desabilita 2FA via e-mail (padrão: desabilitado)
+- Option `dps_portal_rate_limits`: controle simples de tentativas para pedidos de link e cria??o/redefini??o de senha
+- Tipos de mensagem customizados para notificações
 
 **Abas do portal**:
 - `inicio`: dashboard com resumo (agendamentos, pets, status financeiro)
@@ -1262,18 +1264,30 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Hook `dps_portal_tabs` (filter): permite add-ons adicionarem abas customizadas
 
 **Menus administrativos**:
-- **Portal do Cliente** (`dps-client-portal-settings`): configuraÃƒÂ§ÃƒÂµes gerais do portal, toggle 2FA
+- **Portal do Cliente** (`dps-client-portal-settings`): configura??es gerais do portal, toggle 2FA e resumo operacional do acesso h?brido
 - **Logins de Clientes** (`dps-client-logins`): gerenciamento de tokens de acesso
-  - Interface para gerar tokens temporÃƒÂ¡rios ou permanentes
-  - RevogaÃƒÂ§ÃƒÂ£o manual de tokens ativos
+  - Interface para gerar tokens tempor?rios ou permanentes
+  - Revoga??o manual de tokens ativos
   - Envio de links por WhatsApp ou e-mail
-  - HistÃƒÂ³rico de acessos por cliente
+  - Envio de e-mail para criar ou redefinir senha do portal
+  - Sincroniza??o de usu?rios WordPress vinculados ao cliente
+  - Hist?rico de acessos por cliente com distin??o entre link direto e login por senha
 
 **Classes principais**:
 
 | Classe | Arquivo | PropÃƒÂ³sito |
 |--------|---------|-----------|
 | `DPS_Client_Portal` | `includes/class-dps-client-portal.php` | Classe principal: shortcode, auth flow, tabs, localize_script |
+| `DPS_Portal_2FA` | `includes/class-dps-portal-2fa.php` | 2FA via e-mail: gera/verifica códigos, renderiza form, AJAX handler |
+| `DPS_Scheduling_Suggestions` | `includes/class-dps-scheduling-suggestions.php` | Sugestões de agendamento baseadas no histórico do pet |
+| `DPS_Portal_Renderer` | `includes/client-portal/class-dps-portal-renderer.php` | Renderização das abas e componentes visuais |
+| `DPS_Portal_Actions_Handler` | `includes/client-portal/class-dps-portal-actions-handler.php` | Handlers de ações POST (save, update, upload) |
+| `DPS_Portal_Ajax_Handler` | `includes/client-portal/class-dps-portal-ajax-handler.php` | Handlers de requisições AJAX |
+| `DPS_Portal_Session_Manager` | `includes/class-dps-portal-session-manager.php` | Gerenciamento de sessões PHP |
+| `DPS_Portal_Token_Manager` | `includes/class-dps-portal-token-manager.php` | CRUD de tokens com suporte a permanentes e temporários |
+| `DPS_Portal_User_Manager` | `includes/class-dps-portal-user-manager.php` | Provisiona/sincroniza usu?rio WordPress pelo e-mail do cliente e envia acesso por senha |
+| `DPS_Portal_Rate_Limiter` | `includes/class-dps-portal-rate-limiter.php` | Limita tentativas de solicita??o de link e de cria??o/redefini??o de senha |
+| `DPS_Finance_Repository` | `includes/client-portal/repositories/class-dps-finance-repository.php` | Acesso a dados financeiros (transações, parcelas, resumos) |
 | `DPS_Portal_2FA` | `includes/class-dps-portal-2fa.php` | 2FA via e-mail: gera/verifica cÃƒÂ³digos, renderiza form, AJAX handler |
 | `DPS_Scheduling_Suggestions` | `includes/class-dps-scheduling-suggestions.php` | SugestÃƒÂµes de agendamento baseadas no histÃƒÂ³rico do pet |
 | `DPS_Portal_Renderer` | `includes/client-portal/class-dps-portal-renderer.php` | RenderizaÃƒÂ§ÃƒÂ£o das abas e componentes visuais |

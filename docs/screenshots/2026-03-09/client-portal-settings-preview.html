@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview - Configuracoes do Portal</title>
+    <style>
+        :root {
+            --dps-color-primary: #1a7a5c;
+            --dps-color-primary-hover: #155f48;
+            --dps-color-primary-pressed: #0f4b39;
+            --dps-color-primary-container: #dff2e7;
+            --dps-color-on-primary: #ffffff;
+            --dps-color-surface-bright: #f7faf8;
+            --dps-color-surface-container-lowest: #ffffff;
+            --dps-color-surface-container-low: #f2f7f4;
+            --dps-color-surface-container: #eaf1ed;
+            --dps-color-surface-container-high: #dde7e2;
+            --dps-color-on-surface: #18322c;
+            --dps-color-on-surface-variant: #587069;
+            --dps-color-outline: #7d918a;
+            --dps-color-outline-variant: #cad7d1;
+            --dps-color-success: #1a7a3a;
+            --dps-color-success-container: #dbf4df;
+            --dps-color-warning: #8a5a00;
+            --dps-color-warning-container: #fff2d2;
+            --dps-color-on-warning-container: #6d4a00;
+            --dps-color-error: #b42318;
+            --dps-color-error-container: #ffe3de;
+            --dps-font-body: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+            --dps-font-display: 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
+            --dps-font-mono: 'Cascadia Code', 'Consolas', monospace;
+            --dps-shape-extra-large: 28px;
+            --dps-shape-large: 24px;
+            --dps-shape-medium: 18px;
+            --dps-shape-small: 14px;
+            --dps-shape-extra-small: 10px;
+            --dps-shape-full: 999px;
+            --dps-shape-button: 999px;
+            --dps-space-1: 4px;
+            --dps-space-2: 8px;
+            --dps-space-3: 12px;
+            --dps-space-4: 16px;
+            --dps-space-5: 20px;
+            --dps-space-6: 24px;
+            --dps-space-7: 28px;
+            --dps-space-8: 32px;
+            --dps-space-9: 40px;
+            --dps-space-10: 48px;
+            --dps-motion-hover: 160ms ease;
+            --dps-motion-enter: 220ms ease;
+            --dps-motion-duration-medium-2: 280ms;
+            --dps-motion-duration-short-4: 160ms;
+            --dps-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+            --dps-elevation-1: 0 4px 12px rgba(24, 50, 44, 0.06);
+            --dps-elevation-2: 0 12px 24px rgba(24, 50, 44, 0.08);
+            --dps-elevation-3: 0 18px 30px rgba(24, 50, 44, 0.12);
+            --dps-elevation-4: 0 24px 40px rgba(24, 50, 44, 0.14);
+            --dps-elevation-button: 0 10px 18px rgba(24, 50, 44, 0.12);
+            --dps-typescale-headline-small-size: 2rem;
+            --dps-typescale-headline-small-weight: 650;
+            --dps-typescale-headline-small-line: 1.1;
+            --dps-typescale-title-large-size: 1.5rem;
+            --dps-typescale-title-medium-size: 1.125rem;
+            --dps-typescale-title-medium-weight: 650;
+            --dps-typescale-title-medium-line: 1.2;
+            --dps-typescale-body-large-size: 1rem;
+            --dps-typescale-body-large-line: 1.6;
+            --dps-typescale-body-medium-size: 0.95rem;
+            --dps-typescale-body-medium-line: 1.6;
+            --dps-typescale-body-small-size: 0.84rem;
+            --dps-typescale-label-large-size: 0.95rem;
+            --dps-typescale-label-large-weight: 650;
+            --dps-typescale-label-small-size: 0.82rem;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: var(--dps-font-body); background: linear-gradient(180deg, #edf4f0 0%, #f9f7f2 100%); color: #18322c; }
+        main { padding: 24px; }
+        .button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 0 16px; border-radius: 999px; border: 1px solid #c7d4ce; background: #ffffff; color: #18322c; font: inherit; text-decoration: none; }
+        .button-primary { background: linear-gradient(135deg, #1a7a5c 0%, #0f5a4d 100%); border-color: #1a7a5c; color: #ffffff; }
+        .button-secondary { background: #f5faf7; }
+        .widefat { width: 100%; }
+    </style>
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-client-portal/assets/css/portal-admin.css">
+</head>
+<body>
+<main>
+
+<div class="dps-portal-admin-shell dps-portal-settings-screen">
+    <header class="dps-portal-admin-shell__header">
+        <h1 class="dps-portal-admin-shell__title">Portal do Cliente: Configuracoes</h1>
+        <p class="dps-portal-admin-shell__description">Painel de configuracao da pagina oficial do portal e do acesso hibrido.</p>
+    </header>
+
+    <section class="dps-portal-admin-shell__summary">
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">Pagina configurada</span><strong class="dps-admin-summary-card__value">Portal do Cliente</strong></article>
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">Modo de acesso</span><strong class="dps-admin-summary-card__value">Link direto + E-mail e senha</strong></article>
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">URL atual</span><strong class="dps-admin-summary-card__value dps-admin-summary-card__value--small">https://desi.pet/portal-cliente/</strong></article>
+    </section>
+
+    <form class="dps-portal-settings-form">
+        <section class="dps-portal-settings-card">
+            <div class="dps-portal-settings-card__header">
+                <h3>Pagina oficial do portal</h3>
+                <p>Essa pagina concentra magic link, login por senha e redefinicao de senha.</p>
+            </div>
+            <div class="dps-admin-field">
+                <label>Pagina do Portal do Cliente</label>
+                <select class="widefat"><option>Portal do Cliente</option></select>
+            </div>
+            <div class="dps-admin-field">
+                <label>URL atual do portal</label>
+                <div class="dps-admin-copy-field">
+                    <input type="text" value="https://desi.pet/portal-cliente/" readonly>
+                    <button type="button" class="button button-secondary">Copiar URL</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="dps-portal-settings-card">
+            <div class="dps-portal-settings-card__header">
+                <h3>Seguranca do acesso</h3>
+                <p>Controles aplicados ao fluxo por link e ao uso recorrente do portal.</p>
+            </div>
+            <label class="dps-admin-toggle"><input type="checkbox" checked><span><strong>Notificar o cliente a cada acesso</strong><small>Envia e-mail quando o acesso por link for utilizado.</small></span></label>
+            <label class="dps-admin-toggle"><input type="checkbox"><span><strong>Exigir codigo por e-mail no magic link</strong><small>Adiciona verificacao em duas etapas ao fluxo do link.</small></span></label>
+        </section>
+
+        <section class="dps-portal-settings-card">
+            <div class="dps-portal-settings-card__header">
+                <h3>Como usar o acesso hibrido</h3>
+                <p>Resumo operacional para a equipe.</p>
+            </div>
+            <ol class="dps-portal-settings-card__steps">
+                <li>Manter a pagina do portal publicada com o shortcode oficial.</li>
+                <li>Cadastrar um e-mail valido em cada cliente.</li>
+                <li>Usar links para acesso imediato e senha para recorrencia.</li>
+                <li>Sincronizar usuarios antigos quando o admin indicar pendencia.</li>
+            </ol>
+        </section>
+
+        <div class="dps-portal-settings-form__actions">
+            <button type="button" class="button button-primary">Salvar configuracoes</button>
+        </div>
+    </form>
+</div>
+
+</main>
+</body>
+</html>

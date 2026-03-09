@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview - Admin de Logins do Portal</title>
+    <style>
+        :root {
+            --dps-color-primary: #1a7a5c;
+            --dps-color-primary-hover: #155f48;
+            --dps-color-primary-pressed: #0f4b39;
+            --dps-color-primary-container: #dff2e7;
+            --dps-color-on-primary: #ffffff;
+            --dps-color-surface-bright: #f7faf8;
+            --dps-color-surface-container-lowest: #ffffff;
+            --dps-color-surface-container-low: #f2f7f4;
+            --dps-color-surface-container: #eaf1ed;
+            --dps-color-surface-container-high: #dde7e2;
+            --dps-color-on-surface: #18322c;
+            --dps-color-on-surface-variant: #587069;
+            --dps-color-outline: #7d918a;
+            --dps-color-outline-variant: #cad7d1;
+            --dps-color-success: #1a7a3a;
+            --dps-color-success-container: #dbf4df;
+            --dps-color-warning: #8a5a00;
+            --dps-color-warning-container: #fff2d2;
+            --dps-color-on-warning-container: #6d4a00;
+            --dps-color-error: #b42318;
+            --dps-color-error-container: #ffe3de;
+            --dps-font-body: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+            --dps-font-display: 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
+            --dps-font-mono: 'Cascadia Code', 'Consolas', monospace;
+            --dps-shape-extra-large: 28px;
+            --dps-shape-large: 24px;
+            --dps-shape-medium: 18px;
+            --dps-shape-small: 14px;
+            --dps-shape-extra-small: 10px;
+            --dps-shape-full: 999px;
+            --dps-shape-button: 999px;
+            --dps-space-1: 4px;
+            --dps-space-2: 8px;
+            --dps-space-3: 12px;
+            --dps-space-4: 16px;
+            --dps-space-5: 20px;
+            --dps-space-6: 24px;
+            --dps-space-7: 28px;
+            --dps-space-8: 32px;
+            --dps-space-9: 40px;
+            --dps-space-10: 48px;
+            --dps-motion-hover: 160ms ease;
+            --dps-motion-enter: 220ms ease;
+            --dps-motion-duration-medium-2: 280ms;
+            --dps-motion-duration-short-4: 160ms;
+            --dps-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+            --dps-elevation-1: 0 4px 12px rgba(24, 50, 44, 0.06);
+            --dps-elevation-2: 0 12px 24px rgba(24, 50, 44, 0.08);
+            --dps-elevation-3: 0 18px 30px rgba(24, 50, 44, 0.12);
+            --dps-elevation-4: 0 24px 40px rgba(24, 50, 44, 0.14);
+            --dps-elevation-button: 0 10px 18px rgba(24, 50, 44, 0.12);
+            --dps-typescale-headline-small-size: 2rem;
+            --dps-typescale-headline-small-weight: 650;
+            --dps-typescale-headline-small-line: 1.1;
+            --dps-typescale-title-large-size: 1.5rem;
+            --dps-typescale-title-medium-size: 1.125rem;
+            --dps-typescale-title-medium-weight: 650;
+            --dps-typescale-title-medium-line: 1.2;
+            --dps-typescale-body-large-size: 1rem;
+            --dps-typescale-body-large-line: 1.6;
+            --dps-typescale-body-medium-size: 0.95rem;
+            --dps-typescale-body-medium-line: 1.6;
+            --dps-typescale-body-small-size: 0.84rem;
+            --dps-typescale-label-large-size: 0.95rem;
+            --dps-typescale-label-large-weight: 650;
+            --dps-typescale-label-small-size: 0.82rem;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: var(--dps-font-body); background: linear-gradient(180deg, #edf4f0 0%, #f9f7f2 100%); color: #18322c; }
+        main { padding: 24px; }
+        .button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 0 16px; border-radius: 999px; border: 1px solid #c7d4ce; background: #ffffff; color: #18322c; font: inherit; text-decoration: none; }
+        .button-primary { background: linear-gradient(135deg, #1a7a5c 0%, #0f5a4d 100%); border-color: #1a7a5c; color: #ffffff; }
+        .button-secondary { background: #f5faf7; }
+        .widefat { width: 100%; }
+    </style>
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-client-portal/assets/css/portal-admin.css">
+</head>
+<body>
+<main>
+
+<div class="dps-portal-admin-shell dps-portal-logins-screen">
+    <header class="dps-portal-admin-shell__header">
+        <h1 class="dps-portal-admin-shell__title">Portal do Cliente: Logins</h1>
+        <p class="dps-portal-admin-shell__description">Visao administrativa para magic link, senha por e-mail e sincronizacao de usuarios WordPress vinculados ao cliente.</p>
+    </header>
+
+    <section class="dps-portal-admin-shell__summary">
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">Clientes listados</span><strong class="dps-admin-summary-card__value">128</strong></article>
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">Com e-mail valido</span><strong class="dps-admin-summary-card__value">109</strong></article>
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">Prontos para senha</span><strong class="dps-admin-summary-card__value">76</strong></article>
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">Links ativos</span><strong class="dps-admin-summary-card__value">18</strong></article>
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">Cadastros para sincronizar</span><strong class="dps-admin-summary-card__value">11</strong></article>
+        <article class="dps-admin-summary-card"><span class="dps-admin-summary-card__label">Conflitos de e-mail</span><strong class="dps-admin-summary-card__value">2</strong></article>
+    </section>
+
+    <form class="dps-portal-admin-shell__filters">
+        <input type="search" value="Maria" aria-label="Buscar clientes">
+        <button type="button" class="button button-secondary">Buscar</button>
+    </form>
+
+    <div class="dps-portal-table-wrap">
+        <table class="widefat striped dps-portal-logins-table">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Contato</th>
+                    <th>Estado do acesso</th>
+                    <th>Ultimo login</th>
+                    <th>Operacoes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="dps-portal-logins-table__row">
+                    <td data-label="Cliente">
+                        <strong class="dps-portal-logins-table__client-name">Maria Probst</strong>
+                        <div class="dps-portal-logins-table__meta"><span>#451</span><a href="#">Abrir cadastro</a></div>
+                    </td>
+                    <td data-label="Contato">
+                        <div class="dps-portal-logins-table__stack"><span>maria@desipet.com.br</span><span>(15) 99160-6299</span></div>
+                    </td>
+                    <td data-label="Estado do acesso">
+                        <div class="dps-portal-status-list">
+                            <div class="dps-portal-status-item">
+                                <span class="dps-status-pill dps-status-pill--success">Magic link</span>
+                                <p>2 links ativos e um permanente em uso recorrente.</p>
+                                <small>Ultimo link gerado ha 12 minutos.</small>
+                            </div>
+                            <div class="dps-portal-status-item">
+                                <span class="dps-status-pill dps-status-pill--success">E-mail e senha</span>
+                                <p>Ativo por e-mail.</p>
+                                <small>Usuario WP #920: maria@desipet.com.br</small>
+                                <small>Ultimo e-mail de senha: hoje, 09:12.</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td data-label="Ultimo login">
+                        <div class="dps-portal-logins-table__last-login"><strong>E-mail e senha</strong><span>Hoje, 08:54</span></div>
+                        <ul class="dps-portal-logins-table__activity">
+                            <li><strong>E-mail e senha</strong><span>Hoje, 08:54</span><small>Login autenticado no WordPress</small></li>
+                            <li><strong>Link direto</strong><span>Ontem, 19:20</span><small>IP 191.22.44.10</small></li>
+                        </ul>
+                    </td>
+                    <td data-label="Operacoes">
+                        <div class="dps-portal-logins-table__actions">
+                            <button type="button" class="button button-primary">Gerar link</button>
+                            <button type="button" class="button button-secondary">Revogar links</button>
+                            <button type="button" class="button">Enviar acesso por senha</button>
+                            <button type="button" class="button">Sincronizar usuario</button>
+                        </div>
+                        <div class="dps-portal-logins-table__feedback is-success">Link gerado com sucesso.</div>
+                        <div class="dps-generated-token__card">
+                            <label class="dps-generated-token__label">Link gerado agora</label>
+                            <div class="dps-generated-token__field"><input type="text" value="https://portal.desi.pet/?dps_token=abc123" readonly></div>
+                            <div class="dps-generated-token__actions">
+                                <button type="button" class="button button-secondary">Copiar</button>
+                                <button type="button" class="button button-secondary">WhatsApp</button>
+                                <button type="button" class="button button-secondary">Preparar e-mail</button>
+                            </div>
+                            <small class="dps-generated-token__note">Link valido por 30 minutos.</small>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</main>
+</body>
+</html>

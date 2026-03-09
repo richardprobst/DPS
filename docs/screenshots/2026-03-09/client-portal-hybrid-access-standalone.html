@@ -1,3 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview - Portal do Cliente</title>
+    <style>
+        :root {
+            --dps-color-primary: #1a7a5c;
+            --dps-color-primary-hover: #155f48;
+            --dps-color-primary-pressed: #0f4b39;
+            --dps-color-primary-container: #dff2e7;
+            --dps-color-on-primary: #ffffff;
+            --dps-color-surface-bright: #f7faf8;
+            --dps-color-surface-container-lowest: #ffffff;
+            --dps-color-surface-container-low: #f2f7f4;
+            --dps-color-surface-container: #eaf1ed;
+            --dps-color-surface-container-high: #dde7e2;
+            --dps-color-on-surface: #18322c;
+            --dps-color-on-surface-variant: #587069;
+            --dps-color-outline: #7d918a;
+            --dps-color-outline-variant: #cad7d1;
+            --dps-color-success: #1a7a3a;
+            --dps-color-success-container: #dbf4df;
+            --dps-color-warning: #8a5a00;
+            --dps-color-warning-container: #fff2d2;
+            --dps-color-on-warning-container: #6d4a00;
+            --dps-color-error: #b42318;
+            --dps-color-error-container: #ffe3de;
+            --dps-font-body: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+            --dps-font-display: 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
+            --dps-font-mono: 'Cascadia Code', 'Consolas', monospace;
+            --dps-shape-extra-large: 28px;
+            --dps-shape-large: 24px;
+            --dps-shape-medium: 18px;
+            --dps-shape-small: 14px;
+            --dps-shape-extra-small: 10px;
+            --dps-shape-full: 999px;
+            --dps-shape-button: 999px;
+            --dps-space-1: 4px;
+            --dps-space-2: 8px;
+            --dps-space-3: 12px;
+            --dps-space-4: 16px;
+            --dps-space-5: 20px;
+            --dps-space-6: 24px;
+            --dps-space-7: 28px;
+            --dps-space-8: 32px;
+            --dps-space-9: 40px;
+            --dps-space-10: 48px;
+            --dps-motion-hover: 160ms ease;
+            --dps-motion-enter: 220ms ease;
+            --dps-motion-duration-medium-2: 280ms;
+            --dps-motion-duration-short-4: 160ms;
+            --dps-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+            --dps-elevation-1: 0 4px 12px rgba(24, 50, 44, 0.06);
+            --dps-elevation-2: 0 12px 24px rgba(24, 50, 44, 0.08);
+            --dps-elevation-3: 0 18px 30px rgba(24, 50, 44, 0.12);
+            --dps-elevation-4: 0 24px 40px rgba(24, 50, 44, 0.14);
+            --dps-elevation-button: 0 10px 18px rgba(24, 50, 44, 0.12);
+            --dps-typescale-headline-small-size: 2rem;
+            --dps-typescale-headline-small-weight: 650;
+            --dps-typescale-headline-small-line: 1.1;
+            --dps-typescale-title-large-size: 1.5rem;
+            --dps-typescale-title-medium-size: 1.125rem;
+            --dps-typescale-title-medium-weight: 650;
+            --dps-typescale-title-medium-line: 1.2;
+            --dps-typescale-body-large-size: 1rem;
+            --dps-typescale-body-large-line: 1.6;
+            --dps-typescale-body-medium-size: 0.95rem;
+            --dps-typescale-body-medium-line: 1.6;
+            --dps-typescale-body-small-size: 0.84rem;
+            --dps-typescale-label-large-size: 0.95rem;
+            --dps-typescale-label-large-weight: 650;
+            --dps-typescale-label-small-size: 0.82rem;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: var(--dps-font-body); background: linear-gradient(180deg, #edf4f0 0%, #f9f7f2 100%); color: #18322c; }
+        main { padding: 24px; }
+        .button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 0 16px; border-radius: 999px; border: 1px solid #c7d4ce; background: #ffffff; color: #18322c; font: inherit; text-decoration: none; }
+        .button-primary { background: linear-gradient(135deg, #1a7a5c 0%, #0f5a4d 100%); border-color: #1a7a5c; color: #ffffff; }
+        .button-secondary { background: #f5faf7; }
+        .widefat { width: 100%; }
+    </style>
+    <style>
 /* ========================================
    PORTAL DO CLIENTE - Estilo Minimalista
    ======================================== */
@@ -9480,3 +9565,93 @@ html {
         transition: none;
     }
 }
+
+</style>
+</head>
+<body>
+<main>
+
+<div class="dps-client-portal-access-page">
+    <section class="dps-portal-entry" aria-labelledby="dps-portal-entry-title">
+        <div class="dps-portal-entry__hero">
+            <div class="dps-portal-entry__hero-copy">
+                <span class="dps-portal-entry__eyebrow">Portal do Cliente</span>
+                <h1 id="dps-portal-entry-title" class="dps-portal-entry__title">Escolha como voce quer entrar</h1>
+                <p class="dps-portal-entry__lead">O portal agora combina link direto e login por e-mail e senha, sempre usando o e-mail cadastrado no cliente.</p>
+                <ul class="dps-portal-entry__feature-list">
+                    <li>Agendamentos, pagamentos, fotos e historico em um so painel.</li>
+                    <li>Magic link para acesso rapido sem senha.</li>
+                    <li>E-mail e senha para uso recorrente e seguro.</li>
+                </ul>
+            </div>
+            <div class="dps-portal-entry__hero-card">
+                <span class="dps-portal-entry__hero-badge">Acesso hibrido</span>
+                <p class="dps-portal-entry__hero-metric">Link direto + E-mail e senha</p>
+                <p class="dps-portal-entry__hero-note">O cliente pode pedir o link imediato ou receber um e-mail para criar/redefinir a senha sem sair desta pagina.</p>
+            </div>
+        </div>
+
+        <div class="dps-portal-entry__notices">
+            <article class="dps-portal-entry__notice dps-portal-entry__notice--success">
+                <h2 class="dps-portal-entry__notice-title">Portal atualizado</h2>
+                <p class="dps-portal-entry__notice-text">Fluxo de acesso revisado para manter o link e habilitar login recorrente.</p>
+            </article>
+        </div>
+
+        <div class="dps-portal-entry__grid">
+            <article class="dps-portal-entry__panel">
+                <span class="dps-portal-entry__panel-tag">Link direto</span>
+                <h2 class="dps-portal-entry__panel-title">Receber link por e-mail</h2>
+                <p class="dps-portal-entry__panel-text">Digite o e-mail cadastrado para receber um link de acesso imediato.</p>
+                <form class="dps-portal-entry__async-form">
+                    <div class="dps-portal-entry__field-group">
+                        <label class="dps-portal-entry__label">E-mail cadastrado</label>
+                        <input class="dps-portal-entry__input" type="email" value="cliente@desipet.com.br">
+                    </div>
+                    <label class="dps-portal-entry__check"><input type="checkbox" checked><span>Manter acesso neste dispositivo</span></label>
+                    <button type="button" class="dps-portal-entry__button dps-portal-entry__button--primary">Enviar link de acesso</button>
+                    <div class="dps-portal-entry__feedback is-success">Link enviado com sucesso. Verifique a caixa de entrada.</div>
+                </form>
+            </article>
+
+            <article class="dps-portal-entry__panel">
+                <span class="dps-portal-entry__panel-tag">E-mail e senha</span>
+                <h2 class="dps-portal-entry__panel-title">Entrar com sua senha</h2>
+                <p class="dps-portal-entry__panel-text">O login sempre usa o e-mail cadastrado no cliente.</p>
+                <form class="dps-portal-entry__login-form">
+                    <div class="dps-portal-entry__field-group">
+                        <label class="dps-portal-entry__label">E-mail cadastrado</label>
+                        <input class="dps-portal-entry__input" type="email" value="cliente@desipet.com.br">
+                    </div>
+                    <div class="dps-portal-entry__field-group">
+                        <label class="dps-portal-entry__label">Senha</label>
+                        <input class="dps-portal-entry__input" type="password" value="12345678">
+                    </div>
+                    <label class="dps-portal-entry__check"><input type="checkbox"><span>Lembrar neste dispositivo</span></label>
+                    <button type="button" class="dps-portal-entry__button dps-portal-entry__button--primary">Entrar no portal</button>
+                </form>
+                <div class="dps-portal-entry__secondary-action">
+                    <p class="dps-portal-entry__secondary-text">Primeiro acesso ou esqueceu a senha?</p>
+                    <button type="button" class="dps-portal-entry__button dps-portal-entry__button--secondary">Criar ou redefinir senha por e-mail</button>
+                    <div class="dps-portal-entry__feedback">O e-mail de configuracao de senha sera enviado quando o cadastro existir.</div>
+                </div>
+            </article>
+
+            <aside class="dps-portal-entry__panel dps-portal-entry__panel--support is-highlighted">
+                <span class="dps-portal-entry__panel-tag">Suporte</span>
+                <h2 class="dps-portal-entry__panel-title">Precisa revisar seus dados?</h2>
+                <p class="dps-portal-entry__panel-text">Se o e-mail ainda nao estiver cadastrado, a equipe precisa atualizar o cliente para liberar os dois tipos de acesso.</p>
+                <ul class="dps-portal-entry__support-list">
+                    <li>Confirme com a equipe qual e-mail esta salvo no cadastro.</li>
+                    <li>O login por senha usa exatamente esse e-mail.</li>
+                    <li>O link direto continua disponivel para acessos rapidos.</li>
+                </ul>
+                <a class="dps-portal-entry__button dps-portal-entry__button--ghost" href="#">Falar com a equipe no WhatsApp</a>
+            </aside>
+        </div>
+    </section>
+</div>
+
+</main>
+</body>
+</html>

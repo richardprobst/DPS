@@ -1,738 +1,257 @@
 <?php
 /**
- * Template para a tela administrativa de gerenciamento de logins/tokens
- * 
- * Variáveis disponíveis:
- * @var array  $clients            Lista de clientes
- * @var string $context            Contexto ('admin' ou 'frontend')
- * @var string $base_url           URL base da página
- * @var array  $feedback_messages  Mensagens de feedback
- * 
+ * Template da tela administrativa de logins do portal.
+ *
  * @package DPS_Client_Portal
- * @since 2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-$title_tag = ( 'admin' === $context ) ? 'h1' : 'h2';
+$title_tag    = ( 'admin' === $context ) ? 'h1' : 'h2';
+$search_value = isset( $search ) ? (string) $search : '';
 
 if ( 'admin' === $context ) {
     echo '<div class="wrap">';
 }
-
-echo '<div class="dps-portal-logins">';
-echo '<' . esc_attr( $title_tag ) . ' class="dps-portal-logins__title">' . esc_html__( 'Portal do Cliente → Logins', 'dps-client-portal' ) . '</' . esc_attr( $title_tag ) . '>';
-
-// Mensagens de feedback
-if ( ! empty( $feedback_messages ) ) {
-    echo '<div class="dps-portal-logins__feedback">';
-    foreach ( $feedback_messages as $feedback ) {
-        $notice_class = 'success' === $feedback['type'] ? 'notice-success' : 'notice-error';
-        echo '<div class="notice ' . esc_attr( $notice_class ) . '"><p>' . esc_html( $feedback['text'] ) . '</p></div>';
-    }
-    echo '</div>';
-}
-
-// Descrição
-echo '<p class="dps-portal-logins__description">';
-echo esc_html__( 'Gerenciar os links de acesso ao Portal do Cliente. Gere links exclusivos para cada cliente, envie por WhatsApp ou e-mail, e controle o acesso de forma segura.', 'dps-client-portal' );
-echo '</p>';
-
-// Resumo
-echo '<div class="dps-portal-logins__summary">';
-echo '<div class="dps-portal-logins__summary-item">';
-echo '<span class="dps-portal-logins__summary-label">' . esc_html__( 'Total de Clientes:', 'dps-client-portal' ) . '</span> ';
-echo '<strong>' . esc_html( number_format_i18n( count( $clients ) ) ) . '</strong>';
-echo '</div>';
-echo '</div>';
-
-// Filtros de busca
-echo '<form method="get" action="' . esc_url( $base_url ) . '" class="dps-portal-logins__filters">';
-if ( 'frontend' === $context ) {
-    echo '<input type="hidden" name="tab" value="logins" />';
-}
-echo '<input type="search" name="dps_search" placeholder="' . esc_attr__( 'Buscar por nome ou telefone...', 'dps-client-portal' ) . '" value="' . esc_attr( isset( $_GET['dps_search'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_search'] ) ) : '' ) . '" />';
-echo '<button type="submit" class="button">' . esc_html__( 'Buscar', 'dps-client-portal' ) . '</button>';
-echo '</form>';
-
-// Tabela de clientes
-if ( ! empty( $clients ) ) {
-    echo '<div class="dps-portal-logins__table-wrapper">';
-    echo '<table class="dps-portal-logins__table widefat striped">';
-    echo '<thead>';
-    echo '<tr>';
-    echo '<th>' . esc_html__( 'Cliente', 'dps-client-portal' ) . '</th>';
-    echo '<th>' . esc_html__( 'Contato', 'dps-client-portal' ) . '</th>';
-    echo '<th>' . esc_html__( 'Situação do Acesso', 'dps-client-portal' ) . '</th>';
-    echo '<th>' . esc_html__( 'Último Login', 'dps-client-portal' ) . '</th>';
-    echo '<th>' . esc_html__( 'Ações', 'dps-client-portal' ) . '</th>';
-    echo '</tr>';
-    echo '</thead>';
-    echo '<tbody>';
-
-    foreach ( $clients as $client_data ) {
-        $client_id = $client_data['id'];
-        $stats     = $client_data['token_stats'];
-        
-        // Busca último login real do histórico (não apenas last_used_at do token)
-        $token_manager = DPS_Portal_Token_Manager::get_instance();
-        $last_login_data = $token_manager->get_last_login( $client_id );
-        
-        // Determina situação do acesso
-        if ( $stats['active_tokens'] > 0 ) {
-            $access_status = __( 'Link ativo', 'dps-client-portal' );
-            $status_class  = 'active';
-        } elseif ( $stats['total_used'] > 0 || $last_login_data ) {
-            $access_status = __( 'Já acessou', 'dps-client-portal' );
-            $status_class  = 'used';
-        } else {
-            $access_status = __( 'Sem acesso ainda', 'dps-client-portal' );
-            $status_class  = 'none';
-        }
-        
-        // Formata último login - usa o histórico real
-        if ( $last_login_data && $last_login_data['timestamp'] ) {
-            $last_login = date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $last_login_data['timestamp'] ) );
-        } elseif ( $stats['last_used_at'] ) {
-            $last_login = date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $stats['last_used_at'] ) );
-        } else {
-            $last_login = '—';
-        }
-
-        echo '<tr>';
-        
-        // Cliente
-        echo '<td data-label="' . esc_attr__( 'Cliente', 'dps-client-portal' ) . '">';
-        echo '<strong>' . esc_html( $client_data['name'] ) . '</strong>';
-        echo '<br><small>#' . esc_html( $client_id ) . '</small>';
-        echo '</td>';
-        
-        // Contato
-        echo '<td data-label="' . esc_attr__( 'Contato', 'dps-client-portal' ) . '">';
-        if ( $client_data['phone'] ) {
-            echo '<div>📱 ' . esc_html( $client_data['phone'] ) . '</div>';
-        }
-        if ( $client_data['email'] ) {
-            echo '<div>✉️ ' . esc_html( $client_data['email'] ) . '</div>';
-        }
-        if ( ! $client_data['phone'] && ! $client_data['email'] ) {
-            echo '—';
-        }
-        echo '</td>';
-        
-        // Situação
-        echo '<td data-label="' . esc_attr__( 'Situação', 'dps-client-portal' ) . '">';
-        echo '<span class="dps-portal-logins__status dps-portal-logins__status--' . esc_attr( $status_class ) . '">';
-        echo esc_html( $access_status );
-        echo '</span>';
-        if ( $stats['active_tokens'] > 0 ) {
-            echo '<br><small>' . esc_html( sprintf( _n( '%d token ativo', '%d tokens ativos', $stats['active_tokens'], 'dps-client-portal' ), $stats['active_tokens'] ) ) . '</small>';
-        }
-        echo '</td>';
-        
-        // Último login
-        echo '<td data-label="' . esc_attr__( 'Último Login', 'dps-client-portal' ) . '">';
-        echo esc_html( $last_login );
-        // Mostra botão de histórico se houver acessos
-        $access_history = $token_manager->get_access_history( $client_id, 1 );
-        if ( ! empty( $access_history ) ) {
-            echo '<br><button type="button" class="button button-small dps-view-history-btn" data-client-id="' . esc_attr( $client_id ) . '" data-client-name="' . esc_attr( $client_data['name'] ) . '" style="margin-top: 4px;">';
-            echo '📋 ' . esc_html__( 'Histórico', 'dps-client-portal' );
-            echo '</button>';
-        }
-        echo '</td>';
-        
-        // Ações
-        echo '<td data-label="' . esc_attr__( 'Ações', 'dps-client-portal' ) . '">';
-        echo '<div class="dps-portal-logins__actions">';
-        
-        // Gera URLs com nonce para ambos os tipos
-        $url_temporary = wp_nonce_url(
-            add_query_arg( [
-                'dps_action'  => 'generate_token',
-                'client_id'   => $client_id,
-                'token_type'  => 'login',
-            ], $base_url ),
-            'dps_generate_token_' . $client_id
-        );
-        
-        $url_permanent = wp_nonce_url(
-            add_query_arg( [
-                'dps_action'  => 'generate_token',
-                'client_id'   => $client_id,
-                'token_type'  => 'permanent',
-            ], $base_url ),
-            'dps_generate_token_' . $client_id
-        );
-        
-        // Determina qual botão mostrar
-        if ( $stats['total_generated'] === 0 ) {
-            // Primeiro acesso - mostra botão que abre modal
-            echo '<button type="button" class="button button-primary dps-generate-token-btn" ';
-            echo 'data-client-id="' . esc_attr( $client_id ) . '" ';
-            echo 'data-client-name="' . esc_attr( $client_data['name'] ) . '" ';
-            echo 'data-url-temporary="' . esc_attr( $url_temporary ) . '" ';
-            echo 'data-url-permanent="' . esc_attr( $url_permanent ) . '">';
-            echo esc_html__( 'Gerar Link de Acesso', 'dps-client-portal' );
-            echo '</button>';
-        } else {
-            // Gerar novo link - mostra botão que abre modal
-            echo '<button type="button" class="button dps-generate-token-btn" ';
-            echo 'data-client-id="' . esc_attr( $client_id ) . '" ';
-            echo 'data-client-name="' . esc_attr( $client_data['name'] ) . '" ';
-            echo 'data-url-temporary="' . esc_attr( $url_temporary ) . '" ';
-            echo 'data-url-permanent="' . esc_attr( $url_permanent ) . '">';
-            echo esc_html__( 'Gerar Novo Link', 'dps-client-portal' );
-            echo '</button>';
-        }
-        
-        // Revogar (se houver tokens ativos)
-        if ( $stats['active_tokens'] > 0 ) {
-            $revoke_url = wp_nonce_url(
-                add_query_arg( [
-                    'dps_action' => 'revoke_tokens',
-                    'client_id'  => $client_id,
-                ], $base_url ),
-                'dps_revoke_tokens_' . $client_id
-            );
-            echo '<a href="' . esc_url( $revoke_url ) . '" class="button button-secondary" onclick="return confirm(\'' . esc_js( __( 'Tem certeza que deseja revogar todos os links ativos deste cliente?', 'dps-client-portal' ) ) . '\');">';
-            echo esc_html__( 'Revogar', 'dps-client-portal' );
-            echo '</a>';
-            
-            // Verifica se há tokens permanentes ativos para mostrar botão de visualização
-            $permanent_tokens = $token_manager->get_active_permanent_tokens( $client_id );
-            if ( ! empty( $permanent_tokens ) ) {
-                echo '<button type="button" class="button button-secondary dps-view-permanent-link-btn" ';
-                echo 'data-client-id="' . esc_attr( $client_id ) . '" ';
-                echo 'data-client-name="' . esc_attr( $client_data['name'] ) . '" ';
-                echo 'title="' . esc_attr__( 'Ver link permanente existente', 'dps-client-portal' ) . '">';
-                echo '🔗 ' . esc_html__( 'Ver Link', 'dps-client-portal' );
-                echo '</button>';
-            }
-        }
-        
-        echo '</div>';
-        
-        // Se houver token gerado recentemente, mostra opções de envio
-        $generated_token = get_transient( 'dps_portal_generated_token_' . $client_id );
-        if ( $generated_token && isset( $generated_token['url'] ) ) {
-            echo '<div class="dps-portal-logins__token-display">';
-            echo '<div class="dps-portal-logins__token-url">';
-            echo '<input type="text" readonly value="' . esc_attr( $generated_token['url'] ) . '" onclick="this.select();" />';
-            echo '<button type="button" class="button button-small dps-copy-token" data-url="' . esc_attr( $generated_token['url'] ) . '">' . esc_html__( 'Copiar', 'dps-client-portal' ) . '</button>';
-            echo '</div>';
-            
-            echo '<div class="dps-portal-logins__send-options">';
-            
-            // Botão WhatsApp
-            if ( $client_data['phone'] ) {
-                $whatsapp_url = wp_nonce_url(
-                    add_query_arg( [
-                        'dps_action' => 'whatsapp_link',
-                        'client_id'  => $client_id,
-                    ], $base_url ),
-                    'dps_whatsapp_link_' . $client_id
-                );
-                echo '<a href="' . esc_url( $whatsapp_url ) . '" class="button button-small" target="_blank">';
-                echo '📱 ' . esc_html__( 'Enviar por WhatsApp', 'dps-client-portal' );
-                echo '</a>';
-            }
-            
-            // Botão E-mail
-            if ( $client_data['email'] ) {
-                echo '<button type="button" class="button button-small dps-preview-email" data-client-id="' . esc_attr( $client_id ) . '" data-url="' . esc_attr( $generated_token['url'] ) . '">';
-                echo '✉️ ' . esc_html__( 'Preparar E-mail', 'dps-client-portal' );
-                echo '</button>';
-            }
-            
-            echo '</div>';
-            
-            // Determina mensagem de validade baseado no tipo
-            $token_type = isset( $generated_token['type'] ) ? $generated_token['type'] : 'login';
-            if ( 'permanent' === $token_type ) {
-                $validity_note = __( 'Link permanente - válido até revogar manualmente', 'dps-client-portal' );
-            } else {
-                $validity_note = __( 'Link válido por 30 minutos', 'dps-client-portal' );
-            }
-            
-            echo '<small class="dps-portal-logins__token-note">' . esc_html( $validity_note ) . '</small>';
-            echo '</div>';
-        }
-        
-        echo '</td>';
-        echo '</tr>';
-    }
-
-    echo '</tbody>';
-    echo '</table>';
-    echo '</div>';
-} else {
-    echo '<p class="dps-portal-logins__empty">' . esc_html__( 'Nenhum cliente encontrado.', 'dps-client-portal' ) . '</p>';
-}
-
-echo '</div>'; // .dps-portal-logins
-
-if ( 'admin' === $context ) {
-    echo '</div>'; // .wrap
-}
-
-// Modal de pré-visualização de e-mail
 ?>
-<div id="dps-email-preview-modal" class="dps-modal" style="display:none;">
-    <div class="dps-modal__overlay"></div>
-    <div class="dps-modal__content">
-        <div class="dps-modal__header">
-            <h2><?php esc_html_e( 'Pré-visualização do E-mail', 'dps-client-portal' ); ?></h2>
-            <button type="button" class="dps-modal__close">&times;</button>
+<div class="dps-portal-admin-shell dps-portal-logins-screen">
+    <header class="dps-portal-admin-shell__header">
+        <<?php echo esc_attr( $title_tag ); ?> class="dps-portal-admin-shell__title"><?php esc_html_e( 'Portal do Cliente: Logins', 'dps-client-portal' ); ?></<?php echo esc_attr( $title_tag ); ?>>
+        <p class="dps-portal-admin-shell__description"><?php esc_html_e( 'Gerencie o acesso por magic link e por e-mail e senha. O usuario do portal sempre deve ser o e-mail cadastrado no cliente.', 'dps-client-portal' ); ?></p>
+    </header>
+
+    <?php if ( ! empty( $feedback_messages ) ) : ?>
+        <div class="dps-portal-admin-shell__feedback">
+            <?php foreach ( $feedback_messages as $feedback ) : ?>
+                <div class="dps-portal-admin-shell__notice dps-portal-admin-shell__notice--<?php echo esc_attr( 'success' === $feedback['type'] ? 'success' : 'error' ); ?>">
+                    <?php echo esc_html( $feedback['text'] ); ?>
+                </div>
+            <?php endforeach; ?>
         </div>
-        <div class="dps-modal__body">
-            <div class="dps-form-field">
-                <label for="dps-email-subject"><?php esc_html_e( 'Assunto:', 'dps-client-portal' ); ?></label>
+    <?php endif; ?>
+
+    <section class="dps-portal-admin-shell__summary" aria-label="<?php esc_attr_e( 'Resumo dos acessos', 'dps-client-portal' ); ?>">
+        <article class="dps-admin-summary-card">
+            <span class="dps-admin-summary-card__label"><?php esc_html_e( 'Clientes listados', 'dps-client-portal' ); ?></span>
+            <strong class="dps-admin-summary-card__value"><?php echo esc_html( number_format_i18n( (int) $login_summary['total_clients'] ) ); ?></strong>
+        </article>
+        <article class="dps-admin-summary-card">
+            <span class="dps-admin-summary-card__label"><?php esc_html_e( 'Com e-mail valido', 'dps-client-portal' ); ?></span>
+            <strong class="dps-admin-summary-card__value"><?php echo esc_html( number_format_i18n( (int) $login_summary['with_email'] ) ); ?></strong>
+        </article>
+        <article class="dps-admin-summary-card">
+            <span class="dps-admin-summary-card__label"><?php esc_html_e( 'Prontos para senha', 'dps-client-portal' ); ?></span>
+            <strong class="dps-admin-summary-card__value"><?php echo esc_html( number_format_i18n( (int) $login_summary['password_ready'] ) ); ?></strong>
+        </article>
+        <article class="dps-admin-summary-card">
+            <span class="dps-admin-summary-card__label"><?php esc_html_e( 'Links ativos', 'dps-client-portal' ); ?></span>
+            <strong class="dps-admin-summary-card__value"><?php echo esc_html( number_format_i18n( (int) $login_summary['active_magic_links'] ) ); ?></strong>
+        </article>
+        <article class="dps-admin-summary-card">
+            <span class="dps-admin-summary-card__label"><?php esc_html_e( 'Cadastros para sincronizar', 'dps-client-portal' ); ?></span>
+            <strong class="dps-admin-summary-card__value"><?php echo esc_html( number_format_i18n( (int) $login_summary['needs_sync'] ) ); ?></strong>
+        </article>
+        <article class="dps-admin-summary-card">
+            <span class="dps-admin-summary-card__label"><?php esc_html_e( 'Conflitos de e-mail', 'dps-client-portal' ); ?></span>
+            <strong class="dps-admin-summary-card__value"><?php echo esc_html( number_format_i18n( (int) $login_summary['email_conflicts'] ) ); ?></strong>
+        </article>
+    </section>
+
+    <form method="get" action="<?php echo esc_url( $base_url ); ?>" class="dps-portal-admin-shell__filters">
+        <?php if ( 'frontend' === $context ) : ?>
+            <input type="hidden" name="tab" value="logins" />
+        <?php endif; ?>
+        <label class="screen-reader-text" for="dps-search-logins"><?php esc_html_e( 'Buscar clientes', 'dps-client-portal' ); ?></label>
+        <input id="dps-search-logins" type="search" name="dps_search" value="<?php echo esc_attr( $search_value ); ?>" placeholder="<?php echo esc_attr__( 'Buscar por nome do cliente', 'dps-client-portal' ); ?>" />
+        <button type="submit" class="button button-secondary"><?php esc_html_e( 'Buscar', 'dps-client-portal' ); ?></button>
+    </form>
+
+    <?php if ( ! empty( $clients ) ) : ?>
+        <div class="dps-portal-table-wrap">
+            <table class="widefat striped dps-portal-logins-table">
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e( 'Cliente', 'dps-client-portal' ); ?></th>
+                        <th><?php esc_html_e( 'Contato', 'dps-client-portal' ); ?></th>
+                        <th><?php esc_html_e( 'Estado do acesso', 'dps-client-portal' ); ?></th>
+                        <th><?php esc_html_e( 'Ultimo login', 'dps-client-portal' ); ?></th>
+                        <th><?php esc_html_e( 'Operacoes', 'dps-client-portal' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ( $clients as $client_data ) : ?>
+                        <?php
+                        $client_id          = (int) $client_data['id'];
+                        $token_stats        = is_array( $client_data['token_stats'] ) ? $client_data['token_stats'] : [];
+                        $password_access    = is_array( $client_data['password_access'] ) ? $client_data['password_access'] : [];
+                        $last_login         = is_array( $client_data['last_login'] ) ? $client_data['last_login'] : [];
+                        $recent_activity    = isset( $client_data['recent_activity'] ) && is_array( $client_data['recent_activity'] ) ? $client_data['recent_activity'] : [];
+                        $active_tokens      = isset( $token_stats['active_tokens'] ) ? (int) $token_stats['active_tokens'] : 0;
+                        $active_permanent   = isset( $client_data['active_permanent'] ) ? (int) $client_data['active_permanent'] : 0;
+                        $password_status    = isset( $password_access['status'] ) ? (string) $password_access['status'] : 'missing_email';
+                        $password_can_send  = ! empty( $password_access['can_send_password_email'] );
+                        $password_needs_sync = ! empty( $password_access['needs_sync'] );
+                        $has_email          = ! empty( $client_data['email'] );
+                        $has_phone          = ! empty( $client_data['phone'] );
+                        $last_login_display = ! empty( $last_login['timestamp'] ) ? date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( (string) $last_login['timestamp'] ) ) : '';
+                        $magic_state_class  = $active_tokens > 0 ? 'success' : ( ! empty( $token_stats['total_used'] ) ? 'neutral' : 'idle' );
+                        $password_state_class = 'conflict' === $password_status ? 'danger' : ( ! empty( $password_access['can_use_password'] ) ? 'success' : 'warning' );
+                        ?>
+                        <tr class="dps-portal-logins-table__row" data-client-row data-client-id="<?php echo esc_attr( $client_id ); ?>" data-client-name="<?php echo esc_attr( $client_data['name'] ); ?>" data-client-phone="<?php echo esc_attr( $client_data['phone'] ); ?>" data-client-email="<?php echo esc_attr( $client_data['email'] ); ?>">
+                            <td data-label="<?php echo esc_attr__( 'Cliente', 'dps-client-portal' ); ?>">
+                                <strong class="dps-portal-logins-table__client-name"><?php echo esc_html( $client_data['name'] ); ?></strong>
+                                <div class="dps-portal-logins-table__meta">
+                                    <span>#<?php echo esc_html( $client_id ); ?></span>
+                                    <?php if ( ! empty( $client_data['edit_url'] ) ) : ?>
+                                        <a href="<?php echo esc_url( $client_data['edit_url'] ); ?>"><?php esc_html_e( 'Abrir cadastro', 'dps-client-portal' ); ?></a>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                            <td data-label="<?php echo esc_attr__( 'Contato', 'dps-client-portal' ); ?>">
+                                <div class="dps-portal-logins-table__stack">
+                                    <span><?php echo $has_email ? esc_html( $client_data['email'] ) : esc_html__( 'Sem e-mail cadastrado', 'dps-client-portal' ); ?></span>
+                                    <span><?php echo $has_phone ? esc_html( $client_data['phone'] ) : esc_html__( 'Sem telefone cadastrado', 'dps-client-portal' ); ?></span>
+                                </div>
+                            </td>
+                            <td data-label="<?php echo esc_attr__( 'Estado do acesso', 'dps-client-portal' ); ?>">
+                                <div class="dps-portal-status-list">
+                                    <div class="dps-portal-status-item">
+                                        <span class="dps-status-pill dps-status-pill--<?php echo esc_attr( $magic_state_class ); ?>"><?php esc_html_e( 'Magic link', 'dps-client-portal' ); ?></span>
+                                        <p><?php echo $active_tokens > 0 ? esc_html( sprintf( _n( '%d link ativo', '%d links ativos', $active_tokens, 'dps-client-portal' ), $active_tokens ) ) : esc_html__( 'Sem links ativos neste momento.', 'dps-client-portal' ); ?></p>
+                                        <?php if ( $active_permanent > 0 ) : ?>
+                                            <small><?php echo esc_html( sprintf( _n( '%d link permanente ativo', '%d links permanentes ativos', $active_permanent, 'dps-client-portal' ), $active_permanent ) ); ?></small>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="dps-portal-status-item">
+                                        <span class="dps-status-pill dps-status-pill--<?php echo esc_attr( $password_state_class ); ?>"><?php esc_html_e( 'E-mail e senha', 'dps-client-portal' ); ?></span>
+                                        <p><?php echo esc_html( isset( $password_access['status_label'] ) ? (string) $password_access['status_label'] : __( 'Sem status', 'dps-client-portal' ) ); ?></p>
+                                        <small><?php echo esc_html( isset( $password_access['status_description'] ) ? (string) $password_access['status_description'] : '' ); ?></small>
+                                        <?php if ( ! empty( $password_access['user_id'] ) ) : ?>
+                                            <small><?php echo esc_html( sprintf( __( 'Usuario WP #%1$d: %2$s', 'dps-client-portal' ), (int) $password_access['user_id'], (string) $password_access['user_login'] ) ); ?></small>
+                                        <?php endif; ?>
+                                        <?php if ( ! empty( $password_access['legacy_username'] ) ) : ?>
+                                            <small><?php esc_html_e( 'Conta legada: o login interno ainda difere do e-mail, mas o acesso por e-mail segue valido.', 'dps-client-portal' ); ?></small>
+                                        <?php endif; ?>
+                                        <?php if ( ! empty( $client_data['last_password_email'] ) ) : ?>
+                                            <small><?php echo esc_html( sprintf( __( 'Ultimo e-mail de senha: %s', 'dps-client-portal' ), date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( (string) $client_data['last_password_email'] ) ) ) ); ?></small>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-label="<?php echo esc_attr__( 'Ultimo login', 'dps-client-portal' ); ?>">
+                                <div class="dps-portal-logins-table__last-login">
+                                    <strong><?php echo esc_html( isset( $last_login['label'] ) ? (string) $last_login['label'] : __( 'Nenhum acesso ainda', 'dps-client-portal' ) ); ?></strong>
+                                    <span><?php echo $last_login_display ? esc_html( $last_login_display ) : esc_html__( 'Nenhum acesso registrado.', 'dps-client-portal' ); ?></span>
+                                </div>
+                                <?php if ( ! empty( $recent_activity ) ) : ?>
+                                    <ul class="dps-portal-logins-table__activity">
+                                        <?php foreach ( $recent_activity as $activity ) : ?>
+                                            <li>
+                                                <strong><?php echo esc_html( $activity['label'] ); ?></strong>
+                                                <span><?php echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( (string) $activity['timestamp'] ) ) ); ?></span>
+                                                <?php if ( ! empty( $activity['meta'] ) ) : ?>
+                                                    <small><?php echo esc_html( $activity['meta'] ); ?></small>
+                                                <?php endif; ?>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php endif; ?>
+                            </td>
+                            <td data-label="<?php echo esc_attr__( 'Operacoes', 'dps-client-portal' ); ?>">
+                                <div class="dps-portal-logins-table__actions">
+                                    <button type="button" class="button button-primary dps-generate-token-btn" data-client-id="<?php echo esc_attr( $client_id ); ?>" data-client-name="<?php echo esc_attr( $client_data['name'] ); ?>">
+                                        <?php esc_html_e( 'Gerar link', 'dps-client-portal' ); ?>
+                                    </button>
+
+                                    <?php if ( $active_tokens > 0 ) : ?>
+                                        <button type="button" class="button button-secondary dps-revoke-token-btn" data-client-id="<?php echo esc_attr( $client_id ); ?>">
+                                            <?php esc_html_e( 'Revogar links', 'dps-client-portal' ); ?>
+                                        </button>
+                                    <?php endif; ?>
+
+                                    <?php if ( $password_can_send ) : ?>
+                                        <button type="button" class="button dps-send-password-access-btn" data-client-id="<?php echo esc_attr( $client_id ); ?>">
+                                            <?php esc_html_e( 'Enviar acesso por senha', 'dps-client-portal' ); ?>
+                                        </button>
+                                    <?php endif; ?>
+
+                                    <?php if ( $has_email && ( $password_needs_sync || empty( $password_access['user_id'] ) ) ) : ?>
+                                        <button type="button" class="button dps-sync-portal-user-btn" data-client-id="<?php echo esc_attr( $client_id ); ?>">
+                                            <?php esc_html_e( 'Sincronizar usuario', 'dps-client-portal' ); ?>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div class="dps-portal-logins-table__feedback" data-row-feedback aria-live="polite"></div>
+                                <div class="dps-generated-token" data-generated-token></div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php else : ?>
+        <div class="dps-portal-admin-shell__empty"><?php esc_html_e( 'Nenhum cliente encontrado.', 'dps-client-portal' ); ?></div>
+    <?php endif; ?>
+</div>
+
+<div id="dps-token-type-modal" class="dps-admin-modal" hidden>
+    <div class="dps-admin-modal__backdrop" data-modal-close></div>
+    <div class="dps-admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="dps-token-modal-title">
+        <header class="dps-admin-modal__header">
+            <h2 id="dps-token-modal-title"><?php esc_html_e( 'Gerar link de acesso', 'dps-client-portal' ); ?></h2>
+            <button type="button" class="dps-admin-modal__close" data-modal-close aria-label="<?php esc_attr_e( 'Fechar', 'dps-client-portal' ); ?>">&times;</button>
+        </header>
+        <div class="dps-admin-modal__body">
+            <p id="dps-token-client-name" class="dps-admin-modal__lead"></p>
+            <label class="dps-admin-choice">
+                <input type="radio" name="dps_token_type" value="login" checked />
+                <span>
+                    <strong><?php esc_html_e( 'Link temporario', 'dps-client-portal' ); ?></strong>
+                    <small><?php esc_html_e( 'Expira em 30 minutos. Ideal para envio imediato por e-mail ou WhatsApp.', 'dps-client-portal' ); ?></small>
+                </span>
+            </label>
+            <label class="dps-admin-choice">
+                <input type="radio" name="dps_token_type" value="permanent" />
+                <span>
+                    <strong><?php esc_html_e( 'Link permanente', 'dps-client-portal' ); ?></strong>
+                    <small><?php esc_html_e( 'Permanece valido ate revogar manualmente. Use apenas para clientes recorrentes.', 'dps-client-portal' ); ?></small>
+                </span>
+            </label>
+        </div>
+        <footer class="dps-admin-modal__footer">
+            <button type="button" class="button button-secondary" data-modal-close><?php esc_html_e( 'Cancelar', 'dps-client-portal' ); ?></button>
+            <button type="button" class="button button-primary" id="dps-confirm-generate-token"><?php esc_html_e( 'Gerar link', 'dps-client-portal' ); ?></button>
+        </footer>
+    </div>
+</div>
+
+<div id="dps-email-preview-modal" class="dps-admin-modal" hidden>
+    <div class="dps-admin-modal__backdrop" data-modal-close></div>
+    <div class="dps-admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="dps-email-modal-title">
+        <header class="dps-admin-modal__header">
+            <h2 id="dps-email-modal-title"><?php esc_html_e( 'Preparar e-mail com magic link', 'dps-client-portal' ); ?></h2>
+            <button type="button" class="dps-admin-modal__close" data-modal-close aria-label="<?php esc_attr_e( 'Fechar', 'dps-client-portal' ); ?>">&times;</button>
+        </header>
+        <div class="dps-admin-modal__body">
+            <div class="dps-admin-field">
+                <label for="dps-email-subject"><?php esc_html_e( 'Assunto', 'dps-client-portal' ); ?></label>
                 <input type="text" id="dps-email-subject" class="widefat" />
             </div>
-            <div class="dps-form-field">
-                <label for="dps-email-body"><?php esc_html_e( 'Mensagem:', 'dps-client-portal' ); ?></label>
+            <div class="dps-admin-field">
+                <label for="dps-email-body"><?php esc_html_e( 'Mensagem', 'dps-client-portal' ); ?></label>
                 <textarea id="dps-email-body" rows="10" class="widefat"></textarea>
             </div>
         </div>
-        <div class="dps-modal__footer">
-            <button type="button" class="button button-secondary dps-modal__close"><?php esc_html_e( 'Cancelar', 'dps-client-portal' ); ?></button>
-            <button type="button" class="button button-primary" id="dps-confirm-send-email"><?php esc_html_e( 'Confirmar Envio', 'dps-client-portal' ); ?></button>
-        </div>
+        <footer class="dps-admin-modal__footer">
+            <button type="button" class="button button-secondary" data-modal-close><?php esc_html_e( 'Cancelar', 'dps-client-portal' ); ?></button>
+            <button type="button" class="button button-primary" id="dps-confirm-send-email"><?php esc_html_e( 'Enviar e-mail', 'dps-client-portal' ); ?></button>
+        </footer>
     </div>
 </div>
-
-<!-- Modal de seleção de tipo de token -->
-<div id="dps-token-type-modal" class="dps-modal" style="display:none;">
-    <div class="dps-modal__overlay"></div>
-    <div class="dps-modal__content">
-        <div class="dps-modal__header">
-            <h2><?php esc_html_e( 'Gerar Link de Acesso', 'dps-client-portal' ); ?></h2>
-            <button type="button" class="dps-modal__close">&times;</button>
-        </div>
-        <div class="dps-modal__body">
-            <p id="dps-token-client-name" style="margin-bottom: 20px; font-weight: 600;"></p>
-            
-            <div class="dps-form-field">
-                <label><?php esc_html_e( 'Tipo de Link:', 'dps-client-portal' ); ?></label>
-                <div style="margin-top: 12px;">
-                    <label style="display: block; margin-bottom: 12px; padding: 12px; border: 2px solid #e5e7eb; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
-                        <input type="radio" name="dps_token_type" value="login" checked style="margin-right: 8px;">
-                        <strong><?php esc_html_e( 'Temporário (30 minutos)', 'dps-client-portal' ); ?></strong>
-                        <br>
-                        <small style="color: #6b7280; margin-left: 24px;">
-                            <?php esc_html_e( 'O link expira após 30 minutos. Ideal para acesso único e imediato.', 'dps-client-portal' ); ?>
-                        </small>
-                    </label>
-                    
-                    <label style="display: block; padding: 12px; border: 2px solid #e5e7eb; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
-                        <input type="radio" name="dps_token_type" value="permanent" style="margin-right: 8px;">
-                        <strong><?php esc_html_e( 'Permanente (até revogar)', 'dps-client-portal' ); ?></strong>
-                        <br>
-                        <small style="color: #6b7280; margin-left: 24px;">
-                            <?php esc_html_e( 'O link permanece válido até que seja revogado manualmente. Ideal para acesso recorrente.', 'dps-client-portal' ); ?>
-                        </small>
-                    </label>
-                </div>
-            </div>
-        </div>
-        <div class="dps-modal__footer">
-            <button type="button" class="button button-secondary dps-modal__close"><?php esc_html_e( 'Cancelar', 'dps-client-portal' ); ?></button>
-            <button type="button" class="button button-primary" id="dps-confirm-generate-token"><?php esc_html_e( 'Gerar Link', 'dps-client-portal' ); ?></button>
-        </div>
-    </div>
-</div>
-
-<style>
-/* Estilos para radio buttons personalizados */
-#dps-token-type-modal input[type="radio"]:checked + strong {
-    color: #0ea5e9;
-}
-
-/* Estilo para label com radio selecionado - compatível com navegadores sem :has() */
-#dps-token-type-modal label {
-    transition: all 0.2s;
-}
-
-#dps-token-type-modal label:has(input[type="radio"]:checked) {
-    border-color: #0ea5e9;
-    background-color: #f0f9ff;
-}
-
-/* Fallback para navegadores sem suporte a :has() - será aplicado via JS */
-#dps-token-type-modal label.dps-radio-checked {
-    border-color: #0ea5e9;
-    background-color: #f0f9ff;
-}
-
-#dps-token-type-modal label:hover {
-    border-color: #0ea5e9;
-}
-
-/* Estilos básicos para a tela de logins */
-.dps-portal-logins {
-    max-width: 1200px;
-}
-
-.dps-portal-logins__title {
-    margin-bottom: 20px;
-}
-
-.dps-portal-logins__description {
-    font-size: 14px;
-    color: #6b7280;
-    margin-bottom: 20px;
-}
-
-.dps-portal-logins__summary {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    padding: 16px;
-    margin-bottom: 20px;
-}
-
-.dps-portal-logins__filters {
-    margin-bottom: 20px;
-    display: flex;
-    gap: 10px;
-}
-
-.dps-portal-logins__filters input[type="search"] {
-    flex: 1;
-    max-width: 400px;
-}
-
-.dps-portal-logins__table-wrapper {
-    overflow-x: auto;
-}
-
-.dps-portal-logins__status {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.dps-portal-logins__status--active {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.dps-portal-logins__status--used {
-    background: #f3f4f6;
-    color: #374151;
-}
-
-.dps-portal-logins__status--none {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.dps-portal-logins__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.dps-portal-logins__token-display {
-    margin-top: 12px;
-    padding: 12px;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-}
-
-.dps-portal-logins__token-url {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.dps-portal-logins__token-url input {
-    flex: 1;
-    font-family: monospace;
-    font-size: 12px;
-}
-
-.dps-portal-logins__send-options {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.dps-portal-logins__token-note {
-    display: block;
-    color: #6b7280;
-    font-size: 12px;
-}
-
-/* Modal */
-.dps-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 100000;
-}
-
-.dps-modal__overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-}
-
-.dps-modal__content {
-    position: relative;
-    max-width: 600px;
-    margin: 50px auto;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-}
-
-.dps-modal__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.dps-modal__header h2 {
-    margin: 0;
-}
-
-.dps-modal__close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 0;
-    width: 32px;
-    height: 32px;
-}
-
-.dps-modal__body {
-    padding: 20px;
-}
-
-.dps-modal__footer {
-    padding: 20px;
-    border-top: 1px solid #e5e7eb;
-    text-align: right;
-}
-
-.dps-modal__footer .button {
-    margin-left: 8px;
-}
-
-.dps-form-field {
-    margin-bottom: 16px;
-}
-
-.dps-form-field label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-}
-
-/* Responsividade */
-@media (max-width: 782px) {
-    .dps-portal-logins__table thead {
-        display: none;
-    }
-    
-    .dps-portal-logins__table tr {
-        display: block;
-        margin-bottom: 20px;
-        border: 1px solid #e5e7eb;
-    }
-    
-    .dps-portal-logins__table td {
-        display: block;
-        text-align: right;
-        padding: 12px;
-        border-bottom: 1px solid #f3f4f6;
-    }
-    
-    .dps-portal-logins__table td:before {
-        content: attr(data-label);
-        float: left;
-        font-weight: 600;
-    }
-    
-    .dps-portal-logins__actions {
-        justify-content: flex-end;
-    }
-}
-</style>
-
-<!-- Modal de histórico de acessos -->
-<div id="dps-access-history-modal" class="dps-modal" style="display:none;">
-    <div class="dps-modal__overlay"></div>
-    <div class="dps-modal__content">
-        <div class="dps-modal__header">
-            <h2><?php esc_html_e( 'Histórico de Acessos', 'dps-client-portal' ); ?></h2>
-            <button type="button" class="dps-modal__close">&times;</button>
-        </div>
-        <div class="dps-modal__body">
-            <p id="dps-history-client-name" style="font-weight: 600; margin-bottom: 16px;"></p>
-            <div id="dps-history-content">
-                <p><?php esc_html_e( 'Carregando...', 'dps-client-portal' ); ?></p>
-            </div>
-        </div>
-        <div class="dps-modal__footer">
-            <button type="button" class="button button-secondary dps-modal__close"><?php esc_html_e( 'Fechar', 'dps-client-portal' ); ?></button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de link permanente -->
-<div id="dps-permanent-link-modal" class="dps-modal" style="display:none;">
-    <div class="dps-modal__overlay"></div>
-    <div class="dps-modal__content">
-        <div class="dps-modal__header">
-            <h2><?php esc_html_e( 'Link Permanente de Acesso', 'dps-client-portal' ); ?></h2>
-            <button type="button" class="dps-modal__close">&times;</button>
-        </div>
-        <div class="dps-modal__body">
-            <p id="dps-permanent-client-name" style="font-weight: 600; margin-bottom: 16px;"></p>
-            <div id="dps-permanent-link-content">
-                <p><?php esc_html_e( 'Carregando...', 'dps-client-portal' ); ?></p>
-            </div>
-        </div>
-        <div class="dps-modal__footer">
-            <button type="button" class="button button-secondary dps-modal__close"><?php esc_html_e( 'Fechar', 'dps-client-portal' ); ?></button>
-        </div>
-    </div>
-</div>
-
 <?php
-// Prepara dados para JavaScript (histórico e links permanentes)
-$history_data = [];
-$permanent_links_data = [];
-
-// Cache de opções de formato de data (evita múltiplas chamadas get_option)
-$date_format = get_option( 'date_format' );
-$time_format = get_option( 'time_format' );
-$datetime_format = $date_format . ' ' . $time_format;
-
-// Token manager é singleton, obtém uma vez fora do loop
-$token_manager = DPS_Portal_Token_Manager::get_instance();
-
-foreach ( $clients as $client_data ) {
-    $client_id = $client_data['id'];
-    
-    // Histórico de acessos
-    $access_history = $token_manager->get_access_history( $client_id, 20 );
-    if ( ! empty( $access_history ) ) {
-        $history_data[ $client_id ] = [];
-        foreach ( $access_history as $access ) {
-            // Trunca user_agent para exibição (80 chars é suficiente para a UI, log armazena até 255)
-            $display_user_agent = isset( $access['user_agent'] ) ? esc_html( substr( $access['user_agent'], 0, 80 ) ) : '—';
-            $history_data[ $client_id ][] = [
-                'date'       => date_i18n( $datetime_format, strtotime( $access['timestamp'] ) ),
-                'ip'         => isset( $access['ip'] ) ? esc_html( $access['ip'] ) : '—',
-                'user_agent' => $display_user_agent,
-            ];
-        }
-    }
-    
-    // Links permanentes ativos
-    $permanent_tokens = $token_manager->get_active_permanent_tokens( $client_id );
-    if ( ! empty( $permanent_tokens ) ) {
-        // Para tokens permanentes, precisamos armazenar a URL do portal (não o token em si por segurança)
-        $created_formatted = date_i18n( $datetime_format, strtotime( $permanent_tokens[0]['created_at'] ) );
-        $permanent_links_data[ $client_id ] = [
-            'count'    => count( $permanent_tokens ),
-            'created'  => $created_formatted,
-            // Nota: Não podemos recuperar o token original (está hashado), mas podemos mostrar info
-            'info'     => sprintf( 
-                __( 'Token permanente criado em %s. O link original foi enviado ao cliente quando gerado. Se precisar de um novo link, use "Gerar Novo Link" e selecione "Permanente".', 'dps-client-portal' ),
-                $created_formatted
-            ),
-        ];
-    }
+if ( 'admin' === $context ) {
+    echo '</div>';
 }
-?>
-
-<script>
-(function($) {
-    'use strict';
-    
-    var historyData = <?php echo wp_json_encode( $history_data ); ?>;
-    var permanentLinksData = <?php echo wp_json_encode( $permanent_links_data ); ?>;
-    
-    // Handler para botão de histórico
-    $(document).on('click', '.dps-view-history-btn', function(e) {
-        e.preventDefault();
-        var clientId = $(this).data('client-id');
-        var clientName = $(this).data('client-name');
-        
-        $('#dps-history-client-name').text(clientName);
-        
-        var content = '';
-        if (historyData[clientId] && historyData[clientId].length > 0) {
-            content = '<table class="widefat striped" style="font-size: 13px;">';
-            content += '<thead><tr><th><?php echo esc_js( __( 'Data/Hora', 'dps-client-portal' ) ); ?></th><th><?php echo esc_js( __( 'IP', 'dps-client-portal' ) ); ?></th><th><?php echo esc_js( __( 'Navegador', 'dps-client-portal' ) ); ?></th></tr></thead>';
-            content += '<tbody>';
-            
-            historyData[clientId].forEach(function(access) {
-                content += '<tr>';
-                content += '<td>' + access.date + '</td>';
-                content += '<td><code>' + access.ip + '</code></td>';
-                content += '<td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="' + access.user_agent + '">' + access.user_agent + '</td>';
-                content += '</tr>';
-            });
-            
-            content += '</tbody></table>';
-        } else {
-            content = '<p><?php echo esc_js( __( 'Nenhum acesso registrado ainda.', 'dps-client-portal' ) ); ?></p>';
-        }
-        
-        $('#dps-history-content').html(content);
-        $('#dps-access-history-modal').show();
-    });
-    
-    // Handler para botão de ver link permanente
-    $(document).on('click', '.dps-view-permanent-link-btn', function(e) {
-        e.preventDefault();
-        var clientId = $(this).data('client-id');
-        var clientName = $(this).data('client-name');
-        
-        $('#dps-permanent-client-name').text(clientName);
-        
-        var content = '';
-        if (permanentLinksData[clientId]) {
-            content = '<div class="notice notice-info" style="margin: 0; padding: 12px;">';
-            content += '<p><strong><?php echo esc_js( __( 'Informação sobre o Link Permanente', 'dps-client-portal' ) ); ?></strong></p>';
-            content += '<p>' + permanentLinksData[clientId].info + '</p>';
-            content += '<p><em><?php echo esc_js( __( 'Por segurança, links de acesso não são armazenados no sistema após a geração.', 'dps-client-portal' ) ); ?></em></p>';
-            content += '</div>';
-        } else {
-            content = '<p><?php echo esc_js( __( 'Nenhum link permanente ativo encontrado.', 'dps-client-portal' ) ); ?></p>';
-        }
-        
-        $('#dps-permanent-link-content').html(content);
-        $('#dps-permanent-link-modal').show();
-    });
-    
-    // Fechar modais
-    $(document).on('click', '#dps-access-history-modal .dps-modal__close, #dps-access-history-modal .dps-modal__overlay', function() {
-        $('#dps-access-history-modal').hide();
-    });
-    
-    $(document).on('click', '#dps-permanent-link-modal .dps-modal__close, #dps-permanent-link-modal .dps-modal__overlay', function() {
-        $('#dps-permanent-link-modal').hide();
-    });
-    
-})(jQuery);
-</script>

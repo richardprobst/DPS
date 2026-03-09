@@ -146,9 +146,17 @@ class DPS_Portal_Admin {
      * @param string $hook_suffix Sufixo do hook da página atual.
      */
     public function enqueue_admin_assets( $hook_suffix ) {
-        // Carrega CSS específico na listagem de mensagens
         if ( 'edit.php' === $hook_suffix && isset( $_GET['post_type'] ) && 'dps_portal_message' === $_GET['post_type'] ) {
             $this->enqueue_message_list_styles();
+        }
+
+        $portal_hooks = [
+            'desi-pet-shower_page_dps-client-logins',
+            'desi-pet-shower_page_dps-client-portal-settings',
+        ];
+
+        if ( in_array( $hook_suffix, $portal_hooks, true ) ) {
+            $this->enqueue_portal_admin_assets();
         }
     }
 
@@ -167,20 +175,53 @@ class DPS_Portal_Admin {
     }
 
     /**
-     * Enfileira o script de administração de logins do portal e localiza dados AJAX.
+     * Enfileira os assets da area administrativa de logins/configuracoes.
      *
-     * @since 2.5.1
+     * @return void
      */
-    private function enqueue_portal_admin_script() {
+    private function enqueue_portal_admin_assets() {
+        $style_deps = [];
+        if ( defined( 'DPS_BASE_URL' ) ) {
+            wp_register_style(
+                'dps-design-tokens',
+                DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
+                [],
+                defined( 'DPS_BASE_VERSION' ) ? DPS_BASE_VERSION : '2.0.0'
+            );
+            $style_deps[] = 'dps-design-tokens';
+        }
+
+        $style_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'assets/css/portal-admin.css';
+        $style_url  = DPS_CLIENT_PORTAL_ADDON_URL . 'assets/css/portal-admin.css';
+        $style_ver  = file_exists( $style_path ) ? filemtime( $style_path ) : '1.0.0';
+
+        wp_enqueue_style( 'dps-portal-admin', $style_url, $style_deps, $style_ver );
+
         $script_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'assets/js/portal-admin.js';
         $script_url  = DPS_CLIENT_PORTAL_ADDON_URL . 'assets/js/portal-admin.js';
-        $version     = file_exists( $script_path ) ? filemtime( $script_path ) : '1.0.0';
+        $script_ver  = file_exists( $script_path ) ? filemtime( $script_path ) : '1.0.0';
 
-        wp_enqueue_script( 'dps-portal-admin', $script_url, [ 'jquery' ], $version, true );
-
-        wp_localize_script( 'dps-portal-admin', 'dpsPortalAdmin', [
-            'nonce' => wp_create_nonce( 'dps_portal_admin_actions' ),
-        ] );
+        wp_enqueue_script( 'dps-portal-admin', $script_url, [ 'jquery' ], $script_ver, true );
+        wp_localize_script(
+            'dps-portal-admin',
+            'dpsPortalAdmin',
+            [
+                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+                'nonce'   => wp_create_nonce( 'dps_portal_admin_actions' ),
+                'i18n'    => [
+                    'generating'          => __( 'Gerando link...', 'dps-client-portal' ),
+                    'sendingEmail'        => __( 'Enviando e-mail...', 'dps-client-portal' ),
+                    'sendingPasswordMail' => __( 'Enviando acesso por senha...', 'dps-client-portal' ),
+                    'syncingUser'         => __( 'Sincronizando usuario...', 'dps-client-portal' ),
+                    'revoking'            => __( 'Revogando links...', 'dps-client-portal' ),
+                    'copySuccess'         => __( 'Copiado!', 'dps-client-portal' ),
+                    'copyError'           => __( 'Nao foi possivel copiar.', 'dps-client-portal' ),
+                    'genericError'        => __( 'Nao foi possivel concluir esta acao agora.', 'dps-client-portal' ),
+                    'confirmRevoke'       => __( 'Tem certeza que deseja revogar todos os links ativos deste cliente?', 'dps-client-portal' ),
+                    'whatsappMissing'     => __( 'Este cliente nao possui telefone cadastrado para WhatsApp.', 'dps-client-portal' ),
+                ],
+            ]
+        );
     }
 
     /**
@@ -478,23 +519,18 @@ class DPS_Portal_Admin {
 
         if ( ! $user_can_manage ) {
             echo '<div class="dps-portal-logins-restricted">';
-            echo '<p>' . esc_html__( 'Você não tem permissão para visualizar os logins dos clientes.', 'dps-client-portal' ) . '</p>';
+            echo '<p>' . esc_html__( 'Voce nao tem permissao para visualizar os logins dos clientes.', 'dps-client-portal' ) . '</p>';
             echo '</div>';
             return;
         }
 
-        // Determina URL base
         if ( ! $base_url ) {
             if ( 'admin' === $context ) {
                 $base_url = menu_page_url( 'dps-client-logins', false );
             } else {
-                $page_id  = get_queried_object_id();
-                if ( $page_id ) {
-                    $permalink = get_permalink( $page_id );
-                    $base_url = ( $permalink && is_string( $permalink ) ) ? $permalink : home_url();
-                } else {
-                    $base_url = home_url();
-                }
+                $page_id   = get_queried_object_id();
+                $permalink = $page_id ? get_permalink( $page_id ) : '';
+                $base_url  = ( $permalink && is_string( $permalink ) ) ? $permalink : home_url();
             }
         }
 
@@ -502,75 +538,79 @@ class DPS_Portal_Admin {
             $base_url = add_query_arg( 'tab', 'logins', $base_url );
         }
 
-        // Enfileira script do admin de logins com nonce para AJAX
-        $this->enqueue_portal_admin_script();
+        $this->enqueue_portal_admin_assets();
 
-        // Processa feedback
         $feedback_messages = $this->get_feedback_messages();
+        $search            = isset( $_GET['dps_search'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_search'] ) ) : '';
+        $clients           = $this->get_clients_with_token_stats( $search );
+        $login_summary     = $this->get_login_dashboard_summary( $clients );
 
-        // Busca clientes
-        $search = isset( $_GET['dps_search'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_search'] ) ) : '';
-        $clients = $this->get_clients_with_token_stats( $search );
-
-        // Carrega template
         $template_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'templates/admin-logins.php';
-        
+
         if ( file_exists( $template_path ) ) {
             include $template_path;
         } else {
-            echo '<p>' . esc_html__( 'Template não encontrado.', 'dps-client-portal' ) . '</p>';
+            echo '<p>' . esc_html__( 'Template nao encontrado.', 'dps-client-portal' ) . '</p>';
         }
     }
 
     /**
-     * Obtém mensagens de feedback da URL.
+     * Obtem mensagens de feedback da URL.
      *
-     * @return array Array de mensagens de feedback.
+     * @return array<int, array<string, string>>
      */
     private function get_feedback_messages() {
         $feedback_messages = [];
 
-        if ( isset( $_GET['dps_token_generated'], $_GET['client_id'] ) ) {
-            $client_name = get_the_title( absint( $_GET['client_id'] ) );
-            $feedback_messages[] = [
-                'type' => 'success',
-                'text' => sprintf( __( 'Link de acesso gerado com sucesso para %s.', 'dps-client-portal' ), $client_name ),
-            ];
-        }
-
-        if ( isset( $_GET['dps_tokens_revoked'], $_GET['client_id'] ) ) {
-            $count = absint( $_GET['dps_tokens_revoked'] );
-            $feedback_messages[] = [
-                'type' => 'success',
-                'text' => sprintf( _n( '%d link foi revogado.', '%d links foram revogados.', $count, 'dps-client-portal' ), $count ),
-            ];
+        if ( isset( $_GET['dps_portal_status'] ) ) {
+            $status = sanitize_key( wp_unslash( $_GET['dps_portal_status'] ) );
+            if ( 'saved' === $status ) {
+                $feedback_messages[] = [
+                    'type' => 'success',
+                    'text' => __( 'Configuracoes atualizadas com sucesso.', 'dps-client-portal' ),
+                ];
+            }
         }
 
         return $feedback_messages;
     }
 
     /**
-     * Busca clientes com estatísticas de tokens.
+     * Busca clientes com estatisticas de acesso do portal.
      *
      * @param string $search Termo de busca.
-     * @return array Array de clientes com dados.
+     * @return array<int, array<string, mixed>>
      */
     private function get_clients_with_token_stats( $search = '' ) {
-        // Usa repositório para buscar clientes
-        $clients_posts = $this->client_repository->get_clients( [
-            'search' => $search,
-        ] );
-        
+        $clients_posts = $this->client_repository->get_clients(
+            [
+                'search' => $search,
+            ]
+        );
+
         $token_manager = DPS_Portal_Token_Manager::get_instance();
+        $user_manager  = DPS_Portal_User_Manager::get_instance();
         $clients       = [];
 
         foreach ( $clients_posts as $client ) {
+            $client_id        = (int) $client->ID;
+            $token_stats      = $token_manager->get_client_stats( $client_id );
+            $password_access  = $user_manager->get_access_summary( $client_id );
+            $last_magic_login = $token_manager->get_last_login( $client_id );
+
             $clients[] = [
-                'id'          => $client->ID,
-                'name'        => get_the_title( $client->ID ),
-                'phone'       => get_post_meta( $client->ID, 'client_phone', true ),
-                'email'       => get_post_meta( $client->ID, 'client_email', true ),
-                'token_stats' => $token_manager->get_client_stats( $client->ID ),
+                'id'                    => $client_id,
+                'name'                  => get_the_title( $client_id ),
+                'edit_url'              => get_edit_post_link( $client_id ),
+                'phone'                 => (string) get_post_meta( $client_id, 'client_phone', true ),
+                'email'                 => (string) get_post_meta( $client_id, 'client_email', true ),
+                'token_stats'           => $token_stats,
+                'password_access'       => $password_access,
+                'last_login'            => $this->build_last_login_data( $client_id, $last_magic_login, $password_access['last_password_login_at'] ),
+                'recent_activity'       => $this->build_recent_activity( $client_id, $token_manager, $password_access['last_password_login_at'] ),
+                'active_permanent'      => count( $token_manager->get_active_permanent_tokens( $client_id ) ),
+                'last_magic_link_login' => (string) get_post_meta( $client_id, 'dps_portal_last_magic_link_login_at', true ),
+                'last_password_email'   => (string) $password_access['last_password_email_sent'],
             ];
         }
 
@@ -578,7 +618,140 @@ class DPS_Portal_Admin {
     }
 
     /**
-     * Renderiza a aba "Portal" na navegação do front-end.
+     * Consolida os indicadores da tela de logins.
+     *
+     * @param array<int, array<string, mixed>> $clients Clientes listados.
+     * @return array<string, int>
+     */
+    private function get_login_dashboard_summary( array $clients ) {
+        $summary = [
+            'total_clients'      => count( $clients ),
+            'with_email'         => 0,
+            'password_ready'     => 0,
+            'needs_sync'         => 0,
+            'email_conflicts'    => 0,
+            'active_magic_links' => 0,
+        ];
+
+        foreach ( $clients as $client ) {
+            if ( ! empty( $client['email'] ) ) {
+                $summary['with_email']++;
+            }
+
+            if ( ! empty( $client['token_stats']['active_tokens'] ) ) {
+                $summary['active_magic_links'] += (int) $client['token_stats']['active_tokens'];
+            }
+
+            if ( ! empty( $client['password_access']['can_use_password'] ) ) {
+                $summary['password_ready']++;
+            }
+
+            if ( ! empty( $client['password_access']['needs_sync'] ) ) {
+                $summary['needs_sync']++;
+            }
+
+            if ( isset( $client['password_access']['status'] ) && 'conflict' === $client['password_access']['status'] ) {
+                $summary['email_conflicts']++;
+            }
+        }
+
+        return $summary;
+    }
+
+    /**
+     * Resolve o ultimo acesso relevante do cliente.
+     *
+     * @param int               $client_id ID do cliente.
+     * @param array<string, mixed>|null $last_magic_login Ultimo login por link.
+     * @param string            $last_password_login Ultimo login por senha.
+     * @return array<string, string>
+     */
+    private function build_last_login_data( $client_id, $last_magic_login, $last_password_login ) {
+        $events = [];
+        $last_method = sanitize_key( get_post_meta( $client_id, 'dps_portal_last_login_method', true ) );
+
+        if ( is_array( $last_magic_login ) && ! empty( $last_magic_login['timestamp'] ) ) {
+            $events[] = [
+                'timestamp' => (string) $last_magic_login['timestamp'],
+                'method'    => 'magic_link',
+                'label'     => 'remember_cookie' === $last_method
+                    ? __( 'Acesso recorrente no dispositivo', 'dps-client-portal' )
+                    : __( 'Link direto', 'dps-client-portal' ),
+            ];
+        }
+
+        if ( ! empty( $last_password_login ) ) {
+            $events[] = [
+                'timestamp' => (string) $last_password_login,
+                'method'    => 'password',
+                'label'     => __( 'E-mail e senha', 'dps-client-portal' ),
+            ];
+        }
+
+        if ( empty( $events ) ) {
+            return [
+                'timestamp' => '',
+                'method'    => 'none',
+                'label'     => __( 'Nenhum acesso ainda', 'dps-client-portal' ),
+            ];
+        }
+
+        usort(
+            $events,
+            static function( $left, $right ) {
+                return strtotime( (string) $right['timestamp'] ) <=> strtotime( (string) $left['timestamp'] );
+            }
+        );
+
+        return $events[0];
+    }
+
+    /**
+     * Monta um historico curto para exibir no admin.
+     *
+     * @param int                      $client_id ID do cliente.
+     * @param DPS_Portal_Token_Manager $token_manager Gerenciador de tokens.
+     * @param string                   $last_password_login Ultimo login por senha.
+     * @return array<int, array<string, string>>
+     */
+    private function build_recent_activity( $client_id, $token_manager, $last_password_login ) {
+        $history    = [];
+        $last_method = sanitize_key( get_post_meta( $client_id, 'dps_portal_last_login_method', true ) );
+
+        foreach ( $token_manager->get_access_history( $client_id, 3 ) as $entry ) {
+            if ( empty( $entry['timestamp'] ) ) {
+                continue;
+            }
+
+            $history[] = [
+                'timestamp' => (string) $entry['timestamp'],
+                'label'     => 'remember_cookie' === $last_method && (string) get_post_meta( $client_id, 'dps_portal_last_magic_link_login_at', true ) === (string) $entry['timestamp']
+                    ? __( 'Acesso recorrente no dispositivo', 'dps-client-portal' )
+                    : __( 'Link direto', 'dps-client-portal' ),
+                'meta'      => ! empty( $entry['ip'] ) ? sprintf( __( 'IP %s', 'dps-client-portal' ), $entry['ip'] ) : '',
+            ];
+        }
+
+        if ( ! empty( $last_password_login ) ) {
+            $history[] = [
+                'timestamp' => (string) $last_password_login,
+                'label'     => __( 'E-mail e senha', 'dps-client-portal' ),
+                'meta'      => __( 'Login autenticado no WordPress', 'dps-client-portal' ),
+            ];
+        }
+
+        usort(
+            $history,
+            static function( $left, $right ) {
+                return strtotime( (string) $right['timestamp'] ) <=> strtotime( (string) $left['timestamp'] );
+            }
+        );
+
+        return array_slice( $history, 0, 4 );
+    }
+
+    /**
+     * Renderiza a aba "Portal" na navegacao do front-end.
      *
      * @param bool $visitor_only Se deve exibir apenas para visitantes.
      */
@@ -652,6 +825,8 @@ class DPS_Portal_Admin {
             echo '</div>';
             return;
         }
+
+        $this->enqueue_portal_admin_assets();
 
         $feedback_messages = [];
         $saved_param       = isset( $_GET['dps_portal_settings_saved'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_portal_settings_saved'] ) ) : '';

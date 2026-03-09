@@ -79,6 +79,8 @@ require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/interfaces/in
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/interfaces/interface-dps-portal-token-manager.php';
 
 // Inclui classes principais (legacy)
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-rate-limiter.php';
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-user-manager.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-token-manager.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-session-manager.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-admin-actions.php';
