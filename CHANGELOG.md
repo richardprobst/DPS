@@ -209,12 +209,19 @@ Antes de criar uma nova versão oficial:
 - **Clipboard**: fallback via `document.execCommand('copy')` para contextos sem HTTPS.
 - **Transições CSS**: substituído `transition: all` por propriedades específicas no botão de resgate.
 
+**Client Portal — Home autenticada refresh M3**
+
+- **Home reestruturada**: a aba Inicio passa a combinar hero contextual, cards de overview e quick actions priorizadas, com badges e status operacionais alimentados por um snapshot unico do cliente.
+- **Leitura operacional mais clara**: proximos passos, fidelidade, pendencias financeiras, mensagens e resumo do Space Groomers agora aparecem na primeira dobra com hierarquia visual mais forte e responsiva.
+- **Atalhos mais resilientes**: quick actions passam a descobrir as abas disponiveis no DOM e aceitam `data-portal-nav-target`, evitando quebra quando a ordem das tabs muda ou quando add-ons adicionam novas entradas.
 #### Fixed (Corrigido)
 
 - **Agenda vazia com filtros**: corrigida a condicao de empty state para refletir o conjunto filtrado real e oferecer acoes de limpar filtros ou abrir um novo agendamento.
 - **Paginacao e acessibilidade das tabs**: preservados `agenda_tab`, `filter_staff`, `filter_pending_payment` e `group_by_client` ao paginar a agenda completa; os paineis agora expoem `aria-labelledby`, `hidden` e navegacao por teclado consistente.
 - **Segurança**: corrigida verificação de propriedade do pet na impressão de histórico — usava meta key incorreta `pet_client_id` ao invés de `owner_id`, impedindo acesso legítimo à funcionalidade.
 
+- **Resumo do próximo agendamento**: a consulta de futuros no portal agora ordena por data/hora e ignora status concluidos ou cancelados, evitando destaque incorreto na home autenticada.
+- **WhatsApp do portal**: a ação de repetir serviço deixa de depender de número hardcoded e passa a usar apenas o contato configurado, com fallback seguro quando o número não estiver disponível.
 #### Security (Segurança)
 
 **Fase 1 — Segurança Crítica (Plano de Implementação)**

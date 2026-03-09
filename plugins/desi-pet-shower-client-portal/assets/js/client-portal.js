@@ -207,12 +207,10 @@
      * Gerencia acoes rapidas (Quick Actions) na aba inicial.
      */
     function handleQuickActions() {
-        // BotÃµes de aÃ§Ã£o rÃ¡pida que abrem o chat
         var chatButtons = document.querySelectorAll('[data-action="open-chat"]');
         chatButtons.forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
-                // Abre o chat widget
                 var chatToggle = document.querySelector('.dps-chat-toggle');
                 if (chatToggle) {
                     chatToggle.click();
@@ -220,26 +218,29 @@
             });
         });
 
-        // BotÃµes de aÃ§Ã£o rÃ¡pida que navegam para tabs
-        var tabButtons = document.querySelectorAll('.dps-quick-action[data-tab], .dps-link-button[data-tab], .dps-pet-card__action-btn[data-tab], .dps-overview-card[data-tab]');
-        // Lista de tabs vÃ¡lidas para prevenir DOM-based XSS
-        var validTabs = ['inicio', 'fidelidade', 'avaliacoes', 'mensagens', 'agendamentos', 'pagamentos', 'historico-pets', 'galeria', 'dados'];
-        
+        var tabButtons = document.querySelectorAll('[data-portal-nav-target], .dps-quick-action[data-tab], .dps-link-button[data-tab], .dps-pet-card__action-btn[data-tab], .dps-overview-card[data-tab]');
+        var validTabs = Array.prototype.slice.call(document.querySelectorAll('.dps-portal-tabs__link[data-tab]')).map(function(tab) {
+            return tab.getAttribute('data-tab');
+        }).filter(function(tabId, index, allTabs) {
+            return !!tabId && allTabs.indexOf(tabId) === index;
+        });
+
+        if (!validTabs.length) {
+            return;
+        }
+
         tabButtons.forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
-                var targetTab = this.getAttribute('data-tab');
-                
-                // Valida se a tab Ã© uma das tabs conhecidas
+                var targetTab = this.getAttribute('data-portal-nav-target') || this.getAttribute('data-tab');
+
                 if (!targetTab || validTabs.indexOf(targetTab) === -1) {
                     return;
                 }
 
-                // Encontra e clica na tab correspondente (selector seguro apÃ³s validaÃ§Ã£o)
                 var tabLink = document.querySelector('.dps-portal-tabs__link[data-tab="' + targetTab + '"]');
                 if (tabLink) {
                     tabLink.click();
-                    // Scroll suave para o topo do conteÃºdo
                     var tabContent = document.querySelector('.dps-portal-tab-content');
                     if (tabContent) {
                         tabContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -247,7 +248,6 @@
                 }
             });
 
-            // Keyboard support for role="button" elements (Enter/Space)
             if (btn.getAttribute('role') === 'button') {
                 btn.addEventListener('keydown', function(e) {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -2848,41 +2848,34 @@ window.DPSSkeleton = (function() {
      * RevisÃ£o de layout: Janeiro 2026
      */
     function handleRepeatService() {
-        // Handler para botÃµes que nÃ£o sÃ£o links diretos (fallback)
         var repeatButtons = document.querySelectorAll('button.dps-btn-repeat-service');
 
         repeatButtons.forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var services = this.getAttribute('data-services');
-                var petId = this.getAttribute('data-pet-id');
-                
-                // Tenta parsear serviÃ§os
-                var servicesText = 'serviÃ§os';
+
+                var servicesText = 'servicos';
                 try {
                     var servicesArray = JSON.parse(services);
                     if (Array.isArray(servicesArray) && servicesArray.length > 0) {
                         servicesText = servicesArray.join(', ');
                     }
                 } catch (e) {
-                    // MantÃ©m texto genÃ©rico
+                    // Keep generic text.
                 }
 
-                // Monta mensagem
-                var message = 'OlÃ¡! Gostaria de agendar novamente os serviÃ§os: ' + servicesText + ' para meu pet.';
-                
-                // ObtÃ©m nÃºmero do WhatsApp (usa valor padrÃ£o se nÃ£o encontrado)
-                var whatsappNumber = '5515991606299'; // Valor padrÃ£o
-                if (typeof dpsPortal !== 'undefined' && dpsPortal.whatsappNumber) {
-                    whatsappNumber = dpsPortal.whatsappNumber;
+                var message = 'Ola! Gostaria de agendar novamente os servicos: ' + servicesText + ' para meu pet.';
+                var whatsappNumber = typeof dpsPortal !== 'undefined' && dpsPortal.whatsappNumber ? dpsPortal.whatsappNumber : '';
+                if (!whatsappNumber) {
+                    console.warn('WhatsApp number is not configured');
+                    return;
                 }
 
-                // Valida que o nÃºmero contÃ©m apenas dÃ­gitos e + (previne URL manipulation)
                 if (!/^[\d+]+$/.test(whatsappNumber)) {
                     console.warn('WhatsApp number contains invalid characters');
                     return;
                 }
 
-                // Abre WhatsApp
                 var whatsappUrl = 'https://wa.me/' + whatsappNumber + '?text=' + encodeURIComponent(message);
                 window.open(whatsappUrl, '_blank');
             });

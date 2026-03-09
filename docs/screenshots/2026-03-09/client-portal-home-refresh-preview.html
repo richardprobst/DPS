@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Portal do Cliente - Home Refresh Preview</title>
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-client-portal/assets/css/client-portal.css">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(14, 165, 233, 0.18), transparent 32%),
+                radial-gradient(circle at top right, rgba(251, 191, 36, 0.18), transparent 28%),
+                linear-gradient(180deg, #f5f8fb 0%, #edf3f8 100%);
+        }
+
+        .portal-preview-frame {
+            max-width: 1480px;
+            margin: 0 auto;
+            padding: 32px 20px 72px;
+        }
+
+        .portal-preview-note {
+            margin: 0 0 16px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            color: #334155;
+            font: 600 13px/1.4 system-ui, sans-serif;
+        }
+
+        .preview-stack {
+            display: grid;
+            gap: 20px;
+        }
+
+        .preview-card {
+            padding: 24px;
+            border-radius: 28px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: 0 22px 60px rgba(15, 23, 42, 0.08);
+        }
+
+        .preview-card h3,
+        .preview-card p {
+            margin: 0;
+        }
+
+        .preview-card__header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .preview-card__eyebrow {
+            display: inline-block;
+            margin-bottom: 8px;
+            color: #0f766e;
+            font: 700 12px/1.2 system-ui, sans-serif;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .preview-card__title {
+            font: 700 24px/1.2 system-ui, sans-serif;
+            color: #0f172a;
+        }
+
+        .preview-card__meta {
+            color: #475569;
+            font: 500 14px/1.5 system-ui, sans-serif;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .preview-pill {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            padding: 0 14px;
+            border-radius: 999px;
+            background: #e0f2fe;
+            color: #0c4a6e;
+            font: 700 12px/1 system-ui, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="portal-preview-frame">
+        <p class="portal-preview-note">Preview estatico da nova home do Portal do Cliente seguindo o padrao M3 de <code>docs/visual/</code> com o CSS real do add-on.</p>
+
+        <div class="dps-client-portal dps-portal-branded">
+            <div class="dps-portal-header dps-portal-header--branded">
+                <div class="dps-portal-header__main">
+                    <div class="dps-portal-hero" style="background-image: linear-gradient(135deg, rgba(14, 165, 233, 0.28), rgba(34, 197, 94, 0.16));"></div>
+                    <h1 class="dps-portal-title">Ola, Maria Probst</h1>
+                </div>
+                <div class="dps-portal-header__actions">
+                    <a href="#" class="dps-portal-review-link"><span class="dps-portal-review-icon">&#9733;</span><span class="dps-portal-review-text">Avalie-nos</span></a>
+                    <a href="#" class="dps-portal-logout">Sair</a>
+                </div>
+            </div>
+
+            <nav class="dps-portal-breadcrumb" aria-label="Navegacao">
+                <span class="dps-portal-breadcrumb__item">Portal do Cliente</span>
+                <span class="dps-portal-breadcrumb__separator" aria-hidden="true">&rsaquo;</span>
+                <span class="dps-portal-breadcrumb__item dps-portal-breadcrumb__item--active">Inicio</span>
+            </nav>
+
+            <div class="dps-portal-tabs-wrapper">
+                <nav class="dps-portal-tabs" role="tablist" aria-label="Secoes do portal">
+                    <div class="dps-portal-tabs__item"><button type="button" class="dps-portal-tabs__link is-active" data-tab="inicio"><span class="dps-portal-tabs__icon">&#127968;</span><span class="dps-portal-tabs__text">Inicio</span></button></div>
+                    <div class="dps-portal-tabs__item"><button type="button" class="dps-portal-tabs__link" data-tab="fidelidade"><span class="dps-portal-tabs__icon">&#127942;</span><span class="dps-portal-tabs__text">Fidelidade</span><span class="dps-portal-tabs__badge dps-portal-tabs__badge--loyalty">420</span></button></div>
+                    <div class="dps-portal-tabs__item"><button type="button" class="dps-portal-tabs__link" data-tab="mensagens"><span class="dps-portal-tabs__icon">&#128172;</span><span class="dps-portal-tabs__text">Mensagens</span><span class="dps-portal-tabs__badge">3</span></button></div>
+                    <div class="dps-portal-tabs__item"><button type="button" class="dps-portal-tabs__link" data-tab="agendamentos"><span class="dps-portal-tabs__icon">&#128197;</span><span class="dps-portal-tabs__text">Agendamentos</span><span class="dps-portal-tabs__badge">2</span></button></div>
+                    <div class="dps-portal-tabs__item"><button type="button" class="dps-portal-tabs__link" data-tab="pagamentos"><span class="dps-portal-tabs__icon">&#128179;</span><span class="dps-portal-tabs__text">Pagamentos</span><span class="dps-portal-tabs__badge">2</span></button></div>
+                    <div class="dps-portal-tabs__item"><button type="button" class="dps-portal-tabs__link" data-tab="dados"><span class="dps-portal-tabs__icon">&#9881;</span><span class="dps-portal-tabs__text">Meus Dados</span></button></div>
+                </nav>
+            </div>
+
+            <div class="dps-portal-tab-content">
+                <div id="panel-inicio" class="dps-portal-tab-panel is-active" role="tabpanel" aria-hidden="false">
+                    <section class="dps-portal-home-hero" aria-labelledby="preview-home-title">
+                        <div class="dps-portal-home-hero__main">
+                            <span class="dps-portal-home-hero__eyebrow">Central do cliente</span>
+                            <h2 id="preview-home-title" class="dps-portal-home-hero__title">Seu proximo cuidado esta organizado</h2>
+                            <p class="dps-portal-home-hero__lead">Banho e hidratação esta previsto para amanha, as 09:30, com Belinha. Existe R$ 148,00 em aberto para revisar e 3 mensagens novas aguardando voce.</p>
+                            <div class="dps-portal-home-hero__chips">
+                                <span class="dps-portal-home-hero__chip">2 pets cadastrados</span>
+                                <span class="dps-portal-home-hero__chip is-info">Amanha - 09:30 - Belinha</span>
+                                <span class="dps-portal-home-hero__chip is-warning">R$ 148,00 em aberto</span>
+                                <span class="dps-portal-home-hero__chip is-info">3 mensagens novas</span>
+                                <span class="dps-portal-home-hero__chip is-primary">420 pontos de fidelidade</span>
+                            </div>
+                            <div class="dps-portal-home-hero__actions">
+                                <button type="button" class="dps-portal-home-hero__action dps-portal-home-hero__action--primary">Ver proximo atendimento</button>
+                                <button type="button" class="dps-portal-home-hero__action">Abrir mensagens</button>
+                            </div>
+                        </div>
+                        <aside class="dps-portal-home-hero__aside" aria-label="Status rapido do portal">
+                            <span class="dps-portal-home-hero__eyebrow">Hoje no portal</span>
+                            <div class="dps-portal-home-status-list">
+                                <article class="dps-portal-home-status dps-portal-home-status--info">
+                                    <div class="dps-portal-home-status__copy">
+                                        <span class="dps-portal-home-status__label">Agenda</span>
+                                        <strong class="dps-portal-home-status__value">Amanha - 09:30 - Belinha</strong>
+                                    </div>
+                                    <span class="dps-portal-home-status__tone dps-portal-home-status__tone--info">Acompanhar</span>
+                                </article>
+                                <article class="dps-portal-home-status dps-portal-home-status--warning">
+                                    <div class="dps-portal-home-status__copy">
+                                        <span class="dps-portal-home-status__label">Pagamentos</span>
+                                        <strong class="dps-portal-home-status__value">2 titulos em aberto</strong>
+                                    </div>
+                                    <span class="dps-portal-home-status__tone dps-portal-home-status__tone--warning">Revisar</span>
+                                </article>
+                                <article class="dps-portal-home-status dps-portal-home-status--info">
+                                    <div class="dps-portal-home-status__copy">
+                                        <span class="dps-portal-home-status__label">Mensagens</span>
+                                        <strong class="dps-portal-home-status__value">Equipe respondeu hoje as 08:41</strong>
+                                    </div>
+                                    <span class="dps-portal-home-status__tone dps-portal-home-status__tone--info">Acompanhar</span>
+                                </article>
+                                <article class="dps-portal-home-status dps-portal-home-status--neutral">
+                                    <div class="dps-portal-home-status__copy">
+                                        <span class="dps-portal-home-status__label">Perfil</span>
+                                        <strong class="dps-portal-home-status__value">Cadastro atualizado com 2 pets</strong>
+                                    </div>
+                                    <span class="dps-portal-home-status__tone dps-portal-home-status__tone--neutral">Disponivel</span>
+                                </article>
+                            </div>
+                        </aside>
+                    </section>
+
+                    <section class="dps-portal-overview" aria-labelledby="preview-overview-title">
+                        <div class="dps-portal-overview__header">
+                            <div>
+                                <h2 id="preview-overview-title" class="dps-portal-overview__title">Visao rapida do portal</h2>
+                                <p class="dps-portal-overview__description">Cards acionaveis para chegar mais rapido na area certa.</p>
+                            </div>
+                        </div>
+                        <div class="dps-overview-cards">
+                            <button type="button" class="dps-overview-card dps-overview-card--appointments">
+                                <span class="dps-overview-card__icon" aria-hidden="true">&#128197;</span>
+                                <span class="dps-overview-card__content">
+                                    <span class="dps-overview-card__value">2</span>
+                                    <span class="dps-overview-card__label">Agendamentos ativos</span>
+                                    <span class="dps-overview-card__support">Amanha - 09:30 - Belinha</span>
+                                </span>
+                            </button>
+                            <button type="button" class="dps-overview-card dps-overview-card--pets">
+                                <span class="dps-overview-card__icon" aria-hidden="true">&#128062;</span>
+                                <span class="dps-overview-card__content">
+                                    <span class="dps-overview-card__value">2</span>
+                                    <span class="dps-overview-card__label">Pets cadastrados</span>
+                                    <span class="dps-overview-card__support">Belinha, Theo</span>
+                                </span>
+                            </button>
+                            <button type="button" class="dps-overview-card dps-overview-card--messages dps-overview-card--has-badge">
+                                <span class="dps-overview-card__icon" aria-hidden="true">&#128172;</span>
+                                <span class="dps-overview-card__content">
+                                    <span class="dps-overview-card__value">3</span>
+                                    <span class="dps-overview-card__label">Mensagens novas</span>
+                                    <span class="dps-overview-card__support">A equipe respondeu hoje no chat.</span>
+                                </span>
+                            </button>
+                            <button type="button" class="dps-overview-card dps-overview-card--payments dps-overview-card--alert">
+                                <span class="dps-overview-card__icon" aria-hidden="true">&#128179;</span>
+                                <span class="dps-overview-card__content">
+                                    <span class="dps-overview-card__value">2</span>
+                                    <span class="dps-overview-card__label">Pendencias financeiras</span>
+                                    <span class="dps-overview-card__support">R$ 148,00 aguardando revisao.</span>
+                                </span>
+                            </button>
+                            <button type="button" class="dps-overview-card dps-overview-card--loyalty">
+                                <span class="dps-overview-card__icon" aria-hidden="true">&#127942;</span>
+                                <span class="dps-overview-card__content">
+                                    <span class="dps-overview-card__value">420</span>
+                                    <span class="dps-overview-card__label">Pontos de fidelidade</span>
+                                    <span class="dps-overview-card__support">Programa pronto para resgates e indicacoes.</span>
+                                </span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="dps-portal-section dps-portal-game-summary" data-game-summary-state="success">
+                        <div class="dps-portal-game-summary__header">
+                            <div>
+                                <h2>Space Groomers</h2>
+                                <p class="dps-portal-game-summary__intro">O modulo de jogo continua visivel na home, agora abaixo do overview contextual.</p>
+                            </div>
+                            <span class="dps-portal-game-summary__pill">Sync ativo</span>
+                        </div>
+                        <div class="dps-portal-game-summary__grid">
+                            <article class="dps-portal-game-summary__card"><span class="dps-portal-game-summary__label">Missao atual</span><strong class="dps-portal-game-summary__value">Banho orbital</strong><small>83% completa</small></article>
+                            <article class="dps-portal-game-summary__card"><span class="dps-portal-game-summary__label">Streak</span><strong class="dps-portal-game-summary__value">5</strong><small>dias ativos</small></article>
+                            <article class="dps-portal-game-summary__card"><span class="dps-portal-game-summary__label">Recorde</span><strong class="dps-portal-game-summary__value">12.400</strong><small>pontos</small></article>
+                            <article class="dps-portal-game-summary__card"><span class="dps-portal-game-summary__label">Badges</span><strong class="dps-portal-game-summary__value">8</strong><small>desbloqueadas</small></article>
+                        </div>
+                        <div class="dps-portal-game-summary__footer">
+                            <span>Ultima run hoje as 07:58</span>
+                            <a href="#" class="dps-portal-game-summary__cta dps-link-button" data-portal-nav-target="inicio">Voltar ao jogo</a>
+                        </div>
+                    </section>
+
+                    <section class="dps-portal-quick-actions" aria-labelledby="preview-actions-title">
+                        <div class="dps-portal-quick-actions__header">
+                            <h2 id="preview-actions-title" class="dps-portal-quick-actions__title">Atalhos rapidos</h2>
+                            <p class="dps-portal-quick-actions__description">Ajuste o atendimento, fale com a equipe e mantenha o cadastro em ordem com poucos toques.</p>
+                        </div>
+                        <div class="dps-quick-actions">
+                            <a href="#" class="dps-quick-action dps-quick-action--primary"><span class="dps-quick-action__icon">&#128197;</span><span class="dps-quick-action__text">Agendar servico</span></a>
+                            <button type="button" class="dps-quick-action dps-quick-action--chat"><span class="dps-quick-action__icon">&#128172;</span><span class="dps-quick-action__text">Falar conosco</span></button>
+                            <button type="button" class="dps-quick-action"><span class="dps-quick-action__icon">&#9993;</span><span class="dps-quick-action__text">Abrir mensagens</span></button>
+                            <a href="#" class="dps-quick-action"><span class="dps-quick-action__icon">&#11088;</span><span class="dps-quick-action__text">Avaliar atendimento</span></a>
+                            <button type="button" class="dps-quick-action dps-quick-action--referral"><span class="dps-quick-action__icon">&#127873;</span><span class="dps-quick-action__text">Indique e ganhe</span></button>
+                            <button type="button" class="dps-quick-action"><span class="dps-quick-action__icon">&#9881;</span><span class="dps-quick-action__text">Meus dados</span></button>
+                        </div>
+                    </section>
+
+                    <div class="preview-stack">
+                        <article class="preview-card">
+                            <div class="preview-card__header">
+                                <div>
+                                    <span class="preview-card__eyebrow">Proximo atendimento</span>
+                                    <h3 class="preview-card__title">Banho, hidratacao e corte higienico</h3>
+                                </div>
+                                <span class="preview-pill">Confirmado</span>
+                            </div>
+                            <p class="preview-card__meta">Belinha chega amanha, 09:30. A equipe ja confirmou retirada no endereco de costume.</p>
+                        </article>
+                        <div class="preview-grid">
+                            <article class="preview-card">
+                                <div class="preview-card__header">
+                                    <div>
+                                        <span class="preview-card__eyebrow">Financeiro</span>
+                                        <h3 class="preview-card__title">2 cobrancas em aberto</h3>
+                                    </div>
+                                    <span class="preview-pill">R$ 148,00</span>
+                                </div>
+                                <p class="preview-card__meta">Uma parcela vence hoje e outra foi reemitida ontem apos ajuste de servico.</p>
+                            </article>
+                            <article class="preview-card">
+                                <div class="preview-card__header">
+                                    <div>
+                                        <span class="preview-card__eyebrow">Historico dos pets</span>
+                                        <h3 class="preview-card__title">Theo teve alta no ultimo grooming</h3>
+                                    </div>
+                                    <span class="preview-pill">Atualizado</span>
+                                </div>
+                                <p class="preview-card__meta">Fotos, observacoes e orientacoes do ultimo atendimento foram publicadas hoje no portal.</p>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

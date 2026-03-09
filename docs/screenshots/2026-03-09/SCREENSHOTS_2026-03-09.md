@@ -75,3 +75,38 @@
 ### Observacoes
 - As capturas foram geradas a partir de um preview estatico para registrar a camada visual e responsiva usando o CSS real do add-on.
 - A validacao funcional completa em um WordPress local nao foi executada neste ambiente.
+## Portal do Cliente - home autenticada refresh
+
+### Contexto
+- Objetivo da mudanca: revisar a home autenticada do Portal do Cliente, reorganizar a leitura inicial, corrigir a navegacao contextual e destacar agenda, mensagens, pagamentos e fidelidade logo na entrada.
+- Ambiente: preview HTML local com o CSS real do add-on, sem WordPress ativo nem banco de dados.
+- Referencia de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+
+### Antes/Depois
+- Resumo do antes: aba Inicio concentrava cards e secoes importantes sem hierarquia suficiente, badges eram montados por chamadas dispersas e os atalhos dependiam de tabs hardcoded no JS.
+- Resumo do depois: a home ganhou hero contextual, overview acionavel, atalhos mais orientados a tarefa, badges centralizados em snapshot unico e CTA de WhatsApp sem fallback inseguro.
+- Arquivos de codigo alterados:
+  - `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
+  - `plugins/desi-pet-shower-client-portal/includes/client-portal/repositories/class-dps-appointment-repository.php`
+  - `plugins/desi-pet-shower-client-portal/assets/js/client-portal.js`
+  - `plugins/desi-pet-shower-client-portal/assets/css/client-portal.css`
+  - `docs/screenshots/2026-03-09/client-portal-home-refresh-preview.html`
+
+### Breakpoints validados
+- 375px
+- 600px
+- 840px
+- 1200px
+- 1920px
+
+### Capturas
+- `./portal-home-refresh-mobile-375-fullpage.png`
+- `./portal-home-refresh-mobile-600-fullpage.png`
+- `./portal-home-refresh-tablet-840-fullpage.png`
+- `./portal-home-refresh-desktop-1200-fullpage.png`
+- `./portal-home-refresh-wide-1920-fullpage.png`
+- `./client-portal-home-refresh-preview.html`
+
+### Observacoes
+- A validacao visual foi feita sobre um preview estatico para exercitar o CSS oficial e registrar a nova composicao da home sem depender de uma instalacao WordPress ativa.
+- A validacao funcional no ambiente real continua limitada pela ausencia de `wp-config.php`, banco e sessao autenticada do portal neste workspace.

@@ -1263,6 +1263,10 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - `dados`: dados pessoais, pets e preferÃƒÂªncias de notificaÃƒÂ§ÃƒÂ£o
 - Hook `dps_portal_tabs` (filter): permite add-ons adicionarem abas customizadas
 
+**Notas de implementacao recentes**:
+- A home autenticada passou a usar um snapshot agregado do cliente para alimentar hero, cards de overview, quick actions e badges das tabs sem duplicar regras de apresentacao.
+- O JavaScript de navegacao rapida passou a resolver destinos a partir das tabs realmente renderizadas no DOM e aceita `data-portal-nav-target` como atributo preferencial para CTAs internos.
+- O resumo do proximo agendamento depende da ordenacao cronologica em `DPS_Appointment_Repository`, ignorando registros concluidos ou cancelados para evitar destaque incorreto na aba `inicio`.
 **Menus administrativos**:
 - **Portal do Cliente** (`dps-client-portal-settings`): configura??es gerais do portal, toggle 2FA e resumo operacional do acesso h?brido
 - **Logins de Clientes** (`dps-client-logins`): gerenciamento de tokens de acesso

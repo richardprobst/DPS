@@ -9480,3 +9480,354 @@ html {
         transition: none;
     }
 }
+
+/* ========================================
+   PORTAL HOME REFRESH - M3 EXPRESSIVE
+   Home contextual com hero, cards acionaveis e atalhos claros
+   ======================================== */
+
+.dps-portal-home-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.95fr);
+    gap: var(--dps-space-5);
+    padding: var(--dps-space-6);
+    background: linear-gradient(135deg, var(--dps-color-surface-container-lowest) 0%, var(--dps-color-primary-container) 100%);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-extra-large);
+    box-shadow: var(--dps-elevation-1);
+    margin-bottom: var(--dps-space-6);
+}
+
+.dps-portal-home-hero__main,
+.dps-portal-home-hero__aside {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-space-4);
+    min-width: 0;
+}
+
+.dps-portal-home-hero__aside {
+    padding: var(--dps-space-5);
+    background: color-mix(in srgb, var(--dps-color-surface-container-lowest) 82%, var(--dps-color-primary-container));
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-large);
+}
+
+.dps-portal-home-hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dps-space-2);
+    font-size: var(--dps-typescale-label-large-size);
+    font-weight: var(--dps-typescale-label-large-weight);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--dps-color-on-primary-container);
+}
+
+.dps-portal-home-hero__title {
+    margin: 0;
+    font-size: var(--dps-typescale-headline-large-size);
+    line-height: var(--dps-typescale-headline-large-line);
+    font-weight: var(--dps-typescale-headline-large-weight);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-portal-home-hero__lead {
+    margin: 0;
+    max-width: 58ch;
+    font-size: var(--dps-typescale-body-large-size);
+    line-height: var(--dps-typescale-body-large-line);
+    color: var(--dps-color-on-surface-variant);
+}
+
+.dps-portal-home-hero__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dps-space-2);
+}
+
+.dps-portal-home-hero__chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 var(--dps-space-3);
+    background: var(--dps-color-surface-container-low);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-full);
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-label-large-size);
+    font-weight: var(--dps-typescale-label-large-weight);
+}
+
+.dps-portal-home-hero__chip.is-primary {
+    background: var(--dps-color-primary-container);
+    color: var(--dps-color-on-primary-container);
+    border-color: color-mix(in srgb, var(--dps-color-primary) 32%, var(--dps-color-outline-variant));
+}
+
+.dps-portal-home-hero__chip.is-info {
+    background: var(--dps-color-secondary-container);
+    color: var(--dps-color-on-secondary-container);
+}
+
+.dps-portal-home-hero__chip.is-success {
+    background: var(--dps-color-success-container);
+    color: var(--dps-color-success);
+}
+
+.dps-portal-home-hero__chip.is-warning {
+    background: var(--dps-color-warning-container);
+    color: var(--dps-color-warning);
+}
+
+.dps-portal-home-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dps-space-3);
+}
+
+.dps-portal-home-hero__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 var(--dps-space-5);
+    border: 1px solid var(--dps-color-outline);
+    border-radius: var(--dps-shape-full);
+    background: var(--dps-color-surface-container-lowest);
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-label-large-size);
+    font-weight: var(--dps-typescale-label-large-weight);
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform var(--dps-motion-hover), box-shadow var(--dps-motion-hover), background-color var(--dps-motion-hover), color var(--dps-motion-hover), border-color var(--dps-motion-hover);
+}
+
+.dps-portal-home-hero__action:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--dps-elevation-2);
+}
+
+.dps-portal-home-hero__action:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
+}
+
+.dps-portal-home-hero__action--primary {
+    background: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+    border-color: var(--dps-color-primary);
+}
+
+.dps-portal-home-hero__action--primary:hover {
+    background: color-mix(in srgb, var(--dps-color-primary) 88%, #000 12%);
+    color: var(--dps-color-on-primary);
+}
+
+.dps-portal-home-status-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-space-3);
+}
+
+.dps-portal-home-status {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--dps-space-3);
+    padding-bottom: var(--dps-space-3);
+    border-bottom: 1px solid var(--dps-color-outline-variant);
+}
+
+.dps-portal-home-status:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.dps-portal-home-status__copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-space-1);
+    min-width: 0;
+}
+
+.dps-portal-home-status__label {
+    font-size: var(--dps-typescale-label-medium-size);
+    font-weight: var(--dps-typescale-label-medium-weight);
+    color: var(--dps-color-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.dps-portal-home-status__value {
+    font-size: var(--dps-typescale-body-large-size);
+    line-height: var(--dps-typescale-body-large-line);
+    font-weight: var(--dps-typescale-title-medium-weight);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-portal-home-status__tone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0 var(--dps-space-3);
+    border-radius: var(--dps-shape-full);
+    font-size: var(--dps-typescale-label-small-size);
+    font-weight: var(--dps-typescale-label-large-weight);
+    white-space: nowrap;
+}
+
+.dps-portal-home-status__tone--success {
+    background: var(--dps-color-success-container);
+    color: var(--dps-color-success);
+}
+
+.dps-portal-home-status__tone--warning {
+    background: var(--dps-color-warning-container);
+    color: var(--dps-color-warning);
+}
+
+.dps-portal-home-status__tone--info {
+    background: var(--dps-color-secondary-container);
+    color: var(--dps-color-on-secondary-container);
+}
+
+.dps-portal-home-status__tone--neutral {
+    background: var(--dps-color-surface-container-low);
+    color: var(--dps-color-on-surface-variant);
+}
+
+.dps-portal-overview__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--dps-space-3);
+    margin-bottom: var(--dps-space-4);
+}
+
+.dps-portal-overview__title,
+.dps-portal-quick-actions__title {
+    margin: 0;
+    font-size: var(--dps-typescale-title-large-size);
+    line-height: var(--dps-typescale-title-large-line);
+    font-weight: var(--dps-typescale-title-large-weight);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-portal-overview__description,
+.dps-portal-quick-actions__description {
+    margin: var(--dps-space-1) 0 0;
+    font-size: var(--dps-typescale-body-medium-size);
+    line-height: var(--dps-typescale-body-medium-line);
+    color: var(--dps-color-on-surface-variant);
+}
+
+.dps-overview-cards {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--dps-space-4);
+}
+
+.dps-overview-card {
+    width: 100%;
+    padding: var(--dps-space-4);
+    border-left-width: 4px;
+    appearance: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.dps-overview-card:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
+}
+
+.dps-overview-card__content {
+    gap: var(--dps-space-1);
+}
+
+.dps-overview-card__value {
+    font-size: var(--dps-typescale-headline-small-size);
+}
+
+.dps-overview-card__support {
+    display: block;
+    margin-top: var(--dps-space-1);
+    font-size: var(--dps-typescale-body-small-size);
+    line-height: var(--dps-typescale-body-small-line);
+    color: var(--dps-color-on-surface-variant);
+}
+
+.dps-overview-card--payments {
+    border-left-color: var(--dps-color-success);
+}
+
+.dps-overview-card--alert {
+    background: color-mix(in srgb, var(--dps-color-warning-container) 58%, var(--dps-color-surface-container-lowest));
+    border-left-color: var(--dps-color-warning);
+}
+
+.dps-portal-quick-actions {
+    display: grid;
+    gap: var(--dps-space-4);
+    padding: var(--dps-space-5);
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-large);
+}
+
+.dps-portal-quick-actions__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-space-1);
+}
+
+.dps-quick-actions {
+    gap: var(--dps-space-3);
+}
+
+@media (max-width: 1199px) {
+    .dps-portal-home-hero {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 839px) {
+    .dps-portal-home-hero,
+    .dps-portal-quick-actions {
+        padding: var(--dps-space-4);
+    }
+
+    .dps-overview-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 599px) {
+    .dps-portal-home-hero__actions,
+    .dps-quick-actions {
+        flex-direction: column;
+    }
+
+    .dps-portal-home-hero__action,
+    .dps-quick-action {
+        width: 100%;
+    }
+
+    .dps-overview-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-portal-home-status {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dps-portal-home-hero__action,
+    .dps-overview-card,
+    .dps-quick-action {
+        transition: none;
+    }
+}

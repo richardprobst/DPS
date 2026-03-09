@@ -46,41 +46,9 @@ class DPS_Appointment_Repository {
      * @return WP_Post|null Próximo agendamento ou null se não houver.
      */
     public function get_next_appointment_for_client( $client_id ) {
-        $today = current_time( 'Y-m-d' );
-        
-        $appointments = get_posts( [
-            'post_type'      => 'dps_agendamento',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'meta_query'     => [
-                [
-                    'key'     => 'appointment_client_id',
-                    'value'   => $client_id,
-                    'compare' => '=',
-                ],
-            ],
-            'orderby'        => 'meta_value',
-            'meta_key'       => 'appointment_date',
-            'order'          => 'ASC',
-        ] );
+        $appointments = $this->get_future_appointments_for_client( $client_id );
 
-        if ( empty( $appointments ) ) {
-            return null;
-        }
-
-        // Filtra para encontrar o próximo agendamento válido
-        foreach ( $appointments as $appt ) {
-            $date   = get_post_meta( $appt->ID, 'appointment_date', true );
-            $status = get_post_meta( $appt->ID, 'appointment_status', true );
-            
-            // Considera apenas status pendentes e datas futuras ou hoje
-            if ( $date && strtotime( $date ) >= strtotime( $today ) && 
-                 ! in_array( $status, [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ], true ) ) {
-                return $appt;
-            }
-        }
-
-        return null;
+        return ! empty( $appointments ) ? $appointments[0] : null;
     }
 
     /**
@@ -91,12 +59,16 @@ class DPS_Appointment_Repository {
      */
     public function get_future_appointments_for_client( $client_id ) {
         $today = current_time( 'Y-m-d' );
-        
-        $args = [
+
+        $appointments = get_posts( [
             'post_type'      => 'dps_agendamento',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
             'fields'         => 'ids',
+            'orderby'        => 'meta_value',
+            'meta_key'       => 'appointment_date',
+            'order'          => 'ASC',
+            'no_found_rows'  => true,
             'meta_query'     => [
                 [
                     'key'     => 'appointment_client_id',
@@ -110,19 +82,41 @@ class DPS_Appointment_Repository {
                     'type'    => 'DATE',
                 ],
             ],
-        ];
-        
-        $appointments = get_posts( $args );
-        
-        // Filtra por status válidos
+        ] );
+
         $valid_appointments = [];
-        foreach ( $appointments as $appt_id ) {
-            $status = get_post_meta( $appt_id, 'appointment_status', true );
-            if ( ! in_array( $status, [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ], true ) ) {
-                $valid_appointments[] = get_post( $appt_id );
+        foreach ( $appointments as $appointment_id ) {
+            $status = get_post_meta( $appointment_id, 'appointment_status', true );
+
+            if ( in_array( $status, [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ], true ) ) {
+                continue;
+            }
+
+            $appointment = get_post( $appointment_id );
+            if ( $appointment instanceof WP_Post ) {
+                $valid_appointments[] = $appointment;
             }
         }
-        
+
+        usort(
+            $valid_appointments,
+            static function ( $appointment_a, $appointment_b ) {
+                $date_a = (string) get_post_meta( $appointment_a->ID, 'appointment_date', true );
+                $time_a = (string) get_post_meta( $appointment_a->ID, 'appointment_time', true );
+                $date_b = (string) get_post_meta( $appointment_b->ID, 'appointment_date', true );
+                $time_b = (string) get_post_meta( $appointment_b->ID, 'appointment_time', true );
+
+                $timestamp_a = strtotime( trim( $date_a . ' ' . ( $time_a ?: '00:00' ) ) );
+                $timestamp_b = strtotime( trim( $date_b . ' ' . ( $time_b ?: '00:00' ) ) );
+
+                if ( false === $timestamp_a || false === $timestamp_b ) {
+                    return 0;
+                }
+
+                return $timestamp_a <=> $timestamp_b;
+            }
+        );
+
         return $valid_appointments;
     }
 

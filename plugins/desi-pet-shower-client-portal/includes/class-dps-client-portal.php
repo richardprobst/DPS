@@ -887,6 +887,7 @@ final class DPS_Client_Portal {
             $data['petHistoryNonce']       = wp_create_nonce( 'dps_portal_pet_history' );
             $data['clientPets']            = $client_pets_data;
             $data['schedulingSuggestions'] = $scheduling_suggestions;
+            $data['whatsappNumber']        = $this->get_portal_whatsapp_number();
             $data['loyalty']               = [
                 'nonce'        => wp_create_nonce( 'dps_portal_loyalty' ),
                 'historyLimit' => 5,
@@ -916,16 +917,11 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Retorna o link de WhatsApp para o cliente falar com a equipe.
+     * Retorna o numero de WhatsApp configurado para o portal.
      *
      * @return string
      */
-    private function get_portal_whatsapp_url() {
-        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
-            $message = DPS_WhatsApp_Helper::get_portal_access_request_message();
-            return (string) DPS_WhatsApp_Helper::get_link_to_team( $message );
-        }
-
+    private function get_portal_whatsapp_number() {
         $whatsapp_number = get_option( 'dps_whatsapp_number', '' );
         if ( ! $whatsapp_number ) {
             return '';
@@ -937,15 +933,41 @@ final class DPS_Client_Portal {
             $whatsapp_number = preg_replace( '/\D+/', '', (string) $whatsapp_number );
         }
 
+        return is_string( $whatsapp_number ) ? trim( $whatsapp_number ) : '';
+    }
+
+    /**
+     * Retorna o link de WhatsApp para o cliente falar com a equipe.
+     *
+     * @return string
+     */
+    private function get_portal_whatsapp_url() {
+        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+            $message = DPS_WhatsApp_Helper::get_portal_access_request_message();
+            return (string) DPS_WhatsApp_Helper::get_link_to_team( $message );
+        }
+
+        return $this->get_portal_whatsapp_link( __( 'Ola! Gostaria de receber acesso ao Portal do Cliente.', 'dps-client-portal' ) );
+    }
+
+    /**
+     * Monta uma URL de WhatsApp para o portal com mensagem customizada.
+     *
+     * @param string $message Mensagem inicial.
+     * @return string
+     */
+    private function get_portal_whatsapp_link( $message ) {
+        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+            return (string) DPS_WhatsApp_Helper::get_link_to_team( (string) $message );
+        }
+
+        $whatsapp_number = $this->get_portal_whatsapp_number();
         if ( ! $whatsapp_number ) {
             return '';
         }
 
-        $message = __( 'Ola! Gostaria de receber acesso ao Portal do Cliente.', 'dps-client-portal' );
-
-        return 'https://wa.me/' . $whatsapp_number . '?text=' . rawurlencode( $message );
+        return 'https://wa.me/' . $whatsapp_number . '?text=' . rawurlencode( (string) $message );
     }
-
     /**
      * Monta o contexto usado pela tela de acesso.
      *
@@ -1205,7 +1227,8 @@ final class DPS_Client_Portal {
         }
         
         // SaudaÃ§Ã£o personalizada com nome do cliente
-        $client_name = get_the_title( $client_id );
+        $client_name        = get_the_title( $client_id );
+        $dashboard_snapshot = $this->get_portal_dashboard_snapshot( $client_id );
         if ( $client_name ) {
             echo '<h1 class="dps-portal-title">';
             echo esc_html( sprintf( __( 'OlÃ¡, %s ðŸ‘‹', 'dps-client-portal' ), $client_name ) );
@@ -1245,15 +1268,7 @@ final class DPS_Client_Portal {
         echo '</nav>';
         
         // Define tabs padrÃ£o (Fase 2.3)
-        // Busca pontos de fidelidade para badge
-        $loyalty_badge = 0;
-        if ( function_exists( 'dps_loyalty_get_points' ) ) {
-            $loyalty_points = dps_loyalty_get_points( $client_id );
-            if ( $loyalty_points > 0 ) {
-                $loyalty_badge = $loyalty_points;
-            }
-        }
-
+        $loyalty_badge = ! empty( $dashboard_snapshot['loyalty_points'] ) ? (int) $dashboard_snapshot['loyalty_points'] : 0;
         $default_tabs = [
             'inicio' => [
                 'icon'  => 'ðŸ ',
@@ -1277,19 +1292,19 @@ final class DPS_Client_Portal {
                 'icon'  => 'ðŸ’¬',
                 'label' => __( 'Mensagens', 'dps-client-portal' ),
                 'active' => false,
-                'badge' => DPS_Portal_Data_Provider::get_instance()->get_unread_messages_count( $client_id ),
+                'badge' => (int) $dashboard_snapshot['unread_count'],
             ],
             'agendamentos' => [
                 'icon'  => 'ðŸ“…',
                 'label' => __( 'Agendamentos', 'dps-client-portal' ),
                 'active' => false,
-                'badge' => DPS_Portal_Data_Provider::get_instance()->count_upcoming_appointments( $client_id ),
+                'badge' => (int) $dashboard_snapshot['upcoming_count'],
             ],
             'pagamentos' => [
                 'icon'  => 'ðŸ’³',
                 'label' => __( 'Pagamentos', 'dps-client-portal' ),
                 'active' => false,
-                'badge' => DPS_Finance_Repository::get_instance()->count_pending_transactions( $client_id ),
+                'badge' => (int) $dashboard_snapshot['pending_count'],
             ],
             'historico-pets' => [
                 'icon'  => 'ðŸ¾',
@@ -1373,7 +1388,8 @@ final class DPS_Client_Portal {
         do_action( 'dps_portal_before_inicio_content', $client_id ); // Fase 2.3
         
         // Novo: Dashboard com mÃ©tricas rÃ¡pidas
-        $this->render_quick_overview( $client_id );
+        $this->render_portal_home_hero( $client_id, $dashboard_snapshot );
+        $this->render_quick_overview( $client_id, $dashboard_snapshot );
 
         if ( class_exists( 'DPS_Game_Progress_Service' ) ) {
             echo '<section class="dps-portal-section dps-portal-game-summary" data-game-summary-state="idle">';
@@ -1393,13 +1409,13 @@ final class DPS_Client_Portal {
             echo '</div>';
             echo '<div class="dps-portal-game-summary__footer">';
             echo '<span data-game-field="last-run">-</span>';
-            echo '<a href="#" class="dps-portal-game-summary__cta dps-link-button" data-tab="inicio">' . esc_html__( 'Voltar ao jogo', 'dps-client-portal' ) . '</a>';
+            echo '<a href="#" class="dps-portal-game-summary__cta dps-link-button" data-portal-nav-target="inicio">' . esc_html__( 'Voltar ao jogo', 'dps-client-portal' ) . '</a>';
             echo '</div>';
             echo '</section>';
         }
         
         // Novo: AÃ§Ãµes rÃ¡pidas
-        $this->render_quick_actions( $client_id );
+        $this->render_quick_actions( $client_id, $dashboard_snapshot );
         
         // ConteÃºdo principal â€” layout vertical empilhado (single-column)
         echo '<div class="dps-inicio-stack">';
@@ -1600,169 +1616,397 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Conta mensagens nÃ£o lidas do cliente.
-     * Fase 4 - continuaÃ§Ã£o: Central de mensagens
+     * Monta um snapshot do dashboard para a home do portal.
      *
      * @param int $client_id ID do cliente.
-     * @return int NÃºmero de mensagens nÃ£o lidas.
+     * @return array<string, mixed>
      */
+
+    private function get_portal_dashboard_snapshot( $client_id ) {
+        $data_provider          = DPS_Portal_Data_Provider::get_instance();
+        $appointment_repository = DPS_Appointment_Repository::get_instance();
+        $finance_repository     = DPS_Finance_Repository::get_instance();
+        $pet_repository         = DPS_Pet_Repository::get_instance();
+        $pets                   = $pet_repository->get_pets_by_client( $client_id );
+        $next_appointment       = $appointment_repository->get_next_appointment_for_client( $client_id );
+        $financial_summary      = $finance_repository->get_client_financial_summary( $client_id );
+        $pet_names              = [];
+
+        foreach ( array_slice( $pets, 0, 3 ) as $pet ) {
+            if ( $pet instanceof WP_Post ) {
+                $pet_names[] = $pet->post_title;
+            }
+        }
+
+        return [
+            'upcoming_count'   => (int) $data_provider->count_upcoming_appointments( $client_id ),
+            'pets_count'       => count( $pets ),
+            'pet_names'        => $pet_names,
+            'unread_count'     => (int) $data_provider->get_unread_messages_count( $client_id ),
+            'pending_count'    => (int) $data_provider->count_financial_pending( $client_id ),
+            'pending_total'    => is_array( $financial_summary ) && isset( $financial_summary['total_pending'] ) ? (float) $financial_summary['total_pending'] : 0.0,
+            'next_appointment' => $next_appointment,
+            'next_summary'     => $this->get_portal_next_appointment_summary( $next_appointment ),
+            'loyalty_enabled'  => function_exists( 'dps_loyalty_get_points' ),
+            'loyalty_points'   => function_exists( 'dps_loyalty_get_points' ) ? max( 0, (int) dps_loyalty_get_points( $client_id ) ) : 0,
+        ];
+    }
+
     /**
-     * Renderiza uma visÃ£o rÃ¡pida (dashboard) com mÃ©tricas do cliente.
-     * Mostra resumo visual de agendamentos, pendÃªncias e fidelidade.
+     * Resume o proximo agendamento para a home do portal.
      *
-     * @since 3.0.0
-     * @param int $client_id ID do cliente.
+     * @param WP_Post|null $appointment Agendamento futuro.
+     * @return array<string, string>
      */
-    private function render_quick_overview( $client_id ) {
-        // Conta agendamentos futuros
-        $upcoming = DPS_Portal_Data_Provider::get_instance()->count_upcoming_appointments( $client_id );
-        
-        // Conta pets
-        $pets = get_posts( [
-            'post_type'      => 'dps_pet',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'meta_key'       => 'owner_id',
-            'meta_value'     => $client_id,
-            'fields'         => 'ids',
-        ] );
-        $pets_count = count( $pets );
-        
-        // Conta mensagens nÃ£o lidas
-        $unread = DPS_Portal_Data_Provider::get_instance()->get_unread_messages_count( $client_id );
-        
-        // Pontos de fidelidade (se disponÃ­vel)
-        $points = 0;
-        if ( function_exists( 'dps_loyalty_get_points' ) ) {
-            $points = dps_loyalty_get_points( $client_id );
+    private function get_portal_next_appointment_summary( $appointment ) {
+        if ( ! $appointment instanceof WP_Post ) {
+            return [
+                'title'    => __( 'Nenhum atendimento reservado', 'dps-client-portal' ),
+                'detail'   => __( 'Use os atalhos abaixo para pedir um novo horario.', 'dps-client-portal' ),
+                'pet_name' => '',
+                'service'  => '',
+            ];
         }
-        
-        echo '<section class="dps-portal-overview">';
-        echo '<h2 class="sr-only">' . esc_html__( 'Resumo RÃ¡pido', 'dps-client-portal' ) . '</h2>';
-        
-        echo '<div class="dps-overview-cards">';
-        
-        // Card: Agendamentos
-        echo '<div class="dps-overview-card dps-overview-card--appointments">';
-        echo '<div class="dps-overview-card__icon">ðŸ“…</div>';
-        echo '<div class="dps-overview-card__content">';
-        echo '<span class="dps-overview-card__value">' . esc_html( $upcoming ) . '</span>';
-        echo '<span class="dps-overview-card__label">' . esc_html( _n( 'Agendamento', 'Agendamentos', $upcoming, 'dps-client-portal' ) ) . '</span>';
-        echo '</div>';
-        echo '</div>';
-        
-        // Card: Pets
-        echo '<div class="dps-overview-card dps-overview-card--pets">';
-        echo '<div class="dps-overview-card__icon">ðŸ¾</div>';
-        echo '<div class="dps-overview-card__content">';
-        echo '<span class="dps-overview-card__value">' . esc_html( $pets_count ) . '</span>';
-        echo '<span class="dps-overview-card__label">' . esc_html( _n( 'Pet', 'Pets', $pets_count, 'dps-client-portal' ) ) . '</span>';
-        echo '</div>';
-        echo '</div>';
-        
-        // Card: Mensagens
-        echo '<div class="dps-overview-card dps-overview-card--messages' . ( $unread > 0 ? ' dps-overview-card--has-badge' : '' ) . '">';
-        echo '<div class="dps-overview-card__icon">ðŸ’¬</div>';
-        echo '<div class="dps-overview-card__content">';
-        echo '<span class="dps-overview-card__value">' . esc_html( $unread ) . '</span>';
-        echo '<span class="dps-overview-card__label">' . esc_html( _n( 'Nova Mensagem', 'Novas Mensagens', $unread, 'dps-client-portal' ) ) . '</span>';
-        echo '</div>';
-        echo '</div>';
-        
-        // Card: Pontos (se fidelidade ativo) â€” destaque especial para engajamento
-        if ( function_exists( 'dps_loyalty_get_points' ) ) {
-            echo '<div class="dps-overview-card dps-overview-card--loyalty" role="button" tabindex="0" data-tab="fidelidade" style="cursor:pointer" aria-label="' . esc_attr__( 'Ver programa de fidelidade', 'dps-client-portal' ) . '">';
-            echo '<div class="dps-overview-card__icon">ðŸ†</div>';
-            echo '<div class="dps-overview-card__content">';
-            echo '<span class="dps-overview-card__value">' . esc_html( number_format( $points, 0, ',', '.' ) ) . '</span>';
-            echo '<span class="dps-overview-card__label">' . esc_html__( 'Pontos de Fidelidade', 'dps-client-portal' ) . '</span>';
-            echo '</div>';
-            echo '</div>';
+
+        $date     = (string) get_post_meta( $appointment->ID, 'appointment_date', true );
+        $time     = (string) get_post_meta( $appointment->ID, 'appointment_time', true );
+        $pet_id   = (int) get_post_meta( $appointment->ID, 'appointment_pet_id', true );
+        $pet_name = $pet_id > 0 ? get_the_title( $pet_id ) : '';
+        $services = get_post_meta( $appointment->ID, 'appointment_services', true );
+        $service  = __( 'Banho e tosa', 'dps-client-portal' );
+
+        if ( is_array( $services ) && ! empty( $services ) ) {
+            $service = implode( ', ', array_map( 'sanitize_text_field', $services ) );
+        } elseif ( is_string( $services ) && '' !== trim( $services ) ) {
+            $service = sanitize_text_field( $services );
         }
-        
-        echo '</div>'; // .dps-overview-cards
+
+        $detail_parts = [];
+        if ( $date ) {
+            $detail_parts[] = $this->get_portal_relative_date_label( $date );
+        }
+
+        if ( $time ) {
+            $detail_parts[] = sprintf( __( 'as %s', 'dps-client-portal' ), $time );
+        }
+
+        if ( $pet_name ) {
+            $detail_parts[] = $pet_name;
+        }
+
+        return [
+            'title'    => $pet_name ? sprintf( __( 'Proximo cuidado de %s', 'dps-client-portal' ), $pet_name ) : __( 'Proximo cuidado', 'dps-client-portal' ),
+            'detail'   => ! empty( $detail_parts ) ? implode( ' - ', $detail_parts ) : __( 'Data a confirmar', 'dps-client-portal' ),
+            'pet_name' => $pet_name,
+            'service'  => $service,
+        ];
+    }
+
+    /**
+     * Converte uma data em um rotulo relativo curto.
+     *
+     * @param string $date Data no formato Y-m-d.
+     * @return string
+     */
+    private function get_portal_relative_date_label( $date ) {
+        $target_timestamp = strtotime( $date . ' 00:00:00' );
+        if ( false === $target_timestamp ) {
+            return __( 'Data a confirmar', 'dps-client-portal' );
+        }
+
+        $current_timestamp = current_time( 'timestamp' );
+        $today_timestamp   = strtotime( wp_date( 'Y-m-d 00:00:00', $current_timestamp ) );
+        $diff_days         = (int) round( ( $target_timestamp - $today_timestamp ) / DAY_IN_SECONDS );
+
+        if ( 0 === $diff_days ) {
+            return __( 'Hoje', 'dps-client-portal' );
+        }
+
+        if ( 1 === $diff_days ) {
+            return __( 'Amanha', 'dps-client-portal' );
+        }
+
+        if ( $diff_days > 1 && $diff_days <= 7 ) {
+            return sprintf( __( 'Em %d dias', 'dps-client-portal' ), $diff_days );
+        }
+
+        return wp_date( get_option( 'date_format' ), $target_timestamp );
+    }
+
+    /**
+     * Renderiza o hero contextual da home do portal.
+     *
+     * @param int   $client_id ID do cliente.
+     * @param array $snapshot  Snapshot do dashboard.
+     * @return void
+     */
+    private function render_portal_home_hero( $client_id, array $snapshot ) {
+        $client_name         = get_the_title( $client_id );
+        $next_summary        = isset( $snapshot['next_summary'] ) && is_array( $snapshot['next_summary'] ) ? $snapshot['next_summary'] : [];
+        $has_upcoming        = ! empty( $snapshot['upcoming_count'] );
+        $has_pending         = ! empty( $snapshot['pending_count'] );
+        $has_unread          = ! empty( $snapshot['unread_count'] );
+        $pending_total_label = DPS_Money_Helper::format_currency_from_decimal( (float) $snapshot['pending_total'] );
+        $whatsapp_url        = $this->get_portal_whatsapp_link( __( 'Ola! Gostaria de agendar um servico.', 'dps-client-portal' ) );
+
+        if ( $has_upcoming ) {
+            $hero_title = __( 'Seu proximo cuidado esta organizado', 'dps-client-portal' );
+            $hero_lead  = sprintf( __( '%1$s esta previsto para %2$s. Use esta area para acompanhar ajustes, pagamentos e mensagens em um unico lugar.', 'dps-client-portal' ), $next_summary['service'] ?? __( 'O atendimento', 'dps-client-portal' ), $next_summary['detail'] ?? __( 'um novo horario', 'dps-client-portal' ) );
+        } elseif ( ! empty( $snapshot['pets_count'] ) ) {
+            $hero_title = __( 'Tudo pronto para o proximo atendimento', 'dps-client-portal' );
+            $hero_lead  = __( 'Com o portal voce revisa agenda, conversa com a equipe e atualiza dados sem depender do WhatsApp para tudo.', 'dps-client-portal' );
+        } else {
+            $hero_title = __( 'Vamos preparar o primeiro cuidado do seu pet', 'dps-client-portal' );
+            $hero_lead  = __( 'Assim que o cadastro estiver completo, o portal vira sua base para agenda, historico, mensagens e pagamentos.', 'dps-client-portal' );
+        }
+
+        if ( $has_unread ) {
+            $hero_lead .= ' ' . sprintf( _n( 'Ha %d mensagem nova aguardando voce.', 'Ha %d mensagens novas aguardando voce.', (int) $snapshot['unread_count'], 'dps-client-portal' ), (int) $snapshot['unread_count'] );
+        } elseif ( $has_pending ) {
+            $hero_lead .= ' ' . sprintf( __( 'Existe %s em aberto para revisar.', 'dps-client-portal' ), $pending_total_label );
+        }
+
+        echo '<section class="dps-portal-home-hero" aria-labelledby="dps-portal-home-title">';
+        echo '<div class="dps-portal-home-hero__main">';
+        echo '<span class="dps-portal-home-hero__eyebrow">' . esc_html__( 'Central do cliente', 'dps-client-portal' ) . '</span>';
+        echo '<h2 id="dps-portal-home-title" class="dps-portal-home-hero__title">' . esc_html( $hero_title ) . '</h2>';
+        echo '<p class="dps-portal-home-hero__lead">' . esc_html( $hero_lead ) . '</p>';
+
+        echo '<div class="dps-portal-home-hero__chips">';
+        echo '<span class="dps-portal-home-hero__chip">' . esc_html( sprintf( _n( '%d pet cadastrado', '%d pets cadastrados', (int) $snapshot['pets_count'], 'dps-client-portal' ), (int) $snapshot['pets_count'] ) ) . '</span>';
+        echo '<span class="dps-portal-home-hero__chip' . ( $has_upcoming ? ' is-info' : '' ) . '">' . esc_html( $has_upcoming ? ( $next_summary['detail'] ?? __( 'Horario em breve', 'dps-client-portal' ) ) : __( 'Sem agenda futura', 'dps-client-portal' ) ) . '</span>';
+        echo '<span class="dps-portal-home-hero__chip' . ( $has_pending ? ' is-warning' : ' is-success' ) . '">' . esc_html( $has_pending ? sprintf( __( '%s em aberto', 'dps-client-portal' ), $pending_total_label ) : __( 'Financeiro em dia', 'dps-client-portal' ) ) . '</span>';
+        echo '<span class="dps-portal-home-hero__chip' . ( $has_unread ? ' is-info' : '' ) . '">' . esc_html( $has_unread ? sprintf( _n( '%d mensagem nova', '%d mensagens novas', (int) $snapshot['unread_count'], 'dps-client-portal' ), (int) $snapshot['unread_count'] ) : __( 'Canal aberto com a equipe', 'dps-client-portal' ) ) . '</span>';
+        if ( ! empty( $snapshot['loyalty_enabled'] ) ) {
+            echo '<span class="dps-portal-home-hero__chip is-primary">' . esc_html( sprintf( __( '%s pontos de fidelidade', 'dps-client-portal' ), number_format( (int) $snapshot['loyalty_points'], 0, ',', '.' ) ) ) . '</span>';
+        }
+        echo '</div>';
+
+        echo '<div class="dps-portal-home-hero__actions">';
+        if ( $has_upcoming ) {
+            echo '<button type="button" class="dps-portal-home-hero__action dps-portal-home-hero__action--primary" data-portal-nav-target="agendamentos">' . esc_html__( 'Ver proximo atendimento', 'dps-client-portal' ) . '</button>';
+        } elseif ( ! empty( $whatsapp_url ) ) {
+            echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" rel="noopener noreferrer" class="dps-portal-home-hero__action dps-portal-home-hero__action--primary">' . esc_html__( 'Agendar banho ou tosa', 'dps-client-portal' ) . '</a>';
+        } else {
+            echo '<button type="button" class="dps-portal-home-hero__action dps-portal-home-hero__action--primary" data-action="open-chat">' . esc_html__( 'Falar com a equipe', 'dps-client-portal' ) . '</button>';
+        }
+
+        if ( $has_unread ) {
+            echo '<button type="button" class="dps-portal-home-hero__action" data-portal-nav-target="mensagens">' . esc_html__( 'Abrir mensagens', 'dps-client-portal' ) . '</button>';
+        } else {
+            echo '<button type="button" class="dps-portal-home-hero__action" data-portal-nav-target="dados">' . esc_html__( 'Atualizar meus dados', 'dps-client-portal' ) . '</button>';
+        }
+        echo '</div>';
+        echo '</div>';
+
+        echo '<aside class="dps-portal-home-hero__aside" aria-label="' . esc_attr__( 'Status rapido do portal', 'dps-client-portal' ) . '">';
+        echo '<span class="dps-portal-home-hero__eyebrow">' . esc_html__( 'Hoje no portal', 'dps-client-portal' ) . '</span>';
+        echo '<div class="dps-portal-home-status-list">';
+        $this->render_portal_home_status_item( __( 'Agenda', 'dps-client-portal' ), $has_upcoming ? ( $next_summary['detail'] ?? __( 'Em acompanhamento', 'dps-client-portal' ) ) : __( 'Sem horario reservado', 'dps-client-portal' ), $has_upcoming ? 'info' : 'neutral' );
+        $this->render_portal_home_status_item( __( 'Pagamentos', 'dps-client-portal' ), $has_pending ? sprintf( __( '%s em aberto', 'dps-client-portal' ), $pending_total_label ) : __( 'Nenhuma pendencia', 'dps-client-portal' ), $has_pending ? 'warning' : 'success' );
+        $this->render_portal_home_status_item( __( 'Mensagens', 'dps-client-portal' ), $has_unread ? sprintf( _n( '%d nova conversa', '%d novas conversas', (int) $snapshot['unread_count'], 'dps-client-portal' ), (int) $snapshot['unread_count'] ) : __( 'Sem novas mensagens', 'dps-client-portal' ), $has_unread ? 'info' : 'success' );
+        $this->render_portal_home_status_item( __( 'Perfil', 'dps-client-portal' ), $client_name ? sprintf( __( 'Conta ativa de %s', 'dps-client-portal' ), $client_name ) : __( 'Conta pronta para uso', 'dps-client-portal' ), 'neutral' );
+        echo '</div>';
+        echo '</aside>';
         echo '</section>';
     }
 
     /**
-     * Renderiza aÃ§Ãµes rÃ¡pidas para o cliente.
-     * Atalhos para as aÃ§Ãµes mais comuns do portal.
+     * Renderiza um item da lista lateral de status.
+     *
+     * @param string $label Rotulo.
+     * @param string $value Valor.
+     * @param string $tone  Tom visual.
+     * @return void
+     */
+    private function render_portal_home_status_item( $label, $value, $tone = 'neutral' ) {
+        $tone_label_map = [
+            'success' => __( 'Em dia', 'dps-client-portal' ),
+            'warning' => __( 'Revisar', 'dps-client-portal' ),
+            'info'    => __( 'Acompanhar', 'dps-client-portal' ),
+            'neutral' => __( 'Disponivel', 'dps-client-portal' ),
+        ];
+        $tone_class = isset( $tone_label_map[ $tone ] ) ? $tone : 'neutral';
+
+        echo '<article class="dps-portal-home-status dps-portal-home-status--' . esc_attr( $tone_class ) . '">';
+        echo '<div class="dps-portal-home-status__copy">';
+        echo '<span class="dps-portal-home-status__label">' . esc_html( $label ) . '</span>';
+        echo '<strong class="dps-portal-home-status__value">' . esc_html( $value ) . '</strong>';
+        echo '</div>';
+        echo '<span class="dps-portal-home-status__tone dps-portal-home-status__tone--' . esc_attr( $tone_class ) . '">' . esc_html( $tone_label_map[ $tone_class ] ) . '</span>';
+        echo '</article>';
+    }
+
+    /**
+     * Renderiza cards acionaveis de overview para a home do portal.
+     *
+     * @param int   $client_id ID do cliente.
+     * @param array $snapshot  Snapshot do dashboard.
+     * @return void
+     */
+    private function render_quick_overview( $client_id, array $snapshot = [] ) {
+        if ( empty( $snapshot ) ) {
+            $snapshot = $this->get_portal_dashboard_snapshot( $client_id );
+        }
+
+        $next_summary    = isset( $snapshot['next_summary'] ) && is_array( $snapshot['next_summary'] ) ? $snapshot['next_summary'] : [];
+        $pets_support    = ! empty( $snapshot['pet_names'] ) ? implode( ', ', $snapshot['pet_names'] ) : __( 'Cadastre o primeiro pet para liberar historico e agenda.', 'dps-client-portal' );
+        $message_support = ! empty( $snapshot['unread_count'] ) ? __( 'Abra a central para acompanhar respostas da equipe.', 'dps-client-portal' ) : __( 'Sem novidades. O chat continua disponivel quando voce precisar.', 'dps-client-portal' );
+        $payment_support = ! empty( $snapshot['pending_count'] ) ? sprintf( __( '%s aguardando revisao.', 'dps-client-portal' ), DPS_Money_Helper::format_currency_from_decimal( (float) $snapshot['pending_total'] ) ) : __( 'Tudo em dia no financeiro.', 'dps-client-portal' );
+
+        echo '<section class="dps-portal-overview" aria-labelledby="dps-portal-overview-title">';
+        echo '<div class="dps-portal-overview__header">';
+        echo '<div>';
+        echo '<h2 id="dps-portal-overview-title" class="dps-portal-overview__title">' . esc_html__( 'Visao rapida do portal', 'dps-client-portal' ) . '</h2>';
+        echo '<p class="dps-portal-overview__description">' . esc_html__( 'Cards acionaveis para chegar mais rapido na area certa.', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+        echo '</div>';
+
+        echo '<div class="dps-overview-cards">';
+        $this->render_overview_card( [
+            'modifier'    => 'appointments',
+            'icon'        => '&#128197;',
+            'value'       => number_format( (int) $snapshot['upcoming_count'], 0, ',', '.' ),
+            'label'       => __( 'Agendamentos ativos', 'dps-client-portal' ),
+            'support'     => ! empty( $snapshot['upcoming_count'] ) ? ( $next_summary['detail'] ?? __( 'Proximo atendimento em breve.', 'dps-client-portal' ) ) : __( 'Nenhum horario reservado no momento.', 'dps-client-portal' ),
+            'target'      => 'agendamentos',
+            'extra_class' => '',
+        ] );
+        $this->render_overview_card( [
+            'modifier'    => 'pets',
+            'icon'        => '&#128062;',
+            'value'       => number_format( (int) $snapshot['pets_count'], 0, ',', '.' ),
+            'label'       => __( 'Pets cadastrados', 'dps-client-portal' ),
+            'support'     => $pets_support,
+            'target'      => 'historico-pets',
+            'extra_class' => '',
+        ] );
+        $this->render_overview_card( [
+            'modifier'    => 'messages',
+            'icon'        => '&#128172;',
+            'value'       => number_format( (int) $snapshot['unread_count'], 0, ',', '.' ),
+            'label'       => __( 'Mensagens novas', 'dps-client-portal' ),
+            'support'     => $message_support,
+            'target'      => 'mensagens',
+            'extra_class' => ! empty( $snapshot['unread_count'] ) ? 'dps-overview-card--has-badge' : '',
+        ] );
+        $this->render_overview_card( [
+            'modifier'    => 'payments',
+            'icon'        => '&#128179;',
+            'value'       => ! empty( $snapshot['pending_count'] ) ? number_format( (int) $snapshot['pending_count'], 0, ',', '.' ) : __( 'OK', 'dps-client-portal' ),
+            'label'       => __( 'Pendencias financeiras', 'dps-client-portal' ),
+            'support'     => $payment_support,
+            'target'      => 'pagamentos',
+            'extra_class' => ! empty( $snapshot['pending_count'] ) ? 'dps-overview-card--alert' : '',
+        ] );
+
+        if ( ! empty( $snapshot['loyalty_enabled'] ) ) {
+            $this->render_overview_card( [
+                'modifier'    => 'loyalty',
+                'icon'        => '&#127942;',
+                'value'       => number_format( (int) $snapshot['loyalty_points'], 0, ',', '.' ),
+                'label'       => __( 'Pontos de fidelidade', 'dps-client-portal' ),
+                'support'     => __( 'Abra o programa para acompanhar beneficios, indicacoes e resgates.', 'dps-client-portal' ),
+                'target'      => 'fidelidade',
+                'extra_class' => '',
+            ] );
+        }
+
+        echo '</div>';
+        echo '</section>';
+    }
+
+    /**
+     * Renderiza um card acionavel da home do portal.
+     *
+     * @param array<string, string> $args Dados do card.
+     * @return void
+     */
+    private function render_overview_card( array $args ) {
+        $modifier    = isset( $args['modifier'] ) ? sanitize_html_class( (string) $args['modifier'] ) : 'generic';
+        $icon        = isset( $args['icon'] ) ? (string) $args['icon'] : '&#8226;';
+        $value       = isset( $args['value'] ) ? (string) $args['value'] : '0';
+        $label       = isset( $args['label'] ) ? (string) $args['label'] : '';
+        $support     = isset( $args['support'] ) ? (string) $args['support'] : '';
+        $target      = isset( $args['target'] ) ? (string) $args['target'] : 'inicio';
+        $extra_class = isset( $args['extra_class'] ) ? (string) $args['extra_class'] : '';
+        $class       = trim( 'dps-overview-card dps-overview-card--' . $modifier . ' ' . $extra_class );
+
+        echo '<button type="button" class="' . esc_attr( $class ) . '" data-portal-nav-target="' . esc_attr( $target ) . '" aria-label="' . esc_attr( $label ) . '">';
+        echo '<span class="dps-overview-card__icon" aria-hidden="true">' . wp_kses_post( $icon ) . '</span>';
+        echo '<span class="dps-overview-card__content">';
+        echo '<span class="dps-overview-card__value">' . esc_html( $value ) . '</span>';
+        echo '<span class="dps-overview-card__label">' . esc_html( $label ) . '</span>';
+        echo '<span class="dps-overview-card__support">' . esc_html( $support ) . '</span>';
+        echo '</span>';
+        echo '</button>';
+    }
+
+    /**
+     * Renderiza atalhos rapidos para o cliente.
      *
      * @since 3.0.0
-     * @param int $client_id ID do cliente.
+     * @param int   $client_id ID do cliente.
+     * @param array $snapshot  Snapshot do dashboard.
      */
-    private function render_quick_actions( $client_id ) {
-        // Gera link de agendamento via WhatsApp
-        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
-            $whatsapp_message = __( 'OlÃ¡! Gostaria de agendar um serviÃ§o.', 'dps-client-portal' );
-            $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( $whatsapp_message );
-        } else {
-            // Usa nÃºmero configurado nas opÃ§Ãµes do sistema (sem fallback hardcoded)
-            $whatsapp_number = get_option( 'dps_whatsapp_number', '' );
-            if ( empty( $whatsapp_number ) ) {
-                $whatsapp_url = '';
-            } else {
-                if ( class_exists( 'DPS_Phone_Helper' ) ) {
-                    $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
-                }
-                $whatsapp_text = urlencode( __( 'OlÃ¡! Gostaria de agendar um serviÃ§o.', 'dps-client-portal' ) );
-                $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . $whatsapp_text;
-            }
+    private function render_quick_actions( $client_id, array $snapshot = [] ) {
+        if ( empty( $snapshot ) ) {
+            $snapshot = $this->get_portal_dashboard_snapshot( $client_id );
         }
-        
-        // Link de avaliaÃ§Ã£o
-        $review_url = $this->get_review_url();
-        
-        echo '<section class="dps-portal-quick-actions">';
-        echo '<h2 class="sr-only">' . esc_html__( 'AÃ§Ãµes RÃ¡pidas', 'dps-client-portal' ) . '</h2>';
-        
+
+        $whatsapp_url = $this->get_portal_whatsapp_link( __( 'Ola! Gostaria de agendar um servico.', 'dps-client-portal' ) );
+        $review_url   = $this->get_review_url();
+        $description  = ! empty( $snapshot['upcoming_count'] )
+            ? __( 'Ajuste o atendimento, fale com a equipe e mantenha o cadastro em ordem com poucos toques.', 'dps-client-portal' )
+            : __( 'Escolha o atalho mais rapido para continuar sua jornada no portal.', 'dps-client-portal' );
+
+        echo '<section class="dps-portal-quick-actions" aria-labelledby="dps-portal-quick-actions-title">';
+        echo '<div class="dps-portal-quick-actions__header">';
+        echo '<h2 id="dps-portal-quick-actions-title" class="dps-portal-quick-actions__title">' . esc_html__( 'Atalhos rapidos', 'dps-client-portal' ) . '</h2>';
+        echo '<p class="dps-portal-quick-actions__description">' . esc_html( $description ) . '</p>';
+        echo '</div>';
+
         echo '<div class="dps-quick-actions">';
-        
-        // BotÃ£o: Agendar ServiÃ§o (apenas se WhatsApp configurado)
         if ( ! empty( $whatsapp_url ) ) {
             echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" rel="noopener noreferrer" class="dps-quick-action dps-quick-action--primary">';
-            echo '<span class="dps-quick-action__icon">ðŸ“…</span>';
-            echo '<span class="dps-quick-action__text">' . esc_html__( 'Agendar ServiÃ§o', 'dps-client-portal' ) . '</span>';
+            echo '<span class="dps-quick-action__icon">&#128197;</span>';
+            echo '<span class="dps-quick-action__text">' . esc_html__( 'Agendar servico', 'dps-client-portal' ) . '</span>';
             echo '</a>';
         }
-        
-        // BotÃ£o: Falar Conosco
+
         echo '<button type="button" class="dps-quick-action dps-quick-action--chat" data-action="open-chat">';
-        echo '<span class="dps-quick-action__icon">ðŸ’¬</span>';
-        echo '<span class="dps-quick-action__text">' . esc_html__( 'Falar Conosco', 'dps-client-portal' ) . '</span>';
+        echo '<span class="dps-quick-action__icon">&#128172;</span>';
+        echo '<span class="dps-quick-action__text">' . esc_html__( 'Falar conosco', 'dps-client-portal' ) . '</span>';
         echo '</button>';
-        
-        // BotÃ£o: Avaliar (se configurado)
-        if ( $review_url ) {
-            echo '<a href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener noreferrer" class="dps-quick-action">';
-            echo '<span class="dps-quick-action__icon">â­</span>';
-            echo '<span class="dps-quick-action__text">' . esc_html__( 'Avaliar Atendimento', 'dps-client-portal' ) . '</span>';
-            echo '</a>';
-        }
-        
-        // BotÃ£o: Indique e Ganhe (se fidelidade ativo)
-        if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
-            echo '<button type="button" class="dps-quick-action dps-quick-action--referral" data-tab="fidelidade">';
-            echo '<span class="dps-quick-action__icon">ðŸŽ</span>';
-            echo '<span class="dps-quick-action__text">' . esc_html__( 'Indique e Ganhe', 'dps-client-portal' ) . '</span>';
+
+        if ( ! empty( $snapshot['unread_count'] ) ) {
+            echo '<button type="button" class="dps-quick-action" data-portal-nav-target="mensagens">';
+            echo '<span class="dps-quick-action__icon">&#9993;</span>';
+            echo '<span class="dps-quick-action__text">' . esc_html__( 'Abrir mensagens', 'dps-client-portal' ) . '</span>';
             echo '</button>';
         }
 
-        // BotÃ£o: Meus Dados
-        echo '<button type="button" class="dps-quick-action" data-tab="dados">';
-        echo '<span class="dps-quick-action__icon">âš™ï¸</span>';
-        echo '<span class="dps-quick-action__text">' . esc_html__( 'Meus Dados', 'dps-client-portal' ) . '</span>';
+        if ( $review_url ) {
+            echo '<a href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener noreferrer" class="dps-quick-action">';
+            echo '<span class="dps-quick-action__icon">&#11088;</span>';
+            echo '<span class="dps-quick-action__text">' . esc_html__( 'Avaliar atendimento', 'dps-client-portal' ) . '</span>';
+            echo '</a>';
+        }
+
+        if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
+            echo '<button type="button" class="dps-quick-action dps-quick-action--referral" data-portal-nav-target="fidelidade">';
+            echo '<span class="dps-quick-action__icon">&#127873;</span>';
+            echo '<span class="dps-quick-action__text">' . esc_html__( 'Indique e ganhe', 'dps-client-portal' ) . '</span>';
+            echo '</button>';
+        }
+
+        echo '<button type="button" class="dps-quick-action" data-portal-nav-target="dados">';
+        echo '<span class="dps-quick-action__icon">&#9881;</span>';
+        echo '<span class="dps-quick-action__text">' . esc_html__( 'Meus dados', 'dps-client-portal' ) . '</span>';
         echo '</button>';
-        
-        echo '</div>'; // .dps-quick-actions
+        echo '</div>';
         echo '</section>';
     }
-
-    /**
-     * NÃºmero mÃ¡ximo de pets exibidos no resumo da aba InÃ­cio.
-     *
-     * @var int
-     */
     const PETS_SUMMARY_LIMIT = 6;
 
     /**
