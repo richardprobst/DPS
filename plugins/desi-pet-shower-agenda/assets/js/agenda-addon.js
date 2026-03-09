@@ -23,38 +23,38 @@
   function showToast(message, type, duration) {
     type = type || 'error';
     duration = duration || 4000;
-    
+
     // Remove toast existente
     $('.dps-toast').remove();
-    
+
     var icons = {
       error: '❌',
       success: '✅',
       warning: '⚠️',
       info: 'ℹ️'
     };
-    
+
     var icon = icons[type] || icons.info;
-    
+
     var toast = $('<div class="dps-toast dps-toast--' + type + '">' +
       '<span class="dps-toast-icon">' + icon + '</span>' +
       '<span class="dps-toast-message">' + escapeHtml(message) + '</span>' +
       '<button type="button" class="dps-toast-close" aria-label="Fechar">&times;</button>' +
     '</div>');
-    
+
     $('body').append(toast);
-    
+
     // Anima entrada
     setTimeout(function() {
       toast.addClass('dps-toast--visible');
     }, 10);
-    
+
     // Fechar ao clicar
     toast.find('.dps-toast-close').on('click', function() {
       toast.removeClass('dps-toast--visible');
       setTimeout(function() { toast.remove(); }, 300);
     });
-    
+
     // Auto-remove após duração
     if (duration > 0) {
       setTimeout(function() {
@@ -74,7 +74,7 @@
    */
   function getPetSizeInfo(size) {
     if (!size) return { label: '', icon: '🐕' };
-    
+
     var sizeLower = size.toLowerCase();
     var sizeMap = {
       'pequeno': { label: 'Pequeno', icon: '🐕' },
@@ -85,7 +85,7 @@
       'grande': { label: 'Grande', icon: '🐕‍🦺' },
       'large': { label: 'Grande', icon: '🐕‍🦺' }
     };
-    
+
     return sizeMap[sizeLower] || { label: '', icon: '🐕' };
   }
 
@@ -101,7 +101,7 @@
       'extra': { icon: '✨', typeClass: 'dps-service-type-extra', typeLabel: 'Extra' },
       'package': { icon: '📦', typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' }
     };
-    
+
     var categoryIcons = {
       'banho': '🛁',
       'tosa': '✂️',
@@ -109,12 +109,12 @@
       'ouvido': '👂',
       'dente': '🦷'
     };
-    
+
     // Verifica TaxiDog primeiro
     if (service.is_taxidog) {
       return typeIcons.taxidog;
     }
-    
+
     // Verifica tipo
     if (service.type && typeIcons[service.type]) {
       var info = Object.assign({}, typeIcons[service.type]);
@@ -122,7 +122,7 @@
       info.icon = getCategoryIcon(service, categoryIcons);
       return info;
     }
-    
+
     // Serviço padrão
     return {
       icon: getCategoryIcon(service, categoryIcons),
@@ -142,7 +142,7 @@
     if (service.category && categoryIcons[service.category]) {
       return categoryIcons[service.category];
     }
-    
+
     // Verifica pelo nome do serviço
     if (service.name) {
       var nameLower = service.name.toLowerCase();
@@ -152,7 +152,7 @@
         }
       }
     }
-    
+
     // Ícone padrão
     return '✂️';
   }
@@ -167,20 +167,23 @@
         select.data('current-status', select.val());
       }
     });
-    
-    // Restaura última aba visitada ao carregar página
+
+    // Restaura a ultima aba apenas quando a URL nao define uma aba explicitamente.
     try {
-      var lastTab = sessionStorage.getItem('dps_agenda_current_tab');
-      if (lastTab) {
-        var button = $('.dps-agenda-tab-button[data-tab="' + lastTab + '"]');
-        if (button.length) {
-          button.trigger('click');
+      var agendaUrl = new URL(window.location.href);
+      var requestedTab = agendaUrl.searchParams.get('agenda_tab');
+      if (!requestedTab) {
+        var lastTab = sessionStorage.getItem('dps_agenda_current_tab');
+        if (lastTab) {
+          var button = $('.dps-agenda-tab-button[data-tab="' + lastTab + '"]');
+          if (button.length) {
+            button.trigger('click');
+          }
         }
       }
     } catch(e) {
-      // Ignora erros de sessionStorage (modo privado, etc)
+      // Ignora erros de URL/sessionStorage (modo privado, etc)
     }
-
     $(document).on('click', '[data-dps-open-appointment-modal]', function(e){
       e.preventDefault();
       openAppointmentModal($(this));
@@ -288,7 +291,7 @@
         }
       });
     });
-    
+
     // UX-1: Evento para botões de ação rápida de status
     $(document).on('click', '.dps-quick-action-btn', function(e){
       e.preventDefault();
@@ -296,28 +299,28 @@
       var apptId = btn.data('appt-id');
       var actionType = btn.data('action');
       var row = $('tr[data-appt-id="' + apptId + '"]');
-      
+
       if ( ! apptId || ! actionType ) {
         return;
       }
-      
+
       // Desabilita todos os botões de ação da linha
       row.find('.dps-quick-action-btn').prop('disabled', true).addClass('is-loading');
-      
+
       var request = $.post(DPS_AG_Addon.ajax, {
         action: 'dps_agenda_quick_action',
         appt_id: apptId,
         action_type: actionType,
         nonce: DPS_AG_Addon.nonce_quick_action
       });
-      
+
       request.done(function(resp){
         if ( resp && resp.success ) {
           // UX-2: Substitui a linha inteira com o HTML atualizado
           if ( resp.data && resp.data.row_html ) {
             var newRow = $(resp.data.row_html);
             row.replaceWith(newRow);
-            
+
             // Anima a nova linha para feedback visual
             newRow.addClass('dps-row-updated');
             setTimeout(function(){
@@ -337,24 +340,24 @@
       }).fail(function(){
         handleQuickActionError(null, row);
       });
-      
+
       function handleQuickActionError(response, row){
-        var message = (response && response.data && response.data.message) 
-          ? response.data.message 
+        var message = (response && response.data && response.data.message)
+          ? response.data.message
           : 'Erro ao executar ação. Tente novamente.';
-        
+
         showToast(message, 'error');
-        
+
         // Remove estado de loading
         row.find('.dps-quick-action-btn').prop('disabled', false).removeClass('is-loading');
-        
+
         // Fallback: recarrega a página em caso de erro para garantir consistência
         setTimeout(function(){
           location.reload();
         }, 1000);
       }
     });
-    
+
     // CONF-2: Evento para botões de confirmação
     $(document).on('click', '.dps-confirmation-btn', function(e){
       e.preventDefault();
@@ -362,28 +365,28 @@
       var apptId = btn.data('appt-id');
       var confirmationStatus = btn.data('action');
       var row = $('tr[data-appt-id="' + apptId + '"]');
-      
+
       if ( ! apptId || ! confirmationStatus ) {
         return;
       }
-      
+
       // Desabilita todos os botões de confirmação da linha
       row.find('.dps-confirmation-btn').prop('disabled', true).addClass('is-loading');
-      
+
       var request = $.post(DPS_AG_Addon.ajax, {
         action: 'dps_agenda_update_confirmation',
         appt_id: apptId,
         confirmation_status: confirmationStatus,
         nonce: DPS_AG_Addon.nonce_confirmation
       });
-      
+
       request.done(function(resp){
         if ( resp && resp.success ) {
           // Substitui a linha inteira com o HTML atualizado
           if ( resp.data && resp.data.row_html ) {
             var newRow = $(resp.data.row_html);
             row.replaceWith(newRow);
-            
+
             // Anima a nova linha para feedback visual
             newRow.addClass('dps-row-updated');
             setTimeout(function(){
@@ -399,14 +402,14 @@
       }).fail(function(){
         handleConfirmationError(null, row);
       });
-      
+
       function handleConfirmationError(response, row){
-        var message = (response && response.data && response.data.message) 
-          ? response.data.message 
+        var message = (response && response.data && response.data.message)
+          ? response.data.message
           : 'Erro ao atualizar confirmação. Tente novamente.';
-        
+
         showToast(message, 'error');
-        
+
         // Remove estado de loading
         row.find('.dps-confirmation-btn').prop('disabled', false).removeClass('is-loading');
       }
@@ -583,15 +586,21 @@
     });
   });
 
-  // FASE 2: Exportação CSV (mantido por compatibilidade)
+  // FASE 2: Exportacao CSV (mantido por compatibilidade)
   $(document).on('click', '.dps-export-csv-btn', function(e){
     e.preventDefault();
     var btn = $(this);
     var date = btn.data('date');
     var view = btn.data('view');
-    
-    btn.prop('disabled', true).text('⏳ Exportando...');
-    
+    var defaultLabel = btn.data('default-label');
+
+    if (!defaultLabel) {
+      defaultLabel = $.trim(btn.text());
+      btn.data('default-label', defaultLabel);
+    }
+
+    btn.prop('disabled', true).text('Exportando...');
+
     $.post(DPS_AG_Addon.ajax, {
       action: 'dps_agenda_export_csv',
       nonce: DPS_AG_Addon.nonce_export,
@@ -599,7 +608,6 @@
       view: view
     }, function(resp){
       if ( resp && resp.success ) {
-        // Decodificar base64 e criar download
         var content = atob(resp.data.content);
         var blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
         var link = document.createElement('a');
@@ -607,38 +615,37 @@
         link.download = resp.data.filename;
         link.click();
         URL.revokeObjectURL(link.href);
-        btn.text('✅ Exportado!');
+        btn.text('Exportado!');
         setTimeout(function(){
-          btn.prop('disabled', false).html('📥 ' + getMessage('export', 'Exportar'));
+          btn.prop('disabled', false).text(defaultLabel);
         }, 2000);
       } else {
         showToast(resp.data ? resp.data.message : 'Erro ao exportar.', 'error');
-        btn.prop('disabled', false).html('📥 ' + getMessage('export', 'Exportar'));
+        btn.prop('disabled', false).text(defaultLabel);
       }
     }).fail(function(){
       showToast('Erro ao exportar agenda.', 'error');
-      btn.prop('disabled', false).html('📥 ' + getMessage('export', 'Exportar'));
+      btn.prop('disabled', false).text(defaultLabel);
     });
   });
-
   // FASE 2: Exportação PDF (abre página de impressão em nova janela)
   $(document).on('click', '.dps-export-pdf-btn', function(e){
     e.preventDefault();
     var btn = $(this);
     var date = btn.data('date') || '';
     var view = btn.data('view') || 'day';
-    
+
     // Constrói URL para a página de impressão PDF
-    var pdfUrl = DPS_AG_Addon.ajax + 
+    var pdfUrl = DPS_AG_Addon.ajax +
       '?action=dps_agenda_export_pdf' +
       '&date=' + encodeURIComponent(date) +
       '&view=' + encodeURIComponent(view) +
       '&nonce=' + encodeURIComponent(DPS_AG_Addon.nonce_export_pdf);
-    
+
     // Calcula dimensões responsivas para a janela
     var width = Math.min(950, window.screen.availWidth - 100);
     var height = Math.min(700, window.screen.availHeight - 100);
-    
+
     // Abre em nova janela com dimensões responsivas
     window.open(pdfUrl, '_blank', 'width=' + width + ',height=' + height + ',scrollbars=yes');
   });
@@ -646,7 +653,7 @@
   // =========================================================================
   // FASE 5: Reagendamento Rápido
   // =========================================================================
-  
+
   // Abrir modal de reagendamento
   $(document).on('click', '.dps-quick-reschedule', function(e){
     e.preventDefault();
@@ -654,7 +661,7 @@
     var apptId = btn.data('appt-id');
     var currentDate = btn.data('date');
     var currentTime = btn.data('time');
-    
+
     // XSS FIX: Escape dos valores que serão inseridos no HTML
     var modal = $('<div class="dps-reschedule-modal">' +
       '<div class="dps-reschedule-content">' +
@@ -678,37 +685,37 @@
         '</div>' +
       '</div>' +
     '</div>');
-    
+
     $('body').append(modal);
     modal.find('#dps-reschedule-date').focus();
   });
-  
+
   // Fechar modal de reagendamento
   $(document).on('click', '.dps-reschedule-close, .dps-reschedule-btn--cancel', function(){
     $('.dps-reschedule-modal').remove();
   });
-  
+
   // Fechar ao clicar fora do modal
   $(document).on('click', '.dps-reschedule-modal', function(e){
     if ( $(e.target).hasClass('dps-reschedule-modal') ) {
       $(this).remove();
     }
   });
-  
+
   // Salvar reagendamento
   $(document).on('click', '.dps-reschedule-btn--save', function(){
     var btn = $(this);
     var apptId = btn.data('appt-id');
     var newDate = $('#dps-reschedule-date').val();
     var newTime = $('#dps-reschedule-time').val();
-    
+
     if ( ! newDate || ! newTime ) {
       showToast(getMessage('fill_all_fields', 'Preencha todos os campos.'), 'warning');
       return;
     }
-    
+
     btn.prop('disabled', true).text(getMessage('saving', 'Salvando...'));
-    
+
     $.post(DPS_AG_Addon.ajax, {
       action: 'dps_quick_reschedule',
       nonce: DPS_AG_Addon.nonce_reschedule,
@@ -729,7 +736,7 @@
       btn.prop('disabled', false).text(getMessage('save', 'Salvar'));
     });
   });
-  
+
   // Tecla ESC fecha modal
   $(document).on('keydown', function(e){
     if ( e.key === 'Escape' && $('.dps-reschedule-modal').length ) {
@@ -740,12 +747,12 @@
   // =========================================================================
   // FASE 5: Histórico de Alterações
   // =========================================================================
-  
+
   $(document).on('click', '.dps-history-indicator', function(e){
     e.preventDefault();
     var btn = $(this);
     var apptId = btn.data('appt-id');
-    
+
     $.post(DPS_AG_Addon.ajax, {
       action: 'dps_get_appointment_history',
       nonce: DPS_AG_Addon.nonce_history,
@@ -757,7 +764,7 @@
           showToast(getMessage('no_history', 'Sem histórico de alterações.'), 'info');
           return;
         }
-        
+
         var content = getMessage('history_title', 'Histórico de Alterações') + ':\n\n';
         history.forEach(function(entry){
           var actionLabel = getActionLabel(entry.action);
@@ -772,7 +779,7 @@
             }
           }
         });
-        
+
         // Exibe histórico em alert - formato de texto longo requer modal dedicado
         // TODO: Criar modal genérico de conteúdo para substituir alert em histórico
         alert(content);
@@ -781,7 +788,7 @@
       }
     });
   });
-  
+
   function getActionLabel(action){
     var labels = {
       'created': getMessage('action_created', 'Criado'),
@@ -904,31 +911,67 @@
     });
   });
 
-  // FASE 6: Sistema de navegação entre abas
-  $(document).on('click', '.dps-agenda-tab-button', function(e){
-    e.preventDefault();
-    
-    var clickedButton = $(this);
+  // FASE 6: Sistema de navegacao entre abas
+  function activateAgendaTab(clickedButton) {
     var targetTab = clickedButton.data('tab');
-    
-    // Atualiza estado dos botões
-    $('.dps-agenda-tab-button').removeClass('dps-agenda-tab-button--active').attr('aria-selected', 'false');
-    clickedButton.addClass('dps-agenda-tab-button--active').attr('aria-selected', 'true');
-    
-    // Atualiza visibilidade dos conteúdos
-    $('.dps-tab-content').removeClass('dps-tab-content--active');
-    $('#dps-tab-content-' + targetTab).addClass('dps-tab-content--active');
-    
-    // Armazena preferência do usuário em sessionStorage
+    var buttons = $('.dps-agenda-tab-button');
+
+    buttons.removeClass('dps-agenda-tab-button--active')
+      .attr('aria-selected', 'false')
+      .attr('tabindex', '-1');
+    clickedButton.addClass('dps-agenda-tab-button--active')
+      .attr('aria-selected', 'true')
+      .attr('tabindex', '0');
+
+    $('.dps-tab-content').removeClass('dps-tab-content--active').attr('hidden', true);
+    $('#dps-tab-content-' + targetTab).addClass('dps-tab-content--active').removeAttr('hidden');
+
     try {
       sessionStorage.setItem('dps_agenda_current_tab', targetTab);
     } catch(e) {
       // Ignora erros de sessionStorage (modo privado, etc)
     }
-  });
-  
-  // Restaura última aba visitada ao carregar página removido daqui (movido para início do ready block)
 
+    try {
+      var nextUrl = new URL(window.location.href);
+      nextUrl.searchParams.set('agenda_tab', targetTab);
+      window.history.replaceState({}, '', nextUrl.toString());
+    } catch(e) {
+      // Ignora erros da URL API
+    }
+  }
+
+  $(document).on('click', '.dps-agenda-tab-button', function(e){
+    e.preventDefault();
+    activateAgendaTab($(this));
+  });
+
+  $(document).on('keydown', '.dps-agenda-tab-button', function(e){
+    var buttons = $('.dps-agenda-tab-button');
+    var currentIndex = buttons.index(this);
+    var nextIndex = currentIndex;
+
+    if (e.key === 'ArrowRight') {
+      nextIndex = (currentIndex + 1) % buttons.length;
+    } else if (e.key === 'ArrowLeft') {
+      nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+    } else if (e.key === 'Home') {
+      nextIndex = 0;
+    } else if (e.key === 'End') {
+      nextIndex = buttons.length - 1;
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      activateAgendaTab($(this));
+      return;
+    } else {
+      return;
+    }
+
+    e.preventDefault();
+    var nextButton = buttons.eq(nextIndex);
+    nextButton.focus();
+    activateAgendaTab(nextButton);
+  });
   // =========================================================================
   // FASE 7: Novos Handlers para Dropdowns e Popups
   // =========================================================================
@@ -939,9 +982,9 @@
     var apptId = select.data('appt-id');
     var confirmationStatus = select.val();
     var row = select.closest('tr');
-    
+
     select.prop('disabled', true).addClass('is-loading');
-    
+
     $.post(DPS_AG_Addon.ajax, {
       action: 'dps_agenda_update_confirmation',
       appt_id: apptId,
@@ -958,7 +1001,7 @@
         } else {
           select.addClass('dps-dropdown--not-confirmed');
         }
-        
+
         // Feedback visual
         row.css('background-color', '#d1fae5');
         setTimeout(function(){
@@ -982,9 +1025,9 @@
     var apptVersion = parseInt(select.data('appt-version'), 10) || 0;
     var previous = select.data('current-status');
     var row = select.closest('tr');
-    
+
     select.prop('disabled', true).addClass('is-loading');
-    
+
     $.post(DPS_AG_Addon.ajax, {
       action: 'dps_update_status',
       id: apptId,
@@ -997,7 +1040,7 @@
         if (resp.data && resp.data.version) {
           select.data('appt-version', resp.data.version);
         }
-        
+
         // Atualiza a classe do dropdown
         select.removeClass('dps-dropdown--pending dps-dropdown--finished dps-dropdown--paid dps-dropdown--cancelled');
         if (status === 'pendente') {
@@ -1009,11 +1052,11 @@
         } else if (status === 'cancelado') {
           select.addClass('dps-dropdown--cancelled');
         }
-        
+
         // Atualiza classes da linha
         row.removeClass('status-pendente status-finalizado status-finalizado_pago status-cancelado')
            .addClass('status-' + status);
-        
+
         // Feedback visual
         row.css('background-color', '#d1fae5');
         setTimeout(function(){
@@ -1046,9 +1089,9 @@
     e.preventDefault();
     var btn = $(this);
     var apptId = btn.data('appt-id');
-    
+
     btn.prop('disabled', true);
-    
+
     $.post(DPS_AG_Addon.ajax, {
       action: 'dps_get_services_details',
       appt_id: apptId,
@@ -1059,7 +1102,7 @@
         var notes = resp.data.notes || '';
         var pet = resp.data.pet || {};
         var totalDuration = resp.data.total_duration || 0;
-        
+
         // Monta o HTML do modal melhorado para funcionários
         var modalHtml = '<div class="dps-services-modal">' +
           '<div class="dps-services-modal-content">' +
@@ -1068,28 +1111,28 @@
               '<button type="button" class="dps-services-modal-close" aria-label="Fechar">&times;</button>' +
             '</div>' +
             '<div class="dps-services-modal-body">';
-        
+
         // Seção do pet (se disponível)
         if (pet && pet.name) {
           var petSizeInfo = getPetSizeInfo(pet.size);
-          
+
           modalHtml += '<div class="dps-services-pet-info">' +
             '<span class="dps-services-pet-icon">' + petSizeInfo.icon + '</span>' +
             '<div class="dps-services-pet-details">' +
               '<span class="dps-services-pet-name">' + escapeHtml(pet.name) + '</span>';
-          
+
           var petMeta = [];
           if (petSizeInfo.label) petMeta.push(petSizeInfo.label);
           if (pet.breed) petMeta.push(escapeHtml(pet.breed));
           if (pet.weight) petMeta.push(escapeHtml(pet.weight) + ' kg');
-          
+
           if (petMeta.length > 0) {
             modalHtml += '<span class="dps-services-pet-meta">' + petMeta.join(' • ') + '</span>';
           }
-          
+
           modalHtml += '</div></div>';
         }
-        
+
         // Resumo rápido no topo
         if (services.length > 0 || totalDuration > 0) {
           modalHtml += '<div class="dps-services-summary">';
@@ -1102,37 +1145,37 @@
           }
           modalHtml += '</div>';
         }
-        
+
         // Lista de serviços
         if (services.length > 0) {
           modalHtml += '<div class="dps-services-checklist">';
           modalHtml += '<h4 class="dps-services-section-title">Serviços a Realizar</h4>';
-          
+
           var total = 0;
           for (var i = 0; i < services.length; i++) {
             var srv = services[i];
             var price = parseFloat(srv.price) || 0;
             total += price;
-            
+
             // Usa função helper para obter informações visuais do serviço
             var visualInfo = getServiceVisualInfo(srv);
-            
+
             modalHtml += '<div class="dps-service-card ' + visualInfo.typeClass + '">' +
               '<div class="dps-service-card-header">' +
                 '<span class="dps-service-card-icon">' + visualInfo.icon + '</span>' +
                 '<div class="dps-service-card-info">' +
                   '<span class="dps-service-card-name">' + escapeHtml(srv.name) + '</span>' +
                   '<span class="dps-service-card-meta">';
-            
+
             var cardMeta = [];
             if (visualInfo.typeLabel && srv.type !== 'padrao') cardMeta.push(visualInfo.typeLabel);
             if (srv.duration && srv.duration > 0) cardMeta.push(srv.duration + ' min');
-            
+
             modalHtml += cardMeta.length > 0 ? cardMeta.join(' • ') : '';
             modalHtml += '</span></div>' +
                 '<span class="dps-service-card-price">R$ ' + price.toFixed(2).replace('.', ',') + '</span>' +
               '</div>';
-            
+
             // Descrição do serviço (instruções para o funcionário)
             if (srv.description && srv.description.trim()) {
               var escapedDesc = escapeHtml(srv.description).replace(/\n/g, '<br>');
@@ -1141,16 +1184,16 @@
                 '<span>' + escapedDesc + '</span>' +
               '</div>';
             }
-            
+
             modalHtml += '</div>';
           }
-          
+
           // Linha de total
           modalHtml += '<div class="dps-services-total-row">' +
             '<span class="dps-services-total-label">Total</span>' +
             '<span class="dps-services-total-value">R$ ' + total.toFixed(2).replace('.', ',') + '</span>' +
           '</div>';
-          
+
           modalHtml += '</div>'; // .dps-services-checklist
         } else {
           modalHtml += '<div class="dps-services-empty">' +
@@ -1158,7 +1201,7 @@
             '<span>Nenhum serviço registrado para este atendimento.</span>' +
           '</div>';
         }
-        
+
         // Observações do cliente (importante para o funcionário)
         if (notes) {
           var escapedNotes = escapeHtml(notes).replace(/\n/g, '<br>');
@@ -1170,9 +1213,9 @@
             '<div class="dps-services-notes-content">' + escapedNotes + '</div>' +
           '</div>';
         }
-        
+
         modalHtml += '</div></div></div>'; // Fecha body, content, modal
-        
+
         $('body').append(modalHtml);
       } else {
         showToast(resp && resp.data ? resp.data.message : 'Erro ao carregar serviços.', 'error');
@@ -1188,7 +1231,7 @@
   $(document).on('click', '.dps-services-modal-close', function(){
     $('.dps-services-modal').remove();
   });
-  
+
   $(document).on('click', '.dps-services-modal', function(e){
     if ($(e.target).hasClass('dps-services-modal')) {
       $(this).remove();
@@ -1206,7 +1249,7 @@
     var clientName = btn.data('client-name');
     var petName = btn.data('pet-name');
     var totalValue = btn.data('total-value');
-    
+
     // Formata o número de WhatsApp (Brasil)
     // Remove todos os caracteres não numéricos
     var whatsappNumber = (clientPhone || '').replace(/\D/g, '');
@@ -1223,9 +1266,9 @@
     } else if (whatsappNumber.length < 10) {
       // Número muito curto - mantém para o usuário corrigir
     }
-    
+
     var whatsappUrl = 'https://wa.me/' + whatsappNumber + '?text=' + encodeURIComponent(whatsappMsg);
-    
+
     // Monta o HTML do modal
     // XSS FIX: Escape de dados de texto inseridos no HTML
     // URLs em href não precisam de escapeHtml (já são URL-encoded), mas data-attributes sim
@@ -1252,7 +1295,7 @@
         '</div>' +
       '</div>' +
     '</div>';
-    
+
     $('body').append(modalHtml);
   });
 
@@ -1260,7 +1303,7 @@
   $(document).on('click', '.dps-payment-modal-close', function(){
     $('.dps-payment-modal').remove();
   });
-  
+
   $(document).on('click', '.dps-payment-modal', function(e){
     if ($(e.target).hasClass('dps-payment-modal')) {
       $(this).remove();
@@ -1271,7 +1314,7 @@
   $(document).on('click', '.dps-payment-action-btn--copy', function(){
     var btn = $(this);
     var link = btn.data('link');
-    
+
     // Copia para clipboard
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(link).then(function(){
@@ -1300,9 +1343,9 @@
     var apptId = select.data('appt-id');
     var taxidogStatus = select.val();
     var row = select.closest('tr');
-    
+
     select.prop('disabled', true).addClass('is-loading');
-    
+
     $.post(DPS_AG_Addon.ajax, {
       action: 'dps_agenda_update_taxidog',
       appt_id: apptId,
@@ -1331,13 +1374,13 @@
     var btn = $(this);
     var apptId = btn.data('appt-id');
     var row = btn.closest('tr');
-    
+
     if (!confirm('Deseja solicitar TaxiDog para este atendimento?')) {
       return;
     }
-    
+
     btn.prop('disabled', true).text('Solicitando...');
-    
+
     $.post(DPS_AG_Addon.ajax, {
       action: 'dps_agenda_request_taxidog',
       appt_id: apptId,

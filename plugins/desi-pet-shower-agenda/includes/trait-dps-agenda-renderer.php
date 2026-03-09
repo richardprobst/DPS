@@ -290,6 +290,129 @@ trait DPS_Agenda_Renderer {
     }
 
     /**
+     * Return active staff members for the agenda filter.
+     *
+     * @return WP_User[]
+     */
+    private function get_staff_for_filter() {
+        $staff = get_users(
+            [
+                'role'    => 'dps_groomer',
+                'orderby' => 'display_name',
+                'order'   => 'ASC',
+            ]
+        );
+
+        if ( empty( $staff ) ) {
+            return [];
+        }
+
+        return array_values(
+            array_filter(
+                $staff,
+                function( $user ) {
+                    $status = get_user_meta( $user->ID, '_dps_groomer_status', true );
+                    return empty( $status ) || 'active' === $status;
+                }
+            )
+        );
+    }
+
+    /**
+     * Build a short scope label for the current agenda view.
+     *
+     * @param string $selected_date Selected date.
+     * @param string $view Current view.
+     * @param bool   $show_all Whether the full agenda is active.
+     * @return string
+     */
+    private function get_agenda_scope_label( $selected_date, $view, $show_all ) {
+        if ( $show_all ) {
+            return __( 'Todos os atendimentos futuros', 'dps-agenda-addon' );
+        }
+
+        $timestamp = strtotime( $selected_date );
+        if ( ! $timestamp ) {
+            return __( 'Visao diaria', 'dps-agenda-addon' );
+        }
+
+        if ( 'week' === $view ) {
+            $date = DateTime::createFromFormat( 'Y-m-d', $selected_date );
+            if ( ! $date ) {
+                return __( 'Visao semanal', 'dps-agenda-addon' );
+            }
+
+            $start = clone $date;
+            $end   = clone $date;
+            $start->modify( 'monday this week' );
+            $end->modify( 'sunday this week' );
+
+            return sprintf(
+                __( 'Semana de %1$s a %2$s', 'dps-agenda-addon' ),
+                date_i18n( 'd/m', $start->getTimestamp() ),
+                date_i18n( 'd/m', $end->getTimestamp() )
+            );
+        }
+
+        if ( 'calendar' === $view ) {
+            return date_i18n( 'F Y', $timestamp );
+        }
+
+        return sprintf( __( 'Dia %s', 'dps-agenda-addon' ), date_i18n( 'd/m/Y', $timestamp ) );
+    }
+
+    /**
+     * Summarize the filtered appointment set for the agenda overview.
+     *
+     * @param array $appointments Filtered appointments.
+     * @return array<string,int>
+     */
+    private function get_agenda_overview_stats( $appointments ) {
+        $stats = [
+            'total'           => 0,
+            'pending'         => 0,
+            'completed'       => 0,
+            'late'            => 0,
+            'pending_payment' => 0,
+            'taxidog'         => 0,
+        ];
+
+        if ( empty( $appointments ) ) {
+            return $stats;
+        }
+
+        foreach ( $appointments as $appointment ) {
+            $stats['total']++;
+
+            $status = get_post_meta( $appointment->ID, 'appointment_status', true );
+            $status = $status ? $status : 'pendente';
+
+            if ( 'pendente' === $status ) {
+                $stats['pending']++;
+            } else {
+                $stats['completed']++;
+            }
+
+            $date = get_post_meta( $appointment->ID, 'appointment_date', true );
+            $time = get_post_meta( $appointment->ID, 'appointment_time', true );
+            if ( $this->is_appointment_late( $date, $time, $status ) ) {
+                $stats['late']++;
+            }
+
+            if ( class_exists( 'DPS_Agenda_Payment_Helper' ) && DPS_Agenda_Payment_Helper::has_pending_payment( $appointment->ID ) ) {
+                $stats['pending_payment']++;
+            }
+
+            $taxidog = get_post_meta( $appointment->ID, 'appointment_taxidog', true );
+            $taxidog_status = get_post_meta( $appointment->ID, 'appointment_taxidog_status', true );
+            if ( '1' === $taxidog || ! empty( $taxidog_status ) ) {
+                $stats['taxidog']++;
+            }
+        }
+
+        return $stats;
+    }
+    /**
      * Aplica filtros aos agendamentos.
      *
      * @since 1.3.0

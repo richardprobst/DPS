@@ -17,7 +17,7 @@ Este diretório centraliza registros visuais padronizados do sistema DPS.
   - [2026-02-15 — Agenda (Check-in / Check-out responsivo)](2026-02-15/SCREENSHOTS_2026-02-15.md)
   - [2026-02-16 — Booking add-on (revisão UX/UI)](2026-02-16/SCREENSHOTS_2026-02-16.md)
   - [2026-02-17 — Agenda add-on (revisão UX/UI)](2026-02-17/SCREENSHOTS_2026-02-17.md)
-  - [2026-03-09 ? Portal do Cliente (login h?brido)](2026-03-09/SCREENSHOTS_2026-03-09.md)
+  - [2026-03-09 - Portal do Cliente e Agenda](2026-03-09/SCREENSHOTS_2026-03-09.md)
   - [2026-03-08 - Space Groomers Fase 3 e resumo sincronizado no portal](2026-03-08/SCREENSHOTS_2026-03-08.md)
 
 ## Regras obrigatórias para novas mudanças visuais

@@ -169,6 +169,11 @@ Antes de criar uma nova versão oficial:
 
 #### Changed (Alterado)
 
+**Agenda Add-on - revisao UX/UI operacional**
+
+- **Shell da agenda**: reestruturado o cabecalho com contexto do periodo, CTAs principais, navegacao temporal mais clara e uma barra de contexto com filtros ativos.
+- **Filtros unificados**: reintroduzido painel unico com data foco, cliente, status, servico, profissional, pagamento pendente e agrupamento por cliente, com responsividade alinhada ao padrao M3.
+- **Leitura operacional**: a lista foi reorganizada em paineis por dia com cards de overview, contagem por status e persistencia da aba ativa na URL e na sessao.
 **Client Portal ? Tela inicial e administra??o de logins**
 
 - **Landing p?blica refeita no padr?o M3**: a p?gina inicial do portal agora apresenta lado a lado as op??es de link direto e e-mail com senha, com suporte contextual para WhatsApp quando o e-mail n?o estiver cadastrado.
@@ -206,6 +211,8 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+- **Agenda vazia com filtros**: corrigida a condicao de empty state para refletir o conjunto filtrado real e oferecer acoes de limpar filtros ou abrir um novo agendamento.
+- **Paginacao e acessibilidade das tabs**: preservados `agenda_tab`, `filter_staff`, `filter_pending_payment` e `group_by_client` ao paginar a agenda completa; os paineis agora expoem `aria-labelledby`, `hidden` e navegacao por teclado consistente.
 - **Segurança**: corrigida verificação de propriedade do pet na impressão de histórico — usava meta key incorreta `pet_client_id` ao invés de `owner_id`, impedindo acesso legítimo à funcionalidade.
 
 #### Security (Segurança)
