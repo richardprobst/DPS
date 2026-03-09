@@ -1,82 +1,82 @@
-# Análise funcional do desi.pet by PRObst
+# AnÃƒÂ¡lise funcional do desi.pet by PRObst
 
 ## Plugin base (`plugins/desi-pet-shower-base`)
-- O arquivo principal declara constantes globais, registra os *custom post types* de clientes, pets e agendamentos, carrega os ativos do frontend e expõe os *shortcodes* `[dps_base]` e `[dps_configuracoes]`, que servem como ponto de entrada para o painel e para a tela de configurações consumida pelos add-ons.
-- `includes/class-dps-cpt-helper.php` centraliza o registro de CPTs com rótulos e argumentos padrão; novos tipos devem instanciar `DPS_CPT_Helper` para herdar as opções comuns e apenas sobrescrever particularidades (ex.: capabilities customizadas ou suporte a editor).
-- **NOTA**: Os CPTs principais (`dps_cliente`, `dps_pet`, `dps_agendamento`) estão registrados com `show_ui => true` e `show_in_menu => false`, sendo exibidos pelo painel central e reutilizáveis pelos add-ons via abas. Para análise completa sobre a interface nativa do WordPress para estes CPTs, consulte `docs/analysis/BASE_PLUGIN_DEEP_ANALYSIS.md` e `docs/analysis/ADMIN_MENUS_MAPPING.md`.
-- A classe `DPS_Base_Frontend` concentra a lógica de interface: normaliza telefones para WhatsApp, agrega dados de agendamentos multi-pet para cobranças conjuntas, monta botões de cobrança, controla salvamento/exclusão de clientes, pets e atendimentos e renderiza as abas consumidas pelos add-ons via *hooks* (`dps_base_nav_tabs_after_pets`, `dps_base_nav_tabs_after_history`, etc.).
-- A classe `DPS_Settings_Frontend` gerencia a página de configurações (`[dps_configuracoes]`) com sistema moderno de registro de abas via `register_tab()`. Os hooks legados `dps_settings_nav_tabs` e `dps_settings_sections` foram depreciados em favor do sistema moderno que oferece melhor consistência visual. A página inclui assets dedicados (`dps-settings.css` e `dps-settings.js`) carregados automaticamente, com suporte a navegação client-side entre abas, busca em tempo real de configurações com destaque visual, barra de status contextual e detecção de alterações não salvas com aviso ao sair.
-- O fluxo de formulários usa `dps_nonce` para CSRF e delega ações específicas (`save_client`, `save_pet`, `save_appointment`, `update_appointment_status`) para métodos especializados, enquanto exclusões limpam também dados financeiros relacionados quando disponíveis. A classe principal é inicializada no hook `init` com prioridade 5, após o carregamento do text domain em prioridade 1.
-- A exclusão de agendamentos dispara o hook `dps_finance_cleanup_for_appointment`, permitindo que add-ons financeiros tratem a remoção de lançamentos vinculados sem depender de SQL no núcleo.
-- O filtro `dps_tosa_consent_required` permite ajustar quando o consentimento de tosa com máquina é exigido ao salvar agendamentos (parâmetros: `$requires`, `$data`, `$service_ids`).
-- A criação de tabelas do núcleo (ex.: `dps_logs`) é registrada no `register_activation_hook` e versionada via option `dps_logger_db_version`. Caso a flag de versão não exista ou esteja desatualizada, `dbDelta` é chamado uma única vez em `plugins_loaded` para alinhar o esquema, evitando consultas de verificação em todos os ciclos de `init`.
-- **Organização do menu admin**: o menu pai `desi-pet-shower` apresenta apenas hubs e itens principais. Um limpador dedicado (`DPS_Admin_Menu_Cleaner`) remove submenus duplicados que já estão cobertos por hubs (Integrações, Sistema, Ferramentas, Agenda, IA, Portal). As páginas continuam acessíveis via URL direta e pelas abas dos hubs, evitando poluição visual na navegação.
+- O arquivo principal declara constantes globais, registra os *custom post types* de clientes, pets e agendamentos, carrega os ativos do frontend e expÃƒÂµe os *shortcodes* `[dps_base]` e `[dps_configuracoes]`, que servem como ponto de entrada para o painel e para a tela de configuraÃƒÂ§ÃƒÂµes consumida pelos add-ons.
+- `includes/class-dps-cpt-helper.php` centraliza o registro de CPTs com rÃƒÂ³tulos e argumentos padrÃƒÂ£o; novos tipos devem instanciar `DPS_CPT_Helper` para herdar as opÃƒÂ§ÃƒÂµes comuns e apenas sobrescrever particularidades (ex.: capabilities customizadas ou suporte a editor).
+- **NOTA**: Os CPTs principais (`dps_cliente`, `dps_pet`, `dps_agendamento`) estÃƒÂ£o registrados com `show_ui => true` e `show_in_menu => false`, sendo exibidos pelo painel central e reutilizÃƒÂ¡veis pelos add-ons via abas. Para anÃƒÂ¡lise completa sobre a interface nativa do WordPress para estes CPTs, consulte `docs/analysis/BASE_PLUGIN_DEEP_ANALYSIS.md` e `docs/analysis/ADMIN_MENUS_MAPPING.md`.
+- A classe `DPS_Base_Frontend` concentra a lÃƒÂ³gica de interface: normaliza telefones para WhatsApp, agrega dados de agendamentos multi-pet para cobranÃƒÂ§as conjuntas, monta botÃƒÂµes de cobranÃƒÂ§a, controla salvamento/exclusÃƒÂ£o de clientes, pets e atendimentos e renderiza as abas consumidas pelos add-ons via *hooks* (`dps_base_nav_tabs_after_pets`, `dps_base_nav_tabs_after_history`, etc.).
+- A classe `DPS_Settings_Frontend` gerencia a pÃƒÂ¡gina de configuraÃƒÂ§ÃƒÂµes (`[dps_configuracoes]`) com sistema moderno de registro de abas via `register_tab()`. Os hooks legados `dps_settings_nav_tabs` e `dps_settings_sections` foram depreciados em favor do sistema moderno que oferece melhor consistÃƒÂªncia visual. A pÃƒÂ¡gina inclui assets dedicados (`dps-settings.css` e `dps-settings.js`) carregados automaticamente, com suporte a navegaÃƒÂ§ÃƒÂ£o client-side entre abas, busca em tempo real de configuraÃƒÂ§ÃƒÂµes com destaque visual, barra de status contextual e detecÃƒÂ§ÃƒÂ£o de alteraÃƒÂ§ÃƒÂµes nÃƒÂ£o salvas com aviso ao sair.
+- O fluxo de formulÃƒÂ¡rios usa `dps_nonce` para CSRF e delega aÃƒÂ§ÃƒÂµes especÃƒÂ­ficas (`save_client`, `save_pet`, `save_appointment`, `update_appointment_status`) para mÃƒÂ©todos especializados, enquanto exclusÃƒÂµes limpam tambÃƒÂ©m dados financeiros relacionados quando disponÃƒÂ­veis. A classe principal ÃƒÂ© inicializada no hook `init` com prioridade 5, apÃƒÂ³s o carregamento do text domain em prioridade 1.
+- A exclusÃƒÂ£o de agendamentos dispara o hook `dps_finance_cleanup_for_appointment`, permitindo que add-ons financeiros tratem a remoÃƒÂ§ÃƒÂ£o de lanÃƒÂ§amentos vinculados sem depender de SQL no nÃƒÂºcleo.
+- O filtro `dps_tosa_consent_required` permite ajustar quando o consentimento de tosa com mÃƒÂ¡quina ÃƒÂ© exigido ao salvar agendamentos (parÃƒÂ¢metros: `$requires`, `$data`, `$service_ids`).
+- A criaÃƒÂ§ÃƒÂ£o de tabelas do nÃƒÂºcleo (ex.: `dps_logs`) ÃƒÂ© registrada no `register_activation_hook` e versionada via option `dps_logger_db_version`. Caso a flag de versÃƒÂ£o nÃƒÂ£o exista ou esteja desatualizada, `dbDelta` ÃƒÂ© chamado uma ÃƒÂºnica vez em `plugins_loaded` para alinhar o esquema, evitando consultas de verificaÃƒÂ§ÃƒÂ£o em todos os ciclos de `init`.
+- **OrganizaÃƒÂ§ÃƒÂ£o do menu admin**: o menu pai `desi-pet-shower` apresenta apenas hubs e itens principais. Um limpador dedicado (`DPS_Admin_Menu_Cleaner`) remove submenus duplicados que jÃƒÂ¡ estÃƒÂ£o cobertos por hubs (IntegraÃƒÂ§ÃƒÂµes, Sistema, Ferramentas, Agenda, IA, Portal). As pÃƒÂ¡ginas continuam acessÃƒÂ­veis via URL direta e pelas abas dos hubs, evitando poluiÃƒÂ§ÃƒÂ£o visual na navegaÃƒÂ§ÃƒÂ£o.
 
-### Helpers globais do núcleo
+### Helpers globais do nÃƒÂºcleo
 
-O plugin base oferece classes utilitárias para padronizar operações comuns e evitar duplicação de lógica. Estes helpers estão disponíveis em `plugins/desi-pet-shower-base/includes/` e podem ser usados tanto pelo núcleo quanto pelos add-ons.
+O plugin base oferece classes utilitÃƒÂ¡rias para padronizar operaÃƒÂ§ÃƒÂµes comuns e evitar duplicaÃƒÂ§ÃƒÂ£o de lÃƒÂ³gica. Estes helpers estÃƒÂ£o disponÃƒÂ­veis em `plugins/desi-pet-shower-base/includes/` e podem ser usados tanto pelo nÃƒÂºcleo quanto pelos add-ons.
 
 #### DPS_Money_Helper
-**Propósito**: Manipulação consistente de valores monetários com conversão entre formato brasileiro e centavos.
+**PropÃƒÂ³sito**: ManipulaÃƒÂ§ÃƒÂ£o consistente de valores monetÃƒÂ¡rios com conversÃƒÂ£o entre formato brasileiro e centavos.
 
-**Entrada/Saída**:
-- `parse_brazilian_format( string )`: Converte string BR (ex.: "1.234,56") → int centavos (123456)
-- `format_to_brazilian( int )`: Converte centavos (123456) → string BR ("1.234,56")
-- `format_currency( int, string $symbol = 'R$ ' )`: Converte centavos → string com símbolo ("R$ 1.234,56")
-- `format_currency_from_decimal( float, string $symbol = 'R$ ' )`: Converte decimal → string com símbolo ("R$ 1.234,56")
-- `decimal_to_cents( float )`: Converte decimal (12.34) → int centavos (1234)
-- `cents_to_decimal( int )`: Converte centavos (1234) → float decimal (12.34)
-- `is_valid_money_string( string )`: Valida se string representa valor monetário → bool
+**Entrada/SaÃƒÂ­da**:
+- `parse_brazilian_format( string )`: Converte string BR (ex.: "1.234,56") Ã¢â€ â€™ int centavos (123456)
+- `format_to_brazilian( int )`: Converte centavos (123456) Ã¢â€ â€™ string BR ("1.234,56")
+- `format_currency( int, string $symbol = 'R$ ' )`: Converte centavos Ã¢â€ â€™ string com sÃƒÂ­mbolo ("R$ 1.234,56")
+- `format_currency_from_decimal( float, string $symbol = 'R$ ' )`: Converte decimal Ã¢â€ â€™ string com sÃƒÂ­mbolo ("R$ 1.234,56")
+- `decimal_to_cents( float )`: Converte decimal (12.34) Ã¢â€ â€™ int centavos (1234)
+- `cents_to_decimal( int )`: Converte centavos (1234) Ã¢â€ â€™ float decimal (12.34)
+- `is_valid_money_string( string )`: Valida se string representa valor monetÃƒÂ¡rio Ã¢â€ â€™ bool
 
-**Exemplos práticos**:
+**Exemplos prÃƒÂ¡ticos**:
 ```php
-// Validar e converter valor do formulário para centavos
+// Validar e converter valor do formulÃƒÂ¡rio para centavos
 $preco_raw = isset( $_POST['preco'] ) ? sanitize_text_field( $_POST['preco'] ) : '';
 $valor_centavos = DPS_Money_Helper::parse_brazilian_format( $preco_raw );
 
-// Exibir valor formatado na tela (com símbolo de moeda)
+// Exibir valor formatado na tela (com sÃƒÂ­mbolo de moeda)
 echo DPS_Money_Helper::format_currency( $valor_centavos );
 // Resultado: "R$ 1.234,56"
 
-// Para valores decimais (em reais, não centavos)
+// Para valores decimais (em reais, nÃƒÂ£o centavos)
 echo DPS_Money_Helper::format_currency_from_decimal( 1234.56 );
 // Resultado: "R$ 1.234,56"
 ```
 
-**Boas práticas**: 
-- Use `format_currency()` para exibição em interfaces (já inclui "R$ ")
-- Use `format_to_brazilian()` quando precisar apenas do valor sem símbolo
-- Evite lógica duplicada de `number_format` espalhada pelo código
+**Boas prÃƒÂ¡ticas**: 
+- Use `format_currency()` para exibiÃƒÂ§ÃƒÂ£o em interfaces (jÃƒÂ¡ inclui "R$ ")
+- Use `format_to_brazilian()` quando precisar apenas do valor sem sÃƒÂ­mbolo
+- Evite lÃƒÂ³gica duplicada de `number_format` espalhada pelo cÃƒÂ³digo
 
 #### DPS_URL_Builder
-**Propósito**: Construção padronizada de URLs de ação (edição, exclusão, visualização, navegação entre abas).
+**PropÃƒÂ³sito**: ConstruÃƒÂ§ÃƒÂ£o padronizada de URLs de aÃƒÂ§ÃƒÂ£o (ediÃƒÂ§ÃƒÂ£o, exclusÃƒÂ£o, visualizaÃƒÂ§ÃƒÂ£o, navegaÃƒÂ§ÃƒÂ£o entre abas).
 
-**Entrada/Saída**:
-- `build_edit_url( int $post_id, string $tab )`: Gera URL de edição com nonce
-- `build_delete_url( int $post_id, string $action, string $tab )`: Gera URL de exclusão com nonce
-- `build_view_url( int $post_id, string $tab )`: Gera URL de visualização
-- `build_tab_url( string $tab_name )`: Gera URL de navegação entre abas
+**Entrada/SaÃƒÂ­da**:
+- `build_edit_url( int $post_id, string $tab )`: Gera URL de ediÃƒÂ§ÃƒÂ£o com nonce
+- `build_delete_url( int $post_id, string $action, string $tab )`: Gera URL de exclusÃƒÂ£o com nonce
+- `build_view_url( int $post_id, string $tab )`: Gera URL de visualizaÃƒÂ§ÃƒÂ£o
+- `build_tab_url( string $tab_name )`: Gera URL de navegaÃƒÂ§ÃƒÂ£o entre abas
 
-**Exemplos práticos**:
+**Exemplos prÃƒÂ¡ticos**:
 ```php
-// Gerar link de edição de cliente
+// Gerar link de ediÃƒÂ§ÃƒÂ£o de cliente
 $url_editar = DPS_URL_Builder::build_edit_url( $client_id, 'clientes' );
 
-// Gerar link de exclusão de agendamento com confirmação
+// Gerar link de exclusÃƒÂ£o de agendamento com confirmaÃƒÂ§ÃƒÂ£o
 $url_excluir = DPS_URL_Builder::build_delete_url( $appointment_id, 'delete_appointment', 'historico' );
 ```
 
-**Boas práticas**: Centralize geração de URLs neste helper para garantir nonces consistentes e evitar links quebrados.
+**Boas prÃƒÂ¡ticas**: Centralize geraÃƒÂ§ÃƒÂ£o de URLs neste helper para garantir nonces consistentes e evitar links quebrados.
 
 #### DPS_Query_Helper
-**Propósito**: Consultas WP_Query reutilizáveis com filtros comuns, paginação e otimizações de performance.
+**PropÃƒÂ³sito**: Consultas WP_Query reutilizÃƒÂ¡veis com filtros comuns, paginaÃƒÂ§ÃƒÂ£o e otimizaÃƒÂ§ÃƒÂµes de performance.
 
-**Entrada/Saída**:
+**Entrada/SaÃƒÂ­da**:
 - `get_all_posts_by_type( string $post_type, array $args )`: Retorna posts com argumentos otimizados
 - `get_paginated_posts( string $post_type, int $per_page, int $paged, array $args )`: Retorna posts paginados
 - `count_posts_by_status( string $post_type, string $status )`: Conta posts por status
 
-**Exemplos práticos**:
+**Exemplos prÃƒÂ¡ticos**:
 ```php
 // Buscar todos os clientes ativos
 $clientes = DPS_Query_Helper::get_all_posts_by_type( 'dps_client', [
@@ -89,108 +89,108 @@ $clientes = DPS_Query_Helper::get_all_posts_by_type( 'dps_client', [
 $agendamentos = DPS_Query_Helper::get_paginated_posts( 'dps_appointment', 20, $paged );
 ```
 
-**Boas práticas**: Use `fields => 'ids'` quando precisar apenas de IDs, e pré-carregue metadados com `update_meta_cache()` quando precisar de metas.
+**Boas prÃƒÂ¡ticas**: Use `fields => 'ids'` quando precisar apenas de IDs, e prÃƒÂ©-carregue metadados com `update_meta_cache()` quando precisar de metas.
 
 #### DPS_Request_Validator
-**Propósito**: Validação centralizada de nonces, capabilities, requisições AJAX e sanitização de campos de formulário.
+**PropÃƒÂ³sito**: ValidaÃƒÂ§ÃƒÂ£o centralizada de nonces, capabilities, requisiÃƒÂ§ÃƒÂµes AJAX e sanitizaÃƒÂ§ÃƒÂ£o de campos de formulÃƒÂ¡rio.
 
-**Métodos principais:**
+**MÃƒÂ©todos principais:**
 - `verify_request_nonce( $nonce_field, $nonce_action, $method, $die_on_failure )`: Verifica nonce POST/GET
-- `verify_nonce_and_capability( $nonce_field, $nonce_action, $capability )`: Valida nonce e permissão
+- `verify_nonce_and_capability( $nonce_field, $nonce_action, $capability )`: Valida nonce e permissÃƒÂ£o
 - `verify_capability( $capability, $die_on_failure )`: Verifica apenas capability
 
-**Métodos AJAX (Fase 3):**
-- `verify_ajax_nonce( $nonce_action, $nonce_field = 'nonce' )`: Verifica nonce AJAX com resposta JSON automática
+**MÃƒÂ©todos AJAX (Fase 3):**
+- `verify_ajax_nonce( $nonce_action, $nonce_field = 'nonce' )`: Verifica nonce AJAX com resposta JSON automÃƒÂ¡tica
 - `verify_ajax_admin( $nonce_action, $capability = 'manage_options' )`: Verifica nonce + capability para AJAX admin
-- `verify_admin_action( $nonce_action, $capability, $nonce_field = '_wpnonce' )`: Verifica nonce de ação GET
-- `verify_admin_form( $nonce_action, $nonce_field, $capability )`: Verifica nonce de formulário POST
-- `verify_dynamic_nonce( $nonce_prefix, $item_id )`: Verifica nonce com ID dinâmico
+- `verify_admin_action( $nonce_action, $capability, $nonce_field = '_wpnonce' )`: Verifica nonce de aÃƒÂ§ÃƒÂ£o GET
+- `verify_admin_form( $nonce_action, $nonce_field, $capability )`: Verifica nonce de formulÃƒÂ¡rio POST
+- `verify_dynamic_nonce( $nonce_prefix, $item_id )`: Verifica nonce com ID dinÃƒÂ¢mico
 
-**Métodos de resposta:**
+**MÃƒÂ©todos de resposta:**
 - `send_json_error( $message, $code, $status )`: Resposta JSON de erro padronizada
 - `send_json_success( $message, $data )`: Resposta JSON de sucesso padronizada
 
-**Métodos auxiliares:**
-- `get_post_int( $field_name, $default )`: Obtém inteiro do POST sanitizado
-- `get_post_string( $field_name, $default )`: Obtém string do POST sanitizada
-- `get_get_int( $field_name, $default )`: Obtém inteiro do GET sanitizado
-- `get_get_string( $field_name, $default )`: Obtém string do GET sanitizada
+**MÃƒÂ©todos auxiliares:**
+- `get_post_int( $field_name, $default )`: ObtÃƒÂ©m inteiro do POST sanitizado
+- `get_post_string( $field_name, $default )`: ObtÃƒÂ©m string do POST sanitizada
+- `get_get_int( $field_name, $default )`: ObtÃƒÂ©m inteiro do GET sanitizado
+- `get_get_string( $field_name, $default )`: ObtÃƒÂ©m string do GET sanitizada
 
-**Exemplos práticos:**
+**Exemplos prÃƒÂ¡ticos:**
 ```php
 // Handler AJAX admin simples
 public function ajax_delete_item() {
     if ( ! DPS_Request_Validator::verify_ajax_admin( 'dps_delete_item' ) ) {
-        return; // Resposta JSON de erro já enviada
+        return; // Resposta JSON de erro jÃƒÂ¡ enviada
     }
-    // ... processar ação
+    // ... processar aÃƒÂ§ÃƒÂ£o
 }
 
-// Verificar nonce com ID dinâmico
+// Verificar nonce com ID dinÃƒÂ¢mico
 $client_id = absint( $_GET['client_id'] );
 if ( ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_delete_client_', $client_id, 'nonce', 'GET' ) ) {
     return;
 }
 
-// Validar formulário admin
+// Validar formulÃƒÂ¡rio admin
 if ( ! DPS_Request_Validator::verify_admin_form( 'dps_save_settings', 'dps_settings_nonce' ) ) {
     return;
 }
 ```
 
-**Boas práticas**: Use `verify_ajax_admin()` para handlers AJAX admin e `verify_ajax_nonce()` para AJAX público. Evite duplicar lógica de segurança.
+**Boas prÃƒÂ¡ticas**: Use `verify_ajax_admin()` para handlers AJAX admin e `verify_ajax_nonce()` para AJAX pÃƒÂºblico. Evite duplicar lÃƒÂ³gica de seguranÃƒÂ§a.
 
 #### DPS_Phone_Helper
-**Propósito**: Formatação e validação padronizada de números de telefone para comunicações (WhatsApp, exibição).
+**PropÃƒÂ³sito**: FormataÃƒÂ§ÃƒÂ£o e validaÃƒÂ§ÃƒÂ£o padronizada de nÃƒÂºmeros de telefone para comunicaÃƒÂ§ÃƒÂµes (WhatsApp, exibiÃƒÂ§ÃƒÂ£o).
 
-**Entrada/Saída**:
-- `format_for_whatsapp( string $phone )`: Formata telefone para WhatsApp (adiciona código do país 55 se necessário) → string apenas dígitos
-- `format_for_display( string $phone )`: Formata telefone para exibição brasileira → string formatada "(11) 98765-4321"
-- `is_valid_brazilian_phone( string $phone )`: Valida se telefone brasileiro é válido → bool
+**Entrada/SaÃƒÂ­da**:
+- `format_for_whatsapp( string $phone )`: Formata telefone para WhatsApp (adiciona cÃƒÂ³digo do paÃƒÂ­s 55 se necessÃƒÂ¡rio) Ã¢â€ â€™ string apenas dÃƒÂ­gitos
+- `format_for_display( string $phone )`: Formata telefone para exibiÃƒÂ§ÃƒÂ£o brasileira Ã¢â€ â€™ string formatada "(11) 98765-4321"
+- `is_valid_brazilian_phone( string $phone )`: Valida se telefone brasileiro ÃƒÂ© vÃƒÂ¡lido Ã¢â€ â€™ bool
 
-**Exemplos práticos**:
+**Exemplos prÃƒÂ¡ticos**:
 ```php
 // Formatar para envio via WhatsApp
 $phone_raw = '(11) 98765-4321';
 $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $phone_raw );
 // Retorna: '5511987654321'
 
-// Formatar para exibição na tela
+// Formatar para exibiÃƒÂ§ÃƒÂ£o na tela
 $phone_stored = '5511987654321';
 $phone_display = DPS_Phone_Helper::format_for_display( $phone_stored );
 // Retorna: '(11) 98765-4321'
 
 // Validar telefone antes de salvar
 if ( ! DPS_Phone_Helper::is_valid_brazilian_phone( $phone_input ) ) {
-    DPS_Message_Helper::add_error( 'Telefone inválido' );
+    DPS_Message_Helper::add_error( 'Telefone invÃƒÂ¡lido' );
 }
 ```
 
-**Boas práticas**: 
-- Use sempre este helper para formatação de telefones
-- Evite duplicação de lógica `preg_replace` espalhada entre add-ons
-- Integrado com `DPS_Communications_API` para envio automático via WhatsApp
-- **IMPORTANTE**: Todas as funções duplicadas `format_whatsapp_number()` foram removidas do plugin base e add-ons. Use SEMPRE `DPS_Phone_Helper::format_for_whatsapp()` diretamente
+**Boas prÃƒÂ¡ticas**: 
+- Use sempre este helper para formataÃƒÂ§ÃƒÂ£o de telefones
+- Evite duplicaÃƒÂ§ÃƒÂ£o de lÃƒÂ³gica `preg_replace` espalhada entre add-ons
+- Integrado com `DPS_Communications_API` para envio automÃƒÂ¡tico via WhatsApp
+- **IMPORTANTE**: Todas as funÃƒÂ§ÃƒÂµes duplicadas `format_whatsapp_number()` foram removidas do plugin base e add-ons. Use SEMPRE `DPS_Phone_Helper::format_for_whatsapp()` diretamente
 
 #### DPS_WhatsApp_Helper
-**Propósito**: Geração centralizada de links do WhatsApp com mensagens personalizadas. Introduzida para padronizar criação de URLs do WhatsApp em todo o sistema.
+**PropÃƒÂ³sito**: GeraÃƒÂ§ÃƒÂ£o centralizada de links do WhatsApp com mensagens personalizadas. Introduzida para padronizar criaÃƒÂ§ÃƒÂ£o de URLs do WhatsApp em todo o sistema.
 
 **Constante**:
-- `TEAM_PHONE = '5515991606299'`: Número padrão da equipe (+55 15 99160-6299)
+- `TEAM_PHONE = '5515991606299'`: NÃƒÂºmero padrÃƒÂ£o da equipe (+55 15 99160-6299)
 
-**Entrada/Saída**:
-- `get_link_to_team( string $message = '' )`: Gera link para cliente → equipe → string URL
-- `get_link_to_client( string $client_phone, string $message = '' )`: Gera link para equipe → cliente → string URL ou vazio se inválido
-- `get_share_link( string $message )`: Gera link de compartilhamento genérico → string URL
-- `get_team_phone()`: Obtém número da equipe configurado → string (formatado)
+**Entrada/SaÃƒÂ­da**:
+- `get_link_to_team( string $message = '' )`: Gera link para cliente Ã¢â€ â€™ equipe Ã¢â€ â€™ string URL
+- `get_link_to_client( string $client_phone, string $message = '' )`: Gera link para equipe Ã¢â€ â€™ cliente Ã¢â€ â€™ string URL ou vazio se invÃƒÂ¡lido
+- `get_share_link( string $message )`: Gera link de compartilhamento genÃƒÂ©rico Ã¢â€ â€™ string URL
+- `get_team_phone()`: ObtÃƒÂ©m nÃƒÂºmero da equipe configurado Ã¢â€ â€™ string (formatado)
 
-**Métodos auxiliares para mensagens padrão**:
-- `get_portal_access_request_message( $client_name = '', $pet_name = '' )`: Mensagem padrão para solicitar acesso
-- `get_portal_link_message( $client_name, $portal_url )`: Mensagem padrão para enviar link do portal
-- `get_appointment_confirmation_message( $appointment_data )`: Mensagem padrão de confirmação de agendamento
-- `get_payment_request_message( $client_name, $amount, $payment_url = '' )`: Mensagem padrão de cobrança
+**MÃƒÂ©todos auxiliares para mensagens padrÃƒÂ£o**:
+- `get_portal_access_request_message( $client_name = '', $pet_name = '' )`: Mensagem padrÃƒÂ£o para solicitar acesso
+- `get_portal_link_message( $client_name, $portal_url )`: Mensagem padrÃƒÂ£o para enviar link do portal
+- `get_appointment_confirmation_message( $appointment_data )`: Mensagem padrÃƒÂ£o de confirmaÃƒÂ§ÃƒÂ£o de agendamento
+- `get_payment_request_message( $client_name, $amount, $payment_url = '' )`: Mensagem padrÃƒÂ£o de cobranÃƒÂ§a
 
-**Exemplos práticos**:
+**Exemplos prÃƒÂ¡ticos**:
 ```php
 // Cliente quer contatar a equipe (ex: solicitar acesso ao portal)
 $message = DPS_WhatsApp_Helper::get_portal_access_request_message();
@@ -200,111 +200,111 @@ echo '<a href="' . esc_url( $url ) . '" target="_blank">Quero acesso</a>';
 // Equipe quer contatar cliente (ex: enviar link do portal)
 $client_phone = get_post_meta( $client_id, 'client_phone', true );
 $portal_url = 'https://exemplo.com/portal?token=abc123';
-$message = DPS_WhatsApp_Helper::get_portal_link_message( 'João Silva', $portal_url );
+$message = DPS_WhatsApp_Helper::get_portal_link_message( 'JoÃƒÂ£o Silva', $portal_url );
 $url = DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $message );
 echo '<a href="' . esc_url( $url ) . '" target="_blank">Enviar via WhatsApp</a>';
 
-// Compartilhamento genérico (ex: foto do pet)
+// Compartilhamento genÃƒÂ©rico (ex: foto do pet)
 $share_text = 'Olha a foto do meu pet: https://exemplo.com/foto.jpg';
 $url = DPS_WhatsApp_Helper::get_share_link( $share_text );
 echo '<a href="' . esc_url( $url ) . '" target="_blank">Compartilhar</a>';
 ```
 
-**Configuração**:
-- Número da equipe configurável em: Admin → desi.pet by PRObst → Comunicações
-- Option: `dps_whatsapp_number` (padrão: +55 15 99160-6299)
-- Fallback automático para constante `TEAM_PHONE` se option não existir
-- Filtro disponível: `dps_team_whatsapp_number` para customização programática
+**ConfiguraÃƒÂ§ÃƒÂ£o**:
+- NÃƒÂºmero da equipe configurÃƒÂ¡vel em: Admin Ã¢â€ â€™ desi.pet by PRObst Ã¢â€ â€™ ComunicaÃƒÂ§ÃƒÂµes
+- Option: `dps_whatsapp_number` (padrÃƒÂ£o: +55 15 99160-6299)
+- Fallback automÃƒÂ¡tico para constante `TEAM_PHONE` se option nÃƒÂ£o existir
+- Filtro disponÃƒÂ­vel: `dps_team_whatsapp_number` para customizaÃƒÂ§ÃƒÂ£o programÃƒÂ¡tica
 
-**Boas práticas**:
-- Use sempre este helper para criar links WhatsApp (não construa URLs manualmente)
-- Helper formata automaticamente números de clientes usando `DPS_Phone_Helper`
+**Boas prÃƒÂ¡ticas**:
+- Use sempre este helper para criar links WhatsApp (nÃƒÂ£o construa URLs manualmente)
+- Helper formata automaticamente nÃƒÂºmeros de clientes usando `DPS_Phone_Helper`
 - Sempre escape URLs com `esc_url()` ao exibir em HTML
-- Mensagens são codificadas automaticamente com `rawurlencode()`
-- Retorna string vazia se número do cliente for inválido (verificar antes de exibir link)
+- Mensagens sÃƒÂ£o codificadas automaticamente com `rawurlencode()`
+- Retorna string vazia se nÃƒÂºmero do cliente for invÃƒÂ¡lido (verificar antes de exibir link)
 
 **Locais que usam este helper**:
 - Lista de clientes (plugin base)
-- Add-on de Agenda (confirmação e cobrança)
-- Add-on de Assinaturas (cobrança de renovação)
-- Add-on de Finance (pendências financeiras)
+- Add-on de Agenda (confirmaÃƒÂ§ÃƒÂ£o e cobranÃƒÂ§a)
+- Add-on de Assinaturas (cobranÃƒÂ§a de renovaÃƒÂ§ÃƒÂ£o)
+- Add-on de Finance (pendÃƒÂªncias financeiras)
 - Add-on de Stats (reengajamento de clientes inativos)
-- Portal do Cliente (solicitação de acesso, envio de link, agendamento, compartilhamento)
+- Portal do Cliente (solicitaÃƒÂ§ÃƒÂ£o de acesso, envio de link, agendamento, compartilhamento)
 
 #### DPS_IP_Helper
-**Propósito**: Obtenção e validação centralizada de endereços IP do cliente, com suporte a proxies, CDNs (Cloudflare) e ambientes de desenvolvimento.
+**PropÃƒÂ³sito**: ObtenÃƒÂ§ÃƒÂ£o e validaÃƒÂ§ÃƒÂ£o centralizada de endereÃƒÂ§os IP do cliente, com suporte a proxies, CDNs (Cloudflare) e ambientes de desenvolvimento.
 
-**Entrada/Saída**:
-- `get_ip()`: Obtém IP simples via REMOTE_ADDR → string (IP ou 'unknown')
-- `get_ip_with_proxy_support()`: Obtém IP real através de proxies/CDNs → string (IP ou vazio)
-- `get_ip_hash( string $salt )`: Obtém hash SHA-256 do IP para rate limiting → string (64 caracteres)
-- `is_valid_ip( string $ip )`: Valida IPv4 ou IPv6 → bool
-- `is_valid_ipv4( string $ip )`: Valida apenas IPv4 → bool
-- `is_valid_ipv6( string $ip )`: Valida apenas IPv6 → bool
-- `is_localhost( string $ip = null )`: Verifica se é localhost → bool
-- `anonymize( string $ip )`: Anonimiza IP para LGPD/GDPR → string
+**Entrada/SaÃƒÂ­da**:
+- `get_ip()`: ObtÃƒÂ©m IP simples via REMOTE_ADDR Ã¢â€ â€™ string (IP ou 'unknown')
+- `get_ip_with_proxy_support()`: ObtÃƒÂ©m IP real atravÃƒÂ©s de proxies/CDNs Ã¢â€ â€™ string (IP ou vazio)
+- `get_ip_hash( string $salt )`: ObtÃƒÂ©m hash SHA-256 do IP para rate limiting Ã¢â€ â€™ string (64 caracteres)
+- `is_valid_ip( string $ip )`: Valida IPv4 ou IPv6 Ã¢â€ â€™ bool
+- `is_valid_ipv4( string $ip )`: Valida apenas IPv4 Ã¢â€ â€™ bool
+- `is_valid_ipv6( string $ip )`: Valida apenas IPv6 Ã¢â€ â€™ bool
+- `is_localhost( string $ip = null )`: Verifica se ÃƒÂ© localhost Ã¢â€ â€™ bool
+- `anonymize( string $ip )`: Anonimiza IP para LGPD/GDPR Ã¢â€ â€™ string
 
-**Exemplos práticos**:
+**Exemplos prÃƒÂ¡ticos**:
 ```php
 // Obter IP simples para logging
 $ip = DPS_IP_Helper::get_ip();
 
-// Obter IP real através de CDN (Cloudflare)
+// Obter IP real atravÃƒÂ©s de CDN (Cloudflare)
 $ip = DPS_IP_Helper::get_ip_with_proxy_support();
 
 // Gerar hash para rate limiting
 $hash = DPS_IP_Helper::get_ip_hash( 'dps_login_' );
 set_transient( 'rate_limit_' . $hash, $count, HOUR_IN_SECONDS );
 
-// Anonimizar IP para logs de longa duração (LGPD)
+// Anonimizar IP para logs de longa duraÃƒÂ§ÃƒÂ£o (LGPD)
 $anon_ip = DPS_IP_Helper::anonymize( $ip );
-// '192.168.1.100' → '192.168.1.0'
+// '192.168.1.100' Ã¢â€ â€™ '192.168.1.0'
 ```
 
 **Headers verificados** (em ordem de prioridade):
 1. `HTTP_CF_CONNECTING_IP` - Cloudflare
 2. `HTTP_X_REAL_IP` - Nginx proxy
-3. `HTTP_X_FORWARDED_FOR` - Proxy padrão (usa primeiro IP da lista)
-4. `REMOTE_ADDR` - Conexão direta
+3. `HTTP_X_FORWARDED_FOR` - Proxy padrÃƒÂ£o (usa primeiro IP da lista)
+4. `REMOTE_ADDR` - ConexÃƒÂ£o direta
 
-**Boas práticas**:
+**Boas prÃƒÂ¡ticas**:
 - Use `get_ip()` para casos simples (logging, auditoria)
-- Use `get_ip_with_proxy_support()` quando há CDN/proxy (rate limiting, segurança)
-- Use `get_ip_hash()` para armazenar referências de IP sem expor o endereço real
-- Use `anonymize()` para logs de longa duração em compliance com LGPD/GDPR
+- Use `get_ip_with_proxy_support()` quando hÃƒÂ¡ CDN/proxy (rate limiting, seguranÃƒÂ§a)
+- Use `get_ip_hash()` para armazenar referÃƒÂªncias de IP sem expor o endereÃƒÂ§o real
+- Use `anonymize()` para logs de longa duraÃƒÂ§ÃƒÂ£o em compliance com LGPD/GDPR
 
 **Add-ons que usam este helper**:
-- Portal do Cliente (autenticação, rate limiting, logs de acesso)
+- Portal do Cliente (autenticaÃƒÂ§ÃƒÂ£o, rate limiting, logs de acesso)
 - Add-on de Pagamentos (webhooks, auditoria)
-- Add-on de IA (rate limiting do chat público)
-- Add-on de Finance (auditoria de operações)
+- Add-on de IA (rate limiting do chat pÃƒÂºblico)
+- Add-on de Finance (auditoria de operaÃƒÂ§ÃƒÂµes)
 - Add-on de Registration (rate limiting de cadastros)
 
 #### DPS_Client_Helper
-**Propósito**: Acesso centralizado a dados de clientes, com suporte a CPT `dps_client` e usermeta do WordPress, eliminando duplicação de código para obtenção de telefone, email, endereço e outros metadados.
+**PropÃƒÂ³sito**: Acesso centralizado a dados de clientes, com suporte a CPT `dps_client` e usermeta do WordPress, eliminando duplicaÃƒÂ§ÃƒÂ£o de cÃƒÂ³digo para obtenÃƒÂ§ÃƒÂ£o de telefone, email, endereÃƒÂ§o e outros metadados.
 
-**Entrada/Saída**:
-- `get_phone( int $client_id, ?string $source = null )`: Obtém telefone do cliente → string
-- `get_email( int $client_id, ?string $source = null )`: Obtém email do cliente → string
-- `get_whatsapp( int $client_id, ?string $source = null )`: Obtém WhatsApp (fallback para phone) → string
-- `get_name( int $client_id, ?string $source = null )`: Obtém nome do cliente → string
-- `get_display_name( int $client_id, ?string $source = null )`: Obtém nome para exibição → string
-- `get_address( int $client_id, ?string $source = null, string $sep = ', ' )`: Obtém endereço formatado → string
-- `get_all_data( int $client_id, ?string $source = null )`: Obtém todos os metadados de uma vez → array
-- `has_valid_phone( int $client_id, ?string $source = null )`: Verifica se tem telefone válido → bool
-- `has_valid_email( int $client_id, ?string $source = null )`: Verifica se tem email válido → bool
-- `get_pets( int $client_id, array $args = [] )`: Obtém lista de pets do cliente → array
-- `get_pets_count( int $client_id )`: Conta pets do cliente → int
-- `get_primary_pet( int $client_id )`: Obtém pet principal → WP_Post|null
-- `format_contact_info( int $client_id, ?string $source = null )`: Formata informações de contato → string (HTML)
-- `get_for_display( int $client_id, ?string $source = null )`: Obtém dados formatados para exibição → array
-- `search_by_phone( string $phone, bool $exact = false )`: Busca cliente por telefone → int|null
-- `search_by_email( string $email )`: Busca cliente por email → int|null
+**Entrada/SaÃƒÂ­da**:
+- `get_phone( int $client_id, ?string $source = null )`: ObtÃƒÂ©m telefone do cliente Ã¢â€ â€™ string
+- `get_email( int $client_id, ?string $source = null )`: ObtÃƒÂ©m email do cliente Ã¢â€ â€™ string
+- `get_whatsapp( int $client_id, ?string $source = null )`: ObtÃƒÂ©m WhatsApp (fallback para phone) Ã¢â€ â€™ string
+- `get_name( int $client_id, ?string $source = null )`: ObtÃƒÂ©m nome do cliente Ã¢â€ â€™ string
+- `get_display_name( int $client_id, ?string $source = null )`: ObtÃƒÂ©m nome para exibiÃƒÂ§ÃƒÂ£o Ã¢â€ â€™ string
+- `get_address( int $client_id, ?string $source = null, string $sep = ', ' )`: ObtÃƒÂ©m endereÃƒÂ§o formatado Ã¢â€ â€™ string
+- `get_all_data( int $client_id, ?string $source = null )`: ObtÃƒÂ©m todos os metadados de uma vez Ã¢â€ â€™ array
+- `has_valid_phone( int $client_id, ?string $source = null )`: Verifica se tem telefone vÃƒÂ¡lido Ã¢â€ â€™ bool
+- `has_valid_email( int $client_id, ?string $source = null )`: Verifica se tem email vÃƒÂ¡lido Ã¢â€ â€™ bool
+- `get_pets( int $client_id, array $args = [] )`: ObtÃƒÂ©m lista de pets do cliente Ã¢â€ â€™ array
+- `get_pets_count( int $client_id )`: Conta pets do cliente Ã¢â€ â€™ int
+- `get_primary_pet( int $client_id )`: ObtÃƒÂ©m pet principal Ã¢â€ â€™ WP_Post|null
+- `format_contact_info( int $client_id, ?string $source = null )`: Formata informaÃƒÂ§ÃƒÂµes de contato Ã¢â€ â€™ string (HTML)
+- `get_for_display( int $client_id, ?string $source = null )`: ObtÃƒÂ©m dados formatados para exibiÃƒÂ§ÃƒÂ£o Ã¢â€ â€™ array
+- `search_by_phone( string $phone, bool $exact = false )`: Busca cliente por telefone Ã¢â€ â€™ int|null
+- `search_by_email( string $email )`: Busca cliente por email Ã¢â€ â€™ int|null
 
-**Parâmetro `$source`**:
-- `null` (padrão): Auto-detecta se é post (`dps_client`) ou user (WordPress user)
-- `'post'`: Força busca em post_meta
-- `'user'`: Força busca em usermeta
+**ParÃƒÂ¢metro `$source`**:
+- `null` (padrÃƒÂ£o): Auto-detecta se ÃƒÂ© post (`dps_client`) ou user (WordPress user)
+- `'post'`: ForÃƒÂ§a busca em post_meta
+- `'user'`: ForÃƒÂ§a busca em usermeta
 
 **Constantes de meta keys**:
 - `META_PHONE` = 'client_phone'
@@ -315,7 +315,7 @@ $anon_ip = DPS_IP_Helper::anonymize( $ip );
 - `META_STATE` = 'client_state'
 - `META_ZIP` = 'client_zip'
 
-**Exemplos práticos**:
+**Exemplos prÃƒÂ¡ticos**:
 ```php
 // Obter telefone de um cliente (auto-detecta source)
 $phone = DPS_Client_Helper::get_phone( $client_id );
@@ -324,7 +324,7 @@ $phone = DPS_Client_Helper::get_phone( $client_id );
 $data = DPS_Client_Helper::get_all_data( $client_id );
 echo $data['name'] . ' - ' . $data['phone'];
 
-// Verificar se tem telefone válido antes de enviar WhatsApp
+// Verificar se tem telefone vÃƒÂ¡lido antes de enviar WhatsApp
 if ( DPS_Client_Helper::has_valid_phone( $client_id ) ) {
     $whatsapp = DPS_Client_Helper::get_whatsapp( $client_id );
     // ...enviar mensagem
@@ -333,70 +333,70 @@ if ( DPS_Client_Helper::has_valid_phone( $client_id ) ) {
 // Buscar cliente por telefone
 $existing = DPS_Client_Helper::search_by_phone( '11999887766' );
 if ( $existing ) {
-    // Cliente já existe
+    // Cliente jÃƒÂ¡ existe
 }
 
-// Para exibição na UI (já formatado)
+// Para exibiÃƒÂ§ÃƒÂ£o na UI (jÃƒÂ¡ formatado)
 $display = DPS_Client_Helper::get_for_display( $client_id );
-echo $display['display_name']; // "João Silva" ou "Cliente sem nome"
+echo $display['display_name']; // "JoÃƒÂ£o Silva" ou "Cliente sem nome"
 echo $display['phone_formatted']; // "(11) 99988-7766"
 ```
 
-**Boas práticas**:
-- Use `get_all_data()` quando precisar de múltiplos campos (evita queries repetidas)
-- Use `get_for_display()` para dados já formatados para UI
-- O helper integra com `DPS_Phone_Helper` automaticamente quando disponível
-- Não acesse diretamente `get_post_meta( $id, 'client_phone' )` — use o helper para consistência
+**Boas prÃƒÂ¡ticas**:
+- Use `get_all_data()` quando precisar de mÃƒÂºltiplos campos (evita queries repetidas)
+- Use `get_for_display()` para dados jÃƒÂ¡ formatados para UI
+- O helper integra com `DPS_Phone_Helper` automaticamente quando disponÃƒÂ­vel
+- NÃƒÂ£o acesse diretamente `get_post_meta( $id, 'client_phone' )` Ã¢â‚¬â€ use o helper para consistÃƒÂªncia
 
 **Add-ons que usam este helper**:
-- Plugin Base (formulários de cliente, frontend)
-- Portal do Cliente (exibição de dados, mensagens)
-- Add-on de IA (chat público, agendador)
-- Add-on de Push (notificações por email/WhatsApp)
+- Plugin Base (formulÃƒÂ¡rios de cliente, frontend)
+- Portal do Cliente (exibiÃƒÂ§ÃƒÂ£o de dados, mensagens)
+- Add-on de IA (chat pÃƒÂºblico, agendador)
+- Add-on de Push (notificaÃƒÂ§ÃƒÂµes por email/WhatsApp)
 - Add-on de Communications (envio de comunicados)
-- Add-on de Finance (relatórios, cobranças)
+- Add-on de Finance (relatÃƒÂ³rios, cobranÃƒÂ§as)
 
 #### DPS_Message_Helper
-**Propósito**: Gerenciamento de mensagens de feedback visual (sucesso, erro, aviso) para operações administrativas.
+**PropÃƒÂ³sito**: Gerenciamento de mensagens de feedback visual (sucesso, erro, aviso) para operaÃƒÂ§ÃƒÂµes administrativas.
 
-**Entrada/Saída**:
+**Entrada/SaÃƒÂ­da**:
 - `add_success( string $message )`: Adiciona mensagem de sucesso
 - `add_error( string $message )`: Adiciona mensagem de erro
 - `add_warning( string $message )`: Adiciona mensagem de aviso
 - `display_messages()`: Retorna HTML com todas as mensagens pendentes e as remove automaticamente
 
-**Exemplos práticos**:
+**Exemplos prÃƒÂ¡ticos**:
 ```php
-// Após salvar cliente com sucesso
+// ApÃƒÂ³s salvar cliente com sucesso
 DPS_Message_Helper::add_success( __( 'Cliente salvo com sucesso!', 'desi-pet-shower' ) );
 wp_safe_redirect( $redirect_url );
 exit;
 
-// No início da seção, exibir mensagens pendentes
+// No inÃƒÂ­cio da seÃƒÂ§ÃƒÂ£o, exibir mensagens pendentes
 echo '<div class="dps-section">';
 echo DPS_Message_Helper::display_messages(); // Renderiza alertas
 echo '<h2>Cadastro de Clientes</h2>';
 ```
 
-**Boas práticas**: 
-- Use mensagens após operações que modificam dados (salvar, excluir, atualizar status)
-- Coloque `display_messages()` no início de cada seção do painel para feedback imediato
-- Mensagens são armazenadas via transients específicos por usuário, garantindo isolamento
-- Mensagens são exibidas apenas uma vez (single-use) e removidas automaticamente após renderização
+**Boas prÃƒÂ¡ticas**: 
+- Use mensagens apÃƒÂ³s operaÃƒÂ§ÃƒÂµes que modificam dados (salvar, excluir, atualizar status)
+- Coloque `display_messages()` no inÃƒÂ­cio de cada seÃƒÂ§ÃƒÂ£o do painel para feedback imediato
+- Mensagens sÃƒÂ£o armazenadas via transients especÃƒÂ­ficos por usuÃƒÂ¡rio, garantindo isolamento
+- Mensagens sÃƒÂ£o exibidas apenas uma vez (single-use) e removidas automaticamente apÃƒÂ³s renderizaÃƒÂ§ÃƒÂ£o
 
 #### DPS_Cache_Control
-**Propósito**: Gerenciamento de cache de páginas para garantir que todas as páginas do sistema DPS não sejam armazenadas em cache, forçando conteúdo sempre atualizado.
+**PropÃƒÂ³sito**: Gerenciamento de cache de pÃƒÂ¡ginas para garantir que todas as pÃƒÂ¡ginas do sistema DPS nÃƒÂ£o sejam armazenadas em cache, forÃƒÂ§ando conteÃƒÂºdo sempre atualizado.
 
-**Entrada/Saída**:
-- `init()`: Registra hooks para detecção e prevenção de cache (chamado automaticamente no boot do plugin)
-- `force_no_cache()`: Força desabilitação de cache na requisição atual
-- `register_shortcode( string $shortcode )`: Registra shortcode adicional para prevenção automática de cache
+**Entrada/SaÃƒÂ­da**:
+- `init()`: Registra hooks para detecÃƒÂ§ÃƒÂ£o e prevenÃƒÂ§ÃƒÂ£o de cache (chamado automaticamente no boot do plugin)
+- `force_no_cache()`: ForÃƒÂ§a desabilitaÃƒÂ§ÃƒÂ£o de cache na requisiÃƒÂ§ÃƒÂ£o atual
+- `register_shortcode( string $shortcode )`: Registra shortcode adicional para prevenÃƒÂ§ÃƒÂ£o automÃƒÂ¡tica de cache
 - `get_registered_shortcodes()`: Retorna lista de shortcodes registrados
 
-**Constantes definidas quando cache é desabilitado**:
-- `DONOTCACHEPAGE`: Previne cache de página (WP Super Cache, W3 Total Cache, LiteSpeed Cache)
+**Constantes definidas quando cache ÃƒÂ© desabilitado**:
+- `DONOTCACHEPAGE`: Previne cache de pÃƒÂ¡gina (WP Super Cache, W3 Total Cache, LiteSpeed Cache)
 - `DONOTCACHEDB`: Previne cache de queries
-- `DONOTMINIFY`: Previne minificação de assets
+- `DONOTMINIFY`: Previne minificaÃƒÂ§ÃƒÂ£o de assets
 - `DONOTCDN`: Previne uso de CDN
 - `DONOTCACHEOBJECT`: Previne cache de objetos
 
@@ -405,17 +405,17 @@ echo '<h2>Cadastro de Clientes</h2>';
 - `Pragma: no-cache`
 - `Expires: Wed, 11 Jan 1984 05:00:00 GMT`
 
-**Exemplos práticos**:
+**Exemplos prÃƒÂ¡ticos**:
 ```php
-// Em um shortcode personalizado de add-on, forçar no-cache
+// Em um shortcode personalizado de add-on, forÃƒÂ§ar no-cache
 public function render_meu_shortcode() {
     if ( class_exists( 'DPS_Cache_Control' ) ) {
         DPS_Cache_Control::force_no_cache();
     }
-    // ... renderização do shortcode
+    // ... renderizaÃƒÂ§ÃƒÂ£o do shortcode
 }
 
-// Registrar um shortcode personalizado para prevenção automática de cache
+// Registrar um shortcode personalizado para prevenÃƒÂ§ÃƒÂ£o automÃƒÂ¡tica de cache
 add_action( 'init', function() {
     if ( class_exists( 'DPS_Cache_Control' ) ) {
         DPS_Cache_Control::register_shortcode( 'meu_addon_shortcode' );
@@ -423,48 +423,48 @@ add_action( 'init', function() {
 } );
 ```
 
-**Boas práticas**:
-- Todos os shortcodes do DPS já chamam `force_no_cache()` automaticamente
-- Para add-ons customizados, sempre inclua a chamada no início do método de renderização
-- Use `class_exists( 'DPS_Cache_Control' )` antes de chamar para compatibilidade com versões anteriores
-- A detecção automática via hook `template_redirect` funciona como backup
+**Boas prÃƒÂ¡ticas**:
+- Todos os shortcodes do DPS jÃƒÂ¡ chamam `force_no_cache()` automaticamente
+- Para add-ons customizados, sempre inclua a chamada no inÃƒÂ­cio do mÃƒÂ©todo de renderizaÃƒÂ§ÃƒÂ£o
+- Use `class_exists( 'DPS_Cache_Control' )` antes de chamar para compatibilidade com versÃƒÂµes anteriores
+- A detecÃƒÂ§ÃƒÂ£o automÃƒÂ¡tica via hook `template_redirect` funciona como backup
 
-#### Sistema de Templates Sobrescrevíveis
+#### Sistema de Templates SobrescrevÃƒÂ­veis
 
-**Propósito**: Permitir que temas customizem a aparência de templates do DPS mantendo a lógica de negócio no plugin. O sistema também oferece controle sobre quando forçar o uso do template do plugin.
+**PropÃƒÂ³sito**: Permitir que temas customizem a aparÃƒÂªncia de templates do DPS mantendo a lÃƒÂ³gica de negÃƒÂ³cio no plugin. O sistema tambÃƒÂ©m oferece controle sobre quando forÃƒÂ§ar o uso do template do plugin.
 
-**Funções disponíveis** (definidas em `includes/template-functions.php`):
+**FunÃƒÂ§ÃƒÂµes disponÃƒÂ­veis** (definidas em `includes/template-functions.php`):
 
-| Função | Propósito |
+| FunÃƒÂ§ÃƒÂ£o | PropÃƒÂ³sito |
 |--------|-----------|
 | `dps_get_template( $template_name, $args )` | Localiza e inclui um template, permitindo override pelo tema |
-| `dps_get_template_path( $template_name )` | Retorna o caminho do template que seria carregado (sem incluí-lo) |
-| `dps_is_template_overridden( $template_name )` | Verifica se um template está sendo sobrescrito pelo tema |
+| `dps_get_template_path( $template_name )` | Retorna o caminho do template que seria carregado (sem incluÃƒÂ­-lo) |
+| `dps_is_template_overridden( $template_name )` | Verifica se um template estÃƒÂ¡ sendo sobrescrito pelo tema |
 
 **Ordem de busca de templates**:
 1. Tema filho: `wp-content/themes/CHILD_THEME/dps-templates/{template_name}`
 2. Tema pai: `wp-content/themes/PARENT_THEME/dps-templates/{template_name}`
 3. Plugin base: `wp-content/plugins/desi-pet-shower-base/templates/{template_name}`
 
-**Filtros disponíveis**:
+**Filtros disponÃƒÂ­veis**:
 
-| Filtro | Propósito | Parâmetros |
+| Filtro | PropÃƒÂ³sito | ParÃƒÂ¢metros |
 |--------|-----------|------------|
-| `dps_use_plugin_template` | Força uso do template do plugin, ignorando override do tema | `$use_plugin (bool)`, `$template_name (string)` |
+| `dps_use_plugin_template` | ForÃƒÂ§a uso do template do plugin, ignorando override do tema | `$use_plugin (bool)`, `$template_name (string)` |
 | `dps_allow_consent_template_override` | Permite que tema sobrescreva o template de consentimento de tosa | `$allow_override (bool)` |
 
-**Actions disponíveis**:
+**Actions disponÃƒÂ­veis**:
 
-| Action | Propósito | Parâmetros |
+| Action | PropÃƒÂ³sito | ParÃƒÂ¢metros |
 |--------|-----------|------------|
-| `dps_template_loaded` | Disparada quando um template é carregado | `$path_to_load (string)`, `$template_name (string)`, `$is_theme_override (bool)` |
+| `dps_template_loaded` | Disparada quando um template ÃƒÂ© carregado | `$path_to_load (string)`, `$template_name (string)`, `$is_theme_override (bool)` |
 
-**Exemplos práticos**:
+**Exemplos prÃƒÂ¡ticos**:
 ```php
-// Forçar uso do template do plugin para um template específico
+// ForÃƒÂ§ar uso do template do plugin para um template especÃƒÂ­fico
 add_filter( 'dps_use_plugin_template', function( $use_plugin, $template_name ) {
     if ( $template_name === 'meu-template.php' ) {
-        return true; // Sempre usa versão do plugin
+        return true; // Sempre usa versÃƒÂ£o do plugin
     }
     return $use_plugin;
 }, 10, 2 );
@@ -472,38 +472,38 @@ add_filter( 'dps_use_plugin_template', function( $use_plugin, $template_name ) {
 // Permitir override do tema no template de consentimento de tosa
 add_filter( 'dps_allow_consent_template_override', '__return_true' );
 
-// Debug: logar qual template está sendo carregado
+// Debug: logar qual template estÃƒÂ¡ sendo carregado
 add_action( 'dps_template_loaded', function( $path, $name, $is_override ) {
     if ( $is_override ) {
         error_log( "DPS: Template '$name' sendo carregado do tema: $path" );
     }
 }, 10, 3 );
 
-// Verificar se um template está sendo sobrescrito
+// Verificar se um template estÃƒÂ¡ sendo sobrescrito
 if ( dps_is_template_overridden( 'tosa-consent-form.php' ) ) {
-    // Template do tema está sendo usado
+    // Template do tema estÃƒÂ¡ sendo usado
 }
 ```
 
-**Boas práticas**:
-- O template de consentimento de tosa (`tosa-consent-form.php`) força uso do plugin por padrão para garantir que melhorias sejam visíveis
-- Use `dps_get_template_path()` para debug quando templates não aparecem como esperado
-- A action `dps_template_loaded` é útil para logging e diagnóstico de problemas
-- Quando sobrescrever templates no tema, mantenha as variáveis esperadas pelo sistema
+**Boas prÃƒÂ¡ticas**:
+- O template de consentimento de tosa (`tosa-consent-form.php`) forÃƒÂ§a uso do plugin por padrÃƒÂ£o para garantir que melhorias sejam visÃƒÂ­veis
+- Use `dps_get_template_path()` para debug quando templates nÃƒÂ£o aparecem como esperado
+- A action `dps_template_loaded` ÃƒÂ© ÃƒÂºtil para logging e diagnÃƒÂ³stico de problemas
+- Quando sobrescrever templates no tema, mantenha as variÃƒÂ¡veis esperadas pelo sistema
 
 #### DPS_Base_Template_Engine
-**Propósito**: Motor de templates compartilhado para renderização de componentes PHP com output buffering e suporte a override pelo tema. Portado do Frontend Add-on para uso global (Fase 2.4).
+**PropÃƒÂ³sito**: Motor de templates compartilhado para renderizaÃƒÂ§ÃƒÂ£o de componentes PHP com output buffering e suporte a override pelo tema. Portado do Frontend Add-on para uso global (Fase 2.4).
 
 **Arquivo**: `includes/class-dps-base-template-engine.php`
 
-**Padrão**: Singleton via `DPS_Base_Template_Engine::get_instance()`
+**PadrÃƒÂ£o**: Singleton via `DPS_Base_Template_Engine::get_instance()`
 
-**Métodos**:
+**MÃƒÂ©todos**:
 - `render( string $template, array $data = [] )`: Renderiza template e retorna HTML. Usa `extract( $data, EXTR_SKIP )` + `ob_start()`/`ob_get_clean()`.
-- `exists( string $template )`: Verifica se um template existe (no tema ou no plugin) → bool.
+- `exists( string $template )`: Verifica se um template existe (no tema ou no plugin) Ã¢â€ â€™ bool.
 - `locateTemplate( string $template )` (private): Busca template em: 1) tema `dps-templates/{prefix}/{file}`, 2) plugin `templates/{file}`.
 
-**Templates disponíveis** (em `templates/`):
+**Templates disponÃƒÂ­veis** (em `templates/`):
 - `components/client-summary-cards.php`: cards de resumo do cliente (total atendimentos, pets, valor total)
 
 **Exemplo**:
@@ -516,133 +516,133 @@ echo $engine->render( 'components/client-summary-cards.php', [
 ] );
 ```
 
-### Feedback visual e organização de interface
-- Todos os formulários principais (clientes, pets, agendamentos) utilizam `DPS_Message_Helper` para feedback após salvar ou excluir
-- Formulários são organizados em fieldsets semânticos com bordas sutis (`1px solid #e5e7eb`) e legends descritivos
-- Hierarquia de títulos padronizada: H1 único no topo ("Painel de Gestão DPS"), H2 para seções principais, H3 para subseções
+### Feedback visual e organizaÃƒÂ§ÃƒÂ£o de interface
+- Todos os formulÃƒÂ¡rios principais (clientes, pets, agendamentos) utilizam `DPS_Message_Helper` para feedback apÃƒÂ³s salvar ou excluir
+- FormulÃƒÂ¡rios sÃƒÂ£o organizados em fieldsets semÃƒÂ¢nticos com bordas sutis (`1px solid #e5e7eb`) e legends descritivos
+- Hierarquia de tÃƒÂ­tulos padronizada: H1 ÃƒÂºnico no topo ("Painel de GestÃƒÂ£o DPS"), H2 para seÃƒÂ§ÃƒÂµes principais, H3 para subseÃƒÂ§ÃƒÂµes
 - Design minimalista com paleta reduzida: base neutra (#f9fafb, #e5e7eb, #374151) + 3 cores de status essenciais (verde, amarelo, vermelho)
-- Responsividade básica implementada com media queries para mobile (480px), tablets (768px) e desktops pequenos (1024px)
+- Responsividade bÃƒÂ¡sica implementada com media queries para mobile (480px), tablets (768px) e desktops pequenos (1024px)
 
 ### Gerenciador de Add-ons
 
 O plugin base inclui um gerenciador de add-ons centralizado (`DPS_Addon_Manager`) que:
-- Lista todos os add-ons disponíveis do ecossistema DPS
-- Verifica status de instalação e ativação
-- Determina a ordem correta de ativação baseada em dependências
-- Permite ativar/desativar add-ons em lote respeitando dependências
+- Lista todos os add-ons disponÃƒÂ­veis do ecossistema DPS
+- Verifica status de instalaÃƒÂ§ÃƒÂ£o e ativaÃƒÂ§ÃƒÂ£o
+- Determina a ordem correta de ativaÃƒÂ§ÃƒÂ£o baseada em dependÃƒÂªncias
+- Permite ativar/desativar add-ons em lote respeitando dependÃƒÂªncias
 
 **Classe**: `includes/class-dps-addon-manager.php`
 
-**Menu administrativo**: desi.pet by PRObst → Add-ons (`dps-addons`)
+**Menu administrativo**: desi.pet by PRObst Ã¢â€ â€™ Add-ons (`dps-addons`)
 
 #### Categorias de Add-ons
 
-| Categoria | Descrição | Add-ons |
+| Categoria | DescriÃƒÂ§ÃƒÂ£o | Add-ons |
 |-----------|-----------|---------|
-| Essenciais | Funcionalidades base recomendadas | Serviços, Financeiro, Comunicações |
-| Operação | Gestão do dia a dia | Agenda, Groomers, Assinaturas, Estoque |
-| Integrações | Conexões externas | Pagamentos, Push Notifications |
-| Cliente | Voltados ao cliente final | Cadastro Público, Portal do Cliente, Fidelidade |
-| Avançado | Funcionalidades extras | IA, Estatísticas |
-| Sistema | Administração e manutenção | Backup |
+| Essenciais | Funcionalidades base recomendadas | ServiÃƒÂ§os, Financeiro, ComunicaÃƒÂ§ÃƒÂµes |
+| OperaÃƒÂ§ÃƒÂ£o | GestÃƒÂ£o do dia a dia | Agenda, Groomers, Assinaturas, Estoque |
+| IntegraÃƒÂ§ÃƒÂµes | ConexÃƒÂµes externas | Pagamentos, Push Notifications |
+| Cliente | Voltados ao cliente final | Cadastro PÃƒÂºblico, Portal do Cliente, Fidelidade |
+| AvanÃƒÂ§ado | Funcionalidades extras | IA, EstatÃƒÂ­sticas |
+| Sistema | AdministraÃƒÂ§ÃƒÂ£o e manutenÃƒÂ§ÃƒÂ£o | Backup |
 
-#### Dependências entre Add-ons
+#### DependÃƒÂªncias entre Add-ons
 
-O sistema resolve automaticamente as dependências na ordem de ativação:
+O sistema resolve automaticamente as dependÃƒÂªncias na ordem de ativaÃƒÂ§ÃƒÂ£o:
 
 | Add-on | Depende de |
 |--------|-----------|
-| Agenda | Serviços |
-| Assinaturas | Serviços, Financeiro |
+| Agenda | ServiÃƒÂ§os |
+| Assinaturas | ServiÃƒÂ§os, Financeiro |
 | Pagamentos | Financeiro |
 | IA | Portal do Cliente |
 
-#### API Pública
+#### API PÃƒÂºblica
 
 ```php
-// Obter instância do gerenciador
+// Obter instÃƒÂ¢ncia do gerenciador
 $manager = DPS_Addon_Manager::get_instance();
 
-// Verificar se add-on está ativo
+// Verificar se add-on estÃƒÂ¡ ativo
 $is_active = $manager->is_active( 'agenda' );
 
-// Verificar dependências
+// Verificar dependÃƒÂªncias
 $deps = $manager->check_dependencies( 'ai' );
 // Retorna: ['satisfied' => false, 'missing' => ['client-portal']]
 
-// Obter ordem recomendada de ativação
+// Obter ordem recomendada de ativaÃƒÂ§ÃƒÂ£o
 $order = $manager->get_activation_order();
-// Retorna array ordenado por dependências com status de cada add-on
+// Retorna array ordenado por dependÃƒÂªncias com status de cada add-on
 
-// Ativar múltiplos add-ons na ordem correta
+// Ativar mÃƒÂºltiplos add-ons na ordem correta
 $result = $manager->activate_addons( ['services', 'agenda', 'finance'] );
-// Ativa: services → finance → agenda (respeitando dependências)
+// Ativa: services Ã¢â€ â€™ finance Ã¢â€ â€™ agenda (respeitando dependÃƒÂªncias)
 ```
 
 #### Interface Administrativa
 
-A página "Add-ons" exibe:
-1. **Ordem de Ativação Recomendada**: Lista visual dos add-ons instalados na ordem sugerida
+A pÃƒÂ¡gina "Add-ons" exibe:
+1. **Ordem de AtivaÃƒÂ§ÃƒÂ£o Recomendada**: Lista visual dos add-ons instalados na ordem sugerida
 2. **Categorias de Add-ons**: Cards organizados por categoria com:
-   - Nome e ícone do add-on
-   - Status (Ativo/Inativo/Não Instalado)
-   - Descrição curta
-   - Dependências necessárias
-   - Checkbox para seleção
-3. **Ações em Lote**: Botões para ativar ou desativar add-ons selecionados
+   - Nome e ÃƒÂ­cone do add-on
+   - Status (Ativo/Inativo/NÃƒÂ£o Instalado)
+   - DescriÃƒÂ§ÃƒÂ£o curta
+   - DependÃƒÂªncias necessÃƒÂ¡rias
+   - Checkbox para seleÃƒÂ§ÃƒÂ£o
+3. **AÃƒÂ§ÃƒÂµes em Lote**: BotÃƒÂµes para ativar ou desativar add-ons selecionados
 
-**Segurança**:
-- Verificação de nonce em todas as ações
-- Capability `manage_options` para acesso à página
-- Capability `activate_plugins`/`deactivate_plugins` para ações
+**SeguranÃƒÂ§a**:
+- VerificaÃƒÂ§ÃƒÂ£o de nonce em todas as aÃƒÂ§ÃƒÂµes
+- Capability `manage_options` para acesso ÃƒÂ  pÃƒÂ¡gina
+- Capability `activate_plugins`/`deactivate_plugins` para aÃƒÂ§ÃƒÂµes
 
 ### GitHub Updater
 
-O plugin base inclui um sistema de atualização automática via GitHub (`DPS_GitHub_Updater`) que:
-- Verifica novas versões diretamente do repositório GitHub
-- Notifica atualizações disponíveis no painel de Plugins do WordPress
+O plugin base inclui um sistema de atualizaÃƒÂ§ÃƒÂ£o automÃƒÂ¡tica via GitHub (`DPS_GitHub_Updater`) que:
+- Verifica novas versÃƒÂµes diretamente do repositÃƒÂ³rio GitHub
+- Notifica atualizaÃƒÂ§ÃƒÂµes disponÃƒÂ­veis no painel de Plugins do WordPress
 - Suporta o plugin base e todos os add-ons oficiais
-- Usa cache inteligente para evitar chamadas excessivas à API
+- Usa cache inteligente para evitar chamadas excessivas ÃƒÂ  API
 
 **Classe**: `includes/class-dps-github-updater.php`
 
-**Repositório**: `richardprobst/DPS`
+**RepositÃƒÂ³rio**: `richardprobst/DPS`
 
 #### Como Funciona
 
-1. **Verificação de Versões**: O updater consulta a API do GitHub (`/repos/{owner}/{repo}/releases/latest`) para obter a versão mais recente.
-2. **Comparação**: Compara a versão instalada de cada plugin com a versão da release mais recente.
-3. **Notificação**: Se houver atualização disponível, injeta os dados no transient de updates do WordPress.
-4. **Instalação**: O WordPress usa seu fluxo padrão de atualização para baixar e instalar.
+1. **VerificaÃƒÂ§ÃƒÂ£o de VersÃƒÂµes**: O updater consulta a API do GitHub (`/repos/{owner}/{repo}/releases/latest`) para obter a versÃƒÂ£o mais recente.
+2. **ComparaÃƒÂ§ÃƒÂ£o**: Compara a versÃƒÂ£o instalada de cada plugin com a versÃƒÂ£o da release mais recente.
+3. **NotificaÃƒÂ§ÃƒÂ£o**: Se houver atualizaÃƒÂ§ÃƒÂ£o disponÃƒÂ­vel, injeta os dados no transient de updates do WordPress.
+4. **InstalaÃƒÂ§ÃƒÂ£o**: O WordPress usa seu fluxo padrÃƒÂ£o de atualizaÃƒÂ§ÃƒÂ£o para baixar e instalar.
 
-#### Configuração
+#### ConfiguraÃƒÂ§ÃƒÂ£o
 
-O sistema funciona automaticamente sem configuração adicional. Para desabilitar:
+O sistema funciona automaticamente sem configuraÃƒÂ§ÃƒÂ£o adicional. Para desabilitar:
 
 ```php
 // Desabilitar o updater via hook (em wp-config.php ou plugin)
 add_filter( 'dps_github_updater_enabled', '__return_false' );
 ```
 
-#### API Pública
+#### API PÃƒÂºblica
 
 ```php
-// Obter instância do updater
+// Obter instÃƒÂ¢ncia do updater
 $updater = DPS_GitHub_Updater::get_instance();
 
-// Forçar verificação (limpa cache)
+// ForÃƒÂ§ar verificaÃƒÂ§ÃƒÂ£o (limpa cache)
 $release_data = $updater->force_check();
 
 // Obter lista de plugins gerenciados
 $plugins = $updater->get_managed_plugins();
 
-// Verificar se um plugin é gerenciado
+// Verificar se um plugin ÃƒÂ© gerenciado
 $is_managed = $updater->is_managed_plugin( 'desi-pet-shower-base_plugin/desi-pet-shower-base.php' );
 ```
 
-#### Forçar Verificação Manual
+#### ForÃƒÂ§ar VerificaÃƒÂ§ÃƒÂ£o Manual
 
-Adicione `?dps_force_update_check=1` à URL do painel de Plugins para forçar nova verificação:
+Adicione `?dps_force_update_check=1` ÃƒÂ  URL do painel de Plugins para forÃƒÂ§ar nova verificaÃƒÂ§ÃƒÂ£o:
 
 ```
 /wp-admin/plugins.php?dps_force_update_check=1
@@ -650,14 +650,14 @@ Adicione `?dps_force_update_check=1` à URL do painel de Plugins para forçar no
 
 #### Requisitos para Releases
 
-Para que o updater reconheça uma nova versão:
+Para que o updater reconheÃƒÂ§a uma nova versÃƒÂ£o:
 1. A release no GitHub deve usar tags semver (ex: `v1.2.0` ou `1.2.0`)
-2. A versão na tag deve ser maior que a versão instalada
+2. A versÃƒÂ£o na tag deve ser maior que a versÃƒÂ£o instalada
 3. Opcionalmente, anexe arquivos `.zip` individuais por plugin para download direto
 
 #### Plugins Gerenciados
 
-| Plugin | Arquivo | Caminho no Repositório |
+| Plugin | Arquivo | Caminho no RepositÃƒÂ³rio |
 |--------|---------|------------------------|
 | Base Plugin | `desi-pet-shower-base_plugin/desi-pet-shower-base.php` | `plugins/desi-pet-shower-base` |
 | Agenda | `desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php` | `plugins/desi-pet-shower-agenda` |
@@ -678,11 +678,11 @@ Para que o updater reconheça uma nova versão:
 
 ### Tipos de Agendamento
 
-O sistema suporta três tipos de agendamentos, identificados pelo metadado `appointment_type`:
+O sistema suporta trÃƒÂªs tipos de agendamentos, identificados pelo metadado `appointment_type`:
 
 #### 1. Agendamento Simples (`simple`)
-- **Propósito**: Atendimento único, sem recorrência
-- **Campos específicos**: Permite adicionar TaxiDog com valor personalizado
+- **PropÃƒÂ³sito**: Atendimento ÃƒÂºnico, sem recorrÃƒÂªncia
+- **Campos especÃƒÂ­ficos**: Permite adicionar TaxiDog com valor personalizado
 - **Comportamento**: Status inicial "pendente", precisa ser manualmente atualizado para "realizado"
 - **Metadados salvos**: 
   - `appointment_type` = 'simple'
@@ -691,11 +691,11 @@ O sistema suporta três tipos de agendamentos, identificados pelo metadado `appo
   - `appointment_total_value` (calculado pelo Services Add-on)
 
 #### 2. Agendamento de Assinatura (`subscription`)
-- **Propósito**: Atendimentos recorrentes (semanal ou quinzenal)
-- **Campos específicos**: 
-  - Frequência (semanal ou quinzenal)
-  - Tosa opcional com preço e ocorrência configurável
-  - TaxiDog disponível mas sem custo adicional
+- **PropÃƒÂ³sito**: Atendimentos recorrentes (semanal ou quinzenal)
+- **Campos especÃƒÂ­ficos**: 
+  - FrequÃƒÂªncia (semanal ou quinzenal)
+  - Tosa opcional com preÃƒÂ§o e ocorrÃƒÂªncia configurÃƒÂ¡vel
+  - TaxiDog disponÃƒÂ­vel mas sem custo adicional
 - **Comportamento**: Vincula-se a um registro de assinatura (`dps_subscription`) e gera atendimentos recorrentes
 - **Metadados salvos**:
   - `appointment_type` = 'subscription'
@@ -706,14 +706,14 @@ O sistema suporta três tipos de agendamentos, identificados pelo metadado `appo
   - `subscription_base_value`, `subscription_total_value`
 
 #### 3. Agendamento Passado (`past`)
-- **Propósito**: Registrar atendimentos já realizados anteriormente
-- **Campos específicos**:
-  - Status do Pagamento: dropdown com opções "Pago" ou "Pendente"
-  - Valor Pendente: campo numérico condicional (exibido apenas se status = "Pendente")
+- **PropÃƒÂ³sito**: Registrar atendimentos jÃƒÂ¡ realizados anteriormente
+- **Campos especÃƒÂ­ficos**:
+  - Status do Pagamento: dropdown com opÃƒÂ§ÃƒÂµes "Pago" ou "Pendente"
+  - Valor Pendente: campo numÃƒÂ©rico condicional (exibido apenas se status = "Pendente")
 - **Comportamento**: 
   - Status inicial automaticamente definido como "realizado"
-  - TaxiDog e Tosa não disponíveis (não aplicável para registros passados)
-  - Permite controlar pagamentos pendentes de atendimentos históricos
+  - TaxiDog e Tosa nÃƒÂ£o disponÃƒÂ­veis (nÃƒÂ£o aplicÃƒÂ¡vel para registros passados)
+  - Permite controlar pagamentos pendentes de atendimentos histÃƒÂ³ricos
 - **Metadados salvos**:
   - `appointment_type` = 'past'
   - `appointment_status` = 'realizado' (definido automaticamente)
@@ -721,29 +721,29 @@ O sistema suporta três tipos de agendamentos, identificados pelo metadado `appo
   - `past_payment_value` (float, salvo apenas se status = 'pending')
   - `appointment_total_value` (calculado pelo Services Add-on)
 - **Casos de uso**:
-  - Migração de dados de sistemas anteriores
-  - Registro de atendimentos realizados antes da implementação do sistema
-  - Controle de pagamentos em atraso de atendimentos históricos
+  - MigraÃƒÂ§ÃƒÂ£o de dados de sistemas anteriores
+  - Registro de atendimentos realizados antes da implementaÃƒÂ§ÃƒÂ£o do sistema
+  - Controle de pagamentos em atraso de atendimentos histÃƒÂ³ricos
 
 **Controle de visibilidade de campos (JavaScript)**:
-- A função `updateTypeFields()` em `dps-appointment-form.js` controla a exibição condicional de campos baseada no tipo selecionado
-- Campos de frequência: visíveis apenas para tipo `subscription`
-- Campos de tosa: visíveis apenas para tipo `subscription`
-- Campos de pagamento passado: visíveis apenas para tipo `past`
-- TaxiDog com preço: visível apenas para tipo `simple`
+- A funÃƒÂ§ÃƒÂ£o `updateTypeFields()` em `dps-appointment-form.js` controla a exibiÃƒÂ§ÃƒÂ£o condicional de campos baseada no tipo selecionado
+- Campos de frequÃƒÂªncia: visÃƒÂ­veis apenas para tipo `subscription`
+- Campos de tosa: visÃƒÂ­veis apenas para tipo `subscription`
+- Campos de pagamento passado: visÃƒÂ­veis apenas para tipo `past`
+- TaxiDog com preÃƒÂ§o: visÃƒÂ­vel apenas para tipo `simple`
 
 
-### Histórico e exportação de agendamentos
-- A coleta de atendimentos finalizados é feita em lotes pelo `WP_Query` com `fields => 'ids'`, `no_found_rows => true` e tamanho configurável via filtro `dps_history_batch_size` (padrão: 200). Isso evita uma única consulta gigante em tabelas volumosas e permite tratar listas grandes de forma incremental.
-- As metas dos agendamentos são pré-carregadas com `update_meta_cache('post')` antes do loop, reduzindo consultas repetidas às mesmas linhas durante a renderização e exportação.
-- Clientes, pets e serviços relacionados são resolvidos com caches em memória por ID, evitando `get_post` duplicadas quando o mesmo registro aparece em várias linhas.
-- O botão de exportação gera CSV apenas com as colunas exibidas e respeita os filtros aplicados na tabela, o que limita o volume exportado a um subconjunto relevante e já paginado/filtrado pelo usuário.
+### HistÃƒÂ³rico e exportaÃƒÂ§ÃƒÂ£o de agendamentos
+- A coleta de atendimentos finalizados ÃƒÂ© feita em lotes pelo `WP_Query` com `fields => 'ids'`, `no_found_rows => true` e tamanho configurÃƒÂ¡vel via filtro `dps_history_batch_size` (padrÃƒÂ£o: 200). Isso evita uma ÃƒÂºnica consulta gigante em tabelas volumosas e permite tratar listas grandes de forma incremental.
+- As metas dos agendamentos sÃƒÂ£o prÃƒÂ©-carregadas com `update_meta_cache('post')` antes do loop, reduzindo consultas repetidas ÃƒÂ s mesmas linhas durante a renderizaÃƒÂ§ÃƒÂ£o e exportaÃƒÂ§ÃƒÂ£o.
+- Clientes, pets e serviÃƒÂ§os relacionados sÃƒÂ£o resolvidos com caches em memÃƒÂ³ria por ID, evitando `get_post` duplicadas quando o mesmo registro aparece em vÃƒÂ¡rias linhas.
+- O botÃƒÂ£o de exportaÃƒÂ§ÃƒÂ£o gera CSV apenas com as colunas exibidas e respeita os filtros aplicados na tabela, o que limita o volume exportado a um subconjunto relevante e jÃƒÂ¡ paginado/filtrado pelo usuÃƒÂ¡rio.
 
 ## Add-ons complementares (`plugins/`)
 
-### Text Domains para Internacionalização (i18n)
+### Text Domains para InternacionalizaÃƒÂ§ÃƒÂ£o (i18n)
 
-Todos os plugins e add-ons do DPS seguem o padrão WordPress de text domains para internacionalização. Os text domains oficiais são:
+Todos os plugins e add-ons do DPS seguem o padrÃƒÂ£o WordPress de text domains para internacionalizaÃƒÂ§ÃƒÂ£o. Os text domains oficiais sÃƒÂ£o:
 
 **Plugin Base**:
 - `desi-pet-shower` - Plugin base que fornece CPTs e funcionalidades core
@@ -751,42 +751,42 @@ Todos os plugins e add-ons do DPS seguem o padrão WordPress de text domains par
 **Add-ons**:
 - `dps-agenda-addon` - Agenda e agendamentos
 - `dps-ai` - Assistente de IA
-- `dps-backup-addon` - Backup e restauração
-- `dps-booking-addon` - Página dedicada de agendamentos
+- `dps-backup-addon` - Backup e restauraÃƒÂ§ÃƒÂ£o
+- `dps-booking-addon` - PÃƒÂ¡gina dedicada de agendamentos
 - `dps-client-portal` - Portal do cliente
-- `dps-communications-addon` - Comunicações (WhatsApp, SMS, email)
-- `dps-finance-addon` - Financeiro (transações, parcelas, cobranças)
-- `dps-groomers-addon` - Gestão de groomers/profissionais
+- `dps-communications-addon` - ComunicaÃƒÂ§ÃƒÂµes (WhatsApp, SMS, email)
+- `dps-finance-addon` - Financeiro (transaÃƒÂ§ÃƒÂµes, parcelas, cobranÃƒÂ§as)
+- `dps-groomers-addon` - GestÃƒÂ£o de groomers/profissionais
 - `dps-loyalty-addon` - Campanhas e fidelidade
-- `dps-payment-addon` - Integração de pagamentos
-- `dps-push-addon` - Notificações push
-- `dps-registration-addon` - Registro e autenticação
-- `dps-services-addon` - Serviços e produtos
-- `dps-stats-addon` - Estatísticas e relatórios
+- `dps-payment-addon` - IntegraÃƒÂ§ÃƒÂ£o de pagamentos
+- `dps-push-addon` - NotificaÃƒÂ§ÃƒÂµes push
+- `dps-registration-addon` - Registro e autenticaÃƒÂ§ÃƒÂ£o
+- `dps-services-addon` - ServiÃƒÂ§os e produtos
+- `dps-stats-addon` - EstatÃƒÂ­sticas e relatÃƒÂ³rios
 - `dps-stock-addon` - Controle de estoque
-- `dps-subscription-addon` - Assinaturas e recorrência
+- `dps-subscription-addon` - Assinaturas e recorrÃƒÂªncia
 
-**Boas práticas de i18n**:
-- Use sempre `__()`, `_e()`, `esc_html__()`, `esc_attr__()` ou `esc_html_e()` para strings exibidas ao usuário
+**Boas prÃƒÂ¡ticas de i18n**:
+- Use sempre `__()`, `_e()`, `esc_html__()`, `esc_attr__()` ou `esc_html_e()` para strings exibidas ao usuÃƒÂ¡rio
 - Sempre especifique o text domain correto do plugin/add-on correspondente
 - Para strings JavaScript em `prompt()` ou `alert()`, use `esc_js( __() )` para escapar e traduzir
-- Mensagens de erro, sucesso, labels de formulário e textos de interface devem sempre ser traduzíveis
-- Dados de negócio (nomes de clientes, endereços hardcoded, etc.) não precisam de tradução
+- Mensagens de erro, sucesso, labels de formulÃƒÂ¡rio e textos de interface devem sempre ser traduzÃƒÂ­veis
+- Dados de negÃƒÂ³cio (nomes de clientes, endereÃƒÂ§os hardcoded, etc.) nÃƒÂ£o precisam de traduÃƒÂ§ÃƒÂ£o
 
 **Carregamento de text domains (WordPress 6.7+)**:
-- Todos os plugins devem incluir o header `Domain Path: /languages` para indicar onde os arquivos de tradução devem ser armazenados
+- Todos os plugins devem incluir o header `Domain Path: /languages` para indicar onde os arquivos de traduÃƒÂ§ÃƒÂ£o devem ser armazenados
 - Add-ons devem carregar text domains usando `load_plugin_textdomain()` no hook `init` com prioridade 1
-- Instanciar classes principais no hook `init` com prioridade 5 (após carregamento do text domain)
-- Isso garante que strings traduzíveis no constructor sejam traduzidas corretamente
-- Métodos de registro (CPT, taxonomias, etc.) devem ser adicionados ao `init` com prioridade padrão (10)
-- **Não** carregar text domains ou instanciar classes antes do hook `init` (evitar `plugins_loaded` ou escopo global)
+- Instanciar classes principais no hook `init` com prioridade 5 (apÃƒÂ³s carregamento do text domain)
+- Isso garante que strings traduzÃƒÂ­veis no constructor sejam traduzidas corretamente
+- MÃƒÂ©todos de registro (CPT, taxonomias, etc.) devem ser adicionados ao `init` com prioridade padrÃƒÂ£o (10)
+- **NÃƒÂ£o** carregar text domains ou instanciar classes antes do hook `init` (evitar `plugins_loaded` ou escopo global)
 
-**Status de localização pt_BR**:
-- ✅ Todos os 17 plugins (1 base + 16 add-ons) possuem headers `Text Domain` e `Domain Path` corretos
-- ✅ Todos os plugins carregam text domain no hook `init` com prioridade 1
-- ✅ Todas as classes são inicializadas no hook `init` com prioridade 5
-- ✅ Todo código, comentários e strings estão em Português do Brasil
-- ✅ Sistema pronto para expansão multilíngue com arquivos .po/.mo em `/languages`
+**Status de localizaÃƒÂ§ÃƒÂ£o pt_BR**:
+- Ã¢Å“â€¦ Todos os 17 plugins (1 base + 16 add-ons) possuem headers `Text Domain` e `Domain Path` corretos
+- Ã¢Å“â€¦ Todos os plugins carregam text domain no hook `init` com prioridade 1
+- Ã¢Å“â€¦ Todas as classes sÃƒÂ£o inicializadas no hook `init` com prioridade 5
+- Ã¢Å“â€¦ Todo cÃƒÂ³digo, comentÃƒÂ¡rios e strings estÃƒÂ£o em PortuguÃƒÂªs do Brasil
+- Ã¢Å“â€¦ Sistema pronto para expansÃƒÂ£o multilÃƒÂ­ngue com arquivos .po/.mo em `/languages`
 
 ---
 
@@ -796,44 +796,44 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 
 **Menu Principal** (criado pelo plugin base):
 - Slug: `desi-pet-shower`
-- Ícone: `dashicons-pets`
+- ÃƒÂcone: `dashicons-pets`
 - Capability: `manage_options`
-- Posição: 56 (após "Settings")
+- PosiÃƒÂ§ÃƒÂ£o: 56 (apÃƒÂ³s "Settings")
 
 **Submenus Ativos** (registrados pelo plugin base e add-ons):
-- **Assistente de IA** (`dps-ai-settings`) - AI Add-on (configurações do assistente virtual)
-- **Backup & Restauração** (`dps-backup`) - Backup Add-on (exportar/importar dados)
+- **Assistente de IA** (`dps-ai-settings`) - AI Add-on (configuraÃƒÂ§ÃƒÂµes do assistente virtual)
+- **Backup & RestauraÃƒÂ§ÃƒÂ£o** (`dps-backup`) - Backup Add-on (exportar/importar dados)
 - **Campanhas** (`edit.php?post_type=dps_campaign`) - Loyalty Add-on (listagem de campanhas)
-- **Campanhas & Fidelidade** (`dps-loyalty`) - Loyalty Add-on (configurações de pontos e indicações)
-- **Clientes** (`dps-clients-settings`) - Plugin Base (define a URL da página dedicada de cadastro exibida nos atalhos da aba Clientes)
-- **Comunicações** (`dps-communications`) - Communications Add-on (templates e gateways)
-- **Formulário de Cadastro** (`dps-registration-settings`) - Registration Add-on (configurações do formulário público para clientes se cadastrarem)
+- **Campanhas & Fidelidade** (`dps-loyalty`) - Loyalty Add-on (configuraÃƒÂ§ÃƒÂµes de pontos e indicaÃƒÂ§ÃƒÂµes)
+- **Clientes** (`dps-clients-settings`) - Plugin Base (define a URL da pÃƒÂ¡gina dedicada de cadastro exibida nos atalhos da aba Clientes)
+- **ComunicaÃƒÂ§ÃƒÂµes** (`dps-communications`) - Communications Add-on (templates e gateways)
+- **FormulÃƒÂ¡rio de Cadastro** (`dps-registration-settings`) - Registration Add-on (configuraÃƒÂ§ÃƒÂµes do formulÃƒÂ¡rio pÃƒÂºblico para clientes se cadastrarem)
 - **Logins de Clientes** (`dps-client-logins`) - Client Portal Add-on (gerenciar tokens de acesso)
-- **Logs do Sistema** (`dps-logs`) - Plugin Base (visualização de logs do sistema)
+- **Logs do Sistema** (`dps-logs`) - Plugin Base (visualizaÃƒÂ§ÃƒÂ£o de logs do sistema)
 - **Mensagens do Portal** (`edit.php?post_type=dps_portal_message`) - Client Portal Add-on (mensagens enviadas pelos clientes)
-- **Notificações** (`dps-push-notifications`) - Push Add-on (push, agenda, relatórios, Telegram)
+- **NotificaÃƒÂ§ÃƒÂµes** (`dps-push-notifications`) - Push Add-on (push, agenda, relatÃƒÂ³rios, Telegram)
 - **Pagamentos** (`dps-payment-settings`) - Payment Add-on (Mercado Pago, PIX)
-- **Portal do Cliente** (`dps-client-portal-settings`) - Client Portal Add-on (configurações do portal)
+- **Portal do Cliente** (`dps-client-portal-settings`) - Client Portal Add-on (configuraÃƒÂ§ÃƒÂµes do portal)
 
 **Nomenclatura de Menus - Diretrizes de Usabilidade**:
-- Use nomes curtos e descritivos que indiquem claramente a função
+- Use nomes curtos e descritivos que indiquem claramente a funÃƒÂ§ÃƒÂ£o
 - Evite prefixos redundantes como "DPS" ou "desi.pet by PRObst" nos nomes de submenu
-- Use verbos ou substantivos que descrevam a ação/entidade gerenciada
+- Use verbos ou substantivos que descrevam a aÃƒÂ§ÃƒÂ£o/entidade gerenciada
 - Exemplos de nomes descritivos:
-  - ✅ "Logs do Sistema" (indica claramente que são logs técnicos)
-  - ✅ "Backup & Restauração" (ações disponíveis)
-  - ✅ "Formulário de Cadastro" (indica que é um formulário para clientes se registrarem)
-  - ❌ "DPS Logs" (prefixo redundante - já está no menu pai)
-  - ❌ "Settings" (genérico demais)
-  - ❌ "Cadastro Público" (pouco intuitivo, prefira "Formulário de Cadastro")
+  - Ã¢Å“â€¦ "Logs do Sistema" (indica claramente que sÃƒÂ£o logs tÃƒÂ©cnicos)
+  - Ã¢Å“â€¦ "Backup & RestauraÃƒÂ§ÃƒÂ£o" (aÃƒÂ§ÃƒÂµes disponÃƒÂ­veis)
+  - Ã¢Å“â€¦ "FormulÃƒÂ¡rio de Cadastro" (indica que ÃƒÂ© um formulÃƒÂ¡rio para clientes se registrarem)
+  - Ã¢ÂÅ’ "DPS Logs" (prefixo redundante - jÃƒÂ¡ estÃƒÂ¡ no menu pai)
+  - Ã¢ÂÅ’ "Settings" (genÃƒÂ©rico demais)
+  - Ã¢ÂÅ’ "Cadastro PÃƒÂºblico" (pouco intuitivo, prefira "FormulÃƒÂ¡rio de Cadastro")
 
-**Boas práticas para registro de menus**:
+**Boas prÃƒÂ¡ticas para registro de menus**:
 - Sempre use `add_submenu_page()` com `'desi-pet-shower'` como menu pai
-- Use prioridade 20 no hook `admin_menu` para garantir que o menu pai já existe:
+- Use prioridade 20 no hook `admin_menu` para garantir que o menu pai jÃƒÂ¡ existe:
   ```php
   add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
   ```
-- Evite criar menus próprios separados (ex: `add_menu_page()` em add-ons)
+- Evite criar menus prÃƒÂ³prios separados (ex: `add_menu_page()` em add-ons)
 - Para CPTs que precisam aparecer no menu, use `show_in_menu => 'desi-pet-shower'` ao registrar o CPT:
   ```php
   register_post_type( 'meu_cpt', [
@@ -841,275 +841,275 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
       // ...
   ] );
   ```
-- Prefira integração via `DPS_Settings_Frontend::register_tab()` para adicionar abas na página de configurações. Os hooks legados (`dps_settings_nav_tabs`, `dps_settings_sections`) estão depreciados.
+- Prefira integraÃƒÂ§ÃƒÂ£o via `DPS_Settings_Frontend::register_tab()` para adicionar abas na pÃƒÂ¡gina de configuraÃƒÂ§ÃƒÂµes. Os hooks legados (`dps_settings_nav_tabs`, `dps_settings_sections`) estÃƒÂ£o depreciados.
 
-**Histórico de correções**:
+**HistÃƒÂ³rico de correÃƒÂ§ÃƒÂµes**:
 - **2025-01-13**: Hooks legados `dps_settings_nav_tabs` e `dps_settings_sections` depreciados em favor do sistema moderno de abas
-- **2025-12-01**: Mensagens do Portal migrado de menu próprio para submenu do desi.pet by PRObst (CPT com show_in_menu)
-- **2025-12-01**: Cadastro Público renomeado para "Formulário de Cadastro" (mais intuitivo)
-- **2025-12-01**: Logs do Sistema migrado de menu próprio para submenu do desi.pet by PRObst
+- **2025-12-01**: Mensagens do Portal migrado de menu prÃƒÂ³prio para submenu do desi.pet by PRObst (CPT com show_in_menu)
+- **2025-12-01**: Cadastro PÃƒÂºblico renomeado para "FormulÃƒÂ¡rio de Cadastro" (mais intuitivo)
+- **2025-12-01**: Logs do Sistema migrado de menu prÃƒÂ³prio para submenu do desi.pet by PRObst
 - **2025-11-24**: Adicionado menu administrativo ao Client Portal Add-on (Portal do Cliente e Logins de Clientes)
 - **2024-11-24**: Corrigida prioridade de registro de menus em todos os add-ons (de 10 para 20)
-- **2024-11-24**: Loyalty Add-on migrado de menu próprio (`dps-loyalty-addon`) para submenu unificado (`desi-pet-shower`)
+- **2024-11-24**: Loyalty Add-on migrado de menu prÃƒÂ³prio (`dps-loyalty-addon`) para submenu unificado (`desi-pet-shower`)
 
 ---
 
 ### Agenda (`desi-pet-shower-agenda_addon`)
 
-**Diretório**: `plugins/desi-pet-shower-agenda`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-agenda`
 
-**Propósito e funcionalidades principais**:
-- Gerenciar agenda de atendimentos e cobranças pendentes
-- Enviar lembretes automáticos diários aos clientes
+**PropÃƒÂ³sito e funcionalidades principais**:
+- Gerenciar agenda de atendimentos e cobranÃƒÂ§as pendentes
+- Enviar lembretes automÃƒÂ¡ticos diÃƒÂ¡rios aos clientes
 - Atualizar status de agendamentos via interface AJAX
 - **[Deprecated v1.1.0]** Endpoint `dps_get_services_details` (movido para Services Add-on)
 
 **Shortcodes expostos**:
-- `[dps_agenda_page]`: renderiza página de agenda com filtros e ações
+- `[dps_agenda_page]`: renderiza pÃƒÂ¡gina de agenda com filtros e aÃƒÂ§ÃƒÂµes
 - `[dps_charges_notes]`: **[Deprecated]** redirecionado para Finance Add-on (`[dps_fin_docs]`)
 
-**CPTs, tabelas e opções**:
-- Não cria CPTs próprios; consome `dps_agendamento` do núcleo
-- Cria páginas automaticamente: "Agenda DPS"
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
+- NÃƒÂ£o cria CPTs prÃƒÂ³prios; consome `dps_agendamento` do nÃƒÂºcleo
+- Cria pÃƒÂ¡ginas automaticamente: "Agenda DPS"
 - Options: `dps_agenda_page_id`
 
 **Meta keys de agendamento** (post meta de `dps_agendamento`):
-- `_dps_checklist`: checklist operacional com status por etapa (pré-banho, banho, secagem, tosa, orelhas/unhas, acabamento) e histórico de retrabalho
-- `_dps_checkin`: dados de check-in (horário, observações, itens de segurança com severidade)
-- `_dps_checkout`: dados de check-out (horário, observações, itens de segurança)
+- `_dps_checklist`: checklist operacional com status por etapa (prÃƒÂ©-banho, banho, secagem, tosa, orelhas/unhas, acabamento) e histÃƒÂ³rico de retrabalho
+- `_dps_checkin`: dados de check-in (horÃƒÂ¡rio, observaÃƒÂ§ÃƒÂµes, itens de seguranÃƒÂ§a com severidade)
+- `_dps_checkout`: dados de check-out (horÃƒÂ¡rio, observaÃƒÂ§ÃƒÂµes, itens de seguranÃƒÂ§a)
 
 **Hooks consumidos**:
-- Nenhum hook específico do núcleo (opera diretamente sobre CPTs)
+- Nenhum hook especÃƒÂ­fico do nÃƒÂºcleo (opera diretamente sobre CPTs)
 
 **Hooks disparados**:
-- `dps_agenda_send_reminders`: cron job diário para envio de lembretes
+- `dps_agenda_send_reminders`: cron job diÃƒÂ¡rio para envio de lembretes
 - `dps_checklist_rework_registered( $appointment_id, $step_key, $reason )`: quando uma etapa do checklist precisa de retrabalho
-- `dps_appointment_checked_in( $appointment_id, $data )`: após check-in registrado
-- `dps_appointment_checked_out( $appointment_id, $data )`: após check-out registrado
+- `dps_appointment_checked_in( $appointment_id, $data )`: apÃƒÂ³s check-in registrado
+- `dps_appointment_checked_out( $appointment_id, $data )`: apÃƒÂ³s check-out registrado
 
 **Filtros**:
-- `dps_checklist_default_steps`: permite add-ons adicionarem etapas ao checklist operacional (ex.: hidratação, ozônio)
-- `dps_checkin_safety_items`: permite add-ons adicionarem itens de segurança ao check-in/check-out
+- `dps_checklist_default_steps`: permite add-ons adicionarem etapas ao checklist operacional (ex.: hidrataÃƒÂ§ÃƒÂ£o, ozÃƒÂ´nio)
+- `dps_checkin_safety_items`: permite add-ons adicionarem itens de seguranÃƒÂ§a ao check-in/check-out
 
 **Endpoints AJAX**:
 - `dps_update_status`: atualiza status de agendamento
 - `dps_checklist_update`: atualiza status de uma etapa do checklist (nonce: `dps_checklist`)
 - `dps_checklist_rework`: registra retrabalho em uma etapa do checklist (nonce: `dps_checklist`)
-- `dps_appointment_checkin`: registra check-in com observações e itens de segurança (nonce: `dps_checkin`)
-- `dps_appointment_checkout`: registra check-out com observações e itens de segurança (nonce: `dps_checkin`)
+- `dps_appointment_checkin`: registra check-in com observaÃƒÂ§ÃƒÂµes e itens de seguranÃƒÂ§a (nonce: `dps_checkin`)
+- `dps_appointment_checkout`: registra check-out com observaÃƒÂ§ÃƒÂµes e itens de seguranÃƒÂ§a (nonce: `dps_checkin`)
 - `dps_get_services_details`: **[Deprecated v1.1.0]** mantido por compatibilidade, delega para `DPS_Services_API::get_services_details()`
 
-**Dependências**:
+**DependÃƒÂªncias**:
 - Depende do plugin base para CPTs de agendamento
-- **[Recomendado]** Services Add-on para cálculo de valores via API
-- Integra-se com add-on de Comunicações para envio de mensagens (se ativo)
-- Aviso exibido se Finance Add-on não estiver ativo (funcionalidades financeiras limitadas)
+- **[Recomendado]** Services Add-on para cÃƒÂ¡lculo de valores via API
+- Integra-se com add-on de ComunicaÃƒÂ§ÃƒÂµes para envio de mensagens (se ativo)
+- Aviso exibido se Finance Add-on nÃƒÂ£o estiver ativo (funcionalidades financeiras limitadas)
 
 **Introduzido em**: v0.1.0 (estimado)
 
 **Assets**:
-- `assets/js/agenda-addon.js`: interações AJAX e feedback visual
-- `assets/js/checklist-checkin.js`: interações do checklist operacional e check-in/check-out
+- `assets/js/agenda-addon.js`: interaÃƒÂ§ÃƒÂµes AJAX e feedback visual
+- `assets/js/checklist-checkin.js`: interaÃƒÂ§ÃƒÂµes do checklist operacional e check-in/check-out
 - `assets/css/checklist-checkin.css`: estilos M3 para checklist e check-in/check-out
 - **[Deprecated]** `agenda-addon.js` e `agenda.js` na raiz (devem ser removidos)
 
-**Classes de serviço**:
+**Classes de serviÃƒÂ§o**:
 - `DPS_Agenda_Checklist_Service`: CRUD de checklist operacional com etapas, progresso e retrabalho
-- `DPS_Agenda_Checkin_Service`: check-in/check-out com itens de segurança e cálculo de duração
+- `DPS_Agenda_Checkin_Service`: check-in/check-out com itens de seguranÃƒÂ§a e cÃƒÂ¡lculo de duraÃƒÂ§ÃƒÂ£o
 
-**Observações**:
+**ObservaÃƒÂ§ÃƒÂµes**:
 - Implementa `register_deactivation_hook` para limpar cron job `dps_agenda_send_reminders` ao desativar
-- **[v1.1.0]** Lógica de serviços movida para Services Add-on; Agenda delega cálculos para `DPS_Services_API`
-- **Documentação completa**: `docs/analysis/AGENDA_ADDON_ANALYSIS.md` (análise profunda de código, funcionalidades, layout e melhorias propostas)
-- **Documentação de layout**: `docs/analysis/AGENDA_ADDON_ANALYSIS.md` (seções de UX, responsividade e acessibilidade)
+- **[v1.1.0]** LÃƒÂ³gica de serviÃƒÂ§os movida para Services Add-on; Agenda delega cÃƒÂ¡lculos para `DPS_Services_API`
+- **DocumentaÃƒÂ§ÃƒÂ£o completa**: `docs/analysis/AGENDA_ADDON_ANALYSIS.md` (anÃƒÂ¡lise profunda de cÃƒÂ³digo, funcionalidades, layout e melhorias propostas)
+- **DocumentaÃƒÂ§ÃƒÂ£o de layout**: `docs/analysis/AGENDA_ADDON_ANALYSIS.md` (seÃƒÂ§ÃƒÂµes de UX, responsividade e acessibilidade)
 
 ---
 
-### Backup & Restauração (`desi-pet-shower-backup_addon`)
+### Backup & RestauraÃƒÂ§ÃƒÂ£o (`desi-pet-shower-backup_addon`)
 
-**Diretório**: `plugins/desi-pet-shower-backup`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-backup`
 
-**Propósito e funcionalidades principais**:
-- Exportar todo o conteúdo do sistema em formato JSON (CPTs, metadados, options, tabelas, anexos)
+**PropÃƒÂ³sito e funcionalidades principais**:
+- Exportar todo o conteÃƒÂºdo do sistema em formato JSON (CPTs, metadados, options, tabelas, anexos)
 - Restaurar dados de backups anteriores com mapeamento inteligente de IDs
-- Proteger operações com nonces, validações e transações SQL
-- Suportar migração entre ambientes WordPress
+- Proteger operaÃƒÂ§ÃƒÂµes com nonces, validaÃƒÂ§ÃƒÂµes e transaÃƒÂ§ÃƒÂµes SQL
+- Suportar migraÃƒÂ§ÃƒÂ£o entre ambientes WordPress
 
 **Shortcodes expostos**: Nenhum
 
 **Menus administrativos**:
-- **Backup & Restauração** (`dps-backup`): interface para exportar e restaurar dados
+- **Backup & RestauraÃƒÂ§ÃƒÂ£o** (`dps-backup`): interface para exportar e restaurar dados
 
-**CPTs, tabelas e opções**:
-- Não cria CPTs ou tabelas próprias
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
+- NÃƒÂ£o cria CPTs ou tabelas prÃƒÂ³prias
 - **Exporta/Importa**: todos os CPTs prefixados com `dps_`, tabelas `dps_*`, options `dps_*`
-- Options de histórico (planejado): `dps_backup_history`, `dps_backup_settings`
+- Options de histÃƒÂ³rico (planejado): `dps_backup_history`, `dps_backup_settings`
 
 **Hooks consumidos**:
 - `admin_menu` (prioridade 20): registra submenu sob "desi.pet by PRObst"
-- `admin_post_dps_backup_export`: processa exportação de backup
-- `admin_post_dps_backup_import`: processa importação de backup
+- `admin_post_dps_backup_export`: processa exportaÃƒÂ§ÃƒÂ£o de backup
+- `admin_post_dps_backup_import`: processa importaÃƒÂ§ÃƒÂ£o de backup
 
-**Hooks disparados**: Nenhum (opera de forma autônoma)
+**Hooks disparados**: Nenhum (opera de forma autÃƒÂ´noma)
 
-**Segurança implementada**:
-- ✅ Nonces em exportação e importação (`dps_backup_nonce`)
-- ✅ Verificação de capability `manage_options`
-- ✅ Validação de extensão (apenas `.json`) e tamanho (máx. 50MB)
-- ✅ Sanitização de tabelas e options (apenas prefixo `dps_`)
-- ✅ Deserialização segura (`allowed_classes => false`)
-- ✅ Transações SQL com rollback em caso de falha
+**SeguranÃƒÂ§a implementada**:
+- Ã¢Å“â€¦ Nonces em exportaÃƒÂ§ÃƒÂ£o e importaÃƒÂ§ÃƒÂ£o (`dps_backup_nonce`)
+- Ã¢Å“â€¦ VerificaÃƒÂ§ÃƒÂ£o de capability `manage_options`
+- Ã¢Å“â€¦ ValidaÃƒÂ§ÃƒÂ£o de extensÃƒÂ£o (apenas `.json`) e tamanho (mÃƒÂ¡x. 50MB)
+- Ã¢Å“â€¦ SanitizaÃƒÂ§ÃƒÂ£o de tabelas e options (apenas prefixo `dps_`)
+- Ã¢Å“â€¦ DeserializaÃƒÂ§ÃƒÂ£o segura (`allowed_classes => false`)
+- Ã¢Å“â€¦ TransaÃƒÂ§ÃƒÂµes SQL com rollback em caso de falha
 
-**Dependências**:
-- **Obrigatória**: Plugin base DPS (verifica `DPS_Base_Plugin`)
-- Acessa todos os CPTs e tabelas do sistema para exportação/importação
+**DependÃƒÂªncias**:
+- **ObrigatÃƒÂ³ria**: Plugin base DPS (verifica `DPS_Base_Plugin`)
+- Acessa todos os CPTs e tabelas do sistema para exportaÃƒÂ§ÃƒÂ£o/importaÃƒÂ§ÃƒÂ£o
 
 **Introduzido em**: v0.1.0 (estimado)
 
-**Versão atual**: 1.0.0
+**VersÃƒÂ£o atual**: 1.0.0
 
-**Observações**:
-- Arquivo único de 1338 linhas; candidato a refatoração modular futura
-- Suporta exportação de anexos (fotos de pets) e documentos financeiros (`dps_docs`)
-- Mapeamento inteligente de IDs: clientes → pets → agendamentos → transações
+**ObservaÃƒÂ§ÃƒÂµes**:
+- Arquivo ÃƒÂºnico de 1338 linhas; candidato a refatoraÃƒÂ§ÃƒÂ£o modular futura
+- Suporta exportaÃƒÂ§ÃƒÂ£o de anexos (fotos de pets) e documentos financeiros (`dps_docs`)
+- Mapeamento inteligente de IDs: clientes Ã¢â€ â€™ pets Ã¢â€ â€™ agendamentos Ã¢â€ â€™ transaÃƒÂ§ÃƒÂµes
 
-**Análise completa**: Consulte `docs/analysis/BACKUP_ADDON_ANALYSIS.md` para análise detalhada de código, funcionalidades, segurança e melhorias propostas
+**AnÃƒÂ¡lise completa**: Consulte `docs/analysis/BACKUP_ADDON_ANALYSIS.md` para anÃƒÂ¡lise detalhada de cÃƒÂ³digo, funcionalidades, seguranÃƒÂ§a e melhorias propostas
 
 ---
 
 ### Booking (`desi-pet-shower-booking`)
 
-**Diretório**: `plugins/desi-pet-shower-booking`  
-**Versão**: 1.3.0
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-booking`  
+**VersÃƒÂ£o**: 1.3.0
 
-**Propósito e funcionalidades principais**:
-- Página dedicada de agendamentos para administradores
-- Mesma funcionalidade da aba Agendamentos do Painel de Gestão DPS, porém em página independente
-- Formulário completo com seleção de cliente, pets, serviços, data/hora, tipo de agendamento (avulso/assinatura) e status de pagamento
-- Tela de confirmação pós-agendamento com resumo e ações rápidas (WhatsApp, novo agendamento, voltar ao painel)
+**PropÃƒÂ³sito e funcionalidades principais**:
+- PÃƒÂ¡gina dedicada de agendamentos para administradores
+- Mesma funcionalidade da aba Agendamentos do Painel de GestÃƒÂ£o DPS, porÃƒÂ©m em pÃƒÂ¡gina independente
+- FormulÃƒÂ¡rio completo com seleÃƒÂ§ÃƒÂ£o de cliente, pets, serviÃƒÂ§os, data/hora, tipo de agendamento (avulso/assinatura) e status de pagamento
+- Tela de confirmaÃƒÂ§ÃƒÂ£o pÃƒÂ³s-agendamento com resumo e aÃƒÂ§ÃƒÂµes rÃƒÂ¡pidas (WhatsApp, novo agendamento, voltar ao painel)
 - Design system migrado para Material 3 Expressive (v1.3.0)
-- Otimizações de performance (batch queries para owners de pets)
-- Validações granulares de segurança (verificação por agendamento específico)
+- OtimizaÃƒÂ§ÃƒÂµes de performance (batch queries para owners de pets)
+- ValidaÃƒÂ§ÃƒÂµes granulares de seguranÃƒÂ§a (verificaÃƒÂ§ÃƒÂ£o por agendamento especÃƒÂ­fico)
 
 **Shortcodes expostos**:
-- `[dps_booking_form]`: renderiza formulário completo de agendamento
+- `[dps_booking_form]`: renderiza formulÃƒÂ¡rio completo de agendamento
 
-**CPTs, tabelas e opções**:
-- Não cria CPTs ou tabelas próprias; consome `dps_agendamento` do núcleo
-- Cria página automaticamente na ativação: "Agendamento de Serviços"
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
+- NÃƒÂ£o cria CPTs ou tabelas prÃƒÂ³prias; consome `dps_agendamento` do nÃƒÂºcleo
+- Cria pÃƒÂ¡gina automaticamente na ativaÃƒÂ§ÃƒÂ£o: "Agendamento de ServiÃƒÂ§os"
 - Options: `dps_booking_page_id`
 
 **Hooks consumidos**:
-- `dps_base_after_save_appointment`: captura agendamento salvo para exibir tela de confirmação
-- `dps_base_appointment_fields`: permite injeção de campos customizados por add-ons
-- `dps_base_appointment_assignment_fields`: permite adicionar campos de atribuição
+- `dps_base_after_save_appointment`: captura agendamento salvo para exibir tela de confirmaÃƒÂ§ÃƒÂ£o
+- `dps_base_appointment_fields`: permite injeÃƒÂ§ÃƒÂ£o de campos customizados por add-ons
+- `dps_base_appointment_assignment_fields`: permite adicionar campos de atribuiÃƒÂ§ÃƒÂ£o
 
-**Hooks disparados**: Nenhum hook próprio
+**Hooks disparados**: Nenhum hook prÃƒÂ³prio
 
 **Capabilities verificadas**:
 - `manage_options` (admin total)
-- `dps_manage_clients` (gestão de clientes)
-- `dps_manage_pets` (gestão de pets)
-- `dps_manage_appointments` (gestão de agendamentos)
+- `dps_manage_clients` (gestÃƒÂ£o de clientes)
+- `dps_manage_pets` (gestÃƒÂ£o de pets)
+- `dps_manage_appointments` (gestÃƒÂ£o de agendamentos)
 
 **Assets (v1.3.0)**:
 - `booking-addon.css`: Estilos M3 Expressive com semantic mapping, 100% tokens M3
-- Dependência condicional de `dps-design-tokens.css` via check de `DPS_BASE_URL`
+- DependÃƒÂªncia condicional de `dps-design-tokens.css` via check de `DPS_BASE_URL`
 - Assets do base plugin carregados via `DPS_Base_Plugin::enqueue_frontend_assets()`
 
-**Melhorias de segurança (v1.3.0)**:
-- Método `can_edit_appointment()`: valida se usuário pode editar agendamento específico
-- Verificação de `can_access()` antes de renderizar seção
-- Documentação phpcs para parâmetros GET read-only
+**Melhorias de seguranÃƒÂ§a (v1.3.0)**:
+- MÃƒÂ©todo `can_edit_appointment()`: valida se usuÃƒÂ¡rio pode editar agendamento especÃƒÂ­fico
+- VerificaÃƒÂ§ÃƒÂ£o de `can_access()` antes de renderizar seÃƒÂ§ÃƒÂ£o
+- DocumentaÃƒÂ§ÃƒÂ£o phpcs para parÃƒÂ¢metros GET read-only
 
-**Otimizações de performance (v1.3.0)**:
-- Batch fetch de owners de pets (redução de N+1 queries: 100+ → 1)
-- Preparado para futura paginação de clientes
+**OtimizaÃƒÂ§ÃƒÂµes de performance (v1.3.0)**:
+- Batch fetch de owners de pets (reduÃƒÂ§ÃƒÂ£o de N+1 queries: 100+ Ã¢â€ â€™ 1)
+- Preparado para futura paginaÃƒÂ§ÃƒÂ£o de clientes
 
 **Acessibilidade (v1.3.0)**:
 - `aria-hidden="true"` em todos emojis decorativos
-- Suporte a `prefers-reduced-motion` em animações
-- ARIA roles e labels conforme padrões do base plugin
+- Suporte a `prefers-reduced-motion` em animaÃƒÂ§ÃƒÂµes
+- ARIA roles e labels conforme padrÃƒÂµes do base plugin
 
 **Endpoints AJAX**: Nenhum
 
-**Dependências**:
+**DependÃƒÂªncias**:
 - Depende do plugin base para CPTs de agendamento e helpers globais
-- Integra-se com Services Add-on para listagem de serviços disponíveis
-- Integra-se com Groomers Add-on para atribuição de profissionais (se ativo)
+- Integra-se com Services Add-on para listagem de serviÃƒÂ§os disponÃƒÂ­veis
+- Integra-se com Groomers Add-on para atribuiÃƒÂ§ÃƒÂ£o de profissionais (se ativo)
 
 **Introduzido em**: v1.0.0
 
 **Assets**:
-- `assets/css/dps-booking-form.css`: estilos do formulário de agendamento
-- `assets/js/dps-booking-form.js`: interações do formulário (seleção de pets, datas, etc.)
+- `assets/css/dps-booking-form.css`: estilos do formulÃƒÂ¡rio de agendamento
+- `assets/js/dps-booking-form.js`: interaÃƒÂ§ÃƒÂµes do formulÃƒÂ¡rio (seleÃƒÂ§ÃƒÂ£o de pets, datas, etc.)
 
-**Observações**:
-- Assets carregados condicionalmente apenas na página de agendamento (`dps_booking_page_id`)
-- Implementa `register_activation_hook` para criar página automaticamente
-- Formulário reutiliza lógica de salvamento do plugin base (`save_appointment`)
+**ObservaÃƒÂ§ÃƒÂµes**:
+- Assets carregados condicionalmente apenas na pÃƒÂ¡gina de agendamento (`dps_booking_page_id`)
+- Implementa `register_activation_hook` para criar pÃƒÂ¡gina automaticamente
+- FormulÃƒÂ¡rio reutiliza lÃƒÂ³gica de salvamento do plugin base (`save_appointment`)
 
 ---
 
 ### Campanhas & Fidelidade (`desi-pet-shower-loyalty_addon`)
 
-**Diretório**: `plugins/desi-pet-shower-loyalty`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-loyalty`
 
-**Propósito e funcionalidades principais**:
+**PropÃƒÂ³sito e funcionalidades principais**:
 - Gerenciar programa de pontos por faturamento
-- Módulo "Indique e Ganhe" com códigos únicos e recompensas
+- MÃƒÂ³dulo "Indique e Ganhe" com cÃƒÂ³digos ÃƒÂºnicos e recompensas
 - Criar e executar campanhas de marketing direcionadas
 
 **Shortcodes expostos**: Nenhum
 
-**CPTs, tabelas e opções**:
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
 - CPT: `dps_campaign` (campanhas de marketing)
-- Tabela: `dps_referrals` (indicações de clientes)
-- Options: configurações de pontos, recompensas e elegibilidade
+- Tabela: `dps_referrals` (indicaÃƒÂ§ÃƒÂµes de clientes)
+- Options: configuraÃƒÂ§ÃƒÂµes de pontos, recompensas e elegibilidade
 
 **Hooks consumidos**:
-- `dps_registration_after_client_created`: registra indicações no cadastro público
-- `dps_finance_booking_paid`: bonifica indicador/indicado na primeira cobrança paga
+- `dps_registration_after_client_created`: registra indicaÃƒÂ§ÃƒÂµes no cadastro pÃƒÂºblico
+- `dps_finance_booking_paid`: bonifica indicador/indicado na primeira cobranÃƒÂ§a paga
 - `dps_base_nav_tabs_after_history`: adiciona aba "Campanhas & Fidelidade"
-- `dps_base_sections_after_history`: renderiza conteúdo da aba
+- `dps_base_sections_after_history`: renderiza conteÃƒÂºdo da aba
 
 **Hooks disparados**: Nenhum
 
-**Dependências**:
-- Integra-se com add-on Financeiro para bonificações
-- Integra-se com add-on de Cadastro Público para capturar códigos de indicação
-- Integra-se com Portal do Cliente para exibir código/link de convite
+**DependÃƒÂªncias**:
+- Integra-se com add-on Financeiro para bonificaÃƒÂ§ÃƒÂµes
+- Integra-se com add-on de Cadastro PÃƒÂºblico para capturar cÃƒÂ³digos de indicaÃƒÂ§ÃƒÂ£o
+- Integra-se com Portal do Cliente para exibir cÃƒÂ³digo/link de convite
 
 **Introduzido em**: v0.2.0
 
-**Observações**:
-- Tabela `dps_referrals` criada via `dbDelta` na ativação
-- Oferece funções globais para crédito e resgate de pontos
+**ObservaÃƒÂ§ÃƒÂµes**:
+- Tabela `dps_referrals` criada via `dbDelta` na ativaÃƒÂ§ÃƒÂ£o
+- Oferece funÃƒÂ§ÃƒÂµes globais para crÃƒÂ©dito e resgate de pontos
 
 ---
 
-### Comunicações (`desi-pet-shower-communications_addon`)
+### ComunicaÃƒÂ§ÃƒÂµes (`desi-pet-shower-communications_addon`)
 
-**Diretório**: `plugins/desi-pet-shower-communications`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-communications`
 
-**Propósito e funcionalidades principais**:
-- **Centralizar TODAS as comunicações do sistema** via API pública `DPS_Communications_API`
+**PropÃƒÂ³sito e funcionalidades principais**:
+- **Centralizar TODAS as comunicaÃƒÂ§ÃƒÂµes do sistema** via API pÃƒÂºblica `DPS_Communications_API`
 - Enviar mensagens via WhatsApp, e-mail e SMS (futuro)
-- Aplicar templates configuráveis com placeholders dinâmicos
-- Registrar logs automáticos de todas as comunicações via `DPS_Logger`
+- Aplicar templates configurÃƒÂ¡veis com placeholders dinÃƒÂ¢micos
+- Registrar logs automÃƒÂ¡ticos de todas as comunicaÃƒÂ§ÃƒÂµes via `DPS_Logger`
 - Fornecer hooks para extensibilidade por outros add-ons
 
 **Arquitetura - Camada Centralizada**:
-- **API Central**: `DPS_Communications_API` (singleton) expõe métodos públicos
+- **API Central**: `DPS_Communications_API` (singleton) expÃƒÂµe mÃƒÂ©todos pÃƒÂºblicos
 - **Gatilhos**: Agenda, Portal e outros add-ons **delegam** envios para a API
-- **Interfaces mantidas**: Botões de ação (wa.me links) **permanecem** na Agenda e Portal
-- **Lógica de envio**: Concentrada na API, não duplicada entre add-ons
+- **Interfaces mantidas**: BotÃƒÂµes de aÃƒÂ§ÃƒÂ£o (wa.me links) **permanecem** na Agenda e Portal
+- **LÃƒÂ³gica de envio**: Concentrada na API, nÃƒÂ£o duplicada entre add-ons
 
-**API Pública** (`includes/class-dps-communications-api.php`):
+**API PÃƒÂºblica** (`includes/class-dps-communications-api.php`):
 ```php
 $api = DPS_Communications_API::get_instance();
 
-// Métodos principais:
+// MÃƒÂ©todos principais:
 $api->send_whatsapp( $to, $message, $context = [] );
 $api->send_email( $to, $subject, $body, $context = [] );
 $api->send_appointment_reminder( $appointment_id );
@@ -1117,29 +1117,29 @@ $api->send_payment_notification( $client_id, $amount_cents, $context = [] );
 $api->send_message_from_client( $client_id, $message, $context = [] );
 ```
 
-**Shortcodes expostos**: Nenhum (operação via API e configurações)
+**Shortcodes expostos**: Nenhum (operaÃƒÂ§ÃƒÂ£o via API e configuraÃƒÂ§ÃƒÂµes)
 
-**CPTs, tabelas e opções**:
-- Não cria CPTs ou tabelas próprias
-- Option `dps_comm_settings`: configurações de gateways e templates
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
+- NÃƒÂ£o cria CPTs ou tabelas prÃƒÂ³prias
+- Option `dps_comm_settings`: configuraÃƒÂ§ÃƒÂµes de gateways e templates
   - `whatsapp_api_key`: chave de API do gateway WhatsApp
   - `whatsapp_api_url`: endpoint base do gateway
-  - `default_email_from`: e-mail remetente padrão
-  - `template_confirmation`: template de confirmação de agendamento
+  - `default_email_from`: e-mail remetente padrÃƒÂ£o
+  - `template_confirmation`: template de confirmaÃƒÂ§ÃƒÂ£o de agendamento
   - `template_reminder`: template de lembrete (placeholders: `{client_name}`, `{pet_name}`, `{date}`, `{time}`)
-  - `template_post_service`: template de pós-atendimento
+  - `template_post_service`: template de pÃƒÂ³s-atendimento
 
 **Hooks consumidos**:
-- `dps_base_after_save_appointment`: dispara confirmação após salvar agendamento
-- ~~`dps_settings_nav_tabs`~~: (migrado para sistema moderno) aba "Comunicações" registrada em `DPS_Settings_Frontend`
-- ~~`dps_settings_sections`~~: (migrado para sistema moderno) renderização via callback em `register_tab()`
+- `dps_base_after_save_appointment`: dispara confirmaÃƒÂ§ÃƒÂ£o apÃƒÂ³s salvar agendamento
+- ~~`dps_settings_nav_tabs`~~: (migrado para sistema moderno) aba "ComunicaÃƒÂ§ÃƒÂµes" registrada em `DPS_Settings_Frontend`
+- ~~`dps_settings_sections`~~: (migrado para sistema moderno) renderizaÃƒÂ§ÃƒÂ£o via callback em `register_tab()`
 
 **Hooks disparados (Actions)**:
-- `dps_after_whatsapp_sent( $to, $message, $context, $result )`: após envio de WhatsApp
-- `dps_after_email_sent( $to, $subject, $body, $context, $result )`: após envio de e-mail
-- `dps_after_reminder_sent( $appointment_id, $sent )`: após envio de lembrete
+- `dps_after_whatsapp_sent( $to, $message, $context, $result )`: apÃƒÂ³s envio de WhatsApp
+- `dps_after_email_sent( $to, $subject, $body, $context, $result )`: apÃƒÂ³s envio de e-mail
+- `dps_after_reminder_sent( $appointment_id, $sent )`: apÃƒÂ³s envio de lembrete
 - `dps_comm_send_appointment_reminder`: cron job para lembretes de agendamento
-- `dps_comm_send_post_service`: cron job para mensagens pós-atendimento
+- `dps_comm_send_post_service`: cron job para mensagens pÃƒÂ³s-atendimento
 
 **Hooks disparados (Filters)**:
 - `dps_comm_whatsapp_message( $message, $to, $context )`: filtra mensagem WhatsApp antes de enviar
@@ -1147,69 +1147,69 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - `dps_comm_email_body( $body, $to, $context )`: filtra corpo de e-mail
 - `dps_comm_email_headers( $headers, $to, $context )`: filtra headers de e-mail
 - `dps_comm_reminder_message( $message, $appointment_id )`: filtra mensagem de lembrete
-- `dps_comm_payment_notification_message( $message, $client_id, $amount_cents, $context )`: filtra notificação de pagamento
+- `dps_comm_payment_notification_message( $message, $client_id, $amount_cents, $context )`: filtra notificaÃƒÂ§ÃƒÂ£o de pagamento
 
-**Dependências**:
+**DependÃƒÂªncias**:
 - Depende do plugin base para `DPS_Logger` e `DPS_Phone_Helper`
-- Agenda e Portal delegam comunicações para esta API (dependência soft)
+- Agenda e Portal delegam comunicaÃƒÂ§ÃƒÂµes para esta API (dependÃƒÂªncia soft)
 
-**Integração com outros add-ons**:
-- **Agenda**: delega lembretes e notificações de status, **mantém** botões wa.me
+**IntegraÃƒÂ§ÃƒÂ£o com outros add-ons**:
+- **Agenda**: delega lembretes e notificaÃƒÂ§ÃƒÂµes de status, **mantÃƒÂ©m** botÃƒÂµes wa.me
 - **Portal**: delega mensagens de clientes para admin
 - **Finance**: pode usar API para notificar pagamentos
 
 **Introduzido em**: v0.1.0  
 **Refatorado em**: v0.2.0 (API centralizada)
 
-**Documentação completa**: `plugins/desi-pet-shower-communications/README.md`
+**DocumentaÃƒÂ§ÃƒÂ£o completa**: `plugins/desi-pet-shower-communications/README.md`
 
 ---
 
 ### Groomers (`desi-pet-shower-groomers_addon`)
 
-**Diretório**: `plugins/desi-pet-shower-groomers`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-groomers`
 
-**Propósito e funcionalidades principais**:
+**PropÃƒÂ³sito e funcionalidades principais**:
 - Cadastrar e gerenciar profissionais (groomers) via role customizada
-- Vincular múltiplos groomers por atendimento
-- Gerar relatórios de produtividade por profissional com métricas visuais
-- Exibir cards de métricas: total de atendimentos, receita total, ticket médio
-- Integração com Finance API para cálculo de receitas
+- Vincular mÃƒÂºltiplos groomers por atendimento
+- Gerar relatÃƒÂ³rios de produtividade por profissional com mÃƒÂ©tricas visuais
+- Exibir cards de mÃƒÂ©tricas: total de atendimentos, receita total, ticket mÃƒÂ©dio
+- IntegraÃƒÂ§ÃƒÂ£o com Finance API para cÃƒÂ¡lculo de receitas
 
 **Shortcodes expostos**: Nenhum
 
-**CPTs, tabelas e opções**:
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
 - Role customizada: `dps_groomer` (profissional de banho e tosa)
 - Metadados: `_dps_groomers` (array de IDs de groomers por agendamento)
 
 **Hooks consumidos**:
-- `dps_base_appointment_assignment_fields`: adiciona campo de seleção múltipla de groomers na seção "Atribuição" (desde v1.8.0)
+- `dps_base_appointment_assignment_fields`: adiciona campo de seleÃƒÂ§ÃƒÂ£o mÃƒÂºltipla de groomers na seÃƒÂ§ÃƒÂ£o "AtribuiÃƒÂ§ÃƒÂ£o" (desde v1.8.0)
 - `dps_base_after_save_appointment`: salva groomers selecionados
 - `dps_base_nav_tabs_after_history`: adiciona aba "Groomers" (prioridade 15)
-- `dps_base_sections_after_history`: renderiza cadastro e relatórios (prioridade 15)
+- `dps_base_sections_after_history`: renderiza cadastro e relatÃƒÂ³rios (prioridade 15)
 - `wp_enqueue_scripts`: carrega CSS e JS no frontend
 - `admin_enqueue_scripts`: carrega CSS e JS no admin
 
 **Hooks disparados**: Nenhum
 
-**Dependências**:
-- Depende do plugin base para estrutura de navegação e agendamentos
-- **Opcional**: Finance Add-on para cálculo automático de receitas nos relatórios
+**DependÃƒÂªncias**:
+- Depende do plugin base para estrutura de navegaÃƒÂ§ÃƒÂ£o e agendamentos
+- **Opcional**: Finance Add-on para cÃƒÂ¡lculo automÃƒÂ¡tico de receitas nos relatÃƒÂ³rios
 
 **Introduzido em**: v0.1.0 (estimado)
 
-**Versão atual**: v1.1.0
+**VersÃƒÂ£o atual**: v1.1.0
 
 **Assets**:
-- `assets/css/groomers-admin.css`: estilos seguindo padrão visual minimalista DPS
-- `assets/js/groomers-admin.js`: validações e interatividade do formulário
+- `assets/css/groomers-admin.css`: estilos seguindo padrÃƒÂ£o visual minimalista DPS
+- `assets/js/groomers-admin.js`: validaÃƒÂ§ÃƒÂµes e interatividade do formulÃƒÂ¡rio
 
-**Observações**:
-- v1.1.0: Refatorado com assets externos, fieldsets no formulário e cards de métricas
-- Formulário de cadastro com fieldsets: Dados de Acesso e Informações Pessoais
-- Relatórios exibem detalhes de cliente e pet por atendimento
-- Integração inteligente com Finance API (fallback para SQL direto)
-- Consulte `docs/analysis/GROOMERS_ADDON_ANALYSIS.md` para análise detalhada e plano de melhorias
+**ObservaÃƒÂ§ÃƒÂµes**:
+- v1.1.0: Refatorado com assets externos, fieldsets no formulÃƒÂ¡rio e cards de mÃƒÂ©tricas
+- FormulÃƒÂ¡rio de cadastro com fieldsets: Dados de Acesso e InformaÃƒÂ§ÃƒÂµes Pessoais
+- RelatÃƒÂ³rios exibem detalhes de cliente e pet por atendimento
+- IntegraÃƒÂ§ÃƒÂ£o inteligente com Finance API (fallback para SQL direto)
+- Consulte `docs/analysis/GROOMERS_ADDON_ANALYSIS.md` para anÃƒÂ¡lise detalhada e plano de melhorias
 
 ---
 
@@ -1228,21 +1228,21 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Coleta de consentimento de tosa com máquina via link tokenizado
 - Aba de pagamentos com resumo financeiro, pendências e histórico de parcelas (Fase 5.5)
 - Galeria multi-fotos por pet com lightbox (Fase 5.1)
-- Preferências de notificação configuráveis pelo cliente (Fase 5.2)
-- Seletor de pet no modal de agendamento para clientes com múltiplos pets (Fase 5.3)
+- PreferÃƒÂªncias de notificaÃƒÂ§ÃƒÂ£o configurÃƒÂ¡veis pelo cliente (Fase 5.2)
+- Seletor de pet no modal de agendamento para clientes com mÃƒÂºltiplos pets (Fase 5.3)
 - Barra de progresso stepper (3 etapas) no fluxo de agendamento (Fase 4.1)
-- Sugestões inteligentes de agendamento baseadas no histórico do pet (Fase 8.1)
-- Autenticação de dois fatores (2FA) via e-mail, opcional (Fase 6.4)
+- SugestÃƒÂµes inteligentes de agendamento baseadas no histÃƒÂ³rico do pet (Fase 8.1)
+- AutenticaÃƒÂ§ÃƒÂ£o de dois fatores (2FA) via e-mail, opcional (Fase 6.4)
 - Remember-me com cookie permanente (Fase 4.6)
 
 **Shortcodes expostos**:
 - `[dps_client_portal]`: renderiza portal completo do cliente
-- `[dps_client_login]`: exibe formulário de login
-- `[dps_profile_update]`: formulário público de atualização de perfil (usado internamente via token)
-- `[dps_tosa_consent]`: formulário público de consentimento de tosa com máquina (via token)
+- `[dps_client_login]`: exibe formulÃƒÂ¡rio de login
+- `[dps_profile_update]`: formulÃƒÂ¡rio pÃƒÂºblico de atualizaÃƒÂ§ÃƒÂ£o de perfil (usado internamente via token)
+- `[dps_tosa_consent]`: formulÃƒÂ¡rio pÃƒÂºblico de consentimento de tosa com mÃƒÂ¡quina (via token)
 
-**CPTs, tabelas e opções**:
-- Não cria CPTs próprios
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
+- NÃƒÂ£o cria CPTs prÃƒÂ³prios
 - Tabela customizada `wp_dps_portal_tokens` para gerenciar tokens de acesso
   - Suporta 5 tipos de token: `login` (temporário 30min), `first_access` (temporário 30min), `permanent` (válido até revogação), `profile_update` (7 dias), `tosa_consent` (7 dias)
 - Sessões PHP próprias para autenticação independente do WordPress
@@ -1253,14 +1253,14 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 **Abas do portal**:
 - `inicio`: dashboard com resumo (agendamentos, pets, status financeiro)
-- `agendamentos`: histórico de atendimentos com filtro por período
-- `pagamentos`: resumo financeiro, transações pendentes com parcelas, histórico de pagos (Fase 5.5)
+- `agendamentos`: histÃƒÂ³rico de atendimentos com filtro por perÃƒÂ­odo
+- `pagamentos`: resumo financeiro, transaÃƒÂ§ÃƒÂµes pendentes com parcelas, histÃƒÂ³rico de pagos (Fase 5.5)
 - `pet-history`: timeline de atendimentos por pet com info card detalhado
 - `galeria`: galeria multi-fotos por pet com lightbox (Fase 5.1)
-- `fidelidade`: programa de indicação e recompensas
-- `reviews`: avaliações pós-serviço
-- `mensagens`: comunicação com o pet shop
-- `dados`: dados pessoais, pets e preferências de notificação
+- `fidelidade`: programa de indicaÃƒÂ§ÃƒÂ£o e recompensas
+- `reviews`: avaliaÃƒÂ§ÃƒÂµes pÃƒÂ³s-serviÃƒÂ§o
+- `mensagens`: comunicaÃƒÂ§ÃƒÂ£o com o pet shop
+- `dados`: dados pessoais, pets e preferÃƒÂªncias de notificaÃƒÂ§ÃƒÂ£o
 - Hook `dps_portal_tabs` (filter): permite add-ons adicionarem abas customizadas
 
 **Menus administrativos**:
@@ -1275,7 +1275,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 **Classes principais**:
 
-| Classe | Arquivo | Propósito |
+| Classe | Arquivo | PropÃƒÂ³sito |
 |--------|---------|-----------|
 | `DPS_Client_Portal` | `includes/class-dps-client-portal.php` | Classe principal: shortcode, auth flow, tabs, localize_script |
 | `DPS_Portal_2FA` | `includes/class-dps-portal-2fa.php` | 2FA via e-mail: gera/verifica códigos, renderiza form, AJAX handler |
@@ -1288,99 +1288,107 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 | `DPS_Portal_User_Manager` | `includes/class-dps-portal-user-manager.php` | Provisiona/sincroniza usu?rio WordPress pelo e-mail do cliente e envia acesso por senha |
 | `DPS_Portal_Rate_Limiter` | `includes/class-dps-portal-rate-limiter.php` | Limita tentativas de solicita??o de link e de cria??o/redefini??o de senha |
 | `DPS_Finance_Repository` | `includes/client-portal/repositories/class-dps-finance-repository.php` | Acesso a dados financeiros (transações, parcelas, resumos) |
+| `DPS_Portal_2FA` | `includes/class-dps-portal-2fa.php` | 2FA via e-mail: gera/verifica cÃƒÂ³digos, renderiza form, AJAX handler |
+| `DPS_Scheduling_Suggestions` | `includes/class-dps-scheduling-suggestions.php` | SugestÃƒÂµes de agendamento baseadas no histÃƒÂ³rico do pet |
+| `DPS_Portal_Renderer` | `includes/client-portal/class-dps-portal-renderer.php` | RenderizaÃƒÂ§ÃƒÂ£o das abas e componentes visuais |
+| `DPS_Portal_Actions_Handler` | `includes/client-portal/class-dps-portal-actions-handler.php` | Handlers de aÃƒÂ§ÃƒÂµes POST (save, update, upload) |
+| `DPS_Portal_Ajax_Handler` | `includes/client-portal/class-dps-portal-ajax-handler.php` | Handlers de requisiÃƒÂ§ÃƒÂµes AJAX |
+| `DPS_Portal_Session_Manager` | `includes/class-dps-portal-session-manager.php` | Gerenciamento de sessÃƒÂµes PHP |
+| `DPS_Portal_Token_Manager` | `includes/class-dps-portal-token-manager.php` | CRUD de tokens com suporte a permanentes e temporÃƒÂ¡rios |
+| `DPS_Finance_Repository` | `includes/client-portal/repositories/class-dps-finance-repository.php` | Acesso a dados financeiros (transaÃƒÂ§ÃƒÂµes, parcelas, resumos) |
 | `DPS_Pet_Repository` | `includes/client-portal/repositories/class-dps-pet-repository.php` | Acesso a dados de pets do cliente |
 | `DPS_Appointment_Repository` | `includes/client-portal/repositories/class-dps-appointment-repository.php` | Acesso a dados de agendamentos do cliente |
 
 **Hooks consumidos**:
 - ~~`dps_settings_nav_tabs`~~: (migrado para sistema moderno) abas "Portal do Cliente" e "Logins de Clientes" registradas em `DPS_Settings_Frontend`
-- ~~`dps_settings_sections`~~: (migrado para sistema moderno) renderização via callbacks em `register_tab()`
-- Hooks do add-on de Pagamentos para links de quitação via Mercado Pago
-- `dps_client_page_header_actions`: adiciona botão "Link de Atualização" no header da página de detalhes do cliente
+- ~~`dps_settings_sections`~~: (migrado para sistema moderno) renderizaÃƒÂ§ÃƒÂ£o via callbacks em `register_tab()`
+- Hooks do add-on de Pagamentos para links de quitaÃƒÂ§ÃƒÂ£o via Mercado Pago
+- `dps_client_page_header_actions`: adiciona botÃƒÂ£o "Link de AtualizaÃƒÂ§ÃƒÂ£o" no header da pÃƒÂ¡gina de detalhes do cliente
 
 **Hooks disparados**:
-- `dps_client_portal_before_content`: disparado após o menu de navegação e antes das seções de conteúdo; passa $client_id como parâmetro; útil para adicionar conteúdo no topo do portal (ex: widgets, assistentes)
-- `dps_client_portal_after_content`: disparado ao final do portal, antes do fechamento do container principal; passa $client_id como parâmetro
+- `dps_client_portal_before_content`: disparado apÃƒÂ³s o menu de navegaÃƒÂ§ÃƒÂ£o e antes das seÃƒÂ§ÃƒÂµes de conteÃƒÂºdo; passa $client_id como parÃƒÂ¢metro; ÃƒÂºtil para adicionar conteÃƒÂºdo no topo do portal (ex: widgets, assistentes)
+- `dps_client_portal_after_content`: disparado ao final do portal, antes do fechamento do container principal; passa $client_id como parÃƒÂ¢metro
 - `dps_portal_tabs` (filter): filtra o array de abas do portal; passa $tabs e $client_id
-- `dps_portal_before_{tab}_content` / `dps_portal_after_{tab}_content` (action): disparados antes/depois do conteúdo de cada aba (inicio, agendamentos, pagamentos, pet-history, galeria, fidelidade, reviews, mensagens, dados); passa $client_id
-- `dps_portal_custom_tab_panels` (action): renderiza painéis de abas customizadas; passa $client_id e $tabs
-- `dps_portal_profile_update_link_generated`: disparado quando um link de atualização de perfil é gerado; passa $client_id e $update_url como parâmetros
-- `dps_portal_profile_updated`: disparado quando o cliente atualiza seu perfil; passa $client_id como parâmetro
-- `dps_portal_new_pet_created`: disparado quando um novo pet é cadastrado via formulário de atualização; passa $pet_id e $client_id como parâmetros
+- `dps_portal_before_{tab}_content` / `dps_portal_after_{tab}_content` (action): disparados antes/depois do conteÃƒÂºdo de cada aba (inicio, agendamentos, pagamentos, pet-history, galeria, fidelidade, reviews, mensagens, dados); passa $client_id
+- `dps_portal_custom_tab_panels` (action): renderiza painÃƒÂ©is de abas customizadas; passa $client_id e $tabs
+- `dps_portal_profile_update_link_generated`: disparado quando um link de atualizaÃƒÂ§ÃƒÂ£o de perfil ÃƒÂ© gerado; passa $client_id e $update_url como parÃƒÂ¢metros
+- `dps_portal_profile_updated`: disparado quando o cliente atualiza seu perfil; passa $client_id como parÃƒÂ¢metro
+- `dps_portal_new_pet_created`: disparado quando um novo pet ÃƒÂ© cadastrado via formulÃƒÂ¡rio de atualizaÃƒÂ§ÃƒÂ£o; passa $pet_id e $client_id como parÃƒÂ¢metros
 - `dps_portal_tosa_consent_link_generated`: disparado ao gerar link de consentimento; passa $client_id e $consent_url
 - `dps_portal_tosa_consent_saved`: disparado ao salvar consentimento; passa $client_id
 - `dps_portal_tosa_consent_revoked`: disparado ao revogar consentimento; passa $client_id
-- `dps_portal_after_update_preferences` (action): disparado após salvar preferências de notificação; passa $client_id
+- `dps_portal_after_update_preferences` (action): disparado apÃƒÂ³s salvar preferÃƒÂªncias de notificaÃƒÂ§ÃƒÂ£o; passa $client_id
 - `dps_portal_before_render` / `dps_portal_after_auth_check` / `dps_portal_client_authenticated` (actions): hooks do ciclo de vida do shortcode
-- `dps_portal_access_notification_sent` (action): disparado após enviar notificação de acesso; passa $client_id, $sent, $access_date, $ip_address
-- `dps_portal_review_url` (filter): permite filtrar a URL de avaliação do Google
+- `dps_portal_access_notification_sent` (action): disparado apÃƒÂ³s enviar notificaÃƒÂ§ÃƒÂ£o de acesso; passa $client_id, $sent, $access_date, $ip_address
+- `dps_portal_review_url` (filter): permite filtrar a URL de avaliaÃƒÂ§ÃƒÂ£o do Google
 
-**Métodos públicos da classe `DPS_Client_Portal`**:
-- `get_current_client_id()`: retorna o ID do cliente autenticado via sessão ou usuário WordPress (0 se não autenticado); permite que add-ons obtenham o cliente logado no portal
+**MÃƒÂ©todos pÃƒÂºblicos da classe `DPS_Client_Portal`**:
+- `get_current_client_id()`: retorna o ID do cliente autenticado via sessÃƒÂ£o ou usuÃƒÂ¡rio WordPress (0 se nÃƒÂ£o autenticado); permite que add-ons obtenham o cliente logado no portal
 
-**Funções helper globais**:
-- `dps_get_portal_page_url()`: retorna URL da página do portal (configurada ou fallback)
-- `dps_get_portal_page_id()`: retorna ID da página do portal (configurada ou fallback)
-- `dps_get_tosa_consent_page_url()`: retorna URL da página de consentimento (configurada ou fallback)
+**FunÃƒÂ§ÃƒÂµes helper globais**:
+- `dps_get_portal_page_url()`: retorna URL da pÃƒÂ¡gina do portal (configurada ou fallback)
+- `dps_get_portal_page_id()`: retorna ID da pÃƒÂ¡gina do portal (configurada ou fallback)
+- `dps_get_tosa_consent_page_url()`: retorna URL da pÃƒÂ¡gina de consentimento (configurada ou fallback)
 
 **Metadados de cliente utilizados** (meta keys em `dps_cliente` CPT):
-- `client_notification_reminders` (default '1'): preferência de lembretes de agendamento
-- `client_notification_payments` (default '1'): preferência de notificações financeiras
-- `client_notification_promotions` (default '0'): preferência de promoções
-- `client_notification_updates` (default ''): preferência de atualizações do sistema
+- `client_notification_reminders` (default '1'): preferÃƒÂªncia de lembretes de agendamento
+- `client_notification_payments` (default '1'): preferÃƒÂªncia de notificaÃƒÂ§ÃƒÂµes financeiras
+- `client_notification_promotions` (default '0'): preferÃƒÂªncia de promoÃƒÂ§ÃƒÂµes
+- `client_notification_updates` (default ''): preferÃƒÂªncia de atualizaÃƒÂ§ÃƒÂµes do sistema
 
-**Dependências**:
+**DependÃƒÂªncias**:
 - Depende do plugin base para CPTs de clientes e pets
-- Integra-se com add-on Financeiro para exibir pendências e parcelas (aba Pagamentos)
-- Integra-se com add-on de Fidelidade para exibir código de indicação
+- Integra-se com add-on Financeiro para exibir pendÃƒÂªncias e parcelas (aba Pagamentos)
+- Integra-se com add-on de Fidelidade para exibir cÃƒÂ³digo de indicaÃƒÂ§ÃƒÂ£o
 
 **Introduzido em**: v0.1.0 (estimado)
-**Versão atual**: v2.1.0
+**VersÃƒÂ£o atual**: v2.1.0
 
-**Observações**:
-- Já segue padrão modular com estrutura `includes/` e `assets/`
-- Sistema de tokens com suporte a temporários (30min) e permanentes (até revogação)
-- Cleanup automático de tokens expirados via cron job hourly
-- Configuração centralizada da página do portal via interface administrativa
+**ObservaÃƒÂ§ÃƒÂµes**:
+- JÃƒÂ¡ segue padrÃƒÂ£o modular com estrutura `includes/` e `assets/`
+- Sistema de tokens com suporte a temporÃƒÂ¡rios (30min) e permanentes (atÃƒÂ© revogaÃƒÂ§ÃƒÂ£o)
+- Cleanup automÃƒÂ¡tico de tokens expirados via cron job hourly
+- ConfiguraÃƒÂ§ÃƒÂ£o centralizada da pÃƒÂ¡gina do portal via interface administrativa
 - Menu administrativo registrado sob `desi-pet-shower` desde v2.1.0
-- 2FA opcional via e-mail (códigos hashed com `wp_hash_password`, 10min expiração, 5 tentativas max)
+- 2FA opcional via e-mail (cÃƒÂ³digos hashed com `wp_hash_password`, 10min expiraÃƒÂ§ÃƒÂ£o, 5 tentativas max)
 - Remember-me: cookie permanente (HttpOnly, Secure, SameSite=Strict, 90 dias)
-- Sugestões inteligentes: análise de até 20 atendimentos por pet (intervalo médio, top 3 serviços, urgência)
+- SugestÃƒÂµes inteligentes: anÃƒÂ¡lise de atÃƒÂ© 20 atendimentos por pet (intervalo mÃƒÂ©dio, top 3 serviÃƒÂ§os, urgÃƒÂªncia)
 
-**Análise de Layout e UX**:
-- Consulte `docs/analysis/CLIENT_PORTAL_ADDON_DEEP_ANALYSIS.md` para análise detalhada de usabilidade e arquitetura do portal
+**AnÃƒÂ¡lise de Layout e UX**:
+- Consulte `docs/analysis/CLIENT_PORTAL_ADDON_DEEP_ANALYSIS.md` para anÃƒÂ¡lise detalhada de usabilidade e arquitetura do portal
 - Consulte `docs/screenshots/CLIENT_PORTAL_REBRANDING_SCREENSHOTS.md` para registro visual e resumo executivo das melhorias aplicadas
-- Portal usa design M3 com tabs, cards, lightbox, progress bar stepper, formulários com validação real-time
+- Portal usa design M3 com tabs, cards, lightbox, progress bar stepper, formulÃƒÂ¡rios com validaÃƒÂ§ÃƒÂ£o real-time
 - Responsividade em 480px, 768px e 1024px; suporte a `prefers-reduced-motion`
 
 ---
 
 ### Assistente de IA (`desi-pet-shower-ai_addon`)
 
-**Diretório**: `plugins/desi-pet-shower-ai`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-ai`
 
-**Propósito e funcionalidades principais**:
+**PropÃƒÂ³sito e funcionalidades principais**:
 - Fornecer assistente virtual inteligente no Portal do Cliente
-- Responder perguntas EXCLUSIVAMENTE sobre: Banho e Tosa, serviços, agendamentos, histórico, pagamentos, fidelidade, assinaturas e dados do cliente/pet
-- NÃO responder sobre assuntos aleatórios fora do contexto (política, religião, tecnologia, etc.)
+- Responder perguntas EXCLUSIVAMENTE sobre: Banho e Tosa, serviÃƒÂ§os, agendamentos, histÃƒÂ³rico, pagamentos, fidelidade, assinaturas e dados do cliente/pet
+- NÃƒÆ’O responder sobre assuntos aleatÃƒÂ³rios fora do contexto (polÃƒÂ­tica, religiÃƒÂ£o, tecnologia, etc.)
 - Integrar-se com OpenAI via API Chat Completions (GPT-3.5 Turbo / GPT-4)
 
 **Shortcodes expostos**: Nenhum (integra-se diretamente ao Portal via hook)
 
-**CPTs, tabelas e opções**:
-- Não cria CPTs ou tabelas próprias
-- Option: `dps_ai_settings` (armazena configurações: enabled, api_key, model, temperature, timeout, max_tokens)
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
+- NÃƒÂ£o cria CPTs ou tabelas prÃƒÂ³prias
+- Option: `dps_ai_settings` (armazena configuraÃƒÂ§ÃƒÂµes: enabled, api_key, model, temperature, timeout, max_tokens)
 
 **Hooks consumidos**:
-- `dps_client_portal_before_content`: renderiza widget de chat no topo do portal (após navegação, antes das seções)
+- `dps_client_portal_before_content`: renderiza widget de chat no topo do portal (apÃƒÂ³s navegaÃƒÂ§ÃƒÂ£o, antes das seÃƒÂ§ÃƒÂµes)
 
 **Hooks disparados**: Nenhum
 
 **Endpoints AJAX**:
 - `dps_ai_portal_ask` (wp_ajax e wp_ajax_nopriv): processa perguntas do cliente e retorna respostas da IA
 
-**Dependências**:
-- **Obrigatório**: Client Portal (fornece autenticação e shortcode `[dps_client_portal]`)
-- **Opcional**: Finance, Loyalty, Services (enriquecem contexto disponível para a IA)
+**DependÃƒÂªncias**:
+- **ObrigatÃƒÂ³rio**: Client Portal (fornece autenticaÃƒÂ§ÃƒÂ£o e shortcode `[dps_client_portal]`)
+- **Opcional**: Finance, Loyalty, Services (enriquecem contexto disponÃƒÂ­vel para a IA)
 
 **Introduzido em**: v1.0.0
 
@@ -1390,555 +1398,555 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 **Arquitetura interna**:
 - `includes/class-dps-ai-client.php`: cliente da API OpenAI com tratamento de erros e timeouts
-- `includes/class-dps-ai-assistant.php`: lógica do assistente (system prompt restritivo, montagem de contexto, filtro de palavras-chave)
-- `includes/class-dps-ai-integration-portal.php`: integração com Portal do Cliente (widget, AJAX handlers)
+- `includes/class-dps-ai-assistant.php`: lÃƒÂ³gica do assistente (system prompt restritivo, montagem de contexto, filtro de palavras-chave)
+- `includes/class-dps-ai-integration-portal.php`: integraÃƒÂ§ÃƒÂ£o com Portal do Cliente (widget, AJAX handlers)
 
 **System Prompt e Regras**:
-- Prompt restritivo define domínio permitido (banho/tosa, pet shop, sistema DPS)
-- Proíbe explicitamente assuntos fora do contexto
+- Prompt restritivo define domÃƒÂ­nio permitido (banho/tosa, pet shop, sistema DPS)
+- ProÃƒÂ­be explicitamente assuntos fora do contexto
 - Instrui a IA a recusar educadamente perguntas inadequadas
-- Recomenda procurar veterinário para problemas de saúde graves do pet
-- Proíbe inventar descontos, promoções ou alterações de plano não documentadas
-- Exige honestidade quando dados não forem encontrados no sistema
+- Recomenda procurar veterinÃƒÂ¡rio para problemas de saÃƒÂºde graves do pet
+- ProÃƒÂ­be inventar descontos, promoÃƒÂ§ÃƒÂµes ou alteraÃƒÂ§ÃƒÂµes de plano nÃƒÂ£o documentadas
+- Exige honestidade quando dados nÃƒÂ£o forem encontrados no sistema
 
 **Filtro Preventivo**:
-- Antes de chamar API, valida se pergunta contém palavras-chave do contexto (pet, banho, tosa, agendamento, pagamento, etc.)
+- Antes de chamar API, valida se pergunta contÃƒÂ©m palavras-chave do contexto (pet, banho, tosa, agendamento, pagamento, etc.)
 - Economiza chamadas de API e protege contra perguntas totalmente fora de escopo
-- Resposta padrão retornada sem chamar API se pergunta não passar no filtro
+- Resposta padrÃƒÂ£o retornada sem chamar API se pergunta nÃƒÂ£o passar no filtro
 
-**Contexto Fornecido à IA**:
+**Contexto Fornecido ÃƒÂ  IA**:
 - Dados do cliente (nome, telefone, email)
-- Lista de pets cadastrados (nome, raça, porte, idade)
-- Últimos 5 agendamentos (data, status, serviços)
-- Pendências financeiras (se Finance add-on ativo)
+- Lista de pets cadastrados (nome, raÃƒÂ§a, porte, idade)
+- ÃƒÅ¡ltimos 5 agendamentos (data, status, serviÃƒÂ§os)
+- PendÃƒÂªncias financeiras (se Finance add-on ativo)
 - Pontos de fidelidade (se Loyalty add-on ativo)
 
-**Comportamento em Cenários**:
+**Comportamento em CenÃƒÂ¡rios**:
 - **IA ativa e funcionando**: Widget aparece e processa perguntas normalmente
-- **IA desabilitada ou sem API key**: Widget não aparece; Portal funciona normalmente
-- **Falha na API**: Mensagem amigável exibida; Portal continua funcional
+- **IA desabilitada ou sem API key**: Widget nÃƒÂ£o aparece; Portal funciona normalmente
+- **Falha na API**: Mensagem amigÃƒÂ¡vel exibida; Portal continua funcional
 
-**Segurança**:
+**SeguranÃƒÂ§a**:
 - API key NUNCA exposta no JavaScript (chamadas server-side only)
-- Nonces em todas as requisições AJAX
-- Sanitização de entrada do usuário
-- Validação de cliente logado antes de processar pergunta
-- Timeout configurável para evitar requisições travadas
-- Logs de erro apenas no server (error_log, não expostos ao cliente)
+- Nonces em todas as requisiÃƒÂ§ÃƒÂµes AJAX
+- SanitizaÃƒÂ§ÃƒÂ£o de entrada do usuÃƒÂ¡rio
+- ValidaÃƒÂ§ÃƒÂ£o de cliente logado antes de processar pergunta
+- Timeout configurÃƒÂ¡vel para evitar requisiÃƒÂ§ÃƒÂµes travadas
+- Logs de erro apenas no server (error_log, nÃƒÂ£o expostos ao cliente)
 
 **Interface Administrativa**:
 - Menu: **desi.pet by PRObst > Assistente de IA**
-- Configurações: ativar/desativar IA, API key, modelo GPT, temperatura, timeout, max_tokens
-- Documentação inline sobre comportamento do assistente
+- ConfiguraÃƒÂ§ÃƒÂµes: ativar/desativar IA, API key, modelo GPT, temperatura, timeout, max_tokens
+- DocumentaÃƒÂ§ÃƒÂ£o inline sobre comportamento do assistente
 
-**Observações**:
-- Sistema totalmente autocontido: falhas não afetam funcionamento do Portal
-- Custo por requisição varia conforme modelo escolhido (GPT-3.5 Turbo recomendado para custo/benefício)
-- Consulte `plugins/desi-pet-shower-ai/README.md` para documentação completa de uso e manutenção
+**ObservaÃƒÂ§ÃƒÂµes**:
+- Sistema totalmente autocontido: falhas nÃƒÂ£o afetam funcionamento do Portal
+- Custo por requisiÃƒÂ§ÃƒÂ£o varia conforme modelo escolhido (GPT-3.5 Turbo recomendado para custo/benefÃƒÂ­cio)
+- Consulte `plugins/desi-pet-shower-ai/README.md` para documentaÃƒÂ§ÃƒÂ£o completa de uso e manutenÃƒÂ§ÃƒÂ£o
 
 ---
 
 ### Financeiro (`desi-pet-shower-finance_addon`)
 
-**Diretório**: `plugins/desi-pet-shower-finance`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-finance`
 
-**Propósito e funcionalidades principais**:
-- Gerenciar transações financeiras e cobranças
-- Sincronizar lançamentos com agendamentos
-- Suportar quitação parcial e geração de documentos
-- Integrar com outros add-ons para bonificações e assinaturas
+**PropÃƒÂ³sito e funcionalidades principais**:
+- Gerenciar transaÃƒÂ§ÃƒÂµes financeiras e cobranÃƒÂ§as
+- Sincronizar lanÃƒÂ§amentos com agendamentos
+- Suportar quitaÃƒÂ§ÃƒÂ£o parcial e geraÃƒÂ§ÃƒÂ£o de documentos
+- Integrar com outros add-ons para bonificaÃƒÂ§ÃƒÂµes e assinaturas
 
-**Shortcodes expostos**: Sim (não especificados na documentação atual)
+**Shortcodes expostos**: Sim (nÃƒÂ£o especificados na documentaÃƒÂ§ÃƒÂ£o atual)
 
-**CPTs, tabelas e opções**:
-- Tabela: `dps_transacoes` (lançamentos financeiros)
-- Tabela: `dps_parcelas` (parcelas de cobranças)
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
+- Tabela: `dps_transacoes` (lanÃƒÂ§amentos financeiros)
+- Tabela: `dps_parcelas` (parcelas de cobranÃƒÂ§as)
 
 **Hooks consumidos**:
-- `dps_finance_cleanup_for_appointment`: remove lançamentos ao excluir agendamento
+- `dps_finance_cleanup_for_appointment`: remove lanÃƒÂ§amentos ao excluir agendamento
 - `dps_base_nav_tabs_*`: adiciona aba "Financeiro"
-- `dps_base_sections_*`: renderiza seção financeira
+- `dps_base_sections_*`: renderiza seÃƒÂ§ÃƒÂ£o financeira
 
 **Hooks disparados**:
-- `dps_finance_booking_paid`: disparado quando cobrança é marcada como paga
+- `dps_finance_booking_paid`: disparado quando cobranÃƒÂ§a ÃƒÂ© marcada como paga
 
-**Dependências**:
-- Depende do plugin base para estrutura de navegação
+**DependÃƒÂªncias**:
+- Depende do plugin base para estrutura de navegaÃƒÂ§ÃƒÂ£o
 - Fornece infraestrutura para add-ons de Pagamentos, Assinaturas e Fidelidade
 
 **Introduzido em**: v0.1.0
 
-**Observações**:
-- Já segue padrão modular com classes auxiliares em `includes/`
-- Tabela compartilhada por múltiplos add-ons; mudanças de schema requerem migração cuidadosa
+**ObservaÃƒÂ§ÃƒÂµes**:
+- JÃƒÂ¡ segue padrÃƒÂ£o modular com classes auxiliares em `includes/`
+- Tabela compartilhada por mÃƒÂºltiplos add-ons; mudanÃƒÂ§as de schema requerem migraÃƒÂ§ÃƒÂ£o cuidadosa
 
 ---
 
 ### Pagamentos (`desi-pet-shower-payment_addon`)
 
-**Diretório**: `plugins/desi-pet-shower-payment`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-payment`
 
-**Propósito e funcionalidades principais**:
-- Integrar com Mercado Pago para geração de links de pagamento
-- Processar notificações de webhook para atualização de status
-- Injetar mensagens de cobrança no WhatsApp via add-on de Agenda
+**PropÃƒÂ³sito e funcionalidades principais**:
+- Integrar com Mercado Pago para geraÃƒÂ§ÃƒÂ£o de links de pagamento
+- Processar notificaÃƒÂ§ÃƒÂµes de webhook para atualizaÃƒÂ§ÃƒÂ£o de status
+- Injetar mensagens de cobranÃƒÂ§a no WhatsApp via add-on de Agenda
 - Gerenciar credenciais do Mercado Pago de forma segura
 
 **Shortcodes expostos**: Nenhum
 
 **Classes principais**:
-- `DPS_Payment_Addon`: Classe principal do add-on (gerencia hooks e integração)
+- `DPS_Payment_Addon`: Classe principal do add-on (gerencia hooks e integraÃƒÂ§ÃƒÂ£o)
 - `DPS_MercadoPago_Config` (v1.1.0+): Gerencia credenciais do Mercado Pago com ordem de prioridade
 
-**CPTs, tabelas e opções**:
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
 - Options: `dps_mercadopago_access_token`, `dps_pix_key`, `dps_mercadopago_webhook_secret` (credenciais Mercado Pago)
-- **IMPORTANTE (v1.1.0+)**: Recomendado definir credenciais via constantes em `wp-config.php` para produção:
+- **IMPORTANTE (v1.1.0+)**: Recomendado definir credenciais via constantes em `wp-config.php` para produÃƒÂ§ÃƒÂ£o:
   - `DPS_MERCADOPAGO_ACCESS_TOKEN`: Token de acesso da API Mercado Pago
-  - `DPS_MERCADOPAGO_WEBHOOK_SECRET`: Secret para validação de webhooks
-  - `DPS_MERCADOPAGO_PUBLIC_KEY`: Chave pública (opcional)
-- Ordem de prioridade: constantes wp-config.php → options em banco de dados
+  - `DPS_MERCADOPAGO_WEBHOOK_SECRET`: Secret para validaÃƒÂ§ÃƒÂ£o de webhooks
+  - `DPS_MERCADOPAGO_PUBLIC_KEY`: Chave pÃƒÂºblica (opcional)
+- Ordem de prioridade: constantes wp-config.php Ã¢â€ â€™ options em banco de dados
 - Metadados em agendamentos (v1.1.0+):
-  - `_dps_payment_link_status`: Status da geração do link ('success' | 'error' | 'not_requested')
-  - `_dps_payment_last_error`: Detalhes do último erro (array: code, message, timestamp, context)
+  - `_dps_payment_link_status`: Status da geraÃƒÂ§ÃƒÂ£o do link ('success' | 'error' | 'not_requested')
+  - `_dps_payment_last_error`: Detalhes do ÃƒÂºltimo erro (array: code, message, timestamp, context)
 
 **Hooks consumidos**:
-- `dps_base_after_save_appointment`: Gera link de pagamento quando agendamento é finalizado
-- `dps_agenda_whatsapp_message`: Injeta link de pagamento na mensagem de cobrança
-- `init` (prioridade 1): Processa webhooks cedo no ciclo de inicialização do WordPress
+- `dps_base_after_save_appointment`: Gera link de pagamento quando agendamento ÃƒÂ© finalizado
+- `dps_agenda_whatsapp_message`: Injeta link de pagamento na mensagem de cobranÃƒÂ§a
+- `init` (prioridade 1): Processa webhooks cedo no ciclo de inicializaÃƒÂ§ÃƒÂ£o do WordPress
 
 **Hooks disparados**: Nenhum
 
-**Dependências**:
-- Depende do add-on Financeiro para criar transações
+**DependÃƒÂªncias**:
+- Depende do add-on Financeiro para criar transaÃƒÂ§ÃƒÂµes
 - Integra-se com add-on de Agenda para envio de links via WhatsApp
 
 **Introduzido em**: v0.1.0 (estimado)
 
-**Versão atual**: v1.1.0
+**VersÃƒÂ£o atual**: v1.1.0
 
-**Mudanças na v1.1.0**:
+**MudanÃƒÂ§as na v1.1.0**:
 - Classe `DPS_MercadoPago_Config` para gerenciamento seguro de credenciais
-- Suporte para constantes em wp-config.php (recomendado para produção)
+- Suporte para constantes em wp-config.php (recomendado para produÃƒÂ§ÃƒÂ£o)
 - Tratamento de erros aprimorado com logging detalhado
 - Flags de status em agendamentos para rastreamento de falhas
-- Interface administrativa mostra campos readonly quando credenciais vêm de constantes
-- Validação completa de respostas da API Mercado Pago
+- Interface administrativa mostra campos readonly quando credenciais vÃƒÂªm de constantes
+- ValidaÃƒÂ§ÃƒÂ£o completa de respostas da API Mercado Pago
 
-**Métodos principais**:
+**MÃƒÂ©todos principais**:
 - `DPS_MercadoPago_Config::get_access_token()`: Retorna access token (constante ou option)
 - `DPS_MercadoPago_Config::get_webhook_secret()`: Retorna webhook secret (constante ou option)
 - `DPS_MercadoPago_Config::is_*_from_constant()`: Verifica se credencial vem de constante
-- `DPS_MercadoPago_Config::get_masked_credential()`: Retorna últimos 4 caracteres para exibição
-- `DPS_Payment_Addon::create_payment_preference()`: Cria preferência de pagamento via API MP
-- `DPS_Payment_Addon::log_payment_error()`: Logging centralizado de erros de cobrança
-- `DPS_Payment_Addon::process_payment_notification()`: Processa notificações de webhook
+- `DPS_MercadoPago_Config::get_masked_credential()`: Retorna ÃƒÂºltimos 4 caracteres para exibiÃƒÂ§ÃƒÂ£o
+- `DPS_Payment_Addon::create_payment_preference()`: Cria preferÃƒÂªncia de pagamento via API MP
+- `DPS_Payment_Addon::log_payment_error()`: Logging centralizado de erros de cobranÃƒÂ§a
+- `DPS_Payment_Addon::process_payment_notification()`: Processa notificaÃƒÂ§ÃƒÂµes de webhook
 - `DPS_Payment_Addon::maybe_generate_payment_link()`: Gera link automaticamente para finalizados
 
-**Observações**:
-- Validação de webhook aplicada apenas quando requisição traz indicadores de notificação do MP
+**ObservaÃƒÂ§ÃƒÂµes**:
+- ValidaÃƒÂ§ÃƒÂ£o de webhook aplicada apenas quando requisiÃƒÂ§ÃƒÂ£o traz indicadores de notificaÃƒÂ§ÃƒÂ£o do MP
 - Requer token de acesso e chave PIX configurados (via constantes ou options)
-- **IMPORTANTE**: Configuração do webhook secret é obrigatória para processamento automático de pagamentos. Veja documentação completa em `plugins/desi-pet-shower-payment/WEBHOOK_CONFIGURATION.md`
-- **SEGURANÇA**: Em produção, sempre defina credenciais via constantes em wp-config.php para evitar armazenamento em texto plano no banco de dados
+- **IMPORTANTE**: ConfiguraÃƒÂ§ÃƒÂ£o do webhook secret ÃƒÂ© obrigatÃƒÂ³ria para processamento automÃƒÂ¡tico de pagamentos. Veja documentaÃƒÂ§ÃƒÂ£o completa em `plugins/desi-pet-shower-payment/WEBHOOK_CONFIGURATION.md`
+- **SEGURANÃƒâ€¡A**: Em produÃƒÂ§ÃƒÂ£o, sempre defina credenciais via constantes em wp-config.php para evitar armazenamento em texto plano no banco de dados
 - Logs de erro incluem contexto completo para debugging (HTTP code, response body, timestamps)
-- Flags de status permitem rastreamento e retry de falhas na geração de links
+- Flags de status permitem rastreamento e retry de falhas na geraÃƒÂ§ÃƒÂ£o de links
 
 ---
 
 ### Push Notifications (`desi-pet-shower-push_addon`)
 
-**Diretório**: `plugins/desi-pet-shower-push`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-push`
 
-**Propósito e funcionalidades principais**:
-- Enviar resumo diário de agendamentos para equipe administrativa
-- Enviar relatório financeiro diário com atendimentos e transações
-- Enviar relatório semanal de pets inativos (sem atendimento há 30 dias)
+**PropÃƒÂ³sito e funcionalidades principais**:
+- Enviar resumo diÃƒÂ¡rio de agendamentos para equipe administrativa
+- Enviar relatÃƒÂ³rio financeiro diÃƒÂ¡rio com atendimentos e transaÃƒÂ§ÃƒÂµes
+- Enviar relatÃƒÂ³rio semanal de pets inativos (sem atendimento hÃƒÂ¡ 30 dias)
 - Integrar com e-mail (via `wp_mail()`) e Telegram Bot API
-- Horários e dias configuráveis para cada tipo de notificação
+- HorÃƒÂ¡rios e dias configurÃƒÂ¡veis para cada tipo de notificaÃƒÂ§ÃƒÂ£o
 
 **Shortcodes expostos**: Nenhum
 
-**CPTs, tabelas e opções**:
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
 
-| Option | Tipo | Descrição |
+| Option | Tipo | DescriÃƒÂ§ÃƒÂ£o |
 |--------|------|-----------|
-| `dps_push_emails_agenda` | array | Lista de emails para agenda diária |
-| `dps_push_emails_report` | array | Lista de emails para relatório financeiro |
-| `dps_push_agenda_time` | string | Horário do resumo de agendamentos (HH:MM) |
-| `dps_push_report_time` | string | Horário do relatório financeiro (HH:MM) |
-| `dps_push_weekly_day` | string | Dia da semana para relatório semanal (english) |
-| `dps_push_weekly_time` | string | Horário do relatório semanal (HH:MM) |
-| `dps_push_inactive_days` | int | Dias de inatividade para considerar pet inativo (padrão: 30) |
-| `dps_push_agenda_enabled` | bool | Ativar/desativar agenda diária |
-| `dps_push_report_enabled` | bool | Ativar/desativar relatório financeiro |
-| `dps_push_weekly_enabled` | bool | Ativar/desativar relatório semanal |
+| `dps_push_emails_agenda` | array | Lista de emails para agenda diÃƒÂ¡ria |
+| `dps_push_emails_report` | array | Lista de emails para relatÃƒÂ³rio financeiro |
+| `dps_push_agenda_time` | string | HorÃƒÂ¡rio do resumo de agendamentos (HH:MM) |
+| `dps_push_report_time` | string | HorÃƒÂ¡rio do relatÃƒÂ³rio financeiro (HH:MM) |
+| `dps_push_weekly_day` | string | Dia da semana para relatÃƒÂ³rio semanal (english) |
+| `dps_push_weekly_time` | string | HorÃƒÂ¡rio do relatÃƒÂ³rio semanal (HH:MM) |
+| `dps_push_inactive_days` | int | Dias de inatividade para considerar pet inativo (padrÃƒÂ£o: 30) |
+| `dps_push_agenda_enabled` | bool | Ativar/desativar agenda diÃƒÂ¡ria |
+| `dps_push_report_enabled` | bool | Ativar/desativar relatÃƒÂ³rio financeiro |
+| `dps_push_weekly_enabled` | bool | Ativar/desativar relatÃƒÂ³rio semanal |
 | `dps_push_telegram_token` | string | Token do bot do Telegram |
 | `dps_push_telegram_chat` | string | ID do chat/grupo Telegram |
 
 **Menus administrativos**:
-- **Notificações** (`dps-push-notifications`): configurações de destinatários, horários e integração Telegram
+- **NotificaÃƒÂ§ÃƒÂµes** (`dps-push-notifications`): configuraÃƒÂ§ÃƒÂµes de destinatÃƒÂ¡rios, horÃƒÂ¡rios e integraÃƒÂ§ÃƒÂ£o Telegram
 
 **Hooks consumidos**:
-- Nenhum hook do sistema de configurações (usa menu admin próprio)
+- Nenhum hook do sistema de configuraÃƒÂ§ÃƒÂµes (usa menu admin prÃƒÂ³prio)
 
 **Hooks disparados**:
 
-| Hook | Tipo | Parâmetros | Descrição |
+| Hook | Tipo | ParÃƒÂ¢metros | DescriÃƒÂ§ÃƒÂ£o |
 |------|------|------------|-----------|
-| `dps_send_agenda_notification` | cron | - | Dispara envio da agenda diária |
-| `dps_send_daily_report` | cron | - | Dispara envio do relatório financeiro |
-| `dps_send_weekly_inactive_report` | cron | - | Dispara envio do relatório de pets inativos |
-| `dps_send_push_notification` | action | `$message`, `$context` | Permite add-ons enviarem notificações via Telegram |
-| `dps_push_notification_content` | filter | `$content`, `$appointments` | Filtra conteúdo do email antes de enviar |
-| `dps_push_notification_recipients` | filter | `$recipients` | Filtra destinatários da agenda diária |
-| `dps_daily_report_recipients` | filter | `$recipients` | Filtra destinatários do relatório financeiro |
-| `dps_daily_report_content` | filter | `$content`, `$appointments`, `$trans` | Filtra conteúdo do relatório |
-| `dps_daily_report_html` | filter | `$html`, `$appointments`, `$trans` | Filtra HTML do relatório |
-| `dps_weekly_inactive_report_recipients` | filter | `$recipients` | Filtra destinatários do relatório semanal |
+| `dps_send_agenda_notification` | cron | - | Dispara envio da agenda diÃƒÂ¡ria |
+| `dps_send_daily_report` | cron | - | Dispara envio do relatÃƒÂ³rio financeiro |
+| `dps_send_weekly_inactive_report` | cron | - | Dispara envio do relatÃƒÂ³rio de pets inativos |
+| `dps_send_push_notification` | action | `$message`, `$context` | Permite add-ons enviarem notificaÃƒÂ§ÃƒÂµes via Telegram |
+| `dps_push_notification_content` | filter | `$content`, `$appointments` | Filtra conteÃƒÂºdo do email antes de enviar |
+| `dps_push_notification_recipients` | filter | `$recipients` | Filtra destinatÃƒÂ¡rios da agenda diÃƒÂ¡ria |
+| `dps_daily_report_recipients` | filter | `$recipients` | Filtra destinatÃƒÂ¡rios do relatÃƒÂ³rio financeiro |
+| `dps_daily_report_content` | filter | `$content`, `$appointments`, `$trans` | Filtra conteÃƒÂºdo do relatÃƒÂ³rio |
+| `dps_daily_report_html` | filter | `$html`, `$appointments`, `$trans` | Filtra HTML do relatÃƒÂ³rio |
+| `dps_weekly_inactive_report_recipients` | filter | `$recipients` | Filtra destinatÃƒÂ¡rios do relatÃƒÂ³rio semanal |
 
-**Dependências**:
-- **Obrigatória**: Plugin base DPS (verifica `DPS_Base_Plugin`)
-- **Opcional**: Finance Add-on (para relatório financeiro com tabela `dps_transacoes`)
+**DependÃƒÂªncias**:
+- **ObrigatÃƒÂ³ria**: Plugin base DPS (verifica `DPS_Base_Plugin`)
+- **Opcional**: Finance Add-on (para relatÃƒÂ³rio financeiro com tabela `dps_transacoes`)
 
 **Introduzido em**: v0.1.0 (estimado)
 
-**Versão atual**: 1.2.0
+**VersÃƒÂ£o atual**: 1.2.0
 
-**Observações**:
+**ObservaÃƒÂ§ÃƒÂµes**:
 - Implementa `register_deactivation_hook` corretamente para limpar cron jobs
 - Usa timezone do WordPress para agendamentos (`get_option('timezone_string')`)
 - Emails enviados em formato HTML com headers `Content-Type: text/html; charset=UTF-8`
-- Integração Telegram envia mensagens em texto plano com `parse_mode` HTML
-- Threshold de inatividade configurável via interface admin (padrão: 30 dias)
-- Interface administrativa integrada na página de Notificações sob menu desi.pet by PRObst
-- **v1.2.0**: Menu admin visível, botões de teste para relatórios e Telegram, uninstall.php atualizado
+- IntegraÃƒÂ§ÃƒÂ£o Telegram envia mensagens em texto plano com `parse_mode` HTML
+- Threshold de inatividade configurÃƒÂ¡vel via interface admin (padrÃƒÂ£o: 30 dias)
+- Interface administrativa integrada na pÃƒÂ¡gina de NotificaÃƒÂ§ÃƒÂµes sob menu desi.pet by PRObst
+- **v1.2.0**: Menu admin visÃƒÂ­vel, botÃƒÂµes de teste para relatÃƒÂ³rios e Telegram, uninstall.php atualizado
 
-**Análise completa**: Consulte `docs/analysis/PUSH_ADDON_ANALYSIS.md` para análise detalhada de código, funcionalidades e melhorias propostas
+**AnÃƒÂ¡lise completa**: Consulte `docs/analysis/PUSH_ADDON_ANALYSIS.md` para anÃƒÂ¡lise detalhada de cÃƒÂ³digo, funcionalidades e melhorias propostas
 
 ---
 
-### Cadastro Público (`desi-pet-shower-registration_addon`)
+### Cadastro PÃƒÂºblico (`desi-pet-shower-registration_addon`)
 
-**Diretório**: `plugins/desi-pet-shower-registration`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-registration`
 
-**Propósito e funcionalidades principais**:
-- Permitir cadastro público de clientes e pets via formulário web
-- Integrar com Google Maps para autocomplete de endereços
-- Disparar hook para outros add-ons após criação de cliente
+**PropÃƒÂ³sito e funcionalidades principais**:
+- Permitir cadastro pÃƒÂºblico de clientes e pets via formulÃƒÂ¡rio web
+- Integrar com Google Maps para autocomplete de endereÃƒÂ§os
+- Disparar hook para outros add-ons apÃƒÂ³s criaÃƒÂ§ÃƒÂ£o de cliente
 
 **Shortcodes expostos**:
-- `[dps_registration_form]`: renderiza formulário de cadastro público
+- `[dps_registration_form]`: renderiza formulÃƒÂ¡rio de cadastro pÃƒÂºblico
 
-**CPTs, tabelas e opções**:
-- Não cria CPTs próprios; cria posts do tipo `dps_client` e `dps_pet`
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
+- NÃƒÂ£o cria CPTs prÃƒÂ³prios; cria posts do tipo `dps_client` e `dps_pet`
 - Options: `dps_google_maps_api_key` (chave de API do Google Maps)
 
 **Hooks consumidos**: Nenhum
 
 **Hooks disparados**:
-- `dps_registration_after_client_created`: disparado após criar novo cliente
+- `dps_registration_after_client_created`: disparado apÃƒÂ³s criar novo cliente
 
-**Dependências**:
+**DependÃƒÂªncias**:
 - Depende do plugin base para CPTs de cliente e pet
-- Integra-se com add-on de Fidelidade para capturar códigos de indicação
+- Integra-se com add-on de Fidelidade para capturar cÃƒÂ³digos de indicaÃƒÂ§ÃƒÂ£o
 
 **Introduzido em**: v0.1.0 (estimado)
 
-**Observações**:
+**ObservaÃƒÂ§ÃƒÂµes**:
 - Sanitiza todas as entradas antes de criar posts
-- Arquivo único de 636 linhas; candidato a refatoração futura
+- Arquivo ÃƒÂºnico de 636 linhas; candidato a refatoraÃƒÂ§ÃƒÂ£o futura
 
 ---
 
 ### Frontend (`desi-pet-shower-frontend`)
 
-**Diretório**: `plugins/desi-pet-shower-frontend`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-frontend`
 
-**Propósito e funcionalidades principais**:
-- Consolidar experiências frontend (cadastro, agendamento, configurações) em add-on modular
-- Arquitetura com módulos independentes, feature flags e camada de compatibilidade
-- Rollout controlado: cada módulo pode ser habilitado/desabilitado individualmente
-- **[Fase 2]** Módulo Registration operacional em dual-run com o add-on legado
-- **[Fase 3]** Módulo Booking operacional em dual-run com o add-on legado
-- **[Fase 4]** Módulo Settings integrado ao sistema de abas de configurações
-- **[Fase 7.1]** Preparação: abstracts, template engine, hook bridges, componentes M3, flags v2
-- **[Fase 7.2]** Registration V2: formulário nativo 100% independente do legado (cadastro + pets + reCAPTCHA + email confirmation)
-- **[Fase 7.3]** Booking V2: wizard nativo 5-step 100% independente do legado (cliente → pets → serviços → data/hora → confirmação + extras TaxiDog/Tosa)
+**PropÃƒÂ³sito e funcionalidades principais**:
+- Consolidar experiÃƒÂªncias frontend (cadastro, agendamento, configuraÃƒÂ§ÃƒÂµes) em add-on modular
+- Arquitetura com mÃƒÂ³dulos independentes, feature flags e camada de compatibilidade
+- Rollout controlado: cada mÃƒÂ³dulo pode ser habilitado/desabilitado individualmente
+- **[Fase 2]** MÃƒÂ³dulo Registration operacional em dual-run com o add-on legado
+- **[Fase 3]** MÃƒÂ³dulo Booking operacional em dual-run com o add-on legado
+- **[Fase 4]** MÃƒÂ³dulo Settings integrado ao sistema de abas de configuraÃƒÂ§ÃƒÂµes
+- **[Fase 7.1]** PreparaÃƒÂ§ÃƒÂ£o: abstracts, template engine, hook bridges, componentes M3, flags v2
+- **[Fase 7.2]** Registration V2: formulÃƒÂ¡rio nativo 100% independente do legado (cadastro + pets + reCAPTCHA + email confirmation)
+- **[Fase 7.3]** Booking V2: wizard nativo 5-step 100% independente do legado (cliente Ã¢â€ â€™ pets Ã¢â€ â€™ serviÃƒÂ§os Ã¢â€ â€™ data/hora Ã¢â€ â€™ confirmaÃƒÂ§ÃƒÂ£o + extras TaxiDog/Tosa)
 
 **Shortcodes expostos**:
-- `dps_registration_form` — quando flag `registration` ativada, o módulo assume o shortcode (wrapper sobre o legado com surface M3)
-- `dps_booking_form` — quando flag `booking` ativada, o módulo assume o shortcode (wrapper sobre o legado com surface M3)
-- `dps_registration_v2` — quando flag `registration_v2` ativada, formulário nativo M3 (100% independente do legado)
-- `dps_booking_v2` — quando flag `booking_v2` ativada, wizard nativo M3 de 5 steps (100% independente do legado)
+- `dps_registration_form` Ã¢â‚¬â€ quando flag `registration` ativada, o mÃƒÂ³dulo assume o shortcode (wrapper sobre o legado com surface M3)
+- `dps_booking_form` Ã¢â‚¬â€ quando flag `booking` ativada, o mÃƒÂ³dulo assume o shortcode (wrapper sobre o legado com surface M3)
+- `dps_registration_v2` Ã¢â‚¬â€ quando flag `registration_v2` ativada, formulÃƒÂ¡rio nativo M3 (100% independente do legado)
+- `dps_booking_v2` Ã¢â‚¬â€ quando flag `booking_v2` ativada, wizard nativo M3 de 5 steps (100% independente do legado)
 
-**CPTs, tabelas e opções**:
-- Option: `dps_frontend_feature_flags` — controle de rollout por módulo (flags: `registration`, `booking`, `settings`, `registration_v2`, `booking_v2`)
-- Option: `dps_frontend_usage_counters` — contadores de telemetria por módulo
-- Transient: `dps_booking_confirmation_{user_id}` — confirmação de agendamento v2 (TTL 5min)
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
+- Option: `dps_frontend_feature_flags` Ã¢â‚¬â€ controle de rollout por mÃƒÂ³dulo (flags: `registration`, `booking`, `settings`, `registration_v2`, `booking_v2`)
+- Option: `dps_frontend_usage_counters` Ã¢â‚¬â€ contadores de telemetria por mÃƒÂ³dulo
+- Transient: `dps_booking_confirmation_{user_id}` Ã¢â‚¬â€ confirmaÃƒÂ§ÃƒÂ£o de agendamento v2 (TTL 5min)
 
-**Hooks consumidos** (Fase 2 — módulo Registration v1 dual-run):
-- `dps_registration_after_fields` (preservado — consumido pelo Loyalty)
-- `dps_registration_after_client_created` (preservado — consumido pelo Loyalty)
+**Hooks consumidos** (Fase 2 Ã¢â‚¬â€ mÃƒÂ³dulo Registration v1 dual-run):
+- `dps_registration_after_fields` (preservado Ã¢â‚¬â€ consumido pelo Loyalty)
+- `dps_registration_after_client_created` (preservado Ã¢â‚¬â€ consumido pelo Loyalty)
 - `dps_registration_spam_check` (preservado)
 - `dps_registration_agenda_url` (preservado)
 
-**Hooks consumidos** (Fase 3 — módulo Booking v1 dual-run):
-- `dps_base_after_save_appointment` (preservado — consumido por stock, payment, groomers, calendar, communications, push, services e booking)
+**Hooks consumidos** (Fase 3 Ã¢â‚¬â€ mÃƒÂ³dulo Booking v1 dual-run):
+- `dps_base_after_save_appointment` (preservado Ã¢â‚¬â€ consumido por stock, payment, groomers, calendar, communications, push, services e booking)
 - `dps_base_appointment_fields` (preservado)
 - `dps_base_appointment_assignment_fields` (preservado)
 
-**Hooks consumidos** (Fase 4 — módulo Settings):
-- `dps_settings_register_tabs` — registra aba "Frontend" via `DPS_Settings_Frontend::register_tab()`
-- `dps_settings_save_save_frontend` — processa salvamento das feature flags
+**Hooks consumidos** (Fase 4 Ã¢â‚¬â€ mÃƒÂ³dulo Settings):
+- `dps_settings_register_tabs` Ã¢â‚¬â€ registra aba "Frontend" via `DPS_Settings_Frontend::register_tab()`
+- `dps_settings_save_save_frontend` Ã¢â‚¬â€ processa salvamento das feature flags
 
-**Hooks disparados** (Fase 7 — módulos nativos V2):
-- `dps_registration_v2_before_render` — antes de renderizar formulário de cadastro v2
-- `dps_registration_v2_after_render` — após renderizar formulário de cadastro v2
-- `dps_registration_v2_client_created` — após criar cliente via v2 (bridge: dispara hooks legados do Loyalty primeiro)
-- `dps_registration_v2_pet_created` — após criar pet via v2
-- `dps_registration_spam_check` — filtro anti-spam (reusa hook legado via bridge)
-- `dps_booking_v2_before_render` — antes de renderizar wizard de booking v2
-- `dps_booking_v2_step_render` — ao renderizar step do wizard
-- `dps_booking_v2_step_validate` — filtro de validação por step
-- `dps_booking_v2_before_process` — antes de criar agendamento v2
-- `dps_booking_v2_after_process` — após processar agendamento v2
-- `dps_booking_v2_appointment_created` — após criar agendamento v2
+**Hooks disparados** (Fase 7 Ã¢â‚¬â€ mÃƒÂ³dulos nativos V2):
+- `dps_registration_v2_before_render` Ã¢â‚¬â€ antes de renderizar formulÃƒÂ¡rio de cadastro v2
+- `dps_registration_v2_after_render` Ã¢â‚¬â€ apÃƒÂ³s renderizar formulÃƒÂ¡rio de cadastro v2
+- `dps_registration_v2_client_created` Ã¢â‚¬â€ apÃƒÂ³s criar cliente via v2 (bridge: dispara hooks legados do Loyalty primeiro)
+- `dps_registration_v2_pet_created` Ã¢â‚¬â€ apÃƒÂ³s criar pet via v2
+- `dps_registration_spam_check` Ã¢â‚¬â€ filtro anti-spam (reusa hook legado via bridge)
+- `dps_booking_v2_before_render` Ã¢â‚¬â€ antes de renderizar wizard de booking v2
+- `dps_booking_v2_step_render` Ã¢â‚¬â€ ao renderizar step do wizard
+- `dps_booking_v2_step_validate` Ã¢â‚¬â€ filtro de validaÃƒÂ§ÃƒÂ£o por step
+- `dps_booking_v2_before_process` Ã¢â‚¬â€ antes de criar agendamento v2
+- `dps_booking_v2_after_process` Ã¢â‚¬â€ apÃƒÂ³s processar agendamento v2
+- `dps_booking_v2_appointment_created` Ã¢â‚¬â€ apÃƒÂ³s criar agendamento v2
 
-**Hooks de bridge** (Fase 7 — CRÍTICO: legado PRIMEIRO, v2 DEPOIS):
-- `dps_base_after_save_appointment` — 8 consumidores: Stock, Payment, Groomers, Calendar, Communications, Push, Services, Booking
-- `dps_base_appointment_fields` — Services: injeção de campos
-- `dps_base_appointment_assignment_fields` — Groomers: campos de atribuição
-- `dps_registration_after_client_created` — Loyalty: código de indicação
+**Hooks de bridge** (Fase 7 Ã¢â‚¬â€ CRÃƒÂTICO: legado PRIMEIRO, v2 DEPOIS):
+- `dps_base_after_save_appointment` Ã¢â‚¬â€ 8 consumidores: Stock, Payment, Groomers, Calendar, Communications, Push, Services, Booking
+- `dps_base_appointment_fields` Ã¢â‚¬â€ Services: injeÃƒÂ§ÃƒÂ£o de campos
+- `dps_base_appointment_assignment_fields` Ã¢â‚¬â€ Groomers: campos de atribuiÃƒÂ§ÃƒÂ£o
+- `dps_registration_after_client_created` Ã¢â‚¬â€ Loyalty: cÃƒÂ³digo de indicaÃƒÂ§ÃƒÂ£o
 
-**AJAX endpoints** (Fase 7.3 — Booking V2):
-- `wp_ajax_dps_booking_search_client` — busca cliente por telefone (nonce + capability)
-- `wp_ajax_dps_booking_get_pets` — lista pets do cliente com paginação (nonce + capability)
-- `wp_ajax_dps_booking_get_services` — serviços ativos com preços por porte (nonce + capability)
-- `wp_ajax_dps_booking_get_slots` — horários livres 08:00-18:00/30min (nonce + capability)
-- `wp_ajax_dps_booking_validate_step` — validação server-side por step (nonce + capability)
+**AJAX endpoints** (Fase 7.3 Ã¢â‚¬â€ Booking V2):
+- `wp_ajax_dps_booking_search_client` Ã¢â‚¬â€ busca cliente por telefone (nonce + capability)
+- `wp_ajax_dps_booking_get_pets` Ã¢â‚¬â€ lista pets do cliente com paginaÃƒÂ§ÃƒÂ£o (nonce + capability)
+- `wp_ajax_dps_booking_get_services` Ã¢â‚¬â€ serviÃƒÂ§os ativos com preÃƒÂ§os por porte (nonce + capability)
+- `wp_ajax_dps_booking_get_slots` Ã¢â‚¬â€ horÃƒÂ¡rios livres 08:00-18:00/30min (nonce + capability)
+- `wp_ajax_dps_booking_validate_step` Ã¢â‚¬â€ validaÃƒÂ§ÃƒÂ£o server-side por step (nonce + capability)
 
-**Dependências**:
+**DependÃƒÂªncias**:
 - Depende do plugin base (DPS_Base_Plugin + design tokens CSS)
-- Módulo Registration v1 depende de `DPS_Registration_Addon` (add-on legado) para dual-run
-- Módulo Booking v1 depende de `DPS_Booking_Addon` (add-on legado) para dual-run
-- Módulos V2 nativos (Registration V2, Booking V2) são 100% independentes dos add-ons legados
-- Módulo Settings depende de `DPS_Settings_Frontend` (sistema de abas do base)
+- MÃƒÂ³dulo Registration v1 depende de `DPS_Registration_Addon` (add-on legado) para dual-run
+- MÃƒÂ³dulo Booking v1 depende de `DPS_Booking_Addon` (add-on legado) para dual-run
+- MÃƒÂ³dulos V2 nativos (Registration V2, Booking V2) sÃƒÂ£o 100% independentes dos add-ons legados
+- MÃƒÂ³dulo Settings depende de `DPS_Settings_Frontend` (sistema de abas do base)
 
 **Arquitetura interna**:
-- `DPS_Frontend_Addon` — orquestrador com injeção de dependências
-- `DPS_Frontend_Module_Registry` — registro e boot de módulos
-- `DPS_Frontend_Feature_Flags` — controle de rollout persistido
-- `DPS_Frontend_Compatibility` — bridges para legado
-- `DPS_Frontend_Assets` — enqueue condicional M3 Expressive
-- `DPS_Frontend_Logger` — observabilidade via error_log + telemetria batch
-- `DPS_Frontend_Request_Guard` — segurança centralizada (nonce, capability, sanitização)
-- `DPS_Template_Engine` — renderização com suporte a override via tema (dps-templates/)
-- `DPS_Frontend_Registration_Module` — v1 dual-run: assume shortcode, delega lógica ao legado
-- `DPS_Frontend_Booking_Module` — v1 dual-run: assume shortcode, delega lógica ao legado
-- `DPS_Frontend_Settings_Module` — registra aba de configurações com controles de feature flags
-- `DPS_Frontend_Registration_V2_Module` — v2 nativo: shortcode `[dps_registration_v2]`, handler, services
-- `DPS_Frontend_Booking_V2_Module` — v2 nativo: shortcode `[dps_booking_v2]`, handler, services, AJAX
-- `DPS_Registration_Hook_Bridge` — compatibilidade v1/v2 Registration (legado primeiro, v2 depois)
-- `DPS_Booking_Hook_Bridge` — compatibilidade v1/v2 Booking (legado primeiro, v2 depois)
+- `DPS_Frontend_Addon` Ã¢â‚¬â€ orquestrador com injeÃƒÂ§ÃƒÂ£o de dependÃƒÂªncias
+- `DPS_Frontend_Module_Registry` Ã¢â‚¬â€ registro e boot de mÃƒÂ³dulos
+- `DPS_Frontend_Feature_Flags` Ã¢â‚¬â€ controle de rollout persistido
+- `DPS_Frontend_Compatibility` Ã¢â‚¬â€ bridges para legado
+- `DPS_Frontend_Assets` Ã¢â‚¬â€ enqueue condicional M3 Expressive
+- `DPS_Frontend_Logger` Ã¢â‚¬â€ observabilidade via error_log + telemetria batch
+- `DPS_Frontend_Request_Guard` Ã¢â‚¬â€ seguranÃƒÂ§a centralizada (nonce, capability, sanitizaÃƒÂ§ÃƒÂ£o)
+- `DPS_Template_Engine` Ã¢â‚¬â€ renderizaÃƒÂ§ÃƒÂ£o com suporte a override via tema (dps-templates/)
+- `DPS_Frontend_Registration_Module` Ã¢â‚¬â€ v1 dual-run: assume shortcode, delega lÃƒÂ³gica ao legado
+- `DPS_Frontend_Booking_Module` Ã¢â‚¬â€ v1 dual-run: assume shortcode, delega lÃƒÂ³gica ao legado
+- `DPS_Frontend_Settings_Module` Ã¢â‚¬â€ registra aba de configuraÃƒÂ§ÃƒÂµes com controles de feature flags
+- `DPS_Frontend_Registration_V2_Module` Ã¢â‚¬â€ v2 nativo: shortcode `[dps_registration_v2]`, handler, services
+- `DPS_Frontend_Booking_V2_Module` Ã¢â‚¬â€ v2 nativo: shortcode `[dps_booking_v2]`, handler, services, AJAX
+- `DPS_Registration_Hook_Bridge` Ã¢â‚¬â€ compatibilidade v1/v2 Registration (legado primeiro, v2 depois)
+- `DPS_Booking_Hook_Bridge` Ã¢â‚¬â€ compatibilidade v1/v2 Booking (legado primeiro, v2 depois)
 
-**Classes de negócio — Registration V2** (Fase 7.2):
-- `DPS_Registration_Handler` — pipeline: reCAPTCHA → anti-spam → validação → duplicata → criar cliente → hooks Loyalty → criar pets → email confirmação
-- `DPS_Form_Validator` — validação de formulário (nome, email, telefone, CPF, pets)
-- `DPS_Cpf_Validator` — validação CPF mod-11
-- `DPS_Client_Service` — CRUD para `dps_cliente` (13+ metas)
-- `DPS_Pet_Service` — CRUD para `dps_pet`
-- `DPS_Breed_Provider` — dataset de raças por espécie (cão: 44, gato: 20)
-- `DPS_Duplicate_Detector` — detecção por telefone com override admin
-- `DPS_Recaptcha_Service` — verificação reCAPTCHA v3
-- `DPS_Email_Confirmation_Service` — token UUID 48h + envio
+**Classes de negÃƒÂ³cio Ã¢â‚¬â€ Registration V2** (Fase 7.2):
+- `DPS_Registration_Handler` Ã¢â‚¬â€ pipeline: reCAPTCHA Ã¢â€ â€™ anti-spam Ã¢â€ â€™ validaÃƒÂ§ÃƒÂ£o Ã¢â€ â€™ duplicata Ã¢â€ â€™ criar cliente Ã¢â€ â€™ hooks Loyalty Ã¢â€ â€™ criar pets Ã¢â€ â€™ email confirmaÃƒÂ§ÃƒÂ£o
+- `DPS_Form_Validator` Ã¢â‚¬â€ validaÃƒÂ§ÃƒÂ£o de formulÃƒÂ¡rio (nome, email, telefone, CPF, pets)
+- `DPS_Cpf_Validator` Ã¢â‚¬â€ validaÃƒÂ§ÃƒÂ£o CPF mod-11
+- `DPS_Client_Service` Ã¢â‚¬â€ CRUD para `dps_cliente` (13+ metas)
+- `DPS_Pet_Service` Ã¢â‚¬â€ CRUD para `dps_pet`
+- `DPS_Breed_Provider` Ã¢â‚¬â€ dataset de raÃƒÂ§as por espÃƒÂ©cie (cÃƒÂ£o: 44, gato: 20)
+- `DPS_Duplicate_Detector` Ã¢â‚¬â€ detecÃƒÂ§ÃƒÂ£o por telefone com override admin
+- `DPS_Recaptcha_Service` Ã¢â‚¬â€ verificaÃƒÂ§ÃƒÂ£o reCAPTCHA v3
+- `DPS_Email_Confirmation_Service` Ã¢â‚¬â€ token UUID 48h + envio
 
-**Classes de negócio — Booking V2** (Fase 7.3):
-- `DPS_Booking_Handler` — pipeline: validação → extras → criar appointment → confirmação transient → hook bridge (8 add-ons)
-- `DPS_Booking_Validator` — validação multi-step (5 steps) + extras (TaxiDog/Tosa)
-- `DPS_Appointment_Service` — CRUD para `dps_agendamento` (16+ metas, conflitos, busca por cliente)
-- `DPS_Booking_Confirmation_Service` — transient de confirmação (5min TTL)
-- `DPS_Booking_Ajax` — 5 endpoints AJAX (busca cliente, pets, serviços, slots, validação)
+**Classes de negÃƒÂ³cio Ã¢â‚¬â€ Booking V2** (Fase 7.3):
+- `DPS_Booking_Handler` Ã¢â‚¬â€ pipeline: validaÃƒÂ§ÃƒÂ£o Ã¢â€ â€™ extras Ã¢â€ â€™ criar appointment Ã¢â€ â€™ confirmaÃƒÂ§ÃƒÂ£o transient Ã¢â€ â€™ hook bridge (8 add-ons)
+- `DPS_Booking_Validator` Ã¢â‚¬â€ validaÃƒÂ§ÃƒÂ£o multi-step (5 steps) + extras (TaxiDog/Tosa)
+- `DPS_Appointment_Service` Ã¢â‚¬â€ CRUD para `dps_agendamento` (16+ metas, conflitos, busca por cliente)
+- `DPS_Booking_Confirmation_Service` Ã¢â‚¬â€ transient de confirmaÃƒÂ§ÃƒÂ£o (5min TTL)
+- `DPS_Booking_Ajax` Ã¢â‚¬â€ 5 endpoints AJAX (busca cliente, pets, serviÃƒÂ§os, slots, validaÃƒÂ§ÃƒÂ£o)
 
-**Estratégia de compatibilidade (Fases 2–4)**:
-- Intervenção mínima: o legado continua processando formulário, emails, REST, AJAX, settings e cron
-- Módulos de shortcode assumem o shortcode (envolve output na `.dps-frontend` surface) e adicionam CSS extra
-- Módulo de settings registra aba via API moderna `register_tab()` sem alterar abas existentes
-- Rollback: desabilitar flag do módulo restaura comportamento 100% legado
+**EstratÃƒÂ©gia de compatibilidade (Fases 2Ã¢â‚¬â€œ4)**:
+- IntervenÃƒÂ§ÃƒÂ£o mÃƒÂ­nima: o legado continua processando formulÃƒÂ¡rio, emails, REST, AJAX, settings e cron
+- MÃƒÂ³dulos de shortcode assumem o shortcode (envolve output na `.dps-frontend` surface) e adicionam CSS extra
+- MÃƒÂ³dulo de settings registra aba via API moderna `register_tab()` sem alterar abas existentes
+- Rollback: desabilitar flag do mÃƒÂ³dulo restaura comportamento 100% legado
 
-**Coexistência v1/v2** (Fase 7):
+**CoexistÃƒÂªncia v1/v2** (Fase 7):
 - Shortcodes v1 (`[dps_registration_form]`, `[dps_booking_form]`) e v2 (`[dps_registration_v2]`, `[dps_booking_v2]`) podem estar ativos simultaneamente
 - Feature flags independentes: `registration` (v1), `registration_v2` (v2), `booking` (v1), `booking_v2` (v2)
 - Hook bridge garante compatibilidade: hooks legados disparam PRIMEIRO, hooks v2 DEPOIS
-- Rollback instantâneo via toggle de flag — sem perda de dados
+- Rollback instantÃƒÂ¢neo via toggle de flag Ã¢â‚¬â€ sem perda de dados
 
-**Introduzido em**: v1.0.0 (Fases 1–6), v2.0.0 (Fase 7.1), v2.1.0 (Fase 7.2), v2.2.0 (Fase 7.3), v2.3.0 (Fase 7.4), v2.4.0 (Fase 7.5)
+**Introduzido em**: v1.0.0 (Fases 1Ã¢â‚¬â€œ6), v2.0.0 (Fase 7.1), v2.1.0 (Fase 7.2), v2.2.0 (Fase 7.3), v2.3.0 (Fase 7.4), v2.4.0 (Fase 7.5)
 
-**Documentação operacional (Fase 5)**:
-- `docs/implementation/FRONTEND_ROLLOUT_GUIDE.md` — guia de ativação por ambiente
-- `docs/implementation/FRONTEND_RUNBOOK.md` — diagnóstico e rollback de incidentes
-- `docs/qa/FRONTEND_COMPATIBILITY_MATRIX.md` — matriz de compatibilidade com todos os add-ons
-- `docs/qa/FRONTEND_REMOVAL_READINESS.md` — checklist de prontidão para remoção futura
+**DocumentaÃƒÂ§ÃƒÂ£o operacional (Fase 5)**:
+- `docs/implementation/FRONTEND_ROLLOUT_GUIDE.md` Ã¢â‚¬â€ guia de ativaÃƒÂ§ÃƒÂ£o por ambiente
+- `docs/implementation/FRONTEND_RUNBOOK.md` Ã¢â‚¬â€ diagnÃƒÂ³stico e rollback de incidentes
+- `docs/qa/FRONTEND_COMPATIBILITY_MATRIX.md` Ã¢â‚¬â€ matriz de compatibilidade com todos os add-ons
+- `docs/qa/FRONTEND_REMOVAL_READINESS.md` Ã¢â‚¬â€ checklist de prontidÃƒÂ£o para remoÃƒÂ§ÃƒÂ£o futura
 
-**Documentação de governança (Fase 6)**:
-- `docs/refactoring/FRONTEND_DEPRECATION_POLICY.md` — política de depreciação (janela mínima 180 dias, processo de comunicação, critérios de aceite)
-- `docs/refactoring/FRONTEND_REMOVAL_TARGETS.md` — lista de alvos com risco, dependências e esforço (booking 🟢 baixo; registration 🟡 médio)
-- Telemetria de uso: contadores por módulo via `dps_frontend_usage_counters`, exibidos na aba Settings
+**DocumentaÃƒÂ§ÃƒÂ£o de governanÃƒÂ§a (Fase 6)**:
+- `docs/refactoring/FRONTEND_DEPRECATION_POLICY.md` Ã¢â‚¬â€ polÃƒÂ­tica de depreciaÃƒÂ§ÃƒÂ£o (janela mÃƒÂ­nima 180 dias, processo de comunicaÃƒÂ§ÃƒÂ£o, critÃƒÂ©rios de aceite)
+- `docs/refactoring/FRONTEND_REMOVAL_TARGETS.md` Ã¢â‚¬â€ lista de alvos com risco, dependÃƒÂªncias e esforÃƒÂ§o (booking Ã°Å¸Å¸Â¢ baixo; registration Ã°Å¸Å¸Â¡ mÃƒÂ©dio)
+- Telemetria de uso: contadores por mÃƒÂ³dulo via `dps_frontend_usage_counters`, exibidos na aba Settings
 
-**Documentação de implementação nativa (Fase 7)**:
-- `docs/refactoring/FRONTEND_NATIVE_IMPLEMENTATION_PLAN.md` — plano completo com inventário legado, hook bridge, templates, estratégia de migração
+**DocumentaÃƒÂ§ÃƒÂ£o de implementaÃƒÂ§ÃƒÂ£o nativa (Fase 7)**:
+- `docs/refactoring/FRONTEND_NATIVE_IMPLEMENTATION_PLAN.md` Ã¢â‚¬â€ plano completo com inventÃƒÂ¡rio legado, hook bridge, templates, estratÃƒÂ©gia de migraÃƒÂ§ÃƒÂ£o
 
-**Documentação de coexistência e migração (Fase 7.4)**:
-- `docs/implementation/FRONTEND_V2_MIGRATION_GUIDE.md` — guia passo a passo de migração v1→v2 (7 etapas, comparação de features, checklist, rollback, troubleshooting, WP-CLI)
-- Seção "Status de Coexistência v1/v2" na aba Settings com indicadores visuais por módulo
+**DocumentaÃƒÂ§ÃƒÂ£o de coexistÃƒÂªncia e migraÃƒÂ§ÃƒÂ£o (Fase 7.4)**:
+- `docs/implementation/FRONTEND_V2_MIGRATION_GUIDE.md` Ã¢â‚¬â€ guia passo a passo de migraÃƒÂ§ÃƒÂ£o v1Ã¢â€ â€™v2 (7 etapas, comparaÃƒÂ§ÃƒÂ£o de features, checklist, rollback, troubleshooting, WP-CLI)
+- SeÃƒÂ§ÃƒÂ£o "Status de CoexistÃƒÂªncia v1/v2" na aba Settings com indicadores visuais por mÃƒÂ³dulo
 
-**Observações**:
+**ObservaÃƒÂ§ÃƒÂµes**:
 - PHP 8.4 moderno: constructor promotion, readonly properties, typed properties, return types
-- Sem singletons: objetos montados por composição no bootstrap
-- Assets carregados somente quando ao menos um módulo está habilitado (feature flag)
+- Sem singletons: objetos montados por composiÃƒÂ§ÃƒÂ£o no bootstrap
+- Assets carregados somente quando ao menos um mÃƒÂ³dulo estÃƒÂ¡ habilitado (feature flag)
 - Roadmap completo em `docs/refactoring/FRONTEND_ADDON_PHASED_ROADMAP.md`
 
 ---
 
-### Serviços (`desi-pet-shower-services_addon`)
+### ServiÃƒÂ§os (`desi-pet-shower-services_addon`)
 
-**Diretório**: `plugins/desi-pet-shower-services`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-services`
 
-**Propósito e funcionalidades principais**:
-- Gerenciar catálogo de serviços oferecidos
-- Definir preços e duração por porte de pet
-- Vincular serviços aos agendamentos
-- Povoar catálogo padrão na ativação
-- **[v1.2.0]** Centralizar toda lógica de cálculo de preços via API pública
+**PropÃƒÂ³sito e funcionalidades principais**:
+- Gerenciar catÃƒÂ¡logo de serviÃƒÂ§os oferecidos
+- Definir preÃƒÂ§os e duraÃƒÂ§ÃƒÂ£o por porte de pet
+- Vincular serviÃƒÂ§os aos agendamentos
+- Povoar catÃƒÂ¡logo padrÃƒÂ£o na ativaÃƒÂ§ÃƒÂ£o
+- **[v1.2.0]** Centralizar toda lÃƒÂ³gica de cÃƒÂ¡lculo de preÃƒÂ§os via API pÃƒÂºblica
 
 **Shortcodes expostos**: Nenhum
 
-**CPTs, tabelas e opções**:
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
 - CPT: `dps_service` (registrado via `DPS_CPT_Helper`)
-- Metadados: preços e duração por porte (pequeno, médio, grande)
+- Metadados: preÃƒÂ§os e duraÃƒÂ§ÃƒÂ£o por porte (pequeno, mÃƒÂ©dio, grande)
 
 **Hooks consumidos**:
-- `dps_base_nav_tabs_*`: adiciona aba "Serviços"
-- `dps_base_sections_*`: renderiza catálogo e formulários
-- Hook de agendamento: adiciona campos de seleção de serviços
+- `dps_base_nav_tabs_*`: adiciona aba "ServiÃƒÂ§os"
+- `dps_base_sections_*`: renderiza catÃƒÂ¡logo e formulÃƒÂ¡rios
+- Hook de agendamento: adiciona campos de seleÃƒÂ§ÃƒÂ£o de serviÃƒÂ§os
 
 **Hooks disparados**: Nenhum
 
 **Endpoints AJAX expostos**:
-- `dps_get_services_details`: retorna detalhes de serviços de um agendamento (movido da Agenda em v1.2.0)
+- `dps_get_services_details`: retorna detalhes de serviÃƒÂ§os de um agendamento (movido da Agenda em v1.2.0)
 
-**API Pública** (desde v1.2.0):
-A classe `DPS_Services_API` centraliza toda a lógica de serviços e cálculo de preços:
+**API PÃƒÂºblica** (desde v1.2.0):
+A classe `DPS_Services_API` centraliza toda a lÃƒÂ³gica de serviÃƒÂ§os e cÃƒÂ¡lculo de preÃƒÂ§os:
 
 ```php
-// Obter dados completos de um serviço
+// Obter dados completos de um serviÃƒÂ§o
 $service = DPS_Services_API::get_service( $service_id );
 // Retorna: ['id', 'title', 'type', 'category', 'active', 'price', 'price_small', 'price_medium', 'price_large']
 
-// Calcular preço de um serviço por porte
+// Calcular preÃƒÂ§o de um serviÃƒÂ§o por porte
 $price = DPS_Services_API::calculate_price( $service_id, 'medio' );
 // Aceita: 'pequeno'/'small', 'medio'/'medium', 'grande'/'large'
 
 // Calcular total de um agendamento
 $total = DPS_Services_API::calculate_appointment_total( 
-    $service_ids,  // array de IDs de serviços
+    $service_ids,  // array de IDs de serviÃƒÂ§os
     $pet_ids,      // array de IDs de pets
     [              // contexto opcional
-        'custom_prices' => [ service_id => price ],  // preços personalizados
+        'custom_prices' => [ service_id => price ],  // preÃƒÂ§os personalizados
         'extras' => 50.00,     // valor de extras
         'taxidog' => 25.00,    // valor de taxidog
     ]
 );
 // Retorna: ['total', 'services_total', 'services_details', 'extras_total', 'taxidog_total']
 
-// Obter detalhes de serviços de um agendamento
+// Obter detalhes de serviÃƒÂ§os de um agendamento
 $details = DPS_Services_API::get_services_details( $appointment_id );
 // Retorna: ['services' => [['name', 'price'], ...], 'total']
 ```
 
-**Contrato de integração**:
-- Outros add-ons DEVEM usar `DPS_Services_API` para cálculos de preços
+**Contrato de integraÃƒÂ§ÃƒÂ£o**:
+- Outros add-ons DEVEM usar `DPS_Services_API` para cÃƒÂ¡lculos de preÃƒÂ§os
 - Agenda Add-on delega `dps_get_services_details` para esta API (desde v1.1.0)
-- Finance Add-on DEVE usar esta API para obter valores históricos
+- Finance Add-on DEVE usar esta API para obter valores histÃƒÂ³ricos
 - Portal do Cliente DEVE usar esta API para exibir valores
 
-**Dependências**:
-- Depende do plugin base para estrutura de navegação
+**DependÃƒÂªncias**:
+- Depende do plugin base para estrutura de navegaÃƒÂ§ÃƒÂ£o
 - Reutiliza `DPS_CPT_Helper` para registro de CPT
 
 **Introduzido em**: v0.1.0  
-**API pública**: v1.2.0
+**API pÃƒÂºblica**: v1.2.0
 
 ---
 
-### Estatísticas (`desi-pet-shower-stats_addon`)
+### EstatÃƒÂ­sticas (`desi-pet-shower-stats_addon`)
 
-**Diretório**: `plugins/desi-pet-shower-stats`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-stats`
 
-**Propósito e funcionalidades principais**:
-- Exibir métricas de uso do sistema (atendimentos, receita, despesas, lucro)
-- Listar serviços mais recorrentes com gráfico de barras (Chart.js)
-- Filtrar estatísticas por período personalizado
+**PropÃƒÂ³sito e funcionalidades principais**:
+- Exibir mÃƒÂ©tricas de uso do sistema (atendimentos, receita, despesas, lucro)
+- Listar serviÃƒÂ§os mais recorrentes com grÃƒÂ¡fico de barras (Chart.js)
+- Filtrar estatÃƒÂ­sticas por perÃƒÂ­odo personalizado
 - Exibir pets inativos com link de reengajamento via WhatsApp
-- Métricas de assinaturas (ativas, pendentes, receita, valor em aberto)
+- MÃƒÂ©tricas de assinaturas (ativas, pendentes, receita, valor em aberto)
 - Sistema de cache via transients (1h para financeiros, 24h para inativos)
 
 **Shortcodes expostos**: Nenhum
 
-**CPTs, tabelas e opções**:
-- Não cria CPTs ou tabelas próprias
-- Consulta `dps_transacoes` para métricas financeiras
-- Consulta CPTs do núcleo: `dps_agendamento`, `dps_cliente`, `dps_pet`, `dps_subscription`, `dps_service`
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
+- NÃƒÂ£o cria CPTs ou tabelas prÃƒÂ³prias
+- Consulta `dps_transacoes` para mÃƒÂ©tricas financeiras
+- Consulta CPTs do nÃƒÂºcleo: `dps_agendamento`, `dps_cliente`, `dps_pet`, `dps_subscription`, `dps_service`
 - Transients criados: `dps_stats_total_revenue_*`, `dps_stats_financial_*`, `dps_stats_appointments_*`, `dps_stats_inactive_*`
 
 **Hooks consumidos**:
-- `dps_base_nav_tabs_after_history` (prioridade 20): adiciona aba "Estatísticas"
-- `dps_base_sections_after_history` (prioridade 20): renderiza dashboard de estatísticas
+- `dps_base_nav_tabs_after_history` (prioridade 20): adiciona aba "EstatÃƒÂ­sticas"
+- `dps_base_sections_after_history` (prioridade 20): renderiza dashboard de estatÃƒÂ­sticas
 - `admin_post_dps_clear_stats_cache`: processa limpeza de cache
 
 **Hooks disparados**: Nenhum
 
-**Funções globais expostas**:
-- `dps_get_total_revenue( $start_date, $end_date )`: retorna receita total paga no período
-- `dps_stats_build_cache_key( $prefix, $start, $end )`: gera chave de cache única
-- `dps_stats_clear_cache()`: limpa todos os transients de estatísticas (requer capability `manage_options`)
+**FunÃƒÂ§ÃƒÂµes globais expostas**:
+- `dps_get_total_revenue( $start_date, $end_date )`: retorna receita total paga no perÃƒÂ­odo
+- `dps_stats_build_cache_key( $prefix, $start, $end )`: gera chave de cache ÃƒÂºnica
+- `dps_stats_clear_cache()`: limpa todos os transients de estatÃƒÂ­sticas (requer capability `manage_options`)
 
-**Dependências**:
-- **Obrigatória**: Plugin base DPS (verifica `DPS_Base_Plugin`)
-- **Recomendada**: Finance Add-on (para tabela `dps_transacoes` e métricas financeiras)
-- **Opcional**: Services Add-on (para títulos de serviços no ranking)
-- **Opcional**: Subscription Add-on (para métricas de assinaturas)
+**DependÃƒÂªncias**:
+- **ObrigatÃƒÂ³ria**: Plugin base DPS (verifica `DPS_Base_Plugin`)
+- **Recomendada**: Finance Add-on (para tabela `dps_transacoes` e mÃƒÂ©tricas financeiras)
+- **Opcional**: Services Add-on (para tÃƒÂ­tulos de serviÃƒÂ§os no ranking)
+- **Opcional**: Subscription Add-on (para mÃƒÂ©tricas de assinaturas)
 - **Opcional**: DPS_WhatsApp_Helper (para links de reengajamento)
 
 **Introduzido em**: v0.1.0 (estimado)
 
-**Versão atual**: 1.0.0
+**VersÃƒÂ£o atual**: 1.0.0
 
-**Observações**:
-- Arquivo único de ~600 linhas; candidato a refatoração modular futura
-- Usa Chart.js (CDN) para gráfico de barras de serviços
-- Cache de 1 hora para métricas financeiras, 24 horas para entidades inativas
-- Limites de segurança: 500 clientes e 1000 agendamentos por consulta
-- Coleta dados de espécies/raças/média por cliente mas não exibe (oportunidade de melhoria)
+**ObservaÃƒÂ§ÃƒÂµes**:
+- Arquivo ÃƒÂºnico de ~600 linhas; candidato a refatoraÃƒÂ§ÃƒÂ£o modular futura
+- Usa Chart.js (CDN) para grÃƒÂ¡fico de barras de serviÃƒÂ§os
+- Cache de 1 hora para mÃƒÂ©tricas financeiras, 24 horas para entidades inativas
+- Limites de seguranÃƒÂ§a: 500 clientes e 1000 agendamentos por consulta
+- Coleta dados de espÃƒÂ©cies/raÃƒÂ§as/mÃƒÂ©dia por cliente mas nÃƒÂ£o exibe (oportunidade de melhoria)
 
-**Análise completa**: Consulte `docs/analysis/STATS_ADDON_ANALYSIS.md` para análise detalhada de código, funcionalidades, segurança, performance, UX e melhorias propostas (38-58h de esforço estimado)
+**AnÃƒÂ¡lise completa**: Consulte `docs/analysis/STATS_ADDON_ANALYSIS.md` para anÃƒÂ¡lise detalhada de cÃƒÂ³digo, funcionalidades, seguranÃƒÂ§a, performance, UX e melhorias propostas (38-58h de esforÃƒÂ§o estimado)
 
 ---
 
 ### Estoque (`desi-pet-shower-stock_addon`)
 
-**Diretório**: `plugins/desi-pet-shower-stock`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-stock`
 
-**Propósito e funcionalidades principais**:
+**PropÃƒÂ³sito e funcionalidades principais**:
 - Controlar estoque de insumos utilizados nos atendimentos
-- Registrar movimentações de entrada e saída
+- Registrar movimentaÃƒÂ§ÃƒÂµes de entrada e saÃƒÂ­da
 - Gerar alertas de estoque baixo
 - Baixar estoque automaticamente ao concluir atendimentos
 
 **Shortcodes expostos**: Nenhum
 
-**CPTs, tabelas e opções**:
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
 - CPT: `dps_stock_item` (registrado via `DPS_CPT_Helper`)
 - Capability customizada: `dps_manage_stock`
-- Metadados: quantidade atual, mínima, histórico de movimentações
+- Metadados: quantidade atual, mÃƒÂ­nima, histÃƒÂ³rico de movimentaÃƒÂ§ÃƒÂµes
 
 **Hooks consumidos**:
 - `dps_base_after_save_appointment`: baixa estoque automaticamente ao concluir atendimento
@@ -1947,53 +1955,53 @@ $details = DPS_Services_API::get_services_details( $appointment_id );
 
 **Hooks disparados**: Nenhum
 
-**Dependências**:
-- Depende do plugin base para estrutura de navegação e hooks de agendamento
+**DependÃƒÂªncias**:
+- Depende do plugin base para estrutura de navegaÃƒÂ§ÃƒÂ£o e hooks de agendamento
 - Reutiliza `DPS_CPT_Helper` para registro de CPT
 
 **Introduzido em**: v0.1.0 (estimado)
 
-**Observações**:
-- Arquivo único de 432 linhas; candidato a refatoração futura
-- Passou a usar navegação integrada ao painel base, removendo menus próprios
+**ObservaÃƒÂ§ÃƒÂµes**:
+- Arquivo ÃƒÂºnico de 432 linhas; candidato a refatoraÃƒÂ§ÃƒÂ£o futura
+- Passou a usar navegaÃƒÂ§ÃƒÂ£o integrada ao painel base, removendo menus prÃƒÂ³prios
 
 ---
 
 ### Assinaturas (`desi-pet-shower-subscription_addon`)
 
-**Diretório**: `plugins/desi-pet-shower-subscription`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-subscription`
 
-**Propósito e funcionalidades principais**:
-- Gerenciar pacotes mensais de banho e tosa com frequências semanal (4 atendimentos) ou quinzenal (2 atendimentos)
-- Gerar automaticamente os agendamentos do ciclo vinculados à assinatura
-- Criar e sincronizar transações financeiras na tabela `dps_transacoes`
+**PropÃƒÂ³sito e funcionalidades principais**:
+- Gerenciar pacotes mensais de banho e tosa com frequÃƒÂªncias semanal (4 atendimentos) ou quinzenal (2 atendimentos)
+- Gerar automaticamente os agendamentos do ciclo vinculados ÃƒÂ  assinatura
+- Criar e sincronizar transaÃƒÂ§ÃƒÂµes financeiras na tabela `dps_transacoes`
 - Controlar status de pagamento (pendente, pago, em atraso) por ciclo
-- Gerar links de renovação via API do Mercado Pago
-- Enviar mensagens de cobrança via WhatsApp usando `DPS_WhatsApp_Helper`
+- Gerar links de renovaÃƒÂ§ÃƒÂ£o via API do Mercado Pago
+- Enviar mensagens de cobranÃƒÂ§a via WhatsApp usando `DPS_WhatsApp_Helper`
 
 **Shortcodes expostos**: Nenhum
 
-**CPTs, tabelas e opções**:
+**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
 
 **CPT `dps_subscription`** (show_ui: false, opera via aba no painel base):
 
-| Meta Key | Tipo | Descrição |
+| Meta Key | Tipo | DescriÃƒÂ§ÃƒÂ£o |
 |----------|------|-----------|
 | `subscription_client_id` | int | ID do cliente (`dps_cliente`) |
 | `subscription_pet_id` | int | ID do pet (`dps_pet`) |
 | `subscription_service` | string | "Banho" ou "Banho e Tosa" |
 | `subscription_frequency` | string | "semanal" (4 atendimentos) ou "quinzenal" (2 atendimentos) |
 | `subscription_price` | float | Valor do pacote mensal |
-| `subscription_start_date` | date | Data de início do ciclo (Y-m-d) |
-| `subscription_start_time` | time | Horário dos atendimentos (H:i) |
+| `subscription_start_date` | date | Data de inÃƒÂ­cio do ciclo (Y-m-d) |
+| `subscription_start_time` | time | HorÃƒÂ¡rio dos atendimentos (H:i) |
 | `subscription_payment_status` | string | "pendente", "pago" ou "em_atraso" |
 | `dps_subscription_payment_link` | url | Cache do link de pagamento Mercado Pago |
-| `dps_generated_cycle_YYYY-mm` | bool | Flag indicando ciclo já gerado (evita duplicação) |
-| `dps_cycle_status_YYYY-mm` | string | Status de pagamento do ciclo específico |
+| `dps_generated_cycle_YYYY-mm` | bool | Flag indicando ciclo jÃƒÂ¡ gerado (evita duplicaÃƒÂ§ÃƒÂ£o) |
+| `dps_cycle_status_YYYY-mm` | string | Status de pagamento do ciclo especÃƒÂ­fico |
 
 **Metadados em agendamentos vinculados** (`dps_agendamento`):
 
-| Meta Key | Tipo | Descrição |
+| Meta Key | Tipo | DescriÃƒÂ§ÃƒÂ£o |
 |----------|------|-----------|
 | `subscription_id` | int | ID da assinatura vinculada |
 | `subscription_cycle` | string | Ciclo no formato Y-m (ex: "2025-12") |
@@ -2002,341 +2010,317 @@ $details = DPS_Services_API::get_services_details( $appointment_id );
 
 **Hooks consumidos**:
 - `dps_base_nav_tabs_after_pets`: Adiciona aba "Assinaturas" no painel (prioridade 20)
-- `dps_base_sections_after_pets`: Renderiza seção de assinaturas (prioridade 20)
+- `dps_base_sections_after_pets`: Renderiza seÃƒÂ§ÃƒÂ£o de assinaturas (prioridade 20)
 - Usa `DPS_MercadoPago_Config::get_access_token()` do Payment Add-on v1.1.0+ (ou options legadas se v1.0.0)
 
 **Hooks disparados**:
 - `dps_subscription_payment_status` (action): Permite add-ons de pagamento atualizar status do ciclo
   - **Assinatura**: `do_action( 'dps_subscription_payment_status', int $sub_id, string $cycle_key, string $status )`
-  - **Parâmetros**:
+  - **ParÃƒÂ¢metros**:
     - `$sub_id`: ID da assinatura
     - `$cycle_key`: Ciclo no formato Y-m (ex: "2025-12"), vazio usa ciclo atual
-    - `$status`: "paid", "approved", "success" → pago | "failed", "rejected" → em_atraso | outros → pendente
+    - `$status`: "paid", "approved", "success" Ã¢â€ â€™ pago | "failed", "rejected" Ã¢â€ â€™ em_atraso | outros Ã¢â€ â€™ pendente
   - **Exemplo de uso**: `do_action( 'dps_subscription_payment_status', 123, '2025-12', 'paid' );`
-- `dps_subscription_whatsapp_message` (filter): Permite customizar mensagem de cobrança via WhatsApp
+- `dps_subscription_whatsapp_message` (filter): Permite customizar mensagem de cobranÃƒÂ§a via WhatsApp
   - **Assinatura**: `apply_filters( 'dps_subscription_whatsapp_message', string $message, WP_Post $subscription, string $payment_link )`
 
-**Fluxo de geração de agendamentos**:
-1. Admin salva assinatura com cliente, pet, serviço, frequência, valor, data/hora
+**Fluxo de geraÃƒÂ§ÃƒÂ£o de agendamentos**:
+1. Admin salva assinatura com cliente, pet, serviÃƒÂ§o, frequÃƒÂªncia, valor, data/hora
 2. Sistema calcula datas: semanal = 4 datas (+7 dias cada), quinzenal = 2 datas (+14 dias cada)
-3. Remove agendamentos existentes do mesmo ciclo (evita duplicação)
+3. Remove agendamentos existentes do mesmo ciclo (evita duplicaÃƒÂ§ÃƒÂ£o)
 4. Cria novos `dps_agendamento` com metas vinculadas
 5. Marca ciclo como gerado (`dps_generated_cycle_YYYY-mm`)
-6. Cria/atualiza transação em `dps_transacoes` via Finance Add-on
+6. Cria/atualiza transaÃƒÂ§ÃƒÂ£o em `dps_transacoes` via Finance Add-on
 
-**Fluxo de renovação**:
-1. Quando todos os atendimentos do ciclo são finalizados, botão "Renovar" aparece
+**Fluxo de renovaÃƒÂ§ÃƒÂ£o**:
+1. Quando todos os atendimentos do ciclo sÃƒÂ£o finalizados, botÃƒÂ£o "Renovar" aparece
 2. Admin clica em "Renovar"
-3. Sistema avança `subscription_start_date` para próximo mês (mesmo dia da semana)
+3. Sistema avanÃƒÂ§a `subscription_start_date` para prÃƒÂ³ximo mÃƒÂªs (mesmo dia da semana)
 4. Reseta `subscription_payment_status` para "pendente"
 5. Gera novos agendamentos para o novo ciclo
-6. Cria nova transação financeira
+6. Cria nova transaÃƒÂ§ÃƒÂ£o financeira
 
-**Dependências**:
-- **Obrigatória**: Plugin base DPS (verifica `DPS_Base_Plugin` na inicialização)
-- **Recomendada**: Finance Add-on (para tabela `dps_transacoes` e sincronização de cobranças)
-- **Recomendada**: Payment Add-on (para geração de links Mercado Pago via API)
+**DependÃƒÂªncias**:
+- **ObrigatÃƒÂ³ria**: Plugin base DPS (verifica `DPS_Base_Plugin` na inicializaÃƒÂ§ÃƒÂ£o)
+- **Recomendada**: Finance Add-on (para tabela `dps_transacoes` e sincronizaÃƒÂ§ÃƒÂ£o de cobranÃƒÂ§as)
+- **Recomendada**: Payment Add-on (para geraÃƒÂ§ÃƒÂ£o de links Mercado Pago via API)
 - **Opcional**: Communications Add-on (para mensagens via WhatsApp)
 
 **Introduzido em**: v0.2.0
 
-**Versão atual**: 1.0.0
+**VersÃƒÂ£o atual**: 1.0.0
 
-**Observações**:
-- Arquivo único de 995 linhas; candidato a refatoração futura para padrão modular (`includes/`, `assets/`, `templates/`)
-- CSS e JavaScript inline na função `section_subscriptions()`; recomenda-se extrair para arquivos externos
-- Usa `DPS_WhatsApp_Helper::get_link_to_client()` para links de cobrança (desde v1.0.0)
-- Cancela assinatura via `wp_trash_post()` (soft delete), preservando dados para possível restauração
-- Exclusão permanente remove assinatura E todas as transações financeiras vinculadas
-- Geração de links Mercado Pago usa `external_reference` no formato `dps_subscription_{ID}` para rastreamento via webhook
+**ObservaÃƒÂ§ÃƒÂµes**:
+- Arquivo ÃƒÂºnico de 995 linhas; candidato a refatoraÃƒÂ§ÃƒÂ£o futura para padrÃƒÂ£o modular (`includes/`, `assets/`, `templates/`)
+- CSS e JavaScript inline na funÃƒÂ§ÃƒÂ£o `section_subscriptions()`; recomenda-se extrair para arquivos externos
+- Usa `DPS_WhatsApp_Helper::get_link_to_client()` para links de cobranÃƒÂ§a (desde v1.0.0)
+- Cancela assinatura via `wp_trash_post()` (soft delete), preservando dados para possÃƒÂ­vel restauraÃƒÂ§ÃƒÂ£o
+- ExclusÃƒÂ£o permanente remove assinatura E todas as transaÃƒÂ§ÃƒÂµes financeiras vinculadas
+- GeraÃƒÂ§ÃƒÂ£o de links Mercado Pago usa `external_reference` no formato `dps_subscription_{ID}` para rastreamento via webhook
 
-**Análise completa**: Consulte `docs/analysis/SUBSCRIPTION_ADDON_ANALYSIS.md` para análise detalhada de código, funcionalidades e melhorias propostas (32KB, 10 seções)
+**AnÃƒÂ¡lise completa**: Consulte `docs/analysis/SUBSCRIPTION_ADDON_ANALYSIS.md` para anÃƒÂ¡lise detalhada de cÃƒÂ³digo, funcionalidades e melhorias propostas (32KB, 10 seÃƒÂ§ÃƒÂµes)
 
 ---
 
 ### Space Groomers (`desi-pet-shower-game`)
 
-**Diretório**: `plugins/desi-pet-shower-game`
+**Diretorio**: `plugins/desi-pet-shower-game`
 
-**Propósito e funcionalidades principais**:
-- Jogo temático "Space Groomers: Invasão das Pulgas" para engajamento casual no portal
-- Canvas + JavaScript puro, sem dependências externas pesadas
-- Partidas curtas com missão diária, streak leve, badges e resumo pós-run
-- Integra automaticamente na aba Início do portal com card jogável e resumo sincronizado
+**Proposito e funcionalidades principais**:
+- jogo tematico "Space Groomers: Invasao das Pulgas" para engajamento casual no portal
+- canvas + JavaScript puro, sem dependencias externas pesadas
+- runs curtas com missao diaria, streak leve, badges locais e resumo pos-run
+- integracao automatica com a aba Inicio do portal e com o hub proprio do jogo
 
 **Shortcodes expostos**:
-- `[dps_space_groomers]` — renderiza o jogo completo em qualquer página
+- `[dps_space_groomers]` - renderiza o jogo completo em qualquer pagina
 
-**Persistência, contratos e REST**:
-- `localStorage` continua como fallback local (`dps_sg_progress_v1` + `dps_sg_highscore`)
-- `post meta` do cliente vira a fonte canônica quando há portal autenticado (`dps_game_progress_v1`)
-- Serviço PHP: `DPS_Game_Progress_Service` (normaliza, faz merge, limita histórico e aplica idempotência)
-- REST controller: `DPS_Game_REST` (nonce custom + sessão do portal ou `manage_options`)
+**Persistencia, contratos e REST**:
+- `localStorage` segue como fallback local (`dps_sg_progress_v1` + `dps_sg_highscore`)
+- `post meta` do cliente e a fonte canonica quando ha portal autenticado (`dps_game_progress_v1`)
+- `DPS_Game_Progress_Service` normaliza, faz merge, limita historico, garante idempotencia e mantem a missao corrente coerente
+- `DPS_Game_REST` valida nonce custom, respeita sessao do portal e aceita resumo sanitizado de telemetria junto do sync de progresso
 
-**Mecânicas meta atuais**:
-- 1 missão rotativa diária com pool enxuto
+**Lifecycle endurecido**:
+- fluxo explicito de `start -> waveIntro -> playing -> paused -> gameover/victory -> retry`
+- pausa manual por botao e `Escape`
+- pausa automatica por `visibilitychange`, `blur` e `orientationchange`
+- retomada sempre explicita pelo usuario, sem auto-resume silencioso
+
+**Mecanicas meta atuais**:
+- 1 missao rotativa diaria com pool enxuto
 - streak simples de retorno
 - badges locais desbloqueadas por recordes e marcos
-- resumo sincronizado para o portal com missão, streak, recorde, badges e última run
+- resumo sincronizado para o portal com missao, streak, recorde, badges e ultima run
 
-**Integração com loyalty**:
-- Reaproveita `DPS_Loyalty_API::award_game_event_points()` e `dps_loyalty_add_points()`
-- Contextos expostos: `game_daily_mission`, `game_streak_3`, `game_streak_7`, `game_first_victory`
-- `rewardMarkers` no progresso evitam crédito duplicado de pontos
+**Telemetria e pontos de extensao**:
+- frontend despacha `dps-space-groomers-telemetry` e eventos especificos como `game_start`, `pause`, `resume`, `game_over`, `mission_completed`, `run_complete`, `retry`, `sync_success` e `sync_error`
+- backend expoe `dps_game_progress_synced` para integracoes de progresso
+- backend expoe `dps_game_telemetry_run_complete` para consumo opt-in do resumo da run
+- filtro `dps_game_should_log_telemetry` permite ligar auditoria sem impor logging padrao
+
+**Integracao com loyalty**:
+- reaproveita `DPS_Loyalty_API::award_game_event_points()` e `dps_loyalty_add_points()`
+- contextos expostos: `game_daily_mission`, `game_streak_3`, `game_streak_7`, `game_first_victory`
+- `rewardMarkers` no progresso evitam credito duplicado de pontos
 
 **Hooks consumidos**:
-- `dps_portal_after_inicio_content`: renderiza o card jogável na aba Início do portal
+- `dps_portal_after_inicio_content`: renderiza o card jogavel na aba Inicio do portal
 
 **Hooks disparados**:
-- evento frontend `dps-space-groomers-progress`: notifica outras superfícies do portal após sync bem-sucedido
+- evento frontend `dps-space-groomers-progress`: notifica outras superficies do portal apos sync bem-sucedido
+- action `dps_game_progress_synced`
+- action `dps_game_telemetry_run_complete`
+- filter `dps_game_should_log_telemetry`
 
-**Dependências**:
-- **Obrigatória**: Plugin base DPS
-- **Opcional**: Client Portal Add-on (sessão e render na aba Início)
-- **Opcional**: Loyalty Add-on (pontuação leve por missão/streak/vitória)
+**Dependencias**:
+- **Obrigatoria**: Plugin base DPS
+- **Opcional**: Client Portal Add-on (sessao e render na aba Inicio)
+- **Opcional**: Loyalty Add-on (pontuacao leve por missao/streak/vitoria)
 
-**Versão atual**: 1.4.0
+**Versao atual**: 1.4.0
 
----
+  - **MigraÃƒÂ§ÃƒÂ£o**: usar `DPS_Settings_Frontend::register_tab()` com callback que renderiza o conteÃƒÂºdo
+  - **Nota**: O sistema moderno de abas jÃƒÂ¡ renderiza automaticamente o conteÃƒÂºdo via callbacks registrados.
 
-## Mapa de hooks
-
-Esta seção consolida os principais hooks expostos pelo núcleo e pelos add-ons, facilitando a integração entre componentes.
-
-### Hooks do plugin base (núcleo)
-
-#### Navegação e seções do painel
-
-- **`dps_base_nav_tabs_after_pets`** (action)
-  - **Parâmetros**: nenhum
-  - **Propósito**: adicionar abas de navegação após a aba "Pets"
-  - **Consumido por**: add-ons que precisam injetar abas customizadas no painel principal
-
-- **`dps_base_nav_tabs_after_history`** (action)
-  - **Parâmetros**: nenhum
-  - **Propósito**: adicionar abas de navegação após a aba "Histórico"
-  - **Consumido por**: Groomers, Estatísticas, Estoque (abas gerenciais)
-
-- **`dps_base_sections_after_pets`** (action)
-  - **Parâmetros**: nenhum
-  - **Propósito**: renderizar conteúdo de seções customizadas após a seção "Pets"
-  - **Consumido por**: add-ons que adicionaram abas via `dps_base_nav_tabs_after_pets`
-
-- **`dps_base_sections_after_history`** (action)
-  - **Parâmetros**: nenhum
-  - **Propósito**: renderizar conteúdo de seções customizadas após a seção "Histórico"
-  - **Consumido por**: Groomers, Estatísticas, Estoque, Campanhas & Fidelidade
-
-- **`dps_settings_nav_tabs`** (action) **DEPRECIADO desde v2.5.0**
-  - **Parâmetros**: nenhum
-  - **Propósito**: (depreciado) adicionar abas de navegação na página de configurações
-  - **Migração**: usar `DPS_Settings_Frontend::register_tab()` em vez deste hook
-  - **Nota**: As abas de configuração agora são registradas no sistema moderno via `register_tab()` em `DPS_Settings_Frontend::register_core_tabs()`. Add-ons devem migrar para o novo sistema.
-
-- **`dps_settings_sections`** (action) **DEPRECIADO desde v2.5.0**
-  - **Parâmetros**: nenhum
-  - **Propósito**: (depreciado) renderizar conteúdo de seções na página de configurações
-  - **Migração**: usar `DPS_Settings_Frontend::register_tab()` com callback que renderiza o conteúdo
-  - **Nota**: O sistema moderno de abas já renderiza automaticamente o conteúdo via callbacks registrados.
-
-#### Página de detalhes do cliente
+#### PÃƒÂ¡gina de detalhes do cliente
 
 - **`dps_client_page_header_badges`** (action) (desde v1.3.0)
-  - **Parâmetros**: `$client_id` (int), `$client` (WP_Post)
-  - **Propósito**: adicionar badges ao lado do nome do cliente (ex: nível de fidelidade, tags)
-  - **Consumido por**: Add-ons de fidelidade para mostrar nível/status
+  - **ParÃƒÂ¢metros**: `$client_id` (int), `$client` (WP_Post)
+  - **PropÃƒÂ³sito**: adicionar badges ao lado do nome do cliente (ex: nÃƒÂ­vel de fidelidade, tags)
+  - **Consumido por**: Add-ons de fidelidade para mostrar nÃƒÂ­vel/status
   - **Exemplo**:
     ```php
     add_action( 'dps_client_page_header_badges', function( $client_id, $client ) {
-        echo '<span class="dps-badge dps-badge--gold">⭐ VIP</span>';
+        echo '<span class="dps-badge dps-badge--gold">Ã¢Â­Â VIP</span>';
     }, 10, 2 );
     ```
 
 - **`dps_client_page_header_actions`** (action) (desde v1.1.0)
-  - **Parâmetros**: `$client_id` (int), `$client` (WP_Post), `$base_url` (string)
-  - **Propósito**: adicionar botões de ação ao painel de ações rápidas da página de detalhes do cliente
-  - **Atualização v1.3.0**: movido para painel dedicado "Ações Rápidas" com melhor organização visual
-  - **Consumido por**: Client Portal (link de atualização de perfil), Tosa Consent (link de consentimento)
+  - **ParÃƒÂ¢metros**: `$client_id` (int), `$client` (WP_Post), `$base_url` (string)
+  - **PropÃƒÂ³sito**: adicionar botÃƒÂµes de aÃƒÂ§ÃƒÂ£o ao painel de aÃƒÂ§ÃƒÂµes rÃƒÂ¡pidas da pÃƒÂ¡gina de detalhes do cliente
+  - **AtualizaÃƒÂ§ÃƒÂ£o v1.3.0**: movido para painel dedicado "AÃƒÂ§ÃƒÂµes RÃƒÂ¡pidas" com melhor organizaÃƒÂ§ÃƒÂ£o visual
+  - **Consumido por**: Client Portal (link de atualizaÃƒÂ§ÃƒÂ£o de perfil), Tosa Consent (link de consentimento)
   - **Exemplo**:
     ```php
     add_action( 'dps_client_page_header_actions', function( $client_id, $client, $base_url ) {
-        echo '<button class="dps-btn-action">Minha Ação</button>';
+        echo '<button class="dps-btn-action">Minha AÃƒÂ§ÃƒÂ£o</button>';
     }, 10, 3 );
     ```
 
 - **`dps_client_page_after_personal_section`** (action) (desde v1.2.0)
-  - **Parâmetros**: `$client_id` (int), `$client` (WP_Post), `$meta` (array)
-  - **Propósito**: adicionar seções personalizadas após os dados pessoais do cliente
-  - **Consumido por**: Add-ons que precisam exibir informações complementares
+  - **ParÃƒÂ¢metros**: `$client_id` (int), `$client` (WP_Post), `$meta` (array)
+  - **PropÃƒÂ³sito**: adicionar seÃƒÂ§ÃƒÂµes personalizadas apÃƒÂ³s os dados pessoais do cliente
+  - **Consumido por**: Add-ons que precisam exibir informaÃƒÂ§ÃƒÂµes complementares
   - **Exemplo**:
     ```php
     add_action( 'dps_client_page_after_personal_section', function( $client_id, $client, $meta ) {
-        echo '<div class="dps-client-section"><!-- Conteúdo personalizado --></div>';
+        echo '<div class="dps-client-section"><!-- ConteÃƒÂºdo personalizado --></div>';
     }, 10, 3 );
     ```
 
 - **`dps_client_page_after_contact_section`** (action) (desde v1.2.0)
-  - **Parâmetros**: `$client_id` (int), `$client` (WP_Post), `$meta` (array)
-  - **Propósito**: adicionar seções após contato e redes sociais
-  - **Consumido por**: Add-ons de fidelidade, comunicações avançadas
+  - **ParÃƒÂ¢metros**: `$client_id` (int), `$client` (WP_Post), `$meta` (array)
+  - **PropÃƒÂ³sito**: adicionar seÃƒÂ§ÃƒÂµes apÃƒÂ³s contato e redes sociais
+  - **Consumido por**: Add-ons de fidelidade, comunicaÃƒÂ§ÃƒÂµes avanÃƒÂ§adas
 
 - **`dps_client_page_after_pets_section`** (action) (desde v1.2.0)
-  - **Parâmetros**: `$client_id` (int), `$client` (WP_Post), `$pets` (array)
-  - **Propósito**: adicionar seções após a lista de pets do cliente
-  - **Consumido por**: Add-ons de assinaturas, pacotes de serviços
+  - **ParÃƒÂ¢metros**: `$client_id` (int), `$client` (WP_Post), `$pets` (array)
+  - **PropÃƒÂ³sito**: adicionar seÃƒÂ§ÃƒÂµes apÃƒÂ³s a lista de pets do cliente
+  - **Consumido por**: Add-ons de assinaturas, pacotes de serviÃƒÂ§os
 
 - **`dps_client_page_after_appointments_section`** (action) (desde v1.2.0)
-  - **Parâmetros**: `$client_id` (int), `$client` (WP_Post), `$appointments` (array)
-  - **Propósito**: adicionar seções após o histórico de atendimentos
-  - **Consumido por**: Add-ons financeiros, estatísticas avançadas
+  - **ParÃƒÂ¢metros**: `$client_id` (int), `$client` (WP_Post), `$appointments` (array)
+  - **PropÃƒÂ³sito**: adicionar seÃƒÂ§ÃƒÂµes apÃƒÂ³s o histÃƒÂ³rico de atendimentos
+  - **Consumido por**: Add-ons financeiros, estatÃƒÂ­sticas avanÃƒÂ§adas
 
 #### Fluxo de agendamentos
 
 - **`dps_base_appointment_fields`** (action)
-  - **Parâmetros**: `$appointment_id` (int, pode ser 0 para novos agendamentos), `$meta` (array)
-  - **Propósito**: adicionar campos customizados ao formulário de agendamento (seção "Serviços e Extras")
-  - **Consumido por**: Serviços (seleção de serviços e extras)
+  - **ParÃƒÂ¢metros**: `$appointment_id` (int, pode ser 0 para novos agendamentos), `$meta` (array)
+  - **PropÃƒÂ³sito**: adicionar campos customizados ao formulÃƒÂ¡rio de agendamento (seÃƒÂ§ÃƒÂ£o "ServiÃƒÂ§os e Extras")
+  - **Consumido por**: ServiÃƒÂ§os (seleÃƒÂ§ÃƒÂ£o de serviÃƒÂ§os e extras)
 
 - **`dps_base_appointment_assignment_fields`** (action) (desde v1.8.0)
-  - **Parâmetros**: `$appointment_id` (int, pode ser 0 para novos agendamentos), `$meta` (array)
-  - **Propósito**: adicionar campos de atribuição de profissionais ao formulário de agendamento (seção "Atribuição")
-  - **Consumido por**: Groomers (seleção de profissionais responsáveis)
-  - **Nota**: Esta seção só é renderizada se houver hooks registrados
+  - **ParÃƒÂ¢metros**: `$appointment_id` (int, pode ser 0 para novos agendamentos), `$meta` (array)
+  - **PropÃƒÂ³sito**: adicionar campos de atribuiÃƒÂ§ÃƒÂ£o de profissionais ao formulÃƒÂ¡rio de agendamento (seÃƒÂ§ÃƒÂ£o "AtribuiÃƒÂ§ÃƒÂ£o")
+  - **Consumido por**: Groomers (seleÃƒÂ§ÃƒÂ£o de profissionais responsÃƒÂ¡veis)
+  - **Nota**: Esta seÃƒÂ§ÃƒÂ£o sÃƒÂ³ ÃƒÂ© renderizada se houver hooks registrados
 
 - **`dps_base_after_save_appointment`** (action)
-  - **Parâmetros**: `$appointment_id` (int)
-  - **Propósito**: executar ações após salvar um agendamento
-  - **Consumido por**: Comunicações (envio de notificações), Estoque (baixa automática)
+  - **ParÃƒÂ¢metros**: `$appointment_id` (int)
+  - **PropÃƒÂ³sito**: executar aÃƒÂ§ÃƒÂµes apÃƒÂ³s salvar um agendamento
+  - **Consumido por**: ComunicaÃƒÂ§ÃƒÂµes (envio de notificaÃƒÂ§ÃƒÂµes), Estoque (baixa automÃƒÂ¡tica)
 
 #### Limpeza de dados
 
 - **`dps_finance_cleanup_for_appointment`** (action)
-  - **Parâmetros**: `$appointment_id` (int)
-  - **Propósito**: remover dados financeiros associados antes de excluir agendamento
-  - **Consumido por**: Financeiro (remove transações vinculadas)
+  - **ParÃƒÂ¢metros**: `$appointment_id` (int)
+  - **PropÃƒÂ³sito**: remover dados financeiros associados antes de excluir agendamento
+  - **Consumido por**: Financeiro (remove transaÃƒÂ§ÃƒÂµes vinculadas)
 
 ### Hooks de add-ons
 
 #### Add-on Financeiro
 
 - **`dps_finance_booking_paid`** (action)
-  - **Parâmetros**: `$transaction_id` (int), `$client_id` (int)
-  - **Propósito**: disparado quando uma cobrança é marcada como paga
-  - **Consumido por**: Campanhas & Fidelidade (bonifica indicador/indicado na primeira cobrança)
+  - **ParÃƒÂ¢metros**: `$transaction_id` (int), `$client_id` (int)
+  - **PropÃƒÂ³sito**: disparado quando uma cobranÃƒÂ§a ÃƒÂ© marcada como paga
+  - **Consumido por**: Campanhas & Fidelidade (bonifica indicador/indicado na primeira cobranÃƒÂ§a)
 
-#### Add-on de Cadastro Público
+#### Add-on de Cadastro PÃƒÂºblico
 
 - **`dps_registration_after_client_created`** (action)
-  - **Parâmetros**: `$client_id` (int), `$referral_code` (string|null)
-  - **Propósito**: disparado após criar novo cliente via formulário público
-  - **Consumido por**: Campanhas & Fidelidade (registra indicações)
+  - **ParÃƒÂ¢metros**: `$client_id` (int), `$referral_code` (string|null)
+  - **PropÃƒÂ³sito**: disparado apÃƒÂ³s criar novo cliente via formulÃƒÂ¡rio pÃƒÂºblico
+  - **Consumido por**: Campanhas & Fidelidade (registra indicaÃƒÂ§ÃƒÂµes)
 
 #### Add-on Portal do Cliente
 
 - **`dps_portal_tabs`** (filter)
-  - **Parâmetros**: `$tabs` (array), `$client_id` (int)
-  - **Propósito**: filtrar abas do portal; permite add-ons adicionarem ou removerem abas
+  - **ParÃƒÂ¢metros**: `$tabs` (array), `$client_id` (int)
+  - **PropÃƒÂ³sito**: filtrar abas do portal; permite add-ons adicionarem ou removerem abas
   - **Retorno**: array de abas com keys: label, icon, badge (opcional)
 
 - **`dps_portal_before_{tab}_content`** / **`dps_portal_after_{tab}_content`** (action)
-  - **Parâmetros**: `$client_id` (int)
-  - **Propósito**: injetar conteúdo antes/depois do conteúdo de cada aba
-  - **Abas disponíveis**: inicio, agendamentos, pagamentos, pet-history, galeria, fidelidade, reviews, mensagens, dados
+  - **ParÃƒÂ¢metros**: `$client_id` (int)
+  - **PropÃƒÂ³sito**: injetar conteÃƒÂºdo antes/depois do conteÃƒÂºdo de cada aba
+  - **Abas disponÃƒÂ­veis**: inicio, agendamentos, pagamentos, pet-history, galeria, fidelidade, reviews, mensagens, dados
 
 - **`dps_portal_custom_tab_panels`** (action)
-  - **Parâmetros**: `$client_id` (int), `$tabs` (array)
-  - **Propósito**: renderizar painéis de abas customizadas adicionadas via `dps_portal_tabs`
+  - **ParÃƒÂ¢metros**: `$client_id` (int), `$tabs` (array)
+  - **PropÃƒÂ³sito**: renderizar painÃƒÂ©is de abas customizadas adicionadas via `dps_portal_tabs`
 
 - **`dps_portal_after_update_preferences`** (action)
-  - **Parâmetros**: `$client_id` (int)
-  - **Propósito**: executar ações após salvar preferências de notificação do cliente
+  - **ParÃƒÂ¢metros**: `$client_id` (int)
+  - **PropÃƒÂ³sito**: executar aÃƒÂ§ÃƒÂµes apÃƒÂ³s salvar preferÃƒÂªncias de notificaÃƒÂ§ÃƒÂ£o do cliente
 
 - **`dps_portal_access_notification_sent`** (action)
-  - **Parâmetros**: `$client_id` (int), `$sent` (bool), `$access_date` (string), `$ip_address` (string)
-  - **Propósito**: executar ações após enviar notificação de acesso ao portal
+  - **ParÃƒÂ¢metros**: `$client_id` (int), `$sent` (bool), `$access_date` (string), `$ip_address` (string)
+  - **PropÃƒÂ³sito**: executar aÃƒÂ§ÃƒÂµes apÃƒÂ³s enviar notificaÃƒÂ§ÃƒÂ£o de acesso ao portal
 
 #### Cron jobs de add-ons
 
 - **`dps_agenda_send_reminders`** (action)
-  - **Frequência**: diária
-  - **Propósito**: enviar lembretes de agendamentos próximos
+  - **FrequÃƒÂªncia**: diÃƒÂ¡ria
+  - **PropÃƒÂ³sito**: enviar lembretes de agendamentos prÃƒÂ³ximos
   - **Registrado por**: Agenda
 
 - **`dps_comm_send_appointment_reminder`** (action)
-  - **Frequência**: conforme agendado
-  - **Propósito**: enviar lembretes de agendamento via canais configurados
-  - **Registrado por**: Comunicações
+  - **FrequÃƒÂªncia**: conforme agendado
+  - **PropÃƒÂ³sito**: enviar lembretes de agendamento via canais configurados
+  - **Registrado por**: ComunicaÃƒÂ§ÃƒÂµes
 
 - **`dps_comm_send_post_service`** (action)
-  - **Frequência**: conforme agendado
-  - **Propósito**: enviar mensagens pós-atendimento
-  - **Registrado por**: Comunicações
+  - **FrequÃƒÂªncia**: conforme agendado
+  - **PropÃƒÂ³sito**: enviar mensagens pÃƒÂ³s-atendimento
+  - **Registrado por**: ComunicaÃƒÂ§ÃƒÂµes
 
 - **`dps_send_push_notification`** (action)
-  - **Parâmetros**: `$message` (string), `$recipients` (array)
-  - **Propósito**: enviar notificações via Telegram ou e-mail
+  - **ParÃƒÂ¢metros**: `$message` (string), `$recipients` (array)
+  - **PropÃƒÂ³sito**: enviar notificaÃƒÂ§ÃƒÂµes via Telegram ou e-mail
   - **Registrado por**: Push Notifications
 
 ---
 
-## Considerações de estrutura e integração
-- Todos os add-ons se conectam por meio dos *hooks* expostos pelo plugin base (`dps_base_nav_tabs_after_pets`, `dps_base_sections_after_history`, `dps_settings_*`), preservando a renderização centralizada de navegação/abas feita por `DPS_Base_Frontend`.
-- As integrações financeiras compartilham a tabela `dps_transacoes`, seja para sincronizar agendamentos (base + financeiro), gerar cobranças (pagamentos, assinaturas) ou exibir pendências no portal e na agenda, reforçando a necessidade de manter o esquema consistente ao evoluir o sistema.
+## ConsideraÃƒÂ§ÃƒÂµes de estrutura e integraÃƒÂ§ÃƒÂ£o
+- Todos os add-ons se conectam por meio dos *hooks* expostos pelo plugin base (`dps_base_nav_tabs_after_pets`, `dps_base_sections_after_history`, `dps_settings_*`), preservando a renderizaÃƒÂ§ÃƒÂ£o centralizada de navegaÃƒÂ§ÃƒÂ£o/abas feita por `DPS_Base_Frontend`.
+- As integraÃƒÂ§ÃƒÂµes financeiras compartilham a tabela `dps_transacoes`, seja para sincronizar agendamentos (base + financeiro), gerar cobranÃƒÂ§as (pagamentos, assinaturas) ou exibir pendÃƒÂªncias no portal e na agenda, reforÃƒÂ§ando a necessidade de manter o esquema consistente ao evoluir o sistema.
 
-## Padrões de desenvolvimento de add-ons
+## PadrÃƒÂµes de desenvolvimento de add-ons
 
 ### Estrutura de arquivos recomendada
-Para novos add-ons ou refatorações futuras, recomenda-se seguir a estrutura modular:
+Para novos add-ons ou refatoraÃƒÂ§ÃƒÂµes futuras, recomenda-se seguir a estrutura modular:
 
 ```
 plugins/desi-pet-shower-NOME_addon/
-├── desi-pet-shower-NOME-addon.php    # Arquivo principal (apenas bootstrapping)
-├── includes/                          # Classes e lógica do negócio
-│   ├── class-dps-NOME-cpt.php        # Registro de Custom Post Types
-│   ├── class-dps-NOME-metaboxes.php  # Metaboxes e campos customizados
-│   ├── class-dps-NOME-admin.php      # Interface administrativa
-│   └── class-dps-NOME-frontend.php   # Lógica do frontend
-├── assets/                            # Recursos estáticos
-│   ├── css/                          # Estilos CSS
-│   │   └── NOME-addon.css
-│   └── js/                           # Scripts JavaScript
-│       └── NOME-addon.js
-└── uninstall.php                      # Limpeza de dados na desinstalação
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ desi-pet-shower-NOME-addon.php    # Arquivo principal (apenas bootstrapping)
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ includes/                          # Classes e lÃƒÂ³gica do negÃƒÂ³cio
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ class-dps-NOME-cpt.php        # Registro de Custom Post Types
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ class-dps-NOME-metaboxes.php  # Metaboxes e campos customizados
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ class-dps-NOME-admin.php      # Interface administrativa
+Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ class-dps-NOME-frontend.php   # LÃƒÂ³gica do frontend
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ assets/                            # Recursos estÃƒÂ¡ticos
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ css/                          # Estilos CSS
+Ã¢â€â€š   Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ NOME-addon.css
+Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ js/                           # Scripts JavaScript
+Ã¢â€â€š       Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ NOME-addon.js
+Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ uninstall.php                      # Limpeza de dados na desinstalaÃƒÂ§ÃƒÂ£o
 ```
 
-**Benefícios desta estrutura:**
-- **Separação de responsabilidades**: cada classe tem um propósito claro
-- **Manutenibilidade**: mais fácil localizar e modificar funcionalidades específicas
-- **Reutilização**: classes podem ser testadas e reutilizadas independentemente
+**BenefÃƒÂ­cios desta estrutura:**
+- **SeparaÃƒÂ§ÃƒÂ£o de responsabilidades**: cada classe tem um propÃƒÂ³sito claro
+- **Manutenibilidade**: mais fÃƒÂ¡cil localizar e modificar funcionalidades especÃƒÂ­ficas
+- **ReutilizaÃƒÂ§ÃƒÂ£o**: classes podem ser testadas e reutilizadas independentemente
 - **Performance**: possibilita carregamento condicional de componentes
 
-**Add-ons que já seguem este padrão:**
+**Add-ons que jÃƒÂ¡ seguem este padrÃƒÂ£o:**
 - `client-portal_addon`: estrutura bem organizada com `includes/` e `assets/`
 - `finance_addon`: possui `includes/` para classes auxiliares
 
-**Add-ons que poderiam se beneficiar de refatoração futura:**
-- `backup_addon`: 1338 linhas em um único arquivo (análise em `docs/analysis/BACKUP_ADDON_ANALYSIS.md`)
-- `loyalty_addon`: 1148 linhas em um único arquivo
-- `subscription_addon`: 995 linhas em um único arquivo (análise em `docs/analysis/SUBSCRIPTION_ADDON_ANALYSIS.md`)
-- `registration_addon`: 636 linhas em um único arquivo
-- `stats_addon`: 538 linhas em um único arquivo
-- `groomers_addon`: 473 linhas em um único arquivo (análise em `docs/analysis/GROOMERS_ADDON_ANALYSIS.md`)
-- `stock_addon`: 432 linhas em um único arquivo (análise em `docs/analysis/STOCK_ADDON_ANALYSIS.md`)
+**Add-ons que poderiam se beneficiar de refatoraÃƒÂ§ÃƒÂ£o futura:**
+- `backup_addon`: 1338 linhas em um ÃƒÂºnico arquivo (anÃƒÂ¡lise em `docs/analysis/BACKUP_ADDON_ANALYSIS.md`)
+- `loyalty_addon`: 1148 linhas em um ÃƒÂºnico arquivo
+- `subscription_addon`: 995 linhas em um ÃƒÂºnico arquivo (anÃƒÂ¡lise em `docs/analysis/SUBSCRIPTION_ADDON_ANALYSIS.md`)
+- `registration_addon`: 636 linhas em um ÃƒÂºnico arquivo
+- `stats_addon`: 538 linhas em um ÃƒÂºnico arquivo
+- `groomers_addon`: 473 linhas em um ÃƒÂºnico arquivo (anÃƒÂ¡lise em `docs/analysis/GROOMERS_ADDON_ANALYSIS.md`)
+- `stock_addon`: 432 linhas em um ÃƒÂºnico arquivo (anÃƒÂ¡lise em `docs/analysis/STOCK_ADDON_ANALYSIS.md`)
 
 ### Activation e Deactivation Hooks
 
 **Activation Hook (`register_activation_hook`):**
-- Criar páginas necessárias
+- Criar pÃƒÂ¡ginas necessÃƒÂ¡rias
 - Criar tabelas de banco de dados via `dbDelta()`
-- Definir opções padrão do plugin
+- Definir opÃƒÂ§ÃƒÂµes padrÃƒÂ£o do plugin
 - Criar roles e capabilities customizadas
-- **NÃO** agendar cron jobs (use `init` com verificação `wp_next_scheduled`)
+- **NÃƒÆ’O** agendar cron jobs (use `init` com verificaÃƒÂ§ÃƒÂ£o `wp_next_scheduled`)
 
 **Deactivation Hook (`register_deactivation_hook`):**
 - Limpar cron jobs agendados com `wp_clear_scheduled_hook()`
-- **NÃO** remover dados do usuário (reservado para `uninstall.php`)
+- **NÃƒÆ’O** remover dados do usuÃƒÂ¡rio (reservado para `uninstall.php`)
 
-**Exemplo de implementação:**
+**Exemplo de implementaÃƒÂ§ÃƒÂ£o:**
 ```php
 class DPS_Exemplo_Addon {
     public function __construct() {
@@ -2348,13 +2332,13 @@ class DPS_Exemplo_Addon {
     }
     
     public function activate() {
-        // Criar páginas, tabelas, opções padrão
+        // Criar pÃƒÂ¡ginas, tabelas, opÃƒÂ§ÃƒÂµes padrÃƒÂ£o
         $this->create_pages();
         $this->create_database_tables();
     }
     
     public function deactivate() {
-        // Limpar APENAS cron jobs temporários
+        // Limpar APENAS cron jobs temporÃƒÂ¡rios
         wp_clear_scheduled_hook( 'dps_exemplo_cron_event' );
     }
     
@@ -2367,139 +2351,139 @@ class DPS_Exemplo_Addon {
 ```
 
 **Add-ons que usam cron jobs:**
-- ✅ `push_addon`: implementa deactivation hook corretamente
-- ✅ `agenda_addon`: agora implementa deactivation hook para limpar `dps_agenda_send_reminders`
+- Ã¢Å“â€¦ `push_addon`: implementa deactivation hook corretamente
+- Ã¢Å“â€¦ `agenda_addon`: agora implementa deactivation hook para limpar `dps_agenda_send_reminders`
 
-### Padrões de documentação (DocBlocks)
+### PadrÃƒÂµes de documentaÃƒÂ§ÃƒÂ£o (DocBlocks)
 
-Todos os métodos devem seguir o padrão WordPress de DocBlocks:
+Todos os mÃƒÂ©todos devem seguir o padrÃƒÂ£o WordPress de DocBlocks:
 
 ```php
 /**
- * Breve descrição do método (uma linha).
+ * Breve descriÃƒÂ§ÃƒÂ£o do mÃƒÂ©todo (uma linha).
  *
- * Descrição mais detalhada explicando o propósito, comportamento
- * e contexto de uso do método (opcional).
+ * DescriÃƒÂ§ÃƒÂ£o mais detalhada explicando o propÃƒÂ³sito, comportamento
+ * e contexto de uso do mÃƒÂ©todo (opcional).
  *
  * @since 1.0.0
  *
- * @param string $param1 Descrição do primeiro parâmetro.
- * @param int    $param2 Descrição do segundo parâmetro.
+ * @param string $param1 DescriÃƒÂ§ÃƒÂ£o do primeiro parÃƒÂ¢metro.
+ * @param int    $param2 DescriÃƒÂ§ÃƒÂ£o do segundo parÃƒÂ¢metro.
  * @param array  $args {
  *     Argumentos opcionais.
  *
- *     @type string $key1 Descrição da chave 1.
- *     @type int    $key2 Descrição da chave 2.
+ *     @type string $key1 DescriÃƒÂ§ÃƒÂ£o da chave 1.
+ *     @type int    $key2 DescriÃƒÂ§ÃƒÂ£o da chave 2.
  * }
- * @return bool Retorna true em caso de sucesso, false caso contrário.
+ * @return bool Retorna true em caso de sucesso, false caso contrÃƒÂ¡rio.
  */
 public function exemplo_metodo( $param1, $param2, $args = [] ) {
-    // Implementação
+    // ImplementaÃƒÂ§ÃƒÂ£o
 }
 ```
 
-**Elementos obrigatórios:**
-- Descrição breve do propósito do método
-- `@param` para cada parâmetro, com tipo e descrição
-- `@return` com tipo e descrição do valor retornado
-- `@since` indicando a versão de introdução (opcional, mas recomendado)
+**Elementos obrigatÃƒÂ³rios:**
+- DescriÃƒÂ§ÃƒÂ£o breve do propÃƒÂ³sito do mÃƒÂ©todo
+- `@param` para cada parÃƒÂ¢metro, com tipo e descriÃƒÂ§ÃƒÂ£o
+- `@return` com tipo e descriÃƒÂ§ÃƒÂ£o do valor retornado
+- `@since` indicando a versÃƒÂ£o de introduÃƒÂ§ÃƒÂ£o (opcional, mas recomendado)
 
-**Elementos opcionais mas úteis:**
-- Descrição detalhada para métodos complexos
-- `@throws` para exceções que podem ser lançadas
-- `@see` para referenciar métodos ou classes relacionadas
-- `@link` para documentação externa
-- `@global` para variáveis globais utilizadas
+**Elementos opcionais mas ÃƒÂºteis:**
+- DescriÃƒÂ§ÃƒÂ£o detalhada para mÃƒÂ©todos complexos
+- `@throws` para exceÃƒÂ§ÃƒÂµes que podem ser lanÃƒÂ§adas
+- `@see` para referenciar mÃƒÂ©todos ou classes relacionadas
+- `@link` para documentaÃƒÂ§ÃƒÂ£o externa
+- `@global` para variÃƒÂ¡veis globais utilizadas
 
-**Prioridade de documentação:**
-1. Métodos públicos (sempre documentar)
-2. Métodos protegidos/privados complexos
+**Prioridade de documentaÃƒÂ§ÃƒÂ£o:**
+1. MÃƒÂ©todos pÃƒÂºblicos (sempre documentar)
+2. MÃƒÂ©todos protegidos/privados complexos
 3. Hooks e filtros expostos
 4. Constantes e propriedades de classe
 
-### Boas práticas adicionais
+### Boas prÃƒÂ¡ticas adicionais
 
-**Prefixação:**
-- Todas as funções globais: `dps_`
+**PrefixaÃƒÂ§ÃƒÂ£o:**
+- Todas as funÃƒÂ§ÃƒÂµes globais: `dps_`
 - Todas as classes: `DPS_`
 - Hooks e filtros: `dps_`
 - Options: `dps_`
 - Handles de scripts/estilos: `dps-`
 - Custom Post Types: `dps_`
 
-**Segurança:**
-- Sempre usar nonces em formulários: `wp_nonce_field()` / `wp_verify_nonce()`
-- Escapar saída: `esc_html()`, `esc_attr()`, `esc_url()`, `esc_js()`
+**SeguranÃƒÂ§a:**
+- Sempre usar nonces em formulÃƒÂ¡rios: `wp_nonce_field()` / `wp_verify_nonce()`
+- Escapar saÃƒÂ­da: `esc_html()`, `esc_attr()`, `esc_url()`, `esc_js()`
 - Sanitizar entrada: `sanitize_text_field()`, `sanitize_email()`, `wp_kses_post()`
 - Verificar capabilities: `current_user_can()`
 
 **Performance:**
-- Registrar assets apenas onde necessário
+- Registrar assets apenas onde necessÃƒÂ¡rio
 - Usar `wp_register_*` seguido de `wp_enqueue_*` condicionalmente
 - Otimizar queries com `fields => 'ids'` quando apropriado
-- Pré-carregar metadados com `update_meta_cache()`
+- PrÃƒÂ©-carregar metadados com `update_meta_cache()`
 
-**Integração com o núcleo:**
-- Preferir hooks do plugin base (`dps_base_*`, `dps_settings_*`) a menus próprios
-- Reutilizar classes helper quando disponíveis (`DPS_CPT_Helper`, `DPS_Money_Helper`, etc.)
+**IntegraÃƒÂ§ÃƒÂ£o com o nÃƒÂºcleo:**
+- Preferir hooks do plugin base (`dps_base_*`, `dps_settings_*`) a menus prÃƒÂ³prios
+- Reutilizar classes helper quando disponÃƒÂ­veis (`DPS_CPT_Helper`, `DPS_Money_Helper`, etc.)
 - Seguir contratos de hooks existentes sem modificar assinaturas
 - Documentar novos hooks expostos com exemplos de uso
 
 ---
 
-## Add-on: White Label (Personalização de Marca)
+## Add-on: White Label (PersonalizaÃƒÂ§ÃƒÂ£o de Marca)
 
-**Diretório**: `plugins/desi-pet-shower-whitelabel_addon/`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-whitelabel_addon/`
 
-**Versão**: 1.0.0
+**VersÃƒÂ£o**: 1.0.0
 
-**Propósito**: Personalize o sistema DPS com sua própria marca, cores, logo, SMTP customizado e controles de acesso. Ideal para agências e revendedores que desejam oferecer o DPS sob sua própria identidade visual.
+**PropÃƒÂ³sito**: Personalize o sistema DPS com sua prÃƒÂ³pria marca, cores, logo, SMTP customizado e controles de acesso. Ideal para agÃƒÂªncias e revendedores que desejam oferecer o DPS sob sua prÃƒÂ³pria identidade visual.
 
 ### Funcionalidades Principais
 
 1. **Branding e Identidade Visual**
-   - Logo customizada (versões clara e escura)
+   - Logo customizada (versÃƒÂµes clara e escura)
    - Favicon personalizado
-   - Paleta de cores (primária, secundária, accent, background, texto)
+   - Paleta de cores (primÃƒÂ¡ria, secundÃƒÂ¡ria, accent, background, texto)
    - Nome da marca e tagline
-   - Informações de contato (email, telefone, WhatsApp, URL de suporte)
-   - URLs customizadas (website, documentação, termos de uso, privacidade)
+   - InformaÃƒÂ§ÃƒÂµes de contato (email, telefone, WhatsApp, URL de suporte)
+   - URLs customizadas (website, documentaÃƒÂ§ÃƒÂ£o, termos de uso, privacidade)
    - Footer customizado
    - CSS customizado para ajustes visuais finos
-   - Opção de ocultar links "Powered by" e links do autor
+   - OpÃƒÂ§ÃƒÂ£o de ocultar links "Powered by" e links do autor
 
-2. **Página de Login Personalizada**
-   - Logo customizada com dimensões configuráveis
-   - Background (cor sólida, imagem ou gradiente)
-   - Formulário de login com largura, cor de fundo e bordas customizáveis
-   - Botão de login com cores personalizadas
-   - Mensagem customizada acima do formulário
+2. **PÃƒÂ¡gina de Login Personalizada**
+   - Logo customizada com dimensÃƒÂµes configurÃƒÂ¡veis
+   - Background (cor sÃƒÂ³lida, imagem ou gradiente)
+   - FormulÃƒÂ¡rio de login com largura, cor de fundo e bordas customizÃƒÂ¡veis
+   - BotÃƒÂ£o de login com cores personalizadas
+   - Mensagem customizada acima do formulÃƒÂ¡rio
    - Footer text customizado
    - CSS adicional para ajustes finos
-   - Opção de ocultar links de registro e recuperação de senha
+   - OpÃƒÂ§ÃƒÂ£o de ocultar links de registro e recuperaÃƒÂ§ÃƒÂ£o de senha
 
-3. **Modo de Manutenção**
+3. **Modo de ManutenÃƒÂ§ÃƒÂ£o**
    - Bloqueia acesso ao site para visitantes (HTTP 503)
-   - Bypass configurável por roles WordPress (padrão: administrator)
-   - Página de manutenção customizada com logo, título e mensagem
-   - Background e cores de texto configuráveis
-   - Countdown timer opcional para previsão de retorno
-   - Indicador visual na admin bar quando modo manutenção está ativo
+   - Bypass configurÃƒÂ¡vel por roles WordPress (padrÃƒÂ£o: administrator)
+   - PÃƒÂ¡gina de manutenÃƒÂ§ÃƒÂ£o customizada com logo, tÃƒÂ­tulo e mensagem
+   - Background e cores de texto configurÃƒÂ¡veis
+   - Countdown timer opcional para previsÃƒÂ£o de retorno
+   - Indicador visual na admin bar quando modo manutenÃƒÂ§ÃƒÂ£o estÃƒÂ¡ ativo
    - Preserva acesso a wp-admin, wp-login e AJAX
 
-4. **Personalização da Admin Bar**
-   - Ocultar itens específicos da admin bar
+4. **PersonalizaÃƒÂ§ÃƒÂ£o da Admin Bar**
+   - Ocultar itens especÃƒÂ­ficos da admin bar
    - Customizar logo e links
-   - Remover menus do WordPress que não sejam relevantes
+   - Remover menus do WordPress que nÃƒÂ£o sejam relevantes
 
 5. **SMTP Customizado**
-   - Configuração de servidor SMTP próprio
-   - Autenticação segura
+   - ConfiguraÃƒÂ§ÃƒÂ£o de servidor SMTP prÃƒÂ³prio
+   - AutenticaÃƒÂ§ÃƒÂ£o segura
    - Teste de envio de e-mail
    - Suporte a TLS/SSL
 
 6. **Assets e Estilos**
-   - Carregamento condicional de assets apenas nas páginas relevantes
+   - Carregamento condicional de assets apenas nas pÃƒÂ¡ginas relevantes
    - WordPress Color Picker integrado
    - WordPress Media Uploader para upload de logos
    - Interface responsiva e intuitiva
@@ -2508,25 +2492,25 @@ public function exemplo_metodo( $param1, $param2, $args = [] ) {
 
 ```
 desi-pet-shower-whitelabel_addon/
-├── desi-pet-shower-whitelabel-addon.php (orquestração principal)
-├── includes/
-│   ├── class-dps-whitelabel-settings.php (branding e configurações gerais)
-│   ├── class-dps-whitelabel-branding.php (aplicação de branding no site)
-│   ├── class-dps-whitelabel-assets.php (gerenciamento de assets CSS/JS)
-│   ├── class-dps-whitelabel-smtp.php (SMTP customizado)
-│   ├── class-dps-whitelabel-login-page.php (página de login personalizada)
-│   ├── class-dps-whitelabel-admin-bar.php (personalização da admin bar)
-│   └── class-dps-whitelabel-maintenance.php (modo de manutenção)
-├── assets/
-│   ├── css/
-│   │   └── whitelabel-admin.css (estilos da interface admin)
-│   └── js/
-│       └── whitelabel-admin.js (JavaScript para color picker, media uploader)
-├── templates/
-│   ├── admin-settings.php (interface de configuração com abas)
-│   └── maintenance.php (template da página de manutenção)
-├── languages/ (arquivos de tradução pt_BR)
-└── uninstall.php (limpeza ao desinstalar)
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ desi-pet-shower-whitelabel-addon.php (orquestraÃƒÂ§ÃƒÂ£o principal)
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ includes/
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ class-dps-whitelabel-settings.php (branding e configuraÃƒÂ§ÃƒÂµes gerais)
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ class-dps-whitelabel-branding.php (aplicaÃƒÂ§ÃƒÂ£o de branding no site)
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ class-dps-whitelabel-assets.php (gerenciamento de assets CSS/JS)
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ class-dps-whitelabel-smtp.php (SMTP customizado)
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ class-dps-whitelabel-login-page.php (pÃƒÂ¡gina de login personalizada)
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ class-dps-whitelabel-admin-bar.php (personalizaÃƒÂ§ÃƒÂ£o da admin bar)
+Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ class-dps-whitelabel-maintenance.php (modo de manutenÃƒÂ§ÃƒÂ£o)
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ assets/
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ css/
+Ã¢â€â€š   Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ whitelabel-admin.css (estilos da interface admin)
+Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ js/
+Ã¢â€â€š       Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ whitelabel-admin.js (JavaScript para color picker, media uploader)
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ templates/
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ admin-settings.php (interface de configuraÃƒÂ§ÃƒÂ£o com abas)
+Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ maintenance.php (template da pÃƒÂ¡gina de manutenÃƒÂ§ÃƒÂ£o)
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ languages/ (arquivos de traduÃƒÂ§ÃƒÂ£o pt_BR)
+Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ uninstall.php (limpeza ao desinstalar)
 ```
 
 ### Hooks Utilizados
@@ -2536,8 +2520,8 @@ desi-pet-shower-whitelabel_addon/
 - `init` (prioridade 5) - Inicializa classes do add-on
 - `admin_menu` (prioridade 20) - Registra menu admin
 - `admin_enqueue_scripts` - Carrega assets admin
-- `template_redirect` (prioridade 1) - Intercepta requisições para modo manutenção
-- `login_enqueue_scripts` - Aplica estilos customizados na página de login
+- `template_redirect` (prioridade 1) - Intercepta requisiÃƒÂ§ÃƒÂµes para modo manutenÃƒÂ§ÃƒÂ£o
+- `login_enqueue_scripts` - Aplica estilos customizados na pÃƒÂ¡gina de login
 - `login_headerurl` - Customiza URL do logo de login
 - `login_headertext` - Customiza texto alternativo do logo
 - `login_footer` - Adiciona footer customizado no login
@@ -2546,170 +2530,170 @@ desi-pet-shower-whitelabel_addon/
 
 **Hooks Expostos (futuros):**
 ```php
-// Permitir bypass customizado do modo manutenção
+// Permitir bypass customizado do modo manutenÃƒÂ§ÃƒÂ£o
 apply_filters( 'dps_whitelabel_maintenance_can_access', false, WP_User $user );
 
-// Customizar template da página de manutenção
+// Customizar template da pÃƒÂ¡gina de manutenÃƒÂ§ÃƒÂ£o
 apply_filters( 'dps_whitelabel_maintenance_template', string $template_path );
 
-// Disparado após salvar configurações
+// Disparado apÃƒÂ³s salvar configuraÃƒÂ§ÃƒÂµes
 do_action( 'dps_whitelabel_settings_saved', array $settings );
 ```
 
 ### Tabelas de Banco de Dados
 
-Nenhuma tabela própria. Todas as configurações são armazenadas como options do WordPress:
+Nenhuma tabela prÃƒÂ³pria. Todas as configuraÃƒÂ§ÃƒÂµes sÃƒÂ£o armazenadas como options do WordPress:
 
 **Options criadas:**
-- `dps_whitelabel_settings` - Configurações de branding e identidade visual
-- `dps_whitelabel_smtp` - Configurações de servidor SMTP
-- `dps_whitelabel_login` - Configurações da página de login
-- `dps_whitelabel_admin_bar` - Configurações da admin bar
-- `dps_whitelabel_maintenance` - Configurações do modo de manutenção
+- `dps_whitelabel_settings` - ConfiguraÃƒÂ§ÃƒÂµes de branding e identidade visual
+- `dps_whitelabel_smtp` - ConfiguraÃƒÂ§ÃƒÂµes de servidor SMTP
+- `dps_whitelabel_login` - ConfiguraÃƒÂ§ÃƒÂµes da pÃƒÂ¡gina de login
+- `dps_whitelabel_admin_bar` - ConfiguraÃƒÂ§ÃƒÂµes da admin bar
+- `dps_whitelabel_maintenance` - ConfiguraÃƒÂ§ÃƒÂµes do modo de manutenÃƒÂ§ÃƒÂ£o
 
 ### Interface Administrativa
 
-**Menu Principal:** desi.pet by PRObst → White Label
+**Menu Principal:** desi.pet by PRObst Ã¢â€ â€™ White Label
 
-**Abas de Configuração:**
+**Abas de ConfiguraÃƒÂ§ÃƒÂ£o:**
 1. **Branding** - Logo, cores, nome da marca, contatos
 2. **SMTP** - Servidor de e-mail customizado
-3. **Login** - Personalização da página de login
-4. **Admin Bar** - Customização da barra administrativa
-5. **Manutenção** - Modo de manutenção e mensagens
+3. **Login** - PersonalizaÃƒÂ§ÃƒÂ£o da pÃƒÂ¡gina de login
+4. **Admin Bar** - CustomizaÃƒÂ§ÃƒÂ£o da barra administrativa
+5. **ManutenÃƒÂ§ÃƒÂ£o** - Modo de manutenÃƒÂ§ÃƒÂ£o e mensagens
 
 **Recursos de UX:**
-- Interface com abas para organização clara
-- Color pickers para seleção visual de cores
+- Interface com abas para organizaÃƒÂ§ÃƒÂ£o clara
+- Color pickers para seleÃƒÂ§ÃƒÂ£o visual de cores
 - Media uploader integrado para upload de logos e imagens
-- Preview ao vivo de alterações (em desenvolvimento)
-- Botão de restaurar padrões
-- Mensagens de sucesso/erro após salvamento
-- Validação de campos (URLs, cores hexadecimais)
+- Preview ao vivo de alteraÃƒÂ§ÃƒÂµes (em desenvolvimento)
+- BotÃƒÂ£o de restaurar padrÃƒÂµes
+- Mensagens de sucesso/erro apÃƒÂ³s salvamento
+- ValidaÃƒÂ§ÃƒÂ£o de campos (URLs, cores hexadecimais)
 
-### Segurança
+### SeguranÃƒÂ§a
 
-**Validações Implementadas:**
-- ✅ Nonce verification em todos os formulários
-- ✅ Capability check (`manage_options`) em todas as ações
-- ✅ Sanitização rigorosa de inputs:
+**ValidaÃƒÂ§ÃƒÂµes Implementadas:**
+- Ã¢Å“â€¦ Nonce verification em todos os formulÃƒÂ¡rios
+- Ã¢Å“â€¦ Capability check (`manage_options`) em todas as aÃƒÂ§ÃƒÂµes
+- Ã¢Å“â€¦ SanitizaÃƒÂ§ÃƒÂ£o rigorosa de inputs:
   - `sanitize_text_field()` para textos
   - `esc_url_raw()` para URLs
   - `sanitize_hex_color()` para cores
   - `sanitize_email()` para e-mails
   - `wp_kses_post()` para HTML permitido
-- ✅ Escape de outputs:
+- Ã¢Å“â€¦ Escape de outputs:
   - `esc_html()`, `esc_attr()`, `esc_url()` conforme contexto
-- ✅ CSS customizado sanitizado (remove JavaScript, expressions, @import)
-- ✅ Administrator sempre incluído nas roles de bypass (não pode ser removido)
-- ✅ Validação de extensões de imagem (logo, favicon)
+- Ã¢Å“â€¦ CSS customizado sanitizado (remove JavaScript, expressions, @import)
+- Ã¢Å“â€¦ Administrator sempre incluÃƒÂ­do nas roles de bypass (nÃƒÂ£o pode ser removido)
+- Ã¢Å“â€¦ ValidaÃƒÂ§ÃƒÂ£o de extensÃƒÂµes de imagem (logo, favicon)
 
 ### Compatibilidade
 
 **WordPress:**
-- Versão mínima: 6.9
+- VersÃƒÂ£o mÃƒÂ­nima: 6.9
 - PHP: 8.4+
 
 **DPS:**
 - Requer: Plugin base (`DPS_Base_Plugin`)
-- Compatível com todos os add-ons existentes
+- CompatÃƒÂ­vel com todos os add-ons existentes
 
 **Plugins de Terceiros:**
-- Compatível com WP Mail SMTP (prioriza configuração do White Label)
-- Compatível com temas page builders (YooTheme, Elementor)
-- Não conflita com plugins de cache (assets condicionais)
+- CompatÃƒÂ­vel com WP Mail SMTP (prioriza configuraÃƒÂ§ÃƒÂ£o do White Label)
+- CompatÃƒÂ­vel com temas page builders (YooTheme, Elementor)
+- NÃƒÂ£o conflita com plugins de cache (assets condicionais)
 
-### Análise Detalhada de Novas Funcionalidades
+### AnÃƒÂ¡lise Detalhada de Novas Funcionalidades
 
-Para análise completa sobre a implementação de **Controle de Acesso ao Site**, incluindo:
-- Bloqueio de acesso para visitantes não autenticados
-- Lista de exceções de páginas públicas
+Para anÃƒÂ¡lise completa sobre a implementaÃƒÂ§ÃƒÂ£o de **Controle de Acesso ao Site**, incluindo:
+- Bloqueio de acesso para visitantes nÃƒÂ£o autenticados
+- Lista de exceÃƒÂ§ÃƒÂµes de pÃƒÂ¡ginas pÃƒÂºblicas
 - Redirecionamento para login customizado
 - Controle por role WordPress
-- Funcionalidades adicionais sugeridas (controle por CPT, horário, IP, logs)
+- Funcionalidades adicionais sugeridas (controle por CPT, horÃƒÂ¡rio, IP, logs)
 
-Consulte a seção **White Label (`desi-pet-shower-whitelabel_addon`)** neste arquivo para o detalhamento funcional e recomendações
+Consulte a seÃƒÂ§ÃƒÂ£o **White Label (`desi-pet-shower-whitelabel_addon`)** neste arquivo para o detalhamento funcional e recomendaÃƒÂ§ÃƒÂµes
 
-### Limitações Conhecidas
+### LimitaÃƒÂ§ÃƒÂµes Conhecidas
 
-- Modo de manutenção bloqueia TODO o site (não permite exceções por página)
-- Não há controle granular de acesso (apenas modo manutenção "tudo ou nada")
-- CSS customizado não tem preview ao vivo (requer salvamento para visualizar)
-- Assets admin carregados mesmo fora da página de configurações (otimização pendente)
-- Falta integração com plugins de two-factor authentication
+- Modo de manutenÃƒÂ§ÃƒÂ£o bloqueia TODO o site (nÃƒÂ£o permite exceÃƒÂ§ÃƒÂµes por pÃƒÂ¡gina)
+- NÃƒÂ£o hÃƒÂ¡ controle granular de acesso (apenas modo manutenÃƒÂ§ÃƒÂ£o "tudo ou nada")
+- CSS customizado nÃƒÂ£o tem preview ao vivo (requer salvamento para visualizar)
+- Assets admin carregados mesmo fora da pÃƒÂ¡gina de configuraÃƒÂ§ÃƒÂµes (otimizaÃƒÂ§ÃƒÂ£o pendente)
+- Falta integraÃƒÂ§ÃƒÂ£o com plugins de two-factor authentication
 
-### Próximos Passos Recomendados (Roadmap)
+### PrÃƒÂ³ximos Passos Recomendados (Roadmap)
 
 **v1.1.0 - Controle de Acesso ao Site** (ALTA PRIORIDADE)
 - Implementar classe `DPS_WhiteLabel_Access_Control`
-- Permitir bloqueio de acesso para visitantes não autenticados
-- Lista de exceções de URLs (com suporte a wildcards)
-- Redirecionamento inteligente para login com preservação de URL original
+- Permitir bloqueio de acesso para visitantes nÃƒÂ£o autenticados
+- Lista de exceÃƒÂ§ÃƒÂµes de URLs (com suporte a wildcards)
+- Redirecionamento inteligente para login com preservaÃƒÂ§ÃƒÂ£o de URL original
 - Controle por role WordPress
 - Indicador visual na admin bar quando ativo
 
-**v1.2.0 - Melhorias de Interface** (MÉDIA PRIORIDADE)
-- Preview ao vivo de alterações de cores
+**v1.2.0 - Melhorias de Interface** (MÃƒâ€°DIA PRIORIDADE)
+- Preview ao vivo de alteraÃƒÂ§ÃƒÂµes de cores
 - Editor visual de CSS com syntax highlighting
-- Upload de múltiplos logos para diferentes contextos
+- Upload de mÃƒÂºltiplos logos para diferentes contextos
 - Galeria de presets de cores e layouts
 
-**v1.3.0 - Recursos Avançados** (BAIXA PRIORIDADE)
+**v1.3.0 - Recursos AvanÃƒÂ§ados** (BAIXA PRIORIDADE)
 - Logs de acesso e auditoria
 - Controle de acesso por CPT
 - Redirecionamento baseado em role
-- Integração com 2FA
+- IntegraÃƒÂ§ÃƒÂ£o com 2FA
 - Rate limiting anti-bot
 
 ### Changelog
 
-**v1.0.0** - 2025-12-06 - Lançamento Inicial
+**v1.0.0** - 2025-12-06 - LanÃƒÂ§amento Inicial
 - Branding completo (logo, cores, nome da marca)
-- Página de login personalizada
-- Modo de manutenção com bypass por roles
-- Personalização da admin bar
+- PÃƒÂ¡gina de login personalizada
+- Modo de manutenÃƒÂ§ÃƒÂ£o com bypass por roles
+- PersonalizaÃƒÂ§ÃƒÂ£o da admin bar
 - SMTP customizado
 - Interface administrativa com abas
 - Suporte a i18n (pt_BR)
-- Documentação completa
+- DocumentaÃƒÂ§ÃƒÂ£o completa
 
 ---
 
 ## Add-on: AI (Assistente Virtual)
 
-**Diretório**: `plugins/desi-pet-shower-ai/`
+**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-ai/`
 
-**Versão**: 1.6.0 (schema DB: 1.5.0)
+**VersÃƒÂ£o**: 1.6.0 (schema DB: 1.5.0)
 
-**Propósito**: Assistente virtual inteligente para o Portal do Cliente, chat público para visitantes, e geração de sugestões de comunicações (WhatsApp e e-mail). Inclui analytics e base de conhecimento.
+**PropÃƒÂ³sito**: Assistente virtual inteligente para o Portal do Cliente, chat pÃƒÂºblico para visitantes, e geraÃƒÂ§ÃƒÂ£o de sugestÃƒÂµes de comunicaÃƒÂ§ÃƒÂµes (WhatsApp e e-mail). Inclui analytics e base de conhecimento.
 
 ### Funcionalidades Principais
 
 1. **Portal do Cliente**
-   - Widget de chat para clientes fazerem perguntas sobre agendamentos, serviços, histórico
+   - Widget de chat para clientes fazerem perguntas sobre agendamentos, serviÃƒÂ§os, histÃƒÂ³rico
    - Respostas contextualizadas baseadas em dados reais do cliente e pets
    - Escopo restrito a assuntos relacionados a Banho e Tosa
 
-2. **Chat Público** (v1.6.0+)
-   - Shortcode `[dps_ai_public_chat]` para visitantes não autenticados
+2. **Chat PÃƒÂºblico** (v1.6.0+)
+   - Shortcode `[dps_ai_public_chat]` para visitantes nÃƒÂ£o autenticados
    - Modos inline e floating, temas light/dark
-   - FAQs customizáveis, rate limiting por IP
-   - Integração com base de conhecimento
+   - FAQs customizÃƒÂ¡veis, rate limiting por IP
+   - IntegraÃƒÂ§ÃƒÂ£o com base de conhecimento
 
-3. **Assistente de Comunicações** (v1.2.0+)
-   - Gera sugestões de mensagens para WhatsApp
-   - Gera sugestões de e-mail (assunto e corpo)
-   - **NUNCA envia automaticamente** - apenas sugere textos para revisão humana
+3. **Assistente de ComunicaÃƒÂ§ÃƒÂµes** (v1.2.0+)
+   - Gera sugestÃƒÂµes de mensagens para WhatsApp
+   - Gera sugestÃƒÂµes de e-mail (assunto e corpo)
+   - **NUNCA envia automaticamente** - apenas sugere textos para revisÃƒÂ£o humana
 
 4. **Analytics e Feedback** (v1.5.0+)
-   - Métricas de uso (perguntas, tokens, erros, tempo de resposta)
-   - Feedback positivo/negativo com comentários
+   - MÃƒÂ©tricas de uso (perguntas, tokens, erros, tempo de resposta)
+   - Feedback positivo/negativo com comentÃƒÂ¡rios
    - Dashboard administrativo de analytics
    - Base de conhecimento (CPT `dps_ai_knowledge`)
 
 5. **Agendamento via Chat** (v1.5.0+)
-   - Integração com Agenda Add-on
-   - Sugestão de horários disponíveis
+   - IntegraÃƒÂ§ÃƒÂ£o com Agenda Add-on
+   - SugestÃƒÂ£o de horÃƒÂ¡rios disponÃƒÂ­veis
    - Modos: request (solicita agendamento) e direct (agenda diretamente)
 
 ### Classes Principais
@@ -2718,36 +2702,36 @@ Consulte a seção **White Label (`desi-pet-shower-whitelabel_addon`)** neste ar
 
 Cliente HTTP para API da OpenAI.
 
-**Métodos:**
-- `chat( array $messages, array $options = [] )`: Faz chamada à API Chat Completions
-- `test_connection()`: Testa validação da API key
+**MÃƒÂ©todos:**
+- `chat( array $messages, array $options = [] )`: Faz chamada ÃƒÂ  API Chat Completions
+- `test_connection()`: Testa validaÃƒÂ§ÃƒÂ£o da API key
 
-**Configurações:**
+**ConfiguraÃƒÂ§ÃƒÂµes:**
 - API key armazenada em `dps_ai_settings['api_key']`
-- Modelo, temperatura, max_tokens, timeout configuráveis
+- Modelo, temperatura, max_tokens, timeout configurÃƒÂ¡veis
 
 #### `DPS_AI_Assistant`
 
 Assistente principal para Portal do Cliente.
 
-**Métodos:**
+**MÃƒÂ©todos:**
 - `answer_portal_question( int $client_id, array $pet_ids, string $user_question )`: Responde pergunta do cliente
-- `get_base_system_prompt()`: Retorna prompt base de segurança (público, reutilizável)
+- `get_base_system_prompt()`: Retorna prompt base de seguranÃƒÂ§a (pÃƒÂºblico, reutilizÃƒÂ¡vel)
 
 **System Prompt:**
-- Escopo restrito a Banho e Tosa, serviços, agendamentos, histórico, funcionalidades DPS
-- Proíbe assuntos fora do contexto (política, religião, finanças pessoais, etc.)
-- Protegido contra contradições de instruções adicionais
+- Escopo restrito a Banho e Tosa, serviÃƒÂ§os, agendamentos, histÃƒÂ³rico, funcionalidades DPS
+- ProÃƒÂ­be assuntos fora do contexto (polÃƒÂ­tica, religiÃƒÂ£o, finanÃƒÂ§as pessoais, etc.)
+- Protegido contra contradiÃƒÂ§ÃƒÂµes de instruÃƒÂ§ÃƒÂµes adicionais
 
 #### `DPS_AI_Message_Assistant` (v1.2.0+)
 
-Assistente para geração de sugestões de comunicações.
+Assistente para geraÃƒÂ§ÃƒÂ£o de sugestÃƒÂµes de comunicaÃƒÂ§ÃƒÂµes.
 
-**Métodos:**
+**MÃƒÂ©todos:**
 
 ```php
 /**
- * Gera sugestão de mensagem para WhatsApp.
+ * Gera sugestÃƒÂ£o de mensagem para WhatsApp.
  *
  * @param array $context {
  *     Contexto da mensagem.
@@ -2756,19 +2740,19 @@ Assistente para geração de sugestões de comunicações.
  *     @type string   $client_name       Nome do cliente
  *     @type string   $client_phone      Telefone do cliente
  *     @type string   $pet_name          Nome do pet
- *     @type string   $appointment_date  Data do agendamento (formato legível)
+ *     @type string   $appointment_date  Data do agendamento (formato legÃƒÂ­vel)
  *     @type string   $appointment_time  Hora do agendamento
- *     @type array    $services          Lista de nomes de serviços
+ *     @type array    $services          Lista de nomes de serviÃƒÂ§os
  *     @type string   $groomer_name      Nome do groomer (opcional)
- *     @type string   $amount            Valor formatado (opcional, para cobranças)
- *     @type string   $additional_info   Informações adicionais (opcional)
+ *     @type string   $amount            Valor formatado (opcional, para cobranÃƒÂ§as)
+ *     @type string   $additional_info   InformaÃƒÂ§ÃƒÂµes adicionais (opcional)
  * }
  * @return array|null Array com ['text' => 'mensagem'] ou null em caso de erro.
  */
 public static function suggest_whatsapp_message( array $context )
 
 /**
- * Gera sugestão de e-mail (assunto e corpo).
+ * Gera sugestÃƒÂ£o de e-mail (assunto e corpo).
  *
  * @param array $context Contexto da mensagem (mesmos campos do WhatsApp).
  * @return array|null Array com ['subject' => 'assunto', 'body' => 'corpo'] ou null.
@@ -2778,17 +2762,17 @@ public static function suggest_email_message( array $context )
 
 **Tipos de mensagens suportados:**
 - `lembrete`: Lembrete de agendamento
-- `confirmacao`: Confirmação de agendamento
-- `pos_atendimento`: Agradecimento pós-atendimento
+- `confirmacao`: ConfirmaÃƒÂ§ÃƒÂ£o de agendamento
+- `pos_atendimento`: Agradecimento pÃƒÂ³s-atendimento
 - `cobranca_suave`: Lembrete educado de pagamento
-- `cancelamento`: Notificação de cancelamento
-- `reagendamento`: Confirmação de reagendamento
+- `cancelamento`: NotificaÃƒÂ§ÃƒÂ£o de cancelamento
+- `reagendamento`: ConfirmaÃƒÂ§ÃƒÂ£o de reagendamento
 
 ### Handlers AJAX
 
 #### `wp_ajax_dps_ai_suggest_whatsapp_message`
 
-Gera sugestão de mensagem WhatsApp via AJAX.
+Gera sugestÃƒÂ£o de mensagem WhatsApp via AJAX.
 
 **Request:**
 ```javascript
@@ -2797,7 +2781,7 @@ Gera sugestão de mensagem WhatsApp via AJAX.
     nonce: 'dps_ai_comm_nonce',
     context: {
         type: 'lembrete',
-        client_name: 'João Silva',
+        client_name: 'JoÃƒÂ£o Silva',
         pet_name: 'Rex',
         appointment_date: '15/12/2024',
         appointment_time: '14:00',
@@ -2811,7 +2795,7 @@ Gera sugestão de mensagem WhatsApp via AJAX.
 {
     success: true,
     data: {
-        text: 'Olá João! Lembrete: amanhã às 14:00 temos o agendamento...'
+        text: 'OlÃƒÂ¡ JoÃƒÂ£o! Lembrete: amanhÃƒÂ£ ÃƒÂ s 14:00 temos o agendamento...'
     }
 }
 ```
@@ -2821,14 +2805,14 @@ Gera sugestão de mensagem WhatsApp via AJAX.
 {
     success: false,
     data: {
-        message: 'Não foi possível gerar sugestão automática. A IA pode estar desativada...'
+        message: 'NÃƒÂ£o foi possÃƒÂ­vel gerar sugestÃƒÂ£o automÃƒÂ¡tica. A IA pode estar desativada...'
     }
 }
 ```
 
 #### `wp_ajax_dps_ai_suggest_email_message`
 
-Gera sugestão de e-mail via AJAX.
+Gera sugestÃƒÂ£o de e-mail via AJAX.
 
 **Request:** (mesma estrutura do WhatsApp)
 
@@ -2838,7 +2822,7 @@ Gera sugestão de e-mail via AJAX.
     success: true,
     data: {
         subject: 'Lembrete de Agendamento - desi.pet by PRObst',
-        body: 'Olá João,\n\nEste é um lembrete...'
+        body: 'OlÃƒÂ¡ JoÃƒÂ£o,\n\nEste ÃƒÂ© um lembrete...'
     }
 }
 ```
@@ -2848,8 +2832,8 @@ Gera sugestão de e-mail via AJAX.
 **Arquivo:** `assets/js/dps-ai-communications.js`
 
 **Classes CSS:**
-- `.dps-ai-suggest-whatsapp`: Botão de sugestão para WhatsApp
-- `.dps-ai-suggest-email`: Botão de sugestão para e-mail
+- `.dps-ai-suggest-whatsapp`: BotÃƒÂ£o de sugestÃƒÂ£o para WhatsApp
+- `.dps-ai-suggest-email`: BotÃƒÂ£o de sugestÃƒÂ£o para e-mail
 
 **Atributos de dados (data-*):**
 
@@ -2859,7 +2843,7 @@ Para WhatsApp:
     class="button dps-ai-suggest-whatsapp"
     data-target="#campo-mensagem"
     data-type="lembrete"
-    data-client-name="João Silva"
+    data-client-name="JoÃƒÂ£o Silva"
     data-pet-name="Rex"
     data-appointment-date="15/12/2024"
     data-appointment-time="14:00"
@@ -2883,12 +2867,12 @@ Para e-mail:
 </button>
 ```
 
-**Modal de pré-visualização:**
-- E-mails abrem modal para revisão antes de inserir nos campos
-- Usuário pode editar assunto e corpo no modal
-- Botão "Inserir" preenche os campos do formulário (não envia)
+**Modal de prÃƒÂ©-visualizaÃƒÂ§ÃƒÂ£o:**
+- E-mails abrem modal para revisÃƒÂ£o antes de inserir nos campos
+- UsuÃƒÂ¡rio pode editar assunto e corpo no modal
+- BotÃƒÂ£o "Inserir" preenche os campos do formulÃƒÂ¡rio (nÃƒÂ£o envia)
 
-### Configurações
+### ConfiguraÃƒÂ§ÃƒÂµes
 
 Armazenadas em `dps_ai_settings`:
 
@@ -2897,84 +2881,84 @@ Armazenadas em `dps_ai_settings`:
     'enabled'                 => bool,   // Habilita/desabilita IA
     'api_key'                 => string, // Chave da OpenAI (sk-...)
     'model'                   => string, // gpt-3.5-turbo, gpt-4, etc.
-    'temperature'             => float,  // 0-1, padrão 0.4
-    'timeout'                 => int,    // Segundos, padrão 10
-    'max_tokens'              => int,    // Padrão 500
-    'additional_instructions' => string, // Instruções customizadas (max 2000 chars)
+    'temperature'             => float,  // 0-1, padrÃƒÂ£o 0.4
+    'timeout'                 => int,    // Segundos, padrÃƒÂ£o 10
+    'max_tokens'              => int,    // PadrÃƒÂ£o 500
+    'additional_instructions' => string, // InstruÃƒÂ§ÃƒÂµes customizadas (max 2000 chars)
 ]
 ```
 
-**Opções específicas para comunicações:**
+**OpÃƒÂ§ÃƒÂµes especÃƒÂ­ficas para comunicaÃƒÂ§ÃƒÂµes:**
 - WhatsApp: `max_tokens => 300` (mensagens curtas)
 - E-mail: `max_tokens => 500` (pode ter mais contexto)
-- Temperatura: `0.5` (levemente mais criativo para tom amigável)
+- Temperatura: `0.5` (levemente mais criativo para tom amigÃƒÂ¡vel)
 
-### Segurança
+### SeguranÃƒÂ§a
 
-- ✅ Validação de nonce em todos os handlers AJAX
-- ✅ Verificação de capability `edit_posts`
-- ✅ Sanitização de todos os inputs (`sanitize_text_field`, `wp_unslash`)
-- ✅ System prompt base protegido contra sobrescrita
-- ✅ **NUNCA envia mensagens automaticamente**
-- ✅ API key server-side only (nunca exposta no JavaScript)
+- Ã¢Å“â€¦ ValidaÃƒÂ§ÃƒÂ£o de nonce em todos os handlers AJAX
+- Ã¢Å“â€¦ VerificaÃƒÂ§ÃƒÂ£o de capability `edit_posts`
+- Ã¢Å“â€¦ SanitizaÃƒÂ§ÃƒÂ£o de todos os inputs (`sanitize_text_field`, `wp_unslash`)
+- Ã¢Å“â€¦ System prompt base protegido contra sobrescrita
+- Ã¢Å“â€¦ **NUNCA envia mensagens automaticamente**
+- Ã¢Å“â€¦ API key server-side only (nunca exposta no JavaScript)
 
 ### Falhas e Tratamento de Erros
 
 **IA desativada ou sem API key:**
-- Retorna `null` em métodos PHP
-- Retorna erro amigável em AJAX: "IA pode estar desativada..."
-- **Campo de mensagem não é alterado** - usuário pode escrever manualmente
+- Retorna `null` em mÃƒÂ©todos PHP
+- Retorna erro amigÃƒÂ¡vel em AJAX: "IA pode estar desativada..."
+- **Campo de mensagem nÃƒÂ£o ÃƒÂ© alterado** - usuÃƒÂ¡rio pode escrever manualmente
 
 **Erro na API da OpenAI:**
-- Timeout, erro de rede, resposta inválida → retorna `null`
+- Timeout, erro de rede, resposta invÃƒÂ¡lida Ã¢â€ â€™ retorna `null`
 - Logs em `error_log()` para debug
-- Não quebra a interface - usuário pode continuar
+- NÃƒÂ£o quebra a interface - usuÃƒÂ¡rio pode continuar
 
 **Parse de e-mail falha:**
-- Tenta múltiplos padrões (ASSUNTO:/CORPO:, Subject:/Body:, divisão por linhas)
+- Tenta mÃƒÂºltiplos padrÃƒÂµes (ASSUNTO:/CORPO:, Subject:/Body:, divisÃƒÂ£o por linhas)
 - Fallback: primeira linha como assunto, resto como corpo
 - Se tudo falhar: retorna `null`
 
-### Integração com Outros Add-ons
+### IntegraÃƒÂ§ÃƒÂ£o com Outros Add-ons
 
 **Communications Add-on:**
-- Sugestões de IA podem ser usadas com `DPS_Communications_API`
-- IA gera texto → usuário revisa → `send_whatsapp()` ou `send_email()`
+- SugestÃƒÂµes de IA podem ser usadas com `DPS_Communications_API`
+- IA gera texto Ã¢â€ â€™ usuÃƒÂ¡rio revisa Ã¢â€ â€™ `send_whatsapp()` ou `send_email()`
 
 **Agenda Add-on:**
-- Pode adicionar botões de sugestão nas páginas de agendamento
+- Pode adicionar botÃƒÂµes de sugestÃƒÂ£o nas pÃƒÂ¡ginas de agendamento
 - Ver exemplos em `includes/ai-communications-examples.php`
 
 **Portal do Cliente:**
-- Widget de chat já integrado via `DPS_AI_Integration_Portal`
-- Usa mesmo system prompt base e configurações
+- Widget de chat jÃƒÂ¡ integrado via `DPS_AI_Integration_Portal`
+- Usa mesmo system prompt base e configuraÃƒÂ§ÃƒÂµes
 
-### Documentação Adicional
+### DocumentaÃƒÂ§ÃƒÂ£o Adicional
 
 - **Manual completo**: `plugins/desi-pet-shower-ai/AI_COMMUNICATIONS.md`
-- **Exemplos de código**: `plugins/desi-pet-shower-ai/includes/ai-communications-examples.php`
+- **Exemplos de cÃƒÂ³digo**: `plugins/desi-pet-shower-ai/includes/ai-communications-examples.php`
 - **Comportamento da IA**: `plugins/desi-pet-shower-ai/BEHAVIOR_EXAMPLES.md`
 
 ### Hooks Expostos
 
-Atualmente nenhum hook específico de comunicações. Possíveis hooks futuros:
+Atualmente nenhum hook especÃƒÂ­fico de comunicaÃƒÂ§ÃƒÂµes. PossÃƒÂ­veis hooks futuros:
 
 ```php
-// Filtro antes de gerar sugestão
+// Filtro antes de gerar sugestÃƒÂ£o
 $context = apply_filters( 'dps_ai_comm_whatsapp_context', $context, $type );
 
-// Filtro após gerar sugestão (permite pós-processamento)
+// Filtro apÃƒÂ³s gerar sugestÃƒÂ£o (permite pÃƒÂ³s-processamento)
 $message = apply_filters( 'dps_ai_comm_whatsapp_message', $message, $context );
 ```
 
 ### Tabelas de Banco de Dados
 
-**Desde v1.5.0**, o AI Add-on mantém 2 tabelas customizadas para analytics e feedback.
-**Desde v1.7.0**, foram adicionadas 2 tabelas para histórico de conversas persistente.
+**Desde v1.5.0**, o AI Add-on mantÃƒÂ©m 2 tabelas customizadas para analytics e feedback.
+**Desde v1.7.0**, foram adicionadas 2 tabelas para histÃƒÂ³rico de conversas persistente.
 
 #### `wp_dps_ai_conversations` (desde v1.7.0)
 
-Armazena metadados de conversas com o assistente de IA em múltiplos canais.
+Armazena metadados de conversas com o assistente de IA em mÃƒÂºltiplos canais.
 
 **Estrutura:**
 ```sql
@@ -2997,12 +2981,12 @@ CREATE TABLE wp_dps_ai_conversations (
 );
 ```
 
-**Propósito:**
-- Rastrear conversas em múltiplos canais: `web_chat` (público), `portal`, `whatsapp`, `admin_specialist`
-- Identificar usuários logados via `customer_id` ou visitantes via `session_identifier`
+**PropÃƒÂ³sito:**
+- Rastrear conversas em mÃƒÂºltiplos canais: `web_chat` (pÃƒÂºblico), `portal`, `whatsapp`, `admin_specialist`
+- Identificar usuÃƒÂ¡rios logados via `customer_id` ou visitantes via `session_identifier`
 - Agrupar mensagens relacionadas em conversas contextuais
-- Analisar padrões de uso por canal
-- Suportar histórico de conversas para futuras funcionalidades (ex: "rever conversas anteriores")
+- Analisar padrÃƒÂµes de uso por canal
+- Suportar histÃƒÂ³rico de conversas para futuras funcionalidades (ex: "rever conversas anteriores")
 
 #### `wp_dps_ai_messages` (desde v1.7.0)
 
@@ -3027,23 +3011,23 @@ CREATE TABLE wp_dps_ai_messages (
 
 **Campos:**
 - `sender_type`: 'user' (cliente/visitante), 'assistant' (IA), 'system' (mensagens do sistema)
-- `sender_identifier`: ID do usuário, telefone, IP, etc (opcional)
+- `sender_identifier`: ID do usuÃƒÂ¡rio, telefone, IP, etc (opcional)
 - `message_metadata`: JSON com dados adicionais (tokens, custo, tempo de resposta, etc)
 
-**Propósito:**
-- Histórico completo de interações em ordem cronológica
-- Análise de padrões de perguntas e respostas
-- Compliance (LGPD/GDPR - exportação de dados pessoais)
+**PropÃƒÂ³sito:**
+- HistÃƒÂ³rico completo de interaÃƒÂ§ÃƒÂµes em ordem cronolÃƒÂ³gica
+- AnÃƒÂ¡lise de padrÃƒÂµes de perguntas e respostas
+- Compliance (LGPD/GDPR - exportaÃƒÂ§ÃƒÂ£o de dados pessoais)
 - Debugging de problemas de IA
-- Base para melhorias futuras (ex: sugestões baseadas em histórico)
+- Base para melhorias futuras (ex: sugestÃƒÂµes baseadas em histÃƒÂ³rico)
 
 **Classe de Acesso:**
 - `DPS_AI_Conversations_Repository` em `includes/class-dps-ai-conversations-repository.php`
-- Métodos: `create_conversation()`, `add_message()`, `get_conversation()`, `get_messages()`, `list_conversations()`
+- MÃƒÂ©todos: `create_conversation()`, `add_message()`, `get_conversation()`, `get_messages()`, `list_conversations()`
 
 #### `wp_dps_ai_metrics`
 
-Armazena métricas agregadas de uso da IA por dia e cliente.
+Armazena mÃƒÂ©tricas agregadas de uso da IA por dia e cliente.
 
 **Estrutura:**
 ```sql
@@ -3066,15 +3050,15 @@ CREATE TABLE wp_dps_ai_metrics (
 );
 ```
 
-**Propósito:**
-- Rastrear uso diário da IA (quantidade de perguntas, tokens consumidos)
-- Monitorar performance (tempo médio de resposta, taxa de erros)
-- Análise de custos e utilização por cliente
+**PropÃƒÂ³sito:**
+- Rastrear uso diÃƒÂ¡rio da IA (quantidade de perguntas, tokens consumidos)
+- Monitorar performance (tempo mÃƒÂ©dio de resposta, taxa de erros)
+- AnÃƒÂ¡lise de custos e utilizaÃƒÂ§ÃƒÂ£o por cliente
 - Dados para dashboard de analytics
 
 #### `wp_dps_ai_feedback`
 
-Armazena feedback individual (👍/👎) de cada resposta da IA.
+Armazena feedback individual (Ã°Å¸â€˜Â/Ã°Å¸â€˜Å½) de cada resposta da IA.
 
 **Estrutura:**
 ```sql
@@ -3093,42 +3077,42 @@ CREATE TABLE wp_dps_ai_feedback (
 );
 ```
 
-**Propósito:**
-- Coletar feedback de usuários sobre qualidade das respostas
-- Identificar padrões de respostas problemáticas
+**PropÃƒÂ³sito:**
+- Coletar feedback de usuÃƒÂ¡rios sobre qualidade das respostas
+- Identificar padrÃƒÂµes de respostas problemÃƒÂ¡ticas
 - Melhorar prompts e treinamento da IA
-- Análise de satisfação
+- AnÃƒÂ¡lise de satisfaÃƒÂ§ÃƒÂ£o
 
 **Versionamento de Schema:**
-- Versão do schema rastreada em opção `dps_ai_db_version`
-- Upgrade automático via `dps_ai_maybe_upgrade_database()` em `plugins_loaded`
+- VersÃƒÂ£o do schema rastreada em opÃƒÂ§ÃƒÂ£o `dps_ai_db_version`
+- Upgrade automÃƒÂ¡tico via `dps_ai_maybe_upgrade_database()` em `plugins_loaded`
 - v1.5.0: Tabelas `dps_ai_metrics` e `dps_ai_feedback` criadas via `dbDelta()`
 - v1.6.0: Tabelas `dps_ai_conversations` e `dps_ai_messages` criadas via `dbDelta()`
-- Idempotente: seguro executar múltiplas vezes
+- Idempotente: seguro executar mÃƒÂºltiplas vezes
 
-**Configurações em `wp_options`:**
-- `dps_ai_settings` - Configurações gerais (API key, modelo, temperatura, etc.)
-- `dps_ai_db_version` - Versão do schema (desde v1.6.1)
+**ConfiguraÃƒÂ§ÃƒÂµes em `wp_options`:**
+- `dps_ai_settings` - ConfiguraÃƒÂ§ÃƒÂµes gerais (API key, modelo, temperatura, etc.)
+- `dps_ai_db_version` - VersÃƒÂ£o do schema (desde v1.6.1)
 
-### Limitações Conhecidas
+### LimitaÃƒÂ§ÃƒÂµes Conhecidas
 
-- Depende de conexão com internet e API key válida da OpenAI
-- Custo por chamada à API (variável por modelo e tokens)
-- Qualidade das sugestões depende da qualidade dos dados fornecidos no contexto
-- Não substitui revisão humana - **sempre revisar antes de enviar**
-- Assets carregados em todas as páginas admin (TODO: otimizar para carregar apenas onde necessário)
+- Depende de conexÃƒÂ£o com internet e API key vÃƒÂ¡lida da OpenAI
+- Custo por chamada ÃƒÂ  API (variÃƒÂ¡vel por modelo e tokens)
+- Qualidade das sugestÃƒÂµes depende da qualidade dos dados fornecidos no contexto
+- NÃƒÂ£o substitui revisÃƒÂ£o humana - **sempre revisar antes de enviar**
+- Assets carregados em todas as pÃƒÂ¡ginas admin (TODO: otimizar para carregar apenas onde necessÃƒÂ¡rio)
 
 ### Exemplos de Uso
 
 Ver arquivo completo de exemplos: `plugins/desi-pet-shower-ai/includes/ai-communications-examples.php`
 
-**Exemplo rápido:**
+**Exemplo rÃƒÂ¡pido:**
 
 ```php
-// Gerar sugestão de WhatsApp
+// Gerar sugestÃƒÂ£o de WhatsApp
 $result = DPS_AI_Message_Assistant::suggest_whatsapp_message([
     'type'              => 'lembrete',
-    'client_name'       => 'João Silva',
+    'client_name'       => 'JoÃƒÂ£o Silva',
     'pet_name'          => 'Rex',
     'appointment_date'  => '15/12/2024',
     'appointment_time'  => '14:00',
@@ -3142,82 +3126,82 @@ if ( null !== $result ) {
 
 ### Changelog
 
-**v1.0.0** - Lançamento inicial
+**v1.0.0** - LanÃƒÂ§amento inicial
 - Widget de chat no Portal do Cliente
-- Respostas contextualizadas sobre agendamentos e serviços
+- Respostas contextualizadas sobre agendamentos e serviÃƒÂ§os
 
-**v1.1.0** - Instruções adicionais
-- Campo de instruções customizadas nas configurações
-- Método público `get_base_system_prompt()`
+**v1.1.0** - InstruÃƒÂ§ÃƒÂµes adicionais
+- Campo de instruÃƒÂ§ÃƒÂµes customizadas nas configuraÃƒÂ§ÃƒÂµes
+- MÃƒÂ©todo pÃƒÂºblico `get_base_system_prompt()`
 
-**v1.2.0** - Assistente de Comunicações
+**v1.2.0** - Assistente de ComunicaÃƒÂ§ÃƒÂµes
 - Classe `DPS_AI_Message_Assistant`
-- Sugestões de WhatsApp e e-mail
+- SugestÃƒÂµes de WhatsApp e e-mail
 - Handlers AJAX e interface JavaScript
-- Modal de pré-visualização para e-mails
+- Modal de prÃƒÂ©-visualizaÃƒÂ§ÃƒÂ£o para e-mails
 - 6 tipos de mensagens suportados
-- Documentação e exemplos de integração
+- DocumentaÃƒÂ§ÃƒÂ£o e exemplos de integraÃƒÂ§ÃƒÂ£o
 
 ---
 
 ## Mapeamento de Capabilities
 
-> **Adicionado em:** 2026-02-18 — Fase 1 do Plano de Implementação
+> **Adicionado em:** 2026-02-18 Ã¢â‚¬â€ Fase 1 do Plano de ImplementaÃƒÂ§ÃƒÂ£o
 
 ### Capabilities utilizadas no sistema
 
 | Capability | Contexto de Uso | Plugins |
 |-----------|-----------------|---------|
-| `manage_options` | Admin pages, REST endpoints, AJAX handlers, configurações | Todos os add-ons |
-| `dps_manage_clients` | Gestão de clientes (CRUD) | Base, Frontend |
-| `dps_manage_pets` | Gestão de pets (CRUD) | Base, Frontend |
-| `dps_manage_appointments` | Gestão de agendamentos (CRUD) | Base, Agenda, Frontend |
+| `manage_options` | Admin pages, REST endpoints, AJAX handlers, configuraÃƒÂ§ÃƒÂµes | Todos os add-ons |
+| `dps_manage_clients` | GestÃƒÂ£o de clientes (CRUD) | Base, Frontend |
+| `dps_manage_pets` | GestÃƒÂ£o de pets (CRUD) | Base, Frontend |
+| `dps_manage_appointments` | GestÃƒÂ£o de agendamentos (CRUD) | Base, Agenda, Frontend |
 
-### Modelo de permissões
+### Modelo de permissÃƒÂµes
 
-- **Administradores** (`manage_options`): acesso total a todas as operações do sistema, incluindo configurações, relatórios financeiros e endpoints REST.
-- **Gestores** (`dps_manage_*`): acesso às operações de gestão do dia a dia (clientes, pets, agendamentos).
-- **Portal do cliente**: autenticação via token/sessão sem WordPress capabilities. Acesso restrito via `DPS_Portal_Session_Manager::get_authenticated_client_id()`.
+- **Administradores** (`manage_options`): acesso total a todas as operaÃƒÂ§ÃƒÂµes do sistema, incluindo configuraÃƒÂ§ÃƒÂµes, relatÃƒÂ³rios financeiros e endpoints REST.
+- **Gestores** (`dps_manage_*`): acesso ÃƒÂ s operaÃƒÂ§ÃƒÂµes de gestÃƒÂ£o do dia a dia (clientes, pets, agendamentos).
+- **Portal do cliente**: autenticaÃƒÂ§ÃƒÂ£o via token/sessÃƒÂ£o sem WordPress capabilities. Acesso restrito via `DPS_Portal_Session_Manager::get_authenticated_client_id()`.
 
-### Endpoints REST — Modelo de Permissão
+### Endpoints REST Ã¢â‚¬â€ Modelo de PermissÃƒÂ£o
 
 | Plugin | Endpoint | Permission Callback |
 |--------|----------|---------------------|
 | Finance | `dps-finance/v1/transactions` | `current_user_can('manage_options')` |
 | Loyalty | `dps-loyalty/v1/*` (5 rotas) | `current_user_can('manage_options')` |
 | Communications | `dps-communications/v1/*` (3 rotas) | `current_user_can('manage_options')` |
-| AI | `dps-ai/v1/whatsapp-webhook` | `__return_true` (webhook público com validação interna) |
-| Agenda | `dps/v1/google-calendar-webhook` | `__return_true` (webhook público com validação interna) |
+| AI | `dps-ai/v1/whatsapp-webhook` | `__return_true` (webhook pÃƒÂºblico com validaÃƒÂ§ÃƒÂ£o interna) |
+| Agenda | `dps/v1/google-calendar-webhook` | `__return_true` (webhook pÃƒÂºblico com validaÃƒÂ§ÃƒÂ£o interna) |
 | Game | `dps-game/v1/*` (2 rotas) | sessao do portal + nonce custom ou `current_user_can('manage_options')` |
 
 ---
 
-## Template Padrão de Add-on (Fase 2.2)
+## Template PadrÃƒÂ£o de Add-on (Fase 2.2)
 
-> Documentação do padrão de inicialização e estrutura de add-ons. Todos os add-ons devem seguir este template para garantir consistência.
+> DocumentaÃƒÂ§ÃƒÂ£o do padrÃƒÂ£o de inicializaÃƒÂ§ÃƒÂ£o e estrutura de add-ons. Todos os add-ons devem seguir este template para garantir consistÃƒÂªncia.
 
-### Estrutura de Diretórios
+### Estrutura de DiretÃƒÂ³rios
 
 ```
 desi-pet-shower-{nome}/
-├── desi-pet-shower-{nome}-addon.php   # Arquivo principal com header WP
-├── includes/                           # Classes PHP
-│   ├── class-dps-{nome}-*.php         # Classes de negócio
-│   └── ...
-├── assets/                             # CSS/JS
-│   ├── css/
-│   └── js/
-├── templates/                          # Templates HTML (quando aplicável)
-└── uninstall.php                       # Limpeza na desinstalação (quando tem tabelas)
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ desi-pet-shower-{nome}-addon.php   # Arquivo principal com header WP
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ includes/                           # Classes PHP
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ class-dps-{nome}-*.php         # Classes de negÃƒÂ³cio
+Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ ...
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ assets/                             # CSS/JS
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ css/
+Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ js/
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ templates/                          # Templates HTML (quando aplicÃƒÂ¡vel)
+Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ uninstall.php                       # Limpeza na desinstalaÃƒÂ§ÃƒÂ£o (quando tem tabelas)
 ```
 
-### Header WordPress Obrigatório
+### Header WordPress ObrigatÃƒÂ³rio
 
 ```php
 /**
  * Plugin Name: Desi Pet Shower - {Nome} Add-on
  * Plugin URI: https://github.com/richardprobst/DPS
- * Description: {Descrição curta}
+ * Description: {DescriÃƒÂ§ÃƒÂ£o curta}
  * Version: X.Y.Z
  * Author: PRObst
  * Author URI: https://probst.pro
@@ -3228,23 +3212,23 @@ desi-pet-shower-{nome}/
  */
 ```
 
-### Padrão de Inicialização
+### PadrÃƒÂ£o de InicializaÃƒÂ§ÃƒÂ£o
 
 | Etapa | Hook | Prioridade | Responsabilidade |
 |-------|------|-----------|------------------|
 | Text domain | `init` | 1 | `load_plugin_textdomain()` |
-| Classes/lógica | `init` | 5 | Instanciar classes, registrar CPTs, hooks |
+| Classes/lÃƒÂ³gica | `init` | 5 | Instanciar classes, registrar CPTs, hooks |
 | Admin menus | `admin_menu` | 20 | Submenu de `desi-pet-shower` |
 | Admin assets | `admin_enqueue_scripts` | 10 | CSS/JS condicionais (`$hook_suffix`) |
-| Ativação | `register_activation_hook` | — | dbDelta, flush rewrite, capabilities |
+| AtivaÃƒÂ§ÃƒÂ£o | `register_activation_hook` | Ã¢â‚¬â€ | dbDelta, flush rewrite, capabilities |
 
-### Assets — Carregamento Condicional (Obrigatório)
+### Assets Ã¢â‚¬â€ Carregamento Condicional (ObrigatÃƒÂ³rio)
 
 ```php
 add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 
 public function enqueue_admin_assets( $hook ) {
-    // Carrega apenas nas páginas do DPS
+    // Carrega apenas nas pÃƒÂ¡ginas do DPS
     if ( false === strpos( $hook, 'desi-pet-shower' ) ) {
         return;
     }
@@ -3253,9 +3237,9 @@ public function enqueue_admin_assets( $hook ) {
 }
 ```
 
-### Helpers Globais Disponíveis (Base Plugin)
+### Helpers Globais DisponÃƒÂ­veis (Base Plugin)
 
-| Helper | Métodos Principais |
+| Helper | MÃƒÂ©todos Principais |
 |--------|-------------------|
 | `DPS_Money_Helper` | `format_currency($cents)`, `format_currency_from_decimal($val)`, `format_decimal_to_brazilian($val)` |
 | `DPS_Phone_Helper` | `clean($phone)`, `format_for_display($phone)`, `format_for_whatsapp($phone)` |
@@ -3269,175 +3253,175 @@ public function enqueue_admin_assets( $hook ) {
 
 | Add-on | Init@1 | Classes@5 | Menu@20 | Assets Cond. | Activation |
 |--------|--------|-----------|---------|-------------|------------|
-| agenda | ✅ | ✅ | ✅ | ✅ | ✅ |
-| ai | ✅ | ✅ | ✅ | ✅ | ✅ |
-| backup | ✅ | ✅ | ✅ | ✅ | ❌ |
-| booking | ✅ | ✅ | — | — | ✅ |
-| client-portal | ✅ | ✅ | ✅ | ✅ | ✅ |
-| communications | ✅ | ✅ | ✅ | ✅ | ❌ |
-| finance | ✅ | ✅ | ✅ | ✅ | ✅ |
-| frontend | ✅ | ✅ | — | — | ❌ |
-| groomers | ✅ | ✅ | ✅ | ✅ | ✅ |
-| loyalty | ✅ | ✅ | ✅ | ✅ | ✅ |
-| payment | ✅ | ✅ | ✅ | ✅ | ❌ |
-| push | ✅ | ✅ | ✅ | ✅ | ✅ |
-| registration | ✅ | ✅ | ✅ | ✅ | ✅ |
-| services | ✅ | ✅ | — | — | ✅ |
-| stats | ✅ | ✅ | — | — | ❌ |
-| stock | ✅ | ✅ | — | ✅ | ✅ |
-| subscription | ✅ | ✅ | — | — | ❌ |
+| agenda | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| ai | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| backup | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢ÂÅ’ |
+| booking | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢â‚¬â€ | Ã¢â‚¬â€ | Ã¢Å“â€¦ |
+| client-portal | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| communications | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢ÂÅ’ |
+| finance | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| frontend | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢â‚¬â€ | Ã¢â‚¬â€ | Ã¢ÂÅ’ |
+| groomers | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| loyalty | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| payment | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢ÂÅ’ |
+| push | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| registration | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| services | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢â‚¬â€ | Ã¢â‚¬â€ | Ã¢Å“â€¦ |
+| stats | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢â‚¬â€ | Ã¢â‚¬â€ | Ã¢ÂÅ’ |
+| stock | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢â‚¬â€ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| subscription | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢â‚¬â€ | Ã¢â‚¬â€ | Ã¢ÂÅ’ |
 
-**Legenda:** ✅ Conforme | ❌ Ausente | — Não aplicável (add-on sem UI admin própria)
+**Legenda:** Ã¢Å“â€¦ Conforme | Ã¢ÂÅ’ Ausente | Ã¢â‚¬â€ NÃƒÂ£o aplicÃƒÂ¡vel (add-on sem UI admin prÃƒÂ³pria)
 
 ---
 
 ## Contratos de Metadados dos CPTs
 
-> **Adicionado em:** 2026-02-18 — Fase 2.5 do Plano de Implementação
+> **Adicionado em:** 2026-02-18 Ã¢â‚¬â€ Fase 2.5 do Plano de ImplementaÃƒÂ§ÃƒÂ£o
 
-### dps_cliente — Metadados do Cliente
+### dps_cliente Ã¢â‚¬â€ Metadados do Cliente
 
-| Meta Key | Tipo/Formato | Obrigatório | Descrição |
+| Meta Key | Tipo/Formato | ObrigatÃƒÂ³rio | DescriÃƒÂ§ÃƒÂ£o |
 |----------|-------------|-------------|-----------|
-| `client_cpf` | String (CPF: `000.000.000-00`) | Não | CPF do cliente |
+| `client_cpf` | String (CPF: `000.000.000-00`) | NÃƒÂ£o | CPF do cliente |
 | `client_phone` | String (telefone) | **Sim** | Telefone principal |
-| `client_email` | String (email) | Não | E-mail do cliente |
-| `client_birth` | String (data: `Y-m-d`) | Não | Data de nascimento |
-| `client_instagram` | String | Não | Handle do Instagram |
-| `client_facebook` | String | Não | Perfil do Facebook |
-| `client_photo_auth` | Int (`0` ou `1`) | Não | Autorização para fotos |
-| `client_address` | String (textarea) | Não | Endereço completo |
-| `client_referral` | String | Não | Código de indicação |
-| `client_lat` | String (float: `-23.5505`) | Não | Latitude (geolocalização) |
-| `client_lng` | String (float: `-46.6333`) | Não | Longitude (geolocalização) |
+| `client_email` | String (email) | NÃƒÂ£o | E-mail do cliente |
+| `client_birth` | String (data: `Y-m-d`) | NÃƒÂ£o | Data de nascimento |
+| `client_instagram` | String | NÃƒÂ£o | Handle do Instagram |
+| `client_facebook` | String | NÃƒÂ£o | Perfil do Facebook |
+| `client_photo_auth` | Int (`0` ou `1`) | NÃƒÂ£o | AutorizaÃƒÂ§ÃƒÂ£o para fotos |
+| `client_address` | String (textarea) | NÃƒÂ£o | EndereÃƒÂ§o completo |
+| `client_referral` | String | NÃƒÂ£o | CÃƒÂ³digo de indicaÃƒÂ§ÃƒÂ£o |
+| `client_lat` | String (float: `-23.5505`) | NÃƒÂ£o | Latitude (geolocalizaÃƒÂ§ÃƒÂ£o) |
+| `client_lng` | String (float: `-46.6333`) | NÃƒÂ£o | Longitude (geolocalizaÃƒÂ§ÃƒÂ£o) |
 
 **Classe handler:** `DPS_Client_Handler` (`includes/class-dps-client-handler.php`)
-**Campos obrigatórios na validação:** `client_name` (post_title), `client_phone`
+**Campos obrigatÃƒÂ³rios na validaÃƒÂ§ÃƒÂ£o:** `client_name` (post_title), `client_phone`
 
-### dps_pet — Metadados do Pet
+### dps_pet Ã¢â‚¬â€ Metadados do Pet
 
-| Meta Key | Tipo/Formato | Obrigatório | Descrição |
+| Meta Key | Tipo/Formato | ObrigatÃƒÂ³rio | DescriÃƒÂ§ÃƒÂ£o |
 |----------|-------------|-------------|-----------|
-| `owner_id` | Int (ID do `dps_cliente`) | **Sim** | ID do tutor/proprietário |
-| `pet_species` | String (enum: `cachorro`, `gato`, `outro`) | **Sim** | Espécie |
-| `pet_breed` | String | Não | Raça |
+| `owner_id` | Int (ID do `dps_cliente`) | **Sim** | ID do tutor/proprietÃƒÂ¡rio |
+| `pet_species` | String (enum: `cachorro`, `gato`, `outro`) | **Sim** | EspÃƒÂ©cie |
+| `pet_breed` | String | NÃƒÂ£o | RaÃƒÂ§a |
 | `pet_size` | String (enum: `pequeno`, `medio`, `grande`, `gigante`) | **Sim** | Porte |
-| `pet_weight` | String (float em kg) | Não | Peso |
-| `pet_coat` | String | Não | Tipo de pelagem |
-| `pet_color` | String | Não | Cor/marcações |
-| `pet_birth` | String (data: `Y-m-d`) | Não | Data de nascimento |
+| `pet_weight` | String (float em kg) | NÃƒÂ£o | Peso |
+| `pet_coat` | String | NÃƒÂ£o | Tipo de pelagem |
+| `pet_color` | String | NÃƒÂ£o | Cor/marcaÃƒÂ§ÃƒÂµes |
+| `pet_birth` | String (data: `Y-m-d`) | NÃƒÂ£o | Data de nascimento |
 | `pet_sex` | String (enum: `macho`, `femea`) | **Sim** | Sexo |
-| `pet_care` | String (textarea) | Não | Cuidados especiais |
-| `pet_aggressive` | Int (`0` ou `1`) | Não | Flag de agressividade |
-| `pet_vaccinations` | String (textarea) | Não | Registro de vacinação |
-| `pet_allergies` | String (textarea) | Não | Alergias conhecidas |
-| `pet_behavior` | String (textarea) | Não | Notas comportamentais |
-| `pet_shampoo_pref` | String | Não | Preferência de shampoo |
-| `pet_perfume_pref` | String | Não | Preferência de perfume |
-| `pet_accessories_pref` | String | Não | Preferência de acessórios |
-| `pet_product_restrictions` | String (textarea) | Não | Restrições de produtos |
-| `pet_photo_id` | Int (attachment ID) | Não | ID da foto do pet |
+| `pet_care` | String (textarea) | NÃƒÂ£o | Cuidados especiais |
+| `pet_aggressive` | Int (`0` ou `1`) | NÃƒÂ£o | Flag de agressividade |
+| `pet_vaccinations` | String (textarea) | NÃƒÂ£o | Registro de vacinaÃƒÂ§ÃƒÂ£o |
+| `pet_allergies` | String (textarea) | NÃƒÂ£o | Alergias conhecidas |
+| `pet_behavior` | String (textarea) | NÃƒÂ£o | Notas comportamentais |
+| `pet_shampoo_pref` | String | NÃƒÂ£o | PreferÃƒÂªncia de shampoo |
+| `pet_perfume_pref` | String | NÃƒÂ£o | PreferÃƒÂªncia de perfume |
+| `pet_accessories_pref` | String | NÃƒÂ£o | PreferÃƒÂªncia de acessÃƒÂ³rios |
+| `pet_product_restrictions` | String (textarea) | NÃƒÂ£o | RestriÃƒÂ§ÃƒÂµes de produtos |
+| `pet_photo_id` | Int (attachment ID) | NÃƒÂ£o | ID da foto do pet |
 
 **Classe handler:** `DPS_Pet_Handler` (`includes/class-dps-pet-handler.php`)
-**Campos obrigatórios na validação:** `pet_name` (post_title), `owner_id`, `pet_species`, `pet_size`, `pet_sex`
+**Campos obrigatÃƒÂ³rios na validaÃƒÂ§ÃƒÂ£o:** `pet_name` (post_title), `owner_id`, `pet_species`, `pet_size`, `pet_sex`
 
-### dps_agendamento — Metadados do Agendamento
+### dps_agendamento Ã¢â‚¬â€ Metadados do Agendamento
 
-| Meta Key | Tipo/Formato | Obrigatório | Descrição |
+| Meta Key | Tipo/Formato | ObrigatÃƒÂ³rio | DescriÃƒÂ§ÃƒÂ£o |
 |----------|-------------|-------------|-----------|
 | `appointment_client_id` | Int (ID do `dps_cliente`) | **Sim** | ID do cliente |
 | `appointment_pet_id` | Int (ID do `dps_pet`) | **Sim** | Pet principal (legado) |
-| `appointment_pet_ids` | Array serializado de IDs | Não | Multi-pet: lista de pet IDs |
+| `appointment_pet_ids` | Array serializado de IDs | NÃƒÂ£o | Multi-pet: lista de pet IDs |
 | `appointment_date` | String (data: `Y-m-d`) | **Sim** | Data do atendimento |
-| `appointment_time` | String (hora: `H:i`) | **Sim** | Horário do atendimento |
+| `appointment_time` | String (hora: `H:i`) | **Sim** | HorÃƒÂ¡rio do atendimento |
 | `appointment_status` | String (enum) | **Sim** | Status do agendamento |
-| `appointment_type` | String (enum: `simple`, `subscription`, `past`) | Não | Tipo de agendamento |
-| `appointment_services` | Array serializado de IDs | Não | IDs dos serviços |
-| `appointment_service_prices` | Array serializado de floats | Não | Preços dos serviços |
-| `appointment_total_value` | Float | Não | Valor total |
-| `appointment_notes` | String (textarea) | Não | Observações |
-| `appointment_taxidog` | Int (`0` ou `1`) | Não | Flag de TaxiDog |
-| `appointment_taxidog_price` | Float | Não | Preço do TaxiDog |
+| `appointment_type` | String (enum: `simple`, `subscription`, `past`) | NÃƒÂ£o | Tipo de agendamento |
+| `appointment_services` | Array serializado de IDs | NÃƒÂ£o | IDs dos serviÃƒÂ§os |
+| `appointment_service_prices` | Array serializado de floats | NÃƒÂ£o | PreÃƒÂ§os dos serviÃƒÂ§os |
+| `appointment_total_value` | Float | NÃƒÂ£o | Valor total |
+| `appointment_notes` | String (textarea) | NÃƒÂ£o | ObservaÃƒÂ§ÃƒÂµes |
+| `appointment_taxidog` | Int (`0` ou `1`) | NÃƒÂ£o | Flag de TaxiDog |
+| `appointment_taxidog_price` | Float | NÃƒÂ£o | PreÃƒÂ§o do TaxiDog |
 
-**Status possíveis:** `pendente`, `confirmado`, `em_atendimento`, `finalizado`, `finalizado e pago`, `finalizado_pago`, `cancelado`
+**Status possÃƒÂ­veis:** `pendente`, `confirmado`, `em_atendimento`, `finalizado`, `finalizado e pago`, `finalizado_pago`, `cancelado`
 
-### Relações entre CPTs
+### RelaÃƒÂ§ÃƒÂµes entre CPTs
 
 ```
-dps_cliente (1) ──── (N) dps_pet          via pet.owner_id → cliente.ID
-dps_cliente (1) ──── (N) dps_agendamento  via agendamento.appointment_client_id → cliente.ID
-dps_pet     (1) ──── (N) dps_agendamento  via agendamento.appointment_pet_id → pet.ID
-dps_pet     (N) ──── (N) dps_agendamento  via agendamento.appointment_pet_ids (serializado)
+dps_cliente (1) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ (N) dps_pet          via pet.owner_id Ã¢â€ â€™ cliente.ID
+dps_cliente (1) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ (N) dps_agendamento  via agendamento.appointment_client_id Ã¢â€ â€™ cliente.ID
+dps_pet     (1) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ (N) dps_agendamento  via agendamento.appointment_pet_id Ã¢â€ â€™ pet.ID
+dps_pet     (N) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ (N) dps_agendamento  via agendamento.appointment_pet_ids (serializado)
 ```
 
 ---
 
-## Integrações Futuras Propostas
+## IntegraÃƒÂ§ÃƒÂµes Futuras Propostas
 
-### Integração com Google Tarefas (Google Tasks API)
+### IntegraÃƒÂ§ÃƒÂ£o com Google Tarefas (Google Tasks API)
 
-**Status:** Proposta de análise (2026-01-19)  
-**Documentação:** proposta consolidada nesta seção do `ANALYSIS.md` (ainda sem documento dedicado em `docs/analysis/`)
+**Status:** Proposta de anÃƒÂ¡lise (2026-01-19)  
+**DocumentaÃƒÂ§ÃƒÂ£o:** proposta consolidada nesta seÃƒÂ§ÃƒÂ£o do `ANALYSIS.md` (ainda sem documento dedicado em `docs/analysis/`)
 
 **Resumo:**
-A integração do sistema DPS com Google Tasks API permite sincronizar atividades do sistema (agendamentos, cobranças, mensagens) com listas de tarefas do Google, melhorando a organização e follow-up de atividades administrativas.
+A integraÃƒÂ§ÃƒÂ£o do sistema DPS com Google Tasks API permite sincronizar atividades do sistema (agendamentos, cobranÃƒÂ§as, mensagens) com listas de tarefas do Google, melhorando a organizaÃƒÂ§ÃƒÂ£o e follow-up de atividades administrativas.
 
-**Status:** ✅ VIÁVEL e RECOMENDADO
+**Status:** Ã¢Å“â€¦ VIÃƒÂVEL e RECOMENDADO
 
 **Funcionalidades propostas:**
 1. **Agendamentos** (Alta Prioridade)
    - Lembretes de agendamentos pendentes (1 dia antes)
-   - Follow-ups pós-atendimento (2 dias depois)
+   - Follow-ups pÃƒÂ³s-atendimento (2 dias depois)
 
 2. **Financeiro** (Alta Prioridade)
-   - Cobranças pendentes (1 dia antes do vencimento)
-   - Renovações de assinatura (5 dias antes)
+   - CobranÃƒÂ§as pendentes (1 dia antes do vencimento)
+   - RenovaÃƒÂ§ÃƒÂµes de assinatura (5 dias antes)
 
-3. **Portal do Cliente** (Média Prioridade)
+3. **Portal do Cliente** (MÃƒÂ©dia Prioridade)
    - Mensagens recebidas de clientes (tarefa imediata)
 
 4. **Estoque** (Baixa Prioridade)
-   - Alertas de estoque baixo (tarefa de reposição)
+   - Alertas de estoque baixo (tarefa de reposiÃƒÂ§ÃƒÂ£o)
 
 **Add-on proposto:** `desi-pet-shower-google-tasks`
 
-**Tipo de sincronização:** Unidirecional (DPS → Google Tasks)
+**Tipo de sincronizaÃƒÂ§ÃƒÂ£o:** Unidirecional (DPS Ã¢â€ â€™ Google Tasks)
 - DPS cria tarefas no Google Tasks
-- Google Tasks não modifica dados do DPS
+- Google Tasks nÃƒÂ£o modifica dados do DPS
 - DPS permanece como "fonte da verdade"
 
-**Esforço estimado:**
+**EsforÃƒÂ§o estimado:**
 - v1.0.0 MVP (OAuth + Agendamentos): 42h (~5.5 dias)
 - v1.1.0 (+ Financeiro): 10h (~1.5 dias)
 - v1.2.0 (+ Portal + Estoque): 14h (~2 dias)
-- v1.3.0 (Testes + Documentação): 21h (~2.5 dias)
-- **Total:** 87h (~11 dias úteis)
+- v1.3.0 (Testes + DocumentaÃƒÂ§ÃƒÂ£o): 21h (~2.5 dias)
+- **Total:** 87h (~11 dias ÃƒÂºteis)
 
-**Benefícios:**
-- Centralização de tarefas em app que equipe já usa
-- Notificações nativas do Google (mobile, desktop, email)
-- Integração com ecossistema Google (Calendar, Gmail, Android, iOS)
-- API gratuita (50.000 requisições/dia)
-- Redução de agendamentos esquecidos (-30% esperado)
+**BenefÃƒÂ­cios:**
+- CentralizaÃƒÂ§ÃƒÂ£o de tarefas em app que equipe jÃƒÂ¡ usa
+- NotificaÃƒÂ§ÃƒÂµes nativas do Google (mobile, desktop, email)
+- IntegraÃƒÂ§ÃƒÂ£o com ecossistema Google (Calendar, Gmail, Android, iOS)
+- API gratuita (50.000 requisiÃƒÂ§ÃƒÂµes/dia)
+- ReduÃƒÂ§ÃƒÂ£o de agendamentos esquecidos (-30% esperado)
 
-**Segurança:**
-- Autenticação OAuth 2.0
+**SeguranÃƒÂ§a:**
+- AutenticaÃƒÂ§ÃƒÂ£o OAuth 2.0
 - Tokens criptografados com AES-256
-- Dados sensíveis filtráveis (admin escolhe o que incluir)
-- LGPD compliance (não envia CPF, RG, telefone completo)
+- Dados sensÃƒÂ­veis filtrÃƒÂ¡veis (admin escolhe o que incluir)
+- LGPD compliance (nÃƒÂ£o envia CPF, RG, telefone completo)
 
-**Próximos passos (se aprovado):**
+**PrÃƒÂ³ximos passos (se aprovado):**
 1. Criar projeto no Google Cloud Console
 2. Obter credenciais OAuth 2.0
 3. Implementar v1.0.0 MVP
-4. Testar com 3-5 pet shops piloto (beta 1 mês)
+4. Testar com 3-5 pet shops piloto (beta 1 mÃƒÂªs)
 5. Iterar baseado em feedback
-6. Lançamento geral para clientes DPS
+6. LanÃƒÂ§amento geral para clientes DPS
 
 **Consulte os documentos completos para:**
 - Arquitetura detalhada (classes, hooks, estrutura de dados)
-- Casos de uso detalhados (3 cenários reais)
-- Requisitos técnicos (APIs, OAuth, configuração Google Cloud)
-- Análise de riscos e mitigações
-- Métricas de sucesso (KPIs técnicos e de negócio)
-- Comparação com alternativas (Microsoft To Do, Todoist, sistema interno)
+- Casos de uso detalhados (3 cenÃƒÂ¡rios reais)
+- Requisitos tÃƒÂ©cnicos (APIs, OAuth, configuraÃƒÂ§ÃƒÂ£o Google Cloud)
+- AnÃƒÂ¡lise de riscos e mitigaÃƒÂ§ÃƒÂµes
+- MÃƒÂ©tricas de sucesso (KPIs tÃƒÂ©cnicos e de negÃƒÂ³cio)
+- ComparaÃƒÂ§ÃƒÂ£o com alternativas (Microsoft To Do, Todoist, sistema interno)
