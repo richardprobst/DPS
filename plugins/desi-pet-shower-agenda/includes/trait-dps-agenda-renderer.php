@@ -614,6 +614,7 @@ trait DPS_Agenda_Renderer {
         $aggr_flag   = '';
         $restrictions_badge = '';
         $consent_badge = '';
+        $group_data = null;
         if ( $pet_post ) {
             $aggr = get_post_meta( $pet_post->ID, 'pet_aggressive', true );
             if ( $aggr ) {
@@ -875,7 +876,7 @@ trait DPS_Agenda_Renderer {
                         $wa_url = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
                     }
                     $links[]      = '<a href="' . esc_url( $wa_url ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança via WhatsApp', 'dps-agenda-addon' ) . '">💰 ' . esc_html__( 'Cobrar', 'dps-agenda-addon' ) . '</a>';
-                    if ( ! empty( $group_data ) && (int) $appt->ID === (int) min( $group_data['ids'] ) ) {
+                    if ( ! empty( $group_data['ids'] ) && (int) $appt->ID === (int) min( $group_data['ids'] ) ) {
                         $group_total = number_format_i18n( $group_data['total'], 2 );
                         $date_fmt    = $group_data['date'] ? date_i18n( 'd/m/Y', strtotime( $group_data['date'] ) ) : '';
                         $group_msg   = sprintf( 'Olá %s, tudo bem? Finalizamos os atendimentos dos pets %s em %s às %s. O valor total ficou em R$ %s. Você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Caso tenha dúvidas estamos à disposição!', $client_name, implode( ', ', $group_data['pet_names'] ), $date_fmt, $group_data['time'], $group_total, $link_to_use );

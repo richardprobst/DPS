@@ -14,11 +14,11 @@
   }
 
   /**
-   * Exibe notificação toast estilizada para feedback do usuário.
-   * Substitui alert() nativo por uma notificação moderna.
+   * Exibe notificaÃ§Ã£o toast estilizada para feedback do usuÃ¡rio.
+   * Substitui alert() nativo por uma notificaÃ§Ã£o moderna.
    * @param {string} message Mensagem a ser exibida.
-   * @param {string} type Tipo da notificação: 'error', 'success', 'warning', 'info'.
-   * @param {number} duration Duração em ms (padrão: 4000).
+   * @param {string} type Tipo da notificaÃ§Ã£o: 'error', 'success', 'warning', 'info'.
+   * @param {number} duration DuraÃ§Ã£o em ms (padrÃ£o: 4000).
    */
   function showToast(message, type, duration) {
     type = type || 'error';
@@ -28,10 +28,10 @@
     $('.dps-toast').remove();
 
     var icons = {
-      error: '❌',
-      success: '✅',
-      warning: '⚠️',
-      info: 'ℹ️'
+      error: 'âŒ',
+      success: 'âœ…',
+      warning: 'âš ï¸',
+      info: 'â„¹ï¸'
     };
 
     var icon = icons[type] || icons.info;
@@ -55,7 +55,7 @@
       setTimeout(function() { toast.remove(); }, 300);
     });
 
-    // Auto-remove após duração
+    // Auto-remove apÃ³s duraÃ§Ã£o
     if (duration > 0) {
       setTimeout(function() {
         toast.removeClass('dps-toast--visible');
@@ -64,50 +64,50 @@
     }
   }
 
-  // Expõe globalmente para uso em outros módulos
+  // ExpÃµe globalmente para uso em outros mÃ³dulos
   window.DPSToast = { show: showToast };
 
   /**
-   * Obtém o label e ícone do porte do pet.
+   * ObtÃ©m o label e Ã­cone do porte do pet.
    * @param {string} size Porte do pet (pequeno, medio, grande, small, medium, large).
    * @return {object} Objeto com label e icon.
    */
   function getPetSizeInfo(size) {
-    if (!size) return { label: '', icon: '🐕' };
+    if (!size) return { label: '', icon: 'ðŸ•' };
 
     var sizeLower = size.toLowerCase();
     var sizeMap = {
-      'pequeno': { label: 'Pequeno', icon: '🐕' },
-      'small': { label: 'Pequeno', icon: '🐕' },
-      'medio': { label: 'Médio', icon: '🦮' },
-      'médio': { label: 'Médio', icon: '🦮' },
-      'medium': { label: 'Médio', icon: '🦮' },
-      'grande': { label: 'Grande', icon: '🐕‍🦺' },
-      'large': { label: 'Grande', icon: '🐕‍🦺' }
+      'pequeno': { label: 'Pequeno', icon: 'ðŸ•' },
+      'small': { label: 'Pequeno', icon: 'ðŸ•' },
+      'medio': { label: 'MÃ©dio', icon: 'ðŸ¦®' },
+      'mÃ©dio': { label: 'MÃ©dio', icon: 'ðŸ¦®' },
+      'medium': { label: 'MÃ©dio', icon: 'ðŸ¦®' },
+      'grande': { label: 'Grande', icon: 'ðŸ•â€ðŸ¦º' },
+      'large': { label: 'Grande', icon: 'ðŸ•â€ðŸ¦º' }
     };
 
-    return sizeMap[sizeLower] || { label: '', icon: '🐕' };
+    return sizeMap[sizeLower] || { label: '', icon: 'ðŸ•' };
   }
 
   /**
-   * Obtém informações visuais do serviço (ícone, classe, label).
-   * @param {object} service Objeto do serviço com name, type, category, is_taxidog.
+   * ObtÃ©m informaÃ§Ãµes visuais do serviÃ§o (Ã­cone, classe, label).
+   * @param {object} service Objeto do serviÃ§o com name, type, category, is_taxidog.
    * @return {object} Objeto com icon, typeClass, typeLabel.
    */
   function getServiceVisualInfo(service) {
-    // Mapas de ícones por tipo e categoria
+    // Mapas de Ã­cones por tipo e categoria
     var typeIcons = {
-      'taxidog': { icon: '🚐', typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' },
-      'extra': { icon: '✨', typeClass: 'dps-service-type-extra', typeLabel: 'Extra' },
-      'package': { icon: '📦', typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' }
+      'taxidog': { icon: 'ðŸš', typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' },
+      'extra': { icon: 'âœ¨', typeClass: 'dps-service-type-extra', typeLabel: 'Extra' },
+      'package': { icon: 'ðŸ“¦', typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' }
     };
 
     var categoryIcons = {
-      'banho': '🛁',
-      'tosa': '✂️',
-      'unha': '💅',
-      'ouvido': '👂',
-      'dente': '🦷'
+      'banho': 'ðŸ›',
+      'tosa': 'âœ‚ï¸',
+      'unha': 'ðŸ’…',
+      'ouvido': 'ðŸ‘‚',
+      'dente': 'ðŸ¦·'
     };
 
     // Verifica TaxiDog primeiro
@@ -118,24 +118,24 @@
     // Verifica tipo
     if (service.type && typeIcons[service.type]) {
       var info = Object.assign({}, typeIcons[service.type]);
-      // Determina ícone pela categoria ou nome
+      // Determina Ã­cone pela categoria ou nome
       info.icon = getCategoryIcon(service, categoryIcons);
       return info;
     }
 
-    // Serviço padrão
+    // ServiÃ§o padrÃ£o
     return {
       icon: getCategoryIcon(service, categoryIcons),
       typeClass: 'dps-service-type-padrao',
-      typeLabel: 'Serviço'
+      typeLabel: 'ServiÃ§o'
     };
   }
 
   /**
-   * Obtém o ícone baseado na categoria ou nome do serviço.
-   * @param {object} service Objeto do serviço.
-   * @param {object} categoryIcons Mapa de ícones por categoria.
-   * @return {string} Ícone emoji.
+   * ObtÃ©m o Ã­cone baseado na categoria ou nome do serviÃ§o.
+   * @param {object} service Objeto do serviÃ§o.
+   * @param {object} categoryIcons Mapa de Ã­cones por categoria.
+   * @return {string} Ãcone emoji.
    */
   function getCategoryIcon(service, categoryIcons) {
     // Verifica categoria diretamente
@@ -143,7 +143,7 @@
       return categoryIcons[service.category];
     }
 
-    // Verifica pelo nome do serviço
+    // Verifica pelo nome do serviÃ§o
     if (service.name) {
       var nameLower = service.name.toLowerCase();
       for (var cat in categoryIcons) {
@@ -153,8 +153,8 @@
       }
     }
 
-    // Ícone padrão
-    return '✂️';
+    // Ãcone padrÃ£o
+    return 'âœ‚ï¸';
   }
 
   $(document).ready(function(){
@@ -189,50 +189,54 @@
       openAppointmentModal($(this));
     });
 
-    // Evento de alteração de status
+    // Evento de alteraÃ§Ã£o de status
+
     $(document).on('change', '.dps-status-select', function(){
-      var select   = $(this);
-      var apptId   = select.data('appt-id');
-      var status   = select.val();
+      var select = $(this);
+      var apptId = select.data('appt-id');
+      var status = select.val();
       var apptVersion = parseInt(select.data('appt-version'), 10) || 0;
       var previous = select.data('current-status');
       var feedback = select.siblings('.dps-status-feedback');
+      var row = select.closest('tr');
 
       if ( ! feedback.length ) {
         feedback = $('<span class="dps-status-feedback" aria-live="polite"></span>');
         select.after(feedback);
       }
 
-      var updatingMessage = getMessage('updating', 'Atualizando status...');
-      feedback.removeClass('dps-status-feedback--error').text(updatingMessage);
-
+      feedback.removeClass('dps-status-feedback--error').text(getMessage('updating', 'Atualizando status...'));
       select.addClass('is-loading').prop('disabled', true);
 
-      var request = $.post(DPS_AG_Addon.ajax, {
+      $.post(DPS_AG_Addon.ajax, {
         action: 'dps_update_status',
         id: apptId,
         status: status,
         version: apptVersion,
-        nonce: DPS_AG_Addon.nonce_status
-      });
-
-      request.done(function(resp){
+        nonce: DPS_AG_Addon.nonce_status,
+        agenda_tab: getCurrentAgendaTab()
+      }).done(function(resp){
         if ( resp && resp.success ) {
-          updateRowStatus(apptId, status);
           select.data('current-status', status);
           if ( resp.data && resp.data.version ) {
             select.data('appt-version', resp.data.version);
           }
-          var successMessage = getMessage('updated', 'Status atualizado!');
-          feedback.text(successMessage);
-          setTimeout(function(){
-            location.reload();
-          }, reloadDelay);
+
+          if ( resp.data && resp.data.row_html ) {
+            replaceAgendaRow(row, resp.data.row_html);
+            showToast(getMessage('updated', 'Status atualizado!'), 'success', 1800);
+          } else {
+            updateRowStatus(apptId, status);
+            feedback.text(getMessage('updated', 'Status atualizado!'));
+            setTimeout(function(){
+              location.reload();
+            }, reloadDelay);
+          }
         } else {
           handleError(resp);
         }
-      }).fail(function(){
-        handleError();
+      }).fail(function(xhr){
+        handleError(xhr);
       }).always(function(){
         select.removeClass('is-loading').prop('disabled', false);
       });
@@ -240,19 +244,18 @@
       function handleError(response){
         var fallback = 'Erro ao atualizar status.';
         if ( response && response.data && response.data.error_code === 'version_conflict' ) {
-          var conflictMessage = getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.');
-          feedback.addClass('dps-status-feedback--error').text(conflictMessage);
+          feedback.addClass('dps-status-feedback--error').text(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usu?rio. Atualize a p?gina para ver as altera??es.'));
           select.val(previous);
           return;
         }
-        var message  = (response && response.data && response.data.message) ? response.data.message : getMessage('error', fallback);
-        feedback.addClass('dps-status-feedback--error').text(message);
+
+        feedback.addClass('dps-status-feedback--error').text(getAjaxErrorMessage(response, getMessage('error', fallback)));
         if ( previous ) {
           select.val(previous);
         }
       }
     });
-    // Evento para visualizar serviços de um agendamento
+    // Evento para visualizar serviÃ§os de um agendamento
     // Usa modal customizado em vez de alert() para melhor UX
     $(document).on('click', '.dps-services-link', function(e){
       e.preventDefault();
@@ -265,11 +268,11 @@
         if ( resp && resp.success ) {
           var services = resp.data.services || [];
           if ( services.length > 0 ) {
-            // Exibe modal customizado ao invés de alert()
+            // Exibe modal customizado ao invÃ©s de alert()
             if ( typeof window.DPSServicesModal !== 'undefined' ) {
               window.DPSServicesModal.show(services);
             } else {
-              // Fallback para alert() caso o modal não esteja carregado
+              // Fallback para alert() caso o modal nÃ£o esteja carregado
               var message = '';
               for ( var i=0; i < services.length; i++ ) {
                 var srv = services[i];
@@ -279,20 +282,21 @@
               alert(message);
             }
           } else {
-            // Lista vazia - exibe modal com mensagem apropriada se disponível
+            // Lista vazia - exibe modal com mensagem apropriada se disponÃ­vel
             if ( typeof window.DPSServicesModal !== 'undefined' ) {
               window.DPSServicesModal.show([]);
             } else {
-              showToast('Nenhum serviço encontrado para este agendamento.', 'info');
+              showToast('Nenhum serviÃ§o encontrado para este agendamento.', 'info');
             }
           }
         } else {
-          showToast(resp.data ? resp.data.message : 'Erro ao buscar serviços.', 'error');
+          showToast(resp.data ? resp.data.message : 'Erro ao buscar serviÃ§os.', 'error');
         }
       });
     });
 
-    // UX-1: Evento para botões de ação rápida de status
+    // UX-1: Evento para botÃµes de aÃ§Ã£o rÃ¡pida de status
+
     $(document).on('click', '.dps-quick-action-btn', function(e){
       e.preventDefault();
       var btn = $(this);
@@ -304,61 +308,40 @@
         return;
       }
 
-      // Desabilita todos os botões de ação da linha
       row.find('.dps-quick-action-btn').prop('disabled', true).addClass('is-loading');
 
-      var request = $.post(DPS_AG_Addon.ajax, {
+      $.post(DPS_AG_Addon.ajax, {
         action: 'dps_agenda_quick_action',
         appt_id: apptId,
         action_type: actionType,
-        nonce: DPS_AG_Addon.nonce_quick_action
-      });
-
-      request.done(function(resp){
+        nonce: DPS_AG_Addon.nonce_quick_action,
+        agenda_tab: getCurrentAgendaTab()
+      }).done(function(resp){
         if ( resp && resp.success ) {
-          // UX-2: Substitui a linha inteira com o HTML atualizado
           if ( resp.data && resp.data.row_html ) {
-            var newRow = $(resp.data.row_html);
-            row.replaceWith(newRow);
-
-            // Anima a nova linha para feedback visual
-            newRow.addClass('dps-row-updated');
-            setTimeout(function(){
-              newRow.removeClass('dps-row-updated');
-            }, 1500);
-          } else {
-            // Fallback: atualiza apenas a classe de status
-            if ( resp.data && resp.data.new_status ) {
-              updateRowStatus(apptId, resp.data.new_status);
-            }
-            // Remove estado de loading
+            replaceAgendaRow(row, resp.data.row_html);
+          } else if ( resp.data && resp.data.new_status ) {
+            updateRowStatus(apptId, resp.data.new_status);
             row.find('.dps-quick-action-btn').prop('disabled', false).removeClass('is-loading');
           }
         } else {
-          handleQuickActionError(resp, row);
+          handleQuickActionError(resp);
         }
-      }).fail(function(){
-        handleQuickActionError(null, row);
+      }).fail(function(xhr){
+        handleQuickActionError(xhr);
       });
 
-      function handleQuickActionError(response, row){
-        var message = (response && response.data && response.data.message)
-          ? response.data.message
-          : 'Erro ao executar ação. Tente novamente.';
-
-        showToast(message, 'error');
-
-        // Remove estado de loading
+      function handleQuickActionError(response){
+        showToast(getAjaxErrorMessage(response, 'Erro ao executar a acao. Tente novamente.'), 'error');
         row.find('.dps-quick-action-btn').prop('disabled', false).removeClass('is-loading');
-
-        // Fallback: recarrega a página em caso de erro para garantir consistência
         setTimeout(function(){
           location.reload();
         }, 1000);
       }
     });
 
-    // CONF-2: Evento para botões de confirmação
+    // CONF-2: Evento para botÃµes de confirmaÃ§Ã£o
+
     $(document).on('click', '.dps-confirmation-btn', function(e){
       e.preventDefault();
       var btn = $(this);
@@ -370,47 +353,30 @@
         return;
       }
 
-      // Desabilita todos os botões de confirmação da linha
       row.find('.dps-confirmation-btn').prop('disabled', true).addClass('is-loading');
 
-      var request = $.post(DPS_AG_Addon.ajax, {
+      $.post(DPS_AG_Addon.ajax, {
         action: 'dps_agenda_update_confirmation',
         appt_id: apptId,
         confirmation_status: confirmationStatus,
-        nonce: DPS_AG_Addon.nonce_confirmation
-      });
-
-      request.done(function(resp){
+        nonce: DPS_AG_Addon.nonce_confirmation,
+        agenda_tab: getCurrentAgendaTab()
+      }).done(function(resp){
         if ( resp && resp.success ) {
-          // Substitui a linha inteira com o HTML atualizado
           if ( resp.data && resp.data.row_html ) {
-            var newRow = $(resp.data.row_html);
-            row.replaceWith(newRow);
-
-            // Anima a nova linha para feedback visual
-            newRow.addClass('dps-row-updated');
-            setTimeout(function(){
-              newRow.removeClass('dps-row-updated');
-            }, 1500);
+            replaceAgendaRow(row, resp.data.row_html);
           } else {
-            // Remove estado de loading
             row.find('.dps-confirmation-btn').prop('disabled', false).removeClass('is-loading');
           }
         } else {
-          handleConfirmationError(resp, row);
+          handleConfirmationError(resp);
         }
-      }).fail(function(){
-        handleConfirmationError(null, row);
+      }).fail(function(xhr){
+        handleConfirmationError(xhr);
       });
 
-      function handleConfirmationError(response, row){
-        var message = (response && response.data && response.data.message)
-          ? response.data.message
-          : 'Erro ao atualizar confirmação. Tente novamente.';
-
-        showToast(message, 'error');
-
-        // Remove estado de loading
+      function handleConfirmationError(response){
+        showToast(getAjaxErrorMessage(response, 'Erro ao atualizar confirmacao. Tente novamente.'), 'error');
         row.find('.dps-confirmation-btn').prop('disabled', false).removeClass('is-loading');
       }
     });
@@ -418,7 +384,7 @@
 
   /**
    * Atualiza a classe de uma linha da tabela da agenda com o novo status.
-   * Cada linha utiliza data-appt-id para identificá-la e classes CSS no formato
+   * Cada linha utiliza data-appt-id para identificÃ¡-la e classes CSS no formato
    * status-pendente, status-finalizado, status-finalizado_pago ou status-cancelado.
    * @param {string|number} apptId ID do agendamento
    * @param {string} status Novo status definido
@@ -434,6 +400,72 @@
   function getMessage(key, fallback){
     if ( typeof DPS_AG_Addon !== 'undefined' && DPS_AG_Addon.messages && DPS_AG_Addon.messages[key] ) {
       return DPS_AG_Addon.messages[key];
+    }
+    return fallback;
+  }
+
+
+  function getCurrentAgendaTab(){
+    var activeButton = $('.dps-agenda-tab-button--active').first();
+    if ( activeButton.length && activeButton.data('tab') ) {
+      return String(activeButton.data('tab'));
+    }
+
+    try {
+      var agendaUrl = new URL(window.location.href);
+      var requestedTab = agendaUrl.searchParams.get('agenda_tab');
+      if ( requestedTab ) {
+        return requestedTab;
+      }
+    } catch(e) {
+      // Ignora erros da URL API
+    }
+
+    return 'visao-rapida';
+  }
+
+  function replaceAgendaRow(row, rowHtml){
+    var currentRow = row && row.jquery ? row : $(row);
+    if ( ! currentRow.length || ! rowHtml ) {
+      return currentRow;
+    }
+
+    var parsedRows = $($.parseHTML($.trim(rowHtml), document, true)).filter('tr');
+    if ( ! parsedRows.length ) {
+      parsedRows = $(rowHtml).filter('tr');
+    }
+    if ( ! parsedRows.length ) {
+      return currentRow;
+    }
+
+    var apptId = currentRow.data('appt-id');
+    var detailRow = currentRow.next('.dps-detail-row[data-appt-id="' + apptId + '"]');
+    var keepExpanded = detailRow.length && detailRow.is(':visible');
+
+    currentRow.replaceWith(parsedRows);
+    if ( detailRow.length ) {
+      detailRow.remove();
+    }
+
+    if ( keepExpanded ) {
+      parsedRows.filter('.dps-detail-row').show();
+      parsedRows.first().find('.dps-expand-panels-btn').attr('aria-expanded', 'true');
+    }
+
+    parsedRows.addClass('dps-row-updated');
+    setTimeout(function(){
+      parsedRows.removeClass('dps-row-updated');
+    }, 1500);
+
+    return parsedRows.first();
+  }
+
+  function getAjaxErrorMessage(xhr, fallback){
+    if ( xhr && xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message ) {
+      return xhr.responseJSON.data.message;
+    }
+    if ( xhr && xhr.responseJSON && xhr.responseJSON.message ) {
+      return xhr.responseJSON.message;
     }
     return fallback;
   }
@@ -496,6 +528,7 @@
     }
   }
 
+
   function openAppointmentModal(button){
     var fallbackUrl = button && button.attr ? button.attr('href') : '';
     if ( typeof DPS_AG_Addon === 'undefined' || ! DPS_AG_Addon.nonce_modal_form ) {
@@ -506,11 +539,25 @@
     var modal = ensureAppointmentModal();
     modal.find('.dps-appointment-modal__title').text(getMessage('modalTitle', 'Novo agendamento'));
     renderModalMessages('', '');
-    setModalBody('<div class="dps-appointment-modal__loader">' + getMessage('formLoading', 'Carregando formulário...') + '</div>');
+    setModalBody('<div class="dps-appointment-modal__loader">' + getMessage('formLoading', 'Carregando formul?rio...') + '</div>');
     modal.addClass('is-open');
     $('body').addClass('dps-modal-open');
     if ( button && button.length ) {
       button.addClass('is-loading').prop('disabled', true);
+    }
+
+    var template = $('#dps-agenda-appointment-template');
+    if ( template.length ) {
+      setModalBody(template.html());
+      if ( typeof window.dpsAppointmentData !== 'undefined' ) {
+        window.dpsAppointmentData.appointmentId = 0;
+      }
+      dispatchAppointmentFormLoaded(modal.find('.dps-appointment-modal__body')[0]);
+      modal.find('.dps-appointment-modal__title').focus();
+      if ( button && button.length ) {
+        button.removeClass('is-loading').prop('disabled', false);
+      }
+      return;
     }
 
     var prefClient = (button && button.data('pref-client')) ? button.data('pref-client') : '';
@@ -532,13 +579,22 @@
         if ( typeof window.dpsAppointmentData !== 'undefined' ) {
           window.dpsAppointmentData.appointmentId = 0;
         }
-        dispatchAppointmentFormLoaded(appointmentModal.find('.dps-appointment-modal__body')[0]);
-        appointmentModal.find('.dps-appointment-modal__title').focus();
-      } else {
+        dispatchAppointmentFormLoaded(modal.find('.dps-appointment-modal__body')[0]);
+        modal.find('.dps-appointment-modal__title').focus();
+      } else if ( fallbackUrl ) {
         fallbackToNewPage(fallbackUrl);
+      } else {
+        renderModalMessages('', 'Nao foi possivel abrir o agendamento.');
+        setModalBody('<div class="dps-modal-alert">' + escapeHtml('Nao foi possivel abrir o agendamento.') + '</div>');
       }
-    }).fail(function(){
-      fallbackToNewPage(fallbackUrl);
+    }).fail(function(xhr){
+      if ( fallbackUrl ) {
+        fallbackToNewPage(fallbackUrl);
+      } else {
+        var openError = getAjaxErrorMessage(xhr, 'Nao foi possivel abrir o agendamento.');
+        renderModalMessages('', openError);
+        setModalBody('<div class="dps-modal-alert">' + escapeHtml(openError) + '</div>');
+      }
     }).always(function(){
       if ( button && button.length ) {
         button.removeClass('is-loading').prop('disabled', false);
@@ -570,7 +626,7 @@
       if ( resp && resp.data && resp.data.messages_html ) {
         renderModalMessages(resp.data.messages_html);
       } else if ( ! (resp && resp.success) ) {
-        renderModalMessages('', getMessage('saveError', 'Não foi possível salvar o agendamento.'));
+        renderModalMessages('', getMessage('saveError', 'NÃ£o foi possÃ­vel salvar o agendamento.'));
       }
 
       if ( resp && resp.success ) {
@@ -580,78 +636,36 @@
         }, 350);
       }
     }).fail(function(){
-      renderModalMessages('', getMessage('saveError', 'Não foi possível salvar o agendamento.'));
+      renderModalMessages('', getMessage('saveError', 'NÃ£o foi possÃ­vel salvar o agendamento.'));
     }).always(function(){
       submitBtn.removeClass('is-loading').prop('disabled', false);
     });
   });
 
-  // FASE 2: Exportacao CSV (mantido por compatibilidade)
-  $(document).on('click', '.dps-export-csv-btn', function(e){
-    e.preventDefault();
-    var btn = $(this);
-    var date = btn.data('date');
-    var view = btn.data('view');
-    var defaultLabel = btn.data('default-label');
-
-    if (!defaultLabel) {
-      defaultLabel = $.trim(btn.text());
-      btn.data('default-label', defaultLabel);
-    }
-
-    btn.prop('disabled', true).text('Exportando...');
-
-    $.post(DPS_AG_Addon.ajax, {
-      action: 'dps_agenda_export_csv',
-      nonce: DPS_AG_Addon.nonce_export,
-      date: date,
-      view: view
-    }, function(resp){
-      if ( resp && resp.success ) {
-        var content = atob(resp.data.content);
-        var blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-        var link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = resp.data.filename;
-        link.click();
-        URL.revokeObjectURL(link.href);
-        btn.text('Exportado!');
-        setTimeout(function(){
-          btn.prop('disabled', false).text(defaultLabel);
-        }, 2000);
-      } else {
-        showToast(resp.data ? resp.data.message : 'Erro ao exportar.', 'error');
-        btn.prop('disabled', false).text(defaultLabel);
-      }
-    }).fail(function(){
-      showToast('Erro ao exportar agenda.', 'error');
-      btn.prop('disabled', false).text(defaultLabel);
-    });
-  });
-  // FASE 2: Exportação PDF (abre página de impressão em nova janela)
+  // FASE 2: ExportaÃ§Ã£o PDF (abre pÃ¡gina de impressÃ£o em nova janela)
   $(document).on('click', '.dps-export-pdf-btn', function(e){
     e.preventDefault();
     var btn = $(this);
     var date = btn.data('date') || '';
     var view = btn.data('view') || 'day';
 
-    // Constrói URL para a página de impressão PDF
+    // ConstrÃ³i URL para a pÃ¡gina de impressÃ£o PDF
     var pdfUrl = DPS_AG_Addon.ajax +
       '?action=dps_agenda_export_pdf' +
       '&date=' + encodeURIComponent(date) +
       '&view=' + encodeURIComponent(view) +
       '&nonce=' + encodeURIComponent(DPS_AG_Addon.nonce_export_pdf);
 
-    // Calcula dimensões responsivas para a janela
+    // Calcula dimensÃµes responsivas para a janela
     var width = Math.min(950, window.screen.availWidth - 100);
     var height = Math.min(700, window.screen.availHeight - 100);
 
-    // Abre em nova janela com dimensões responsivas
+    // Abre em nova janela com dimensÃµes responsivas
     window.open(pdfUrl, '_blank', 'width=' + width + ',height=' + height + ',scrollbars=yes');
   });
 
   // =========================================================================
-  // FASE 5: Reagendamento Rápido
+  // FASE 5: Reagendamento RÃ¡pido
   // =========================================================================
 
   // Abrir modal de reagendamento
@@ -662,11 +676,11 @@
     var currentDate = btn.data('date');
     var currentTime = btn.data('time');
 
-    // XSS FIX: Escape dos valores que serão inseridos no HTML
+    // XSS FIX: Escape dos valores que serÃ£o inseridos no HTML
     var modal = $('<div class="dps-reschedule-modal">' +
       '<div class="dps-reschedule-content">' +
         '<div class="dps-reschedule-header">' +
-          '<h3 class="dps-reschedule-title">📅 ' + getMessage('reschedule_title', 'Reagendar') + '</h3>' +
+          '<h3 class="dps-reschedule-title">ðŸ“… ' + getMessage('reschedule_title', 'Reagendar') + '</h3>' +
           '<button type="button" class="dps-reschedule-close">&times;</button>' +
         '</div>' +
         '<div class="dps-reschedule-body">' +
@@ -675,7 +689,7 @@
             '<input type="date" id="dps-reschedule-date" value="' + escapeHtml(currentDate) + '" required>' +
           '</div>' +
           '<div class="dps-reschedule-field">' +
-            '<label>' + getMessage('new_time', 'Novo horário') + '</label>' +
+            '<label>' + getMessage('new_time', 'Novo horÃ¡rio') + '</label>' +
             '<input type="time" id="dps-reschedule-time" value="' + escapeHtml(currentTime) + '" required>' +
           '</div>' +
         '</div>' +
@@ -725,7 +739,7 @@
     }, function(resp){
       if ( resp && resp.success ) {
         showToast(resp.data.message, 'success');
-        // Aguarda 2 segundos para o usuário ver a mensagem de sucesso antes de recarregar
+        // Aguarda 2 segundos para o usuÃ¡rio ver a mensagem de sucesso antes de recarregar
         setTimeout(function(){ location.reload(); }, 2000);
       } else {
         showToast(resp.data ? resp.data.message : getMessage('error', 'Erro ao reagendar.'), 'error');
@@ -745,7 +759,7 @@
   });
 
   // =========================================================================
-  // FASE 5: Histórico de Alterações
+  // FASE 5: HistÃ³rico de AlteraÃ§Ãµes
   // =========================================================================
 
   $(document).on('click', '.dps-history-indicator', function(e){
@@ -761,17 +775,17 @@
       if ( resp && resp.success ) {
         var history = resp.data.history || [];
         if ( history.length === 0 ) {
-          showToast(getMessage('no_history', 'Sem histórico de alterações.'), 'info');
+          showToast(getMessage('no_history', 'Sem histÃ³rico de alteraÃ§Ãµes.'), 'info');
           return;
         }
 
-        var content = getMessage('history_title', 'Histórico de Alterações') + ':\n\n';
+        var content = getMessage('history_title', 'HistÃ³rico de AlteraÃ§Ãµes') + ':\n\n';
         history.forEach(function(entry){
           var actionLabel = getActionLabel(entry.action);
-          content += '• ' + entry.date + ' - ' + actionLabel + ' (' + entry.user + ')\n';
+          content += 'â€¢ ' + entry.date + ' - ' + actionLabel + ' (' + entry.user + ')\n';
           if ( entry.details ) {
             if ( entry.details.old_status && entry.details.new_status ) {
-              content += '  De: ' + entry.details.old_status + ' → Para: ' + entry.details.new_status + '\n';
+              content += '  De: ' + entry.details.old_status + ' â†’ Para: ' + entry.details.new_status + '\n';
             }
             if ( entry.details.old_date && entry.details.new_date ) {
               content += '  De: ' + entry.details.old_date + ' ' + entry.details.old_time + '\n';
@@ -780,11 +794,11 @@
           }
         });
 
-        // Exibe histórico em alert - formato de texto longo requer modal dedicado
-        // TODO: Criar modal genérico de conteúdo para substituir alert em histórico
+        // Exibe histÃ³rico em alert - formato de texto longo requer modal dedicado
+        // TODO: Criar modal genÃ©rico de conteÃºdo para substituir alert em histÃ³rico
         alert(content);
       } else {
-        showToast(resp.data ? resp.data.message : getMessage('error', 'Erro ao buscar histórico.'), 'error');
+        showToast(resp.data ? resp.data.message : getMessage('error', 'Erro ao buscar histÃ³rico.'), 'error');
       }
     });
   });
@@ -798,7 +812,8 @@
     return labels[action] || action;
   }
 
-  // FASE 3: Ações rápidas de TaxiDog
+  // FASE 3: AÃ§Ãµes rÃ¡pidas de TaxiDog
+
   $(document).on('click', '.dps-taxidog-action-btn', function(e){
     e.preventDefault();
     var btn = $(this);
@@ -806,38 +821,27 @@
     var taxidogStatus = btn.data('action');
     var row = btn.closest('tr');
 
-    // Desabilita todos os botões da linha
     row.find('.dps-taxidog-action-btn').prop('disabled', true).css('opacity', 0.5);
 
     $.post(DPS_AG_Addon.ajax, {
       action: 'dps_agenda_update_taxidog',
       appt_id: apptId,
       taxidog_status: taxidogStatus,
-      nonce: DPS_AG_Addon.nonce_taxidog
+      nonce: DPS_AG_Addon.nonce_taxidog,
+      agenda_tab: getCurrentAgendaTab()
     }, function(resp){
       if ( resp && resp.success ) {
-        // UX-2: Substitui a linha inteira com HTML atualizado
-        if ( resp.data.row_html ) {
-          var newRow = $(resp.data.row_html);
-          row.replaceWith(newRow);
-          // Aplica animação de feedback visual
-          newRow.css('background-color', '#d1fae5');
-          setTimeout(function(){
-            newRow.css('background-color', '');
-          }, 1000);
+        if ( resp.data && resp.data.row_html ) {
+          replaceAgendaRow(row, resp.data.row_html);
         } else {
-          // Fallback: reload
           location.reload();
         }
       } else {
-        var message = (resp && resp.data && resp.data.message) ? resp.data.message : 'Erro ao atualizar TaxiDog.';
-        showToast(message, 'error');
-        // Reabilita botões em caso de erro
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar TaxiDog.', 'error');
         row.find('.dps-taxidog-action-btn').prop('disabled', false).css('opacity', 1);
       }
-    }).fail(function(){
-      showToast('Erro de comunicação ao atualizar TaxiDog.', 'error');
-      // Reabilita botões em caso de erro
+    }).fail(function(xhr){
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao ao atualizar TaxiDog.'), 'error');
       row.find('.dps-taxidog-action-btn').prop('disabled', false).css('opacity', 1);
     });
   });
@@ -869,6 +873,7 @@
   });
 
   // FASE 5: Reenviar link de pagamento
+
   $(document).on('click', '.dps-resend-payment-btn', function(e){
     e.preventDefault();
     var btn = $(this);
@@ -879,35 +884,27 @@
       return;
     }
 
-    // Desabilita botão
     btn.prop('disabled', true).text('Reenviando...');
 
     $.post(DPS_AG_Addon.ajax, {
       action: 'dps_agenda_resend_payment',
       appt_id: apptId,
-      nonce: DPS_AG_Addon.nonce_resend_payment
+      nonce: DPS_AG_Addon.nonce_resend_payment,
+      agenda_tab: getCurrentAgendaTab()
     }, function(resp){
       if (resp && resp.success) {
-        // Substitui a linha com HTML atualizado
-        if (resp.data.row_html) {
-          var newRow = $(resp.data.row_html);
-          row.replaceWith(newRow);
-          // Feedback visual
-          newRow.css('background-color', '#d1fae5');
-          setTimeout(function(){
-            newRow.css('background-color', '');
-          }, 1000);
+        if (resp.data && resp.data.row_html) {
+          replaceAgendaRow(row, resp.data.row_html);
         } else {
           location.reload();
         }
       } else {
-        var message = (resp && resp.data && resp.data.message) ? resp.data.message : 'Erro ao reenviar link.';
-        showToast(message, 'error');
-        btn.prop('disabled', false).text('🔄 Reenviar');
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao reenviar link.', 'error');
+        btn.prop('disabled', false).text('Reenviar');
       }
-    }).fail(function(){
-      showToast('Erro de comunicação ao reenviar link.', 'error');
-      btn.prop('disabled', false).text('🔄 Reenviar');
+    }).fail(function(xhr){
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao ao reenviar link.'), 'error');
+      btn.prop('disabled', false).text('Reenviar');
     });
   });
 
@@ -976,7 +973,8 @@
   // FASE 7: Novos Handlers para Dropdowns e Popups
   // =========================================================================
 
-  // Handler para dropdown de confirmação (Tab1)
+  // Handler para dropdown de confirmaÃ§Ã£o (Tab1)
+
   $(document).on('change', '.dps-confirmation-dropdown', function(){
     var select = $(this);
     var apptId = select.data('appt-id');
@@ -989,35 +987,39 @@
       action: 'dps_agenda_update_confirmation',
       appt_id: apptId,
       confirmation_status: confirmationStatus,
-      nonce: DPS_AG_Addon.nonce_confirmation
+      nonce: DPS_AG_Addon.nonce_confirmation,
+      agenda_tab: getCurrentAgendaTab()
     }, function(resp){
       if (resp && resp.success) {
-        // Atualiza a classe do dropdown para refletir o novo status
-        select.removeClass('dps-dropdown--confirmed dps-dropdown--not-confirmed dps-dropdown--cancelled');
-        if (confirmationStatus === 'confirmed') {
-          select.addClass('dps-dropdown--confirmed');
-        } else if (confirmationStatus === 'denied') {
-          select.addClass('dps-dropdown--cancelled');
+        if (resp.data && resp.data.row_html) {
+          replaceAgendaRow(row, resp.data.row_html);
+          showToast(resp.data.message || 'Confirmacao atualizada.', 'success', 1600);
         } else {
-          select.addClass('dps-dropdown--not-confirmed');
+          select.removeClass('dps-dropdown--confirmed dps-dropdown--not-confirmed dps-dropdown--cancelled');
+          if (confirmationStatus === 'confirmed') {
+            select.addClass('dps-dropdown--confirmed');
+          } else if (confirmationStatus === 'denied') {
+            select.addClass('dps-dropdown--cancelled');
+          } else {
+            select.addClass('dps-dropdown--not-confirmed');
+          }
+          row.css('background-color', '#d1fae5');
+          setTimeout(function(){
+            row.css('background-color', '');
+          }, 1000);
         }
-
-        // Feedback visual
-        row.css('background-color', '#d1fae5');
-        setTimeout(function(){
-          row.css('background-color', '');
-        }, 1000);
       } else {
-        showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar confirmação.', 'error');
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar confirmacao.', 'error');
       }
-    }).fail(function(){
-      showToast('Erro de comunicação.', 'error');
+    }).fail(function(xhr){
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
     }).always(function(){
       select.prop('disabled', false).removeClass('is-loading');
     });
   });
 
   // Handler para dropdown de status (Tab2) - usa o mesmo handler dps-status-select existente
+
   $(document).on('change', '.dps-status-dropdown', function(){
     var select = $(this);
     var apptId = select.data('appt-id');
@@ -1033,7 +1035,8 @@
       id: apptId,
       status: status,
       version: apptVersion,
-      nonce: DPS_AG_Addon.nonce_status
+      nonce: DPS_AG_Addon.nonce_status,
+      agenda_tab: getCurrentAgendaTab()
     }, function(resp){
       if (resp && resp.success) {
         select.data('current-status', status);
@@ -1041,50 +1044,55 @@
           select.data('appt-version', resp.data.version);
         }
 
-        // Atualiza a classe do dropdown
-        select.removeClass('dps-dropdown--pending dps-dropdown--finished dps-dropdown--paid dps-dropdown--cancelled');
-        if (status === 'pendente') {
-          select.addClass('dps-dropdown--pending');
-        } else if (status === 'finalizado') {
-          select.addClass('dps-dropdown--finished');
-        } else if (status === 'finalizado_pago') {
-          select.addClass('dps-dropdown--paid');
-        } else if (status === 'cancelado') {
-          select.addClass('dps-dropdown--cancelled');
-        }
-
-        // Atualiza classes da linha
-        row.removeClass('status-pendente status-finalizado status-finalizado_pago status-cancelado')
-           .addClass('status-' + status);
-
-        // Feedback visual
-        row.css('background-color', '#d1fae5');
-        setTimeout(function(){
-          row.css('background-color', '');
-          // Se status é finalizado ou finalizado_pago, abre popup do checklist operacional
+        if (resp.data && resp.data.row_html) {
+          replaceAgendaRow(row, resp.data.row_html);
           if (status === 'finalizado' || status === 'finalizado_pago') {
-            openChecklistPopup(apptId);
+            setTimeout(function(){
+              openChecklistPopup(apptId);
+            }, 150);
           } else {
-            location.reload();
+            showToast(resp.data.message || 'Status atualizado.', 'success', 1600);
           }
-        }, 800);
+        } else {
+          select.removeClass('dps-dropdown--pending dps-dropdown--finished dps-dropdown--paid dps-dropdown--cancelled');
+          if (status === 'pendente') {
+            select.addClass('dps-dropdown--pending');
+          } else if (status === 'finalizado') {
+            select.addClass('dps-dropdown--finished');
+          } else if (status === 'finalizado_pago') {
+            select.addClass('dps-dropdown--paid');
+          } else if (status === 'cancelado') {
+            select.addClass('dps-dropdown--cancelled');
+          }
+          row.removeClass('status-pendente status-finalizado status-finalizado_pago status-cancelado')
+             .addClass('status-' + status);
+          row.css('background-color', '#d1fae5');
+          setTimeout(function(){
+            row.css('background-color', '');
+            if (status === 'finalizado' || status === 'finalizado_pago') {
+              openChecklistPopup(apptId);
+            } else {
+              location.reload();
+            }
+          }, 800);
+        }
       } else {
         if (resp && resp.data && resp.data.error_code === 'version_conflict') {
-          showToast(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.'), 'warning');
+          showToast(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usu?rio. Atualize a p?gina para ver as altera??es.'), 'warning');
         } else {
           showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar status.', 'error');
         }
         select.val(previous);
       }
-    }).fail(function(){
-      showToast('Erro de comunicação.', 'error');
+    }).fail(function(xhr){
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
       select.val(previous);
     }).always(function(){
       select.prop('disabled', false).removeClass('is-loading');
     });
   });
 
-  // Handler para botão de popup de serviços (Tab1)
+  // Handler para botÃ£o de popup de serviÃ§os (Tab1)
   $(document).on('click', '.dps-services-popup-btn', function(e){
     e.preventDefault();
     var btn = $(this);
@@ -1103,16 +1111,16 @@
         var pet = resp.data.pet || {};
         var totalDuration = resp.data.total_duration || 0;
 
-        // Monta o HTML do modal melhorado para funcionários
+        // Monta o HTML do modal melhorado para funcionÃ¡rios
         var modalHtml = '<div class="dps-services-modal">' +
           '<div class="dps-services-modal-content">' +
             '<div class="dps-services-modal-header">' +
-              '<h3 class="dps-services-modal-title">🐾 O Que Fazer</h3>' +
+              '<h3 class="dps-services-modal-title">ðŸ¾ O Que Fazer</h3>' +
               '<button type="button" class="dps-services-modal-close" aria-label="Fechar">&times;</button>' +
             '</div>' +
             '<div class="dps-services-modal-body">';
 
-        // Seção do pet (se disponível)
+        // SeÃ§Ã£o do pet (se disponÃ­vel)
         if (pet && pet.name) {
           var petSizeInfo = getPetSizeInfo(pet.size);
 
@@ -1127,29 +1135,29 @@
           if (pet.weight) petMeta.push(escapeHtml(pet.weight) + ' kg');
 
           if (petMeta.length > 0) {
-            modalHtml += '<span class="dps-services-pet-meta">' + petMeta.join(' • ') + '</span>';
+            modalHtml += '<span class="dps-services-pet-meta">' + petMeta.join(' â€¢ ') + '</span>';
           }
 
           modalHtml += '</div></div>';
         }
 
-        // Resumo rápido no topo
+        // Resumo rÃ¡pido no topo
         if (services.length > 0 || totalDuration > 0) {
           modalHtml += '<div class="dps-services-summary">';
-          modalHtml += '<div class="dps-services-summary-item"><span class="dps-services-summary-icon">📋</span><span class="dps-services-summary-value">' + services.length + '</span><span class="dps-services-summary-label">serviço' + (services.length !== 1 ? 's' : '') + '</span></div>';
+          modalHtml += '<div class="dps-services-summary-item"><span class="dps-services-summary-icon">ðŸ“‹</span><span class="dps-services-summary-value">' + services.length + '</span><span class="dps-services-summary-label">serviÃ§o' + (services.length !== 1 ? 's' : '') + '</span></div>';
           if (totalDuration > 0) {
             var hours = Math.floor(totalDuration / 60);
             var mins = totalDuration % 60;
             var durationText = hours > 0 ? hours + 'h' + (mins > 0 ? mins + 'min' : '') : mins + 'min';
-            modalHtml += '<div class="dps-services-summary-item"><span class="dps-services-summary-icon">⏱️</span><span class="dps-services-summary-value">' + durationText + '</span><span class="dps-services-summary-label">estimado</span></div>';
+            modalHtml += '<div class="dps-services-summary-item"><span class="dps-services-summary-icon">â±ï¸</span><span class="dps-services-summary-value">' + durationText + '</span><span class="dps-services-summary-label">estimado</span></div>';
           }
           modalHtml += '</div>';
         }
 
-        // Lista de serviços
+        // Lista de serviÃ§os
         if (services.length > 0) {
           modalHtml += '<div class="dps-services-checklist">';
-          modalHtml += '<h4 class="dps-services-section-title">Serviços a Realizar</h4>';
+          modalHtml += '<h4 class="dps-services-section-title">ServiÃ§os a Realizar</h4>';
 
           var total = 0;
           for (var i = 0; i < services.length; i++) {
@@ -1157,7 +1165,7 @@
             var price = parseFloat(srv.price) || 0;
             total += price;
 
-            // Usa função helper para obter informações visuais do serviço
+            // Usa funÃ§Ã£o helper para obter informaÃ§Ãµes visuais do serviÃ§o
             var visualInfo = getServiceVisualInfo(srv);
 
             modalHtml += '<div class="dps-service-card ' + visualInfo.typeClass + '">' +
@@ -1171,16 +1179,16 @@
             if (visualInfo.typeLabel && srv.type !== 'padrao') cardMeta.push(visualInfo.typeLabel);
             if (srv.duration && srv.duration > 0) cardMeta.push(srv.duration + ' min');
 
-            modalHtml += cardMeta.length > 0 ? cardMeta.join(' • ') : '';
+            modalHtml += cardMeta.length > 0 ? cardMeta.join(' â€¢ ') : '';
             modalHtml += '</span></div>' +
                 '<span class="dps-service-card-price">R$ ' + price.toFixed(2).replace('.', ',') + '</span>' +
               '</div>';
 
-            // Descrição do serviço (instruções para o funcionário)
+            // DescriÃ§Ã£o do serviÃ§o (instruÃ§Ãµes para o funcionÃ¡rio)
             if (srv.description && srv.description.trim()) {
               var escapedDesc = escapeHtml(srv.description).replace(/\n/g, '<br>');
               modalHtml += '<div class="dps-service-card-description">' +
-                '<span class="dps-service-card-desc-icon">💡</span>' +
+                '<span class="dps-service-card-desc-icon">ðŸ’¡</span>' +
                 '<span>' + escapedDesc + '</span>' +
               '</div>';
             }
@@ -1197,18 +1205,18 @@
           modalHtml += '</div>'; // .dps-services-checklist
         } else {
           modalHtml += '<div class="dps-services-empty">' +
-            '<span class="dps-services-empty-icon">📋</span>' +
-            '<span>Nenhum serviço registrado para este atendimento.</span>' +
+            '<span class="dps-services-empty-icon">ðŸ“‹</span>' +
+            '<span>Nenhum serviÃ§o registrado para este atendimento.</span>' +
           '</div>';
         }
 
-        // Observações do cliente (importante para o funcionário)
+        // ObservaÃ§Ãµes do cliente (importante para o funcionÃ¡rio)
         if (notes) {
           var escapedNotes = escapeHtml(notes).replace(/\n/g, '<br>');
           modalHtml += '<div class="dps-services-notes dps-services-notes-highlight">' +
             '<div class="dps-services-notes-title">' +
-              '<span class="dps-services-notes-icon">⚠️</span>' +
-              '<span>Observações do Cliente</span>' +
+              '<span class="dps-services-notes-icon">âš ï¸</span>' +
+              '<span>ObservaÃ§Ãµes do Cliente</span>' +
             '</div>' +
             '<div class="dps-services-notes-content">' + escapedNotes + '</div>' +
           '</div>';
@@ -1218,16 +1226,16 @@
 
         $('body').append(modalHtml);
       } else {
-        showToast(resp && resp.data ? resp.data.message : 'Erro ao carregar serviços.', 'error');
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao carregar serviÃ§os.', 'error');
       }
     }).fail(function(){
-      showToast('Erro de comunicação.', 'error');
+      showToast('Erro de comunicaÃ§Ã£o.', 'error');
     }).always(function(){
       btn.prop('disabled', false);
     });
   });
 
-  // Fechar modal de serviços
+  // Fechar modal de serviÃ§os
   $(document).on('click', '.dps-services-modal-close', function(){
     $('.dps-services-modal').remove();
   });
@@ -1238,7 +1246,7 @@
     }
   });
 
-  // Handler para botão de popup de pagamento (Tab2)
+  // Handler para botÃ£o de popup de pagamento (Tab2)
   $(document).on('click', '.dps-payment-popup-btn', function(e){
     e.preventDefault();
     var btn = $(this);
@@ -1250,32 +1258,32 @@
     var petName = btn.data('pet-name');
     var totalValue = btn.data('total-value');
 
-    // Formata o número de WhatsApp (Brasil)
-    // Remove todos os caracteres não numéricos
+    // Formata o nÃºmero de WhatsApp (Brasil)
+    // Remove todos os caracteres nÃ£o numÃ©ricos
     var whatsappNumber = (clientPhone || '').replace(/\D/g, '');
-    // Adiciona código do país apenas se necessário
-    // 10 dígitos = DDD (2) + número fixo (8) - formato antigo celular
-    // 11 dígitos = DDD (2) + número celular (9)
-    // 12 dígitos = código país (2) + DDD (2) + número fixo (8)
-    // 13 dígitos = código país (2) + DDD (2) + número celular (9)
+    // Adiciona cÃ³digo do paÃ­s apenas se necessÃ¡rio
+    // 10 dÃ­gitos = DDD (2) + nÃºmero fixo (8) - formato antigo celular
+    // 11 dÃ­gitos = DDD (2) + nÃºmero celular (9)
+    // 12 dÃ­gitos = cÃ³digo paÃ­s (2) + DDD (2) + nÃºmero fixo (8)
+    // 13 dÃ­gitos = cÃ³digo paÃ­s (2) + DDD (2) + nÃºmero celular (9)
     if (whatsappNumber.length === 10 || whatsappNumber.length === 11) {
-      // Número brasileiro sem código do país
+      // NÃºmero brasileiro sem cÃ³digo do paÃ­s
       whatsappNumber = '55' + whatsappNumber;
     } else if (whatsappNumber.length >= 12 && whatsappNumber.substring(0, 2) === '55') {
-      // Número já tem código do país (mantém como está)
+      // NÃºmero jÃ¡ tem cÃ³digo do paÃ­s (mantÃ©m como estÃ¡)
     } else if (whatsappNumber.length < 10) {
-      // Número muito curto - mantém para o usuário corrigir
+      // NÃºmero muito curto - mantÃ©m para o usuÃ¡rio corrigir
     }
 
     var whatsappUrl = 'https://wa.me/' + whatsappNumber + '?text=' + encodeURIComponent(whatsappMsg);
 
     // Monta o HTML do modal
     // XSS FIX: Escape de dados de texto inseridos no HTML
-    // URLs em href não precisam de escapeHtml (já são URL-encoded), mas data-attributes sim
+    // URLs em href nÃ£o precisam de escapeHtml (jÃ¡ sÃ£o URL-encoded), mas data-attributes sim
     var modalHtml = '<div class="dps-payment-modal">' +
       '<div class="dps-payment-modal-content">' +
         '<div class="dps-payment-modal-header">' +
-          '<h3 class="dps-payment-modal-title">💳 Enviar Link de Pagamento</h3>' +
+          '<h3 class="dps-payment-modal-title">ðŸ’³ Enviar Link de Pagamento</h3>' +
           '<button type="button" class="dps-payment-modal-close">&times;</button>' +
         '</div>' +
         '<div class="dps-payment-modal-body">' +
@@ -1286,10 +1294,10 @@
           '</div>' +
           '<div class="dps-payment-actions">' +
             '<a href="' + whatsappUrl + '" target="_blank" class="dps-payment-action-btn dps-payment-action-btn--whatsapp">' +
-              '📱 Enviar por WhatsApp' +
+              'ðŸ“± Enviar por WhatsApp' +
             '</a>' +
             '<button type="button" class="dps-payment-action-btn dps-payment-action-btn--copy" data-link="' + escapeHtml(paymentLink) + '">' +
-              '📋 Copiar Link de Pagamento' +
+              'ðŸ“‹ Copiar Link de Pagamento' +
             '</button>' +
           '</div>' +
         '</div>' +
@@ -1318,9 +1326,9 @@
     // Copia para clipboard
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(link).then(function(){
-        btn.addClass('copied').text('✅ Link Copiado!');
+        btn.addClass('copied').text('âœ… Link Copiado!');
         setTimeout(function(){
-          btn.removeClass('copied').text('📋 Copiar Link de Pagamento');
+          btn.removeClass('copied').text('ðŸ“‹ Copiar Link de Pagamento');
         }, 2000);
       });
     } else {
@@ -1330,14 +1338,15 @@
       tempInput.val(link).select();
       document.execCommand('copy');
       tempInput.remove();
-      btn.addClass('copied').text('✅ Link Copiado!');
+      btn.addClass('copied').text('âœ… Link Copiado!');
       setTimeout(function(){
-        btn.removeClass('copied').text('📋 Copiar Link de Pagamento');
+        btn.removeClass('copied').text('ðŸ“‹ Copiar Link de Pagamento');
       }, 2000);
     }
   });
 
   // Handler para dropdown de TaxiDog (Tab3)
+
   $(document).on('change', '.dps-taxidog-dropdown', function(){
     var select = $(this);
     var apptId = select.data('appt-id');
@@ -1350,25 +1359,31 @@
       action: 'dps_agenda_update_taxidog',
       appt_id: apptId,
       taxidog_status: taxidogStatus,
-      nonce: DPS_AG_Addon.nonce_taxidog
+      nonce: DPS_AG_Addon.nonce_taxidog,
+      agenda_tab: getCurrentAgendaTab()
     }, function(resp){
       if (resp && resp.success) {
-        // Feedback visual
-        row.css('background-color', '#d1fae5');
-        setTimeout(function(){
-          row.css('background-color', '');
-        }, 1000);
+        if (resp.data && resp.data.row_html) {
+          replaceAgendaRow(row, resp.data.row_html);
+          showToast(resp.data.message || 'TaxiDog atualizado.', 'success', 1600);
+        } else {
+          row.css('background-color', '#d1fae5');
+          setTimeout(function(){
+            row.css('background-color', '');
+          }, 1000);
+        }
       } else {
         showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar TaxiDog.', 'error');
       }
-    }).fail(function(){
-      showToast('Erro de comunicação.', 'error');
+    }).fail(function(xhr){
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
     }).always(function(){
       select.prop('disabled', false).removeClass('is-loading');
     });
   });
 
-  // Handler para botão de solicitar TaxiDog (Tab3)
+  // Handler para botÃ£o de solicitar TaxiDog (Tab3)
+
   $(document).on('click', '.dps-taxidog-request-btn', function(e){
     e.preventDefault();
     var btn = $(this);
@@ -1384,23 +1399,28 @@
     $.post(DPS_AG_Addon.ajax, {
       action: 'dps_agenda_request_taxidog',
       appt_id: apptId,
-      nonce: DPS_AG_Addon.nonce_taxidog
+      nonce: DPS_AG_Addon.nonce_taxidog,
+      agenda_tab: getCurrentAgendaTab()
     }, function(resp){
       if (resp && resp.success) {
-        // Recarrega a página para atualizar a UI
-        location.reload();
+        if (resp.data && resp.data.row_html) {
+          replaceAgendaRow(row, resp.data.row_html);
+          showToast(resp.data.message || 'TaxiDog solicitado com sucesso!', 'success', 1600);
+        } else {
+          location.reload();
+        }
       } else {
         showToast(resp && resp.data ? resp.data.message : 'Erro ao solicitar TaxiDog.', 'error');
-        btn.prop('disabled', false).text('🚐 SOLICITAR TAXIDOG');
+        btn.prop('disabled', false).text('Solicitar TaxiDog');
       }
-    }).fail(function(){
-      showToast('Erro de comunicação.', 'error');
-      btn.prop('disabled', false).text('🚐 SOLICITAR TAXIDOG');
+    }).fail(function(xhr){
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
+      btn.prop('disabled', false).text('Solicitar TaxiDog');
     });
   });
 
   /* ===========================
-     CHECKLIST OPERACIONAL — POPUP
+     CHECKLIST OPERACIONAL â€” POPUP
      =========================== */
 
   /**
@@ -1420,7 +1440,7 @@
       '<div class="dps-checklist-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dps-checklist-modal-title">' +
         '<div class="dps-checklist-modal">' +
           '<div class="dps-checklist-modal-header">' +
-            '<h3 id="dps-checklist-modal-title">📋 ' + titleMsg + '</h3>' +
+            '<h3 id="dps-checklist-modal-title">ðŸ“‹ ' + titleMsg + '</h3>' +
             '<button type="button" class="dps-checklist-modal-close" title="' + closeMsg + '">&times;</button>' +
           '</div>' +
           '<div class="dps-checklist-modal-body">' +
@@ -1443,11 +1463,11 @@
       if (resp && resp.success && resp.data && resp.data.html) {
         $('.dps-checklist-modal-body').html(resp.data.html);
       } else {
-        var errorMsg = getMessage('checklistError', 'Não foi possível carregar o checklist.');
+        var errorMsg = getMessage('checklistError', 'NÃ£o foi possÃ­vel carregar o checklist.');
         $('.dps-checklist-modal-body').html('<p class="dps-checklist-modal-error">' + escapeHtml(errorMsg) + '</p>');
       }
     }).fail(function() {
-      var errorMsg = getMessage('checklistError', 'Não foi possível carregar o checklist.');
+      var errorMsg = getMessage('checklistError', 'NÃ£o foi possÃ­vel carregar o checklist.');
       $('.dps-checklist-modal-body').html('<p class="dps-checklist-modal-error">' + escapeHtml(errorMsg) + '</p>');
     });
   }
