@@ -522,3 +522,110 @@
         align-items: flex-start;
     }
 }
+
+/* M3 dashboard normalization */
+.dps-dashboard-wrapper {
+    display: grid;
+    gap: var(--dps-space-5);
+    padding: 0;
+}
+
+.dps-dashboard-date-selector__header,
+.dps-dashboard-section-header {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--dps-space-4);
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.dps-dashboard-kpi-section h3,
+.dps-dashboard-next-appointments h3,
+.dps-dashboard-capacity-section h3 {
+    margin: 0;
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-title-medium-size);
+    line-height: var(--dps-typescale-title-medium-line);
+    font-weight: var(--dps-typescale-title-medium-weight);
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.dps-dashboard-kpi-section {
+    align-content: start;
+}
+
+.dps-dashboard-card {
+    position: relative;
+    border-left-width: 1px;
+    overflow: hidden;
+}
+
+.dps-dashboard-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--dps-dashboard-tone, var(--dps-color-primary));
+}
+
+.dps-dashboard-card__value {
+    color: var(--dps-dashboard-tone, var(--dps-color-primary));
+}
+
+.dps-dashboard-card--primary { --dps-dashboard-tone: var(--dps-color-primary); }
+.dps-dashboard-card--success { --dps-dashboard-tone: var(--dps-color-success); }
+.dps-dashboard-card--warning { --dps-dashboard-tone: var(--dps-color-warning); }
+.dps-dashboard-card--error { --dps-dashboard-tone: var(--dps-color-error); }
+.dps-dashboard-card--tertiary { --dps-dashboard-tone: var(--dps-color-tertiary); }
+
+.dps-dashboard-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+}
+
+.dps-dashboard-table {
+    min-width: 640px;
+}
+
+.dps-dashboard-table td {
+    vertical-align: middle;
+}
+
+.dps-dashboard-table-status {
+    justify-content: center;
+}
+
+.dps-dashboard-actions {
+    padding: 0;
+}
+
+.dps-dashboard-actions .dps-btn {
+    min-width: min(100%, 260px);
+}
+
+.dps-capacity-config .description {
+    display: block;
+    margin-top: var(--dps-space-3);
+    color: var(--dps-color-on-surface-variant);
+}
+
+@media (max-width: 840px) {
+    .dps-dashboard-date-selector__header,
+    .dps-dashboard-section-header,
+    .dps-capacity-week-nav {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dps-capacity-week-label {
+        text-align: center;
+    }
+}
+
+@media (max-width: 600px) {
+    .dps-dashboard-table {
+        min-width: 560px;
+    }
+}

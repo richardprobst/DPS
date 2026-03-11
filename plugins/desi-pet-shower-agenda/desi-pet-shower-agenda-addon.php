@@ -415,22 +415,21 @@ class DPS_Agenda_Addon {
      * @since 1.3.0
      */
     public function enqueue_dashboard_assets( $hook ) {
-        // Cast para string para compatibilidade com PHP 8.1+
         $hook = (string) $hook;
 
-        // Carrega apenas na página do dashboard ou na aba Dashboard do hub
         $is_dashboard_page = 'desi-pet-shower_page_dps-agenda-dashboard' === $hook;
+        $is_settings_page  = 'desi-pet-shower_page_dps-agenda-settings' === $hook;
+        $is_hub_page       = 'desi-pet-shower_page_dps-agenda-hub' === $hook;
 
         $is_hub_dashboard_tab = (
-            'desi-pet-shower_page_dps-agenda-hub' === $hook
+            $is_hub_page
             && 'dashboard' === DPS_Admin_Tabs_Helper::get_active_tab( 'dashboard' )
         );
 
-        if ( ! $is_dashboard_page && ! $is_hub_dashboard_tab ) {
+        if ( ! $is_dashboard_page && ! $is_settings_page && ! $is_hub_page ) {
             return;
         }
 
-        // Design tokens M3 Expressive (devem ser carregados antes de qualquer CSS)
         wp_enqueue_style(
             'dps-design-tokens',
             DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
@@ -439,14 +438,22 @@ class DPS_Agenda_Addon {
         );
 
         wp_enqueue_style(
-            'dps-dashboard-css',
-            plugin_dir_url( __FILE__ ) . 'assets/css/dashboard.css',
+            'dps-agenda-admin-css',
+            plugin_dir_url( __FILE__ ) . 'assets/css/agenda-admin.css',
             [ 'dps-design-tokens' ],
-            '2.0.0'
+            '2.1.0'
         );
 
-        // jQuery já está enfileirado no admin
-        wp_enqueue_script( 'jquery' );
+        if ( $is_dashboard_page || $is_hub_dashboard_tab ) {
+            wp_enqueue_style(
+                'dps-dashboard-css',
+                plugin_dir_url( __FILE__ ) . 'assets/css/dashboard.css',
+                [ 'dps-design-tokens', 'dps-agenda-admin-css' ],
+                '2.1.0'
+            );
+
+            wp_enqueue_script( 'jquery' );
+        }
     }
 
     /**
@@ -459,8 +466,7 @@ class DPS_Agenda_Addon {
             wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'dps-agenda-addon' ) );
         }
 
-        echo '<div class="wrap">';
-        echo '<h1>' . esc_html__( 'Dashboard Operacional da Agenda', 'dps-agenda-addon' ) . '</h1>';
+        echo '<div class="wrap dps-agenda-admin-shell">';
         echo $this->render_dashboard_shortcode();
         echo '</div>';
     }
@@ -494,47 +500,85 @@ class DPS_Agenda_Addon {
             wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'dps-agenda-addon' ) );
         }
 
-        // Processa salvamento
+        $settings_saved = false;
+
         if ( isset( $_POST['dps_save_settings'] ) && check_admin_referer( 'dps_agenda_settings' ) ) {
-            $shop_address = isset( $_POST['dps_shop_address'] ) ? sanitize_textarea_field( $_POST['dps_shop_address'] ) : '';
+            $shop_address = isset( $_POST['dps_shop_address'] ) ? sanitize_textarea_field( wp_unslash( $_POST['dps_shop_address'] ) ) : '';
             update_option( 'dps_shop_address', $shop_address );
-            
-            echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Configurações salvas com sucesso!', 'dps-agenda-addon' ) . '</p></div>';
+            $settings_saved = true;
         }
 
         $shop_address = get_option( 'dps_shop_address', '' );
-
         ?>
-        <div class="wrap">
-            <h1><?php esc_html_e( 'Configurações da Agenda', 'dps-agenda-addon' ); ?></h1>
-            
-            <form method="post" action="">
-                <?php wp_nonce_field( 'dps_agenda_settings' ); ?>
-                
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">
-                            <label for="dps_shop_address"><?php esc_html_e( 'Endereço do Banho e Tosa', 'dps-agenda-addon' ); ?></label>
-                        </th>
-                        <td>
-                            <textarea 
-                                name="dps_shop_address" 
-                                id="dps_shop_address" 
-                                rows="3" 
-                                class="large-text"
-                                placeholder="<?php esc_attr_e( 'Ex: Rua Exemplo, 123, Centro, São Paulo - SP, CEP 01234-567', 'dps-agenda-addon' ); ?>"
-                            ><?php echo esc_textarea( $shop_address ); ?></textarea>
-                            <p class="description">
-                                <?php esc_html_e( 'Endereço completo usado como ponto de origem nas rotas GPS. Será usado para traçar rotas do Banho e Tosa até o cliente.', 'dps-agenda-addon' ); ?>
+        <div class="wrap dps-agenda-admin-shell">
+            <div class="dps-agenda-admin-page">
+                <section class="dps-agenda-admin-card">
+                    <div class="dps-agenda-admin-card__header">
+                        <div>
+                            <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'Agenda', 'dps-agenda-addon' ); ?></p>
+                            <h1 class="dps-agenda-admin-title"><?php esc_html_e( 'Configurações da Agenda', 'dps-agenda-addon' ); ?></h1>
+                            <p class="dps-agenda-admin-description">
+                                <?php esc_html_e( 'Padronize os dados operacionais usados na logística da agenda, nas rotas do GPS e nas integrações administrativas.', 'dps-agenda-addon' ); ?>
                             </p>
-                        </td>
-                    </tr>
-                </table>
-                
-                <p class="submit">
-                    <input type="submit" name="dps_save_settings" class="button button-primary" value="<?php esc_attr_e( 'Salvar Configurações', 'dps-agenda-addon' ); ?>">
-                </p>
-            </form>
+                        </div>
+                        <div class="dps-agenda-admin-chips" aria-label="<?php esc_attr_e( 'Resumo do contexto', 'dps-agenda-addon' ); ?>">
+                            <span class="dps-agenda-admin-chip dps-agenda-admin-chip--primary"><?php esc_html_e( 'Padrão M3', 'dps-agenda-addon' ); ?></span>
+                            <span class="dps-agenda-admin-chip"><?php esc_html_e( 'Logística', 'dps-agenda-addon' ); ?></span>
+                            <span class="dps-agenda-admin-chip"><?php esc_html_e( 'GPS', 'dps-agenda-addon' ); ?></span>
+                        </div>
+                    </div>
+
+                    <?php if ( $settings_saved ) : ?>
+                        <div class="dps-agenda-admin-notice dps-agenda-admin-notice--success" role="status">
+                            <?php esc_html_e( 'Configurações salvas com sucesso!', 'dps-agenda-addon' ); ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="dps-agenda-admin-grid">
+                        <form method="post" action="" class="dps-agenda-admin-card dps-agenda-admin-card--subtle dps-agenda-admin-form">
+                            <?php wp_nonce_field( 'dps_agenda_settings' ); ?>
+
+                            <div class="dps-agenda-admin-field dps-agenda-admin-field--full">
+                                <label class="dps-agenda-admin-field__label" for="dps_shop_address">
+                                    <?php esc_html_e( 'Endereço do Banho e Tosa', 'dps-agenda-addon' ); ?>
+                                </label>
+                                <p class="dps-agenda-admin-field__hint">
+                                    <?php esc_html_e( 'Use o endereço completo da operação para rotas, mapas e referências logísticas exibidas na Agenda.', 'dps-agenda-addon' ); ?>
+                                </p>
+                                <textarea
+                                    name="dps_shop_address"
+                                    id="dps_shop_address"
+                                    rows="5"
+                                    class="dps-agenda-admin-textarea"
+                                    placeholder="<?php esc_attr_e( 'Ex: Rua Exemplo, 123, Centro, São Paulo - SP, CEP 01234-567', 'dps-agenda-addon' ); ?>"
+                                ><?php echo esc_textarea( $shop_address ); ?></textarea>
+                                <p class="dps-agenda-admin-field__description">
+                                    <?php esc_html_e( 'O valor será usado como origem nas rotas do GPS e como contexto operacional para os atendimentos com deslocamento.', 'dps-agenda-addon' ); ?>
+                                </p>
+                            </div>
+
+                            <div class="dps-agenda-admin-form-actions">
+                                <button type="submit" name="dps_save_settings" class="dps-btn dps-btn--primary">
+                                    <?php esc_html_e( 'Salvar configurações', 'dps-agenda-addon' ); ?>
+                                </button>
+                            </div>
+                        </form>
+
+                        <aside class="dps-agenda-admin-card dps-agenda-admin-card--subtle dps-agenda-admin-sidecard">
+                            <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'Impacto operacional', 'dps-agenda-addon' ); ?></p>
+                            <h2 class="dps-agenda-admin-subtitle"><?php esc_html_e( 'Onde esta configuração aparece', 'dps-agenda-addon' ); ?></h2>
+                            <ul class="dps-agenda-admin-list">
+                                <li><?php esc_html_e( 'Botão “Abrir rota” na aba de detalhes da Agenda.', 'dps-agenda-addon' ); ?></li>
+                                <li><?php esc_html_e( 'Referência de deslocamento para atendimentos com TaxiDog.', 'dps-agenda-addon' ); ?></li>
+                                <li><?php esc_html_e( 'Fluxos operacionais que dependem do ponto de origem da loja.', 'dps-agenda-addon' ); ?></li>
+                            </ul>
+                            <p class="dps-agenda-admin-card__note">
+                                <?php esc_html_e( 'Mantenha esse endereço atualizado para evitar rotas incorretas na operação diária.', 'dps-agenda-addon' ); ?>
+                            </p>
+                        </aside>
+                    </div>
+                </section>
+            </div>
         </div>
         <?php
     }
@@ -546,272 +590,209 @@ class DPS_Agenda_Addon {
      * @return string HTML do dashboard.
      */
     public function render_dashboard_shortcode() {
-        // Desabilita cache da página para garantir dados sempre atualizados
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();
         }
 
-        // Verifica permissão
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
             return '<p>' . esc_html__( 'Acesso negado.', 'dps-agenda-addon' ) . '</p>';
         }
 
-        // Obtém data selecionada (default: hoje)
-        $selected_date = isset( $_GET['dashboard_date'] ) ? sanitize_text_field( $_GET['dashboard_date'] ) : current_time( 'Y-m-d' );
+        $selected_date = isset( $_GET['dashboard_date'] )
+            ? sanitize_text_field( wp_unslash( $_GET['dashboard_date'] ) )
+            : current_time( 'Y-m-d' );
 
-        // Valida formato de data
         if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $selected_date ) ) {
             $selected_date = current_time( 'Y-m-d' );
         }
 
-        // Obtém KPIs do dia
-        $kpis = DPS_Agenda_Dashboard_Service::get_daily_kpis( $selected_date );
-
-        // Obtém próximos atendimentos
-        $next_appointments = DPS_Agenda_Dashboard_Service::get_next_appointments( $selected_date, 10 );
+        $selected_date_label = date_i18n( get_option( 'date_format' ), strtotime( $selected_date ) );
+        $page_slug           = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : 'dps-agenda-dashboard';
+        $kpis                = DPS_Agenda_Dashboard_Service::get_daily_kpis( $selected_date );
+        $next_appointments   = DPS_Agenda_Dashboard_Service::get_next_appointments( $selected_date, 10 );
 
         ob_start();
         ?>
-        <div class="dps-dashboard-wrapper">
-            
-            <!-- Seletor de Data -->
-            <div class="dps-dashboard-date-selector">
+        <div class="dps-dashboard-wrapper dps-agenda-admin-page">
+            <section class="dps-dashboard-date-selector dps-agenda-admin-card">
+                <div class="dps-dashboard-date-selector__header">
+                    <div class="dps-dashboard-section-header">
+                        <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'Agenda', 'dps-agenda-addon' ); ?></p>
+                        <h2 class="dps-agenda-admin-subtitle"><?php esc_html_e( 'Dashboard operacional', 'dps-agenda-addon' ); ?></h2>
+                        <p class="dps-dashboard-date-selector__description">
+                            <?php esc_html_e( 'Acompanhe volume, próximos atendimentos e capacidade semanal em uma leitura única e consistente com o padrão M3.', 'dps-agenda-addon' ); ?>
+                        </p>
+                    </div>
+                    <div class="dps-agenda-admin-chips">
+                        <span class="dps-agenda-admin-chip dps-agenda-admin-chip--primary"><?php echo esc_html( $selected_date_label ); ?></span>
+                        <span class="dps-agenda-admin-chip"><?php esc_html_e( 'Visão diária', 'dps-agenda-addon' ); ?></span>
+                    </div>
+                </div>
+
                 <form method="get" class="dps-dashboard-form">
-                    <?php
-                    // Preserva parâmetros da URL
-                    if ( isset( $_GET['page'] ) ) {
-                        echo '<input type="hidden" name="page" value="' . esc_attr( $_GET['page'] ) . '">';
-                    }
-                    ?>
-                    
+                    <input type="hidden" name="page" value="<?php echo esc_attr( $page_slug ); ?>">
+
                     <div class="dps-dashboard-date-controls">
-                        <button type="button" class="dps-dashboard-quick-date" data-days="-1">
-                            <?php esc_html_e( '← Ontem', 'dps-agenda-addon' ); ?>
-                        </button>
-                        
-                        <button type="button" class="dps-dashboard-quick-date" data-days="0">
-                            <?php esc_html_e( 'Hoje', 'dps-agenda-addon' ); ?>
-                        </button>
-                        
-                        <button type="button" class="dps-dashboard-quick-date" data-days="1">
-                            <?php esc_html_e( 'Amanhã →', 'dps-agenda-addon' ); ?>
-                        </button>
-                        
-                        <input type="date" 
-                               name="dashboard_date" 
-                               value="<?php echo esc_attr( $selected_date ); ?>" 
-                               class="dps-dashboard-date-input">
-                        
-                        <button type="submit" class="button button-primary">
-                            <?php esc_html_e( 'Atualizar', 'dps-agenda-addon' ); ?>
-                        </button>
+                        <button type="button" class="dps-btn dps-btn--ghost dps-dashboard-quick-date" data-days="-1"><?php esc_html_e( 'Ontem', 'dps-agenda-addon' ); ?></button>
+                        <button type="button" class="dps-btn dps-btn--tonal dps-dashboard-quick-date" data-days="0"><?php esc_html_e( 'Hoje', 'dps-agenda-addon' ); ?></button>
+                        <button type="button" class="dps-btn dps-btn--ghost dps-dashboard-quick-date" data-days="1"><?php esc_html_e( 'Amanhã', 'dps-agenda-addon' ); ?></button>
+                        <input type="date" name="dashboard_date" value="<?php echo esc_attr( $selected_date ); ?>" class="dps-dashboard-date-input">
+                        <button type="submit" class="dps-btn dps-btn--primary dps-dashboard-submit"><?php esc_html_e( 'Atualizar painel', 'dps-agenda-addon' ); ?></button>
                     </div>
                 </form>
-            </div>
+            </section>
 
-            <!-- KPI Cards -->
             <div class="dps-dashboard-kpis">
-                
-                <!-- Card 1: Atendimentos de Hoje -->
-                <div class="dps-dashboard-kpi-section">
+                <section class="dps-dashboard-kpi-section dps-agenda-admin-card dps-agenda-admin-card--subtle">
                     <h3><?php esc_html_e( 'Atendimentos', 'dps-agenda-addon' ); ?></h3>
                     <div class="dps-dashboard-cards">
                         <?php
                         echo DPS_Agenda_Dashboard_Service::render_kpi_card(
                             __( 'Total', 'dps-agenda-addon' ),
                             $kpis['total_counts']['total'],
-                            sprintf(
-                                __( 'Manhã: %d | Tarde: %d', 'dps-agenda-addon' ),
-                                $kpis['total_counts']['morning'],
-                                $kpis['total_counts']['afternoon']
-                            ),
-                            '#3b82f6'
+                            sprintf( __( 'Manhã: %d | Tarde: %d', 'dps-agenda-addon' ), $kpis['total_counts']['morning'], $kpis['total_counts']['afternoon'] ),
+                            'primary'
                         );
                         ?>
                     </div>
-                </div>
+                </section>
 
-                <!-- Card 2: Confirmação -->
-                <div class="dps-dashboard-kpi-section">
+                <section class="dps-dashboard-kpi-section dps-agenda-admin-card dps-agenda-admin-card--subtle">
                     <h3><?php esc_html_e( 'Confirmação', 'dps-agenda-addon' ); ?></h3>
                     <div class="dps-dashboard-cards">
                         <?php
-                        echo DPS_Agenda_Dashboard_Service::render_kpi_card(
-                            __( 'Confirmados', 'dps-agenda-addon' ),
-                            $kpis['confirmation_stats']['confirmed'],
-                            '',
-                            '#10b981'
-                        );
-                        
-                        echo DPS_Agenda_Dashboard_Service::render_kpi_card(
-                            __( 'Não Confirmados', 'dps-agenda-addon' ),
-                            $kpis['confirmation_stats']['not_confirmed'],
-                            '',
-                            '#f59e0b'
-                        );
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'Confirmados', 'dps-agenda-addon' ), $kpis['confirmation_stats']['confirmed'], '', 'success' );
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'Não confirmados', 'dps-agenda-addon' ), $kpis['confirmation_stats']['not_confirmed'], '', 'warning' );
                         ?>
                     </div>
-                </div>
+                </section>
 
-                <!-- Card 3: Status de Execução -->
-                <div class="dps-dashboard-kpi-section">
+                <section class="dps-dashboard-kpi-section dps-agenda-admin-card dps-agenda-admin-card--subtle">
                     <h3><?php esc_html_e( 'Execução', 'dps-agenda-addon' ); ?></h3>
                     <div class="dps-dashboard-cards">
                         <?php
-                        echo DPS_Agenda_Dashboard_Service::render_kpi_card(
-                            __( 'Concluídos', 'dps-agenda-addon' ),
-                            $kpis['execution_stats']['completed'],
-                            '',
-                            '#10b981'
-                        );
-                        
-                        echo DPS_Agenda_Dashboard_Service::render_kpi_card(
-                            __( 'Cancelados', 'dps-agenda-addon' ),
-                            $kpis['execution_stats']['canceled'],
-                            '',
-                            '#ef4444'
-                        );
-                        
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'Concluídos', 'dps-agenda-addon' ), $kpis['execution_stats']['completed'], '', 'success' );
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'Cancelados', 'dps-agenda-addon' ), $kpis['execution_stats']['canceled'], '', 'error' );
+
                         if ( $kpis['execution_stats']['late'] > 0 ) {
-                            echo DPS_Agenda_Dashboard_Service::render_kpi_card(
-                                __( 'Atrasados', 'dps-agenda-addon' ),
-                                $kpis['execution_stats']['late'],
-                                __( 'Pendentes após horário', 'dps-agenda-addon' ),
-                                '#f59e0b'
-                            );
+                            echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'Atrasados', 'dps-agenda-addon' ), $kpis['execution_stats']['late'], __( 'Pendentes após o horário previsto', 'dps-agenda-addon' ), 'warning' );
                         }
                         ?>
                     </div>
-                </div>
+                </section>
 
-                <!-- Card 4: Especiais -->
-                <div class="dps-dashboard-kpi-section">
+                <section class="dps-dashboard-kpi-section dps-agenda-admin-card dps-agenda-admin-card--subtle">
                     <h3><?php esc_html_e( 'Especiais', 'dps-agenda-addon' ); ?></h3>
                     <div class="dps-dashboard-cards">
                         <?php
-                        echo DPS_Agenda_Dashboard_Service::render_kpi_card(
-                            __( 'TaxiDog', 'dps-agenda-addon' ),
-                            $kpis['special_stats']['with_taxidog'],
-                            '',
-                            '#3b82f6'
-                        );
-                        
-                        echo DPS_Agenda_Dashboard_Service::render_kpi_card(
-                            __( 'Cobrança Pendente', 'dps-agenda-addon' ),
-                            $kpis['special_stats']['pending_payment'],
-                            '',
-                            '#f59e0b'
-                        );
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'TaxiDog', 'dps-agenda-addon' ), $kpis['special_stats']['with_taxidog'], '', 'tertiary' );
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'Cobrança pendente', 'dps-agenda-addon' ), $kpis['special_stats']['pending_payment'], '', 'warning' );
                         ?>
                     </div>
-                </div>
+                </section>
             </div>
 
-            <!-- Próximos Atendimentos -->
             <?php if ( ! empty( $next_appointments ) ) : ?>
-                <div class="dps-dashboard-next-appointments">
-                    <h3><?php esc_html_e( 'Próximos Atendimentos', 'dps-agenda-addon' ); ?></h3>
-                    
-                    <table class="dps-dashboard-table">
-                        <thead>
-                            <tr>
-                                <th><?php esc_html_e( 'Hora', 'dps-agenda-addon' ); ?></th>
-                                <th><?php esc_html_e( 'Pet', 'dps-agenda-addon' ); ?></th>
-                                <th><?php esc_html_e( 'Tutor', 'dps-agenda-addon' ); ?></th>
-                                <th><?php esc_html_e( 'Serviços', 'dps-agenda-addon' ); ?></th>
-                                <th><?php esc_html_e( 'Status', 'dps-agenda-addon' ); ?></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ( $next_appointments as $appt ) : ?>
+                <section class="dps-dashboard-next-appointments dps-agenda-admin-card">
+                    <div class="dps-dashboard-section-header">
+                        <div>
+                            <h3><?php esc_html_e( 'Próximos atendimentos', 'dps-agenda-addon' ); ?></h3>
+                            <p><?php esc_html_e( 'Leitura rápida dos próximos horários para a operação do dia.', 'dps-agenda-addon' ); ?></p>
+                        </div>
+                    </div>
+
+                    <div class="dps-dashboard-table-wrapper">
+                        <table class="dps-dashboard-table">
+                            <thead>
                                 <tr>
-                                    <td><strong><?php echo esc_html( $appt['time'] ); ?></strong></td>
-                                    <td><?php echo esc_html( $appt['pet_name'] ); ?></td>
-                                    <td><?php echo esc_html( $appt['client_name'] ); ?></td>
-                                    <td><?php echo esc_html( $appt['services'] ?: '-' ); ?></td>
-                                    <td>
-                                        <?php
-                                        $status_config = DPS_Agenda_Addon::get_status_config();
-                                        $status_label = isset( $status_config[ $appt['status'] ]['label'] ) 
-                                            ? $status_config[ $appt['status'] ]['label'] 
-                                            : $appt['status'];
-                                        echo esc_html( $status_label );
-                                        ?>
-                                    </td>
+                                    <th><?php esc_html_e( 'Hora', 'dps-agenda-addon' ); ?></th>
+                                    <th><?php esc_html_e( 'Pet', 'dps-agenda-addon' ); ?></th>
+                                    <th><?php esc_html_e( 'Tutor', 'dps-agenda-addon' ); ?></th>
+                                    <th><?php esc_html_e( 'Serviços', 'dps-agenda-addon' ); ?></th>
+                                    <th><?php esc_html_e( 'Status', 'dps-agenda-addon' ); ?></th>
                                 </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                <?php foreach ( $next_appointments as $appt ) : ?>
+                                    <?php
+                                    $status_config     = DPS_Agenda_Addon::get_status_config();
+                                    $status_slug       = isset( $appt['status'] ) ? (string) $appt['status'] : 'pendente';
+                                    $status_label      = isset( $status_config[ $status_slug ]['label'] ) ? $status_config[ $status_slug ]['label'] : $status_slug;
+                                    $status_chip_class = 'dps-agenda-admin-chip--warning';
+
+                                    if ( in_array( $status_slug, [ self::STATUS_FINISHED, self::STATUS_PAID ], true ) ) {
+                                        $status_chip_class = 'dps-agenda-admin-chip--success';
+                                    } elseif ( self::STATUS_CANCELED === $status_slug ) {
+                                        $status_chip_class = 'dps-agenda-admin-chip--error';
+                                    }
+                                    ?>
+                                    <tr>
+                                        <td><strong><?php echo esc_html( $appt['time'] ); ?></strong></td>
+                                        <td><?php echo esc_html( $appt['pet_name'] ); ?></td>
+                                        <td><?php echo esc_html( $appt['client_name'] ); ?></td>
+                                        <td><?php echo esc_html( $appt['services'] ?: '-' ); ?></td>
+                                        <td><span class="dps-agenda-admin-chip dps-dashboard-table-status <?php echo esc_attr( $status_chip_class ); ?>"><?php echo esc_html( $status_label ); ?></span></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
             <?php else : ?>
-                <div class="dps-dashboard-empty">
+                <div class="dps-dashboard-empty dps-agenda-admin-card" role="status">
                     <p><?php esc_html_e( 'Nenhum atendimento próximo encontrado para esta data.', 'dps-agenda-addon' ); ?></p>
                 </div>
             <?php endif; ?>
 
-            <!-- FASE 4: Capacidade/Lotação Heatmap -->
-            <div class="dps-dashboard-capacity-section">
+            <section class="dps-dashboard-capacity-section dps-agenda-admin-card">
                 <div class="dps-dashboard-capacity-header">
-                    <h3><?php esc_html_e( 'Capacidade / Lotação da Semana', 'dps-agenda-addon' ); ?></h3>
-                    
-                    <!-- Navegação de Semana -->
+                    <div class="dps-dashboard-section-header">
+                        <div>
+                            <h3><?php esc_html_e( 'Capacidade da semana', 'dps-agenda-addon' ); ?></h3>
+                            <p><?php esc_html_e( 'Use a capacidade como referência operacional para evitar sobrecarga e antecipar gargalos.', 'dps-agenda-addon' ); ?></p>
+                        </div>
+                    </div>
+
                     <?php
-                    $week_dates = DPS_Agenda_Capacity_Helper::get_week_dates( $selected_date );
+                    $week_dates     = DPS_Agenda_Capacity_Helper::get_week_dates( $selected_date );
                     $prev_week_date = date( 'Y-m-d', strtotime( $week_dates['start'] . ' -7 days' ) );
                     $next_week_date = date( 'Y-m-d', strtotime( $week_dates['start'] . ' +7 days' ) );
+                    $prev_week_url  = add_query_arg( [ 'page' => $page_slug, 'dashboard_date' => $prev_week_date ], admin_url( 'admin.php' ) );
+                    $next_week_url  = add_query_arg( [ 'page' => $page_slug, 'dashboard_date' => $next_week_date ], admin_url( 'admin.php' ) );
                     ?>
                     <div class="dps-capacity-week-nav">
-                        <a href="?page=<?php echo esc_attr( $_GET['page'] ?? 'dps-agenda-dashboard' ); ?>&dashboard_date=<?php echo esc_attr( $prev_week_date ); ?>" class="button">
-                            ← <?php esc_html_e( 'Semana Anterior', 'dps-agenda-addon' ); ?>
-                        </a>
+                        <a href="<?php echo esc_url( $prev_week_url ); ?>" class="dps-btn dps-btn--ghost dps-dashboard-week-nav-link"><?php esc_html_e( 'Semana anterior', 'dps-agenda-addon' ); ?></a>
                         <span class="dps-capacity-week-label">
-                            <?php
-                            echo esc_html(
-                                sprintf(
-                                    __( 'Semana de %s a %s', 'dps-agenda-addon' ),
-                                    date_i18n( 'd/m', strtotime( $week_dates['start'] ) ),
-                                    date_i18n( 'd/m/Y', strtotime( $week_dates['end'] ) )
-                                )
-                            );
-                            ?>
+                            <?php echo esc_html( sprintf( __( 'Semana de %s a %s', 'dps-agenda-addon' ), date_i18n( 'd/m', strtotime( $week_dates['start'] ) ), date_i18n( 'd/m/Y', strtotime( $week_dates['end'] ) ) ) ); ?>
                         </span>
-                        <a href="?page=<?php echo esc_attr( $_GET['page'] ?? 'dps-agenda-dashboard' ); ?>&dashboard_date=<?php echo esc_attr( $next_week_date ); ?>" class="button">
-                            <?php esc_html_e( 'Próxima Semana', 'dps-agenda-addon' ); ?> →
-                        </a>
+                        <a href="<?php echo esc_url( $next_week_url ); ?>" class="dps-btn dps-btn--ghost dps-dashboard-week-nav-link"><?php esc_html_e( 'Próxima semana', 'dps-agenda-addon' ); ?></a>
                     </div>
                 </div>
 
-                <!-- Configuração de Capacidade -->
                 <div class="dps-capacity-config">
-                    <h4><?php esc_html_e( 'Configuração de Capacidade Máxima', 'dps-agenda-addon' ); ?></h4>
+                    <h4><?php esc_html_e( 'Configuração de capacidade máxima', 'dps-agenda-addon' ); ?></h4>
                     <?php $capacity_config = DPS_Agenda_Capacity_Helper::get_capacity_config(); ?>
                     <form id="dps-capacity-config-form" class="dps-capacity-form">
                         <div class="dps-capacity-inputs">
                             <div class="dps-capacity-input-group">
-                                <label for="capacity_morning"><?php esc_html_e( 'Manhã (08:00-11:59):', 'dps-agenda-addon' ); ?></label>
+                                <label for="capacity_morning"><?php esc_html_e( 'Manhã (08:00-11:59)', 'dps-agenda-addon' ); ?></label>
                                 <input type="number" id="capacity_morning" name="morning" value="<?php echo esc_attr( $capacity_config['morning'] ); ?>" min="1" max="100">
                                 <span class="description"><?php esc_html_e( 'atendimentos', 'dps-agenda-addon' ); ?></span>
                             </div>
                             <div class="dps-capacity-input-group">
-                                <label for="capacity_afternoon"><?php esc_html_e( 'Tarde (12:00-17:59):', 'dps-agenda-addon' ); ?></label>
+                                <label for="capacity_afternoon"><?php esc_html_e( 'Tarde (12:00-17:59)', 'dps-agenda-addon' ); ?></label>
                                 <input type="number" id="capacity_afternoon" name="afternoon" value="<?php echo esc_attr( $capacity_config['afternoon'] ); ?>" min="1" max="100">
                                 <span class="description"><?php esc_html_e( 'atendimentos', 'dps-agenda-addon' ); ?></span>
                             </div>
-                            <button type="submit" class="button button-primary">
-                                <?php esc_html_e( 'Salvar Capacidade', 'dps-agenda-addon' ); ?>
-                            </button>
+                            <button type="submit" class="dps-btn dps-btn--primary dps-capacity-submit"><?php esc_html_e( 'Salvar capacidade', 'dps-agenda-addon' ); ?></button>
                         </div>
                     </form>
-                    <p class="description">
-                        <?php esc_html_e( 'A capacidade é uma referência para ajudar a equipe a evitar overbooking. Não impede agendamentos automaticamente.', 'dps-agenda-addon' ); ?>
-                    </p>
+                    <p class="description"><?php esc_html_e( 'A capacidade é uma referência operacional e não bloqueia agendamentos automaticamente.', 'dps-agenda-addon' ); ?></p>
                 </div>
 
-                <!-- Heatmap -->
                 <?php echo DPS_Agenda_Capacity_Helper::render_capacity_heatmap( $week_dates['start'], $week_dates['end'] ); ?>
-            </div>
+            </section>
 
-            <!-- Link para Agenda Completa -->
             <div class="dps-dashboard-actions">
                 <?php
                 $agenda_page_id = get_option( 'dps_agenda_page_id' );
@@ -819,46 +800,41 @@ class DPS_Agenda_Addon {
                     $agenda_permalink = get_permalink( $agenda_page_id );
                     if ( $agenda_permalink && is_string( $agenda_permalink ) ) {
                         $agenda_url = add_query_arg( 'dps_date', $selected_date, $agenda_permalink );
-                    ?>
-                    <a href="<?php echo esc_url( $agenda_url ); ?>" class="button button-primary button-large">
-                        <?php esc_html_e( 'Ver Agenda Completa', 'dps-agenda-addon' ); ?>
-                    </a>
-                    <?php
+                        ?>
+                        <a href="<?php echo esc_url( $agenda_url ); ?>" class="dps-btn dps-btn--primary dps-btn--large"><?php esc_html_e( 'Ver agenda completa', 'dps-agenda-addon' ); ?></a>
+                        <?php
                     }
                 }
                 ?>
             </div>
-
         </div>
 
         <script>
         jQuery(document).ready(function($){
-            // Botões de data rápida
             $('.dps-dashboard-quick-date').on('click', function(){
                 var days = parseInt($(this).data('days'), 10);
                 var today = new Date();
                 today.setDate(today.getDate() + days);
-                
+
                 var year = today.getFullYear();
                 var month = String(today.getMonth() + 1).padStart(2, '0');
                 var day = String(today.getDate()).padStart(2, '0');
                 var dateStr = year + '-' + month + '-' + day;
-                
+
                 $('.dps-dashboard-date-input').val(dateStr);
                 $('.dps-dashboard-form').submit();
             });
 
-            // FASE 4: Form de configuração de capacidade
             $('#dps-capacity-config-form').on('submit', function(e){
                 e.preventDefault();
-                
+
                 var morning = $('#capacity_morning').val();
                 var afternoon = $('#capacity_afternoon').val();
                 var submitBtn = $(this).find('button[type="submit"]');
                 var originalText = submitBtn.text();
-                
+
                 submitBtn.prop('disabled', true).text('Salvando...');
-                
+
                 $.post(ajaxurl, {
                     action: 'dps_agenda_save_capacity',
                     nonce: DPS_AG_Addon.nonce_capacity,
@@ -867,7 +843,6 @@ class DPS_Agenda_Addon {
                 }, function(resp){
                     if (resp && resp.success) {
                         submitBtn.text('Salvo!');
-                        // Recarrega a página após 1 segundo para atualizar o heatmap
                         setTimeout(function(){
                             location.reload();
                         }, 1000);
@@ -1899,10 +1874,14 @@ class DPS_Agenda_Addon {
 
         // Header da lista de atendimentos.
         echo '<div class="dps-agenda-tabs-header">';
+        echo '<div>';
         echo '<h3 class="dps-agenda-tabs-title">&#128203; ' . esc_html__( 'Lista de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
+        echo '<p class="dps-agenda-tabs-description">' . esc_html__( 'As três abas compartilham o padrão visual M3 e reorganizam a leitura da operação por nível de detalhe.', 'dps-agenda-addon' ) . '</p>';
+        echo '</div>';
+        echo '<span class="dps-context-pill dps-context-pill--primary">' . esc_html__( 'Padrão M3', 'dps-agenda-addon' ) . '</span>';
         echo '</div>';
 
-        echo '<nav class="dps-agenda-tabs-nav" role="tablist">';
+        echo '<nav class="dps-agenda-tabs-nav" role="tablist" aria-label="' . esc_attr__( 'Modos de visualização da agenda', 'dps-agenda-addon' ) . '">';
 
         foreach ( $tabs as $tab_id => $tab_data ) {
             $is_active = ( $current_tab === $tab_id );
@@ -1936,8 +1915,8 @@ class DPS_Agenda_Addon {
                 echo '<p>' . sprintf( _n( '%d atendimento no periodo', '%d atendimentos no periodo', $day_total, 'dps-agenda-addon' ), $day_total ) . '</p>';
                 echo '</div>';
                 echo '<div class="dps-agenda-day-panel__stats">';
-                echo '<span class="dps-context-pill">' . sprintf( esc_html__( '%d pendentes', 'dps-agenda-addon' ), count( $day_info['upcoming'] ) ) . '</span>';
-                echo '<span class="dps-context-pill">' . sprintf( esc_html__( '%d finalizados', 'dps-agenda-addon' ), count( $day_info['completed'] ) ) . '</span>';
+                echo '<span class="dps-context-pill dps-context-pill--warning">' . sprintf( esc_html__( '%d pendentes', 'dps-agenda-addon' ), count( $day_info['upcoming'] ) ) . '</span>';
+                echo '<span class="dps-context-pill dps-context-pill--success">' . sprintf( esc_html__( '%d finalizados', 'dps-agenda-addon' ), count( $day_info['completed'] ) ) . '</span>';
                 echo '</div>';
                 echo '</div>';
                 echo '<div class="dps-agenda-day-panel__body">';
@@ -1961,8 +1940,8 @@ class DPS_Agenda_Addon {
                 echo '<p>' . sprintf( _n( '%d atendimento no periodo', '%d atendimentos no periodo', $day_total, 'dps-agenda-addon' ), $day_total ) . '</p>';
                 echo '</div>';
                 echo '<div class="dps-agenda-day-panel__stats">';
-                echo '<span class="dps-context-pill">' . sprintf( esc_html__( '%d pendentes', 'dps-agenda-addon' ), count( $day_info['upcoming'] ) ) . '</span>';
-                echo '<span class="dps-context-pill">' . sprintf( esc_html__( '%d finalizados', 'dps-agenda-addon' ), count( $day_info['completed'] ) ) . '</span>';
+                echo '<span class="dps-context-pill dps-context-pill--warning">' . sprintf( esc_html__( '%d pendentes', 'dps-agenda-addon' ), count( $day_info['upcoming'] ) ) . '</span>';
+                echo '<span class="dps-context-pill dps-context-pill--success">' . sprintf( esc_html__( '%d finalizados', 'dps-agenda-addon' ), count( $day_info['completed'] ) ) . '</span>';
                 echo '</div>';
                 echo '</div>';
                 echo '<div class="dps-agenda-day-panel__body">';
@@ -1986,8 +1965,8 @@ class DPS_Agenda_Addon {
                 echo '<p>' . sprintf( _n( '%d atendimento no periodo', '%d atendimentos no periodo', $day_total, 'dps-agenda-addon' ), $day_total ) . '</p>';
                 echo '</div>';
                 echo '<div class="dps-agenda-day-panel__stats">';
-                echo '<span class="dps-context-pill">' . sprintf( esc_html__( '%d pendentes', 'dps-agenda-addon' ), count( $day_info['upcoming'] ) ) . '</span>';
-                echo '<span class="dps-context-pill">' . sprintf( esc_html__( '%d finalizados', 'dps-agenda-addon' ), count( $day_info['completed'] ) ) . '</span>';
+                echo '<span class="dps-context-pill dps-context-pill--warning">' . sprintf( esc_html__( '%d pendentes', 'dps-agenda-addon' ), count( $day_info['upcoming'] ) ) . '</span>';
+                echo '<span class="dps-context-pill dps-context-pill--success">' . sprintf( esc_html__( '%d finalizados', 'dps-agenda-addon' ), count( $day_info['completed'] ) ) . '</span>';
                 echo '</div>';
                 echo '</div>';
                 echo '<div class="dps-agenda-day-panel__body">';

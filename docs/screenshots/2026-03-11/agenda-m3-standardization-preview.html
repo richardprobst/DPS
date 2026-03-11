@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda - padronização M3 das abas e superfícies</title>
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/agenda-refresh.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/checklist-checkin.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/agenda-admin.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/dashboard.css">
+    <style>
+        :root { color-scheme: light; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, color-mix(in srgb, var(--dps-color-primary-container) 70%, white) 0%, transparent 30%),
+                linear-gradient(180deg, #f5f7fb 0%, #eef2f8 100%);
+            color: var(--dps-color-on-surface);
+            font-family: var(--dps-font-system);
+        }
+        .preview-shell {
+            max-width: 1760px;
+            margin: 0 auto;
+            padding: 32px 24px 80px;
+            display: grid;
+            gap: 24px;
+        }
+        .preview-card {
+            padding: 28px;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(120,132,150,0.2);
+            border-radius: 28px;
+            box-shadow: 0 20px 44px rgba(42, 57, 79, 0.08);
+        }
+        .preview-kicker {
+            margin: 0;
+            color: var(--dps-color-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+        .preview-card h1,
+        .preview-card h2 {
+            margin: 10px 0 8px;
+            color: var(--dps-color-on-surface);
+        }
+        .preview-card h1 {
+            font-size: clamp(2.1rem, 4vw, 3.5rem);
+            line-height: 1.02;
+        }
+        .preview-card p {
+            color: var(--dps-color-on-surface-variant);
+            line-height: 1.6;
+        }
+        .preview-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .preview-meta span {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            padding: 0 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.86);
+            border: 1px solid rgba(120,132,150,0.24);
+            color: var(--dps-color-on-surface-variant);
+            font-size: 0.92rem;
+        }
+        .preview-front-shell {
+            padding: 0;
+            background: transparent;
+            max-width: none;
+        }
+        .preview-admin-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+        }
+        .preview-admin-grid > * {
+            min-width: 0;
+        }
+        .preview-subsection {
+            margin: 0 0 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dps-color-on-surface);
+        }
+        .dps-table th,
+        .dps-table td {
+            white-space: nowrap;
+        }
+        .dps-table td[data-wrap],
+        .dps-table th[data-wrap] {
+            white-space: normal;
+        }
+        .dps-agenda-admin-shell {
+            display: block;
+        }
+        @media (max-width: 1200px) {
+            .preview-admin-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="preview-shell">
+        <section class="preview-card">
+            <p class="preview-kicker">Agenda</p>
+            <h1>Padronização M3 das abas, superfícies e painéis</h1>
+            <p>
+                Preview estático para validar a revisão completa da UI da Agenda seguindo
+                <code>docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md</code> e
+                <code>docs/visual/VISUAL_STYLE_GUIDE.md</code> como fonte de verdade do padrão M3.
+                O HTML abaixo referencia os CSS reais do add-on.
+            </p>
+            <div class="preview-meta">
+                <span>Abas operacionais unificadas</span>
+                <span>Dashboard admin em M3</span>
+                <span>Configurações e integrações no mesmo sistema visual</span>
+                <span>Checklist e painéis expandidos alinhados</span>
+            </div>
+        </section>
+
+        <section class="preview-card">
+            <p class="preview-kicker">Frontend</p>
+            <h2>Abas operacionais da Agenda</h2>
+            <div class="preview-front-shell">
+                <section class="dps-agenda-overview" aria-label="Resumo da agenda">
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--primary"><span class="dps-agenda-overview-card__label">Total</span><strong class="dps-agenda-overview-card__value">12</strong></article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--warning"><span class="dps-agenda-overview-card__label">Pendentes</span><strong class="dps-agenda-overview-card__value">6</strong></article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--success"><span class="dps-agenda-overview-card__label">Finalizados</span><strong class="dps-agenda-overview-card__value">4</strong></article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--error"><span class="dps-agenda-overview-card__label">Atrasados</span><strong class="dps-agenda-overview-card__value">2</strong></article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--secondary"><span class="dps-agenda-overview-card__label">Pagamento pendente</span><strong class="dps-agenda-overview-card__value">3</strong></article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--tertiary"><span class="dps-agenda-overview-card__label">TaxiDog</span><strong class="dps-agenda-overview-card__value">5</strong></article>
+                </section>
+
+                <div class="dps-agenda-tabs-wrapper">
+                    <div class="dps-agenda-tabs-header">
+                        <div>
+                            <h3 class="dps-agenda-tabs-title">&#128203; Lista de Atendimentos</h3>
+                            <p class="dps-agenda-tabs-description">As três abas compartilham o padrão visual M3 e reorganizam a leitura da operação por nível de detalhe.</p>
+                        </div>
+                        <span class="dps-context-pill dps-context-pill--primary">Padrão M3</span>
+                    </div>
+
+                    <nav class="dps-agenda-tabs-nav" role="tablist" aria-label="Modos de visualização da agenda">
+                        <button type="button" class="dps-agenda-tab-button dps-agenda-tab-button--active" role="tab" aria-selected="true">
+                            <span class="dps-tab-icon">◌</span>
+                            <span class="dps-tab-label">Visão rápida</span>
+                            <span class="dps-tab-desc">Check rápido de status</span>
+                        </button>
+                        <button type="button" class="dps-agenda-tab-button" role="tab" aria-selected="false">
+                            <span class="dps-tab-icon">▣</span>
+                            <span class="dps-tab-label">Operação</span>
+                            <span class="dps-tab-desc">Ações, cobrança e execução</span>
+                        </button>
+                        <button type="button" class="dps-agenda-tab-button" role="tab" aria-selected="false">
+                            <span class="dps-tab-icon">✦</span>
+                            <span class="dps-tab-label">Detalhes</span>
+                            <span class="dps-tab-desc">Logística, TaxiDog e notas</span>
+                        </button>
+                    </nav>
+
+                    <div class="dps-agenda-tabs-content">
+                        <div class="dps-tab-content dps-tab-content--active">
+                            <section class="dps-agenda-day-panel">
+                                <div class="dps-agenda-day-panel__header">
+                                    <div>
+                                        <h4>Quarta-feira, 11/03</h4>
+                                        <p>6 atendimentos no período</p>
+                                    </div>
+                                    <div class="dps-agenda-day-panel__stats">
+                                        <span class="dps-context-pill dps-context-pill--warning">4 pendentes</span>
+                                        <span class="dps-context-pill dps-context-pill--success">2 finalizados</span>
+                                    </div>
+                                </div>
+
+                                <div class="dps-agenda-day-panel__body">
+                                    <h5>Operação principal</h5>
+                                    <div class="dps-agenda-table-container">
+                                        <table class="dps-table dps-table--tab2">
+                                            <thead>
+                                                <tr>
+                                                    <th>Horário</th>
+                                                    <th>Pet</th>
+                                                    <th>Serviços</th>
+                                                    <th>Pagamento</th>
+                                                    <th>TaxiDog</th>
+                                                    <th>Ações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>09:00</strong></td>
+                                                    <td data-wrap>
+                                                        <button type="button" class="dps-pet-profile-trigger">
+                                                            <span class="dps-pet-profile-trigger__name">Maya (Spitz)</span>
+                                                        </button>
+                                                    </td>
+                                                    <td data-wrap>
+                                                        <button type="button" class="dps-services-popup-btn">Banho + hidratação</button>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="dps-payment-popup-btn">R$ 145,00 pendente</button>
+                                                    </td>
+                                                    <td data-wrap>
+                                                        <div class="dps-taxidog-wrapper">
+                                                            <span class="dps-taxidog-label dps-taxidog-label--requested">Solicitado</span>
+                                                            <select class="dps-taxidog-dropdown">
+                                                                <option>A caminho</option>
+                                                                <option selected>No pet shop</option>
+                                                            </select>
+                                                        </div>
+                                                    </td>
+                                                    <td data-wrap>
+                                                        <div class="dps-quick-actions">
+                                                            <button type="button" class="dps-quick-action-btn">Confirmar</button>
+                                                            <button type="button" class="dps-quick-action-btn">Check-in</button>
+                                                            <button type="button" class="dps-quick-action-btn">Finalizar</button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr class="dps-detail-row">
+                                                    <td colspan="6">
+                                                        <div class="dps-detail-panels">
+                                                            <div class="dps-checklist-panel">
+                                                                <h4>Checklist operacional</h4>
+                                                                <div class="dps-checklist-progress">
+                                                                    <div class="dps-checklist-progress-bar"><div class="dps-checklist-progress-fill" style="width: 66%;"></div></div>
+                                                                    <span class="dps-checklist-progress-text">66%</span>
+                                                                </div>
+                                                                <ul class="dps-checklist-steps">
+                                                                    <li class="dps-checklist-step" data-status="done"><span class="dps-checklist-step-label">Pré-check concluído</span><span class="dps-checklist-rework-badge">1 ajuste</span></li>
+                                                                    <li class="dps-checklist-step"><span class="dps-checklist-step-label">Confirmar observações do tutor</span></li>
+                                                                    <li class="dps-checklist-step"><span class="dps-checklist-step-label">Separar logística do retorno</span></li>
+                                                                </ul>
+                                                            </div>
+                                                            <div class="dps-checkin-panel">
+                                                                <h4>Check-in / Check-out</h4>
+                                                                <div class="dps-checkin-status">
+                                                                    <span class="dps-checkin-status-badge dps-checkin-status-badge--in">Check-in 08:53</span>
+                                                                    <span class="dps-checkin-status-badge dps-checkin-status-badge--duration">42 min</span>
+                                                                </div>
+                                                                <div class="dps-safety-summary">
+                                                                    <span class="dps-safety-tag dps-safety-tag--warning">Pele sensível</span>
+                                                                    <span class="dps-safety-tag dps-safety-tag--alert">Evitar secagem alta</span>
+                                                                </div>
+                                                                <div class="dps-checkin-actions">
+                                                                    <button type="button" class="dps-checkin-btn dps-checkin-btn--checkout">Registrar check-out</button>
+                                                                    <a href="#" class="dps-checkin-btn dps-checkin-btn--whatsapp">Enviar relatório</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="preview-card">
+            <p class="preview-kicker">Admin</p>
+            <h2>Dashboard, Configurações e Integrações</h2>
+            <div class="preview-admin-grid">
+                <div class="dps-agenda-admin-shell">
+                    <div class="dps-dashboard-wrapper dps-agenda-admin-page">
+                        <section class="dps-dashboard-date-selector dps-agenda-admin-card">
+                            <div class="dps-dashboard-date-selector__header">
+                                <div class="dps-dashboard-section-header">
+                                    <div>
+                                        <p class="dps-agenda-admin-eyebrow">Agenda</p>
+                                        <h2 class="dps-agenda-admin-subtitle">Dashboard operacional</h2>
+                                        <p class="dps-dashboard-date-selector__description">Leitura diária dos KPIs, atendimentos e capacidade em um mesmo shell M3.</p>
+                                    </div>
+                                </div>
+                                <div class="dps-agenda-admin-chips">
+                                    <span class="dps-agenda-admin-chip dps-agenda-admin-chip--primary">11/03/2026</span>
+                                    <span class="dps-agenda-admin-chip">Visão diária</span>
+                                </div>
+                            </div>
+                            <div class="dps-dashboard-date-controls">
+                                <button class="dps-btn dps-btn--ghost">Ontem</button>
+                                <button class="dps-btn dps-btn--tonal">Hoje</button>
+                                <button class="dps-btn dps-btn--ghost">Amanhã</button>
+                                <input class="dps-dashboard-date-input" type="date" value="2026-03-11">
+                                <button class="dps-btn dps-btn--primary dps-dashboard-submit">Atualizar painel</button>
+                            </div>
+                        </section>
+
+                        <div class="dps-dashboard-kpis">
+                            <section class="dps-dashboard-kpi-section dps-agenda-admin-card dps-agenda-admin-card--subtle"><h3>Atendimentos</h3><div class="dps-dashboard-cards"><article class="dps-dashboard-card dps-dashboard-card--primary"><div class="dps-dashboard-card__title">Total</div><div class="dps-dashboard-card__value">18</div><div class="dps-dashboard-card__subtitle">Manhã: 9 | Tarde: 9</div></article></div></section>
+                            <section class="dps-dashboard-kpi-section dps-agenda-admin-card dps-agenda-admin-card--subtle"><h3>Confirmação</h3><div class="dps-dashboard-cards"><article class="dps-dashboard-card dps-dashboard-card--success"><div class="dps-dashboard-card__title">Confirmados</div><div class="dps-dashboard-card__value">12</div></article><article class="dps-dashboard-card dps-dashboard-card--warning"><div class="dps-dashboard-card__title">Não confirmados</div><div class="dps-dashboard-card__value">6</div></article></div></section>
+                            <section class="dps-dashboard-kpi-section dps-agenda-admin-card dps-agenda-admin-card--subtle"><h3>Execução</h3><div class="dps-dashboard-cards"><article class="dps-dashboard-card dps-dashboard-card--success"><div class="dps-dashboard-card__title">Concluídos</div><div class="dps-dashboard-card__value">8</div></article><article class="dps-dashboard-card dps-dashboard-card--error"><div class="dps-dashboard-card__title">Cancelados</div><div class="dps-dashboard-card__value">1</div></article><article class="dps-dashboard-card dps-dashboard-card--warning"><div class="dps-dashboard-card__title">Atrasados</div><div class="dps-dashboard-card__value">2</div><div class="dps-dashboard-card__subtitle">Pendentes após o horário previsto</div></article></div></section>
+                            <section class="dps-dashboard-kpi-section dps-agenda-admin-card dps-agenda-admin-card--subtle"><h3>Especiais</h3><div class="dps-dashboard-cards"><article class="dps-dashboard-card dps-dashboard-card--tertiary"><div class="dps-dashboard-card__title">TaxiDog</div><div class="dps-dashboard-card__value">5</div></article><article class="dps-dashboard-card dps-dashboard-card--warning"><div class="dps-dashboard-card__title">Cobrança pendente</div><div class="dps-dashboard-card__value">3</div></article></div></section>
+                        </div>
+
+                        <section class="dps-dashboard-next-appointments dps-agenda-admin-card">
+                            <div class="dps-dashboard-section-header"><div><h3>Próximos atendimentos</h3><p>Shell administrativo padronizado com chips de status.</p></div></div>
+                            <div class="dps-dashboard-table-wrapper">
+                                <table class="dps-dashboard-table">
+                                    <thead><tr><th>Hora</th><th>Pet</th><th>Tutor</th><th>Serviços</th><th>Status</th></tr></thead>
+                                    <tbody>
+                                        <tr><td><strong>13:40</strong></td><td>Luna</td><td>Maria</td><td>Tosa bebê</td><td><span class="dps-agenda-admin-chip dps-dashboard-table-status dps-agenda-admin-chip--warning">Pendente</span></td></tr>
+                                        <tr><td><strong>15:10</strong></td><td>Thor</td><td>Rafael</td><td>Banho premium</td><td><span class="dps-agenda-admin-chip dps-dashboard-table-status dps-agenda-admin-chip--success">Finalizado</span></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+                <div class="dps-agenda-admin-page">
+                    <section class="dps-agenda-admin-card">
+                        <div class="dps-agenda-admin-card__header">
+                            <div>
+                                <p class="dps-agenda-admin-eyebrow">Agenda</p>
+                                <h2 class="dps-agenda-admin-title">Configurações da Agenda</h2>
+                                <p class="dps-agenda-admin-description">Superfície administrativa padronizada para logística e origem das rotas.</p>
+                            </div>
+                            <div class="dps-agenda-admin-chips">
+                                <span class="dps-agenda-admin-chip dps-agenda-admin-chip--primary">Padrão M3</span>
+                                <span class="dps-agenda-admin-chip">GPS</span>
+                            </div>
+                        </div>
+                        <div class="dps-agenda-admin-grid">
+                            <div class="dps-agenda-admin-card dps-agenda-admin-card--subtle dps-agenda-admin-form">
+                                <div class="dps-agenda-admin-field">
+                                    <label class="dps-agenda-admin-field__label">Endereço do Banho e Tosa</label>
+                                    <p class="dps-agenda-admin-field__hint">Referência única usada no GPS, nas rotas e no contexto operacional.</p>
+                                    <textarea class="dps-agenda-admin-textarea" rows="4">Rua Exemplo, 123, Centro, São Paulo - SP</textarea>
+                                </div>
+                                <div class="dps-agenda-admin-form-actions">
+                                    <button class="dps-btn dps-btn--primary">Salvar configurações</button>
+                                </div>
+                            </div>
+                            <aside class="dps-agenda-admin-card dps-agenda-admin-card--subtle">
+                                <p class="dps-agenda-admin-eyebrow">Impacto operacional</p>
+                                <h3 class="dps-agenda-admin-subtitle">Onde isso aparece</h3>
+                                <ul class="dps-agenda-admin-list">
+                                    <li>Rotas na aba de detalhes</li>
+                                    <li>Contexto TaxiDog</li>
+                                    <li>Referência da operação diária</li>
+                                </ul>
+                            </aside>
+                        </div>
+                    </section>
+
+                    <section class="dps-agenda-admin-card">
+                        <div class="dps-agenda-admin-card__header">
+                            <div>
+                                <p class="dps-agenda-admin-eyebrow">Agenda + Google Workspace</p>
+                                <h2 class="dps-agenda-admin-subtitle">Integrações com Google Workspace</h2>
+                                <p class="dps-agenda-admin-description">A mesma linguagem visual do hub cobre conexão, status e toggles de sincronização.</p>
+                            </div>
+                            <div class="dps-agenda-admin-chips">
+                                <span class="dps-agenda-admin-chip">Google Calendar</span>
+                                <span class="dps-agenda-admin-chip">Google Tasks</span>
+                            </div>
+                        </div>
+                        <div class="dps-agenda-admin-card dps-agenda-admin-card--subtle dps-google-status-card">
+                            <div class="dps-google-status-card__header">
+                                <div>
+                                    <p class="dps-agenda-admin-eyebrow">Status da conexão</p>
+                                    <h3 class="dps-agenda-admin-subtitle"><span class="dps-google-status-card__icon">✓</span>Conectado ao Google</h3>
+                                </div>
+                                <span class="dps-agenda-admin-chip dps-agenda-admin-chip--success">Ativo</span>
+                            </div>
+                            <div class="dps-agenda-admin-chips">
+                                <span class="dps-agenda-admin-chip">Conectado em 11/03/2026 09:12</span>
+                                <span class="dps-agenda-admin-chip">Sincronização bidirecional ativa</span>
+                            </div>
+                        </div>
+                        <div class="dps-agenda-admin-card dps-agenda-admin-card--subtle">
+                            <p class="dps-agenda-admin-eyebrow">Sincronização</p>
+                            <h3 class="dps-agenda-admin-subtitle">Configurações de sincronização</h3>
+                            <div class="dps-google-toggle-list">
+                                <label class="dps-google-toggle"><input type="checkbox" checked><span class="dps-google-toggle__body"><span class="dps-google-toggle__title">Google Calendar</span><span class="dps-google-toggle__description">Eventos e remarcações sincronizados com a agenda.</span></span></label>
+                                <label class="dps-google-toggle"><input type="checkbox" checked><span class="dps-google-toggle__body"><span class="dps-google-toggle__title">Google Tasks</span><span class="dps-google-toggle__description">Follow-ups e cobranças enviados como tarefas administrativas.</span></span></label>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

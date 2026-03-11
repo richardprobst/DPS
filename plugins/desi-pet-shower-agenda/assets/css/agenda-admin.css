@@ -1,0 +1,468 @@
+﻿/**
+ * Agenda admin surfaces - DPS
+ * Material 3 Standard for Agenda hub, settings and integrations.
+ *
+ * Requer: dps-design-tokens.css
+ *
+ * @version 2.1.0
+ */
+
+.dps-agenda-admin-shell,
+.dps-agenda-admin-page {
+    font-family: var(--dps-font-system);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-agenda-admin-page {
+    display: grid;
+    gap: var(--dps-space-5);
+    max-width: 1320px;
+}
+
+.dps-agenda-admin-card {
+    display: grid;
+    gap: var(--dps-space-4);
+    padding: clamp(var(--dps-space-5), 1.4vw, var(--dps-space-6));
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-card);
+    box-shadow: var(--dps-elevation-1);
+}
+
+.dps-agenda-admin-card--subtle {
+    background: var(--dps-color-surface-container-low);
+    box-shadow: var(--dps-elevation-0);
+}
+
+.dps-agenda-admin-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--dps-space-4);
+    flex-wrap: wrap;
+}
+
+.dps-agenda-admin-eyebrow {
+    margin: 0 0 var(--dps-space-2);
+    color: var(--dps-color-primary);
+    font-size: var(--dps-typescale-label-medium-size);
+    font-weight: var(--dps-typescale-label-medium-weight);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.dps-agenda-admin-title,
+.dps-agenda-admin-subtitle {
+    margin: 0 0 var(--dps-space-2);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-agenda-admin-title {
+    font-size: var(--dps-typescale-headline-large-size);
+    line-height: var(--dps-typescale-headline-large-line);
+    font-weight: var(--dps-typescale-headline-large-weight);
+}
+
+.dps-agenda-admin-subtitle {
+    font-size: var(--dps-typescale-headline-small-size);
+    line-height: var(--dps-typescale-headline-small-line);
+    font-weight: var(--dps-typescale-headline-small-weight);
+}
+
+.dps-agenda-admin-description,
+.dps-agenda-admin-card__note,
+.dps-agenda-admin-field__description,
+.dps-agenda-admin-field__hint,
+.dps-dashboard-date-selector__description,
+.dps-dashboard-section-header p,
+.dps-dashboard-capacity-header p {
+    margin: 0;
+    color: var(--dps-color-on-surface-variant);
+    font-size: var(--dps-typescale-body-medium-size);
+    line-height: var(--dps-typescale-body-medium-line);
+}
+
+.dps-agenda-admin-notice {
+    padding: var(--dps-space-4) var(--dps-space-5);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+    font-size: var(--dps-typescale-body-medium-size);
+    line-height: var(--dps-typescale-body-medium-line);
+}
+
+.dps-agenda-admin-notice--success {
+    background: var(--dps-color-success-container);
+    border-color: color-mix(in srgb, var(--dps-color-success) 32%, var(--dps-color-success-container));
+    color: var(--dps-color-on-success-container);
+}
+
+.dps-agenda-admin-notice--info {
+    background: var(--dps-color-primary-container);
+    border-color: color-mix(in srgb, var(--dps-color-primary) 24%, var(--dps-color-primary-container));
+    color: var(--dps-color-on-primary-container);
+}
+
+.dps-agenda-admin-notice--warning {
+    background: var(--dps-color-warning-container);
+    border-color: color-mix(in srgb, var(--dps-color-warning) 32%, var(--dps-color-warning-container));
+    color: var(--dps-color-on-warning-container);
+}
+
+.dps-agenda-admin-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.95fr);
+    gap: var(--dps-space-5);
+}
+
+.dps-agenda-admin-form {
+    align-content: start;
+}
+
+.dps-agenda-admin-field {
+    display: grid;
+    gap: var(--dps-space-2);
+}
+
+.dps-agenda-admin-field__label {
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-label-large-size);
+    font-weight: var(--dps-typescale-label-large-weight);
+    line-height: var(--dps-typescale-label-large-line);
+}
+
+.dps-agenda-admin-textarea,
+.dps-dashboard-date-input,
+.dps-capacity-input-group input[type="number"] {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-input);
+    background: var(--dps-color-surface-container-lowest);
+    color: var(--dps-color-on-surface);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover), background var(--dps-motion-hover);
+}
+
+.dps-agenda-admin-textarea:focus,
+.dps-dashboard-date-input:focus,
+.dps-capacity-input-group input[type="number"]:focus {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
+    border-color: var(--dps-color-primary);
+    background: var(--dps-color-surface-container-lowest);
+}
+
+.dps-agenda-admin-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dps-space-3);
+    align-items: center;
+}
+
+.dps-agenda-admin-list,
+.dps-agenda-admin-steps {
+    display: grid;
+    gap: var(--dps-space-2);
+    margin: 0;
+    padding-left: 1.15rem;
+    color: var(--dps-color-on-surface-variant);
+}
+
+.dps-agenda-admin-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--dps-space-4);
+}
+
+.dps-agenda-admin-feature-card {
+    padding: var(--dps-space-4);
+    background: var(--dps-color-surface-container-low);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+}
+
+.dps-agenda-admin-feature-card h3,
+.dps-agenda-admin-feature-card h4 {
+    margin: 0 0 var(--dps-space-2);
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-title-medium-size);
+    line-height: var(--dps-typescale-title-medium-line);
+    font-weight: var(--dps-typescale-title-medium-weight);
+}
+
+.dps-agenda-admin-feature-card p {
+    margin: 0;
+    color: var(--dps-color-on-surface-variant);
+}
+
+.dps-agenda-admin-chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--dps-space-2);
+}
+
+.dps-agenda-admin-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 var(--dps-space-4);
+    background: var(--dps-color-surface-container);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-full);
+    color: var(--dps-color-on-surface-variant);
+    font-size: var(--dps-typescale-label-medium-size);
+    font-weight: var(--dps-typescale-label-medium-weight);
+}
+
+.dps-agenda-admin-chip--primary {
+    background: var(--dps-color-primary-container);
+    border-color: var(--dps-color-primary-container);
+    color: var(--dps-color-on-primary-container);
+}
+
+.dps-agenda-admin-chip--success,
+.dps-agenda-admin-chip--finalizado,
+.dps-agenda-admin-chip--finalizado_pago {
+    background: var(--dps-color-success-container);
+    border-color: color-mix(in srgb, var(--dps-color-success) 26%, var(--dps-color-success-container));
+    color: var(--dps-color-on-success-container);
+}
+
+.dps-agenda-admin-chip--warning,
+.dps-agenda-admin-chip--pendente {
+    background: var(--dps-color-warning-container);
+    border-color: color-mix(in srgb, var(--dps-color-warning) 26%, var(--dps-color-warning-container));
+    color: var(--dps-color-on-warning-container);
+}
+
+.dps-agenda-admin-chip--error,
+.dps-agenda-admin-chip--cancelado {
+    background: var(--dps-color-error-container);
+    border-color: color-mix(in srgb, var(--dps-color-error) 26%, var(--dps-color-error-container));
+    color: var(--dps-color-on-error-container);
+}
+
+.dps-agenda-admin-chip--status {
+    white-space: nowrap;
+}
+
+.dps-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 var(--dps-space-5);
+    border: 1px solid transparent;
+    border-radius: var(--dps-shape-full);
+    cursor: pointer;
+    font-size: var(--dps-typescale-label-large-size);
+    line-height: var(--dps-typescale-label-large-line);
+    font-weight: var(--dps-typescale-label-large-weight);
+    letter-spacing: var(--dps-typescale-label-large-tracking);
+    text-decoration: none;
+    transition: background var(--dps-motion-hover), border-color var(--dps-motion-hover), color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
+}
+
+.dps-btn:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
+}
+
+.dps-btn--primary {
+    background: var(--dps-color-primary);
+    border-color: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+    box-shadow: var(--dps-elevation-1);
+}
+
+.dps-btn--primary:hover {
+    background: var(--dps-color-primary-hover);
+    border-color: var(--dps-color-primary-hover);
+    color: var(--dps-color-on-primary);
+}
+
+.dps-btn--ghost {
+    background: transparent;
+    border-color: var(--dps-color-outline);
+    color: var(--dps-color-primary);
+}
+
+.dps-btn--ghost:hover {
+    background: color-mix(in srgb, var(--dps-color-primary) 10%, transparent);
+    color: var(--dps-color-primary);
+}
+
+.dps-btn--tonal {
+    background: var(--dps-color-secondary-container);
+    border-color: var(--dps-color-secondary-container);
+    color: var(--dps-color-on-secondary-container);
+}
+
+.dps-btn--tonal:hover {
+    background: color-mix(in srgb, var(--dps-color-secondary-container) 88%, white);
+    color: var(--dps-color-on-secondary-container);
+}
+
+.dps-btn--danger {
+    background: var(--dps-color-error-container);
+    border-color: color-mix(in srgb, var(--dps-color-error) 24%, var(--dps-color-error-container));
+    color: var(--dps-color-on-error-container);
+}
+
+.dps-btn--danger:hover {
+    background: color-mix(in srgb, var(--dps-color-error-container) 88%, white);
+    color: var(--dps-color-on-error-container);
+}
+
+.dps-btn--large {
+    min-height: 48px;
+    padding-inline: var(--dps-space-7);
+}
+
+.dps-admin-tabbed-page > h1 {
+    margin-bottom: var(--dps-space-4);
+}
+
+.dps-admin-tabbed-page .nav-tab-wrapper {
+    display: flex;
+    gap: var(--dps-space-2);
+    flex-wrap: wrap;
+    padding: var(--dps-space-2);
+    margin-bottom: var(--dps-space-5);
+    background: var(--dps-color-surface-container-low);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-full);
+}
+
+.dps-admin-tabbed-page .nav-tab {
+    margin: 0;
+    padding: 0.7rem 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--dps-shape-full);
+    background: transparent;
+    color: var(--dps-color-on-surface-variant);
+    font-size: var(--dps-typescale-label-large-size);
+    font-weight: var(--dps-typescale-label-large-weight);
+    transition: background var(--dps-motion-hover), color var(--dps-motion-hover), border-color var(--dps-motion-hover);
+}
+
+.dps-admin-tabbed-page .nav-tab:hover,
+.dps-admin-tabbed-page .nav-tab:focus-visible {
+    background: var(--dps-color-surface-container-lowest);
+    border-color: var(--dps-color-outline-variant);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-admin-tabbed-page .nav-tab-active,
+.dps-admin-tabbed-page .nav-tab-active:hover {
+    background: var(--dps-color-primary-container);
+    border-color: var(--dps-color-primary-container);
+    color: var(--dps-color-on-primary-container);
+}
+
+.dps-admin-tabbed-page .dps-tab-content {
+    margin-top: 0 !important;
+}
+
+.dps-google-status-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--dps-space-4);
+    flex-wrap: wrap;
+}
+
+.dps-google-status-card__icon {
+    margin-right: var(--dps-space-2);
+}
+
+.dps-google-toggle-list {
+    display: grid;
+    gap: var(--dps-space-3);
+}
+
+.dps-google-toggle {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--dps-space-3);
+    align-items: flex-start;
+    padding: var(--dps-space-4);
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+}
+
+.dps-google-toggle input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 0.15rem;
+    accent-color: var(--dps-color-primary);
+}
+
+.dps-google-toggle__body {
+    display: grid;
+    gap: var(--dps-space-1);
+}
+
+.dps-google-toggle__title {
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-title-small-size);
+    font-weight: var(--dps-typescale-title-small-weight);
+}
+
+.dps-google-toggle__description {
+    color: var(--dps-color-on-surface-variant);
+    font-size: var(--dps-typescale-body-medium-size);
+    line-height: var(--dps-typescale-body-medium-line);
+}
+
+.dps-agenda-admin-card code {
+    display: block;
+    width: 100%;
+    padding: var(--dps-space-3) var(--dps-space-4);
+    margin-top: var(--dps-space-2);
+    background: var(--dps-color-surface-container);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-small);
+    color: var(--dps-color-on-surface);
+    font-family: var(--dps-font-mono, Consolas, monospace);
+    font-size: var(--dps-typescale-body-small-size);
+    overflow-x: auto;
+}
+
+.dps-google-release-note {
+    gap: var(--dps-space-2);
+}
+
+@media (max-width: 960px) {
+    .dps-agenda-admin-grid,
+    .dps-agenda-admin-feature-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 782px) {
+    .dps-agenda-admin-shell .wrap,
+    .dps-agenda-admin-page {
+        gap: var(--dps-space-4);
+    }
+
+    .dps-admin-tabbed-page .nav-tab-wrapper,
+    .dps-agenda-admin-card__header,
+    .dps-google-status-card__header,
+    .dps-agenda-admin-form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dps-agenda-admin-chips {
+        justify-content: flex-start;
+    }
+
+    .dps-btn,
+    .dps-dashboard-submit {
+        width: 100%;
+    }
+}

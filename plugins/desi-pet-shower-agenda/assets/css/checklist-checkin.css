@@ -807,3 +807,89 @@
     white-space: nowrap;
     max-width: 200px;
 }
+
+/* M3 detail panels normalization */
+.dps-checklist-panel,
+.dps-checkin-panel {
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+    padding: var(--dps-space-5);
+    box-shadow: var(--dps-elevation-0);
+}
+
+.dps-checklist-panel h4,
+.dps-checkin-panel h4 {
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-title-small-size);
+    line-height: var(--dps-typescale-title-small-line);
+    font-weight: var(--dps-typescale-title-small-weight);
+}
+
+.dps-checklist-btn,
+.dps-checkin-btn,
+.dps-expand-panels-btn {
+    border-radius: var(--dps-shape-full);
+    font-weight: var(--dps-typescale-label-large-weight);
+}
+
+.dps-checkin-status-badge--pending,
+.dps-safety-tag--info {
+    background: var(--dps-color-surface-container);
+    color: var(--dps-color-on-surface-variant);
+    border: 1px solid var(--dps-color-outline-variant);
+}
+
+.dps-checkin-status-badge--in,
+.dps-safety-tag--success {
+    background: var(--dps-color-success-container);
+    color: var(--dps-color-on-success-container);
+}
+
+.dps-checkin-status-badge--out {
+    background: var(--dps-color-primary-container);
+    color: var(--dps-color-on-primary-container);
+}
+
+.dps-checkin-status-badge--duration,
+.dps-safety-tag--warning {
+    background: var(--dps-color-warning-container);
+    color: var(--dps-color-on-warning-container);
+}
+
+.dps-safety-tag--alert {
+    background: var(--dps-color-error-container);
+    color: var(--dps-color-on-error-container);
+}
+
+.dps-safety-item,
+.dps-checkin-observations textarea,
+.dps-safety-item-notes {
+    border-radius: var(--dps-shape-medium);
+    border-color: var(--dps-color-outline-variant);
+}
+
+.dps-expand-panels-btn {
+    background: var(--dps-color-surface-container-lowest);
+    border-color: var(--dps-color-outline-variant);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-expand-panels-btn:hover,
+.dps-expand-panels-btn[aria-expanded="true"] {
+    background: var(--dps-color-primary-container);
+    border-color: var(--dps-color-primary);
+    color: var(--dps-color-on-primary-container);
+    box-shadow: var(--dps-elevation-1);
+}
+
+.dps-detail-row td {
+    background: transparent;
+}
+
+.dps-detail-panels {
+    padding: var(--dps-space-4);
+    background: var(--dps-color-surface-container-low);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-large);
+}

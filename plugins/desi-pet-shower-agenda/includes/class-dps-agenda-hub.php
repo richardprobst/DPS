@@ -43,7 +43,7 @@ class DPS_Agenda_Hub {
      * Construtor privado.
      */
     private function __construct() {
-        add_action( 'admin_menu', [ $this, 'register_hub_menu' ], 19 ); // Antes dos submenus antigos
+        add_action( 'admin_menu', [ $this, 'register_hub_menu' ], 19 );
     }
 
     /**
@@ -76,6 +76,18 @@ class DPS_Agenda_Hub {
             'capacity'  => [ $this, 'render_capacity_tab' ],
         ];
 
+        $tabs = apply_filters( 'dps_agenda_hub_tabs', $tabs );
+
+        foreach ( array_keys( $tabs ) as $slug ) {
+            if ( isset( $callbacks[ $slug ] ) ) {
+                continue;
+            }
+
+            $callbacks[ $slug ] = function() use ( $slug ) {
+                do_action( 'dps_agenda_hub_tab_content_' . $slug );
+            };
+        }
+
         DPS_Admin_Tabs_Helper::render_tabbed_page(
             __( 'Agenda', 'dps-agenda-addon' ),
             $tabs,
@@ -94,12 +106,11 @@ class DPS_Agenda_Hub {
             ob_start();
             $addon->render_dashboard_admin_page();
             $content = ob_get_clean();
-            
-            // Remove o wrapper e H1 duplicado
+
             $content = preg_replace( '/^<div class="wrap[^>]*">/i', '', $content );
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
-            
+
             echo wp_kses_post( $content );
         }
     }
@@ -113,12 +124,11 @@ class DPS_Agenda_Hub {
             ob_start();
             $addon->render_settings_admin_page();
             $content = ob_get_clean();
-            
-            // Remove o wrapper e H1 duplicado
+
             $content = preg_replace( '/^<div class="wrap[^>]*">/i', '', $content );
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
-            
+
             echo wp_kses_post( $content );
         }
     }
@@ -128,22 +138,45 @@ class DPS_Agenda_Hub {
      */
     public function render_capacity_tab() {
         ?>
-        <div class="dps-capacity-placeholder">
-            <div class="notice notice-info inline">
-                <p>
-                    <strong><?php esc_html_e( 'Gerenciamento de Capacidade', 'dps-agenda-addon' ); ?></strong><br>
-                    <?php esc_html_e( 'Esta funcionalidade está em desenvolvimento. Em breve você poderá configurar limites de agendamentos por horário, dia da semana e período.', 'dps-agenda-addon' ); ?>
-                </p>
-            </div>
+        <div class="dps-agenda-admin-page dps-agenda-hub-placeholder">
+            <section class="dps-agenda-admin-card">
+                <div class="dps-agenda-admin-card__header">
+                    <div>
+                        <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'Agenda', 'dps-agenda-addon' ); ?></p>
+                        <h2 class="dps-agenda-admin-subtitle"><?php esc_html_e( 'Gerenciamento de Capacidade', 'dps-agenda-addon' ); ?></h2>
+                        <p class="dps-agenda-admin-description">
+                            <?php esc_html_e( 'Esta aba prepara a evolução da Agenda para uma leitura mais previsível de ocupação, limites e bloqueios operacionais.', 'dps-agenda-addon' ); ?>
+                        </p>
+                    </div>
+                    <div class="dps-agenda-admin-chips">
+                        <span class="dps-agenda-admin-chip dps-agenda-admin-chip--primary"><?php esc_html_e( 'Em planejamento', 'dps-agenda-addon' ); ?></span>
+                        <span class="dps-agenda-admin-chip"><?php esc_html_e( 'Capacidade semanal', 'dps-agenda-addon' ); ?></span>
+                    </div>
+                </div>
 
-            <h2><?php esc_html_e( 'Funcionalidades Planejadas', 'dps-agenda-addon' ); ?></h2>
-            <ul style="line-height: 2; margin-left: 20px;">
-                <li><?php esc_html_e( '✓ Limite de agendamentos simultâneos por horário', 'dps-agenda-addon' ); ?></li>
-                <li><?php esc_html_e( '✓ Configuração de capacidade por dia da semana', 'dps-agenda-addon' ); ?></li>
-                <li><?php esc_html_e( '✓ Bloqueio de horários específicos', 'dps-agenda-addon' ); ?></li>
-                <li><?php esc_html_e( '✓ Alertas de sobrecarga', 'dps-agenda-addon' ); ?></li>
-                <li><?php esc_html_e( '✓ Relatório de ocupação', 'dps-agenda-addon' ); ?></li>
-            </ul>
+                <div class="dps-agenda-admin-notice dps-agenda-admin-notice--info">
+                    <?php esc_html_e( 'A leitura de capacidade completa já está disponível no Dashboard operacional. Esta aba ficará dedicada à configuração avançada do recurso.', 'dps-agenda-addon' ); ?>
+                </div>
+
+                <div class="dps-agenda-admin-feature-grid">
+                    <article class="dps-agenda-admin-feature-card">
+                        <h3><?php esc_html_e( 'Limites por horário', 'dps-agenda-addon' ); ?></h3>
+                        <p><?php esc_html_e( 'Definir teto operacional por faixa horária para evitar sobrecarga em momentos críticos.', 'dps-agenda-addon' ); ?></p>
+                    </article>
+                    <article class="dps-agenda-admin-feature-card">
+                        <h3><?php esc_html_e( 'Capacidade por dia', 'dps-agenda-addon' ); ?></h3>
+                        <p><?php esc_html_e( 'Ajustar a leitura da semana conforme escala, equipe e perfil de demanda de cada dia.', 'dps-agenda-addon' ); ?></p>
+                    </article>
+                    <article class="dps-agenda-admin-feature-card">
+                        <h3><?php esc_html_e( 'Bloqueios pontuais', 'dps-agenda-addon' ); ?></h3>
+                        <p><?php esc_html_e( 'Reservar períodos para manutenção, encaixes prioritários ou indisponibilidades temporárias.', 'dps-agenda-addon' ); ?></p>
+                    </article>
+                    <article class="dps-agenda-admin-feature-card">
+                        <h3><?php esc_html_e( 'Alertas de sobrecarga', 'dps-agenda-addon' ); ?></h3>
+                        <p><?php esc_html_e( 'Identificar rapidamente quando a semana estiver acima do volume seguro para a operação.', 'dps-agenda-addon' ); ?></p>
+                    </article>
+                </div>
+            </section>
         </div>
         <?php
     }
