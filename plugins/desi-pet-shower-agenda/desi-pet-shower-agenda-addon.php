@@ -178,7 +178,27 @@ class DPS_Agenda_Addon {
     const STATUS_FINISHED = 'finalizado';
     const STATUS_PAID = 'finalizado_pago';
     const STATUS_CANCELED = 'cancelado';
-    
+
+    /**
+     * Retorna a URL do endpoint AJAX em formato relativo.
+     *
+     * A agenda roda em pagina frontend e pode ficar atras de proxy/CDN.
+     * O caminho relativo evita mixed content e falhas de mesma origem
+     * quando o esquema detectado pelo WordPress nao coincide com o da pagina.
+     *
+     * @since 2.0.2
+     * @return string
+     */
+    private static function get_frontend_ajax_url() {
+        $ajax_url = admin_url( 'admin-ajax.php', 'relative' );
+
+        if ( ! is_string( $ajax_url ) || '' === $ajax_url ) {
+            $ajax_url = admin_url( 'admin-ajax.php' );
+        }
+
+        return $ajax_url;
+    }
+
     /**
      * Retorna configuração de status com labels, cores e ícones.
      *
@@ -1048,7 +1068,7 @@ class DPS_Agenda_Addon {
             );
 
             wp_localize_script( 'dps-checklist-checkin', 'DPS_Checklist_Checkin', [
-                'ajax'            => admin_url( 'admin-ajax.php' ),
+                'ajax'            => self::get_frontend_ajax_url(),
                 'nonce_checklist' => wp_create_nonce( 'dps_checklist' ),
                 'nonce_checkin'   => wp_create_nonce( 'dps_checkin' ),
                 'messages'        => [
@@ -1069,7 +1089,7 @@ class DPS_Agenda_Addon {
             ] );
             
             wp_localize_script( 'dps-appointment-form', 'dpsAppointmentData', [
-                'ajaxurl' => admin_url( 'admin-ajax.php' ),
+                'ajaxurl' => self::get_frontend_ajax_url(),
                 'nonce'   => wp_create_nonce( 'dps_action' ),
                 'appointmentId' => 0,
                 'l10n' => [
@@ -1138,7 +1158,7 @@ class DPS_Agenda_Addon {
             ] );
 
             wp_localize_script( 'dps-agenda-addon', 'DPS_AG_Addon', [
-                'ajax'          => admin_url( 'admin-ajax.php' ),
+                'ajax'          => self::get_frontend_ajax_url(),
                 'nonce_status'  => wp_create_nonce( 'dps_update_status' ),
                 'nonce_services'=> wp_create_nonce( 'dps_get_services_details' ),
                 'nonce_export_pdf' => wp_create_nonce( 'dps_agenda_export_pdf' ),
@@ -3726,7 +3746,7 @@ class DPS_Agenda_Addon {
         $calendar_attrs = sprintf(
             'id="dps-calendar-container" class="dps-calendar" data-date="%s" data-ajax="%s" data-nonce="%s"',
             esc_attr( $selected_date ),
-            esc_attr( admin_url( 'admin-ajax.php' ) ),
+            esc_attr( self::get_frontend_ajax_url() ),
             esc_attr( wp_create_nonce( 'dps_agenda_calendar' ) )
         );
         echo '<div ' . $calendar_attrs . '>';

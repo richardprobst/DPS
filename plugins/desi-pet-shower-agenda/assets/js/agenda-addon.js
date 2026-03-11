@@ -460,6 +460,35 @@
     return parsedRows.first();
   }
 
+  function parseAjaxPayload(text){
+    if ( ! text || typeof text !== 'string' ) {
+      return null;
+    }
+
+    var trimmed = text.trim();
+    if ( ! trimmed ) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(trimmed);
+    } catch (error) {
+      // Continua: alguns proxies/plugins injetam HTML antes do JSON.
+    }
+
+    var start = trimmed.indexOf('{');
+    var end = trimmed.lastIndexOf('}');
+    if ( start === -1 || end === -1 || end <= start ) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(trimmed.slice(start, end + 1));
+    } catch (error) {
+      return null;
+    }
+  }
+
   function getAjaxErrorMessage(xhr, fallback){
     if ( xhr && xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message ) {
       return xhr.responseJSON.data.message;
@@ -467,6 +496,22 @@
     if ( xhr && xhr.responseJSON && xhr.responseJSON.message ) {
       return xhr.responseJSON.message;
     }
+
+    var parsed = xhr && xhr.responseText ? parseAjaxPayload(xhr.responseText) : null;
+    if ( parsed && parsed.data && parsed.data.message ) {
+      return parsed.data.message;
+    }
+    if ( parsed && parsed.message ) {
+      return parsed.message;
+    }
+
+    if ( xhr && xhr.responseText && /Fatal error|Parse error|Falha|Permiss|nonce|admin-ajax/i.test(xhr.responseText) ) {
+      var text = $('<div>').html(xhr.responseText).text().replace(/\s+/g, ' ').trim();
+      if ( text ) {
+        return text.slice(0, 220);
+      }
+    }
+
     return fallback;
   }
 
@@ -635,8 +680,8 @@
           window.location.href = redirect;
         }, 350);
       }
-    }).fail(function(){
-      renderModalMessages('', getMessage('saveError', 'NÃ£o foi possÃ­vel salvar o agendamento.'));
+    }).fail(function(xhr){
+      renderModalMessages('', getAjaxErrorMessage(xhr, getMessage('saveError', 'Nao foi possivel salvar o agendamento.')));
     }).always(function(){
       submitBtn.removeClass('is-loading').prop('disabled', false);
     });
@@ -745,8 +790,8 @@
         showToast(resp.data ? resp.data.message : getMessage('error', 'Erro ao reagendar.'), 'error');
         btn.prop('disabled', false).text(getMessage('save', 'Salvar'));
       }
-    }).fail(function(){
-      showToast(getMessage('error', 'Erro ao reagendar.'), 'error');
+    }).fail(function(xhr){
+      showToast(getAjaxErrorMessage(xhr, getMessage('error', 'Erro ao reagendar.')), 'error');
       btn.prop('disabled', false).text(getMessage('save', 'Salvar'));
     });
   });
@@ -1228,8 +1273,8 @@
       } else {
         showToast(resp && resp.data ? resp.data.message : 'Erro ao carregar serviÃ§os.', 'error');
       }
-    }).fail(function(){
-      showToast('Erro de comunicaÃ§Ã£o.', 'error');
+    }).fail(function(xhr){
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
     }).always(function(){
       btn.prop('disabled', false);
     });
