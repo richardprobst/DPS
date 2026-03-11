@@ -1385,9 +1385,10 @@ class DPS_Agenda_Addon {
         $all_view_args = array_merge( $nav_args, [ 'show_all' => '1' ] );
         $focused_view_args = array_merge( $nav_args, [ 'dps_date' => $selected_date, 'view' => $view ] );
         $current_tab = isset( $_GET['agenda_tab'] ) ? sanitize_text_field( $_GET['agenda_tab'] ) : 'visao-rapida';
-        $scope_label         = $this->get_agenda_scope_label( $selected_date, $view, ! empty( $show_all ) );
-        $group_by_client     = isset( $_GET['group_by_client'] ) && '1' === sanitize_text_field( $_GET['group_by_client'] );
-        $clear_filters_args  = [
+        $scope_label        = $this->get_agenda_scope_label( $selected_date, $view, ! empty( $show_all ) );
+        $header_description = $this->get_agenda_context_description( $view, ! empty( $show_all ) );
+        $group_by_client    = isset( $_GET['group_by_client'] ) && '1' === sanitize_text_field( $_GET['group_by_client'] );
+        $clear_filters_args = [
             'dps_date'   => $selected_date,
             'view'       => $view,
             'agenda_tab' => $current_tab,
@@ -1400,21 +1401,14 @@ class DPS_Agenda_Addon {
         echo '<div class="dps-agenda-title">';
         echo '<span class="dps-agenda-kicker">' . esc_html__( 'Visao operacional', 'dps-agenda-addon' ) . '</span>';
         echo '<h3>' . esc_html__( 'Agenda de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
-        echo '<p class="dps-agenda-subtitle">' . esc_html( $scope_label ) . '</p>';
+        echo '<p class="dps-agenda-subtitle">' . esc_html( $header_description ) . '</p>';
         echo '</div>';
 
         echo '<div class="dps-agenda-header-nav">';
-        if ( ! $show_all ) {
-            $date_display = date_i18n( 'd/m/Y', strtotime( $selected_date ) );
-            echo '<span class="dps-current-date" title="' . esc_attr__( 'Data atual', 'dps-agenda-addon' ) . '">';
-            echo '<strong>' . esc_html( $date_display ) . '</strong>';
-            echo '</span>';
-        } else {
-            echo '<span class="dps-current-date">';
-            echo '<strong>' . esc_html__( 'Todos os agendamentos', 'dps-agenda-addon' ) . '</strong>';
-            echo '</span>';
-        }
-
+        echo '<span class="dps-current-date" title="' . esc_attr__( 'Periodo em foco', 'dps-agenda-addon' ) . '">';
+        echo '<span class="dps-current-date__label">' . esc_html__( 'Periodo ativo', 'dps-agenda-addon' ) . '</span>';
+        echo '<strong>' . esc_html( $scope_label ) . '</strong>';
+        echo '</span>';
         echo '<div class="dps-date-nav">';
         echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--prev" title="' . esc_attr( $is_week_view ? __( 'Ver periodo anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '">';
         echo '&larr;';
@@ -1431,9 +1425,6 @@ class DPS_Agenda_Addon {
         echo '<div class="dps-agenda-header-actions">';
         echo '<button type="button" class="dps-btn dps-btn--primary" data-dps-open-appointment-modal>';
         echo esc_html__( 'Novo agendamento', 'dps-agenda-addon' );
-        echo '</button>';
-        echo '<button type="button" class="dps-btn dps-btn--soft dps-export-pdf-btn" data-date="' . esc_attr( $selected_date ) . '" data-view="' . esc_attr( $view ) . '">';
-        echo esc_html__( 'Imprimir', 'dps-agenda-addon' );
         echo '</button>';
         echo '</div>';
         echo '</header>';

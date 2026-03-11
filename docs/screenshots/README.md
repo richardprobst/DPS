@@ -20,6 +20,7 @@ Este diretório centraliza registros visuais padronizados do sistema DPS.
   - [2026-03-09 - Portal do Cliente e Agenda](2026-03-09/SCREENSHOTS_2026-03-09.md)
   - [2026-03-10 - Agenda (remocao de blocos contextuais)](2026-03-10/SCREENSHOTS_2026-03-10.md)
   - [2026-03-11 - Agenda (abas junto da lista de atendimentos)](2026-03-11/SCREENSHOTS_2026-03-11.md)
+  - [2026-03-11 - Agenda (bloco Visao operacional)](2026-03-11/SCREENSHOTS_2026-03-11_visao-operacional.md)
   - [2026-03-08 - Space Groomers Fase 3 e resumo sincronizado no portal](2026-03-08/SCREENSHOTS_2026-03-08.md)
 
 ## Regras obrigatórias para novas mudanças visuais

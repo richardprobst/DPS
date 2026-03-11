@@ -361,6 +361,29 @@ trait DPS_Agenda_Renderer {
         return sprintf( __( 'Dia %s', 'dps-agenda-addon' ), date_i18n( 'd/m/Y', $timestamp ) );
     }
 
+
+    /**
+     * Build supporting copy for the operational header without repeating the period.
+     *
+     * @param string $view Current view.
+     * @param bool   $show_all Whether the full agenda is active.
+     * @return string
+     */
+    private function get_agenda_context_description( $view, $show_all ) {
+        if ( $show_all ) {
+            return __( 'Panorama consolidado para acompanhar volume, pendencias e proximos passos da operacao.', 'dps-agenda-addon' );
+        }
+
+        if ( 'week' === $view ) {
+            return __( 'Leitura semanal com indicadores, navegacao rapida e acoes alinhadas no mesmo bloco.', 'dps-agenda-addon' );
+        }
+
+        if ( 'calendar' === $view ) {
+            return __( 'Visao mensal para distribuir capacidade, localizar datas e agir sem perder contexto.', 'dps-agenda-addon' );
+        }
+
+        return __( 'Leitura do dia com foco em horarios, status, pagamentos e proximas acoes da equipe.', 'dps-agenda-addon' );
+    }
     /**
      * Summarize the filtered appointment set for the agenda overview.
      *
