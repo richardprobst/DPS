@@ -1587,15 +1587,6 @@ class DPS_Agenda_Addon {
         
         // FASE 6: Sistema de abas para reorganizar visualização
         
-        echo '<div class="dps-agenda-tabs-wrapper">';
-        
-        // Cabeçalho das abas com título e descrição
-        echo '<div class="dps-agenda-tabs-header">';
-        echo '<h3 class="dps-agenda-tabs-title">📋 ' . esc_html__( 'Lista de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
-        echo '</div>';
-        
-        echo '<nav class="dps-agenda-tabs-nav" role="tablist">';
-        
         // Definir abas com ícones e descrições
         $tabs = [
             'visao-rapida' => [
@@ -1614,22 +1605,6 @@ class DPS_Agenda_Addon {
                 'desc'  => __( 'Logística e TaxiDog', 'dps-agenda-addon' ),
             ],
         ];
-        
-        foreach ( $tabs as $tab_id => $tab_data ) {
-            $is_active = ( $current_tab === $tab_id );
-            $tab_class = 'dps-agenda-tab-button' . ( $is_active ? ' dps-agenda-tab-button--active' : '' );
-            
-            echo '<button type="button" id="dps-agenda-tab-' . esc_attr( $tab_id ) . '" class="' . esc_attr( $tab_class ) . '" data-tab="' . esc_attr( $tab_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="dps-tab-content-' . esc_attr( $tab_id ) . '" title="' . esc_attr( $tab_data['desc'] ) . '" tabindex="' . ( $is_active ? '0' : '-1' ) . '">';
-            echo '<span class="dps-tab-icon">' . $tab_data['icon'] . '</span>';
-            echo '<span class="dps-tab-label">' . esc_html( $tab_data['label'] ) . '</span>';
-            echo '<span class="dps-tab-desc">' . esc_html( $tab_data['desc'] ) . '</span>';
-            echo '</button>';
-        }
-        
-        echo '</nav>';
-        
-        // Container para conteúdo das abas
-        echo '<div class="dps-agenda-tabs-content">';
         
         // Inicializa variáveis e coleta dados de todos os dias primeiro
         $has_any = false;
@@ -1929,6 +1904,30 @@ class DPS_Agenda_Addon {
             echo '</article>';
         }
         echo '</section>';
+        echo '<div class="dps-agenda-tabs-wrapper">';
+
+        // Header da lista de atendimentos.
+        echo '<div class="dps-agenda-tabs-header">';
+        echo '<h3 class="dps-agenda-tabs-title">&#128203; ' . esc_html__( 'Lista de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
+        echo '</div>';
+
+        echo '<nav class="dps-agenda-tabs-nav" role="tablist">';
+
+        foreach ( $tabs as $tab_id => $tab_data ) {
+            $is_active = ( $current_tab === $tab_id );
+            $tab_class = 'dps-agenda-tab-button' . ( $is_active ? ' dps-agenda-tab-button--active' : '' );
+
+            echo '<button type="button" id="dps-agenda-tab-' . esc_attr( $tab_id ) . '" class="' . esc_attr( $tab_class ) . '" data-tab="' . esc_attr( $tab_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="dps-tab-content-' . esc_attr( $tab_id ) . '" title="' . esc_attr( $tab_data['desc'] ) . '" tabindex="' . ( $is_active ? '0' : '-1' ) . '">';
+            echo '<span class="dps-tab-icon">' . $tab_data['icon'] . '</span>';
+            echo '<span class="dps-tab-label">' . esc_html( $tab_data['label'] ) . '</span>';
+            echo '<span class="dps-tab-desc">' . esc_html( $tab_data['desc'] ) . '</span>';
+            echo '</button>';
+        }
+
+        echo '</nav>';
+
+        // Container para conteudo das abas.
+        echo '<div class="dps-agenda-tabs-content">';
         // FASE 4: Renderiza conteudo das abas (uma unica vez, fora do loop de dias)
         if ( $group_by_client && ! empty( $all_filtered_appointments ) ) {
             $this->render_grouped_by_client( $all_filtered_appointments, $column_labels );

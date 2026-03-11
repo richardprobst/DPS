@@ -165,6 +165,10 @@
     border-style: solid;
 }
 
+.dps-agenda-tabs-wrapper {
+    margin-top: 0;
+}
+
 .dps-context-actions {
     color: var(--dps-color-on-surface-variant);
     font-weight: var(--dps-typescale-label-large-weight);
