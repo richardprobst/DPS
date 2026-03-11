@@ -1446,17 +1446,6 @@ class DPS_Agenda_Addon {
         echo '</div>';
         echo '</div>';
 
-        echo '<div class="dps-agenda-context-bar">';
-        echo '<div class="dps-context-meta">';
-        if ( 'calendar' === $view ) {
-            echo '<span class="dps-context-pill dps-context-pill--accent">' . esc_html__( 'Calendario mensal', 'dps-agenda-addon' ) . '</span>';
-            echo '<span class="dps-context-hint">' . esc_html__( 'A visualizacao mensal prioriza navegacao rapida por data e leitura do volume da agenda.', 'dps-agenda-addon' ) . '</span>';
-        } else {
-            echo '<span class="dps-context-pill dps-context-pill--accent">' . esc_html( $scope_label ) . '</span>';
-            echo '<span class="dps-context-hint">' . esc_html__( 'Use as abas para acompanhar a operacao sem poluicao visual de filtros adicionais.', 'dps-agenda-addon' ) . '</span>';
-        }
-        echo '</div>';
-        echo '</div>';
         // Inicializa variaveis de filtro (ja foram obtidas acima no formulario unificado)
         if ( $view === 'calendar' ) {
             $filter_client  = 0;
@@ -1901,15 +1890,6 @@ class DPS_Agenda_Addon {
         $has_filtered_results = ! empty( $all_filtered_appointments );
         $overview_stats = $this->get_agenda_overview_stats( $all_filtered_appointments );
 
-        echo '<div class="dps-agenda-context-bar">';
-        echo '<div class="dps-context-meta">';
-        echo '<span class="dps-context-pill dps-context-pill--accent">' . esc_html( $scope_label ) . '</span>';
-        echo '<span class="dps-context-hint">' . esc_html__( 'Resumo operacional em tempo real da agenda.', 'dps-agenda-addon' ) . '</span>';
-        echo '</div>';
-        echo '<div class="dps-context-actions">';
-        echo '<span class="dps-context-btn">' . sprintf( esc_html__( '%d atendimentos no escopo atual', 'dps-agenda-addon' ), (int) $overview_stats['total'] ) . '</span>';
-        echo '</div>';
-        echo '</div>';
 
         $overview_cards = [
             [ 'label' => __( 'Total', 'dps-agenda-addon' ), 'value' => $overview_stats['total'], 'tone' => 'primary' ],
