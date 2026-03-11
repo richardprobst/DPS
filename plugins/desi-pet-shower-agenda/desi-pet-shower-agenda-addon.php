@@ -308,6 +308,7 @@ class DPS_Agenda_Addon {
 
         // AJAX para obter detalhes de serviços de um agendamento (apenas usuários autenticados)
         add_action( 'wp_ajax_dps_get_services_details', [ $this, 'get_services_details_ajax' ] );
+        add_action( 'wp_ajax_nopriv_dps_get_services_details', [ $this, 'get_services_details_ajax' ] );
 
         // FASE 2: AJAX para exportação CSV da agenda (mantido por compatibilidade)
         
@@ -2210,196 +2211,226 @@ class DPS_Agenda_Addon {
      *                   Mantido por compatibilidade, mas delega para API quando disponível.
      */
     public function get_services_details_ajax() {
-        // Apenas administradores podem consultar detalhes de serviços. Garante que usuários não
-        // autenticados ou sem permissão não exponham dados. Caso contrário, retorna erro.
+        // Apenas administradores podem consultar detalhes de servi?os. Garante que usu?rios n?o
+        // autenticados ou sem permiss?o n?o exponham dados. Caso contr?rio, retorna erro.
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
             wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
         }
-        // SEGURANÇA: Verificação de nonce obrigatória para prevenir CSRF
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+
+        // SEGURAN?A: verifica??o de nonce obrigat?ria para prevenir CSRF.
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_get_services_details' ) ) {
             wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
         }
-        $id_param  = isset( $_POST['appt_id'] ) ? intval( $_POST['appt_id'] ) : 0;
+
+        $id_param = isset( $_POST['appt_id'] ) ? intval( wp_unslash( $_POST['appt_id'] ) ) : 0;
         if ( ! $id_param ) {
-            // Compatibilidade: aceita "id" como fallback
-            $id_param = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : 0;
+            // Compatibilidade: aceita "id" como fallback.
+            $id_param = isset( $_POST['id'] ) ? intval( wp_unslash( $_POST['id'] ) ) : 0;
         }
         if ( ! $id_param ) {
             wp_send_json_error( [ 'message' => __( 'ID inválido.', 'dps-agenda-addon' ) ] );
         }
-        
-        // Busca observações do agendamento
-        $appt_notes = get_post_meta( $id_param, 'appointment_notes', true );
-        
-        // Verifica se TaxiDog foi solicitado e seu valor
-        $taxidog_requested = get_post_meta( $id_param, 'appointment_taxidog', true );
-        $taxidog_price = 0;
-        if ( $taxidog_requested ) {
-            $taxidog_price = (float) get_post_meta( $id_param, 'appointment_taxidog_price', true );
+
+        $appointment = get_post( $id_param );
+        if ( ! $appointment || 'dps_agendamento' !== $appointment->post_type ) {
+            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
         }
 
-        // Busca informações do pet para exibir no modal
-        $pet_id   = get_post_meta( $id_param, 'appointment_pet_id', true );
-        if ( ! $pet_id ) {
-            $pet_id = get_post_meta( $id_param, 'appointment_pet', true );
-        }
-        $pet_info = [];
-        if ( $pet_id ) {
-            $pet_post = get_post( $pet_id );
-            if ( $pet_post ) {
-                $pet_info = [
-                    'name'   => $pet_post->post_title,
-                    'size'   => get_post_meta( $pet_id, 'pet_size', true ),
-                    'breed'  => get_post_meta( $pet_id, 'pet_breed', true ),
-                    'weight' => get_post_meta( $pet_id, 'pet_weight', true ),
-                ];
-            }
+        try {
+            $payload = $this->build_services_details_payload( $id_param );
+        } catch ( Throwable $exception ) {
+            wp_send_json_error(
+                [ 'message' => __( 'Não foi possível carregar os serviços deste atendimento.', 'dps-agenda-addon' ) ],
+                500
+            );
         }
 
-        // Delega para Services API se disponível (recomendado)
-        if ( class_exists( 'DPS_Services_API' ) ) {
-            $details = DPS_Services_API::get_services_details( $id_param );
-            $services_basic = $details['services'];
-            
-            // Enriquece dados dos serviços com informações adicionais úteis para o funcionário
-            $service_ids = get_post_meta( $id_param, 'appointment_services', true );
-            $services = [];
-            $total_duration = 0;
-            
-            if ( is_array( $service_ids ) ) {
-                foreach ( $service_ids as $idx => $sid ) {
-                    $srv_data = DPS_Services_API::get_service( $sid );
-                    if ( $srv_data ) {
-                        // Busca o preço do serviço básico
-                        $basic_price = isset( $services_basic[ $idx ]['price'] ) ? $services_basic[ $idx ]['price'] : $srv_data['price'];
-                        
-                        // Determina duração baseada no porte do pet
-                        $pet_size = isset( $pet_info['size'] ) ? $pet_info['size'] : '';
-                        $duration = $this->get_service_duration_for_pet_size( $sid, $pet_size );
-                        $total_duration += $duration;
-                        
-                        $services[] = [
-                            'name'        => $srv_data['title'],
-                            'price'       => (float) $basic_price,
-                            'type'        => $srv_data['type'],
-                            'category'    => $srv_data['category'],
-                            'description' => $srv_data['description'],
-                            'duration'    => $duration,
-                        ];
-                    }
-                }
+        wp_send_json_success( $payload );
+    }
+
+    /**
+     * Monta o payload do modal de servi?os do atendimento.
+     *
+     * @param int $appointment_id ID do agendamento.
+     * @return array
+     */
+    private function build_services_details_payload( $appointment_id ) {
+        $appt_notes        = $this->normalize_services_modal_text( get_post_meta( $appointment_id, 'appointment_notes', true ), true );
+        $taxidog_requested = ! empty( get_post_meta( $appointment_id, 'appointment_taxidog', true ) );
+        $taxidog_price     = $taxidog_requested ? (float) get_post_meta( $appointment_id, 'appointment_taxidog_price', true ) : 0.0;
+        $pet_info          = $this->get_services_modal_pet_info( $appointment_id );
+        $pet_size          = $pet_info['size'] ?? '';
+        $service_ids       = get_post_meta( $appointment_id, 'appointment_services', true );
+        $service_prices    = get_post_meta( $appointment_id, 'appointment_service_prices', true );
+        $service_ids       = is_array( $service_ids ) ? array_values( array_filter( array_map( 'absint', $service_ids ) ) ) : [];
+        $service_prices    = is_array( $service_prices ) ? $service_prices : [];
+        $services          = [];
+        $total_duration    = 0;
+
+        foreach ( $service_ids as $service_id ) {
+            $service_data = $this->get_service_details_entry( $service_id, $pet_size, $service_prices );
+            if ( null === $service_data ) {
+                continue;
             }
-            
-            // Adiciona TaxiDog como serviço se foi solicitado
-            if ( $taxidog_requested ) {
-                $services[] = [
-                    'name'       => __( 'TaxiDog', 'dps-agenda-addon' ),
-                    'price'      => $taxidog_price,
-                    'is_taxidog' => true,
-                    'type'       => 'extra',
-                    'category'   => 'transporte',
-                    'duration'   => 0,
-                ];
-            }
-            
-            wp_send_json_success( [
-                'services'       => $services,
-                'notes'          => $appt_notes,
-                'pet'            => $pet_info,
-                'total_duration' => $total_duration,
-            ] );
+
+            $total_duration += $service_data['duration'];
+            $services[]      = $service_data;
         }
 
-        // Fallback: implementação legada (mantida se Services Add-on não estiver ativo)
-        $service_ids    = get_post_meta( $id_param, 'appointment_services', true );
-        $service_prices = get_post_meta( $id_param, 'appointment_service_prices', true );
-        if ( ! is_array( $service_prices ) ) {
-            $service_prices = [];
-        }
-        $services = [];
-        $total_duration = 0;
-        if ( is_array( $service_ids ) ) {
-            foreach ( $service_ids as $sid ) {
-                $srv = get_post( $sid );
-                if ( $srv ) {
-                    $name  = $srv->post_title;
-                    // Preço personalizado ou base
-                    $price = 0;
-                    if ( isset( $service_prices[ $sid ] ) ) {
-                        $price = (float) $service_prices[ $sid ];
-                    } else {
-                        $price = (float) get_post_meta( $sid, 'service_price', true );
-                    }
-                    
-                    // Busca tipo, categoria e duração
-                    $type     = get_post_meta( $sid, 'service_type', true );
-                    $category = get_post_meta( $sid, 'service_category', true );
-                    
-                    // Determina duração baseada no porte do pet
-                    $pet_size = isset( $pet_info['size'] ) ? $pet_info['size'] : '';
-                    $duration = $this->get_service_duration_for_pet_size( $sid, $pet_size );
-                    $total_duration += $duration;
-                    
-                    $services[] = [
-                        'name'        => $name,
-                        'price'       => $price,
-                        'type'        => $type,
-                        'category'    => $category,
-                        'description' => $srv->post_content,
-                        'duration'    => $duration,
-                    ];
-                }
-            }
-        }
-        
-        // Adiciona TaxiDog como serviço se foi solicitado
         if ( $taxidog_requested ) {
             $services[] = [
-                'name'       => __( 'TaxiDog', 'dps-agenda-addon' ),
-                'price'      => $taxidog_price,
-                'is_taxidog' => true,
-                'type'       => 'extra',
-                'category'   => 'transporte',
-                'duration'   => 0,
+                'name'        => __( 'TaxiDog', 'dps-agenda-addon' ),
+                'price'       => $taxidog_price,
+                'is_taxidog'  => true,
+                'type'        => 'extra',
+                'category'    => 'transporte',
+                'description' => '',
+                'duration'    => 0,
             ];
         }
-        
-        wp_send_json_success( [
+
+        return [
             'services'       => $services,
             'notes'          => $appt_notes,
             'pet'            => $pet_info,
             'total_duration' => $total_duration,
-        ] );
+        ];
     }
 
     /**
-     * Obtém a duração de um serviço baseada no porte do pet.
+     * Retorna uma entrada de servi?o pronta para o modal.
      *
-     * @param int    $service_id ID do serviço.
+     * @param int    $service_id     ID do servi?o.
+     * @param string $pet_size       Porte do pet.
+     * @param array  $service_prices Pre?os customizados do agendamento.
+     * @return array|null
+     */
+    private function get_service_details_entry( $service_id, $pet_size, array $service_prices ) {
+        $service_id = absint( $service_id );
+        if ( ! $service_id ) {
+            return null;
+        }
+
+        $duration = $this->get_service_duration_for_pet_size( $service_id, $pet_size );
+
+        if ( class_exists( 'DPS_Services_API' ) && method_exists( 'DPS_Services_API', 'get_service' ) ) {
+            $service_data = DPS_Services_API::get_service( $service_id );
+            if ( is_array( $service_data ) ) {
+                $price = null;
+                if ( isset( $service_prices[ $service_id ] ) ) {
+                    $price = (float) $service_prices[ $service_id ];
+                } elseif ( method_exists( 'DPS_Services_API', 'calculate_price' ) ) {
+                    $price = DPS_Services_API::calculate_price( $service_id, $pet_size );
+                }
+
+                if ( null === $price ) {
+                    $price = isset( $service_data['price'] ) ? (float) $service_data['price'] : 0.0;
+                }
+
+                return [
+                    'name'        => $this->normalize_services_modal_text( $service_data['title'] ?? '' ),
+                    'price'       => (float) $price,
+                    'type'        => $this->normalize_services_modal_text( $service_data['type'] ?? '' ),
+                    'category'    => $this->normalize_services_modal_text( $service_data['category'] ?? '' ),
+                    'description' => $this->normalize_services_modal_text( $service_data['description'] ?? '', true ),
+                    'duration'    => $duration,
+                ];
+            }
+        }
+
+        $service_post = get_post( $service_id );
+        if ( ! $service_post ) {
+            return null;
+        }
+
+        $price = isset( $service_prices[ $service_id ] ) ? (float) $service_prices[ $service_id ] : (float) get_post_meta( $service_id, 'service_price', true );
+
+        return [
+            'name'        => $this->normalize_services_modal_text( $service_post->post_title ),
+            'price'       => $price,
+            'type'        => $this->normalize_services_modal_text( get_post_meta( $service_id, 'service_type', true ) ),
+            'category'    => $this->normalize_services_modal_text( get_post_meta( $service_id, 'service_category', true ) ),
+            'description' => $this->normalize_services_modal_text( $service_post->post_content, true ),
+            'duration'    => $duration,
+        ];
+    }
+
+    /**
+     * Obt?m informa??es do pet para exibi??o no modal.
+     *
+     * @param int $appointment_id ID do agendamento.
+     * @return array
+     */
+    private function get_services_modal_pet_info( $appointment_id ) {
+        $pet_id = absint( get_post_meta( $appointment_id, 'appointment_pet_id', true ) );
+        if ( ! $pet_id ) {
+            $pet_id = absint( get_post_meta( $appointment_id, 'appointment_pet', true ) );
+        }
+
+        if ( ! $pet_id ) {
+            return [];
+        }
+
+        $pet_post = get_post( $pet_id );
+        if ( ! $pet_post ) {
+            return [];
+        }
+
+        return [
+            'name'   => $this->normalize_services_modal_text( $pet_post->post_title ),
+            'size'   => $this->normalize_services_modal_text( get_post_meta( $pet_id, 'pet_size', true ) ),
+            'breed'  => $this->normalize_services_modal_text( get_post_meta( $pet_id, 'pet_breed', true ) ),
+            'weight' => $this->normalize_services_modal_text( get_post_meta( $pet_id, 'pet_weight', true ) ),
+        ];
+    }
+
+    /**
+     * Normaliza textos exibidos no modal para evitar quebra de JSON.
+     *
+     * @param mixed $value     Valor bruto.
+     * @param bool  $multiline Se true, preserva quebras de linha.
+     * @return string
+     */
+    private function normalize_services_modal_text( $value, $multiline = false ) {
+        if ( ! is_scalar( $value ) ) {
+            return '';
+        }
+
+        $text = wp_check_invalid_utf8( (string) $value );
+        if ( '' === $text ) {
+            return '';
+        }
+
+        return $multiline ? sanitize_textarea_field( $text ) : sanitize_text_field( $text );
+    }
+
+    /**
+     * Obt?m a dura??o de um servi?o baseada no porte do pet.
+     *
+     * @param int    $service_id ID do servi?o.
      * @param string $pet_size   Porte do pet (pequeno, medio, grande, small, medium, large).
-     * @return int Duração em minutos.
+     * @return int Dura??o em minutos.
      */
     private function get_service_duration_for_pet_size( $service_id, $pet_size ) {
-        $pet_size = strtolower( $pet_size );
+        $pet_size = remove_accents( strtolower( $this->normalize_services_modal_text( $pet_size ) ) );
         $duration = 0;
 
         if ( 'pequeno' === $pet_size || 'small' === $pet_size ) {
             $duration = (int) get_post_meta( $service_id, 'service_duration_small', true );
-        } elseif ( 'medio' === $pet_size || 'médio' === $pet_size || 'medium' === $pet_size ) {
+        } elseif ( 'medio' === $pet_size || 'medium' === $pet_size ) {
             $duration = (int) get_post_meta( $service_id, 'service_duration_medium', true );
         } elseif ( 'grande' === $pet_size || 'large' === $pet_size ) {
             $duration = (int) get_post_meta( $service_id, 'service_duration_large', true );
         }
 
-        // Fallback para duração base se não houver duração específica por porte
+        // Fallback para dura??o base se n?o houver dura??o espec?fica por porte.
         if ( ! $duration ) {
             $duration = (int) get_post_meta( $service_id, 'service_duration', true );
         }
 
         return $duration;
     }
-
     /**
      * Limpa cron jobs agendados quando o plugin é desativado.
      */

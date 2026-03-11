@@ -255,11 +255,18 @@
         }
       }
     });
-    // Evento para visualizar serviÃ§os de um agendamento
+    // Evento para visualizar servi?os de um agendamento
     // Usa modal customizado em vez de alert() para melhor UX
     $(document).on('click', '.dps-services-link', function(e){
       e.preventDefault();
-      var apptId = $(this).data('appt-id');
+      var link = $(this);
+      var apptId = parseInt(link.data('appt-id'), 10) || 0;
+
+      if (!apptId) {
+        showToast('Agendamento inválido.', 'error');
+        return;
+      }
+
       $.post(DPS_AG_Addon.ajax, {
         action: 'dps_get_services_details',
         appt_id: apptId,
@@ -268,11 +275,11 @@
         if ( resp && resp.success ) {
           var services = resp.data.services || [];
           if ( services.length > 0 ) {
-            // Exibe modal customizado ao invÃ©s de alert()
+            // Exibe modal customizado em vez de alert()
             if ( typeof window.DPSServicesModal !== 'undefined' ) {
               window.DPSServicesModal.show(services);
             } else {
-              // Fallback para alert() caso o modal nÃ£o esteja carregado
+              // Fallback para alert() caso o modal n?o esteja carregado
               var message = '';
               for ( var i=0; i < services.length; i++ ) {
                 var srv = services[i];
@@ -282,21 +289,20 @@
               alert(message);
             }
           } else {
-            // Lista vazia - exibe modal com mensagem apropriada se disponÃ­vel
+            // Lista vazia - exibe modal com mensagem apropriada se dispon?vel
             if ( typeof window.DPSServicesModal !== 'undefined' ) {
               window.DPSServicesModal.show([]);
             } else {
-              showToast('Nenhum serviÃ§o encontrado para este agendamento.', 'info');
+              showToast('Nenhum serviço encontrado para este agendamento.', 'info');
             }
           }
         } else {
-          showToast(resp.data ? resp.data.message : 'Erro ao buscar serviÃ§os.', 'error');
+          showToast(resp && resp.data ? resp.data.message : 'Erro ao buscar serviços.', 'error');
         }
+      }).fail(function(xhr){
+        showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
       });
     });
-
-    // UX-1: Evento para botÃµes de aÃ§Ã£o rÃ¡pida de status
-
     $(document).on('click', '.dps-quick-action-btn', function(e){
       e.preventDefault();
       var btn = $(this);
@@ -1141,7 +1147,12 @@
   $(document).on('click', '.dps-services-popup-btn', function(e){
     e.preventDefault();
     var btn = $(this);
-    var apptId = btn.data('appt-id');
+    var apptId = parseInt(btn.data('appt-id'), 10) || 0;
+
+    if (!apptId) {
+      showToast('Agendamento inválido.', 'error');
+      return;
+    }
 
     btn.prop('disabled', true);
 
@@ -1269,6 +1280,7 @@
 
         modalHtml += '</div></div></div>'; // Fecha body, content, modal
 
+        $('.dps-services-modal').remove();
         $('body').append(modalHtml);
       } else {
         showToast(resp && resp.data ? resp.data.message : 'Erro ao carregar serviÃ§os.', 'error');

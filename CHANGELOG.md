@@ -179,7 +179,7 @@ Antes de criar uma nova versão oficial:
 - **Landing p?blica refeita no padr?o M3**: a p?gina inicial do portal agora apresenta lado a lado as op??es de link direto e e-mail com senha, com suporte contextual para WhatsApp quando o e-mail n?o estiver cadastrado.
 - **Reset de senha dentro do portal**: nova tela dedicada para cria??o/redefini??o de senha, mantendo o mesmo contexto visual do acesso p?blico.
 - **Admin de logins revisado**: a ?rea administrativa passou a exibir estado de magic link, estado do acesso por senha, ?ltimo login, atividade recente e a??es de sincroniza??o/envio de acesso por senha.
-- **Sess?o h?brida unificada**: logins por magic link e por senha agora compartilham restaura??o de sess?o, remember-me e registro de ?ltimo acesso.
+- **Sess?o h?brida unificada**: logins por magic link e por senha agora compartilham restaura??o de sessão, remember-me e registro de ?ltimo acesso.
 
 **AI Add-on — Assistente Virtual no Portal do Cliente**
 
@@ -220,6 +220,7 @@ Antes de criar uma nova versão oficial:
 - **Paginacao e acessibilidade das tabs**: preservados `agenda_tab`, `filter_staff`, `filter_pending_payment` e `group_by_client` ao paginar a agenda completa; os paineis agora expoem `aria-labelledby`, `hidden` e navegacao por teclado consistente.
 - **Segurança**: corrigida verificação de propriedade do pet na impressão de histórico — usava meta key incorreta `pet_client_id` ao invés de `owner_id`, impedindo acesso legítimo à funcionalidade.
 
+- **Agenda - modal de serviços**: corrigido o carregamento do modal na lista de atendimentos, com endpoint mais resiliente para dados inconsistentes e resposta JSON mesmo quando a sessão expira antes do clique.
 - **Resumo do próximo agendamento**: a consulta de futuros no portal agora ordena por data/hora e ignora status concluidos ou cancelados, evitando destaque incorreto na home autenticada.
 - **WhatsApp do portal**: a ação de repetir serviço deixa de depender de número hardcoded e passa a usar apenas o contato configurado, com fallback seguro quando o número não estiver disponível.
 #### Security (Segurança)
