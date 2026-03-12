@@ -1374,7 +1374,9 @@ class DPS_Agenda_Addon {
         echo '<header class="dps-agenda-header dps-agenda-header--refresh">';
         echo '<div class="dps-agenda-title">';
         echo '<h3>' . esc_html__( 'Agenda de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
-        echo '<p class="dps-agenda-subtitle">' . esc_html( $header_description ) . '</p>';
+        if ( '' !== $header_description ) {
+            echo '<p class="dps-agenda-subtitle">' . esc_html( $header_description ) . '</p>';
+        }
         echo '</div>';
 
         echo '<div class="dps-agenda-header-nav">';

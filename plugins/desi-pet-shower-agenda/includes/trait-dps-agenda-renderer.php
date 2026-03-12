@@ -370,18 +370,6 @@ trait DPS_Agenda_Renderer {
      * @return string
      */
     private function get_agenda_context_description( $view, $show_all ) {
-        if ( $show_all ) {
-            return __( 'Panorama consolidado para acompanhar volume, pendencias e proximos passos da operacao.', 'dps-agenda-addon' );
-        }
-
-        if ( 'week' === $view ) {
-            return __( 'Leitura semanal com indicadores, navegacao rapida e acoes alinhadas no mesmo bloco.', 'dps-agenda-addon' );
-        }
-
-        if ( 'calendar' === $view ) {
-            return __( 'Visao mensal para distribuir capacidade, localizar datas e agir sem perder contexto.', 'dps-agenda-addon' );
-        }
-
         return '';
     }
     /**
