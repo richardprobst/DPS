@@ -522,7 +522,6 @@ class DPS_Agenda_Addon {
                             </p>
                         </div>
                         <div class="dps-agenda-admin-chips" aria-label="<?php esc_attr_e( 'Resumo do contexto', 'dps-agenda-addon' ); ?>">
-                            <span class="dps-agenda-admin-chip dps-agenda-admin-chip--primary"><?php esc_html_e( 'Padrão M3', 'dps-agenda-addon' ); ?></span>
                             <span class="dps-agenda-admin-chip"><?php esc_html_e( 'Logística', 'dps-agenda-addon' ); ?></span>
                             <span class="dps-agenda-admin-chip"><?php esc_html_e( 'GPS', 'dps-agenda-addon' ); ?></span>
                         </div>
@@ -1374,7 +1373,6 @@ class DPS_Agenda_Addon {
 
         echo '<header class="dps-agenda-header dps-agenda-header--refresh">';
         echo '<div class="dps-agenda-title">';
-        echo '<span class="dps-agenda-kicker">' . esc_html__( 'Visao operacional', 'dps-agenda-addon' ) . '</span>';
         echo '<h3>' . esc_html__( 'Agenda de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
         echo '<p class="dps-agenda-subtitle">' . esc_html( $header_description ) . '</p>';
         echo '</div>';
@@ -1876,9 +1874,7 @@ class DPS_Agenda_Addon {
         echo '<div class="dps-agenda-tabs-header">';
         echo '<div>';
         echo '<h3 class="dps-agenda-tabs-title">&#128203; ' . esc_html__( 'Lista de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
-        echo '<p class="dps-agenda-tabs-description">' . esc_html__( 'As três abas compartilham o padrão visual M3 e reorganizam a leitura da operação por nível de detalhe.', 'dps-agenda-addon' ) . '</p>';
         echo '</div>';
-        echo '<span class="dps-context-pill dps-context-pill--primary">' . esc_html__( 'Padrão M3', 'dps-agenda-addon' ) . '</span>';
         echo '</div>';
 
         echo '<nav class="dps-agenda-tabs-nav" role="tablist" aria-label="' . esc_attr__( 'Modos de visualização da agenda', 'dps-agenda-addon' ) . '">';

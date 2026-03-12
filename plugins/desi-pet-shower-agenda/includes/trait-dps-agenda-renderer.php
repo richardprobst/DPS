@@ -382,7 +382,7 @@ trait DPS_Agenda_Renderer {
             return __( 'Visao mensal para distribuir capacidade, localizar datas e agir sem perder contexto.', 'dps-agenda-addon' );
         }
 
-        return __( 'Leitura do dia com foco em horarios, status, pagamentos e proximas acoes da equipe.', 'dps-agenda-addon' );
+        return '';
     }
     /**
      * Summarize the filtered appointment set for the agenda overview.
