@@ -1374,27 +1374,13 @@ class DPS_Agenda_Addon {
         echo '<header class="dps-agenda-header dps-agenda-header--refresh">';
         echo '<div class="dps-agenda-title">';
         echo '<h3>' . esc_html__( 'Agenda de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
+        echo '<p class="dps-current-date dps-current-date--header" title="' . esc_attr__( 'Periodo em foco', 'dps-agenda-addon' ) . '">';
+        echo '<span class="dps-current-date__label">' . esc_html__( 'Periodo ativo', 'dps-agenda-addon' ) . '</span>';
+        echo '<strong>' . esc_html( $scope_label ) . '</strong>';
+        echo '</p>';
         if ( '' !== $header_description ) {
             echo '<p class="dps-agenda-subtitle">' . esc_html( $header_description ) . '</p>';
         }
-        echo '</div>';
-
-        echo '<div class="dps-agenda-header-nav">';
-        echo '<span class="dps-current-date" title="' . esc_attr__( 'Periodo em foco', 'dps-agenda-addon' ) . '">';
-        echo '<span class="dps-current-date__label">' . esc_html__( 'Periodo ativo', 'dps-agenda-addon' ) . '</span>';
-        echo '<strong>' . esc_html( $scope_label ) . '</strong>';
-        echo '</span>';
-        echo '<div class="dps-date-nav">';
-        echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--prev" title="' . esc_attr( $is_week_view ? __( 'Ver periodo anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '">';
-        echo '&larr;';
-        echo '</a>';
-        echo '<a href="' . esc_url( add_query_arg( $today_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--today" title="' . esc_attr__( 'Ver agendamentos de hoje', 'dps-agenda-addon' ) . '">';
-        echo esc_html__( 'Hoje', 'dps-agenda-addon' );
-        echo '</a>';
-        echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--next" title="' . esc_attr( $is_week_view ? __( 'Ver proximo periodo', 'dps-agenda-addon' ) : __( 'Ver proximo dia', 'dps-agenda-addon' ) ) . '">';
-        echo '&rarr;';
-        echo '</a>';
-        echo '</div>';
         echo '</div>';
 
         echo '<div class="dps-agenda-header-actions">';
@@ -1429,6 +1415,17 @@ class DPS_Agenda_Addon {
         }
 
         echo '<div class="dps-view-buttons">' . implode( '', $view_buttons ) . '</div>';
+        echo '<div class="dps-view-buttons dps-view-buttons--date-nav">';
+        echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--prev" title="' . esc_attr( $is_week_view ? __( 'Ver periodo anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '">';
+        echo '&larr;';
+        echo '</a>';
+        echo '<a href="' . esc_url( add_query_arg( $today_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--today" title="' . esc_attr__( 'Ver agendamentos de hoje', 'dps-agenda-addon' ) . '">';
+        echo esc_html__( 'Hoje', 'dps-agenda-addon' );
+        echo '</a>';
+        echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--next" title="' . esc_attr( $is_week_view ? __( 'Ver proximo periodo', 'dps-agenda-addon' ) : __( 'Ver proximo dia', 'dps-agenda-addon' ) ) . '">';
+        echo '&rarr;';
+        echo '</a>';
+        echo '</div>';
         echo '</div>';
         echo '</div>';
         echo '</div>';

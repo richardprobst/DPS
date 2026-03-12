@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda - bloco Visao operacional refinado</title>
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/agenda-refresh.css">
+    <style>
+        :root {
+            color-scheme: light;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, color-mix(in srgb, var(--dps-color-primary-container) 68%, white) 0%, transparent 32%),
+                linear-gradient(180deg, #f5f7fb 0%, #edf1f8 100%);
+            color: var(--dps-color-on-surface, #1a1c1e);
+            font-family: var(--dps-font-system, "Segoe UI", sans-serif);
+        }
+
+        .preview-shell {
+            max-width: 1680px;
+            margin: 0 auto;
+            padding: 32px 24px 64px;
+            display: grid;
+            gap: 24px;
+        }
+
+        .preview-intro,
+        .preview-block {
+            padding: 28px;
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(120, 132, 150, 0.2);
+            border-radius: 28px;
+            box-shadow: 0 16px 40px rgba(45, 57, 79, 0.08);
+        }
+
+        .preview-kicker {
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--dps-color-primary, #0b6bcb);
+        }
+
+        .preview-intro h1 {
+            margin: 12px 0 8px;
+            font-size: clamp(2rem, 5vw, 3.4rem);
+            line-height: 1.02;
+        }
+
+        .preview-subtitle,
+        .preview-block > p {
+            margin: 0;
+            color: var(--dps-color-on-surface-variant, #4a5565);
+            line-height: 1.6;
+        }
+
+        .preview-block > p {
+            margin-bottom: 18px;
+        }
+
+        .preview-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .preview-meta span {
+            display: inline-flex;
+            align-items: center;
+            min-height: 36px;
+            padding: 0 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(120, 132, 150, 0.24);
+            color: var(--dps-color-on-surface-variant, #4a5565);
+            font-size: 0.9rem;
+        }
+
+        .dps-agenda-wrapper {
+            padding: 0;
+            background: transparent;
+            max-width: none;
+        }
+
+        .dps-agenda-controls-wrapper {
+            margin-top: 18px;
+            margin-bottom: 18px;
+        }
+
+        .dps-agenda-overview {
+            margin-top: 0;
+        }
+
+        .dps-agenda-tabs-title {
+            margin: 0;
+        }
+
+        .preview-footnote {
+            margin-top: 14px;
+            font-size: 0.9rem;
+            color: var(--dps-color-on-surface-variant, #4a5565);
+        }
+    </style>
+</head>
+<body>
+    <main class="preview-shell">
+        <section class="preview-intro">
+            <p class="preview-kicker">Agenda</p>
+            <h1>Cabecalho minimalista com periodo ativo integrado</h1>
+            <p class="preview-subtitle">
+                Preview estatico do bloco atualizado da Agenda seguindo <code>docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md</code>
+                e <code>docs/visual/VISUAL_STYLE_GUIDE.md</code>. O periodo ativo fica abaixo de "Agenda de Atendimentos"
+                sem borda, e a navegacao de data passa para o bloco de "Ver:" no mesmo padrao visual.
+            </p>
+            <div class="preview-meta">
+                <span>Periodo ativo sem container</span>
+                <span>Navegacao de data no bloco Ver:</span>
+                <span>Padrao visual unificado</span>
+                <span>Responsividade preservada</span>
+            </div>
+        </section>
+
+        <section class="preview-block">
+            <p>O shell abaixo usa os estilos reais do add-on para validar o novo bloco Visao operacional junto da leitura principal da Agenda.</p>
+
+            <div class="dps-agenda-wrapper">
+                <header class="dps-agenda-header dps-agenda-header--refresh">
+                    <div class="dps-agenda-title">
+                        <span class="dps-agenda-kicker">Visao operacional</span>
+                        <h3>Agenda de Atendimentos</h3>
+                        <p class="dps-current-date dps-current-date--header" title="Periodo em foco">
+                            <span class="dps-current-date__label">Periodo ativo</span>
+                            <strong>Semana de 09/03 a 15/03</strong>
+                        </p>
+                        <p class="dps-agenda-subtitle">Leitura semanal com indicadores, navegacao rapida e acoes alinhadas no mesmo bloco.</p>
+                    </div>
+
+                    <div class="dps-agenda-header-actions">
+                        <button type="button" class="dps-btn dps-btn--primary">Novo agendamento</button>
+                    </div>
+                </header>
+
+                <div class="dps-agenda-controls-wrapper">
+                    <div class="dps-agenda-nav dps-agenda-nav--primary">
+                        <div class="dps-agenda-nav-group dps-agenda-nav-group--views">
+                            <span class="dps-nav-label">Ver:</span>
+                            <div class="dps-view-buttons">
+                                <a href="#" class="dps-view-btn" title="Ver lista diaria">Dia</a>
+                                <a href="#" class="dps-view-btn dps-view-btn--active" title="Ver lista semanal">Semana</a>
+                                <a href="#" class="dps-view-btn" title="Ver calendario mensal">Mes</a>
+                                <a href="#" class="dps-view-btn" title="Ver todos os agendamentos futuros">Agenda completa</a>
+                            </div>
+                            <div class="dps-view-buttons dps-view-buttons--date-nav">
+                                <a href="#" class="dps-nav-btn dps-nav-btn--prev" title="Ver periodo anterior">&larr;</a>
+                                <a href="#" class="dps-nav-btn dps-nav-btn--today" title="Ver agendamentos de hoje">Hoje</a>
+                                <a href="#" class="dps-nav-btn dps-nav-btn--next" title="Ver proximo periodo">&rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="dps-agenda-overview" aria-label="Resumo da agenda">
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--primary">
+                        <span class="dps-agenda-overview-card__label">Total</span>
+                        <strong class="dps-agenda-overview-card__value">18</strong>
+                    </article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--warning">
+                        <span class="dps-agenda-overview-card__label">Pendentes</span>
+                        <strong class="dps-agenda-overview-card__value">7</strong>
+                    </article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--success">
+                        <span class="dps-agenda-overview-card__label">Finalizados</span>
+                        <strong class="dps-agenda-overview-card__value">6</strong>
+                    </article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--error">
+                        <span class="dps-agenda-overview-card__label">Atrasados</span>
+                        <strong class="dps-agenda-overview-card__value">2</strong>
+                    </article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--secondary">
+                        <span class="dps-agenda-overview-card__label">Pagamento pendente</span>
+                        <strong class="dps-agenda-overview-card__value">5</strong>
+                    </article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--tertiary">
+                        <span class="dps-agenda-overview-card__label">TaxiDog</span>
+                        <strong class="dps-agenda-overview-card__value">4</strong>
+                    </article>
+                </section>
+
+                <div class="dps-agenda-tabs-wrapper">
+                    <div class="dps-agenda-tabs-header">
+                        <h3 class="dps-agenda-tabs-title">&#128203; Lista de Atendimentos</h3>
+                    </div>
+
+                    <nav class="dps-agenda-tabs-nav" role="tablist" aria-label="Abas da agenda">
+                        <button type="button" class="dps-agenda-tab-button dps-agenda-tab-button--active" role="tab" aria-selected="true" tabindex="0">
+                            <span class="dps-tab-icon">o</span>
+                            <span class="dps-tab-label">Visao rapida</span>
+                            <span class="dps-tab-desc">Check rapido de status</span>
+                        </button>
+                        <button type="button" class="dps-agenda-tab-button" role="tab" aria-selected="false" tabindex="-1">
+                            <span class="dps-tab-icon">[]</span>
+                            <span class="dps-tab-label">Operacao</span>
+                            <span class="dps-tab-desc">Acoes e pagamentos</span>
+                        </button>
+                        <button type="button" class="dps-agenda-tab-button" role="tab" aria-selected="false" tabindex="-1">
+                            <span class="dps-tab-icon">*</span>
+                            <span class="dps-tab-label">Detalhes</span>
+                            <span class="dps-tab-desc">Logistica e TaxiDog</span>
+                        </button>
+                    </nav>
+
+                    <div class="dps-agenda-tabs-content">
+                        <div class="dps-tab-content dps-tab-content--active">
+                            <section class="dps-agenda-day-panel">
+                                <div class="dps-agenda-day-panel__header">
+                                    <div>
+                                        <h4>Segunda-feira 09/03</h4>
+                                        <p>9 atendimentos no periodo</p>
+                                    </div>
+                                    <div class="dps-agenda-day-panel__stats">
+                                        <span class="dps-context-pill">4 pendentes</span>
+                                        <span class="dps-context-pill">3 finalizados</span>
+                                        <span class="dps-context-pill">2 em deslocamento</span>
+                                    </div>
+                                </div>
+
+                                <div class="dps-agenda-day-panel__body">
+                                    <h5>Proximos Atendimentos</h5>
+                                    <div class="dps-agenda-table-container">
+                                        <table class="dps-table dps-table--tab1">
+                                            <thead>
+                                                <tr>
+                                                    <th>Horario</th>
+                                                    <th>Pet</th>
+                                                    <th>Servicos</th>
+                                                    <th>Confirmacao</th>
+                                                    <th>Acoes</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="status-pendente">
+                                                    <td>09:00</td>
+                                                    <td>Mel (Clinica Vila dos Pets)</td>
+                                                    <td>Banho e tosa higienica</td>
+                                                    <td>Confirmado por WhatsApp</td>
+                                                    <td><button class="dps-btn dps-btn--soft" type="button">Abrir</button></td>
+                                                </tr>
+                                                <tr class="status-pendente">
+                                                    <td>10:30</td>
+                                                    <td>Thor (Clinica Vila dos Pets)</td>
+                                                    <td>Banho + hidratacao</td>
+                                                    <td>Aguardando retorno</td>
+                                                    <td><button class="dps-btn dps-btn--soft" type="button">Abrir</button></td>
+                                                </tr>
+                                                <tr class="status-finalizado">
+                                                    <td>11:45</td>
+                                                    <td>Luna (Clube do Labrador)</td>
+                                                    <td>Tosa comercial</td>
+                                                    <td>Finalizado</td>
+                                                    <td><button class="dps-btn dps-btn--soft" type="button">Resumo</button></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="preview-footnote">Preview local para validar hierarquia, motion do fundo e comportamento responsivo sem depender de uma instancia WordPress ativa neste workspace.</p>
+        </section>
+    </main>
+</body>
+</html>
