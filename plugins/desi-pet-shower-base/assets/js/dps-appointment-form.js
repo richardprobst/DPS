@@ -699,8 +699,10 @@
             const l10n = (typeof dpsAppointmentData !== 'undefined' && dpsAppointmentData.l10n) ? dpsAppointmentData.l10n : {};
             const ajaxUrl = (typeof dpsAppointmentData !== 'undefined' && dpsAppointmentData.ajaxurl) ? dpsAppointmentData.ajaxurl : '';
             const ajaxUrlAbsolute = (typeof dpsAppointmentData !== 'undefined' && dpsAppointmentData.ajaxurlAbsolute) ? dpsAppointmentData.ajaxurlAbsolute : '';
+            const timesRestUrl = (typeof dpsAppointmentData !== 'undefined' && dpsAppointmentData.timesRestUrl) ? dpsAppointmentData.timesRestUrl : '';
             const ajaxCandidates = [];
             const localizedNonce = (typeof dpsAppointmentData !== 'undefined' && dpsAppointmentData.nonce) ? dpsAppointmentData.nonce : '';
+            const restNonce = (typeof dpsAppointmentData !== 'undefined' && dpsAppointmentData.restNonce) ? dpsAppointmentData.restNonce : '';
             const formNonce = $form.find('input[name="dps_nonce_agendamentos"]').val() || '';
             const requestNonce = formNonce || localizedNonce;
             const formAppointmentId = parseInt($form.find('input[name="appointment_id"]').val(), 10) || 0;
@@ -712,6 +714,9 @@
                     ajaxCandidates.push(candidate);
                 }
             });
+
+            const hasAjaxTransport = ajaxCandidates.length > 0 && !!requestNonce;
+            const hasRestTransport = !!(timesRestUrl && restNonce);
 
             if (!$timeSelect.length) {
                 return;
@@ -735,7 +740,7 @@
                 return;
             }
 
-            if (!ajaxCandidates.length || !requestNonce) {
+            if (!hasAjaxTransport && !hasRestTransport) {
                 $timeSelect.removeData('dpsTimesRequest');
                 $timeSelect.empty();
                 var $configErrorOption = $('<option></option>')
@@ -784,45 +789,131 @@
                 $timeSelect.prop('disabled', false);
             }
 
+            function handleTimesSuccess(payload) {
+                if (!isCurrentRequest()) {
+                    return true;
+                }
+
+                if (payload && Array.isArray(payload.times)) {
+                    $timeSelect.empty();
+                    var $defaultOption = $('<option></option>')
+                        .attr('value', '')
+                        .text(l10n.selectTime || 'Selecione um horario');
+                    $timeSelect.append($defaultOption);
+
+                    const times = payload.times;
+                    let hasAvailable = false;
+
+                    times.forEach(function(timeObj) {
+                        if (timeObj.available) {
+                            var $option = $('<option></option>')
+                                .attr('value', timeObj.value)
+                                .text(timeObj.label);
+                            $timeSelect.append($option);
+                            hasAvailable = true;
+                        }
+                    });
+
+                    if (!hasAvailable) {
+                        $timeSelect.empty();
+                        var $noTimesOption = $('<option></option>')
+                            .attr('value', '')
+                            .text(l10n.noTimes || 'Nenhum horario disponivel');
+                        $timeSelect.append($noTimesOption);
+                    }
+
+                    $timeSelect.prop('disabled', false);
+                    return true;
+                }
+
+                return false;
+            }
+
+            function extractErrorMessage(xhr, fallbackMessage) {
+                let errorMessage = fallbackMessage;
+                const sessionExpiredText = l10n.sessionExpired || 'Sessao expirada. Atualize a pagina e tente novamente.';
+
+                if (xhr && xhr.responseJSON) {
+                    if (xhr.responseJSON.data && typeof xhr.responseJSON.data.message === 'string' && xhr.responseJSON.data.message.trim() !== '') {
+                        errorMessage = xhr.responseJSON.data.message;
+                    } else if (typeof xhr.responseJSON.message === 'string' && xhr.responseJSON.message.trim() !== '') {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                } else if (xhr && typeof xhr.responseText === 'string') {
+                    const rawResponse = xhr.responseText.trim();
+                    if (rawResponse === '-1') {
+                        errorMessage = sessionExpiredText;
+                    } else if (rawResponse) {
+                        try {
+                            const parsedResponse = JSON.parse(rawResponse);
+                            if (parsedResponse && parsedResponse.data && typeof parsedResponse.data.message === 'string' && parsedResponse.data.message.trim() !== '') {
+                                errorMessage = parsedResponse.data.message;
+                            } else if (parsedResponse && typeof parsedResponse.message === 'string' && parsedResponse.message.trim() !== '') {
+                                errorMessage = parsedResponse.message;
+                            }
+                        } catch (parseError) {
+                            // Mantem mensagem padrao quando resposta nao e JSON.
+                        }
+                    }
+                }
+
+                return errorMessage;
+            }
+
+            function requestTimesViaRest() {
+                if (!hasRestTransport) {
+                    renderError(l10n.loadError || 'Erro ao carregar horarios');
+                    return;
+                }
+
+                const xhrRequest = $.ajax({
+                    url: timesRestUrl,
+                    type: 'GET',
+                    data: {
+                        date: date,
+                        appointment_id: appointmentId
+                    },
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-WP-Nonce', restNonce);
+                    },
+                    success: function(response) {
+                        if (!handleTimesSuccess(response)) {
+                            let errorMessage = l10n.loadError || 'Erro ao carregar horarios';
+                            if (response && typeof response.message === 'string' && response.message.trim() !== '') {
+                                errorMessage = response.message;
+                            }
+                            renderError(errorMessage);
+                        }
+                    },
+                    error: function(xhr, textStatus) {
+                        if (textStatus === 'abort' || !isCurrentRequest()) {
+                            return;
+                        }
+
+                        renderError(extractErrorMessage(xhr, l10n.loadError || 'Erro ao carregar horarios'));
+                    },
+                    complete: function() {
+                        if (isCurrentRequest()) {
+                            $timeSelect.removeData('dpsTimesRequest');
+                        }
+                    }
+                });
+
+                $timeSelect.data('dpsTimesRequest', xhrRequest);
+            }
+
             function requestTimes(urlIndex) {
+                if (!hasAjaxTransport || urlIndex >= ajaxCandidates.length) {
+                    requestTimesViaRest();
+                    return;
+                }
+
                 const xhrRequest = $.ajax({
                     url: ajaxCandidates[urlIndex],
                     type: 'POST',
                     data: requestData,
                     success: function(response) {
-                        if (!isCurrentRequest()) {
-                            return;
-                        }
-
-                        if (response && response.success && response.data && Array.isArray(response.data.times)) {
-                            $timeSelect.empty();
-                            var $defaultOption = $('<option></option>')
-                                .attr('value', '')
-                                .text(l10n.selectTime || 'Selecione um horario');
-                            $timeSelect.append($defaultOption);
-
-                            const times = response.data.times;
-                            let hasAvailable = false;
-
-                            times.forEach(function(timeObj) {
-                                if (timeObj.available) {
-                                    var $option = $('<option></option>')
-                                        .attr('value', timeObj.value)
-                                        .text(timeObj.label);
-                                    $timeSelect.append($option);
-                                    hasAvailable = true;
-                                }
-                            });
-
-                            if (!hasAvailable) {
-                                $timeSelect.empty();
-                                var $noTimesOption = $('<option></option>')
-                                    .attr('value', '')
-                                    .text(l10n.noTimes || 'Nenhum horario disponivel');
-                                $timeSelect.append($noTimesOption);
-                            }
-
-                            $timeSelect.prop('disabled', false);
+                        if (handleTimesSuccess(response && response.data ? response.data : null)) {
                             return;
                         }
 
@@ -847,28 +938,12 @@
                             return;
                         }
 
-                        let errorMessage = l10n.loadError || 'Erro ao carregar horarios';
-                        const sessionExpiredText = l10n.sessionExpired || 'Sessao expirada. Atualize a pagina e tente novamente.';
-
-                        if (xhr && xhr.responseJSON && xhr.responseJSON.data && typeof xhr.responseJSON.data.message === 'string' && xhr.responseJSON.data.message.trim() !== '') {
-                            errorMessage = xhr.responseJSON.data.message;
-                        } else if (xhr && typeof xhr.responseText === 'string') {
-                            const rawResponse = xhr.responseText.trim();
-                            if (rawResponse === '-1') {
-                                errorMessage = sessionExpiredText;
-                            } else if (rawResponse) {
-                                try {
-                                    const parsedResponse = JSON.parse(rawResponse);
-                                    if (parsedResponse && parsedResponse.data && typeof parsedResponse.data.message === 'string' && parsedResponse.data.message.trim() !== '') {
-                                        errorMessage = parsedResponse.data.message;
-                                    }
-                                } catch (parseError) {
-                                    // Mantem mensagem padrao quando resposta nao e JSON.
-                                }
-                            }
+                        if (hasRestTransport) {
+                            requestTimesViaRest();
+                            return;
                         }
 
-                        renderError(errorMessage);
+                        renderError(extractErrorMessage(xhr, l10n.loadError || 'Erro ao carregar horarios'));
                     },
                     complete: function() {
                         if (isCurrentRequest()) {

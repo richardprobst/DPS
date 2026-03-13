@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Classe principal do add-on Space Groomers.
  *
@@ -161,6 +161,7 @@ class DPS_Game_Addon {
      */
     public function render_portal_card( int $client_id ): void {
         $branding = $this->get_branding_config();
+        $payload  = $this->get_portal_payload( $client_id );
 
         $this->enqueue_game_assets( 'portal', $client_id );
 

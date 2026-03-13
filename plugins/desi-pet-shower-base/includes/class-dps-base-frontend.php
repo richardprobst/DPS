@@ -52,6 +52,15 @@ class DPS_Base_Frontend {
     }
 
     /**
+     * Permission callback da rota REST de horários.
+     *
+     * @return bool
+     */
+    public static function rest_available_times_permissions() {
+        return self::can_manage_appointments();
+    }
+
+    /**
      * Normaliza a chave de status do agendamento para uso consistente no sistema.
      *
      * @param string $status Status bruto do agendamento.
@@ -1510,13 +1519,71 @@ class DPS_Base_Frontend {
             wp_send_json_error( [ 'message' => __( 'Data nao fornecida.', 'desi-pet-shower' ) ], 400 );
         }
 
-        // Valida formato da data
-        $date_obj = DateTime::createFromFormat( 'Y-m-d', $date );
-        if ( ! $date_obj || $date_obj->format( 'Y-m-d' ) !== $date ) {
-            wp_send_json_error( [ 'message' => __( 'Data invalida.', 'desi-pet-shower' ) ], 400 );
+        $validation_error = self::validate_available_times_date( $date );
+        if ( is_wp_error( $validation_error ) ) {
+            $error_data = $validation_error->get_error_data();
+            wp_send_json_error(
+                [ 'message' => $validation_error->get_error_message() ],
+                isset( $error_data['status'] ) ? (int) $error_data['status'] : 400
+            );
         }
 
-        // Busca agendamentos existentes nesta data
+        wp_send_json_success( self::build_available_times_payload( $date, $appointment_id ) );
+    }
+
+    /**
+     * Rota REST para retornar horários disponíveis.
+     *
+     * @param WP_REST_Request $request Requisição atual.
+     * @return WP_REST_Response|WP_Error
+     */
+    public static function rest_get_available_times( WP_REST_Request $request ) {
+        $date = (string) $request->get_param( 'date' );
+        $appointment_id = (int) $request->get_param( 'appointment_id' );
+
+        if ( '' === $date ) {
+            return new WP_Error(
+                'dps_missing_date',
+                __( 'Data nao fornecida.', 'desi-pet-shower' ),
+                [ 'status' => 400 ]
+            );
+        }
+
+        $validation_error = self::validate_available_times_date( $date );
+        if ( is_wp_error( $validation_error ) ) {
+            return $validation_error;
+        }
+
+        return rest_ensure_response( self::build_available_times_payload( $date, $appointment_id ) );
+    }
+
+    /**
+     * Valida a data recebida para consulta de horários.
+     *
+     * @param string $date Data no formato Y-m-d.
+     * @return null|WP_Error
+     */
+    private static function validate_available_times_date( $date ) {
+        $date_obj = DateTime::createFromFormat( 'Y-m-d', $date );
+        if ( ! $date_obj || $date_obj->format( 'Y-m-d' ) !== $date ) {
+            return new WP_Error(
+                'dps_invalid_date',
+                __( 'Data invalida.', 'desi-pet-shower' ),
+                [ 'status' => 400 ]
+            );
+        }
+
+        return null;
+    }
+
+    /**
+     * Monta o payload com horários disponíveis para uma data.
+     *
+     * @param string $date Data no formato Y-m-d.
+     * @param int    $appointment_id Agendamento atual em edição.
+     * @return array
+     */
+    private static function build_available_times_payload( $date, $appointment_id = 0 ) {
         $args = [
             'post_type'      => 'dps_agendamento',
             'posts_per_page' => -1,
@@ -1529,35 +1596,31 @@ class DPS_Base_Frontend {
                 ],
             ],
         ];
-        
+
         $appointments = get_posts( $args );
-        
-        // Coleta horários já ocupados
         $occupied_times = [];
+
         foreach ( $appointments as $appt ) {
-            // Ignora o agendamento atual se estiver editando
             if ( $appointment_id && $appt->ID === $appointment_id ) {
                 continue;
             }
-            
+
             $time = get_post_meta( $appt->ID, 'appointment_time', true );
             if ( $time ) {
                 $occupied_times[] = $time;
             }
         }
-        
-        // Define horários de trabalho (8h às 18h, intervalos de 30 minutos)
+
         $all_times = [];
         for ( $hour = 8; $hour <= 18; $hour++ ) {
             foreach ( [ '00', '30' ] as $min ) {
-                // Não adicionar 18:30
-                if ( $hour === 18 && $min === '30' ) {
+                if ( $hour === 18 && '30' === $min ) {
                     break;
                 }
-                
+
                 $time = sprintf( '%02d:%s', $hour, $min );
                 $is_occupied = in_array( $time, $occupied_times, true );
-                
+
                 $all_times[] = [
                     'value'     => $time,
                     'label'     => $time . ( $is_occupied ? ' - ' . __( 'Ocupado', 'desi-pet-shower' ) : '' ),
@@ -1565,11 +1628,11 @@ class DPS_Base_Frontend {
                 ];
             }
         }
-        
-        wp_send_json_success( [
+
+        return [
             'times' => $all_times,
             'date'  => $date,
-        ] );
+        ];
     }
 
     /**

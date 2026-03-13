@@ -224,8 +224,9 @@ Antes de criar uma nova versÃ£o oficial:
 - **Agenda - modal de serviÃ§os**: corrigido o carregamento do modal na lista de atendimentos, com endpoint mais resiliente para dados inconsistentes e resposta JSON mesmo quando a sessÃ£o expira antes do clique.
 - **Resumo do prÃ³ximo agendamento**: a consulta de futuros no portal agora ordena por data/hora e ignora status concluidos ou cancelados, evitando destaque incorreto na home autenticada.
 - **WhatsApp do portal**: a aÃ§Ã£o de repetir serviÃ§o deixa de depender de nÃºmero hardcoded e passa a usar apenas o contato configurado, com fallback seguro quando o nÃºmero nÃ£o estiver disponÃ­vel.
-- **Agendamentos - horarios**: endurecido o carregamento de horarios via AJAX com controle de concorrencia no frontend e validacao de nonce compativel no backend para reduzir falhas intermitentes de "erro ao carregar horarios".
+- **Agendamentos - horarios**: endurecido o carregamento de horarios com controle de concorrencia no frontend, validacao de nonce compativel no backend e fallback autenticado via REST quando `admin-ajax.php` nao responde corretamente.
 - **Booking Add-on - permissao de agendamento**: a pagina dedicada passa a exigir permissao real de agendamentos antes de renderizar o formulario, evitando o estado inconsistente em que a data era selecionada mas o carregamento de horarios falhava no AJAX.
+- **Space Groomers - conflito com agendamentos**: removida a saida indevida de BOM UTF-8 dos arquivos PHP do add-on e corrigido o card do portal que usava payload nao inicializado, eliminando o conflito que quebrava headers e contaminava respostas AJAX/JSON.
 - **Agendamentos - selecao de pets**: unificada a compatibilidade `owner_id`/`pet_owner` no preparo e renderizacao do formulario, evitando casos em que apenas parte dos pets era exibida ao selecionar o cliente.
 #### Security (SeguranÃ§a)
 

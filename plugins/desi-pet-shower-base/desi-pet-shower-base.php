@@ -497,6 +497,8 @@ class DPS_Base_Plugin {
         wp_localize_script( 'dps-appointment-form', 'dpsAppointmentData', [
             'ajaxurl'         => self::get_frontend_ajax_url(),
             'ajaxurlAbsolute' => self::get_frontend_ajax_fallback_url(),
+            'timesRestUrl'    => esc_url_raw( rest_url( 'dps/v1/appointments/available-times' ) ),
+            'restNonce'       => wp_create_nonce( 'wp_rest' ),
             'nonce'           => wp_create_nonce( 'dps_action' ),
             'appointmentId' => isset( $_GET['dps_edit'] ) && isset( $_GET['id'] ) ? intval( $_GET['id'] ) : 0,
             'l10n' => [
@@ -628,6 +630,28 @@ class DPS_Base_Plugin {
                         'sanitize_callback' => 'sanitize_text_field',
                     ],
                     'owner'  => [
+                        'type'              => 'integer',
+                        'default'           => 0,
+                        'sanitize_callback' => 'absint',
+                    ],
+                ],
+            ]
+        );
+
+        register_rest_route(
+            'dps/v1',
+            '/appointments/available-times',
+            [
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => [ 'DPS_Base_Frontend', 'rest_get_available_times' ],
+                'permission_callback' => [ 'DPS_Base_Frontend', 'rest_available_times_permissions' ],
+                'args'                => [
+                    'date'           => [
+                        'type'              => 'string',
+                        'required'          => true,
+                        'sanitize_callback' => 'sanitize_text_field',
+                    ],
+                    'appointment_id' => [
                         'type'              => 'integer',
                         'default'           => 0,
                         'sanitize_callback' => 'absint',

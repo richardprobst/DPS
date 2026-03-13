@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Plugin Name:       desi.pet by PRObst - Space Groomers
  * Plugin URI:        https://www.probst.pro
