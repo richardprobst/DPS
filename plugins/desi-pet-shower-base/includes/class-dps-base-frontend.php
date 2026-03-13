@@ -43,6 +43,15 @@ class DPS_Base_Frontend {
     }
 
     /**
+     * Verifica se o usuário atual pode executar operações de agendamento.
+     *
+     * @return bool
+     */
+    private static function can_manage_appointments() {
+        return current_user_can( 'manage_options' ) || current_user_can( 'dps_manage_appointments' );
+    }
+
+    /**
      * Normaliza a chave de status do agendamento para uso consistente no sistema.
      *
      * @param string $status Status bruto do agendamento.
@@ -641,13 +650,13 @@ class DPS_Base_Frontend {
                 self::save_pet();
                 break;
             case 'save_appointment':
-                if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+                if ( ! self::can_manage_appointments() ) {
                     wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
                 }
                 self::save_appointment();
                 break;
             case 'update_appointment_status':
-                if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+                if ( ! self::can_manage_appointments() ) {
                     wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
                 }
                 self::update_appointment_status();
@@ -766,7 +775,7 @@ class DPS_Base_Frontend {
                 wp_delete_post( $id, true );
                 break;
             case 'appointment':
-                if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+                if ( ! self::can_manage_appointments() ) {
                     wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
                 }
                 // Exclui o agendamento
@@ -1245,7 +1254,7 @@ class DPS_Base_Frontend {
     private static function save_appointment( $context = 'page' ) {
         $is_ajax = ( 'ajax' === $context ) || wp_doing_ajax();
 
-        if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+        if ( ! self::can_manage_appointments() ) {
             if ( $is_ajax ) {
                 self::send_ajax_response(
                     false,
@@ -1375,7 +1384,7 @@ class DPS_Base_Frontend {
 
         // Aceita tanto a capability customizada quanto manage_options (admin)
         // para manter consistência com a verificação da página de agenda
-        if ( ! current_user_can( 'dps_manage_appointments' ) && ! current_user_can( 'manage_options' ) ) {
+        if ( ! self::can_manage_appointments() ) {
             wp_send_json_error( [ 'message' => __( 'Acesso negado.', 'desi-pet-shower' ) ], 403 );
         }
 
@@ -1432,7 +1441,7 @@ class DPS_Base_Frontend {
 
         // Aceita tanto a capability customizada quanto manage_options (admin)
         // para manter consistência com a verificação da página de agenda
-        if ( ! current_user_can( 'dps_manage_appointments' ) && ! current_user_can( 'manage_options' ) ) {
+        if ( ! self::can_manage_appointments() ) {
             self::send_ajax_response(
                 false,
                 [
@@ -1456,6 +1465,8 @@ class DPS_Base_Frontend {
         // Validacao de nonce e permissoes
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
         $is_valid_nonce = ! empty( $nonce ) && wp_verify_nonce( $nonce, 'dps_action' );
+        $date = isset( $_POST['date'] ) ? sanitize_text_field( wp_unslash( $_POST['date'] ) ) : '';
+        $appointment_id = isset( $_POST['appointment_id'] ) ? intval( wp_unslash( $_POST['appointment_id'] ) ) : 0;
 
         if ( ! $is_valid_nonce ) {
             $form_nonce = isset( $_POST['dps_nonce_agendamentos'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_nonce_agendamentos'] ) ) : '';
@@ -1463,19 +1474,37 @@ class DPS_Base_Frontend {
         }
 
         if ( ! $is_valid_nonce ) {
+            DPS_Logger::warning(
+                __( 'Falha ao validar nonce no carregamento de horários.', 'desi-pet-shower' ),
+                [
+                    'user_id'        => get_current_user_id(),
+                    'date'           => $date,
+                    'appointment_id' => $appointment_id,
+                    'referer'        => wp_get_referer(),
+                ],
+                'appointments'
+            );
             wp_send_json_error(
                 [ 'message' => __( 'Sessao expirada. Atualize a pagina e tente novamente.', 'desi-pet-shower' ) ],
                 403
             );
         }
 
-        if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'dps_manage_appointments' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissao negada.', 'desi-pet-shower' ) ], 403 );
+        if ( ! self::can_manage_appointments() ) {
+            DPS_Logger::warning(
+                __( 'Tentativa sem permissão de carregar horários do agendamento.', 'desi-pet-shower' ),
+                [
+                    'user_id'        => get_current_user_id(),
+                    'date'           => $date,
+                    'appointment_id' => $appointment_id,
+                ],
+                'appointments'
+            );
+            wp_send_json_error(
+                [ 'message' => __( 'Permissao negada. Seu usuario precisa da permissao de agendamentos.', 'desi-pet-shower' ) ],
+                403
+            );
         }
-
-        // Sanitiza e valida a data recebida
-        $date = isset( $_POST['date'] ) ? sanitize_text_field( wp_unslash( $_POST['date'] ) ) : '';
-        $appointment_id = isset( $_POST['appointment_id'] ) ? intval( wp_unslash( $_POST['appointment_id'] ) ) : 0;
 
         if ( empty( $date ) ) {
             wp_send_json_error( [ 'message' => __( 'Data nao fornecida.', 'desi-pet-shower' ) ], 400 );

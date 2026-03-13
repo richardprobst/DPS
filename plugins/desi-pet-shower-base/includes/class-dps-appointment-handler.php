@@ -201,7 +201,7 @@ class DPS_Appointment_Handler {
      * @return void Redireciona e encerra execução.
      */
     public static function update_status( $redirect_url_fn ) {
-        if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+        if ( ! current_user_can( 'dps_manage_appointments' ) && ! current_user_can( 'manage_options' ) ) {
             wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
         }
 

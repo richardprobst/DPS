@@ -748,6 +748,7 @@
                 data: {
                     action: 'dps_get_available_times',
                     nonce: requestNonce,
+                    dps_nonce_agendamentos: formNonce,
                     date: date,
                     appointment_id: appointmentId
                 },

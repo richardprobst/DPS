@@ -225,6 +225,7 @@ Antes de criar uma nova versÃ£o oficial:
 - **Resumo do prÃ³ximo agendamento**: a consulta de futuros no portal agora ordena por data/hora e ignora status concluidos ou cancelados, evitando destaque incorreto na home autenticada.
 - **WhatsApp do portal**: a aÃ§Ã£o de repetir serviÃ§o deixa de depender de nÃºmero hardcoded e passa a usar apenas o contato configurado, com fallback seguro quando o nÃºmero nÃ£o estiver disponÃ­vel.
 - **Agendamentos - horarios**: endurecido o carregamento de horarios via AJAX com controle de concorrencia no frontend e validacao de nonce compativel no backend para reduzir falhas intermitentes de "erro ao carregar horarios".
+- **Booking Add-on - permissao de agendamento**: a pagina dedicada passa a exigir permissao real de agendamentos antes de renderizar o formulario, evitando o estado inconsistente em que a data era selecionada mas o carregamento de horarios falhava no AJAX.
 - **Agendamentos - selecao de pets**: unificada a compatibilidade `owner_id`/`pet_owner` no preparo e renderizacao do formulario, evitando casos em que apenas parte dos pets era exibida ao selecionar o cliente.
 #### Security (SeguranÃ§a)
 

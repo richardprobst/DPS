@@ -184,6 +184,16 @@ class DPS_Booking_Addon {
     }
 
     /**
+     * Verifica se o usuário pode criar ou editar agendamentos.
+     *
+     * @since 1.3.2
+     * @return bool
+     */
+    private function can_manage_bookings() {
+        return current_user_can( 'manage_options' ) || current_user_can( 'dps_manage_appointments' );
+    }
+
+    /**
      * Verifica se o usuário pode editar/duplicar um agendamento específico.
      *
      * @since 1.3.0
@@ -191,7 +201,7 @@ class DPS_Booking_Addon {
      * @return bool
      */
     private function can_edit_appointment( $appointment_id ) {
-        if ( ! $this->can_access() ) {
+        if ( ! $this->can_manage_bookings() ) {
             return false;
         }
 
@@ -264,6 +274,13 @@ class DPS_Booking_Addon {
                    '</div>';
         }
 
+        if ( ! $this->can_manage_bookings() ) {
+            return '<div class="dps-booking-access-denied">' .
+                   '<p>' . esc_html__( 'Seu usuário pode acessar o painel, mas não possui permissão para gerenciar agendamentos.', 'dps-booking-addon' ) . '</p>' .
+                   '<p>' . esc_html__( 'Solicite a capability dps_manage_appointments para carregar horários e salvar novos atendimentos.', 'dps-booking-addon' ) . '</p>' .
+                   '</div>';
+        }
+
         // Verifica se há confirmação de agendamento a exibir
         $transient_key = 'dps_booking_confirmation_' . get_current_user_id();
         $confirmation_data = get_transient( $transient_key );
@@ -321,10 +338,10 @@ class DPS_Booking_Addon {
      * @return string HTML da seção de agendamentos.
      */
     private function render_appointments_section() {
-        // Verifica permissões de acesso antes de renderizar
-        if ( ! $this->can_access() ) {
-            return '<div class="dps-notice dps-notice--error"><p>' . 
-                   esc_html__( 'Você não tem permissão para acessar esta funcionalidade.', 'dps-booking-addon' ) . 
+        // Verifica permissões reais do fluxo antes de renderizar
+        if ( ! $this->can_manage_bookings() ) {
+            return '<div class="dps-notice dps-notice--error"><p>' .
+                   esc_html__( 'Você não tem permissão para gerenciar agendamentos nesta página.', 'dps-booking-addon' ) .
                    '</p></div>';
         }
 

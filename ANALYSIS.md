@@ -1011,6 +1011,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - `dps_manage_clients` (gestÃƒÂ£o de clientes)
 - `dps_manage_pets` (gestÃƒÂ£o de pets)
 - `dps_manage_appointments` (gestÃƒÂ£o de agendamentos)
+- ObservaÃƒÂ§ÃƒÂ£o: a pÃƒÂ¡gina dedicada de booking valida carregamento e salvamento com `manage_options` ou `dps_manage_appointments`, evitando que o formulÃƒÂ¡rio fique acessÃƒÂ­vel sem permissÃƒÂ£o real de agendamento.
 
 **Assets (v1.3.0)**:
 - `booking-addon.css`: Estilos M3 Expressive com semantic mapping, 100% tokens M3
