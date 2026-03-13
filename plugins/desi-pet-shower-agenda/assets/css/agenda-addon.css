@@ -3675,7 +3675,7 @@ tr.dps-row-updated {
 }
 
 .dps-summary-report > summary::before {
-    content: 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶';
+    content: "\25B8";
     font-size: 0.7rem;
     transition: transform var(--dps-motion-hover);
 }
@@ -4096,7 +4096,7 @@ tr.dps-row-updated {
 }
 
 .dps-agenda-empty::before {
-    content: 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¹';
+    content: "\1F4C5";
     display: block;
     font-size: 2.5rem;
     margin-bottom: 0.75rem;
@@ -4752,31 +4752,30 @@ tr.dps-row-updated {
 .dps-agenda-header--refresh::after {
     content: "";
     position: absolute;
-    border-radius: 50%;
     pointer-events: none;
     z-index: 0;
+    transform-origin: center;
+    will-change: transform;
 }
 
 .dps-agenda-header--refresh::before {
-    top: -8rem;
-    right: -4rem;
-    width: 20rem;
-    height: 20rem;
+    inset: auto -18% -88% -24%;
+    height: 172%;
+    border-radius: 56% 44% 0 0 / 42% 36% 0 0;
     background:
-        radial-gradient(circle, color-mix(in srgb, var(--dps-color-primary-container) 90%, white) 0%, color-mix(in srgb, var(--dps-color-primary) 14%, transparent) 44%, transparent 72%);
-    opacity: 0.72;
-    animation: dpsAgendaHeaderFloat 18s var(--dps-motion-easing-expressive-default) infinite alternate;
+        linear-gradient(124deg, color-mix(in srgb, var(--dps-color-primary-container) 82%, white) 0%, color-mix(in srgb, var(--dps-color-secondary-container) 66%, white) 48%, color-mix(in srgb, var(--dps-color-tertiary-container) 58%, white) 100%);
+    opacity: 0.64;
+    animation: dpsAgendaHeaderWavePrimary 20s var(--dps-motion-easing-expressive-default) infinite alternate;
 }
 
 .dps-agenda-header--refresh::after {
-    bottom: -10rem;
-    left: -4rem;
-    width: 18rem;
-    height: 18rem;
+    inset: auto -24% -96% -12%;
+    height: 156%;
+    border-radius: 46% 54% 0 0 / 38% 34% 0 0;
     background:
-        radial-gradient(circle, color-mix(in srgb, var(--dps-color-tertiary-container) 88%, white) 0%, color-mix(in srgb, var(--dps-color-secondary-container) 58%, white) 50%, transparent 74%);
-    opacity: 0.54;
-    animation: dpsAgendaHeaderFloatSecondary 22s var(--dps-motion-easing-expressive-slow) infinite alternate;
+        linear-gradient(110deg, color-mix(in srgb, var(--dps-color-surface-container-lowest) 32%, white) 0%, color-mix(in srgb, var(--dps-color-primary-container) 44%, white) 42%, color-mix(in srgb, var(--dps-color-tertiary-container) 52%, white) 100%);
+    opacity: 0.46;
+    animation: dpsAgendaHeaderWaveSecondary 28s var(--dps-motion-easing-expressive-slow) infinite alternate;
 }
 
 .dps-agenda-header--refresh > * {
@@ -5016,31 +5015,31 @@ tr.dps-row-updated {
     margin-top: var(--dps-space-4);
 }
 
-@keyframes dpsAgendaHeaderFloat {
+@keyframes dpsAgendaHeaderWavePrimary {
     0% {
-        transform: translate3d(0, 0, 0) scale(1);
+        transform: translate3d(-3%, 0, 0) rotate(-1.4deg) scale(1);
     }
 
     50% {
-        transform: translate3d(-1.35rem, 1rem, 0) scale(1.06);
+        transform: translate3d(2%, -3%, 0) rotate(1deg) scale(1.04);
     }
 
     100% {
-        transform: translate3d(-2rem, -0.85rem, 0) scale(0.98);
+        transform: translate3d(-1%, -1.2%, 0) rotate(-0.35deg) scale(1.02);
     }
 }
 
-@keyframes dpsAgendaHeaderFloatSecondary {
+@keyframes dpsAgendaHeaderWaveSecondary {
     0% {
-        transform: translate3d(0, 0, 0) scale(0.98);
+        transform: translate3d(2%, 2%, 0) rotate(0.8deg) scale(1.01);
     }
 
     50% {
-        transform: translate3d(1.1rem, -1.4rem, 0) scale(1.04);
+        transform: translate3d(-2.4%, -3.5%, 0) rotate(-1.3deg) scale(1.06);
     }
 
     100% {
-        transform: translate3d(2rem, 0.65rem, 0) scale(1);
+        transform: translate3d(1.2%, -1%, 0) rotate(0.45deg) scale(1.02);
     }
 }
 
@@ -5074,6 +5073,33 @@ tr.dps-row-updated {
 }
 
 @media (max-width: 840px) {
+    .dps-agenda-header--refresh {
+        justify-items: center;
+        gap: var(--dps-space-4);
+        text-align: center;
+    }
+
+    .dps-agenda-title {
+        justify-items: center;
+        align-content: center;
+        text-align: center;
+    }
+
+    .dps-agenda-subtitle {
+        margin-inline: auto;
+    }
+
+    .dps-agenda-header--refresh .dps-agenda-title .dps-current-date {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .dps-agenda-header-actions {
+        justify-self: center;
+        justify-content: center;
+        width: 100%;
+    }
+
     .dps-agenda-day-panel__header {
         flex-direction: column;
     }

@@ -23,6 +23,7 @@ Este diretório centraliza registros visuais padronizados do sistema DPS.
   - [2026-03-11 - Agenda (bloco Visao operacional)](2026-03-11/SCREENSHOTS_2026-03-11_visao-operacional.md)
   - [2026-03-11 - Agenda (padronizacao M3 das abas)](2026-03-11/SCREENSHOTS_2026-03-11_agenda-m3-standardization.md)
   - [2026-03-12 - Agenda (cabecalho minimalista com periodo ativo integrado)](2026-03-12/SCREENSHOTS_2026-03-12.md)
+  - [2026-03-13 - Agenda (cabecalho centralizado em tablet/mobile + fundo wave)](2026-03-13/SCREENSHOTS_2026-03-13.md)
   - [2026-03-08 - Space Groomers Fase 3 e resumo sincronizado no portal](2026-03-08/SCREENSHOTS_2026-03-08.md)
 
 ## Regras obrigatórias para novas mudanças visuais

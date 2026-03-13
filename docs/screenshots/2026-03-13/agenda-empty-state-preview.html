@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agenda Empty State - Encoding Fix</title>
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 2rem;
+            font-family: var(--dps-font-system, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+            background: var(--dps-color-surface, #f8f9ff);
+            color: var(--dps-color-on-surface, #191c20);
+        }
+
+        .preview-shell {
+            max-width: 960px;
+            margin: 0 auto;
+            background: var(--dps-color-surface-container-lowest, #ffffff);
+            border: 1px solid var(--dps-color-outline-variant, #c3c6cf);
+            border-radius: var(--dps-shape-card, 12px);
+            padding: 1.5rem;
+            box-shadow: var(--dps-elevation-0, none);
+        }
+
+        .preview-shell > h1 {
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+
+        .dps-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0.625rem 1rem;
+            border-radius: 9999px;
+            border: 1px solid transparent;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .dps-btn--primary {
+            background: var(--dps-color-primary, #0b6bcb);
+            color: var(--dps-color-on-primary, #fff);
+        }
+    </style>
+</head>
+<body>
+    <main class="preview-shell">
+        <h1>Preview - Estado vazio da Agenda</h1>
+        <div class="dps-agenda-empty" role="status">
+            <strong>Nenhum atendimento encontrado.</strong>
+            <p>Abra um novo agendamento ou altere o periodo para continuar a operacao.</p>
+            <div class="dps-agenda-empty__actions">
+                <button type="button" class="dps-btn dps-btn--primary">Novo agendamento</button>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

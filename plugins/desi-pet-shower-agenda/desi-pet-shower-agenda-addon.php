@@ -1849,7 +1849,7 @@ class DPS_Agenda_Addon {
             [ 'label' => __( 'Pendentes', 'dps-agenda-addon' ), 'value' => $overview_stats['pending'], 'tone' => 'warning' ],
             [ 'label' => __( 'Finalizados', 'dps-agenda-addon' ), 'value' => $overview_stats['completed'], 'tone' => 'success' ],
             [ 'label' => __( 'Atrasados', 'dps-agenda-addon' ), 'value' => $overview_stats['late'], 'tone' => 'error' ],
-            [ 'label' => __( 'Pagamento pendente', 'dps-agenda-addon' ), 'value' => $overview_stats['pending_payment'], 'tone' => 'secondary' ],
+            [ 'label' => __( 'PG pendente', 'dps-agenda-addon' ), 'value' => $overview_stats['pending_payment'], 'tone' => 'secondary' ],
             [ 'label' => __( 'TaxiDog', 'dps-agenda-addon' ), 'value' => $overview_stats['taxidog'], 'tone' => 'tertiary' ],
         ];
 
