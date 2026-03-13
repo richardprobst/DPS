@@ -652,8 +652,13 @@ class DPS_Base_Plugin {
 
         if ( $owner_id ) {
             $query_args['meta_query'] = [
+                'relation' => 'OR',
                 [
                     'key'   => 'owner_id',
+                    'value' => $owner_id,
+                ],
+                [
+                    'key'   => 'pet_owner',
                     'value' => $owner_id,
                 ],
             ];
@@ -665,11 +670,15 @@ class DPS_Base_Plugin {
         if ( $pets_query->have_posts() ) {
             foreach ( $pets_query->posts as $pet ) {
                 $owner_meta = get_post_meta( $pet->ID, 'owner_id', true );
-                $owner_name = $owner_meta ? get_the_title( (int) $owner_meta ) : '';
+                if ( '' === (string) $owner_meta ) {
+                    $owner_meta = get_post_meta( $pet->ID, 'pet_owner', true );
+                }
+                $owner_id_value = absint( $owner_meta );
+                $owner_name = $owner_id_value ? get_the_title( $owner_id_value ) : '';
                 $pets_data[] = [
                     'id'         => $pet->ID,
                     'name'       => $pet->post_title,
-                    'owner_id'   => $owner_meta ? (string) $owner_meta : '',
+                    'owner_id'   => $owner_id_value ? (string) $owner_id_value : '',
                     'owner_name' => $owner_name,
                     'size'       => get_post_meta( $pet->ID, 'pet_size', true ),
                     'breed'      => get_post_meta( $pet->ID, 'pet_breed', true ),

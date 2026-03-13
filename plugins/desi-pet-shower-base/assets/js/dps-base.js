@@ -158,7 +158,9 @@
         var restConfig     = window.dpsBaseData || {};
         var petState = {
           search: '',
-          loading: false
+          loading: false,
+          requestId: 0,
+          activeRequest: null
         };
         var searchTimer;
 
@@ -347,11 +349,15 @@
         }
 
         function fetchPets(){
-          if (petState.loading) {
-            return;
+          var ownerId = $clientSelect.val();
+
+          if (petState.activeRequest && petState.activeRequest.readyState !== 4) {
+            petState.activeRequest.abort();
+            petState.activeRequest = null;
           }
 
-          var ownerId = $clientSelect.val();
+          petState.loading = false;
+
           if (!ownerId) {
             $petList.empty();
             $petOptions = $();
@@ -366,8 +372,9 @@
           }
 
           petState.loading = true;
+          var requestId = ++petState.requestId;
 
-          $.ajax({
+          petState.activeRequest = $.ajax({
             url: restConfig.restUrl,
             method: 'GET',
             data: {
@@ -381,10 +388,20 @@
               }
             }
           }).done(function(resp){
+            if (requestId !== petState.requestId) {
+              return;
+            }
             renderPets(resp.items || []);
-          }).fail(function(){
+          }).fail(function(xhr, textStatus){
+            if (textStatus === 'abort' || requestId !== petState.requestId) {
+              return;
+            }
             applyPetFilters();
           }).always(function(){
+            if (requestId !== petState.requestId) {
+              return;
+            }
+            petState.activeRequest = null;
             petState.loading = false;
           });
         }

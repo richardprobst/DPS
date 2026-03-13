@@ -64,7 +64,7 @@
             $(document).on('change', '#dps-appointment-cliente', this.updateConsentWarning.bind(this));
             $(document).on('change', '.dps-pet-checkbox', this.updateAppointmentSummary.bind(this));
             $(document).on('change', '#appointment_date', function() {
-                self.loadAvailableTimes();
+                self.loadAvailableTimes(this);
                 self.updateAppointmentSummary();
             });
             $(document).on('change', '#appointment_time', this.updateAppointmentSummary.bind(this));
@@ -691,43 +691,67 @@
         /**
          * FASE 2: Carrega horários disponíveis via AJAX
          */
-        loadAvailableTimes: function() {
-            const date = $('#appointment_date').val();
-            const $timeSelect = $('#appointment_time');
-            
-            if (!date) {
-                $timeSelect.html('<option value="">' + (dpsAppointmentData.l10n.selectTime || 'Escolha uma data primeiro') + '</option>');
+        loadAvailableTimes: function(dateField) {
+            const $dateField = dateField ? $(dateField) : $('#appointment_date').first();
+            const $form = $dateField.length ? $dateField.closest('form') : $();
+            const $timeSelect = $form.length ? $form.find('#appointment_time').first() : $('#appointment_time').first();
+            const date = $dateField.val();
+            const l10n = (typeof dpsAppointmentData !== 'undefined' && dpsAppointmentData.l10n) ? dpsAppointmentData.l10n : {};
+            const ajaxUrl = (typeof dpsAppointmentData !== 'undefined' && dpsAppointmentData.ajaxurl) ? dpsAppointmentData.ajaxurl : '';
+            const localizedNonce = (typeof dpsAppointmentData !== 'undefined' && dpsAppointmentData.nonce) ? dpsAppointmentData.nonce : '';
+            const formNonce = $form.find('input[name="dps_nonce_agendamentos"]').val() || '';
+            const requestNonce = formNonce || localizedNonce;
+            const formAppointmentId = parseInt($form.find('input[name="appointment_id"]').val(), 10) || 0;
+            const localizedAppointmentId = (typeof dpsAppointmentData !== 'undefined' && dpsAppointmentData.appointmentId) ? dpsAppointmentData.appointmentId : 0;
+            const appointmentId = formAppointmentId || localizedAppointmentId || 0;
+
+            if (!$timeSelect.length) {
                 return;
             }
-            
+
+            if (!date) {
+                $timeSelect.html('<option value="">' + (l10n.selectTime || 'Escolha uma data primeiro') + '</option>');
+                return;
+            }
+
+            if (!ajaxUrl || !requestNonce) {
+                $timeSelect.empty();
+                var $configErrorOption = $('<option></option>')
+                    .attr('value', '')
+                    .text(l10n.loadError || 'Erro ao carregar horarios');
+                $timeSelect.append($configErrorOption);
+                $timeSelect.prop('disabled', false);
+                return;
+            }
+
             // Mostra estado de carregamento
-            $timeSelect.prop('disabled', true).html('<option>' + (dpsAppointmentData.l10n.loadingTimes || 'Carregando...') + '</option>');
-            
-            // Faz requisição AJAX
+            $timeSelect.prop('disabled', true).html('<option>' + (l10n.loadingTimes || 'Carregando...') + '</option>');
+
+            // Faz requisi��o AJAX
             $.ajax({
-                url: dpsAppointmentData.ajaxurl,
+                url: ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'dps_get_available_times',
-                    nonce: dpsAppointmentData.nonce,
+                    nonce: requestNonce,
                     date: date,
-                    appointment_id: dpsAppointmentData.appointmentId || 0
+                    appointment_id: appointmentId
                 },
                 success: function(response) {
-                    if (response.success && response.data.times) {
-                        // Limpa o select e adiciona opção padrão
+                    if (response && response.success && response.data && Array.isArray(response.data.times)) {
+                        // Limpa o select e adiciona op��o padr�o
                         $timeSelect.empty();
                         var $defaultOption = $('<option></option>')
                             .attr('value', '')
-                            .text(dpsAppointmentData.l10n.selectTime || 'Selecione um horário');
+                            .text(l10n.selectTime || 'Selecione um horario');
                         $timeSelect.append($defaultOption);
-                        
+
                         const times = response.data.times;
                         let hasAvailable = false;
-                        
+
                         times.forEach(function(timeObj) {
                             if (timeObj.available) {
-                                // Usa criação de elementos DOM para evitar XSS
+                                // Usa cria��o de elementos DOM para evitar XSS
                                 var $option = $('<option></option>')
                                     .attr('value', timeObj.value)
                                     .text(timeObj.label);
@@ -735,30 +759,60 @@
                                 hasAvailable = true;
                             }
                         });
-                        
+
                         if (!hasAvailable) {
                             $timeSelect.empty();
                             var $noTimesOption = $('<option></option>')
                                 .attr('value', '')
-                                .text(dpsAppointmentData.l10n.noTimes || 'Nenhum horário disponível');
+                                .text(l10n.noTimes || 'Nenhum horario disponivel');
                             $timeSelect.append($noTimesOption);
                         }
-                        
+
                         $timeSelect.prop('disabled', false);
                     } else {
+                        let errorMessage = l10n.loadError || 'Erro ao carregar horarios';
+                        if (response && response.data) {
+                            if (typeof response.data.message === 'string' && response.data.message.trim() !== '') {
+                                errorMessage = response.data.message;
+                            } else if (typeof response.data === 'string' && response.data.trim() !== '') {
+                                errorMessage = response.data;
+                            }
+                        }
+
                         $timeSelect.empty();
                         var $errorOption = $('<option></option>')
                             .attr('value', '')
-                            .text(dpsAppointmentData.l10n.loadError || 'Erro ao carregar horários');
+                            .text(errorMessage);
                         $timeSelect.append($errorOption);
                         $timeSelect.prop('disabled', false);
                     }
                 },
-                error: function() {
+                error: function(xhr) {
+                    let errorMessage = l10n.loadError || 'Erro ao carregar horarios';
+                    const sessionExpiredText = l10n.sessionExpired || 'Sessao expirada. Atualize a pagina e tente novamente.';
+
+                    if (xhr && xhr.responseJSON && xhr.responseJSON.data && typeof xhr.responseJSON.data.message === 'string' && xhr.responseJSON.data.message.trim() !== '') {
+                        errorMessage = xhr.responseJSON.data.message;
+                    } else if (xhr && typeof xhr.responseText === 'string') {
+                        const rawResponse = xhr.responseText.trim();
+                        if (rawResponse === '-1') {
+                            errorMessage = sessionExpiredText;
+                        } else if (rawResponse) {
+                            try {
+                                const parsedResponse = JSON.parse(rawResponse);
+                                if (parsedResponse && parsedResponse.data && typeof parsedResponse.data.message === 'string' && parsedResponse.data.message.trim() !== '') {
+                                    errorMessage = parsedResponse.data.message;
+                                }
+                            } catch (parseError) {
+                                // Mantem mensagem padrao quando resposta nao e JSON.
+                            }
+                        }
+                    }
+
                     $timeSelect.empty();
                     var $errorOption = $('<option></option>')
                         .attr('value', '')
-                        .text(dpsAppointmentData.l10n.loadError || 'Erro ao carregar horários');
+                        .text(errorMessage);
                     $timeSelect.append($errorOption);
                     $timeSelect.prop('disabled', false);
                 }

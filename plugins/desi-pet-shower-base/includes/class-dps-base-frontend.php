@@ -1453,27 +1453,33 @@ class DPS_Base_Frontend {
      * @since 1.0.0
      */
     public static function ajax_get_available_times() {
-        // Validação de nonce e permissões
-        check_ajax_referer( 'dps_action', 'nonce' );
-        
-        if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'dps_manage_appointments' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'desi-pet-shower' ) ] );
+        // Validacao de nonce e permissoes
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+        if ( ! wp_verify_nonce( $nonce, 'dps_action' ) ) {
+            wp_send_json_error(
+                [ 'message' => __( 'Sessao expirada. Atualize a pagina e tente novamente.', 'desi-pet-shower' ) ],
+                403
+            );
         }
-        
+
+        if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'dps_manage_appointments' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissao negada.', 'desi-pet-shower' ) ], 403 );
+        }
+
         // Sanitiza e valida a data recebida
         $date = isset( $_POST['date'] ) ? sanitize_text_field( wp_unslash( $_POST['date'] ) ) : '';
-        $appointment_id = isset( $_POST['appointment_id'] ) ? intval( $_POST['appointment_id'] ) : 0;
-        
+        $appointment_id = isset( $_POST['appointment_id'] ) ? intval( wp_unslash( $_POST['appointment_id'] ) ) : 0;
+
         if ( empty( $date ) ) {
-            wp_send_json_error( [ 'message' => __( 'Data não fornecida.', 'desi-pet-shower' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Data nao fornecida.', 'desi-pet-shower' ) ], 400 );
         }
-        
+
         // Valida formato da data
         $date_obj = DateTime::createFromFormat( 'Y-m-d', $date );
         if ( ! $date_obj || $date_obj->format( 'Y-m-d' ) !== $date ) {
-            wp_send_json_error( [ 'message' => __( 'Data inválida.', 'desi-pet-shower' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Data invalida.', 'desi-pet-shower' ) ], 400 );
         }
-        
+
         // Busca agendamentos existentes nesta data
         $args = [
             'post_type'      => 'dps_agendamento',
