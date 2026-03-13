@@ -1,78 +1,192 @@
-(function($){
+(function ($) {
   'use strict';
 
-  function closePetProfileModal() {
-    $('.dps-pet-profile-modal').remove();
-  }
+  var MODAL_SELECTOR = '.dps-pet-profile-modal';
+  var MODAL_CONTENT_SELECTOR = '.dps-pet-profile-modal-content';
+  var MODAL_CLOSE_SELECTOR = '.dps-pet-profile-modal-close, .dps-pet-profile-modal-dismiss';
+  var FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])';
+
+  var modalCounter = 0;
+  var lastTrigger = null;
 
   function escapeHtml(value) {
     return $('<div>').text(value || '').html();
   }
 
-  $(document).on('click', '.dps-pet-profile-trigger', function(e){
-    e.preventDefault();
+  function normalizeValue(value) {
+    var normalized = $.trim(String(value || ''));
+    return normalized.length ? normalized : '—';
+  }
 
-    var btn = $(this);
-    var data = {
-      petName: btn.data('pet-name') || '—',
-      petSpecies: btn.data('pet-species') || '—',
-      petBreed: btn.data('pet-breed') || '—',
-      petSize: btn.data('pet-size') || '—',
-      petWeight: btn.data('pet-weight') || '—',
-      petSex: btn.data('pet-sex') || '—',
-      clientName: btn.data('client-name') || '—',
-      clientPhone: btn.data('client-phone') || '—',
-      clientEmail: btn.data('client-email') || '—',
-      clientAddress: btn.data('client-address') || '—'
-    };
+  function closePetProfileModal() {
+    var modal = $(MODAL_SELECTOR);
 
-    var petWeight = data.petWeight !== '—' ? escapeHtml(data.petWeight) + ' kg' : '—';
+    if (!modal.length) {
+      return;
+    }
 
-    var modalHtml = '<div class="dps-pet-profile-modal" role="dialog" aria-modal="true" aria-labelledby="dps-pet-profile-modal-title">' +
-      '<div class="dps-pet-profile-modal-content">' +
+    modal.remove();
+    $('body').removeClass('dps-pet-profile-modal-open');
+    $(document).off('keydown.dpsPetProfileModal');
+    $('.dps-pet-profile-trigger[aria-expanded="true"]').attr('aria-expanded', 'false');
+
+    if (lastTrigger && lastTrigger.length) {
+      lastTrigger.trigger('focus');
+    }
+
+    lastTrigger = null;
+  }
+
+  function getFocusables(modal) {
+    return modal.find(FOCUSABLE_SELECTOR).filter(':visible');
+  }
+
+  function trapFocus(event) {
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    var modal = $(MODAL_SELECTOR);
+    if (!modal.length) {
+      return;
+    }
+
+    var focusables = getFocusables(modal);
+
+    if (!focusables.length) {
+      event.preventDefault();
+      modal.find(MODAL_CONTENT_SELECTOR).trigger('focus');
+      return;
+    }
+
+    var first = focusables.first()[0];
+    var last = focusables.last()[0];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+      return;
+    }
+
+    if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function buildProfileItem(label, value) {
+    return '<div class="dps-pet-profile-item">' +
+      '<dt>' + escapeHtml(label) + '</dt>' +
+      '<dd>' + escapeHtml(value) + '</dd>' +
+    '</div>';
+  }
+
+  function buildSection(title, sectionClass, itemsHtml) {
+    return '<section class="dps-pet-profile-section ' + sectionClass + '" aria-label="' + escapeHtml(title) + '">' +
+      '<h4>' + escapeHtml(title) + '</h4>' +
+      '<dl class="dps-pet-profile-list">' + itemsHtml + '</dl>' +
+    '</section>';
+  }
+
+  function buildModalHtml(data) {
+    modalCounter += 1;
+
+    var titleId = 'dps-pet-profile-modal-title-' + modalCounter;
+    var descId = 'dps-pet-profile-modal-desc-' + modalCounter;
+
+    var petItems = '';
+    petItems += buildProfileItem('Nome', data.petName);
+    petItems += buildProfileItem('Especie', data.petSpecies);
+    petItems += buildProfileItem('Raca', data.petBreed);
+    petItems += buildProfileItem('Porte', data.petSize);
+    petItems += buildProfileItem('Peso', data.petWeight);
+    petItems += buildProfileItem('Sexo', data.petSex);
+
+    var tutorItems = '';
+    tutorItems += buildProfileItem('Nome', data.clientName);
+    tutorItems += buildProfileItem('Telefone', data.clientPhone);
+    tutorItems += buildProfileItem('E-mail', data.clientEmail);
+    tutorItems += buildProfileItem('Endereco', data.clientAddress);
+
+    return '<div class="dps-pet-profile-modal" role="dialog" aria-modal="true" aria-labelledby="' + titleId + '" aria-describedby="' + descId + '">' +
+      '<div class="dps-pet-profile-modal-content" role="document" tabindex="-1">' +
         '<div class="dps-pet-profile-modal-header">' +
-          '<h3 id="dps-pet-profile-modal-title" class="dps-pet-profile-modal-title">🐾 Perfil rápido do pet</h3>' +
-          '<button type="button" class="dps-pet-profile-modal-close" aria-label="Fechar">&times;</button>' +
-        '</div>' +
-        '<div class="dps-pet-profile-modal-body">' +
-          '<div class="dps-pet-profile-grid">' +
-            '<div class="dps-pet-profile-section">' +
-              '<h4>Pet</h4>' +
-              '<p><strong>Nome:</strong> ' + escapeHtml(data.petName) + '</p>' +
-              '<p><strong>Espécie:</strong> ' + escapeHtml(data.petSpecies) + '</p>' +
-              '<p><strong>Raça:</strong> ' + escapeHtml(data.petBreed) + '</p>' +
-              '<p><strong>Porte:</strong> ' + escapeHtml(data.petSize) + '</p>' +
-              '<p><strong>Peso:</strong> ' + petWeight + '</p>' +
-              '<p><strong>Sexo:</strong> ' + escapeHtml(data.petSex) + '</p>' +
-            '</div>' +
-            '<div class="dps-pet-profile-section">' +
-              '<h4>Tutor</h4>' +
-              '<p><strong>Nome:</strong> ' + escapeHtml(data.clientName) + '</p>' +
-              '<p><strong>Telefone:</strong> ' + escapeHtml(data.clientPhone) + '</p>' +
-              '<p><strong>E-mail:</strong> ' + escapeHtml(data.clientEmail) + '</p>' +
-              '<p><strong>Endereço:</strong> ' + escapeHtml(data.clientAddress) + '</p>' +
-            '</div>' +
+          '<div>' +
+            '<p class="dps-pet-profile-modal-eyebrow">Perfil do atendimento</p>' +
+            '<h3 id="' + titleId + '" class="dps-pet-profile-modal-title">Perfil rapido do pet</h3>' +
           '</div>' +
+          '<button type="button" class="dps-pet-profile-modal-close" aria-label="Fechar modal">&times;</button>' +
+        '</div>' +
+        '<div class="dps-pet-profile-modal-body" id="' + descId + '">' +
+          '<p class="dps-pet-profile-modal-subtitle">Dados essenciais do pet e do tutor para agilizar o atendimento.</p>' +
+          '<div class="dps-pet-profile-grid">' +
+            buildSection('Pet', 'dps-pet-profile-section--pet', petItems) +
+            buildSection('Tutor', 'dps-pet-profile-section--tutor', tutorItems) +
+          '</div>' +
+        '</div>' +
+        '<div class="dps-pet-profile-modal-footer">' +
+          '<button type="button" class="dps-btn dps-btn--ghost dps-pet-profile-modal-dismiss">Fechar</button>' +
         '</div>' +
       '</div>' +
     '</div>';
+  }
+
+  function openPetProfileModal(trigger) {
+    var data = {
+      petName: normalizeValue(trigger.data('pet-name')),
+      petSpecies: normalizeValue(trigger.data('pet-species')),
+      petBreed: normalizeValue(trigger.data('pet-breed')),
+      petSize: normalizeValue(trigger.data('pet-size')),
+      petWeight: normalizeValue(trigger.data('pet-weight') ? String(trigger.data('pet-weight')) + ' kg' : ''),
+      petSex: normalizeValue(trigger.data('pet-sex')),
+      clientName: normalizeValue(trigger.data('client-name')),
+      clientPhone: normalizeValue(trigger.data('client-phone')),
+      clientEmail: normalizeValue(trigger.data('client-email')),
+      clientAddress: normalizeValue(trigger.data('client-address'))
+    };
 
     closePetProfileModal();
-    $('body').append(modalHtml);
+
+    lastTrigger = trigger;
+    trigger.attr('aria-expanded', 'true');
+
+    $('body').addClass('dps-pet-profile-modal-open').append(buildModalHtml(data));
+
+    $(document).on('keydown.dpsPetProfileModal', function (event) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closePetProfileModal();
+        return;
+      }
+
+      trapFocus(event);
+    });
+
+    window.setTimeout(function () {
+      var modal = $(MODAL_SELECTOR);
+      var focusables = getFocusables(modal);
+
+      if (focusables.length) {
+        focusables.first().trigger('focus');
+      } else {
+        modal.find(MODAL_CONTENT_SELECTOR).trigger('focus');
+      }
+    }, 0);
+  }
+
+  $(document).on('click', '.dps-pet-profile-trigger', function (event) {
+    event.preventDefault();
+    openPetProfileModal($(this));
   });
 
-  $(document).on('click', '.dps-pet-profile-modal-close', closePetProfileModal);
+  $(document).on('click', MODAL_CLOSE_SELECTOR, function (event) {
+    event.preventDefault();
+    closePetProfileModal();
+  });
 
-  $(document).on('click', '.dps-pet-profile-modal', function(e){
-    if ($(e.target).hasClass('dps-pet-profile-modal')) {
+  $(document).on('click', MODAL_SELECTOR, function (event) {
+    if ($(event.target).is(MODAL_SELECTOR)) {
       closePetProfileModal();
     }
   });
-
-  $(document).on('keydown', function(e){
-    if (e.key === 'Escape' && $('.dps-pet-profile-modal').length) {
-      closePetProfileModal();
-    }
-  });
-
 })(jQuery);

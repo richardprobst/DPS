@@ -1082,6 +1082,12 @@ trait DPS_Agenda_Renderer {
         $client_phone   = $client_post ? get_post_meta( $client_post->ID, 'client_phone', true ) : '';
         $client_email   = $client_post ? get_post_meta( $client_post->ID, 'client_email', true ) : '';
         $client_address = $client_post ? get_post_meta( $client_post->ID, 'client_address', true ) : '';
+        $aria_label     = sprintf(
+            /* translators: 1: pet name, 2: tutor name. */
+            __( 'Abrir perfil rapido de %1$s e %2$s', 'dps-agenda-addon' ),
+            $pet_name ? $pet_name : __( 'pet', 'dps-agenda-addon' ),
+            $client_name ? $client_name : __( 'tutor', 'dps-agenda-addon' )
+        );
 
         $button  = '<button type="button" class="dps-pet-profile-trigger"';
         $button .= ' data-pet-name="' . esc_attr( $pet_name ) . '"';
@@ -1094,9 +1100,11 @@ trait DPS_Agenda_Renderer {
         $button .= ' data-client-phone="' . esc_attr( $client_phone ) . '"';
         $button .= ' data-client-email="' . esc_attr( $client_email ) . '"';
         $button .= ' data-client-address="' . esc_attr( $client_address ) . '"';
-        $button .= ' title="' . esc_attr__( 'Ver perfil rápido do pet e tutor', 'dps-agenda-addon' ) . '">';
+        $button .= ' title="' . esc_attr__( 'Ver perfil rapido do pet e tutor', 'dps-agenda-addon' ) . '"';
+        $button .= ' aria-label="' . esc_attr( $aria_label ) . '" aria-haspopup="dialog" aria-expanded="false">';
         $button .= '<span class="dps-pet-profile-trigger__name">' . esc_html( $pet_name ) . '</span>';
-        $button .= '<span class="dps-pet-profile-trigger__icon" aria-hidden="true">↗</span>';
+        $button .= '<span class="dps-pet-profile-trigger__meta">' . esc_html__( 'Perfil', 'dps-agenda-addon' ) . '</span>';
+        $button .= '<span class="dps-pet-profile-trigger__icon" aria-hidden="true">&gt;</span>';
         $button .= '</button>';
 
         return $button;

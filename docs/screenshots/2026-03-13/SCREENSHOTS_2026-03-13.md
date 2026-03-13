@@ -57,3 +57,34 @@
 - `./agenda-empty-state-840-fullpage.png`
 - `./agenda-empty-state-600-fullpage.png`
 - `./agenda-empty-state-375-fullpage.png`
+
+---
+
+## Atualizacao extra - Agenda (coluna Pet + modal de perfil rapido)
+
+### Contexto
+- Objetivo da mudanca: alinhar o botao da coluna Pet ao padrao visual M3 e melhorar a UX da modal aberta por esse botao.
+- Fonte de verdade visual aplicada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Preview usado: `./agenda-pet-profile-modal-preview.html`.
+
+### Antes/Depois
+- Antes: botao da coluna Pet sem metadado de acao, alvo de toque limitado e modal com estrutura simples sem foco inicial/trap de teclado e sem retorno de foco ao fechar.
+- Depois: botao com hierarquia visual M3 (shape, foco visivel, target maior, label auxiliar "Perfil"), atributos ARIA para dialog e modal com estrutura em secoes (Pet/Tutor), foco controlado, fechamento consistente e responsividade para 840/600/375.
+- Arquivos de codigo alterados:
+  - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+  - `plugins/desi-pet-shower-agenda/assets/js/pet-profile-modal.js`
+  - `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+
+### Breakpoints validados
+- `1920px`
+- `1200px`
+- `840px`
+- `600px`
+- `375px`
+
+### Capturas
+- `./agenda-pet-profile-modal-1920-fullpage.png`
+- `./agenda-pet-profile-modal-1200-fullpage.png`
+- `./agenda-pet-profile-modal-840-fullpage.png`
+- `./agenda-pet-profile-modal-600-fullpage.png`
+- `./agenda-pet-profile-modal-375-fullpage.png`

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Agenda - Coluna Pet e Modal</title>
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: var(--dps-font-system);
+            background:
+                radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--dps-color-primary-container) 80%, white) 0%, transparent 48%),
+                radial-gradient(circle at 88% 22%, color-mix(in srgb, var(--dps-color-tertiary-container) 70%, white) 0%, transparent 52%),
+                linear-gradient(180deg, var(--dps-color-surface) 0%, var(--dps-color-surface-container-low) 100%);
+            color: var(--dps-color-on-surface);
+        }
+
+        .preview-shell {
+            width: min(1200px, calc(100% - 2rem));
+            margin: 2rem auto;
+            padding: 1.25rem;
+            border: 1px solid var(--dps-color-outline-variant);
+            border-radius: var(--dps-shape-card);
+            background: var(--dps-color-surface-container-lowest);
+            box-shadow: var(--dps-elevation-2);
+        }
+
+        .preview-shell h1 {
+            margin: 0 0 0.5rem;
+            font-size: var(--dps-typescale-headline-small-size);
+            line-height: var(--dps-typescale-headline-small-line);
+            font-weight: var(--dps-typescale-headline-small-weight);
+        }
+
+        .preview-shell p {
+            margin: 0 0 1rem;
+            color: var(--dps-color-on-surface-variant);
+            font-size: var(--dps-typescale-body-medium-size);
+            line-height: var(--dps-typescale-body-medium-line);
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid var(--dps-color-outline-variant);
+            border-radius: var(--dps-shape-medium);
+            overflow: hidden;
+            background: var(--dps-color-surface-container-lowest);
+        }
+
+        .preview-table th,
+        .preview-table td {
+            padding: 0.875rem;
+            border-bottom: 1px solid var(--dps-color-outline-variant);
+            text-align: left;
+            vertical-align: middle;
+            font-size: var(--dps-typescale-body-medium-size);
+        }
+
+        .preview-table th {
+            color: var(--dps-color-on-surface-variant);
+            font-size: var(--dps-typescale-label-medium-size);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .preview-table tr:last-child td {
+            border-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <main class="preview-shell dps-agenda-wrapper">
+        <h1>Agenda - Coluna Pet</h1>
+        <p>Preview do botao da coluna Pet e da modal de perfil rapido no padrao visual M3.</p>
+
+        <table class="preview-table">
+            <thead>
+                <tr>
+                    <th>Horario</th>
+                    <th>Pet</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>09:30</td>
+                    <td>
+                        <button type="button" class="dps-pet-profile-trigger" aria-haspopup="dialog" aria-expanded="true">
+                            <span class="dps-pet-profile-trigger__name">Maya</span>
+                            <span class="dps-pet-profile-trigger__meta">Perfil</span>
+                            <span class="dps-pet-profile-trigger__icon" aria-hidden="true">&gt;</span>
+                        </button>
+                    </td>
+                    <td>Pendente</td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+    <div class="dps-pet-profile-modal" role="dialog" aria-modal="true" aria-labelledby="dps-preview-modal-title" aria-describedby="dps-preview-modal-desc">
+        <div class="dps-pet-profile-modal-content" role="document" tabindex="-1">
+            <div class="dps-pet-profile-modal-header">
+                <div>
+                    <p class="dps-pet-profile-modal-eyebrow">Perfil do atendimento</p>
+                    <h3 id="dps-preview-modal-title" class="dps-pet-profile-modal-title">Perfil rapido do pet</h3>
+                </div>
+                <button type="button" class="dps-pet-profile-modal-close" aria-label="Fechar modal">&times;</button>
+            </div>
+            <div id="dps-preview-modal-desc" class="dps-pet-profile-modal-body">
+                <p class="dps-pet-profile-modal-subtitle">Dados essenciais do pet e do tutor para agilizar o atendimento.</p>
+                <div class="dps-pet-profile-grid">
+                    <section class="dps-pet-profile-section dps-pet-profile-section--pet" aria-label="Pet">
+                        <h4>Pet</h4>
+                        <dl class="dps-pet-profile-list">
+                            <div class="dps-pet-profile-item"><dt>Nome</dt><dd>Maya</dd></div>
+                            <div class="dps-pet-profile-item"><dt>Especie</dt><dd>Canina</dd></div>
+                            <div class="dps-pet-profile-item"><dt>Raca</dt><dd>Shih-tzu</dd></div>
+                            <div class="dps-pet-profile-item"><dt>Porte</dt><dd>Pequeno</dd></div>
+                            <div class="dps-pet-profile-item"><dt>Peso</dt><dd>6.1 kg</dd></div>
+                            <div class="dps-pet-profile-item"><dt>Sexo</dt><dd>Femea</dd></div>
+                        </dl>
+                    </section>
+                    <section class="dps-pet-profile-section dps-pet-profile-section--tutor" aria-label="Tutor">
+                        <h4>Tutor</h4>
+                        <dl class="dps-pet-profile-list">
+                            <div class="dps-pet-profile-item"><dt>Nome</dt><dd>Carla Mendes</dd></div>
+                            <div class="dps-pet-profile-item"><dt>Telefone</dt><dd>(15) 98888-1234</dd></div>
+                            <div class="dps-pet-profile-item"><dt>E-mail</dt><dd>carla@example.com</dd></div>
+                            <div class="dps-pet-profile-item"><dt>Endereco</dt><dd>Rua das Flores, 123 - Sorocaba/SP</dd></div>
+                        </dl>
+                    </section>
+                </div>
+            </div>
+            <div class="dps-pet-profile-modal-footer">
+                <button type="button" class="dps-btn dps-btn--ghost dps-pet-profile-modal-dismiss">Fechar</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
