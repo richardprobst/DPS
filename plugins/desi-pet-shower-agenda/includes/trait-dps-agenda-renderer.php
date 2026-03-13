@@ -1084,7 +1084,7 @@ trait DPS_Agenda_Renderer {
         $client_address = $client_post ? get_post_meta( $client_post->ID, 'client_address', true ) : '';
         $aria_label     = sprintf(
             /* translators: 1: pet name, 2: tutor name. */
-            __( 'Abrir perfil rapido de %1$s e %2$s', 'dps-agenda-addon' ),
+            __( 'Abrir perfil rápido de %1$s e %2$s', 'dps-agenda-addon' ),
             $pet_name ? $pet_name : __( 'pet', 'dps-agenda-addon' ),
             $client_name ? $client_name : __( 'tutor', 'dps-agenda-addon' )
         );
@@ -1100,10 +1100,9 @@ trait DPS_Agenda_Renderer {
         $button .= ' data-client-phone="' . esc_attr( $client_phone ) . '"';
         $button .= ' data-client-email="' . esc_attr( $client_email ) . '"';
         $button .= ' data-client-address="' . esc_attr( $client_address ) . '"';
-        $button .= ' title="' . esc_attr__( 'Ver perfil rapido do pet e tutor', 'dps-agenda-addon' ) . '"';
+        $button .= ' title="' . esc_attr__( 'Ver perfil rápido do pet e tutor', 'dps-agenda-addon' ) . '"';
         $button .= ' aria-label="' . esc_attr( $aria_label ) . '" aria-haspopup="dialog" aria-expanded="false">';
         $button .= '<span class="dps-pet-profile-trigger__name">' . esc_html( $pet_name ) . '</span>';
-        $button .= '<span class="dps-pet-profile-trigger__meta">' . esc_html__( 'Perfil', 'dps-agenda-addon' ) . '</span>';
         $button .= '<span class="dps-pet-profile-trigger__icon" aria-hidden="true">&gt;</span>';
         $button .= '</button>';
 
@@ -1166,13 +1165,20 @@ trait DPS_Agenda_Renderer {
         echo '</td>';
         
         // Serviços (botão que abre popup)
-        echo '<td data-label="' . esc_attr( $column_labels['service'] ?? __( 'Serviços', 'dps-agenda-addon' ) ) . '">';
+        echo '<td class="dps-col-service" data-label="' . esc_attr( $column_labels['service'] ?? __( 'Serviços', 'dps-agenda-addon' ) ) . '">';
         $service_ids = get_post_meta( $appt->ID, 'appointment_services', true );
         if ( is_array( $service_ids ) && ! empty( $service_ids ) ) {
             // Conta quantos serviços
             $service_count = count( $service_ids );
-            echo '<button type="button" class="dps-services-popup-btn" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Ver serviços e observações', 'dps-agenda-addon' ) . '">';
-            echo '📋 ' . sprintf( _n( '%d serviço', '%d serviços', $service_count, 'dps-agenda-addon' ), $service_count );
+            $service_label = sprintf( _n( '%d serviço', '%d serviços', $service_count, 'dps-agenda-addon' ), $service_count );
+            $service_aria_label = sprintf(
+                /* translators: %s: quantidade de serviços. */
+                __( 'Abrir modal de serviços do atendimento: %s', 'dps-agenda-addon' ),
+                $service_label
+            );
+            echo '<button type="button" class="dps-services-popup-btn" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Ver serviços e observações', 'dps-agenda-addon' ) . '" aria-label="' . esc_attr( $service_aria_label ) . '" aria-haspopup="dialog" aria-expanded="false">';
+            echo '<span class="dps-services-popup-btn__text">' . esc_html( $service_label ) . '</span>';
+            echo '<span class="dps-services-popup-btn__icon" aria-hidden="true">&gt;</span>';
             echo '</button>';
         } else {
             echo '<span class="dps-no-services">–</span>';

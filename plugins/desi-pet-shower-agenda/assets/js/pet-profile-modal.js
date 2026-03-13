@@ -3,7 +3,7 @@
 
   var MODAL_SELECTOR = '.dps-pet-profile-modal';
   var MODAL_CONTENT_SELECTOR = '.dps-pet-profile-modal-content';
-  var MODAL_CLOSE_SELECTOR = '.dps-pet-profile-modal-close, .dps-pet-profile-modal-dismiss';
+  var MODAL_CLOSE_SELECTOR = '.dps-pet-profile-modal-close';
   var FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])';
 
   var modalCounter = 0;
@@ -13,9 +13,33 @@
     return $('<div>').text(value || '').html();
   }
 
+  function applyAccentFixes(value) {
+    var text = String(value || '');
+    var replacements = [
+      [/\brapido\b/gi, 'r\u00E1pido'],
+      [/\bespecie\b/gi, 'esp\u00E9cie'],
+      [/\braca\b/gi, 'ra\u00E7a'],
+      [/\bendereco\b/gi, 'endere\u00E7o'],
+      [/\bfemea\b/gi, 'f\u00EAmea'],
+      [/\bmedio\b/gi, 'm\u00E9dio'],
+      [/\bnao\b/gi, 'n\u00E3o'],
+      [/\bcao\b/gi, 'c\u00E3o'],
+      [/\bcaes\b/gi, 'c\u00E3es'],
+      [/\bnumero\b/gi, 'n\u00FAmero'],
+      [/\bvacinacao\b/gi, 'vacina\u00E7\u00E3o'],
+      [/\bobservacao\b/gi, 'observa\u00E7\u00E3o']
+    ];
+
+    replacements.forEach(function (pair) {
+      text = text.replace(pair[0], pair[1]);
+    });
+
+    return text;
+  }
+
   function normalizeValue(value) {
     var normalized = $.trim(String(value || ''));
-    return normalized.length ? normalized : '—';
+    return normalized.length ? applyAccentFixes(normalized) : '\u2014';
   }
 
   function closePetProfileModal() {
@@ -96,8 +120,8 @@
 
     var petItems = '';
     petItems += buildProfileItem('Nome', data.petName);
-    petItems += buildProfileItem('Especie', data.petSpecies);
-    petItems += buildProfileItem('Raca', data.petBreed);
+    petItems += buildProfileItem('Esp\u00E9cie', data.petSpecies);
+    petItems += buildProfileItem('Ra\u00E7a', data.petBreed);
     petItems += buildProfileItem('Porte', data.petSize);
     petItems += buildProfileItem('Peso', data.petWeight);
     petItems += buildProfileItem('Sexo', data.petSex);
@@ -106,26 +130,21 @@
     tutorItems += buildProfileItem('Nome', data.clientName);
     tutorItems += buildProfileItem('Telefone', data.clientPhone);
     tutorItems += buildProfileItem('E-mail', data.clientEmail);
-    tutorItems += buildProfileItem('Endereco', data.clientAddress);
+    tutorItems += buildProfileItem('Endere\u00E7o', data.clientAddress);
 
     return '<div class="dps-pet-profile-modal" role="dialog" aria-modal="true" aria-labelledby="' + titleId + '" aria-describedby="' + descId + '">' +
       '<div class="dps-pet-profile-modal-content" role="document" tabindex="-1">' +
         '<div class="dps-pet-profile-modal-header">' +
           '<div>' +
-            '<p class="dps-pet-profile-modal-eyebrow">Perfil do atendimento</p>' +
-            '<h3 id="' + titleId + '" class="dps-pet-profile-modal-title">Perfil rapido do pet</h3>' +
+            '<h3 id="' + titleId + '" class="dps-pet-profile-modal-title">Perfil r\u00E1pido do pet</h3>' +
           '</div>' +
           '<button type="button" class="dps-pet-profile-modal-close" aria-label="Fechar modal">&times;</button>' +
         '</div>' +
         '<div class="dps-pet-profile-modal-body" id="' + descId + '">' +
-          '<p class="dps-pet-profile-modal-subtitle">Dados essenciais do pet e do tutor para agilizar o atendimento.</p>' +
           '<div class="dps-pet-profile-grid">' +
             buildSection('Pet', 'dps-pet-profile-section--pet', petItems) +
             buildSection('Tutor', 'dps-pet-profile-section--tutor', tutorItems) +
           '</div>' +
-        '</div>' +
-        '<div class="dps-pet-profile-modal-footer">' +
-          '<button type="button" class="dps-btn dps-btn--ghost dps-pet-profile-modal-dismiss">Fechar</button>' +
         '</div>' +
       '</div>' +
     '</div>';

@@ -966,15 +966,298 @@
     });
   });
 
-  // Handler para botÃ£o de popup de serviÃ§os (Tab1)
-  $(document).on('click', '.dps-services-popup-btn', function(e){
+  // Handler para bot�o de popup de servi�os (Tab1)
+  var SERVICES_MODAL_SELECTOR = '.dps-services-modal';
+  var SERVICES_MODAL_CONTENT_SELECTOR = '.dps-services-modal-content';
+  var SERVICES_MODAL_CLOSE_SELECTOR = '.dps-services-modal-close';
+  var SERVICES_MODAL_FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])';
+  var servicesModalCounter = 0;
+  var lastServicesTrigger = null;
+
+  function formatServiceDuration(totalDuration) {
+    var minutes = parseInt(totalDuration, 10) || 0;
+    var hours = Math.floor(minutes / 60);
+    var mins = minutes % 60;
+
+    if (minutes <= 0) {
+      return '';
+    }
+
+    if (hours > 0 && mins > 0) {
+      return hours + 'h ' + mins + 'min';
+    }
+
+    if (hours > 0) {
+      return hours + 'h';
+    }
+
+    return mins + 'min';
+  }
+
+  function getServiceCardVisual(service) {
+    if (service && service.is_taxidog) {
+      return { icon: '\uD83D\uDE90', typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' };
+    }
+
+    if (service && service.type === 'extra') {
+      return { icon: '\u2728', typeClass: 'dps-service-type-extra', typeLabel: 'Extra' };
+    }
+
+    if (service && service.type === 'package') {
+      return { icon: '\uD83D\uDCE6', typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' };
+    }
+
+    return { icon: '\u2702\uFE0F', typeClass: 'dps-service-type-padrao', typeLabel: 'Servi\u00E7o' };
+  }
+
+  function getPetSizeLabel(size) {
+    var normalized = String(size || '').toLowerCase();
+
+    if (normalized === 'pequeno' || normalized === 'small') {
+      return 'Pequeno';
+    }
+
+    if (normalized === 'medio' || normalized === 'm�dio' || normalized === 'medium') {
+      return 'M\u00E9dio';
+    }
+
+    if (normalized === 'grande' || normalized === 'large') {
+      return 'Grande';
+    }
+
+    return '';
+  }
+
+  function closeServicesModal() {
+    var modal = $(SERVICES_MODAL_SELECTOR);
+
+    if (!modal.length) {
+      return;
+    }
+
+    modal.remove();
+    $('body').removeClass('dps-services-modal-open');
+    $(document).off('keydown.dpsServicesModal');
+    $('.dps-services-popup-btn[aria-expanded="true"]').attr('aria-expanded', 'false');
+
+    if (lastServicesTrigger && lastServicesTrigger.length) {
+      lastServicesTrigger.trigger('focus');
+    }
+
+    lastServicesTrigger = null;
+  }
+
+  function getServicesModalFocusables(modal) {
+    return modal.find(SERVICES_MODAL_FOCUSABLE_SELECTOR).filter(':visible');
+  }
+
+  function trapServicesModalFocus(event) {
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    var modal = $(SERVICES_MODAL_SELECTOR);
+    if (!modal.length) {
+      return;
+    }
+
+    var focusables = getServicesModalFocusables(modal);
+    if (!focusables.length) {
+      event.preventDefault();
+      modal.find(SERVICES_MODAL_CONTENT_SELECTOR).trigger('focus');
+      return;
+    }
+
+    var first = focusables.first()[0];
+    var last = focusables.last()[0];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+      return;
+    }
+
+    if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function buildServicesModalHtml(services, notes, pet, totalDuration) {
+    servicesModalCounter += 1;
+
+    var titleId = 'dps-services-modal-title-' + servicesModalCounter;
+    var descId = 'dps-services-modal-desc-' + servicesModalCounter;
+    var total = 0;
+    var durationText = formatServiceDuration(totalDuration);
+    var modalHtml = '<div class="dps-services-modal" role="dialog" aria-modal="true" aria-labelledby="' + titleId + '" aria-describedby="' + descId + '">' +
+      '<div class="dps-services-modal-content" role="document" tabindex="-1">' +
+        '<div class="dps-services-modal-header">' +
+          '<h3 id="' + titleId + '" class="dps-services-modal-title">\uD83D\uDCCB Servi\u00E7os do atendimento</h3>' +
+          '<button type="button" class="dps-services-modal-close" aria-label="Fechar modal">&times;</button>' +
+        '</div>' +
+        '<div class="dps-services-modal-body" id="' + descId + '">';
+
+    if (pet && pet.name) {
+      var petMeta = [];
+      var petSize = getPetSizeLabel(pet.size);
+
+      if (petSize) {
+        petMeta.push(petSize);
+      }
+      if (pet.breed) {
+        petMeta.push(String(pet.breed));
+      }
+      if (pet.weight) {
+        petMeta.push(String(pet.weight) + ' kg');
+      }
+
+      modalHtml += '<div class="dps-services-pet-info">' +
+        '<span class="dps-services-pet-icon" aria-hidden="true">\uD83D\uDC15</span>' +
+        '<div class="dps-services-pet-details">' +
+          '<span class="dps-services-pet-name">' + escapeHtml(pet.name) + '</span>';
+
+      if (petMeta.length > 0) {
+        modalHtml += '<span class="dps-services-pet-meta">' + escapeHtml(petMeta.join(' \u2022 ')) + '</span>';
+      }
+
+      modalHtml += '</div></div>';
+    }
+
+    if (services.length > 0 || durationText) {
+      modalHtml += '<div class="dps-services-summary">';
+      modalHtml += '<div class="dps-services-summary-item">' +
+        '<span class="dps-services-summary-icon" aria-hidden="true">\uD83D\uDCCB</span>' +
+        '<span class="dps-services-summary-value">' + services.length + '</span>' +
+        '<span class="dps-services-summary-label">servi\u00E7o' + (services.length !== 1 ? 's' : '') + '</span>' +
+      '</div>';
+
+      if (durationText) {
+        modalHtml += '<div class="dps-services-summary-item">' +
+          '<span class="dps-services-summary-icon" aria-hidden="true">\u23F1\uFE0F</span>' +
+          '<span class="dps-services-summary-value">' + escapeHtml(durationText) + '</span>' +
+          '<span class="dps-services-summary-label">tempo estimado</span>' +
+        '</div>';
+      }
+
+      modalHtml += '</div>';
+    }
+
+    if (services.length > 0) {
+      modalHtml += '<div class="dps-services-checklist">';
+      modalHtml += '<h4 class="dps-services-section-title">Servi\u00E7os a realizar</h4>';
+
+      for (var i = 0; i < services.length; i++) {
+        var srv = services[i] || {};
+        var price = parseFloat(srv.price) || 0;
+        var visualInfo = getServiceCardVisual(srv);
+        var serviceName = String(srv.name || 'Servi\u00E7o');
+        var cardMeta = [];
+
+        total += price;
+
+        if (visualInfo.typeLabel && srv.type !== 'padrao') {
+          cardMeta.push(visualInfo.typeLabel);
+        }
+        if (srv.duration && parseInt(srv.duration, 10) > 0) {
+          cardMeta.push(String(srv.duration) + ' min');
+        }
+
+        modalHtml += '<div class="dps-service-card ' + visualInfo.typeClass + '">' +
+          '<div class="dps-service-card-header">' +
+            '<span class="dps-service-card-icon" aria-hidden="true">' + visualInfo.icon + '</span>' +
+            '<div class="dps-service-card-info">' +
+              '<span class="dps-service-card-name">' + escapeHtml(serviceName) + '</span>' +
+              '<span class="dps-service-card-meta">' + (cardMeta.length ? escapeHtml(cardMeta.join(' \u2022 ')) : '') + '</span>' +
+            '</div>' +
+            '<span class="dps-service-card-price">R$ ' + price.toFixed(2).replace('.', ',') + '</span>' +
+          '</div>';
+
+        if (srv.description && String(srv.description).trim()) {
+          modalHtml += '<div class="dps-service-card-description">' +
+            '<span class="dps-service-card-desc-icon" aria-hidden="true">\uD83D\uDCA1</span>' +
+            '<span>' + escapeHtml(String(srv.description)).replace(/\n/g, '<br>') + '</span>' +
+          '</div>';
+        }
+
+        modalHtml += '</div>';
+      }
+
+      modalHtml += '<div class="dps-services-total-row">' +
+        '<span class="dps-services-total-label">Total</span>' +
+        '<span class="dps-services-total-value">R$ ' + total.toFixed(2).replace('.', ',') + '</span>' +
+      '</div>';
+
+      modalHtml += '</div>';
+    } else {
+      modalHtml += '<div class="dps-services-empty">' +
+        '<span class="dps-services-empty-icon" aria-hidden="true">\uD83D\uDCCB</span>' +
+        '<span>Nenhum servi\u00E7o registrado para este atendimento.</span>' +
+      '</div>';
+    }
+
+    if (notes && String(notes).trim()) {
+      modalHtml += '<div class="dps-services-notes dps-services-notes-highlight">' +
+        '<div class="dps-services-notes-title">' +
+          '<span class="dps-services-notes-icon" aria-hidden="true">\u26A0\uFE0F</span>' +
+          '<span>Observa\u00E7\u00F5es do cliente</span>' +
+        '</div>' +
+        '<div class="dps-services-notes-content">' + escapeHtml(String(notes)).replace(/\n/g, '<br>') + '</div>' +
+      '</div>';
+    }
+
+    modalHtml += '</div></div></div>';
+
+    return modalHtml;
+  }
+
+  function openServicesModal(trigger, services, notes, pet, totalDuration) {
+    closeServicesModal();
+
+    lastServicesTrigger = trigger;
+    if (trigger && trigger.length) {
+      trigger.attr('aria-expanded', 'true');
+    }
+
+    $('body')
+      .addClass('dps-services-modal-open')
+      .append(buildServicesModalHtml(services, notes, pet, totalDuration));
+
+    $(document).on('keydown.dpsServicesModal', function(event) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeServicesModal();
+        return;
+      }
+
+      trapServicesModalFocus(event);
+    });
+
+    window.setTimeout(function() {
+      var modal = $(SERVICES_MODAL_SELECTOR);
+      var focusables = getServicesModalFocusables(modal);
+
+      if (focusables.length) {
+        focusables.first().trigger('focus');
+      } else {
+        modal.find(SERVICES_MODAL_CONTENT_SELECTOR).trigger('focus');
+      }
+    }, 0);
+  }
+
+  $(document).on('click', '.dps-services-popup-btn', function(e) {
     e.preventDefault();
     var btn = $(this);
     var apptId = parseInt(btn.data('appt-id'), 10) || 0;
 
     if (!apptId) {
-      showToast('Agendamento inválido.', 'error');
+      showToast('Agendamento inv\u00E1lido.', 'error');
       return;
+    }
+
+    btn.attr('aria-haspopup', 'dialog');
+    if (!btn.attr('aria-expanded')) {
+      btn.attr('aria-expanded', 'false');
     }
 
     btn.prop('disabled', true);
@@ -990,143 +1273,28 @@
         var pet = resp.data.pet || {};
         var totalDuration = resp.data.total_duration || 0;
 
-        // Monta o HTML do modal melhorado para funcionÃ¡rios
-        var modalHtml = '<div class="dps-services-modal">' +
-          '<div class="dps-services-modal-content">' +
-            '<div class="dps-services-modal-header">' +
-              '<h3 class="dps-services-modal-title">ðŸ¾ O Que Fazer</h3>' +
-              '<button type="button" class="dps-services-modal-close" aria-label="Fechar">&times;</button>' +
-            '</div>' +
-            '<div class="dps-services-modal-body">';
-
-        // SeÃ§Ã£o do pet (se disponÃ­vel)
-        if (pet && pet.name) {
-          var petSizeInfo = getPetSizeInfo(pet.size);
-
-          modalHtml += '<div class="dps-services-pet-info">' +
-            '<span class="dps-services-pet-icon">' + petSizeInfo.icon + '</span>' +
-            '<div class="dps-services-pet-details">' +
-              '<span class="dps-services-pet-name">' + escapeHtml(pet.name) + '</span>';
-
-          var petMeta = [];
-          if (petSizeInfo.label) petMeta.push(petSizeInfo.label);
-          if (pet.breed) petMeta.push(escapeHtml(pet.breed));
-          if (pet.weight) petMeta.push(escapeHtml(pet.weight) + ' kg');
-
-          if (petMeta.length > 0) {
-            modalHtml += '<span class="dps-services-pet-meta">' + petMeta.join(' â€¢ ') + '</span>';
-          }
-
-          modalHtml += '</div></div>';
-        }
-
-        // Resumo rÃ¡pido no topo
-        if (services.length > 0 || totalDuration > 0) {
-          modalHtml += '<div class="dps-services-summary">';
-          modalHtml += '<div class="dps-services-summary-item"><span class="dps-services-summary-icon">ðŸ“‹</span><span class="dps-services-summary-value">' + services.length + '</span><span class="dps-services-summary-label">serviÃ§o' + (services.length !== 1 ? 's' : '') + '</span></div>';
-          if (totalDuration > 0) {
-            var hours = Math.floor(totalDuration / 60);
-            var mins = totalDuration % 60;
-            var durationText = hours > 0 ? hours + 'h' + (mins > 0 ? mins + 'min' : '') : mins + 'min';
-            modalHtml += '<div class="dps-services-summary-item"><span class="dps-services-summary-icon">â±ï¸</span><span class="dps-services-summary-value">' + durationText + '</span><span class="dps-services-summary-label">estimado</span></div>';
-          }
-          modalHtml += '</div>';
-        }
-
-        // Lista de serviÃ§os
-        if (services.length > 0) {
-          modalHtml += '<div class="dps-services-checklist">';
-          modalHtml += '<h4 class="dps-services-section-title">ServiÃ§os a Realizar</h4>';
-
-          var total = 0;
-          for (var i = 0; i < services.length; i++) {
-            var srv = services[i];
-            var price = parseFloat(srv.price) || 0;
-            total += price;
-
-            // Usa funÃ§Ã£o helper para obter informaÃ§Ãµes visuais do serviÃ§o
-            var visualInfo = getServiceVisualInfo(srv);
-
-            modalHtml += '<div class="dps-service-card ' + visualInfo.typeClass + '">' +
-              '<div class="dps-service-card-header">' +
-                '<span class="dps-service-card-icon">' + visualInfo.icon + '</span>' +
-                '<div class="dps-service-card-info">' +
-                  '<span class="dps-service-card-name">' + escapeHtml(srv.name) + '</span>' +
-                  '<span class="dps-service-card-meta">';
-
-            var cardMeta = [];
-            if (visualInfo.typeLabel && srv.type !== 'padrao') cardMeta.push(visualInfo.typeLabel);
-            if (srv.duration && srv.duration > 0) cardMeta.push(srv.duration + ' min');
-
-            modalHtml += cardMeta.length > 0 ? cardMeta.join(' â€¢ ') : '';
-            modalHtml += '</span></div>' +
-                '<span class="dps-service-card-price">R$ ' + price.toFixed(2).replace('.', ',') + '</span>' +
-              '</div>';
-
-            // DescriÃ§Ã£o do serviÃ§o (instruÃ§Ãµes para o funcionÃ¡rio)
-            if (srv.description && srv.description.trim()) {
-              var escapedDesc = escapeHtml(srv.description).replace(/\n/g, '<br>');
-              modalHtml += '<div class="dps-service-card-description">' +
-                '<span class="dps-service-card-desc-icon">ðŸ’¡</span>' +
-                '<span>' + escapedDesc + '</span>' +
-              '</div>';
-            }
-
-            modalHtml += '</div>';
-          }
-
-          // Linha de total
-          modalHtml += '<div class="dps-services-total-row">' +
-            '<span class="dps-services-total-label">Total</span>' +
-            '<span class="dps-services-total-value">R$ ' + total.toFixed(2).replace('.', ',') + '</span>' +
-          '</div>';
-
-          modalHtml += '</div>'; // .dps-services-checklist
-        } else {
-          modalHtml += '<div class="dps-services-empty">' +
-            '<span class="dps-services-empty-icon">ðŸ“‹</span>' +
-            '<span>Nenhum serviÃ§o registrado para este atendimento.</span>' +
-          '</div>';
-        }
-
-        // ObservaÃ§Ãµes do cliente (importante para o funcionÃ¡rio)
-        if (notes) {
-          var escapedNotes = escapeHtml(notes).replace(/\n/g, '<br>');
-          modalHtml += '<div class="dps-services-notes dps-services-notes-highlight">' +
-            '<div class="dps-services-notes-title">' +
-              '<span class="dps-services-notes-icon">âš ï¸</span>' +
-              '<span>ObservaÃ§Ãµes do Cliente</span>' +
-            '</div>' +
-            '<div class="dps-services-notes-content">' + escapedNotes + '</div>' +
-          '</div>';
-        }
-
-        modalHtml += '</div></div></div>'; // Fecha body, content, modal
-
-        $('.dps-services-modal').remove();
-        $('body').append(modalHtml);
+        openServicesModal(btn, services, notes, pet, totalDuration);
       } else {
-        showToast(resp && resp.data ? resp.data.message : 'Erro ao carregar serviÃ§os.', 'error');
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao carregar servi\u00E7os.', 'error');
       }
     }).fail(function(xhr){
-      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunica\u00E7\u00E3o.'), 'error');
     }).always(function(){
       btn.prop('disabled', false);
     });
   });
 
-  // Fechar modal de serviÃ§os
-  $(document).on('click', '.dps-services-modal-close', function(){
-    $('.dps-services-modal').remove();
+  $(document).on('click', SERVICES_MODAL_CLOSE_SELECTOR, function(event) {
+    event.preventDefault();
+    closeServicesModal();
   });
 
-  $(document).on('click', '.dps-services-modal', function(e){
-    if ($(e.target).hasClass('dps-services-modal')) {
-      $(this).remove();
+  $(document).on('click', SERVICES_MODAL_SELECTOR, function(event) {
+    if ($(event.target).is(SERVICES_MODAL_SELECTOR)) {
+      closeServicesModal();
     }
   });
 
-  // Handler para botÃ£o de popup de pagamento (Tab2)
   $(document).on('click', '.dps-payment-popup-btn', function(e){
     e.preventDefault();
     var btn = $(this);
@@ -1374,7 +1542,10 @@
         location.reload();
         return;
       }
-      $('.dps-services-modal, .dps-payment-modal').remove();
+      if ($('.dps-services-modal').length) {
+        closeServicesModal();
+      }
+      $('.dps-payment-modal').remove();
     }
   });
 

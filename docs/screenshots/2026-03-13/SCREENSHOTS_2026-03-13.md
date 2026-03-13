@@ -69,7 +69,10 @@
 
 ### Antes/Depois
 - Antes: botao da coluna Pet sem metadado de acao, alvo de toque limitado e modal com estrutura simples sem foco inicial/trap de teclado e sem retorno de foco ao fechar.
-- Depois: botao com hierarquia visual M3 (shape, foco visivel, target maior, label auxiliar "Perfil"), atributos ARIA para dialog e modal com estrutura em secoes (Pet/Tutor), foco controlado, fechamento consistente e responsividade para 840/600/375.
+- Depois: botao com hierarquia visual M3 (shape, foco visivel e target maior), sem a palavra "Perfil", centralizado horizontal e verticalmente na coluna Pet, com atributos ARIA para dialog e modal em secoes (Pet/Tutor), foco controlado, fechamento consistente e responsividade para 840/600/375.
+- Ajuste solicitado: modal sem os textos "Perfil do atendimento" e "Dados essenciais do pet e do tutor para agilizar o atendimento.", mantendo apenas um botao de fechar (X no cabecalho).
+- Ajuste solicitado: correção de acentuação nos textos da modal (`Perfil rápido do pet`, `Espécie`, `Raça`, `Endereço`).
+- Ajuste técnico complementar: versão de `pet-profile-modal.js` incrementada para `1.0.1` a fim de invalidar cache do navegador e refletir imediatamente os textos acentuados.
 - Arquivos de codigo alterados:
   - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
   - `plugins/desi-pet-shower-agenda/assets/js/pet-profile-modal.js`
@@ -88,3 +91,35 @@
 - `./agenda-pet-profile-modal-840-fullpage.png`
 - `./agenda-pet-profile-modal-600-fullpage.png`
 - `./agenda-pet-profile-modal-375-fullpage.png`
+
+---
+
+## Atualizacao extra - Agenda (coluna Servicos + modal de Servicos)
+
+### Contexto
+- Objetivo da mudanca: centralizar o botao da coluna Servicos na aba Visao Rapida, alinhar o componente ao padrao M3 e melhorar UX/UI da modal de servicos.
+- Fonte de verdade visual aplicada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Preview usado: `./agenda-services-modal-preview.html`.
+
+### Antes/Depois
+- Antes: botao de Servicos sem alinhamento consistente com a coluna Pet e modal sem controle de foco/ESC/trap de teclado, com ocorrencia de caracteres corrompidos.
+- Depois: botao centralizado horizontal e verticalmente com hierarquia visual M3; modal com ARIA de dialog, foco inicial, trap de teclado, retorno de foco ao gatilho, fechamento por X/overlay/ESC e textos com caracteres corrigidos.
+- Arquivos de codigo alterados:
+  - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+  - `plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js`
+  - `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+  - `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
+
+### Breakpoints validados
+- `1920px`
+- `1200px`
+- `840px`
+- `600px`
+- `375px`
+
+### Capturas
+- `./agenda-services-modal-1920-fullpage.png`
+- `./agenda-services-modal-1200-fullpage.png`
+- `./agenda-services-modal-840-fullpage.png`
+- `./agenda-services-modal-600-fullpage.png`
+- `./agenda-services-modal-375-fullpage.png`

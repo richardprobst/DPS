@@ -4993,6 +4993,7 @@ tr.dps-row-updated {
 .dps-pet-profile-trigger {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: var(--dps-space-2);
     min-height: 2.5rem;
     max-width: 100%;
@@ -5005,8 +5006,9 @@ tr.dps-row-updated {
     font-weight: var(--dps-typescale-label-large-weight);
     line-height: var(--dps-typescale-label-large-line);
     letter-spacing: var(--dps-typescale-label-large-tracking);
-    text-align: left;
+    text-align: center;
     cursor: pointer;
+    margin-inline: auto;
     transition: background var(--dps-motion-hover), border-color var(--dps-motion-hover), color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
 }
 
@@ -5026,17 +5028,9 @@ tr.dps-row-updated {
 }
 
 .dps-pet-profile-trigger__name {
-    flex: 1;
+    flex: 0 1 auto;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.dps-pet-profile-trigger__meta {
-    color: var(--dps-color-on-surface-variant);
-    font-size: var(--dps-typescale-label-small-size);
-    font-weight: var(--dps-typescale-label-small-weight);
-    line-height: var(--dps-typescale-label-small-line);
     white-space: nowrap;
 }
 
@@ -5044,6 +5038,158 @@ tr.dps-row-updated {
     color: var(--dps-color-on-surface-variant);
     font-size: 0.875rem;
     line-height: 1;
+}
+
+.dps-agenda-wrapper table.dps-table td[data-label="Pet"],
+.dps-agenda-wrapper table.dps-table td[data-label="Pet (Cliente)"] {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.dps-agenda-wrapper table.dps-table td[data-label="Pet"] .dps-pet-profile-trigger,
+.dps-agenda-wrapper table.dps-table td[data-label="Pet (Cliente)"] .dps-pet-profile-trigger {
+    margin-inline: auto;
+}
+
+/* === Ajustes M3: Coluna Servicos e Modal de Servicos === */
+.dps-services-popup-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dps-space-2);
+    width: auto;
+    min-height: 2.5rem;
+    max-width: 100%;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-button);
+    background: var(--dps-color-surface-container-lowest);
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-label-large-size);
+    font-weight: var(--dps-typescale-label-large-weight);
+    line-height: var(--dps-typescale-label-large-line);
+    letter-spacing: var(--dps-typescale-label-large-tracking);
+    text-align: center;
+    cursor: pointer;
+    margin-inline: auto;
+    transition: background var(--dps-motion-hover), border-color var(--dps-motion-hover), color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
+}
+
+.dps-services-popup-btn:hover {
+    background: var(--dps-color-surface-container-low);
+    border-color: var(--dps-color-outline);
+    box-shadow: var(--dps-elevation-1);
+}
+
+.dps-services-popup-btn:active {
+    background: var(--dps-color-surface-container);
+}
+
+.dps-services-popup-btn:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
+}
+
+.dps-services-popup-btn__text {
+    flex: 0 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dps-services-popup-btn__icon {
+    color: var(--dps-color-on-surface-variant);
+    font-size: 0.875rem;
+    line-height: 1;
+}
+
+.dps-agenda-wrapper table.dps-table td.dps-col-service {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.dps-agenda-wrapper table.dps-table td.dps-col-service .dps-services-popup-btn {
+    margin-inline: auto;
+}
+
+.dps-services-modal-open {
+    overflow: hidden;
+}
+
+.dps-services-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: color-mix(in srgb, var(--dps-color-on-surface) 48%, transparent);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+
+.dps-services-modal-content {
+    width: min(100%, 48rem);
+    max-height: calc(100dvh - 2rem);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-dialog);
+    background: var(--dps-color-surface-container-lowest);
+    box-shadow: var(--dps-elevation-4);
+    overflow: hidden;
+}
+
+.dps-services-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--dps-space-3);
+    padding: var(--dps-space-4) var(--dps-space-5) var(--dps-space-3);
+    border-bottom: 1px solid var(--dps-color-outline-variant);
+    background: var(--dps-color-surface-container-lowest);
+}
+
+.dps-services-modal-title {
+    margin: 0;
+    color: var(--dps-color-on-surface);
+    font-size: clamp(1.05rem, 1.7vw, 1.25rem);
+    font-weight: var(--dps-typescale-title-medium-weight);
+    line-height: var(--dps-typescale-title-medium-line);
+    letter-spacing: var(--dps-typescale-title-medium-tracking);
+}
+
+.dps-services-modal-close {
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-full);
+    background: var(--dps-color-surface-container-low);
+    color: var(--dps-color-on-surface-variant);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--dps-motion-hover), color var(--dps-motion-hover), border-color var(--dps-motion-hover);
+}
+
+.dps-services-modal-close:hover {
+    background: var(--dps-color-surface-container);
+    color: var(--dps-color-on-surface);
+    border-color: var(--dps-color-outline);
+}
+
+.dps-services-modal-close:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
+}
+
+.dps-services-modal-body {
+    padding: var(--dps-space-4) var(--dps-space-5) var(--dps-space-5);
+    overflow: auto;
 }
 
 .dps-pet-profile-modal-open {
@@ -5211,6 +5357,21 @@ tr.dps-row-updated {
 }
 
 @media (max-width: 600px) {
+    .dps-services-modal {
+        padding: 0.75rem;
+    }
+
+    .dps-services-modal-content {
+        width: 100%;
+        max-height: calc(100dvh - 1.5rem);
+    }
+
+    .dps-services-modal-header,
+    .dps-services-modal-body {
+        padding-left: var(--dps-space-4);
+        padding-right: var(--dps-space-4);
+    }
+
     .dps-pet-profile-modal {
         padding: 0.75rem;
     }
@@ -5233,8 +5394,22 @@ tr.dps-row-updated {
     }
 
     .dps-pet-profile-trigger {
-        width: 100%;
+        width: auto;
         min-height: 3rem;
-        justify-content: space-between;
+        justify-content: center;
+    }
+
+    .dps-services-popup-btn {
+        width: auto;
+        min-height: 3rem;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 640px) {
+    .dps-agenda-wrapper table.dps-table td[data-label="Pet"],
+    .dps-agenda-wrapper table.dps-table td[data-label="Pet (Cliente)"],
+    .dps-agenda-wrapper table.dps-table td.dps-col-service {
+        align-items: center;
     }
 }

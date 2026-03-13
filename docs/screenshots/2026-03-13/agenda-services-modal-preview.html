@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Agenda - Coluna Servi&ccedil;o e Modal</title>
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: var(--dps-font-system);
+            background:
+                radial-gradient(circle at 15% 16%, color-mix(in srgb, var(--dps-color-primary-container) 78%, white) 0%, transparent 46%),
+                radial-gradient(circle at 86% 18%, color-mix(in srgb, var(--dps-color-secondary-container) 64%, white) 0%, transparent 52%),
+                linear-gradient(180deg, var(--dps-color-surface) 0%, var(--dps-color-surface-container-low) 100%);
+            color: var(--dps-color-on-surface);
+        }
+
+        .preview-shell {
+            width: min(1240px, calc(100% - 2rem));
+            margin: 2rem auto;
+            padding: 1.25rem;
+            border: 1px solid var(--dps-color-outline-variant);
+            border-radius: var(--dps-shape-card);
+            background: var(--dps-color-surface-container-lowest);
+            box-shadow: var(--dps-elevation-2);
+        }
+
+        .preview-shell h1 {
+            margin: 0 0 0.5rem;
+            font-size: var(--dps-typescale-headline-small-size);
+            line-height: var(--dps-typescale-headline-small-line);
+            font-weight: var(--dps-typescale-headline-small-weight);
+        }
+
+        .preview-shell p {
+            margin: 0 0 1rem;
+            color: var(--dps-color-on-surface-variant);
+            font-size: var(--dps-typescale-body-medium-size);
+            line-height: var(--dps-typescale-body-medium-line);
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid var(--dps-color-outline-variant);
+            border-radius: var(--dps-shape-medium);
+            overflow: hidden;
+            background: var(--dps-color-surface-container-lowest);
+        }
+
+        .preview-table th,
+        .preview-table td {
+            padding: 0.875rem;
+            border-bottom: 1px solid var(--dps-color-outline-variant);
+            text-align: left;
+            vertical-align: middle;
+            font-size: var(--dps-typescale-body-medium-size);
+        }
+
+        .preview-table th {
+            color: var(--dps-color-on-surface-variant);
+            font-size: var(--dps-typescale-label-medium-size);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .preview-table tr:last-child td {
+            border-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <main class="preview-shell dps-agenda-wrapper">
+        <h1>Agenda - Coluna Servi&ccedil;o</h1>
+        <p>Preview do bot&atilde;o da coluna Servi&ccedil;o e da modal de servi&ccedil;os no padr&atilde;o visual M3.</p>
+
+        <table class="preview-table dps-table">
+            <thead>
+                <tr>
+                    <th>Hor&aacute;rio</th>
+                    <th>Pet</th>
+                    <th>Servi&ccedil;os</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>10:20</td>
+                    <td>Maya</td>
+                    <td class="dps-col-service">
+                        <button type="button" class="dps-services-popup-btn" aria-haspopup="dialog" aria-expanded="true">
+                            <span class="dps-services-popup-btn__text">3 servi&ccedil;os</span>
+                            <span class="dps-services-popup-btn__icon" aria-hidden="true">&gt;</span>
+                        </button>
+                    </td>
+                    <td>Pendente</td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+    <div class="dps-services-modal" role="dialog" aria-modal="true" aria-labelledby="dps-services-preview-title" aria-describedby="dps-services-preview-desc">
+        <div class="dps-services-modal-content" role="document" tabindex="-1">
+            <div class="dps-services-modal-header">
+                <h3 id="dps-services-preview-title" class="dps-services-modal-title">&#x1F4CB; Servi&ccedil;os do atendimento</h3>
+                <button type="button" class="dps-services-modal-close" aria-label="Fechar modal">&times;</button>
+            </div>
+            <div id="dps-services-preview-desc" class="dps-services-modal-body">
+                <div class="dps-services-pet-info">
+                    <span class="dps-services-pet-icon" aria-hidden="true">&#x1F415;</span>
+                    <div class="dps-services-pet-details">
+                        <span class="dps-services-pet-name">Maya</span>
+                        <span class="dps-services-pet-meta">M&eacute;dio &#8226; Shih-tzu &#8226; 8 kg</span>
+                    </div>
+                </div>
+
+                <div class="dps-services-summary">
+                    <div class="dps-services-summary-item">
+                        <span class="dps-services-summary-icon" aria-hidden="true">&#x1F4CB;</span>
+                        <span class="dps-services-summary-value">3</span>
+                        <span class="dps-services-summary-label">servi&ccedil;os</span>
+                    </div>
+                    <div class="dps-services-summary-item">
+                        <span class="dps-services-summary-icon" aria-hidden="true">&#x23F1;&#xFE0F;</span>
+                        <span class="dps-services-summary-value">1h 40min</span>
+                        <span class="dps-services-summary-label">tempo estimado</span>
+                    </div>
+                </div>
+
+                <div class="dps-services-checklist">
+                    <h4 class="dps-services-section-title">Servi&ccedil;os a realizar</h4>
+
+                    <div class="dps-service-card dps-service-type-padrao">
+                        <div class="dps-service-card-header">
+                            <span class="dps-service-card-icon" aria-hidden="true">&#x1F6C1;</span>
+                            <div class="dps-service-card-info">
+                                <span class="dps-service-card-name">Banho completo</span>
+                                <span class="dps-service-card-meta">Servi&ccedil;o &#8226; 45 min</span>
+                            </div>
+                            <span class="dps-service-card-price">R$ 55,00</span>
+                        </div>
+                    </div>
+
+                    <div class="dps-service-card dps-service-type-extra">
+                        <div class="dps-service-card-header">
+                            <span class="dps-service-card-icon" aria-hidden="true">&#x2728;</span>
+                            <div class="dps-service-card-info">
+                                <span class="dps-service-card-name">Hidrata&ccedil;&atilde;o</span>
+                                <span class="dps-service-card-meta">Extra &#8226; 25 min</span>
+                            </div>
+                            <span class="dps-service-card-price">R$ 25,00</span>
+                        </div>
+                    </div>
+
+                    <div class="dps-service-card dps-service-type-taxidog">
+                        <div class="dps-service-card-header">
+                            <span class="dps-service-card-icon" aria-hidden="true">&#x1F690;</span>
+                            <div class="dps-service-card-info">
+                                <span class="dps-service-card-name">TaxiDog ida e volta</span>
+                                <span class="dps-service-card-meta">Transporte</span>
+                            </div>
+                            <span class="dps-service-card-price">R$ 20,00</span>
+                        </div>
+                    </div>
+
+                    <div class="dps-services-total-row">
+                        <span class="dps-services-total-label">Total</span>
+                        <span class="dps-services-total-value">R$ 100,00</span>
+                    </div>
+                </div>
+
+                <div class="dps-services-notes dps-services-notes-highlight">
+                    <div class="dps-services-notes-title">
+                        <span class="dps-services-notes-icon" aria-hidden="true">&#x26A0;&#xFE0F;</span>
+                        <span>Observa&ccedil;&otilde;es do cliente</span>
+                    </div>
+                    <div class="dps-services-notes-content">Pet com pele sens&iacute;vel. Usar shampoo hipoalerg&ecirc;nico e secagem morna.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

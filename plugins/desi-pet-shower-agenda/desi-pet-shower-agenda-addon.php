@@ -963,7 +963,7 @@ class DPS_Agenda_Addon {
                 'dps-agenda-addon-css',
                 plugin_dir_url( __FILE__ ) . 'assets/css/agenda-addon.css',
                 [ 'dps-design-tokens' ],
-                '2.1.0'
+                '2.1.1'
             );
 
             // CSS do Checklist Operacional e Check-in/Check-out
@@ -988,7 +988,7 @@ class DPS_Agenda_Addon {
                 'dps-agenda-addon', 
                 plugin_dir_url( __FILE__ ) . 'assets/js/agenda-addon.js', 
                 [ 'jquery', 'dps-services-modal' ],
-                '1.4.0', 
+                '1.4.1',
                 true 
             );
 
@@ -996,7 +996,7 @@ class DPS_Agenda_Addon {
                 'dps-pet-profile-modal',
                 plugin_dir_url( __FILE__ ) . 'assets/js/pet-profile-modal.js',
                 [ 'jquery', 'dps-agenda-addon' ],
-                '1.0.0',
+                '1.0.2',
                 true
             );
 
