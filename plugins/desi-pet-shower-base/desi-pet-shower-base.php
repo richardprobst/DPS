@@ -213,6 +213,26 @@ class DPS_Base_Plugin {
     }
 
     /**
+     * Retorna uma URL absoluta de fallback para o endpoint AJAX.
+     *
+     * Alguns ambientes expõem o frontend e o admin com caminhos/hosts
+     * distintos. Esse fallback permite uma segunda tentativa quando o
+     * caminho relativo não chega ao endpoint.
+     *
+     * @since 2.0.4
+     * @return string
+     */
+    private static function get_frontend_ajax_fallback_url() {
+        $ajax_url = admin_url( 'admin-ajax.php' );
+
+        if ( ! is_string( $ajax_url ) || '' === $ajax_url ) {
+            $ajax_url = site_url( '/wp-admin/admin-ajax.php' );
+        }
+
+        return $ajax_url;
+    }
+
+    /**
      * Executa rotinas de ativação: criação de capabilities e do papel de recepção.
      */
     public static function activate() {
@@ -475,8 +495,9 @@ class DPS_Base_Plugin {
         
         // Localização para o script de agendamento
         wp_localize_script( 'dps-appointment-form', 'dpsAppointmentData', [
-            'ajaxurl' => self::get_frontend_ajax_url(),
-            'nonce'   => wp_create_nonce( 'dps_action' ),
+            'ajaxurl'         => self::get_frontend_ajax_url(),
+            'ajaxurlAbsolute' => self::get_frontend_ajax_fallback_url(),
+            'nonce'           => wp_create_nonce( 'dps_action' ),
             'appointmentId' => isset( $_GET['dps_edit'] ) && isset( $_GET['id'] ) ? intval( $_GET['id'] ) : 0,
             'l10n' => [
                 'loadingTimes'    => __( 'Carregando horários...', 'desi-pet-shower' ),
