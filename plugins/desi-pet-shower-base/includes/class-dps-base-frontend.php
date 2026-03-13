@@ -1456,7 +1456,7 @@ class DPS_Base_Frontend {
         // Validação de nonce e permissões
         check_ajax_referer( 'dps_action', 'nonce' );
         
-        if ( ! current_user_can( 'edit_posts' ) ) {
+        if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'dps_manage_appointments' ) ) {
             wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'desi-pet-shower' ) ] );
         }
         

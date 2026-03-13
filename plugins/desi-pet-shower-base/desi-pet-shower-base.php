@@ -599,7 +599,10 @@ class DPS_Base_Plugin {
      * Verifica permissões para acesso às rotas REST do plugin.
      */
     public function rest_permissions() {
-        return current_user_can( 'dps_manage_pets' );
+        return current_user_can( 'manage_options' )
+            || current_user_can( 'dps_manage_clients' )
+            || current_user_can( 'dps_manage_pets' )
+            || current_user_can( 'dps_manage_appointments' );
     }
 
     /**
@@ -610,28 +613,14 @@ class DPS_Base_Plugin {
      * @return WP_REST_Response
      */
     public function rest_list_pets( WP_REST_Request $request ) {
-        $page       = max( 1, (int) $request->get_param( 'page' ) );
-        $search     = $request->get_param( 'search' );
-        $owner_id   = (int) $request->get_param( 'owner' );
-        $cache_args = [
-            'page'   => $page,
-            'search' => $search,
-            'owner'  => $owner_id,
-        ];
-        $cache_key  = $this->build_pets_cache_key( $cache_args );
-        
-        // Verifica cache apenas se não estiver desabilitado
-        if ( ! dps_is_cache_disabled() ) {
-            $cached = get_transient( $cache_key );
-            if ( false !== $cached ) {
-                return rest_ensure_response( $cached );
-            }
-        }
+        $page     = max( 1, (int) $request->get_param( 'page' ) );
+        $search   = $request->get_param( 'search' );
+        $owner_id = (int) $request->get_param( 'owner' );
 
         $query_args = [
             'post_type'      => 'dps_pet',
             'post_status'    => 'publish',
-            'posts_per_page' => DPS_BASE_PETS_PER_PAGE,
+            'posts_per_page' => $owner_id ? -1 : DPS_BASE_PETS_PER_PAGE,
             'orderby'        => 'title',
             'order'          => 'ASC',
             'paged'          => $page,
@@ -674,12 +663,6 @@ class DPS_Base_Plugin {
             'total_pages' => (int) max( 1, $pets_query->max_num_pages ),
             'total'       => (int) $pets_query->found_posts,
         ];
-
-        // Armazena cache apenas se não estiver desabilitado
-        if ( ! dps_is_cache_disabled() ) {
-            set_transient( $cache_key, $response, 15 * MINUTE_IN_SECONDS );
-            $this->remember_pets_cache_key( $cache_key );
-        }
 
         return rest_ensure_response( $response );
     }

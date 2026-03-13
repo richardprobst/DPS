@@ -135,360 +135,337 @@
     });
     // Nova seleção de pets baseada em checkboxes filtradas por tutor
     (function(){
-      var $clientSelect = $('#dps-appointment-cliente');
-      var $petWrapper   = $('#dps-appointment-pet-wrapper');
-      if (!$petWrapper.length) {
-        return;
-      }
-      var $petList       = $('#dps-appointment-pet-list');
-      var $petOptions    = $petWrapper.find('.dps-pet-option');
-      var $petCheckboxes = $petWrapper.find('.dps-pet-checkbox');
-      var $noPetsMsg     = $('#dps-no-pets-message');
-      var $summary       = $('#dps-pet-summary');
-      var $selectHint    = $('#dps-pet-select-client');
-      var $pendingAlert  = $('#dps-client-pending-alert');
-      var $searchInput   = $('#dps-pet-search');
-      var $loadMore      = $petWrapper.find('.dps-pet-load-more');
-      var restConfig     = window.dpsBaseData || {};
-      var petState = {
-        page: parseInt($petWrapper.data('currentPage'), 10) || 1,
-        totalPages: parseInt($petWrapper.data('totalPages'), 10) || 1,
-        search: '',
-        loading: false
-      };
-      var searchTimer;
+      function initPetPicker(context){
+        var $context = context ? $(context) : $(document);
+        var $petWrapper = $context.find('#dps-appointment-pet-wrapper').first();
 
-      function updateSummary(){
-        var selected = $petCheckboxes.filter(':checked');
-        var $counter = $('#dps-pet-counter');
-        
-        if (selected.length) {
-          var names = selected.map(function(){
-            return $(this).closest('.dps-pet-option').find('.dps-pet-name').text();
-          }).get();
-          $summary.text(selected.length === 1 ?
-            dpsBaseL10n.summarySingle.replace('%s', names[0]) :
-            dpsBaseL10n.summaryMultiple.replace('%d', selected.length).replace('%s', names.join(', '))
-          );
-          $summary.show();
-          
-          // Update counter
-          $counter.text(selected.length + ' ' + (selected.length === 1 ? dpsBaseL10n.selectedSingle : dpsBaseL10n.selectedMultiple)).show();
-        } else {
-          $summary.hide();
-          $counter.hide();
+        if (!$petWrapper.length || $petWrapper.data('dpsPetPickerReady')) {
+          return;
         }
-      }
 
-      function updatePendingAlert(){
-        if (!$pendingAlert.length) {
+        $petWrapper.data('dpsPetPickerReady', true);
+
+        var $form          = $petWrapper.closest('form');
+        var $clientSelect  = $form.find('#dps-appointment-cliente').first();
+        var $petList       = $petWrapper.find('#dps-appointment-pet-list');
+        var $petOptions    = $petWrapper.find('.dps-pet-option');
+        var $petCheckboxes = $petWrapper.find('.dps-pet-checkbox');
+        var $noPetsMsg     = $petWrapper.find('#dps-no-pets-message');
+        var $summary       = $petWrapper.find('#dps-pet-summary');
+        var $selectHint    = $petWrapper.find('#dps-pet-select-client');
+        var $pendingAlert  = $form.find('#dps-client-pending-alert');
+        var $searchInput   = $petWrapper.find('#dps-pet-search');
+        var restConfig     = window.dpsBaseData || {};
+        var petState = {
+          search: '',
+          loading: false
+        };
+        var searchTimer;
+
+        if (!$clientSelect.length) {
           return;
         }
-        var $selected = $clientSelect.find('option:selected');
-        var hasPending = $selected.data('hasPending');
-        if (hasPending === undefined) {
-          hasPending = $selected.attr('data-has-pending');
-        }
-        if (!hasPending || String(hasPending) === '0') {
-          $pendingAlert.attr('aria-hidden', 'true').hide().empty();
-          $petWrapper.removeClass('dps-pet-picker--warning');
-          $clientSelect.removeClass('dps-client-select--warning');
-          return;
-        }
-        var pendingInfo = $selected.data('pendingInfo');
-        if (typeof pendingInfo === 'string') {
-          try {
-            pendingInfo = JSON.parse(pendingInfo);
-          } catch (err) {
-            pendingInfo = [];
-          }
-        }
-        if (!Array.isArray(pendingInfo) || !pendingInfo.length) {
-          $pendingAlert.attr('aria-hidden', 'true').hide().empty();
-          $petWrapper.removeClass('dps-pet-picker--warning');
-          $clientSelect.removeClass('dps-client-select--warning');
-          return;
-        }
-        var clientName = $.trim($selected.text());
-        var titleText = clientName ?
-          dpsBaseL10n.pendingTitle.replace('%s', clientName) :
-          dpsBaseL10n.pendingGenericTitle;
-        $pendingAlert.empty();
-        $('<strong/>').text(titleText).appendTo($pendingAlert);
-        var $list = $('<ul/>');
-        pendingInfo.forEach(function(row){
-          var date = row.date || '';
-          var value = row.value || '0,00';
-          var desc = row.description || dpsBaseL10n.pendingItemNoDate;
-          var label;
-          if (date) {
-            label = dpsBaseL10n.pendingItem
-              .replace('%1$s', date)
-              .replace('%2$s', value)
-              .replace('%3$s', desc);
+
+        function updateSummary(){
+          var selected = $petCheckboxes.filter(':checked');
+          var $counter = $petWrapper.find('#dps-pet-counter').first();
+
+          if (selected.length) {
+            var names = selected.map(function(){
+              return $(this).closest('.dps-pet-option').find('.dps-pet-name').text();
+            }).get();
+            $summary.text(selected.length === 1 ?
+              dpsBaseL10n.summarySingle.replace('%s', names[0]) :
+              dpsBaseL10n.summaryMultiple.replace('%d', selected.length).replace('%s', names.join(', '))
+            );
+            $summary.show();
+            $counter.text(selected.length + ' ' + (selected.length === 1 ? dpsBaseL10n.selectedSingle : dpsBaseL10n.selectedMultiple)).show();
           } else {
-            label = dpsBaseL10n.pendingItemNoDate
-              .replace('%1$s', value)
-              .replace('%2$s', desc);
+            $summary.hide();
+            $counter.hide();
           }
-          $('<li/>').text(label).appendTo($list);
-        });
-        $pendingAlert.append($list);
-        $pendingAlert.attr('aria-hidden', 'false').show();
-        $petWrapper.addClass('dps-pet-picker--warning');
-        $clientSelect.addClass('dps-client-select--warning');
-      }
-
-      function updateLoadMore(page, total){
-        if (!$loadMore.length) {
-          return;
-        }
-        if (!restConfig.restUrl || page >= total) {
-          $loadMore.hide();
-          return;
-        }
-        $loadMore.show()
-          .attr('data-next-page', page + 1)
-          .attr('aria-busy', 'false')
-          .text(dpsBaseL10n.petLoadMore);
-      }
-
-      function buildPetOption(pet, selectedIds){
-        var $label = $('<label/>', {
-          'class': 'dps-pet-option'
-        });
-        // Set data attributes using .attr() to ensure they are DOM attributes
-        // (not jQuery internal data). This is required for .attr() reads in applyPetFilters.
-        $label.attr('data-owner', pet.owner_id || '');
-        $label.attr('data-search', (pet.name + ' ' + (pet.breed || '') + ' ' + (pet.owner_name || '')).toLowerCase());
-
-        if (pet.size) {
-          $label.attr('data-size', String(pet.size).toLowerCase());
         }
 
-        var $checkbox = $('<input/>', {
-          type: 'checkbox',
-          'class': 'dps-pet-checkbox',
-          name: 'appointment_pet_ids[]',
-          value: pet.id
-        });
-
-        if (selectedIds.indexOf(String(pet.id)) !== -1) {
-          $checkbox.prop('checked', true);
-          // Fallback for browsers without :has() support
-          $label.addClass('is-selected');
-        }
-
-        $label.append($checkbox);
-        $('<span/>', { 'class': 'dps-pet-name', text: pet.name }).appendTo($label);
-
-        if (pet.breed) {
-          $('<span/>', { 'class': 'dps-pet-breed', text: ' – ' + pet.breed }).appendTo($label);
-        }
-
-        if (pet.owner_name) {
-          $('<span/>', { 'class': 'dps-pet-owner', text: ' (' + pet.owner_name + ')' }).appendTo($label);
-        }
-
-        if (pet.size) {
-          var label = String(pet.size).charAt(0).toUpperCase() + String(pet.size).slice(1);
-          $('<span/>', { 'class': 'dps-pet-size', text: ' · ' + label }).appendTo($label);
-        }
-
-        return $label;
-      }
-
-      function renderPets(items, append){
-        var previousSelection = $petWrapper.find('.dps-pet-checkbox:checked').map(function(){
-          return String($(this).val());
-        }).get();
-
-        if (!append) {
-          $petList.empty();
-        }
-
-        if (!items.length && !append) {
-          $petList.hide();
-          $noPetsMsg.text(dpsBaseL10n.petNoResults).show();
-          $petOptions = $();
-          $petCheckboxes = $();
-          updateSummary();
-          return;
-        }
-
-        $noPetsMsg.hide();
-        $petList.show();
-
-        items.forEach(function(pet){
-          var $option = buildPetOption(pet, previousSelection);
-          $petList.append($option);
-        });
-
-        $petOptions = $petWrapper.find('.dps-pet-option');
-        $petCheckboxes = $petWrapper.find('.dps-pet-checkbox');
-        applyPetFilters(true);
-      }
-
-      function applyPetFilters(skipReset){
-        var ownerId = $clientSelect.val();
-        var visible = 0;
-
-        $petOptions.each(function(){
-          var $option = $(this);
-          var optionOwner = $option.attr('data-owner');
-          var matchesOwner = ownerId ? String(optionOwner) === String(ownerId) : false;
-
-          if (!matchesOwner && !skipReset) {
-            $option.find('.dps-pet-checkbox').prop('checked', false);
+        function updatePendingAlert(){
+          if (!$pendingAlert.length) {
+            return;
           }
-
-          $option.toggle(matchesOwner);
-
-          if (matchesOwner) {
-            visible++;
+          var $selected = $clientSelect.find('option:selected');
+          var hasPending = $selected.data('hasPending');
+          if (hasPending === undefined) {
+            hasPending = $selected.attr('data-has-pending');
           }
-        });
-
-        $petList.toggle(visible > 0);
-        $noPetsMsg.toggle(visible === 0 && !!ownerId);
-        $selectHint.toggle(!ownerId);
-        $petWrapper.toggleClass('dps-pet-picker--disabled', !ownerId);
-        $petWrapper.find('.dps-pet-toggle').prop('disabled', !ownerId || visible === 0);
-        if (!ownerId && $loadMore.length) {
-          $loadMore.hide();
-        }
-        updateSummary();
-        updatePendingAlert();
-        $(document).trigger('dps-pet-selection-updated');
-      }
-
-      function fetchPets(targetPage, append){
-        if (petState.loading) {
-          return;
-        }
-
-        var ownerId = $clientSelect.val();
-        if (!ownerId) {
-          $petList.empty();
-          $petOptions = $();
-          $petCheckboxes = $();
-          applyPetFilters();
-          return;
-        }
-
-        if (!restConfig.restUrl) {
-          applyPetFilters();
-          return;
-        }
-
-        petState.loading = true;
-
-        if ($loadMore.length) {
-          $loadMore.attr('aria-busy', 'true').text(dpsBaseL10n.petLoading);
-        }
-
-        $.ajax({
-          url: restConfig.restUrl,
-          method: 'GET',
-          data: {
-            page: targetPage,
-            owner: ownerId,
-            search: petState.search
-          },
-          beforeSend: function(xhr){
-            if (restConfig.restNonce) {
-              xhr.setRequestHeader('X-WP-Nonce', restConfig.restNonce);
+          if (!hasPending || String(hasPending) === '0') {
+            $pendingAlert.attr('aria-hidden', 'true').hide().empty();
+            $petWrapper.removeClass('dps-pet-picker--warning');
+            $clientSelect.removeClass('dps-client-select--warning');
+            return;
+          }
+          var pendingInfo = $selected.data('pendingInfo');
+          if (typeof pendingInfo === 'string') {
+            try {
+              pendingInfo = JSON.parse(pendingInfo);
+            } catch (err) {
+              pendingInfo = [];
             }
           }
-        }).done(function(resp){
-          petState.page = resp.page || targetPage;
-          petState.totalPages = resp.total_pages || 1;
-          renderPets(resp.items || [], append);
-          updateLoadMore(petState.page, petState.totalPages);
-        }).fail(function(){
-          applyPetFilters();
-          updateLoadMore(petState.page, petState.totalPages);
-        }).always(function(){
-          petState.loading = false;
-          if ($loadMore.length) {
-            $loadMore.attr('aria-busy', 'false').text(dpsBaseL10n.petLoadMore);
+          if (!Array.isArray(pendingInfo) || !pendingInfo.length) {
+            $pendingAlert.attr('aria-hidden', 'true').hide().empty();
+            $petWrapper.removeClass('dps-pet-picker--warning');
+            $clientSelect.removeClass('dps-client-select--warning');
+            return;
           }
-        });
-      }
-
-      $clientSelect.on('change', function(){
-        petState.page = 1;
-        petState.search = '';
-        $searchInput.val('');
-        fetchPets(1, false);
-      });
-
-      $petWrapper.on('change', '.dps-pet-checkbox', function(){
-        // Fallback for browsers without :has() support - toggle .is-selected class
-        var $checkbox = $(this);
-        var $option = $checkbox.closest('.dps-pet-option');
-        if ($checkbox.prop('checked')) {
-          $option.addClass('is-selected');
-        } else {
-          $option.removeClass('is-selected');
-        }
-        updateSummary();
-        $(document).trigger('dps-pet-selection-updated');
-      });
-
-      $petWrapper.on('click', '.dps-pet-toggle', function(e){
-        e.preventDefault();
-        var action = $(this).data('action');
-        var ownerId = $clientSelect.val();
-        $petOptions.each(function(){
-          var $option = $(this);
-          // Use .attr() instead of .data() to read DOM attributes set by buildPetOption
-          var optionOwner = $option.attr('data-owner');
-          var matches = ownerId && String(optionOwner) === String(ownerId);
-          if (matches) {
-            $option.find('.dps-pet-checkbox').prop('checked', action === 'select');
-            // Fallback for browsers without :has() support
-            if (action === 'select') {
-              $option.addClass('is-selected');
+          var clientName = $.trim($selected.text());
+          var titleText = clientName ?
+            dpsBaseL10n.pendingTitle.replace('%s', clientName) :
+            dpsBaseL10n.pendingGenericTitle;
+          $pendingAlert.empty();
+          $('<strong/>').text(titleText).appendTo($pendingAlert);
+          var $list = $('<ul/>');
+          pendingInfo.forEach(function(row){
+            var date = row.date || '';
+            var value = row.value || '0,00';
+            var desc = row.description || dpsBaseL10n.pendingItemNoDate;
+            var label;
+            if (date) {
+              label = dpsBaseL10n.pendingItem
+                .replace('%1$s', date)
+                .replace('%2$s', value)
+                .replace('%3$s', desc);
             } else {
+              label = dpsBaseL10n.pendingItemNoDate
+                .replace('%1$s', value)
+                .replace('%2$s', desc);
+            }
+            $('<li/>').text(label).appendTo($list);
+          });
+          $pendingAlert.append($list);
+          $pendingAlert.attr('aria-hidden', 'false').show();
+          $petWrapper.addClass('dps-pet-picker--warning');
+          $clientSelect.addClass('dps-client-select--warning');
+        }
+
+        function buildPetOption(pet, selectedIds){
+          var $label = $('<label/>', {
+            'class': 'dps-pet-option'
+          });
+
+          $label.attr('data-owner', pet.owner_id || '');
+          $label.attr('data-search', (pet.name + ' ' + (pet.breed || '') + ' ' + (pet.owner_name || '')).toLowerCase());
+
+          if (pet.size) {
+            $label.attr('data-size', String(pet.size).toLowerCase());
+          }
+
+          var $checkbox = $('<input/>', {
+            type: 'checkbox',
+            'class': 'dps-pet-checkbox',
+            name: 'appointment_pet_ids[]',
+            value: pet.id
+          });
+
+          if (selectedIds.indexOf(String(pet.id)) !== -1) {
+            $checkbox.prop('checked', true);
+            $label.addClass('is-selected');
+          }
+
+          $label.append($checkbox);
+          $('<span/>', { 'class': 'dps-pet-name', text: pet.name }).appendTo($label);
+
+          if (pet.breed) {
+            $('<span/>', { 'class': 'dps-pet-breed', text: ' – ' + pet.breed }).appendTo($label);
+          }
+
+          if (pet.owner_name) {
+            $('<span/>', { 'class': 'dps-pet-owner', text: ' (' + pet.owner_name + ')' }).appendTo($label);
+          }
+
+          if (pet.size) {
+            var label = String(pet.size).charAt(0).toUpperCase() + String(pet.size).slice(1);
+            $('<span/>', { 'class': 'dps-pet-size', text: ' · ' + label }).appendTo($label);
+          }
+
+          return $label;
+        }
+
+        function renderPets(items){
+          var previousSelection = $petWrapper.find('.dps-pet-checkbox:checked').map(function(){
+            return String($(this).val());
+          }).get();
+
+          $petList.empty();
+
+          if (!items.length) {
+            $petList.hide();
+            $petOptions = $();
+            $petCheckboxes = $();
+            applyPetFilters();
+            updateSummary();
+            return;
+          }
+
+          items.forEach(function(pet){
+            $petList.append(buildPetOption(pet, previousSelection));
+          });
+
+          $petOptions = $petWrapper.find('.dps-pet-option');
+          $petCheckboxes = $petWrapper.find('.dps-pet-checkbox');
+          applyPetFilters(true);
+        }
+
+        function applyPetFilters(skipReset){
+          var ownerId = $clientSelect.val();
+          var visible = 0;
+
+          $petOptions.each(function(){
+            var $option = $(this);
+            var optionOwner = $option.attr('data-owner');
+            var matchesOwner = ownerId ? String(optionOwner) === String(ownerId) : false;
+
+            if (!matchesOwner && !skipReset) {
+              $option.find('.dps-pet-checkbox').prop('checked', false);
               $option.removeClass('is-selected');
             }
+
+            $option.toggle(matchesOwner);
+
+            if (matchesOwner) {
+              visible++;
+            }
+          });
+
+          $petList.toggle(!!ownerId && visible > 0);
+          $noPetsMsg.toggle(!!ownerId && visible === 0);
+          if ($selectHint.length) {
+            $selectHint.toggle(!ownerId);
           }
+          $petWrapper.toggleClass('dps-pet-picker--disabled', !ownerId);
+          $petWrapper.find('.dps-pet-toggle').prop('disabled', !ownerId || visible === 0);
+          updateSummary();
+          updatePendingAlert();
+          $(document).trigger('dps-pet-selection-updated');
+        }
+
+        function fetchPets(){
+          if (petState.loading) {
+            return;
+          }
+
+          var ownerId = $clientSelect.val();
+          if (!ownerId) {
+            $petList.empty();
+            $petOptions = $();
+            $petCheckboxes = $();
+            applyPetFilters();
+            return;
+          }
+
+          if (!restConfig.restUrl) {
+            applyPetFilters();
+            return;
+          }
+
+          petState.loading = true;
+
+          $.ajax({
+            url: restConfig.restUrl,
+            method: 'GET',
+            data: {
+              page: 1,
+              owner: ownerId,
+              search: petState.search
+            },
+            beforeSend: function(xhr){
+              if (restConfig.restNonce) {
+                xhr.setRequestHeader('X-WP-Nonce', restConfig.restNonce);
+              }
+            }
+          }).done(function(resp){
+            renderPets(resp.items || []);
+          }).fail(function(){
+            applyPetFilters();
+          }).always(function(){
+            petState.loading = false;
+          });
+        }
+
+        $clientSelect.on('change.dpsPetPicker', function(){
+          petState.search = '';
+          if ($searchInput.length) {
+            $searchInput.val('');
+          }
+          fetchPets();
         });
-        updateSummary();
-        $(document).trigger('dps-pet-selection-updated');
-      });
 
-      $searchInput.on('input', function(){
-        petState.search = $(this).val();
-        petState.page = 1;
-        if (searchTimer) {
-          clearTimeout(searchTimer);
+        $petWrapper.on('change.dpsPetPicker', '.dps-pet-checkbox', function(){
+          var $checkbox = $(this);
+          var $option = $checkbox.closest('.dps-pet-option');
+          if ($checkbox.prop('checked')) {
+            $option.addClass('is-selected');
+          } else {
+            $option.removeClass('is-selected');
+          }
+          updateSummary();
+          $(document).trigger('dps-pet-selection-updated');
+        });
+
+        $petWrapper.on('click.dpsPetPicker', '.dps-pet-toggle', function(e){
+          e.preventDefault();
+          var action = $(this).data('action');
+          var ownerId = $clientSelect.val();
+          $petOptions.each(function(){
+            var $option = $(this);
+            var optionOwner = $option.attr('data-owner');
+            var matches = ownerId && String(optionOwner) === String(ownerId);
+            if (matches) {
+              $option.find('.dps-pet-checkbox').prop('checked', action === 'select');
+              if (action === 'select') {
+                $option.addClass('is-selected');
+              } else {
+                $option.removeClass('is-selected');
+              }
+            }
+          });
+          updateSummary();
+          $(document).trigger('dps-pet-selection-updated');
+        });
+
+        if ($searchInput.length) {
+          $searchInput.on('input.dpsPetPicker', function(){
+            petState.search = $(this).val();
+            if (searchTimer) {
+              clearTimeout(searchTimer);
+            }
+            searchTimer = setTimeout(function(){
+              fetchPets();
+            }, 300);
+          });
         }
-        searchTimer = setTimeout(function(){
-          fetchPets(1, false);
-        }, 300);
-      });
 
-      $petWrapper.on('click', '.dps-pet-load-more', function(e){
-        e.preventDefault();
-        var nextPage = parseInt($(this).attr('data-next-page'), 10) || (petState.page + 1);
-        if (petState.page < petState.totalPages) {
-          fetchPets(nextPage, true);
+        if ($form.length && !$form.data('dpsPetPickerSubmitBound')) {
+          $form.data('dpsPetPickerSubmitBound', true);
+          $form.on('submit.dpsPetPicker', function(){
+            if ($petCheckboxes.filter(':checked').length === 0) {
+              alert(dpsBaseL10n.selectPetWarning);
+              return false;
+            }
+            return true;
+          });
         }
-      });
 
-      // Impede envio do formulário sem pet selecionado
-      $petWrapper.closest('form').on('submit', function(){
-        if ($petCheckboxes.filter(':checked').length === 0) {
-          alert(dpsBaseL10n.selectPetWarning);
-          return false;
+        if ($clientSelect.val()) {
+          fetchPets();
+        } else {
+          applyPetFilters(true);
         }
-        return true;
-      });
+      }
 
-      applyPetFilters(true);
-      updateLoadMore(petState.page, petState.totalPages);
+      initPetPicker(document);
+
+      document.addEventListener('dps:appointmentFormLoaded', function(event){
+        var container = event && event.detail && event.detail.container ? event.detail.container : document;
+        initPetPicker(container);
+      });
     })();
 
     $(document).on('change', '.dps-inline-status-form select[name="appointment_status"]', function(){

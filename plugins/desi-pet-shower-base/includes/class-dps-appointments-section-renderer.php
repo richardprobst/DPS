@@ -58,10 +58,7 @@ class DPS_Appointments_Section_Renderer {
      * @return array Dados estruturados para renderização.
      */
     public static function prepare_data( $visitor_only = false, array $overrides = [] ) {
-        $clients    = DPS_Query_Helper::get_all_posts_by_type( 'dps_cliente' );
-        $pets_query = DPS_Query_Helper::get_paginated_posts( 'dps_pet', 1, DPS_BASE_PETS_PER_PAGE );
-        $pets       = $pets_query->posts;
-        $pet_pages  = (int) max( 1, $pets_query->max_num_pages );
+        $clients = DPS_Query_Helper::get_all_posts_by_type( 'dps_cliente' );
 
         // Detecta edição de agendamento.
         $edit_id = ( isset( $_GET['dps_edit'] ) && 'appointment' === $_GET['dps_edit'] && isset( $_GET['id'] ) )
@@ -139,6 +136,23 @@ class DPS_Appointments_Section_Renderer {
 
         if ( isset( $overrides['pref_pet'] ) ) {
             $pref_pet = intval( $overrides['pref_pet'] );
+        }
+
+        if ( ! $pref_client && $pref_pet ) {
+            $pref_client = (int) get_post_meta( $pref_pet, 'owner_id', true );
+        }
+
+        $selected_client_for_pets = 0;
+        if ( ! empty( $meta['client_id'] ) ) {
+            $selected_client_for_pets = (int) $meta['client_id'];
+        } elseif ( $pref_client ) {
+            $selected_client_for_pets = (int) $pref_client;
+        }
+
+        $pets      = [];
+        $pet_pages = 1;
+        if ( $selected_client_for_pets ) {
+            $pets = DPS_Query_Helper::get_posts_by_meta( 'dps_pet', 'owner_id', $selected_client_for_pets );
         }
 
         $override_base_url    = isset( $overrides['base_url'] ) ? esc_url_raw( $overrides['base_url'] ) : '';
@@ -454,7 +468,9 @@ class DPS_Appointments_Section_Renderer {
             if ( $multi_meta && is_array( $multi_meta ) ) {
                 $sel_pets = array_map( 'strval', $multi_meta );
             }
-            $pet_wrapper_attrs = ' id="dps-appointment-pet-wrapper" class="dps-pet-picker"';
+            $has_selected_client = ! empty( $sel_client );
+            $pet_wrapper_classes = 'dps-pet-picker' . ( $has_selected_client ? '' : ' dps-pet-picker--disabled' );
+            $pet_wrapper_attrs = ' id="dps-appointment-pet-wrapper" class="' . esc_attr( $pet_wrapper_classes ) . '"';
             $pet_wrapper_attrs .= ' data-current-page="1" data-total-pages="' . esc_attr( $pet_pages ) . '"';
             echo '<div' . $pet_wrapper_attrs . '>';
             echo '<p id="dps-pet-selector-label"><strong>' . esc_html__( 'Pet(s)', 'desi-pet-shower' ) . ' <span class="dps-required">*</span></strong><span id="dps-pet-counter" class="dps-selection-counter" style="display:none;">0 ' . esc_html__( 'selecionados', 'desi-pet-shower' ) . '</span></p>';
@@ -462,7 +478,10 @@ class DPS_Appointments_Section_Renderer {
             echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="select">' . esc_html__( 'Selecionar todos', 'desi-pet-shower' ) . '</button> ';
             echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="clear">' . esc_html__( 'Limpar seleção', 'desi-pet-shower' ) . '</button>';
             echo '</div>';
-            echo '<div id="dps-appointment-pet-list" class="dps-pet-list" role="group" aria-labelledby="dps-pet-selector-label">';
+            $select_hint_style = $has_selected_client ? 'display:none;' : '';
+            echo '<p id="dps-pet-select-client" class="dps-field-hint" style="' . esc_attr( $select_hint_style ) . '">' . esc_html__( 'Escolha um cliente para carregar os pets disponiveis.', 'desi-pet-shower' ) . '</p>';
+            $pet_list_style = $has_selected_client && ! empty( $pets ) ? '' : ' style="display:none;"';
+            echo '<div id="dps-appointment-pet-list" class="dps-pet-list" role="group" aria-labelledby="dps-pet-selector-label"' . $pet_list_style . '>';
             foreach ( $pets as $pet ) {
                 $owner_id   = get_post_meta( $pet->ID, 'owner_id', true );
                 $owner_post = $owner_id ? get_post( $owner_id ) : null;
@@ -485,11 +504,9 @@ class DPS_Appointments_Section_Renderer {
                 echo '</label>';
             }
             echo '</div>';
-            if ( $pet_pages > 1 ) {
-                echo '<p><button type="button" class="button dps-pet-load-more" data-next-page="2" data-loading="false">' . esc_html__( 'Carregar mais pets', 'desi-pet-shower' ) . '</button></p>';
-            }
             echo '<p id="dps-pet-summary" class="dps-field-hint" style="display:none;"></p>';
-            echo '<p id="dps-no-pets-message" class="dps-field-hint" style="display:none;">' . esc_html__( 'Nenhum pet disponível para o cliente selecionado.', 'desi-pet-shower' ) . '</p>';
+            $no_pets_style = $has_selected_client && empty( $pets ) ? '' : 'display:none;';
+            echo '<p id="dps-no-pets-message" class="dps-field-hint" style="' . esc_attr( $no_pets_style ) . '">' . esc_html__( 'Nenhum pet disponível para o cliente selecionado.', 'desi-pet-shower' ) . '</p>';
             echo '</div>';
             
             echo '</fieldset>';

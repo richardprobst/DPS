@@ -329,10 +329,7 @@ class DPS_Booking_Addon {
         }
 
         // Prepara dados necessários para o formulário
-        $clients    = $this->get_clients();
-        $pets_query = $this->get_pets();
-        $pets       = $pets_query->posts;
-        $pet_pages  = (int) max( 1, $pets_query->max_num_pages );
+        $clients = $this->get_clients();
 
         // Detecta edição de agendamento com validação de segurança
         $edit_id = 0;
@@ -402,6 +399,21 @@ class DPS_Booking_Addon {
         $pref_client = isset( $_GET['client_id'] ) ? absint( $_GET['client_id'] ) : 0;
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only GET params for pre-selection, validated by capability
         $pref_pet    = isset( $_GET['pet_id'] ) ? absint( $_GET['pet_id'] ) : 0;
+
+        if ( ! $pref_client && $pref_pet ) {
+            $pref_client = (int) get_post_meta( $pref_pet, 'owner_id', true );
+        }
+
+        $selected_client_for_pets = 0;
+        if ( ! empty( $meta['client_id'] ) ) {
+            $selected_client_for_pets = (int) $meta['client_id'];
+        } elseif ( $pref_client ) {
+            $selected_client_for_pets = $pref_client;
+        }
+
+        $pets_query = $this->get_pets( 1, $selected_client_for_pets );
+        $pets       = $pets_query->posts;
+        $pet_pages  = (int) max( 1, $pets_query->max_num_pages );
 
         // URLs - use safe URL building instead of raw REQUEST_URI
         $base_url    = $this->get_booking_page_url();
@@ -539,7 +551,9 @@ class DPS_Booking_Addon {
             }
         }
         
-        echo '<div id="dps-appointment-pet-wrapper" class="dps-pet-picker" data-current-page="1" data-total-pages="' . esc_attr( $pet_pages ) . '">';
+        $has_selected_client = ! empty( $sel_client );
+        $pet_wrapper_class   = 'dps-pet-picker' . ( $has_selected_client ? '' : ' dps-pet-picker--disabled' );
+        echo '<div id="dps-appointment-pet-wrapper" class="' . esc_attr( $pet_wrapper_class ) . '" data-current-page="1" data-total-pages="' . esc_attr( $pet_pages ) . '">';
         echo '<p id="dps-pet-selector-label"><strong>' . esc_html__( 'Pet(s)', 'dps-booking-addon' ) . ' <span class="dps-required">*</span></strong>';
         echo '<span id="dps-pet-counter" class="dps-selection-counter" style="display:none;">0 ' . esc_html__( 'selecionados', 'dps-booking-addon' ) . '</span></p>';
         
@@ -547,6 +561,8 @@ class DPS_Booking_Addon {
         echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="select">' . esc_html__( 'Selecionar todos', 'dps-booking-addon' ) . '</button> ';
         echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="clear">' . esc_html__( 'Limpar seleção', 'dps-booking-addon' ) . '</button>';
         echo '</div>';
+        $select_hint_style = $has_selected_client ? 'display:none;' : '';
+        echo '<p id="dps-pet-select-client" class="dps-field-hint" style="' . esc_attr( $select_hint_style ) . '">' . esc_html__( 'Escolha um cliente para carregar os pets disponiveis.', 'dps-booking-addon' ) . '</p>';
         
         // Otimização: buscar todos os owners de uma vez para evitar N+1 query
         $owner_ids = array_filter( array_map( function( $pet ) {
@@ -567,7 +583,8 @@ class DPS_Booking_Addon {
             }
         }
         
-        echo '<div id="dps-appointment-pet-list" class="dps-pet-list" role="group" aria-labelledby="dps-pet-selector-label">';
+        $pet_list_style = $has_selected_client && ! empty( $pets ) ? '' : ' style="display:none;"';
+        echo '<div id="dps-appointment-pet-list" class="dps-pet-list" role="group" aria-labelledby="dps-pet-selector-label"' . $pet_list_style . '>';
         foreach ( $pets as $pet ) {
             $owner_id   = (int) get_post_meta( $pet->ID, 'owner_id', true );
             $owner_name = isset( $owners_map[ $owner_id ] ) ? $owners_map[ $owner_id ] : '';
@@ -591,12 +608,9 @@ class DPS_Booking_Addon {
         }
         echo '</div>';
         
-        if ( $pet_pages > 1 ) {
-            echo '<p><button type="button" class="button dps-pet-load-more" data-next-page="2" data-loading="false">' . esc_html__( 'Carregar mais pets', 'dps-booking-addon' ) . '</button></p>';
-        }
-        
         echo '<p id="dps-pet-summary" class="dps-field-hint" style="display:none;"></p>';
-        echo '<p id="dps-no-pets-message" class="dps-field-hint" style="display:none;">' . esc_html__( 'Nenhum pet disponível para o cliente selecionado.', 'dps-booking-addon' ) . '</p>';
+        $no_pets_style = $has_selected_client && empty( $pets ) ? '' : 'display:none;';
+        echo '<p id="dps-no-pets-message" class="dps-field-hint" style="' . esc_attr( $no_pets_style ) . '">' . esc_html__( 'Nenhum pet disponível para o cliente selecionado.', 'dps-booking-addon' ) . '</p>';
         echo '</div>';
         
         echo '</fieldset>';
@@ -829,19 +843,30 @@ class DPS_Booking_Addon {
      * @param int $page Número da página.
      * @return WP_Query Objeto de consulta com pets paginados.
      */
-    private function get_pets( $page = 1 ) {
+    private function get_pets( $page = 1, $owner_id = 0 ) {
         $per_page = defined( 'DPS_BASE_PETS_PER_PAGE' ) ? absint( DPS_BASE_PETS_PER_PAGE ) : 50;
         // Validate per_page to prevent excessive memory usage
         $per_page = min( max( $per_page, 1 ), 200 );
-        
-        return new WP_Query( [
+
+        $query_args = [
             'post_type'      => 'dps_pet',
-            'posts_per_page' => $per_page,
+            'posts_per_page' => $owner_id ? -1 : $per_page,
             'paged'          => $page,
             'post_status'    => 'publish',
             'orderby'        => 'title',
             'order'          => 'ASC',
-        ] );
+        ];
+
+        if ( $owner_id ) {
+            $query_args['meta_query'] = [
+                [
+                    'key'   => 'owner_id',
+                    'value' => $owner_id,
+                ],
+            ];
+        }
+
+        return new WP_Query( $query_args );
     }
 
     /**
