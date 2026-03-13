@@ -1455,7 +1455,14 @@ class DPS_Base_Frontend {
     public static function ajax_get_available_times() {
         // Validacao de nonce e permissoes
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
-        if ( ! wp_verify_nonce( $nonce, 'dps_action' ) ) {
+        $is_valid_nonce = ! empty( $nonce ) && wp_verify_nonce( $nonce, 'dps_action' );
+
+        if ( ! $is_valid_nonce ) {
+            $form_nonce = isset( $_POST['dps_nonce_agendamentos'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_nonce_agendamentos'] ) ) : '';
+            $is_valid_nonce = ! empty( $form_nonce ) && wp_verify_nonce( $form_nonce, 'dps_action' );
+        }
+
+        if ( ! $is_valid_nonce ) {
             wp_send_json_error(
                 [ 'message' => __( 'Sessao expirada. Atualize a pagina e tente novamente.', 'desi-pet-shower' ) ],
                 403

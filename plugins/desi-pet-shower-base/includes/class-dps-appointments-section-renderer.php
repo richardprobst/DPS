@@ -140,6 +140,9 @@ class DPS_Appointments_Section_Renderer {
 
         if ( ! $pref_client && $pref_pet ) {
             $pref_client = (int) get_post_meta( $pref_pet, 'owner_id', true );
+            if ( ! $pref_client ) {
+                $pref_client = (int) get_post_meta( $pref_pet, 'pet_owner', true );
+            }
         }
 
         $selected_client_for_pets = 0;
@@ -152,7 +155,26 @@ class DPS_Appointments_Section_Renderer {
         $pets      = [];
         $pet_pages = 1;
         if ( $selected_client_for_pets ) {
-            $pets = DPS_Query_Helper::get_posts_by_meta( 'dps_pet', 'owner_id', $selected_client_for_pets );
+            $pets = DPS_Query_Helper::get_posts_by_meta_query(
+                'dps_pet',
+                [
+                    'relation' => 'OR',
+                    [
+                        'key'     => 'owner_id',
+                        'value'   => $selected_client_for_pets,
+                        'compare' => '=',
+                    ],
+                    [
+                        'key'     => 'pet_owner',
+                        'value'   => $selected_client_for_pets,
+                        'compare' => '=',
+                    ],
+                ],
+                [
+                    'orderby' => 'title',
+                    'order'   => 'ASC',
+                ]
+            );
         }
 
         $override_base_url    = isset( $overrides['base_url'] ) ? esc_url_raw( $overrides['base_url'] ) : '';
@@ -484,6 +506,9 @@ class DPS_Appointments_Section_Renderer {
             echo '<div id="dps-appointment-pet-list" class="dps-pet-list" role="group" aria-labelledby="dps-pet-selector-label"' . $pet_list_style . '>';
             foreach ( $pets as $pet ) {
                 $owner_id   = get_post_meta( $pet->ID, 'owner_id', true );
+                if ( '' === (string) $owner_id ) {
+                    $owner_id = get_post_meta( $pet->ID, 'pet_owner', true );
+                }
                 $owner_post = $owner_id ? get_post( $owner_id ) : null;
                 $owner_name = $owner_post ? $owner_post->post_title : '';
                 $size       = get_post_meta( $pet->ID, 'pet_size', true );

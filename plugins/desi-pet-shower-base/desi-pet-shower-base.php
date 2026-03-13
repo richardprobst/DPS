@@ -489,6 +489,7 @@ class DPS_Base_Plugin {
                 'pastDate'        => __( 'A data não pode ser anterior a hoje', 'desi-pet-shower' ),
                 'saving'          => __( 'Salvando...', 'desi-pet-shower' ),
                 'loadError'       => __( 'Erro ao carregar horários', 'desi-pet-shower' ),
+                'sessionExpired'  => __( 'Sessão expirada. Atualize a página e tente novamente.', 'desi-pet-shower' ),
                 'formErrorsTitle' => __( 'Por favor, corrija os seguintes erros:', 'desi-pet-shower' ),
                 'tosaConsentOk'       => __( 'Consentimento tosa máquina ativo', 'desi-pet-shower' ),
                 'tosaConsentMissing'  => __( 'Consentimento tosa máquina pendente', 'desi-pet-shower' ),

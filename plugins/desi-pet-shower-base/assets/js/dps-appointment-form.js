@@ -709,12 +709,26 @@
                 return;
             }
 
+            const previousRequest = $timeSelect.data('dpsTimesRequest');
+            const requestKey = String(Date.now()) + Math.random().toString(36).slice(2);
+
+            function isCurrentRequest() {
+                return $timeSelect.data('dpsTimesRequestKey') === requestKey;
+            }
+
+            if (previousRequest && previousRequest.readyState !== 4) {
+                previousRequest.abort();
+            }
+            $timeSelect.data('dpsTimesRequestKey', requestKey);
+
             if (!date) {
+                $timeSelect.removeData('dpsTimesRequest');
                 $timeSelect.html('<option value="">' + (l10n.selectTime || 'Escolha uma data primeiro') + '</option>');
                 return;
             }
 
             if (!ajaxUrl || !requestNonce) {
+                $timeSelect.removeData('dpsTimesRequest');
                 $timeSelect.empty();
                 var $configErrorOption = $('<option></option>')
                     .attr('value', '')
@@ -727,8 +741,8 @@
             // Mostra estado de carregamento
             $timeSelect.prop('disabled', true).html('<option>' + (l10n.loadingTimes || 'Carregando...') + '</option>');
 
-            // Faz requisi��o AJAX
-            $.ajax({
+            // Faz requisicao AJAX
+            const xhrRequest = $.ajax({
                 url: ajaxUrl,
                 type: 'POST',
                 data: {
@@ -738,8 +752,11 @@
                     appointment_id: appointmentId
                 },
                 success: function(response) {
+                    if (!isCurrentRequest()) {
+                        return;
+                    }
+
                     if (response && response.success && response.data && Array.isArray(response.data.times)) {
-                        // Limpa o select e adiciona op��o padr�o
                         $timeSelect.empty();
                         var $defaultOption = $('<option></option>')
                             .attr('value', '')
@@ -751,7 +768,6 @@
 
                         times.forEach(function(timeObj) {
                             if (timeObj.available) {
-                                // Usa cria��o de elementos DOM para evitar XSS
                                 var $option = $('<option></option>')
                                     .attr('value', timeObj.value)
                                     .text(timeObj.label);
@@ -769,25 +785,30 @@
                         }
 
                         $timeSelect.prop('disabled', false);
-                    } else {
-                        let errorMessage = l10n.loadError || 'Erro ao carregar horarios';
-                        if (response && response.data) {
-                            if (typeof response.data.message === 'string' && response.data.message.trim() !== '') {
-                                errorMessage = response.data.message;
-                            } else if (typeof response.data === 'string' && response.data.trim() !== '') {
-                                errorMessage = response.data;
-                            }
-                        }
-
-                        $timeSelect.empty();
-                        var $errorOption = $('<option></option>')
-                            .attr('value', '')
-                            .text(errorMessage);
-                        $timeSelect.append($errorOption);
-                        $timeSelect.prop('disabled', false);
+                        return;
                     }
+
+                    let errorMessage = l10n.loadError || 'Erro ao carregar horarios';
+                    if (response && response.data) {
+                        if (typeof response.data.message === 'string' && response.data.message.trim() !== '') {
+                            errorMessage = response.data.message;
+                        } else if (typeof response.data === 'string' && response.data.trim() !== '') {
+                            errorMessage = response.data;
+                        }
+                    }
+
+                    $timeSelect.empty();
+                    var $errorOption = $('<option></option>')
+                        .attr('value', '')
+                        .text(errorMessage);
+                    $timeSelect.append($errorOption);
+                    $timeSelect.prop('disabled', false);
                 },
-                error: function(xhr) {
+                error: function(xhr, textStatus) {
+                    if (textStatus === 'abort' || !isCurrentRequest()) {
+                        return;
+                    }
+
                     let errorMessage = l10n.loadError || 'Erro ao carregar horarios';
                     const sessionExpiredText = l10n.sessionExpired || 'Sessao expirada. Atualize a pagina e tente novamente.';
 
@@ -815,8 +836,15 @@
                         .text(errorMessage);
                     $timeSelect.append($errorOption);
                     $timeSelect.prop('disabled', false);
+                },
+                complete: function() {
+                    if (isCurrentRequest()) {
+                        $timeSelect.removeData('dpsTimesRequest');
+                    }
                 }
             });
+
+            $timeSelect.data('dpsTimesRequest', xhrRequest);
         },
         
         /**
