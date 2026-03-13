@@ -10,7 +10,7 @@
 - Depois: `Periodo ativo` aparece como texto minimalista abaixo do titulo e o seletor de data foi integrado ao bloco inferior `Ver:`.
 - Arquivos de codigo alterados:
   - `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
-  - `plugins/desi-pet-shower-agenda/assets/css/agenda-refresh.css`
+  - `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
 
 ## Breakpoints validados
 - 375px

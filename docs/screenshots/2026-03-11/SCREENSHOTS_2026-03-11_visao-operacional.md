@@ -11,7 +11,7 @@
 - Arquivos de codigo alterados:
   - `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
   - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
-  - `plugins/desi-pet-shower-agenda/assets/css/agenda-refresh.css`
+  - `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
   - `docs/screenshots/2026-03-11/agenda-visao-operacional-preview.html`
   - `docs/screenshots/2026-03-11/SCREENSHOTS_2026-03-11_visao-operacional.md`
   - `docs/screenshots/README.md`

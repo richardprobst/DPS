@@ -55,7 +55,7 @@
   - `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
   - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
   - `plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js`
-  - `plugins/desi-pet-shower-agenda/assets/css/agenda-refresh.css`
+  - `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
 
 ### Breakpoints validados
 - 375px

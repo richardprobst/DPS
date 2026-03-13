@@ -15,7 +15,7 @@
   - `plugins/desi-pet-shower-agenda/includes/integrations/class-dps-google-integrations-settings.php`
   - `plugins/desi-pet-shower-agenda/assets/css/agenda-admin.css`
   - `plugins/desi-pet-shower-agenda/assets/css/dashboard.css`
-  - `plugins/desi-pet-shower-agenda/assets/css/agenda-refresh.css`
+  - `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
   - `plugins/desi-pet-shower-agenda/assets/css/checklist-checkin.css`
   - `docs/screenshots/2026-03-11/agenda-m3-standardization-preview.html`
   - `docs/screenshots/2026-03-11/SCREENSHOTS_2026-03-11_agenda-m3-standardization.md`

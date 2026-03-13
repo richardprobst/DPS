@@ -1,28 +1,28 @@
 /**
  * Estilos da Agenda de Atendimentos - DPS
  * Material Design 3 Expressive
- * 
+ *
  * Este arquivo segue o sistema de design M3 Expressive do DPS:
  * - Todas as cores via var(--dps-color-*) / var(--dps-*) tokens
  * - Formas via var(--dps-shape-*) tokens
- * - Elevação via var(--dps-elevation-*) tokens
+ * - ElevaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o via var(--dps-elevation-*) tokens
  * - Movimento via var(--dps-motion-*) tokens
- * - Espaçamento via var(--dps-space-*) tokens
+ * - EspaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§amento via var(--dps-space-*) tokens
  * - Tipografia via var(--dps-typescale-*) tokens
  *
  * Requer: dps-design-tokens.css carregado antes deste arquivo.
  *
  * Compatibilidade com Microsoft Edge e outros navegadores:
- * - Propriedade 'inset:' substituída por top/right/bottom/left para Edge antigo
+ * - Propriedade 'inset:' substituÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­da por top/right/bottom/left para Edge antigo
  * - backdrop-filter inclui prefixo -webkit- para Safari/Edge antigo
- * - Fallbacks via classes JS para seletores :has() quando necessário
+ * - Fallbacks via classes JS para seletores :has() quando necessÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡rio
  *
  * @version 2.0.0
  */
 
-/* === Variáveis CSS e Estrutura Base (M3 Expressive) === */
+/* === VariÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡veis CSS e Estrutura Base (M3 Expressive) === */
 .dps-agenda-wrapper {
-    /* Tokens semânticos mapeados para M3 (via dps-design-tokens.css) */
+    /* Tokens semÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢nticos mapeados para M3 (via dps-design-tokens.css) */
     --dps-accent: var(--dps-color-primary);
     --dps-accent-strong: var(--dps-color-primary-pressed);
     --dps-accent-soft: var(--dps-color-primary-container);
@@ -89,26 +89,12 @@
     justify-content: flex-end;
 }
 
-/* Navegação de data no cabeçalho */
-.dps-agenda-header-nav {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
 .dps-agenda-header .dps-current-date {
     font-size: 0.9375rem;
     color: var(--dps-color-on-surface);
 }
 
-.dps-agenda-header .dps-date-nav {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-/* === Navegação === */
+/* === NavegaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o === */
 .dps-agenda-wrapper .dps-agenda-nav {
     display: flex;
     flex-wrap: wrap;
@@ -133,12 +119,7 @@
     align-items: center;
 }
 
-/* Grupo de ações principais (Novo, Exportar) - destaque visual */
-.dps-agenda-nav-group--actions {
-    margin-left: auto;
-}
-
-/* Separador visual entre grupos de navegação - oculto em mobile */
+/* Separador visual entre grupos de navegaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o - oculto em mobile */
 .dps-agenda-nav-group + .dps-agenda-nav-group::before {
     content: '|';
     color: var(--dps-border);
@@ -167,31 +148,9 @@
 }
 
 .dps-status-select:focus {
-    outline: none;
     border-color: var(--dps-accent);
     outline: 2px solid var(--dps-color-primary);
     outline-offset: 2px;
-}
-
-/* === Barra de contexto === */
-.dps-agenda-context-bar {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.9rem 1.1rem;
-    background: var(--dps-background);
-    border: 1px dashed var(--dps-border);
-    border-radius: var(--dps-shape-card);
-    margin-bottom: 1.5rem;
-}
-
-.dps-context-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 .dps-context-pill {
@@ -213,24 +172,6 @@
     color: var(--dps-color-primary);
 }
 
-.dps-context-hint {
-    color: var(--dps-muted);
-    font-size: 0.9rem;
-}
-
-.dps-context-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: flex-end;
-}
-
-.dps-context-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-}
-
 /* === Estado Vazio === */
 .dps-agenda-empty {
     margin: 2rem auto 0;
@@ -245,7 +186,7 @@
     word-break: break-word;
 }
 
-/* === Botões (M3 Expressive - Padronizado com o Sistema DPS) === */
+/* === BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes (M3 Expressive - Padronizado com o Sistema DPS) === */
 .dps-btn {
     display: inline-flex;
     align-items: center;
@@ -310,84 +251,11 @@
     background: var(--dps-color-secondary-container);
 }
 
-/* Botão Novo na barra de navegação - destaque especial */
-.dps-agenda-nav-group--actions .dps-btn--primary {
-    white-space: nowrap;
-    min-width: auto;
-    padding: 10px 20px;
-    font-size: 14px;
-}
-
-/* Estado de carregamento do botão */
+/* Estado de carregamento do botÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o */
 .dps-btn.is-loading {
     opacity: 0.7;
     pointer-events: none;
     cursor: wait;
-}
-
-/* === Resumo de Atendimentos === */
-.dps-agenda-summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem 1.5rem;
-    align-items: center;
-    justify-content: center;
-    margin: 1rem 0 1.5rem;
-    padding: 1rem 1.25rem;
-    background: var(--dps-color-primary-container);
-    border: 1px solid color-mix(in srgb, var(--dps-color-primary) 12%, transparent);
-    border-radius: var(--dps-shape-card);
-    color: var(--dps-color-on-surface);
-}
-
-.dps-summary-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: var(--dps-surface);
-    border-radius: var(--dps-shape-chip);
-    border: 1px solid var(--dps-border);
-    font-size: 0.9rem;
-    transition: all var(--dps-motion-press);
-}
-
-.dps-summary-item:hover {
-    border-color: var(--dps-accent);
-    box-shadow: var(--dps-elevation-1);
-}
-
-.dps-summary-icon {
-    font-size: 1.1rem;
-}
-
-.dps-summary-item strong {
-    font-size: 1.15rem;
-    font-weight: 500;
-    color: var(--dps-accent);
-}
-
-.dps-summary-item--pending strong {
-    color: var(--dps-color-warning);
-}
-
-.dps-summary-item--done strong {
-    color: var(--dps-color-success);
-}
-
-.dps-summary-item--total strong {
-    color: var(--dps-color-primary);
-}
-
-.dps-agenda-summary span {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.95rem;
-}
-
-.dps-agenda-summary span strong {
-    font-size: 1.05rem;
 }
 
 /* === Container da Tabela === */
@@ -504,23 +372,16 @@
     margin-left: 0.25rem;
 }
 
-/* === Ícones em Links === */
-.dps-link-icon {
-    font-size: 1.1em;
-    margin-right: 0.25rem;
-    vertical-align: middle;
-}
-
-/* === Modal de Serviços === */
+/* === Modal de ServiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§os === */
 .dps-modal-overlay {
-    /* CSS Variables para o modal (necessárias pois o modal é anexado ao body e não herda de .dps-agenda-wrapper) */
+    /* CSS Variables para o modal (necessÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡rias pois o modal ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© anexado ao body e nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o herda de .dps-agenda-wrapper) */
     --dps-accent: var(--dps-color-primary);
     --dps-accent-strong: var(--dps-color-primary-pressed);
     --dps-surface: var(--dps-color-surface-container-lowest);
     --dps-background: var(--dps-color-surface);
     --dps-border: var(--dps-color-outline-variant);
     --dps-muted: var(--dps-color-on-surface-variant);
-    
+
     position: fixed;
     top: 0;
     right: 0;
@@ -725,7 +586,7 @@
 }
 
 .dps-section--modal {
-    display: block; /* Sobrescreve dps-base (display:none) para exibir conteúdo no modal */
+    display: block; /* Sobrescreve dps-base (display:none) para exibir conteÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºdo no modal */
     margin: 0;
 }
 
@@ -737,7 +598,7 @@
     margin-top: 0;
 }
 
-/* Melhoria visual do formulário no modal */
+/* Melhoria visual do formulÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡rio no modal */
 .dps-section--modal .dps-surface {
     margin: 0;
     border: none;
@@ -745,7 +606,7 @@
 }
 
 .dps-section--modal .dps-surface__title {
-    display: none; /* O título do modal já está no header */
+    display: none; /* O tÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­tulo do modal jÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ no header */
 }
 
 .dps-section--modal .dps-fieldset {
@@ -791,13 +652,12 @@
 .dps-section--modal select:focus,
 .dps-section--modal input:focus,
 .dps-section--modal textarea:focus {
-    outline: none;
     border-color: var(--dps-accent, var(--dps-color-primary));
     outline: 2px solid var(--dps-color-primary);
     outline-offset: 2px;
 }
 
-/* Botão de submit no modal */
+/* BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de submit no modal */
 .dps-section--modal .dps-appointment-submit,
 .dps-section--modal .button-primary {
     background: var(--dps-color-primary);
@@ -841,23 +701,23 @@
     .dps-appointment-modal__messages {
         padding: 1rem;
     }
-    
+
     .dps-section--modal .dps-fieldset {
         padding: 0.85rem;
     }
-    
+
     .dps-section--modal .dps-appointment-submit,
     .dps-section--modal .button-primary {
         width: 100%;
     }
 }
 
-/* Modal responsivo para telas muito pequenas (até 480px) */
+/* Modal responsivo para telas muito pequenas (atÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© 480px) */
 @media (max-width: 480px) {
     .dps-appointment-modal {
         padding: 0;
     }
-    
+
     .dps-appointment-modal__content {
         width: 100%;
         height: 100%;
@@ -865,39 +725,39 @@
         margin: 0;
         border-radius: 0;
     }
-    
+
     .dps-appointment-modal__header {
         padding: 0.85rem 1rem;
         position: sticky;
         top: 0;
         z-index: 10;
     }
-    
+
     .dps-appointment-modal__title {
         font-size: 1rem;
     }
-    
+
     .dps-appointment-modal__body {
         padding: 0.75rem;
         overflow-x: hidden;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     .dps-section--modal .dps-fieldset {
         padding: 0.65rem;
         margin-bottom: 1rem;
     }
-    
+
     .dps-section--modal .dps-fieldset__legend {
         font-size: 0.875rem;
         margin-bottom: 0.75rem;
     }
-    
+
     .dps-section--modal .dps-form-field label {
         font-size: 0.8rem;
     }
-    
+
     .dps-section--modal select,
     .dps-section--modal input[type="text"],
     .dps-section--modal input[type="date"],
@@ -906,116 +766,161 @@
         padding: 0.5rem 0.65rem;
         font-size: 0.875rem;
     }
-    
+
     .dps-section--modal .dps-appointment-submit,
     .dps-section--modal .button-primary {
         padding: 0.75rem 1rem;
         font-size: 0.9rem;
     }
+
+
+    .dps-calendar-day-events {
+        padding: 0.15rem;
+    }
+
+
+    .dps-legend-item {
+        font-size: 0.7rem;
+    }
+
+
+    .dps-kpi-value {
+        font-size: 1.25rem;
+    }
+
+    .dps-kpi-card {
+        padding: 0.75rem;
+    }
+
+    .dps-current-date {
+        font-size: 0.875rem;
+    }
+
+    .dps-nav-btn {
+        font-size: 0.8125rem;
+        padding: 0.4rem 0.6rem;
+    }
+
+    .dps-agenda-tabs-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .dps-agenda-tabs-title {
+        font-size: 1rem;
+    }
+
+    .dps-payment-action-btn {
+        font-size: 0.875rem;
+        padding: 0.75rem 0.875rem;
+    }
+
+    /* Modal de serviÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§os melhorado - mobile pequeno */
+    .dps-services-pet-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    .dps-services-pet-details {
+        align-items: center;
+    }
+
+    .dps-service-card {
+        padding: 0.75rem;
+    }
+
+    .dps-service-card-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 1rem;
+    }
+
+    .dps-services-total-row {
+        padding: 0.75rem;
+    }
+
+    .dps-toast {
+        top: auto;
+        bottom: 20px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
 }
 
 /* === Responsividade === */
 
-/* Tablets e telas médias (até 1024px) */
+/* Tablets e telas mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©dias (atÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© 1024px) */
 @media (max-width: 1024px) {
     .dps-agenda-nav {
         justify-content: flex-start;
         gap: 0.75rem;
     }
-    
+
     .dps-agenda-nav-group {
         flex: 0 1 auto;
         justify-content: flex-start;
     }
-    
-    /* Primeiro grupo (navegação de data) ocupa linha inteira */
+
+    /* Primeiro grupo (navegaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de data) ocupa linha inteira */
     .dps-agenda-nav-group:first-child {
         flex: 1 1 100%;
         justify-content: center;
     }
-    
-    /* Grupo de ações alinhado à direita em tablets */
-    .dps-agenda-nav-group--actions {
-        margin-left: auto;
-    }
+
 }
 
-/* Telas médias (até 860px) */
-@media (max-width: 860px) {
-    .dps-agenda-context-bar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-    }
-    
-    .dps-context-actions {
-        width: 100%;
-    }
-}
-
-/* Tablets (até 768px) */
 @media (max-width: 768px) {
     .dps-agenda-wrapper .dps-agenda-nav {
         padding: 0.85rem 1rem;
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .dps-agenda-nav-group {
         width: 100%;
         justify-content: center;
     }
-    
-    .dps-agenda-nav-group--actions {
-        margin-left: 0;
-        justify-content: center;
-    }
-    
-    .dps-agenda-context-bar {
-        padding: 0.85rem 1rem;
-    }
-    
+
     .dps-agenda-table-container {
         border-radius: var(--dps-shape-chip);
     }
-    
+
     .dps-agenda-wrapper table.dps-table {
         min-width: 640px;
     }
 }
 
-/* Mobile (até 640px) - Cards Verticais */
+/* Mobile (atÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© 640px) - Cards Verticais */
 @media (max-width: 640px) {
     .dps-agenda-wrapper table.dps-table {
         min-width: 0;
     }
-    
+
     .dps-agenda-wrapper table.dps-table thead {
         display: none;
     }
-    
+
     .dps-agenda-wrapper table.dps-table tbody {
         display: flex;
         flex-direction: column;
         gap: 1rem;
     }
-    
+
     .dps-agenda-wrapper table.dps-table tr {
         display: flex;
         flex-direction: column;
         border: 1px solid var(--dps-border);
-        border-left-width: 3px; /* Mantido em 3px para consistência */
-        border-radius: var(--dps-shape-card);
+        border-left-width: 3px;
+        border-radius: var(--dps-shape-medium);
         background: var(--dps-surface);
         padding: 1rem;
-        /* Estilo minimalista: sem sombras em cards */
+        box-shadow: var(--dps-elevation-1);
     }
-    
-    .dps-agenda-empty {
-        margin-top: 1.5rem;
-        padding: 1.25rem;
-    }
-    
+
+
     .dps-agenda-wrapper table.dps-table tbody td {
         border: 0;
         padding: 0.5rem 0;
@@ -1023,44 +928,130 @@
         flex-direction: column;
         gap: 0.25rem;
     }
-    
+
     .dps-agenda-wrapper table.dps-table tbody td::before {
         content: attr(data-label);
-        font-size: 0.8rem;
+        font-size: 0.6875rem;
         font-weight: 500;
         color: var(--dps-muted);
         text-transform: uppercase;
+        letter-spacing: 0.03em;
     }
-    
-    .dps-agenda-summary {
-        width: 100%;
-        flex-direction: column;
+
+    .dps-occupancy-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dps-client-appt {
+        flex-wrap: wrap;
         gap: 0.5rem;
     }
-    
-    .dps-summary-item {
+
+    .dps-appt-datetime {
+        min-width: auto;
+    }
+
+    .dps-appt-pet {
+        flex-basis: 100%;
+        order: 1;
+    }
+
+    .dps-agenda-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.875rem;
+        padding: 1rem;
+    }
+
+    .dps-agenda-title h3 {
+        font-size: 1.125rem;
+        text-align: center;
+    }
+
+    .dps-agenda-header .dps-current-date {
         width: 100%;
         justify-content: center;
+        margin-bottom: 0.25rem;
     }
+
+
+    .dps-agenda-tab-button {
+        border-radius: var(--dps-shape-medium);
+    }
+
+    .dps-agenda-tab-button::before {
+        display: none;
+    }
+
+    .dps-agenda-tab-button--active {
+        padding-left: calc(1rem - 2px);
+    }
+
+
+    .dps-tab-label {
+        font-size: 0.9375rem;
+    }
+
+
+    .dps-agenda-wrapper table.dps-table tr.status-pendente,
+    .dps-agenda-wrapper table.dps-table tr.status-finalizado,
+    .dps-agenda-wrapper table.dps-table tr.status-finalizado_pago,
+    .dps-agenda-wrapper table.dps-table tr.status-cancelado {
+        background: var(--dps-surface);
+    }
+
+
+    .dps-agenda-nav--primary {
+        padding: 0.75rem;
+    }
+
+    .dps-view-buttons {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .dps-view-btn {
+        flex: 1 1 auto;
+        padding: 0.5rem 0.625rem;
+        font-size: 0.75rem;
+        text-align: center;
+    }
+
+    /* Estado vazio mais compacto */
+    .dps-agenda-empty {
+        padding: 1.5rem 1rem;
+        margin-top: 1.25rem;
+    }
+
+    .dps-agenda-empty::before {
+        font-size: 2rem;
+    }
+
+    .dps-pet-profile-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-pet-profile-trigger {
+        width: 100%;
+        justify-content: space-between;
+    }
+
 }
 
-/* Mobile pequeno (até 420px) */
+/* Mobile pequeno (atÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© 420px) */
 @media (max-width: 420px) {
     .dps-agenda-nav .dps-btn {
         flex: 1 1 100%;
     }
-    
+
     .dps-agenda-empty {
         padding: 1.1rem;
         border-radius: var(--dps-shape-card);
     }
-    
-    .dps-context-actions {
-        width: 100%;
-    }
+
 }
 
-/* === FASE 2: Relatório de Ocupação === */
+/* === FASE 2: RelatÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³rio de OcupaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o === */
 .dps-occupancy-report {
     margin-bottom: 1.25rem;
     border: 1px solid var(--dps-border);
@@ -1292,27 +1283,8 @@
 }
 
 /* === Responsividade Fase 2 === */
-@media (max-width: 640px) {
-    .dps-occupancy-cards {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .dps-client-appt {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-    
-    .dps-appt-datetime {
-        min-width: auto;
-    }
-    
-    .dps-appt-pet {
-        flex-basis: 100%;
-        order: 1;
-    }
-}
 
-/* === FASE 4: Calendário Mensal === */
+/* === FASE 4: CalendÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡rio Mensal === */
 .dps-calendar-header {
     display: flex;
     align-items: center;
@@ -1533,74 +1505,37 @@
     .dps-calendar-day {
         min-height: 60px;
     }
-    
+
     .dps-calendar-weekday {
         padding: 0.5rem 0.25rem;
         font-size: 0.7rem;
     }
-    
+
     .dps-calendar-day-number {
         font-size: 0.8rem;
     }
-    
+
     .dps-calendar-badge {
         font-size: 0.6rem;
         padding: 1px 4px;
     }
-    
+
     .dps-calendar-header {
         flex-wrap: wrap;
         justify-content: center;
     }
-    
+
     .dps-calendar-title-group {
         order: -1;
         flex: 1 1 100%;
         margin-bottom: 0.5rem;
     }
-    
+
     .dps-calendar-nav-btn {
         font-size: 0.8rem;
     }
 }
 
-@media (max-width: 480px) {
-    .dps-calendar-day {
-        min-height: 45px;
-    }
-    
-    .dps-calendar-day-events {
-        padding: 0.15rem;
-    }
-    
-    .dps-calendar-badge {
-        font-size: 0.55rem;
-        padding: 1px 3px;
-    }
-    
-    .dps-legend-item {
-        font-size: 0.7rem;
-    }
-}
-
-/* === FASE 5: Dashboard de KPIs Administrativos === */
-.dps-admin-dashboard {
-    margin-bottom: 1.5rem;
-    padding: 1rem 1.25rem;
-    background: var(--dps-surface);
-    border: 1px solid var(--dps-border);
-    border-radius: var(--dps-shape-card);
-}
-
-.dps-dashboard-title {
-    font-size: 1rem;
-    font-weight: 500;
-    margin: 0 0 1rem;
-    color: var(--dps-color-on-surface);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
 
 .dps-kpi-grid {
     display: grid;
@@ -1651,15 +1586,15 @@
 .dps-kpi-cancel { border-left-color: var(--dps-color-error); }
 .dps-kpi-avg { border-left-color: var(--dps-color-tertiary); }
 
-/* === FASE 5: Modal de Reagendamento Rápido === */
+/* === FASE 5: Modal de Reagendamento RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡pido === */
 .dps-reschedule-modal {
-    /* CSS Variables para o modal (necessárias pois o modal é anexado ao body e não herda de .dps-agenda-wrapper) */
+    /* CSS Variables para o modal (necessÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡rias pois o modal ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© anexado ao body e nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o herda de .dps-agenda-wrapper) */
     --dps-accent: var(--dps-color-primary);
     --dps-accent-strong: var(--dps-color-primary-pressed);
     --dps-background: var(--dps-color-surface);
     --dps-border: var(--dps-color-outline-variant);
     --dps-muted: var(--dps-color-on-surface-variant);
-    
+
     position: fixed;
     top: 0;
     right: 0;
@@ -1743,7 +1678,6 @@
 }
 
 .dps-reschedule-field input:focus {
-    outline: none;
     border-color: var(--dps-accent);
     outline: 2px solid var(--dps-color-primary);
     outline-offset: 2px;
@@ -1793,7 +1727,7 @@
     cursor: not-allowed;
 }
 
-/* === FASE 5: Botão de Ação Rápida === */
+/* === FASE 5: BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡pida === */
 .dps-quick-action {
     display: inline-flex;
     align-items: center;
@@ -1810,7 +1744,7 @@
     background: var(--dps-accent-soft);
 }
 
-/* === FASE 5: Indicador de Histórico === */
+/* === FASE 5: Indicador de HistÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³rico === */
 .dps-history-indicator {
     display: inline-flex;
     align-items: center;
@@ -1833,23 +1767,103 @@
     .dps-kpi-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-}
 
-@media (max-width: 480px) {
-    .dps-kpi-grid {
-        grid-template-columns: 1fr 1fr;
+    .dps-quick-actions {
+        flex-direction: column;
+        width: 100%;
     }
-    
-    .dps-kpi-value {
+
+    .dps-quick-action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .dps-view-buttons {
+        width: 100%;
+        justify-content: space-around;
+    }
+
+    .dps-confirmation-wrapper {
+        align-items: flex-start;
+    }
+
+    .dps-confirmation-actions {
+        width: 100%;
+    }
+
+    .dps-confirmation-btn {
+        flex: 1 1 auto;
+    }
+
+    .dps-whatsapp-link {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .dps-payment-badge,
+    .dps-taxidog-badge {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.4rem;
+    }
+
+    .dps-taxidog-actions {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 0.25rem;
+    }
+
+    .dps-taxidog-action-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+
+    .dps-route-btn {
+        width: 100%;
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+
+    .dps-payment-tooltip {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 90vw;
+    }
+
+    .dps-agenda-tabs-nav {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .dps-agenda-tab-button {
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        gap: 0.75rem;
+    }
+
+    .dps-tab-icon {
         font-size: 1.25rem;
     }
-    
-    .dps-kpi-card {
-        padding: 0.75rem;
+
+    .dps-tab-label {
+        flex: 1;
+    }
+
+    .dps-tab-desc {
+        display: none;
+    }
+
+    .dps-agenda-tab-button--active {
+        border-left: 4px solid var(--dps-accent);
+        border-radius: 0 var(--dps-shape-medium) var(--dps-shape-medium) 0;
     }
 }
 
-/* === UX-1: Botões de Ação Rápida === */
+
+/* === UX-1: BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes de AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡pida === */
 .dps-quick-actions {
     display: flex;
     flex-wrap: wrap;
@@ -1883,7 +1897,7 @@
     cursor: not-allowed;
 }
 
-/* Cores específicas para cada tipo de ação */
+/* Cores especÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­ficas para cada tipo de aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o */
 .dps-quick-finish {
     border-color: var(--dps-color-success);
     color: var(--dps-color-success);
@@ -1924,7 +1938,7 @@ tr.is-late td:first-child {
     padding-left: calc(1rem - 4px);
 }
 
-/* Animação sutil para chamar atenção (opcional) */
+/* AnimaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o sutil para chamar atenÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o (opcional) */
 @keyframes pulse-late {
     0%, 100% {
         background-color: var(--dps-color-warning-container);
@@ -1934,11 +1948,7 @@ tr.is-late td:first-child {
     }
 }
 
-tr.is-late.dps-late-critical {
-    animation: pulse-late 2s ease-in-out infinite;
-}
-
-/* === UX-2: Feedback Visual de Atualização de Linha === */
+/* === UX-2: Feedback Visual de AtualizaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de Linha === */
 @keyframes row-updated {
     0% {
         background-color: var(--dps-color-success-container);
@@ -1952,27 +1962,14 @@ tr.dps-row-updated {
     animation: row-updated 1.5s ease-out;
 }
 
-/* === Responsividade para Ações Rápidas === */
-@media (max-width: 768px) {
-    .dps-quick-actions {
-        flex-direction: column;
-        width: 100%;
-    }
-    
-    .dps-quick-action-btn {
-        width: 100%;
-        justify-content: center;
-    }
-}
-
-/* === UX-4/5/6: Layout Consolidado de Navegação e Filtros === */
+/* === UX-4/5/6: Layout Consolidado de NavegaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o e Filtros === */
 
 /* Wrapper principal dos controles */
 .dps-agenda-controls-wrapper {
     margin-bottom: 2rem;
 }
 
-/* Linha 1: Navegação principal */
+/* Linha 1: NavegaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o principal */
 .dps-agenda-nav--primary {
     display: flex;
     flex-wrap: wrap;
@@ -1986,21 +1983,9 @@ tr.dps-row-updated {
     margin-bottom: 0.75rem;
 }
 
-.dps-agenda-nav-group--date {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
 .dps-current-date {
     font-size: 0.9375rem;
     color: var(--dps-color-on-surface);
-}
-
-.dps-date-nav {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
 }
 
 .dps-nav-btn {
@@ -2076,76 +2061,31 @@ tr.dps-row-updated {
     box-shadow: var(--dps-elevation-1);
 }
 
-.dps-agenda-nav-group--actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-/* Responsividade para navegação consolidada */
+/* Responsividade para navegaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o consolidada */
 @media (max-width: 1024px) {
     .dps-agenda-nav--primary {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .dps-agenda-nav-group {
         width: 100%;
         justify-content: space-between;
     }
-    
-    .dps-agenda-nav-group--actions {
-        justify-content: center;
-    }
+
 }
 
-@media (max-width: 768px) {
-    .dps-date-nav {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .dps-view-buttons {
-        width: 100%;
-        justify-content: space-around;
-    }
-    
-    .dps-agenda-context-bar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .dps-context-actions {
-        width: 100%;
-        justify-content: flex-start;
-    }
-}
 
-@media (max-width: 480px) {
-    .dps-current-date {
-        font-size: 0.875rem;
-    }
-    
-    .dps-nav-btn {
-        font-size: 0.8125rem;
-        padding: 0.4rem 0.6rem;
-    }
-    
-    .dps-context-actions .dps-btn {
-        width: 100%;
-        justify-content: center;
-    }
-}
+/* === CONF-2/CONF-3: Sistema de ConfirmaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de Atendimentos === */
 
-/* === CONF-2/CONF-3: Sistema de Confirmação de Atendimentos === */
-
-/* Wrapper da coluna de confirmação */
+/* Wrapper da coluna de confirmaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o */
 .dps-confirmation-wrapper {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-/* Badge de status de confirmação */
+/* Badge de status de confirmaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o */
 .dps-confirmation-badge {
     display: inline-flex;
     align-items: center;
@@ -2187,7 +2127,7 @@ tr.dps-row-updated {
     border: 1px solid var(--dps-color-warning-container);
 }
 
-/* Botões de ação de confirmação */
+/* BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes de aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de confirmaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o */
 .dps-confirmation-actions {
     display: flex;
     flex-wrap: wrap;
@@ -2279,26 +2219,6 @@ tr.dps-row-updated {
 .dps-whatsapp-link:hover {
     background: var(--dps-color-primary-container);
     border-color: var(--dps-color-primary);
-}
-
-/* Responsividade para confirmação */
-@media (max-width: 768px) {
-    .dps-confirmation-wrapper {
-        align-items: flex-start;
-    }
-    
-    .dps-confirmation-actions {
-        width: 100%;
-    }
-    
-    .dps-confirmation-btn {
-        flex: 1 1 auto;
-    }
-    
-    .dps-whatsapp-link {
-        width: 100%;
-        justify-content: center;
-    }
 }
 
 /* ========================================================
@@ -2494,40 +2414,6 @@ tr.dps-row-updated {
     color: var(--dps-color-on-primary);
 }
 
-/* === Responsive Adjustments for Phase 3 === */
-@media (max-width: 768px) {
-    .dps-payment-badge,
-    .dps-taxidog-badge {
-        font-size: 0.75rem;
-        padding: 0.2rem 0.4rem;
-    }
-
-    .dps-taxidog-actions {
-        width: 100%;
-        margin-left: 0;
-        margin-top: 0.25rem;
-    }
-
-    .dps-taxidog-action-btn {
-        flex: 1 1 auto;
-        justify-content: center;
-    }
-
-    .dps-route-btn {
-        width: 100%;
-        justify-content: center;
-        margin-top: 0.5rem;
-    }
-
-    .dps-payment-tooltip {
-        position: fixed;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        max-width: 90vw;
-    }
-}
-
 /* === Animation for row updates === */
 @keyframes fadeIn {
     from {
@@ -2549,7 +2435,7 @@ tr.dps-row-updated {
     margin-top: 1.5rem;
 }
 
-/* Cabeçalho das abas */
+/* CabeÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§alho das abas */
 .dps-agenda-tabs-header {
     display: flex;
     align-items: center;
@@ -2569,7 +2455,7 @@ tr.dps-row-updated {
     gap: 0.5rem;
 }
 
-/* Navegação de abas - Cards */
+/* NavegaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de abas - Cards */
 .dps-agenda-tabs-nav {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -2579,7 +2465,7 @@ tr.dps-row-updated {
     background: transparent;
 }
 
-/* Botões de aba - Card Style */
+/* BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes de aba - Card Style */
 .dps-agenda-tab-button {
     display: flex;
     flex-direction: column;
@@ -2614,7 +2500,7 @@ tr.dps-row-updated {
     outline-offset: 2px;
 }
 
-/* Elementos internos dos botões de aba */
+/* Elementos internos dos botÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes de aba */
 .dps-tab-icon {
     font-size: 1.5rem;
     line-height: 1;
@@ -2638,7 +2524,7 @@ tr.dps-row-updated {
     opacity: 1;
 }
 
-/* Conteúdo das abas */
+/* ConteÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºdo das abas */
 .dps-tab-content {
     display: none;
 }
@@ -2659,52 +2545,8 @@ tr.dps-row-updated {
     }
 }
 
-/* Ajustes responsivos para abas */
-@media (max-width: 768px) {
-    .dps-agenda-tabs-nav {
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
-    }
-    
-    .dps-agenda-tab-button {
-        flex-direction: row;
-        justify-content: flex-start;
-        padding: 0.75rem 1rem;
-        text-align: left;
-        gap: 0.75rem;
-    }
-    
-    .dps-tab-icon {
-        font-size: 1.25rem;
-    }
-    
-    .dps-tab-label {
-        flex: 1;
-    }
-    
-    .dps-tab-desc {
-        display: none;
-    }
-    
-    .dps-agenda-tab-button--active {
-        border-left: 4px solid var(--dps-accent);
-        border-radius: 0 var(--dps-shape-medium) var(--dps-shape-medium) 0;
-    }
-}
 
-@media (max-width: 480px) {
-    .dps-agenda-tabs-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-    
-    .dps-agenda-tabs-title {
-        font-size: 1rem;
-    }
-}
-
-/* Customizações específicas por tabela de aba */
+/* CustomizaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes especÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­ficas por tabela de aba */
 .dps-table--tab1,
 .dps-table--tab2,
 .dps-table--tab3 {
@@ -2713,7 +2555,7 @@ tr.dps-row-updated {
     border-spacing: 0;
 }
 
-/* Aba 1: Visão Rápida - layout mais compacto */
+/* Aba 1: VisÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡pida - layout mais compacto */
 .dps-table--tab1 th,
 .dps-table--tab1 td {
     padding: 0.6rem 0.75rem;
@@ -2726,7 +2568,7 @@ tr.dps-row-updated {
     font-weight: 500;
 }
 
-/* Aba 2: Operação - destaque para ações */
+/* Aba 2: OperaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o - destaque para aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes */
 .dps-table--tab2 thead th {
     background: var(--dps-color-warning-container);
     color: var(--dps-color-on-warning-container);
@@ -2744,7 +2586,7 @@ tr.dps-row-updated {
     font-size: 0.75rem;
 }
 
-/* Aba 3: Detalhes - permite mais espaço para texto */
+/* Aba 3: Detalhes - permite mais espaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§o para texto */
 .dps-table--tab3 thead th {
     background: var(--dps-color-success-container);
     color: var(--dps-color-on-success-container);
@@ -2757,11 +2599,11 @@ tr.dps-row-updated {
 }
 
 .dps-table--tab3 td[data-label*="Observ"],
-.dps-table--tab3 td[data-label*="Endereço"] {
+.dps-table--tab3 td[data-label*="EndereÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§o"] {
     min-width: 200px;
 }
 
-/* Preview de observações */
+/* Preview de observaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes */
 .dps-notes-preview {
     display: block;
     max-width: 250px;
@@ -2777,7 +2619,7 @@ tr.dps-row-updated {
     color: var(--dps-color-on-surface);
 }
 
-/* Subtítulos das seções de atendimentos */
+/* SubtÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­tulos das seÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes de atendimentos */
 .dps-tab-content h5 {
     margin: 1.5rem 0 0.75rem;
     padding: 0.5rem 0;
@@ -2829,7 +2671,7 @@ tr.dps-row-updated {
     }
 }
 
-/* === Badge de Restrições de Produtos === */
+/* === Badge de RestriÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes de Produtos === */
 .dps-pet-badge--restrictions {
     background: var(--dps-color-warning-container);
     color: var(--dps-color-on-warning-container);
@@ -2841,7 +2683,7 @@ tr.dps-row-updated {
     background: var(--dps-color-warning-container);
 }
 
-/* === Dropdown Elegante de Confirmação (Tab1) === */
+/* === Dropdown Elegante de ConfirmaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o (Tab1) === */
 .dps-confirmation-dropdown-wrapper {
     position: relative;
 }
@@ -2869,7 +2711,6 @@ tr.dps-row-updated {
 }
 
 .dps-confirmation-dropdown:focus {
-    outline: none;
     border-color: var(--dps-accent);
     outline: 2px solid var(--dps-color-primary);
     outline-offset: 2px;
@@ -2922,7 +2763,6 @@ tr.dps-row-updated {
 }
 
 .dps-status-dropdown:focus {
-    outline: none;
     border-color: var(--dps-accent);
     outline: 2px solid var(--dps-color-primary);
     outline-offset: 2px;
@@ -2948,7 +2788,7 @@ tr.dps-row-updated {
     color: var(--dps-color-on-surface);
 }
 
-/* === Badge de Status (para não-editores) === */
+/* === Badge de Status (para nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o-editores) === */
 .dps-status-badge {
     display: inline-flex;
     align-items: center;
@@ -2981,7 +2821,7 @@ tr.dps-row-updated {
     color: var(--dps-color-on-surface);
 }
 
-/* === Botão de Serviços Popup (Tab1) === */
+/* === BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de ServiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§os Popup (Tab1) === */
 .dps-services-popup-btn {
     display: inline-flex;
     align-items: center;
@@ -3012,7 +2852,7 @@ tr.dps-row-updated {
     font-style: italic;
 }
 
-/* === Botão de Pagamento Popup (Tab2) === */
+/* === BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de Pagamento Popup (Tab2) === */
 .dps-payment-popup-btn {
     display: inline-flex;
     align-items: center;
@@ -3097,11 +2937,6 @@ tr.dps-row-updated {
     border: 1px solid var(--dps-color-surface-container-high);
 }
 
-/* === Dropdown de TaxiDog (Tab3) === */
-.dps-taxidog-dropdown-wrapper {
-    margin-top: 0.35rem;
-}
-
 .dps-taxidog-dropdown {
     appearance: none;
     -webkit-appearance: none;
@@ -3131,7 +2966,7 @@ tr.dps-row-updated {
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-warning) 20%, transparent);
 }
 
-/* === Botão de Solicitar TaxiDog (Tab3) === */
+/* === BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de Solicitar TaxiDog (Tab3) === */
 .dps-taxidog-request-btn {
     display: inline-flex;
     align-items: center;
@@ -3159,7 +2994,7 @@ tr.dps-row-updated {
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-warning) 30%, transparent);
 }
 
-/* === Botão de Mapa TaxiDog (Tab3) === */
+/* === BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de Mapa TaxiDog (Tab3) === */
 .dps-taxidog-map-btn {
     display: inline-flex;
     align-items: center;
@@ -3191,14 +3026,14 @@ tr.dps-row-updated {
 
 /* === Modal de Popup de Pagamento === */
 .dps-payment-modal {
-    /* CSS Variables para o modal (necessárias pois o modal é anexado ao body e não herda de .dps-agenda-wrapper) */
+    /* CSS Variables para o modal (necessÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡rias pois o modal ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© anexado ao body e nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o herda de .dps-agenda-wrapper) */
     --dps-accent: var(--dps-color-primary);
     --dps-accent-strong: var(--dps-color-primary-pressed);
     --dps-surface: var(--dps-color-surface-container-lowest);
     --dps-background: var(--dps-color-surface);
     --dps-border: var(--dps-color-outline-variant);
     --dps-muted: var(--dps-color-on-surface-variant);
-    
+
     position: fixed;
     top: 0;
     right: 0;
@@ -3457,16 +3292,16 @@ tr.dps-row-updated {
     margin-bottom: 0;
 }
 
-/* === Modal de Popup de Serviços === */
+/* === Modal de Popup de ServiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§os === */
 .dps-services-modal {
-    /* CSS Variables para o modal (necessárias pois o modal é anexado ao body e não herda de .dps-agenda-wrapper) */
+    /* CSS Variables para o modal (necessÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡rias pois o modal ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© anexado ao body e nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o herda de .dps-agenda-wrapper) */
     --dps-accent: var(--dps-color-primary);
     --dps-accent-strong: var(--dps-color-primary-pressed);
     --dps-surface: var(--dps-color-surface-container-lowest);
     --dps-background: var(--dps-color-surface);
     --dps-border: var(--dps-color-outline-variant);
     --dps-muted: var(--dps-color-on-surface-variant);
-    
+
     position: fixed;
     top: 0;
     right: 0;
@@ -3530,50 +3365,6 @@ tr.dps-row-updated {
     overflow-y: auto;
 }
 
-.dps-services-list-modal {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.dps-services-list-modal li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--dps-border);
-}
-
-.dps-services-list-modal li:last-child {
-    border-bottom: none;
-}
-
-.dps-services-list-modal .service-name {
-    font-weight: 500;
-    color: var(--dps-color-on-surface);
-}
-
-.dps-services-list-modal .service-price {
-    font-weight: 500;
-    color: var(--dps-accent);
-}
-
-/* Estilo especial para TaxiDog no modal de serviços */
-.dps-services-list-modal li.dps-service-taxidog {
-    background: var(--dps-color-warning-container);
-    border-radius: var(--dps-shape-chip);
-    margin: 0.25rem -0.5rem;
-    padding: 0.75rem 0.5rem;
-}
-
-.dps-services-list-modal li.dps-service-taxidog .service-name {
-    color: var(--dps-color-on-warning-container);
-}
-
-.dps-services-list-modal li.dps-service-taxidog .service-price {
-    color: var(--dps-color-on-warning-container);
-}
-
 .dps-services-notes {
     margin-top: 1rem;
     padding: 1rem;
@@ -3598,9 +3389,9 @@ tr.dps-row-updated {
     line-height: 1.5;
 }
 
-/* === Modal de Serviços Melhorado (para funcionários) === */
+/* === Modal de ServiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§os Melhorado (para funcionÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡rios) === */
 
-/* Seção de informações do pet */
+/* SeÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de informaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes do pet */
 .dps-services-pet-info {
     display: flex;
     align-items: center;
@@ -3634,7 +3425,7 @@ tr.dps-row-updated {
     color: var(--dps-color-primary);
 }
 
-/* Resumo rápido */
+/* Resumo rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡pido */
 .dps-services-summary {
     display: flex;
     gap: 1rem;
@@ -3670,7 +3461,7 @@ tr.dps-row-updated {
     color: var(--dps-color-on-surface-variant);
 }
 
-/* Checklist de serviços */
+/* Checklist de serviÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§os */
 .dps-services-checklist {
     margin-bottom: 0.5rem;
 }
@@ -3684,7 +3475,7 @@ tr.dps-row-updated {
     margin: 0 0 0.75rem 0;
 }
 
-/* Card de serviço individual */
+/* Card de serviÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§o individual */
 .dps-service-card {
     background: var(--dps-color-surface-container-lowest);
     border: 1px solid var(--dps-color-surface-container-high);
@@ -3744,7 +3535,7 @@ tr.dps-row-updated {
     white-space: nowrap;
 }
 
-/* Descrição/instruções do serviço */
+/* DescriÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o/instruÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes do serviÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§o */
 .dps-service-card-description {
     display: flex;
     gap: 0.375rem;
@@ -3761,7 +3552,7 @@ tr.dps-row-updated {
     font-size: 0.75rem;
 }
 
-/* Estilos por tipo de serviço */
+/* Estilos por tipo de serviÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§o */
 .dps-service-type-taxidog {
     background: var(--dps-color-warning-container);
     border-color: var(--dps-color-warning-container);
@@ -3834,7 +3625,7 @@ tr.dps-row-updated {
     opacity: 0.5;
 }
 
-/* Observações destacadas */
+/* ObservaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes destacadas */
 .dps-services-notes-highlight {
     background: var(--dps-color-warning-container);
     border: 1px solid var(--dps-color-warning-container);
@@ -3858,7 +3649,7 @@ tr.dps-row-updated {
     font-size: 0.9rem;
 }
 
-/* === Resumo do Dia Colapsável === */
+/* === Resumo do Dia ColapsÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡vel === */
 .dps-summary-report {
     margin-top: 2rem;
     border: 1px solid var(--dps-border);
@@ -3884,7 +3675,7 @@ tr.dps-row-updated {
 }
 
 .dps-summary-report > summary::before {
-    content: '▶';
+    content: 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶';
     font-size: 0.7rem;
     transition: transform var(--dps-motion-hover);
 }
@@ -3909,44 +3700,44 @@ tr.dps-row-updated {
         margin-left: 0;
         margin-top: 0.35rem;
     }
-    
+
     .dps-confirmation-dropdown,
     .dps-status-dropdown,
     .dps-taxidog-dropdown {
         min-width: 100%;
     }
-    
+
     .dps-services-popup-btn,
     .dps-payment-popup-btn,
     .dps-taxidog-request-btn {
         width: 100%;
         justify-content: center;
     }
-    
+
     .dps-payment-modal-content,
     .dps-services-modal-content {
         max-width: 100%;
         margin: 0.5rem;
     }
-    
+
     .dps-taxidog-wrapper {
         align-items: stretch;
     }
-    
-    /* Modal de serviços melhorado - responsivo */
+
+    /* Modal de serviÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§os melhorado - responsivo */
     .dps-services-summary {
         flex-direction: column;
         gap: 0.5rem;
     }
-    
+
     .dps-services-summary-item {
         justify-content: center;
     }
-    
+
     .dps-service-card-header {
         flex-wrap: wrap;
     }
-    
+
     .dps-service-card-price {
         width: 100%;
         text-align: right;
@@ -3954,37 +3745,6 @@ tr.dps-row-updated {
     }
 }
 
-@media (max-width: 480px) {
-    .dps-payment-action-btn {
-        font-size: 0.875rem;
-        padding: 0.75rem 0.875rem;
-    }
-    
-    /* Modal de serviços melhorado - mobile pequeno */
-    .dps-services-pet-info {
-        flex-direction: column;
-        text-align: center;
-        gap: 0.5rem;
-    }
-    
-    .dps-services-pet-details {
-        align-items: center;
-    }
-    
-    .dps-service-card {
-        padding: 0.75rem;
-    }
-    
-    .dps-service-card-icon {
-        width: 24px;
-        height: 24px;
-        font-size: 1rem;
-    }
-    
-    .dps-services-total-row {
-        padding: 0.75rem;
-    }
-}
 
 /* ========================================================
    MELHORIAS DE LAYOUT E USABILIDADE v2.0
@@ -4017,7 +3777,7 @@ tr.dps-row-updated {
     color: var(--dps-accent);
 }
 
-/* Botões de navegação de data mais elegantes */
+/* BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes de navegaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de data mais elegantes */
 .dps-nav-btn {
     display: inline-flex;
     align-items: center;
@@ -4059,7 +3819,6 @@ tr.dps-row-updated {
     color: var(--dps-color-on-primary);
 }
 
-/* === Controles de Visualização Refinados === */
 .dps-agenda-controls-wrapper {
     margin-bottom: 1.25rem;
 }
@@ -4294,7 +4053,7 @@ tr.dps-row-updated {
     opacity: 0.8;
 }
 
-/* Subtítulos de seções mais elegantes */
+/* SubtÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­tulos de seÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes mais elegantes */
 .dps-tab-content h5 {
     margin: 1.75rem 0 0.875rem;
     padding: 0.625rem 0;
@@ -4337,7 +4096,7 @@ tr.dps-row-updated {
 }
 
 .dps-agenda-empty::before {
-    content: '📋';
+    content: 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¹';
     display: block;
     font-size: 2.5rem;
     margin-bottom: 0.75rem;
@@ -4351,61 +4110,60 @@ tr.dps-row-updated {
     .dps-agenda-wrapper {
         padding: 0 0.5rem;
     }
-    
+
     .dps-agenda-header {
         padding: 1rem;
         gap: 0.75rem;
     }
-    
+
     .dps-agenda-title h3 {
         font-size: 1.2rem;
     }
-    
+
     .dps-agenda-header .dps-current-date {
         font-size: 0.875rem;
         padding: 0.4rem 0.75rem;
     }
-    
+
     .dps-nav-btn {
         min-width: 2rem;
         min-height: 2rem;
         padding: 0.4rem 0.65rem;
         font-size: 0.8125rem;
     }
-    
+
     /* Abas em grid de 3 colunas mais compactas */
     .dps-agenda-tabs-nav {
         gap: 0.625rem;
     }
-    
+
     .dps-agenda-tab-button {
         padding: 0.875rem 0.75rem;
     }
-    
+
     .dps-tab-icon {
         font-size: 1.375rem;
     }
-    
+
     .dps-tab-label {
         font-size: 0.875rem;
     }
-    
+
     .dps-tab-desc {
         font-size: 0.6875rem;
     }
-    
+
     /* Tabela mais compacta */
     .dps-agenda-wrapper table.dps-table thead th {
         padding: 0.75rem 0.875rem;
         font-size: 0.6875rem;
     }
-    
+
     .dps-agenda-wrapper table.dps-table tbody td {
         padding: 0.75rem 0.875rem;
         font-size: 0.875rem;
     }
-    
-    /* Controles de visualização */
+
     .dps-view-btn {
         padding: 0.4rem 0.75rem;
         font-size: 0.8125rem;
@@ -4419,54 +4177,48 @@ tr.dps-row-updated {
         justify-content: center;
         gap: 0.75rem;
     }
-    
+
     .dps-agenda-title {
         width: 100%;
         text-align: center;
     }
-    
-    .dps-agenda-header-nav {
-        justify-content: center;
-        gap: 0.5rem;
-    }
-    
+
     .dps-agenda-header .dps-current-date {
         margin-bottom: 0.25rem;
     }
-    
+
     /* Abas ocupam toda largura mas em linha */
     .dps-agenda-tabs-nav {
         grid-template-columns: repeat(3, 1fr);
         gap: 0.5rem;
     }
-    
+
     .dps-agenda-tab-button {
         padding: 0.75rem 0.5rem;
         gap: 0.375rem;
     }
-    
+
     .dps-tab-icon {
         font-size: 1.25rem;
     }
-    
+
     .dps-tab-label {
         font-size: 0.8125rem;
     }
-    
+
     .dps-tab-desc {
         display: none;
     }
-    
-    /* Controles de visualização empilhados */
+
     .dps-agenda-nav--primary {
         padding: 0.625rem 0.75rem;
     }
-    
+
     .dps-view-buttons {
         flex-wrap: wrap;
         justify-content: center;
     }
-    
+
     .dps-view-btn {
         padding: 0.4rem 0.625rem;
         font-size: 0.75rem;
@@ -4478,13 +4230,13 @@ tr.dps-row-updated {
     .dps-agenda-wrapper table.dps-table {
         min-width: 580px;
     }
-    
+
     /* Abas em layout horizontal compacto */
     .dps-agenda-tabs-nav {
         grid-template-columns: repeat(3, 1fr);
         gap: 0.375rem;
     }
-    
+
     .dps-agenda-tab-button {
         flex-direction: row;
         justify-content: center;
@@ -4492,182 +4244,69 @@ tr.dps-row-updated {
         gap: 0.5rem;
         border-radius: var(--dps-shape-chip);
     }
-    
+
     .dps-agenda-tab-button::before {
         display: none;
     }
-    
+
     .dps-agenda-tab-button--active {
         border-width: 2px;
     }
-    
+
     .dps-tab-icon {
         font-size: 1.125rem;
     }
-    
+
     .dps-tab-label {
         font-size: 0.75rem;
     }
-    
+
     .dps-tab-desc {
         display: none;
     }
 }
 
-/* Mobile (até 640px) - Melhorias adicionais */
-@media (max-width: 640px) {
-    .dps-agenda-header {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.875rem;
-        padding: 1rem;
-    }
-    
-    .dps-agenda-title h3 {
-        font-size: 1.125rem;
-        text-align: center;
-    }
-    
-    .dps-agenda-header-nav {
-        width: 100%;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-    
-    .dps-agenda-header .dps-current-date {
-        width: 100%;
-        justify-content: center;
-        margin-bottom: 0.25rem;
-    }
-    
-    .dps-agenda-header .dps-date-nav {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    /* Abas em coluna única com layout horizontal */
-    .dps-agenda-tabs-nav {
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
-    }
-    
-    .dps-agenda-tab-button {
-        flex-direction: row;
-        justify-content: flex-start;
-        padding: 0.875rem 1rem;
-        gap: 0.75rem;
-        border-radius: var(--dps-shape-medium);
-    }
-    
-    .dps-agenda-tab-button::before {
-        display: none;
-    }
-    
-    .dps-agenda-tab-button--active {
-        border-left-width: 4px;
-        padding-left: calc(1rem - 2px);
-    }
-    
-    .dps-tab-icon {
-        font-size: 1.375rem;
-    }
-    
-    .dps-tab-label {
-        font-size: 0.9375rem;
-        flex: 1;
-    }
-    
-    .dps-tab-desc {
-        display: none;
-    }
-    
-    /* Cards de tabela aprimorados */
-    .dps-agenda-wrapper table.dps-table tr {
-        padding: 1rem;
-        border-radius: var(--dps-shape-medium);
-        box-shadow: var(--dps-elevation-1);
-    }
-    
-    .dps-agenda-wrapper table.dps-table tr.status-pendente,
-    .dps-agenda-wrapper table.dps-table tr.status-finalizado,
-    .dps-agenda-wrapper table.dps-table tr.status-finalizado_pago,
-    .dps-agenda-wrapper table.dps-table tr.status-cancelado {
-        background: var(--dps-surface);
-    }
-    
-    .dps-agenda-wrapper table.dps-table tbody td::before {
-        font-size: 0.6875rem;
-        letter-spacing: 0.03em;
-    }
-    
-    /* Controles de visualização em mobile */
-    .dps-agenda-nav--primary {
-        padding: 0.75rem;
-    }
-    
-    .dps-view-buttons {
-        flex-wrap: wrap;
-        gap: 0.25rem;
-    }
-    
-    .dps-view-btn {
-        flex: 1 1 auto;
-        padding: 0.5rem 0.625rem;
-        font-size: 0.75rem;
-        text-align: center;
-    }
-    
-    /* Estado vazio mais compacto */
-    .dps-agenda-empty {
-        padding: 1.5rem 1rem;
-        margin-top: 1.25rem;
-    }
-    
-    .dps-agenda-empty::before {
-        font-size: 2rem;
-    }
-}
+/* Mobile (atÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© 640px) - Melhorias adicionais */
 
-/* Mobile pequeno (até 420px) */
+/* Mobile pequeno (atÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© 420px) */
 @media (max-width: 420px) {
     .dps-agenda-header {
         padding: 0.875rem;
     }
-    
+
     .dps-agenda-title h3 {
         font-size: 1rem;
     }
-    
+
     .dps-nav-btn {
         min-width: 2rem;
         min-height: 2rem;
         font-size: 0.75rem;
     }
-    
+
     .dps-agenda-tabs-title {
         font-size: 0.9375rem;
     }
-    
+
     .dps-agenda-tab-button {
         padding: 0.75rem 0.875rem;
     }
-    
+
     .dps-tab-icon {
         font-size: 1.25rem;
     }
-    
+
     .dps-tab-label {
         font-size: 0.875rem;
     }
-    
+
     /* Dropdowns mais compactos */
     .dps-confirmation-dropdown,
     .dps-status-dropdown {
         min-width: 100%;
         font-size: 0.8125rem;
     }
-    
+
     .dps-services-popup-btn,
     .dps-payment-popup-btn {
         width: 100%;
@@ -4676,7 +4315,7 @@ tr.dps-row-updated {
     }
 }
 
-/* === Animações Sutis e Feedback Visual === */
+/* === AnimaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes Sutis e Feedback Visual === */
 .dps-row-updated {
     animation: rowUpdatePulse 1.5s ease-out;
 }
@@ -4725,7 +4364,6 @@ tr.dps-row-updated {
 
 /* === Print Styles === */
 @media print {
-    .dps-agenda-header-nav,
     .dps-agenda-nav,
     .dps-agenda-controls-wrapper,
     .dps-agenda-tabs-nav,
@@ -4734,21 +4372,21 @@ tr.dps-row-updated {
     .dps-quick-action-btn {
         display: none !important;
     }
-    
+
     .dps-agenda-wrapper {
         max-width: 100%;
     }
-    
+
     .dps-agenda-table-container {
         border: none;
         box-shadow: none;
     }
-    
+
     .dps-agenda-wrapper table.dps-table {
         min-width: 0;
         font-size: 11px;
     }
-    
+
     .dps-agenda-wrapper table.dps-table tbody tr {
         page-break-inside: avoid;
     }
@@ -4848,15 +4486,6 @@ tr.dps-row-updated {
     color: var(--dps-color-on-surface-variant);
 }
 
-@media (max-width: 480px) {
-    .dps-toast {
-        top: auto;
-        bottom: 20px;
-        right: 10px;
-        left: 10px;
-        max-width: none;
-    }
-}
 
 /* Badge de consentimento de tosa */
 .dps-consent-status {
@@ -4999,24 +4628,6 @@ tr.dps-row-updated {
     color: var(--dps-color-on-primary);
 }
 
-.dps-agenda-context-bar {
-    background: var(--dps-color-surface-container-lowest);
-    border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-medium);
-}
-
-.dps-agenda-summary {
-    background: var(--dps-color-surface-container-low);
-    border: 1px solid var(--dps-color-outline-variant);
-    color: var(--dps-color-on-surface);
-}
-
-.dps-summary-item {
-    background: var(--dps-color-surface-container-lowest);
-    border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-chip);
-}
-
 .dps-agenda-table-container {
     background: var(--dps-color-surface-container-lowest);
     border: 1px solid var(--dps-color-outline-variant);
@@ -5117,13 +4728,518 @@ tr.dps-row-updated {
 }
 
 
-@media (max-width: 640px) {
-    .dps-pet-profile-grid {
+/* === Agenda Consolidado (módulo unificado) === */
+/* Bloco organizado em: Header > Overview > Tabs > Controles > Responsividade */
+
+/* Header e contexto */
+.dps-agenda-header--refresh {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--dps-space-5);
+    align-items: center;
+    padding: clamp(var(--dps-space-5), 2vw, var(--dps-space-6));
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--dps-color-primary-container) 82%, white) 0%, color-mix(in srgb, var(--dps-color-surface-container-lowest) 94%, white) 46%, color-mix(in srgb, var(--dps-color-tertiary-container) 52%, white) 100%);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-card);
+    box-shadow: var(--dps-elevation-1);
+    overflow: hidden;
+}
+
+.dps-agenda-header--refresh::before,
+.dps-agenda-header--refresh::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.dps-agenda-header--refresh::before {
+    top: -8rem;
+    right: -4rem;
+    width: 20rem;
+    height: 20rem;
+    background:
+        radial-gradient(circle, color-mix(in srgb, var(--dps-color-primary-container) 90%, white) 0%, color-mix(in srgb, var(--dps-color-primary) 14%, transparent) 44%, transparent 72%);
+    opacity: 0.72;
+    animation: dpsAgendaHeaderFloat 18s var(--dps-motion-easing-expressive-default) infinite alternate;
+}
+
+.dps-agenda-header--refresh::after {
+    bottom: -10rem;
+    left: -4rem;
+    width: 18rem;
+    height: 18rem;
+    background:
+        radial-gradient(circle, color-mix(in srgb, var(--dps-color-tertiary-container) 88%, white) 0%, color-mix(in srgb, var(--dps-color-secondary-container) 58%, white) 50%, transparent 74%);
+    opacity: 0.54;
+    animation: dpsAgendaHeaderFloatSecondary 22s var(--dps-motion-easing-expressive-slow) infinite alternate;
+}
+
+.dps-agenda-header--refresh > * {
+    position: relative;
+    z-index: 1;
+}
+
+.dps-agenda-title {
+    display: grid;
+    gap: var(--dps-space-2);
+    align-content: start;
+}
+
+.dps-agenda-title h3 {
+    margin: 0;
+}
+
+.dps-agenda-subtitle {
+    margin: 0;
+    color: var(--dps-color-on-surface-variant);
+    font-size: var(--dps-typescale-body-medium-size);
+    line-height: var(--dps-typescale-body-medium-line);
+    max-width: 56ch;
+}
+
+.dps-agenda-header--refresh .dps-agenda-title .dps-current-date {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--dps-space-2);
+    margin: 0;
+    min-width: 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    color: var(--dps-color-on-surface-variant);
+    text-align: left;
+    box-shadow: none;
+}
+
+.dps-agenda-header--refresh .dps-agenda-title .dps-current-date__label {
+    color: var(--dps-color-on-surface-variant);
+    font-size: var(--dps-typescale-label-small-size);
+    font-weight: var(--dps-typescale-label-small-weight);
+    letter-spacing: 0.02em;
+    text-transform: none;
+}
+
+.dps-agenda-header--refresh .dps-agenda-title .dps-current-date strong {
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-title-small-size);
+    line-height: var(--dps-typescale-title-small-line);
+    font-weight: var(--dps-typescale-title-medium-weight);
+}
+
+.dps-agenda-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dps-space-3);
+    justify-content: flex-end;
+    align-items: center;
+    justify-self: end;
+}
+
+.dps-agenda-header-actions .dps-btn {
+    min-height: 44px;
+}
+
+.dps-agenda-nav-group--views {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--dps-space-2);
+    width: 100%;
+}
+
+.dps-agenda-nav-group--views .dps-nav-label {
+    margin-right: 0;
+}
+
+.dps-agenda-nav-group--views .dps-view-buttons--date-nav {
+    margin-inline-start: auto;
+    background: var(--dps-color-surface-container-low);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-chip);
+    padding: var(--dps-space-1);
+    gap: var(--dps-space-1);
+}
+
+.dps-view-buttons--date-nav .dps-nav-btn {
+    min-width: 2.2rem;
+    min-height: 2.2rem;
+    padding: 0.5rem 0.75rem;
+    border: 0;
+    border-radius: var(--dps-shape-chip);
+    background: transparent;
+    color: var(--dps-color-on-surface-variant);
+    box-shadow: none;
+}
+
+.dps-view-buttons--date-nav .dps-nav-btn:hover {
+    background: var(--dps-color-surface-container);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-view-buttons--date-nav .dps-nav-btn:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 1px;
+}
+
+.dps-view-buttons--date-nav .dps-nav-btn--today {
+    background: var(--dps-color-primary-container);
+    color: var(--dps-color-on-primary-container);
+}
+
+.dps-view-buttons--date-nav .dps-nav-btn--today:hover {
+    background: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+}
+
+.dps-view-buttons--date-nav .dps-nav-btn--prev,
+.dps-view-buttons--date-nav .dps-nav-btn--next {
+    padding-inline: 0.65rem;
+}
+
+.dps-agenda-tabs-wrapper {
+    margin-top: 0;
+}
+
+/* Overview e painÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©is diÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡rios */
+.dps-agenda-overview {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--dps-space-4);
+    margin-bottom: var(--dps-space-6);
+}
+
+.dps-agenda-overview-card,
+.dps-agenda-day-panel {
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-card);
+    box-shadow: var(--dps-elevation-1);
+}
+
+.dps-agenda-overview-card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dps-space-2);
+    min-height: 132px;
+    padding: var(--dps-space-5);
+}
+
+.dps-agenda-overview-card::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 5px;
+    background: var(--dps-agenda-overview-accent, var(--dps-color-primary));
+}
+
+.dps-agenda-overview-card__label {
+    color: var(--dps-color-on-surface-variant);
+    font-size: var(--dps-typescale-label-medium-size);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.dps-agenda-overview-card__value {
+    color: var(--dps-agenda-overview-accent, var(--dps-color-primary));
+    font-size: clamp(1.7rem, 3vw, 2.35rem);
+    line-height: 1;
+}
+
+.dps-agenda-overview-card--primary { --dps-agenda-overview-accent: var(--dps-color-primary); }
+.dps-agenda-overview-card--warning { --dps-agenda-overview-accent: var(--dps-color-warning); }
+.dps-agenda-overview-card--success { --dps-agenda-overview-accent: var(--dps-color-success); }
+.dps-agenda-overview-card--error { --dps-agenda-overview-accent: var(--dps-color-error); }
+.dps-agenda-overview-card--secondary { --dps-agenda-overview-accent: var(--dps-color-secondary); }
+.dps-agenda-overview-card--tertiary { --dps-agenda-overview-accent: var(--dps-color-tertiary); }
+
+.dps-agenda-day-panel {
+    margin-bottom: var(--dps-space-5);
+    padding: var(--dps-space-5);
+}
+
+.dps-agenda-day-panel__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--dps-space-4);
+    margin-bottom: var(--dps-space-4);
+}
+
+.dps-agenda-day-panel__header h4 {
+    margin: 0 0 var(--dps-space-2);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-agenda-day-panel__header p {
+    margin: 0;
+    color: var(--dps-color-on-surface-variant);
+}
+
+.dps-agenda-day-panel__stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--dps-space-2);
+}
+
+.dps-agenda-day-panel__body > h5 {
+    margin-top: 0;
+}
+
+.dps-agenda-empty {
+    background: linear-gradient(180deg, var(--dps-color-surface-container-lowest) 0%, var(--dps-color-surface-container-low) 100%);
+    border-style: solid;
+    box-shadow: var(--dps-elevation-1);
+}
+
+.dps-agenda-empty strong {
+    display: block;
+    margin-bottom: var(--dps-space-2);
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-title-medium-size);
+}
+
+.dps-agenda-empty__actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--dps-space-3);
+    margin-top: var(--dps-space-4);
+}
+
+@keyframes dpsAgendaHeaderFloat {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+
+    50% {
+        transform: translate3d(-1.35rem, 1rem, 0) scale(1.06);
+    }
+
+    100% {
+        transform: translate3d(-2rem, -0.85rem, 0) scale(0.98);
+    }
+}
+
+@keyframes dpsAgendaHeaderFloatSecondary {
+    0% {
+        transform: translate3d(0, 0, 0) scale(0.98);
+    }
+
+    50% {
+        transform: translate3d(1.1rem, -1.4rem, 0) scale(1.04);
+    }
+
+    100% {
+        transform: translate3d(2rem, 0.65rem, 0) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dps-agenda-header--refresh::before,
+    .dps-agenda-header--refresh::after {
+        animation: none;
+        transform: none;
+    }
+}
+
+@media (min-width: 1920px) {
+    .dps-agenda-overview {
+        grid-template-columns: repeat(6, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 1200px) {
+    .dps-agenda-header--refresh {
         grid-template-columns: 1fr;
     }
 
-    .dps-pet-profile-trigger {
-        width: 100%;
-        justify-content: space-between;
+    .dps-agenda-header-actions {
+        justify-self: stretch;
+        justify-content: flex-start;
     }
+
+    .dps-agenda-overview {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 840px) {
+    .dps-agenda-day-panel__header {
+        flex-direction: column;
+    }
+
+    .dps-agenda-nav-group--views .dps-view-buttons--date-nav {
+        margin-inline-start: 0;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .dps-view-buttons--date-nav .dps-nav-btn {
+        flex: 1 1 0;
+    }
+
+    .dps-view-buttons--date-nav .dps-nav-btn--today {
+        flex: 1.2 1 0;
+    }
+
+    .dps-agenda-day-panel__stats {
+        justify-content: flex-start;
+    }
+
+    .dps-agenda-overview {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dps-agenda-tabs-header {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 600px) {
+    .dps-agenda-header--refresh,
+    .dps-agenda-day-panel {
+        padding: var(--dps-space-4);
+    }
+
+    .dps-agenda-header-actions,
+    .dps-agenda-empty__actions {
+        width: 100%;
+    }
+
+    .dps-agenda-header-actions .dps-btn,
+    .dps-agenda-empty__actions .dps-btn {
+        width: 100%;
+    }
+
+    .dps-agenda-overview {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-agenda-header--refresh .dps-agenda-title .dps-current-date {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .dps-services-popup-btn,
+    .dps-payment-popup-btn,
+    .dps-taxidog-request-btn,
+    .dps-taxidog-map-btn,
+    .dps-quick-action,
+    .dps-quick-action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+@media (max-width: 375px) {
+    .dps-agenda-subtitle {
+        font-size: var(--dps-typescale-body-small-size);
+    }
+}
+
+/* M3 agenda tabs normalization */
+.dps-agenda-tabs-header {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--dps-space-4);
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: var(--dps-space-4);
+}
+
+.dps-agenda-tabs-header > div {
+    display: grid;
+    gap: var(--dps-space-2);
+}
+
+.dps-context-pill--warning {
+    background: var(--dps-color-warning-container);
+    border-color: color-mix(in srgb, var(--dps-color-warning) 24%, var(--dps-color-warning-container));
+    color: var(--dps-color-on-warning-container);
+}
+
+.dps-context-pill--success {
+    background: var(--dps-color-success-container);
+    border-color: color-mix(in srgb, var(--dps-color-success) 24%, var(--dps-color-success-container));
+    color: var(--dps-color-on-success-container);
+}
+
+.dps-agenda-tabs-nav {
+    padding: var(--dps-space-2);
+    background: var(--dps-color-surface-container-low);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-card);
+    box-shadow: var(--dps-elevation-0);
+}
+
+.dps-agenda-tab-button {
+    min-height: 76px;
+    border-radius: var(--dps-shape-large);
+}
+
+.dps-agenda-day-panel__body .dps-agenda-table-container {
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+    overflow: hidden;
+}
+
+.dps-pet-profile-trigger,
+.dps-services-popup-btn,
+.dps-payment-popup-btn,
+.dps-taxidog-request-btn,
+.dps-taxidog-map-btn,
+.dps-taxidog-dropdown,
+.dps-quick-action,
+.dps-quick-action-btn {
+    border-radius: var(--dps-shape-full);
+    border-color: var(--dps-color-outline-variant);
+    font-weight: var(--dps-typescale-label-large-weight);
+    transition: background var(--dps-motion-hover), border-color var(--dps-motion-hover), color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
+}
+
+.dps-pet-profile-trigger,
+.dps-services-popup-btn,
+.dps-payment-popup-btn,
+.dps-taxidog-map-btn,
+.dps-quick-action,
+.dps-quick-action-btn {
+    background: var(--dps-color-surface-container-lowest);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-pet-profile-trigger:hover,
+.dps-services-popup-btn:hover,
+.dps-payment-popup-btn:hover,
+.dps-taxidog-request-btn:hover,
+.dps-taxidog-map-btn:hover,
+.dps-quick-action:hover,
+.dps-quick-action-btn:hover {
+    box-shadow: var(--dps-elevation-1);
+}
+
+.dps-taxidog-dropdown,
+.dps-taxidog-request-btn {
+    background: var(--dps-color-secondary-container);
+    color: var(--dps-color-on-secondary-container);
+}
+
+.dps-taxidog-label,
+.dps-taxidog-badge {
+    border-radius: var(--dps-shape-full);
+    font-weight: var(--dps-typescale-label-medium-weight);
+}
+
+.dps-quick-actions,
+.dps-taxidog-actions {
+    gap: var(--dps-space-2);
 }

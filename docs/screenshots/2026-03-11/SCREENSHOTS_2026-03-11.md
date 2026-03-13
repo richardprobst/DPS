@@ -10,7 +10,7 @@
 - Resumo do depois: o resumo fica acima do bloco da lista e as abas passam a abrir imediatamente a area das tabelas de atendimento.
 - Arquivos de codigo alterados:
   - `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
-  - `plugins/desi-pet-shower-agenda/assets/css/agenda-refresh.css`
+  - `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
   - `docs/screenshots/2026-03-11/agenda-tabs-near-list-preview.html`
   - `docs/screenshots/README.md`
 

@@ -990,13 +990,7 @@ class DPS_Agenda_Addon {
                 'dps-agenda-addon-css',
                 plugin_dir_url( __FILE__ ) . 'assets/css/agenda-addon.css',
                 [ 'dps-design-tokens' ],
-                '2.0.0'
-            );
-            wp_enqueue_style(
-                'dps-agenda-refresh-css',
-                plugin_dir_url( __FILE__ ) . 'assets/css/agenda-refresh.css',
-                [ 'dps-design-tokens', 'dps-agenda-addon-css' ],
-                '2.0.0'
+                '2.1.0'
             );
 
             // CSS do Checklist Operacional e Check-in/Check-out

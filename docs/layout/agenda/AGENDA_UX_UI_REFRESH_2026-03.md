@@ -19,7 +19,7 @@
 - Incluídos chips de contexto e cards de overview para leitura imediata do estado operacional.
 - Reorganizadas as listas em painéis por dia, com contagem de pendentes/finalizados por bloco.
 - Mantida a estrutura de abas, agora com persistência em URL/sessionStorage e sem perder o foco operacional.
-- Criado stylesheet dedicado `assets/css/agenda-refresh.css` para evoluir a UI sem ampliar o débito do CSS legado principal.
+- Consolidada a camada de refresh em `assets/css/agenda-addon.css`, eliminando duplicidade de arquivos e mantendo evolução incremental da UI.
 
 ## Correções funcionais aplicadas junto com o redesign
 - Empty state agora respeita o resultado filtrado real e oferece ações objetivas de recuperação.
