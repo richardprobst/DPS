@@ -5413,3 +5413,170 @@ tr.dps-row-updated {
         align-items: center;
     }
 }
+
+/* === Agenda UX Audit 2026-03-21: Filtros operacionais e resumo === */
+.dps-agenda-filter-panel {
+    margin: 0 0 var(--dps-space-6);
+    padding: var(--dps-space-5);
+    background: var(--dps-color-surface-container-lowest);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-card);
+    box-shadow: var(--dps-elevation-1);
+}
+
+.dps-agenda-filter-form {
+    display: grid;
+    gap: var(--dps-space-4);
+}
+
+.dps-agenda-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--dps-space-3);
+}
+
+.dps-agenda-filter-field {
+    display: grid;
+    gap: var(--dps-space-1);
+}
+
+.dps-agenda-filter-field > span {
+    color: var(--dps-color-on-surface-variant);
+    font-size: var(--dps-typescale-label-medium-size);
+    font-weight: var(--dps-typescale-label-medium-weight);
+    line-height: var(--dps-typescale-label-medium-line);
+}
+
+.dps-agenda-filter-input {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--dps-color-outline);
+    border-radius: var(--dps-shape-small);
+    background: var(--dps-color-surface-container-lowest);
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-body-medium-size);
+    line-height: var(--dps-typescale-body-medium-line);
+    transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
+}
+
+.dps-agenda-filter-input:hover {
+    border-color: var(--dps-color-on-surface-variant);
+}
+
+.dps-agenda-filter-input:focus-visible {
+    border-color: var(--dps-color-primary);
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 1px;
+}
+
+.dps-agenda-filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dps-space-3);
+}
+
+.dps-agenda-filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dps-space-2);
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-body-medium-size);
+    line-height: var(--dps-typescale-body-medium-line);
+    cursor: pointer;
+}
+
+.dps-agenda-filter-toggle input[type="checkbox"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0;
+    accent-color: var(--dps-color-primary);
+}
+
+.dps-agenda-filter-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dps-space-3);
+}
+
+.dps-agenda-active-filters {
+    display: grid;
+    gap: var(--dps-space-2);
+    margin-top: var(--dps-space-4);
+}
+
+.dps-agenda-active-filters__label {
+    color: var(--dps-color-on-surface-variant);
+    font-size: var(--dps-typescale-label-medium-size);
+    font-weight: var(--dps-typescale-label-medium-weight);
+    line-height: var(--dps-typescale-label-medium-line);
+}
+
+.dps-agenda-active-filters__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dps-space-2);
+}
+
+.dps-agenda-pagination {
+    margin-top: var(--dps-space-5);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dps-space-2);
+    justify-content: center;
+    align-items: center;
+}
+
+.dps-pagination-info {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.5rem;
+    padding: 0.5rem 0.9rem;
+    background: var(--dps-color-surface-container-low);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-chip);
+    color: var(--dps-color-on-surface-variant);
+    font-size: var(--dps-typescale-label-large-size);
+    font-weight: var(--dps-typescale-label-large-weight);
+}
+
+.dps-agenda-overview {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+@media (max-width: 1200px) {
+    .dps-agenda-filter-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 840px) {
+    .dps-agenda-filter-panel {
+        padding: var(--dps-space-4);
+    }
+
+    .dps-agenda-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .dps-agenda-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-agenda-filter-input {
+        min-height: 3rem;
+    }
+
+    .dps-agenda-filter-actions .dps-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 375px) {
+    .dps-agenda-filter-panel {
+        padding: var(--dps-space-3);
+    }
+}

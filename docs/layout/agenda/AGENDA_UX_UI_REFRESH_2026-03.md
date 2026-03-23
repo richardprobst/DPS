@@ -35,3 +35,31 @@
 - Separar visualmente “cancelados” de “finalizados” nas métricas resumidas, evitando leitura ambígua em agendas com muitos encerramentos não concluídos.
 - Reduzir densidade das tabelas das abas Operação e Detalhes em mobile com estratégias de colapso por prioridade.
 - Considerar quick filters de status no topo para acelerar o uso diário em equipes com alto volume.
+
+## Complemento (2026-03-21) - Verificacao por fases
+
+### Fase 1 - Diagnostico
+- Confirmado gap de UX: filtros ativos na logica (`$_GET`) sem painel visivel no shell principal da Agenda.
+- Confirmada ambiguidade semantica no resumo: status `cancelado` era contado junto de finalizados.
+
+### Fase 2 - Implementacao de filtros operacionais
+- Reintroduzido painel completo de filtros no `render_agenda_shortcode()` com:
+  - data foco;
+  - cliente;
+  - status;
+  - servico;
+  - profissional;
+  - toggles para pagamento pendente e agrupamento por cliente.
+- Incluido bloco de chips com contagem de filtros ativos para preservar contexto operacional durante a navegacao.
+
+### Fase 3 - Ajuste de metricas
+- `get_agenda_overview_stats()` atualizado para separar `canceled` de `completed`.
+- Overview passa a exibir cards distintos de `Finalizados` e `Cancelados`.
+
+### Fase 4 - Acessibilidade e consistencia
+- Links de navegacao temporal (`anterior`, `hoje`, `proximo`) receberam `aria-label`.
+- Botoes de modo (`Dia`, `Semana`, `Mes`, `Agenda completa`) passam a usar `aria-current="page"` quando ativos.
+
+### Fase 5 - Responsividade e limpeza
+- Adicionadas regras M3 para o novo painel de filtros no `assets/css/agenda-addon.css` com validacao nos breakpoints `375`, `600`, `840`, `1200` e `1920`.
+- Paginacao da Agenda migrada de `style` inline para classes dedicadas (`.dps-agenda-pagination` e `.dps-pagination-info`).

@@ -370,7 +370,19 @@ trait DPS_Agenda_Renderer {
      * @return string
      */
     private function get_agenda_context_description( $view, $show_all ) {
-        return '';
+        if ( $show_all ) {
+            return __( 'Leitura operacional completa para priorizar pendencias, pagamentos e confirmacoes da agenda futura.', 'dps-agenda-addon' );
+        }
+
+        if ( 'week' === $view ) {
+            return __( 'Visao semanal para antecipar conflitos de capacidade e acompanhar o volume da equipe.', 'dps-agenda-addon' );
+        }
+
+        if ( 'calendar' === $view ) {
+            return __( 'Mapa mensal para localizar picos de agendamento e distribuir a operacao com antecedencia.', 'dps-agenda-addon' );
+        }
+
+        return __( 'Visao do dia com foco em confirmacao, execucao e fechamento dos atendimentos.', 'dps-agenda-addon' );
     }
     /**
      * Summarize the filtered appointment set for the agenda overview.
@@ -383,6 +395,7 @@ trait DPS_Agenda_Renderer {
             'total'           => 0,
             'pending'         => 0,
             'completed'       => 0,
+            'canceled'        => 0,
             'late'            => 0,
             'pending_payment' => 0,
             'taxidog'         => 0,
@@ -400,6 +413,8 @@ trait DPS_Agenda_Renderer {
 
             if ( 'pendente' === $status ) {
                 $stats['pending']++;
+            } elseif ( 'cancelado' === $status ) {
+                $stats['canceled']++;
             } else {
                 $stats['completed']++;
             }
