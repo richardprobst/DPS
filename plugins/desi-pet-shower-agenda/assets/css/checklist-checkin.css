@@ -12,21 +12,7 @@
    =========================== */
 
 .dps-checklist-panel {
-    background: var(--md-sys-color-surface, #fff);
-    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
-    border-radius: 12px;
-    padding: 16px;
     margin-top: 12px;
-}
-
-.dps-checklist-panel h4 {
-    margin: 0 0 12px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--md-sys-color-on-surface, #1d1b20);
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 .dps-checklist-progress {
@@ -218,21 +204,7 @@
    =========================== */
 
 .dps-checkin-panel {
-    background: var(--md-sys-color-surface, #fff);
-    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
-    border-radius: 12px;
-    padding: 16px;
     margin-top: 12px;
-}
-
-.dps-checkin-panel h4 {
-    margin: 0 0 12px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--md-sys-color-on-surface, #1d1b20);
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 .dps-checkin-status {
@@ -676,21 +648,6 @@
     background: var(--md-sys-color-surface-variant, #f5f0fa);
 }
 
-.dps-detail-panels {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 16px;
-}
-
-@media (max-width: 768px) {
-    .dps-detail-panels {
-        grid-template-columns: 1fr;
-        padding: 12px;
-        gap: 12px;
-    }
-}
-
 /* Responsive */
 @media (max-width: 900px) {
     .dps-safety-items {
@@ -740,9 +697,6 @@
         display: inline;
     }
 
-    .dps-checkin-panel {
-        padding: 12px;
-    }
 }
 
 /* ===========================
@@ -809,30 +763,6 @@
 }
 
 /* M3 detail panels normalization */
-.dps-checklist-panel,
-.dps-checkin-panel {
-    background: var(--dps-color-surface-container-lowest);
-    border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-medium);
-    padding: var(--dps-space-5);
-    box-shadow: var(--dps-elevation-0);
-}
-
-.dps-checklist-panel h4,
-.dps-checkin-panel h4 {
-    color: var(--dps-color-on-surface);
-    font-size: var(--dps-typescale-title-small-size);
-    line-height: var(--dps-typescale-title-small-line);
-    font-weight: var(--dps-typescale-title-small-weight);
-}
-
-.dps-checklist-btn,
-.dps-checkin-btn,
-.dps-expand-panels-btn {
-    border-radius: var(--dps-shape-full);
-    font-weight: var(--dps-typescale-label-large-weight);
-}
-
 .dps-checkin-status-badge--pending,
 .dps-safety-tag--info {
     background: var(--dps-color-surface-container);
@@ -862,13 +792,6 @@
     color: var(--dps-color-on-error-container);
 }
 
-.dps-safety-item,
-.dps-checkin-observations textarea,
-.dps-safety-item-notes {
-    border-radius: var(--dps-shape-medium);
-    border-color: var(--dps-color-outline-variant);
-}
-
 .dps-expand-panels-btn {
     background: var(--dps-color-surface-container-lowest);
     border-color: var(--dps-color-outline-variant);
@@ -883,17 +806,6 @@
     box-shadow: var(--dps-elevation-1);
 }
 
-.dps-detail-row td {
-    background: transparent;
-}
-
-.dps-detail-panels {
-    padding: var(--dps-space-4);
-    background: var(--dps-color-surface-container-low);
-    border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-large);
-}
-
 /* ==========================================================================
    Lista de Atendimentos - Painel operacional M3 unificado
    Fonte de verdade visual: docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md
@@ -901,9 +813,14 @@
    ========================================================================== */
 
 .dps-detail-panels {
+    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
     gap: var(--dps-space-4);
+    padding: var(--dps-space-4);
+    background: var(--dps-color-surface-container-low);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-large);
 }
 
 .dps-checklist-panel,
@@ -921,6 +838,13 @@
 .dps-checklist-panel h4,
 .dps-checkin-panel h4 {
     margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-title-small-size);
+    line-height: var(--dps-typescale-title-small-line);
+    font-weight: var(--dps-typescale-title-small-weight);
 }
 
 .dps-checklist-progress {

@@ -1,13 +1,14 @@
 # Screenshots 2026-03-23 - Agenda (Lista de Atendimentos redesign M3)
 
 ## Contexto
-- Objetivo da mudanca: implementar o redesign completo da Lista de Atendimentos da Agenda, incluindo shell, tabs, linhas, painel operacional inline, checkboxes e dialog system.
+- Objetivo da mudanca: implementar o redesign completo da Lista de Atendimentos da Agenda, incluindo shell, tabs, linhas, painel operacional inline, checkboxes e dialog system, e consolidar o CSS final removendo duplicacoes e regras legadas.
 - Ambiente: previews estaticos servidos localmente a partir do workspace.
 - Referencia de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
 
 ## Antes/Depois
 - Antes: a Lista de Atendimentos misturava shells visuais, tabs altas demais, profundidade fragmentada entre grid e modal, e dialogs inconsistentes entre historico, cobranca, reagendamento e retrabalho.
-- Depois: a area opera como um unico workspace M3 com overview mais contido, tabs compactas, linhas padronizadas entre as tres leituras, painel inline unificado na aba Operacao e dialogs compartilhando o mesmo shell visual.
+- Depois: a area opera como um unico workspace M3 com overview redesenhado em superficies tonais, tabs compactas, linhas padronizadas entre as tres leituras, painel inline unificado na aba Operacao e dialogs compartilhando o mesmo shell visual.
+- Consolidacao complementar: o CSS da Agenda foi limpo para depender da camada final M3, com remocao de blocos repetidos nas tabs, overview e detail panels, e neutralizacao de shells legados de modal sem uso no fluxo atual.
 - Arquivos de codigo alterados:
   - `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
   - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
@@ -42,3 +43,4 @@
 ## Observacoes
 - Os previews usam os CSS reais do add-on para registrar o redesign mesmo sem uma instancia WordPress ativa no momento da captura.
 - O registro cobre a shell principal, as tres abas, o painel operacional inline e o dialog system unificado, em conformidade com o padrao M3 adotado em `docs/visual/`.
+- Esta rodada tambem revalidou a responsividade apos a limpeza estrutural do CSS em `agenda-addon.css` e `checklist-checkin.css`.

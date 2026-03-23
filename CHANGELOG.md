@@ -176,6 +176,8 @@ Antes de criar uma nova versão oficial:
 - **Simplificacao estrutural**: o bloco operacional legado foi aposentado para manter a Agenda alinhada ao shell principal do add-on.
 - **Agenda sem criacao direta**: removido da agenda o botao **Novo agendamento** e todo o fluxo associado no add-on (modal, template e submissao AJAX do formulario).
 - **Lista de Atendimentos em workspace M3**: shell, overview, tabs, linhas e microcopy da lista foram redesenhados para leitura operacional mais limpa, consistente e responsiva.
+- **Cards de overview refinados**: Total, Pendentes, Finalizados, Cancelados, Atrasados, Pagamento pendente e TaxiDog agora usam superficies tonais mais claras, hierarquia forte de numero e destaque principal para o volume total.
+- **CSS da Agenda consolidado**: removidas regras redundantes e estados legados nas tabs, overview e paineis operacionais, reduzindo heranca acidental e duplicacao entre `agenda-addon.css` e `checklist-checkin.css`.
 - **Operacao com profundidade unica**: checklist operacional e check-in/check-out agora vivem no mesmo painel expansivel inline da aba Operacao, eliminando a quebra de contexto entre grid e modal.
 - **Dialogs padronizados na Agenda**: reagendamento, historico, cobranca, confirmacoes sensiveis e retrabalho passaram a usar o mesmo dialog system do add-on, removendo `confirm()`/`alert()` do fluxo principal da lista.
 **Client Portal ? Tela inicial e administra??o de logins**

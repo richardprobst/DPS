@@ -209,30 +209,6 @@ trait DPS_Agenda_Renderer {
 
         return sprintf( __( 'Dia %s', 'dps-agenda-addon' ), date_i18n( 'd/m/Y', $timestamp ) );
     }
-
-
-    /**
-     * Build supporting copy for the operational header without repeating the period.
-     *
-     * @param string $view Current view.
-     * @param bool   $show_all Whether the full agenda is active.
-     * @return string
-     */
-    private function get_agenda_context_description( $view, $show_all ) {
-        if ( $show_all ) {
-            return __( 'Leitura operacional completa para priorizar confirmações, execução e pendências financeiras da agenda futura.', 'dps-agenda-addon' );
-        }
-
-        if ( 'week' === $view ) {
-            return __( 'Visão semanal para antecipar conflitos de capacidade e distribuir a carga da equipe.', 'dps-agenda-addon' );
-        }
-
-        if ( 'calendar' === $view ) {
-            return __( 'Mapa mensal para localizar picos de agendamento e organizar a operação com antecedência.', 'dps-agenda-addon' );
-        }
-
-        return __( 'Confirmações, execução e fechamento do dia com clareza operacional.', 'dps-agenda-addon' );
-    }
     /**
      * Summarize the filtered appointment set for the agenda overview.
      *

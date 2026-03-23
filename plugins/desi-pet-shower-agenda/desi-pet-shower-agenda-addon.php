@@ -1196,7 +1196,6 @@ class DPS_Agenda_Addon {
         $all_view_args = array_merge( $nav_args, [ 'show_all' => '1' ] );
         $focused_view_args = array_merge( $nav_args, [ 'dps_date' => $selected_date, 'view' => $view ] );
         $scope_label        = $this->get_agenda_scope_label( $selected_date, $view, ! empty( $show_all ) );
-        $header_description = $this->get_agenda_context_description( $view, ! empty( $show_all ) );
 
         echo '<header class="dps-agenda-header dps-agenda-header--refresh">';
         echo '<div class="dps-agenda-title">';
@@ -1205,9 +1204,6 @@ class DPS_Agenda_Addon {
         echo '<span class="dps-current-date__label">' . esc_html__( 'Periodo ativo', 'dps-agenda-addon' ) . '</span>';
         echo '<strong>' . esc_html( $scope_label ) . '</strong>';
         echo '</p>';
-        if ( '' !== $header_description ) {
-            echo '<p class="dps-agenda-subtitle">' . esc_html( $header_description ) . '</p>';
-        }
         echo '</div>';
 
         echo '</header>';
@@ -1613,20 +1609,66 @@ class DPS_Agenda_Addon {
 
 
         $overview_cards = [
-            [ 'label' => __( 'Total', 'dps-agenda-addon' ), 'value' => $overview_stats['total'], 'tone' => 'primary' ],
-            [ 'label' => __( 'Pendentes', 'dps-agenda-addon' ), 'value' => $overview_stats['pending'], 'tone' => 'warning' ],
-            [ 'label' => __( 'Finalizados', 'dps-agenda-addon' ), 'value' => $overview_stats['completed'], 'tone' => 'success' ],
-            [ 'label' => __( 'Cancelados', 'dps-agenda-addon' ), 'value' => $overview_stats['canceled'], 'tone' => 'error' ],
-            [ 'label' => __( 'Atrasados', 'dps-agenda-addon' ), 'value' => $overview_stats['late'], 'tone' => 'warning' ],
-            [ 'label' => __( 'Pagamento pendente', 'dps-agenda-addon' ), 'value' => $overview_stats['pending_payment'], 'tone' => 'secondary' ],
-            [ 'label' => __( 'TaxiDog', 'dps-agenda-addon' ), 'value' => $overview_stats['taxidog'], 'tone' => 'tertiary' ],
+            [
+                'label'    => __( 'Total', 'dps-agenda-addon' ),
+                'value'    => $overview_stats['total'],
+                'tone'     => 'primary',
+                'icon'     => '◎',
+                'featured' => true,
+            ],
+            [
+                'label' => __( 'Pendentes', 'dps-agenda-addon' ),
+                'value' => $overview_stats['pending'],
+                'tone'  => 'warning',
+                'icon'  => '○',
+            ],
+            [
+                'label' => __( 'Finalizados', 'dps-agenda-addon' ),
+                'value' => $overview_stats['completed'],
+                'tone'  => 'success',
+                'icon'  => '✓',
+            ],
+            [
+                'label' => __( 'Cancelados', 'dps-agenda-addon' ),
+                'value' => $overview_stats['canceled'],
+                'tone'  => 'error',
+                'icon'  => '×',
+            ],
+            [
+                'label' => __( 'Atrasados', 'dps-agenda-addon' ),
+                'value' => $overview_stats['late'],
+                'tone'  => 'warning',
+                'icon'  => '!',
+            ],
+            [
+                'label' => __( 'Pagamento pendente', 'dps-agenda-addon' ),
+                'value' => $overview_stats['pending_payment'],
+                'tone'  => 'secondary',
+                'icon'  => 'R$',
+            ],
+            [
+                'label' => __( 'TaxiDog', 'dps-agenda-addon' ),
+                'value' => $overview_stats['taxidog'],
+                'tone'  => 'tertiary',
+                'icon'  => 'TD',
+            ],
         ];
 
         echo '<section class="dps-agenda-overview" aria-label="' . esc_attr__( 'Resumo da agenda', 'dps-agenda-addon' ) . '">';
         foreach ( $overview_cards as $overview_card ) {
-            echo '<article class="dps-agenda-overview-card dps-agenda-overview-card--' . esc_attr( $overview_card['tone'] ) . '">';
-            echo '<span class="dps-agenda-overview-card__label">' . esc_html( $overview_card['label'] ) . '</span>';
+            $card_classes = 'dps-agenda-overview-card dps-agenda-overview-card--' . esc_attr( $overview_card['tone'] );
+            if ( ! empty( $overview_card['featured'] ) ) {
+                $card_classes .= ' dps-agenda-overview-card--featured';
+            }
+
+            echo '<article class="' . esc_attr( $card_classes ) . '">';
+            echo '<div class="dps-agenda-overview-card__top">';
+            echo '<span class="dps-agenda-overview-card__icon" aria-hidden="true">' . esc_html( $overview_card['icon'] ) . '</span>';
+            echo '</div>';
+            echo '<div class="dps-agenda-overview-card__body">';
             echo '<strong class="dps-agenda-overview-card__value">' . esc_html( $overview_card['value'] ) . '</strong>';
+            echo '<span class="dps-agenda-overview-card__label">' . esc_html( $overview_card['label'] ) . '</span>';
+            echo '</div>';
             echo '</article>';
         }
         echo '</section>';
