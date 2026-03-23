@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name:       desi.pet by PRObst – Agenda Add-on
+ * Plugin Name:       desi.pet by PRObst Ã¢â‚¬â€œ Agenda Add-on
  * Plugin URI:        https://www.probst.pro
- * Description:       Cria página automática com agenda de atendimentos. Visualize e gerencie compromissos de forma prática.
+ * Description:       Cria pÃƒÂ¡gina automÃƒÂ¡tica com agenda de atendimentos. Visualize e gerencie compromissos de forma prÃƒÂ¡tica.
  * Version:           1.1.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
@@ -20,8 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base desi.pet by PRObst está ativo.
- * Se não estiver, exibe aviso e interrompe carregamento do add-on.
+ * Verifica se o plugin base desi.pet by PRObst estÃƒÂ¡ ativo.
+ * Se nÃƒÂ£o estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_agenda_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
@@ -42,14 +42,14 @@ add_action( 'plugins_loaded', function() {
 
 /**
  * Carrega o text domain do Agenda Add-on.
- * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 5).
+ * Usa prioridade 1 para garantir que rode antes da inicializaÃƒÂ§ÃƒÂ£o da classe (prioridade 5).
  */
 function dps_agenda_load_textdomain() {
     load_plugin_textdomain( 'dps-agenda-addon', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 add_action( 'init', 'dps_agenda_load_textdomain', 1 );
 
-// FASE 3: Carrega traits de refatoração e helpers
+// FASE 3: Carrega traits de refatoraÃƒÂ§ÃƒÂ£o e helpers
 require_once __DIR__ . '/includes/trait-dps-agenda-renderer.php';
 require_once __DIR__ . '/includes/trait-dps-agenda-query.php';
 
@@ -61,50 +61,50 @@ require_once __DIR__ . '/includes/class-dps-agenda-gps-helper.php';
 // FASE 4: Carrega helper para Dashboard Operacional
 require_once __DIR__ . '/includes/class-dps-agenda-dashboard-service.php';
 
-// FASE 4: Carrega helper para Capacidade/Lotação
+// FASE 4: Carrega helper para Capacidade/LotaÃƒÂ§ÃƒÂ£o
 require_once __DIR__ . '/includes/class-dps-agenda-capacity-helper.php';
 
 // Checklist Operacional e Check-in/Check-out
 require_once __DIR__ . '/includes/class-dps-agenda-checklist-service.php';
 require_once __DIR__ . '/includes/class-dps-agenda-checkin-service.php';
 
-// Hub centralizado de Agenda (Fase 2 - Reorganização de Menus)
+// Hub centralizado de Agenda (Fase 2 - ReorganizaÃƒÂ§ÃƒÂ£o de Menus)
 require_once __DIR__ . '/includes/class-dps-agenda-hub.php';
 
-// FASE 1 - Integrações Google (Calendar + Tasks): Infraestrutura
-// Carrega apenas se extensões OpenSSL estão disponíveis (necessário para criptografia)
+// FASE 1 - IntegraÃƒÂ§ÃƒÂµes Google (Calendar + Tasks): Infraestrutura
+// Carrega apenas se extensÃƒÂµes OpenSSL estÃƒÂ£o disponÃƒÂ­veis (necessÃƒÂ¡rio para criptografia)
 if ( extension_loaded( 'openssl' ) ) {
     require_once __DIR__ . '/includes/integrations/class-dps-google-auth.php';
     require_once __DIR__ . '/includes/integrations/class-dps-google-integrations-settings.php';
     
-    // FASE 2 - Google Calendar: Sincronização (DPS → Calendar)
+    // FASE 2 - Google Calendar: SincronizaÃƒÂ§ÃƒÂ£o (DPS Ã¢â€ â€™ Calendar)
     require_once __DIR__ . '/includes/integrations/class-dps-google-calendar-client.php';
     require_once __DIR__ . '/includes/integrations/class-dps-google-calendar-sync.php';
     
-    // FASE 3 - Google Calendar: Sincronização Bidirecional (Calendar ⇄ DPS)
+    // FASE 3 - Google Calendar: SincronizaÃƒÂ§ÃƒÂ£o Bidirecional (Calendar Ã¢â€¡â€ž DPS)
     require_once __DIR__ . '/includes/integrations/class-dps-google-calendar-webhook.php';
     
-    // FASE 4 - Google Tasks: Sincronização (DPS → Tasks)
+    // FASE 4 - Google Tasks: SincronizaÃƒÂ§ÃƒÂ£o (DPS Ã¢â€ â€™ Tasks)
     require_once __DIR__ . '/includes/integrations/class-dps-google-tasks-client.php';
     require_once __DIR__ . '/includes/integrations/class-dps-google-tasks-sync.php';
     
-    // Inicializa interface de configurações
+    // Inicializa interface de configuraÃƒÂ§ÃƒÂµes
     add_action( 'plugins_loaded', function() {
         if ( is_admin() ) {
             new DPS_Google_Integrations_Settings();
         }
         
-        // Inicializa sincronização Calendar e Tasks (se conectado)
+        // Inicializa sincronizaÃƒÂ§ÃƒÂ£o Calendar e Tasks (se conectado)
         if ( DPS_Google_Auth::is_connected() ) {
             new DPS_Google_Calendar_Sync();
             
-            // Inicializa webhook para sincronização bidirecional
+            // Inicializa webhook para sincronizaÃƒÂ§ÃƒÂ£o bidirecional
             $webhook = new DPS_Google_Calendar_Webhook();
             
-            // Registra ação para processar mudanças
+            // Registra aÃƒÂ§ÃƒÂ£o para processar mudanÃƒÂ§as
             add_action( 'dps_google_calendar_process_changes', [ $webhook, 'process_calendar_changes' ] );
             
-            // FASE 4: Inicializa sincronização Google Tasks
+            // FASE 4: Inicializa sincronizaÃƒÂ§ÃƒÂ£o Google Tasks
             new DPS_Google_Tasks_Sync();
         }
     }, 20 );
@@ -112,12 +112,12 @@ if ( extension_loaded( 'openssl' ) ) {
 
 class DPS_Agenda_Addon {
     
-    // FASE 3: Usa traits para métodos auxiliares
+    // FASE 3: Usa traits para mÃƒÂ©todos auxiliares
     use DPS_Agenda_Renderer;
     use DPS_Agenda_Query;
     
     /**
-     * Instância única (singleton).
+     * InstÃƒÂ¢ncia ÃƒÂºnica (singleton).
      *
      * @since 1.4.1
      * @var DPS_Agenda_Addon|null
@@ -125,7 +125,7 @@ class DPS_Agenda_Addon {
     private static $instance = null;
     
     /**
-     * Recupera a instância única.
+     * Recupera a instÃƒÂ¢ncia ÃƒÂºnica.
      *
      * @since 1.4.1
      * @return DPS_Agenda_Addon
@@ -138,14 +138,14 @@ class DPS_Agenda_Addon {
     }
     
     /**
-     * Número de agendamentos por página no modo "Todos".
+     * NÃƒÂºmero de agendamentos por pÃƒÂ¡gina no modo "Todos".
      * 
      * @since 1.1.0
      */
     const APPOINTMENTS_PER_PAGE = 50;
     
     /**
-     * Limite de agendamentos por dia nas queries de visualização.
+     * Limite de agendamentos por dia nas queries de visualizaÃƒÂ§ÃƒÂ£o.
      * Pode ser filtrado via 'dps_agenda_daily_limit'.
      * 
      * @since 1.2.0
@@ -184,11 +184,11 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Retorna configuração de status com labels, cores e ícones.
+     * Retorna configuraÃƒÂ§ÃƒÂ£o de status com labels, cores e ÃƒÂ­cones.
      *
-     * Use este método para obter a configuração completa de todos os status
-     * disponíveis. Cada status contém label traduzida, cor de destaque,
-     * cor de fundo e ícone.
+     * Use este mÃƒÂ©todo para obter a configuraÃƒÂ§ÃƒÂ£o completa de todos os status
+     * disponÃƒÂ­veis. Cada status contÃƒÂ©m label traduzida, cor de destaque,
+     * cor de fundo e ÃƒÂ­cone.
      *
      * Exemplo de uso:
      * ```php
@@ -198,11 +198,11 @@ class DPS_Agenda_Addon {
      * ```
      *
      * @since 1.3.1
-     * @return array Configuração completa de status. Cada item contém:
+     * @return array ConfiguraÃƒÂ§ÃƒÂ£o completa de status. Cada item contÃƒÂ©m:
      *               - 'label' (string) Label traduzida
      *               - 'color' (string) Cor hex para borda/destaque
      *               - 'bg'    (string) Cor hex para fundo
-     *               - 'icon'  (string) Emoji/ícone
+     *               - 'icon'  (string) Emoji/ÃƒÂ­cone
      */
     public static function get_status_config() {
         return [
@@ -210,25 +210,25 @@ class DPS_Agenda_Addon {
                 'label' => __( 'Pendente', 'dps-agenda-addon' ),
                 'color' => '#f59e0b',
                 'bg'    => '#fffbeb',
-                'icon'  => '⏳',
+                'icon'  => 'Ã¢ÂÂ³',
             ],
             self::STATUS_FINISHED => [
                 'label' => __( 'Finalizado', 'dps-agenda-addon' ),
                 'color' => '#0ea5e9',
                 'bg'    => '#f0f9ff',
-                'icon'  => '✓',
+                'icon'  => 'Ã¢Å“â€œ',
             ],
             self::STATUS_PAID => [
                 'label' => __( 'Finalizado e pago', 'dps-agenda-addon' ),
                 'color' => '#22c55e',
                 'bg'    => '#f0fdf4',
-                'icon'  => '💰',
+                'icon'  => 'Ã°Å¸â€™Â°',
             ],
             self::STATUS_CANCELED => [
                 'label' => __( 'Cancelado', 'dps-agenda-addon' ),
                 'color' => '#ef4444',
                 'bg'    => '#fef2f2',
-                'icon'  => '❌',
+                'icon'  => 'Ã¢ÂÅ’',
             ],
         ];
     }
@@ -237,8 +237,8 @@ class DPS_Agenda_Addon {
      * Retorna label traduzida para um status.
      *
      * @since 1.3.1
-     * @param string $status Código do status.
-     * @return string Label traduzida ou o próprio código se não encontrado.
+     * @param string $status CÃƒÂ³digo do status.
+     * @return string Label traduzida ou o prÃƒÂ³prio cÃƒÂ³digo se nÃƒÂ£o encontrado.
      */
     public static function get_status_label( $status ) {
         $config = self::get_status_config();
@@ -251,10 +251,10 @@ class DPS_Agenda_Addon {
      * @since 1.4.1
      */
     private function __construct() {
-        // Verifica dependência do Finance Add-on após todos os plugins terem sido carregados
+        // Verifica dependÃƒÂªncia do Finance Add-on apÃƒÂ³s todos os plugins terem sido carregados
         add_action( 'plugins_loaded', [ $this, 'check_finance_dependency' ] );
 
-        // Cria páginas necessárias ao ativar o plugin (apenas agenda, sem a página de cobranças)
+        // Cria pÃƒÂ¡ginas necessÃƒÂ¡rias ao ativar o plugin (apenas agenda, sem a pÃƒÂ¡gina de cobranÃƒÂ§as)
         register_activation_hook( __FILE__, [ $this, 'create_agenda_page' ] );
         // Limpa cron jobs ao desativar o plugin
         register_deactivation_hook( __FILE__, [ $this, 'deactivate' ] );
@@ -264,24 +264,24 @@ class DPS_Agenda_Addon {
         add_shortcode( 'dps_agenda_dashboard', [ $this, 'render_dashboard_shortcode' ] );
         // Shortcode dps_charges_notes deprecated - redireciona para Finance
         add_shortcode( 'dps_charges_notes', [ $this, 'render_charges_notes_shortcode_deprecated' ] );
-        // Enfileira scripts e estilos somente quando páginas específicas forem exibidas
+        // Enfileira scripts e estilos somente quando pÃƒÂ¡ginas especÃƒÂ­ficas forem exibidas
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-        // AJAX para atualizar status de agendamento (apenas usuários autenticados)
+        // AJAX para atualizar status de agendamento (apenas usuÃƒÂ¡rios autenticados)
         add_action( 'wp_ajax_dps_update_status', [ $this, 'update_status_ajax' ] );
         
-        // UX-1: AJAX para ações rápidas de status
+        // UX-1: AJAX para aÃƒÂ§ÃƒÂµes rÃƒÂ¡pidas de status
         add_action( 'wp_ajax_dps_agenda_quick_action', [ $this, 'quick_action_ajax' ] );
         
-        // CONF-2: AJAX para atualização de status de confirmação
+        // CONF-2: AJAX para atualizaÃƒÂ§ÃƒÂ£o de status de confirmaÃƒÂ§ÃƒÂ£o
         add_action( 'wp_ajax_dps_agenda_update_confirmation', [ $this, 'update_confirmation_ajax' ] );
         
-        // FASE 3: AJAX para atualização de status de TaxiDog
+        // FASE 3: AJAX para atualizaÃƒÂ§ÃƒÂ£o de status de TaxiDog
         add_action( 'wp_ajax_dps_agenda_update_taxidog', [ $this, 'update_taxidog_ajax' ] );
         
         // FASE 7: AJAX para solicitar TaxiDog
         add_action( 'wp_ajax_dps_agenda_request_taxidog', [ $this, 'request_taxidog_ajax' ] );
         
-        // FASE 4: AJAX para salvar configuração de capacidade
+        // FASE 4: AJAX para salvar configuraÃƒÂ§ÃƒÂ£o de capacidade
         add_action( 'wp_ajax_dps_agenda_save_capacity', [ $this, 'save_capacity_ajax' ] );
         
         // FASE 5: AJAX para reenviar link de pagamento
@@ -290,19 +290,17 @@ class DPS_Agenda_Addon {
         // Versionamento de agendamentos para evitar conflitos de escrita
         add_action( 'save_post_dps_agendamento', [ $this, 'ensure_appointment_version_meta' ], 10, 3 );
 
-        // AJAX para obter detalhes de serviços de um agendamento (apenas usuários autenticados)
+        // AJAX para obter detalhes de serviÃƒÂ§os de um agendamento (apenas usuÃƒÂ¡rios autenticados)
         add_action( 'wp_ajax_dps_get_services_details', [ $this, 'get_services_details_ajax' ] );
         add_action( 'wp_ajax_nopriv_dps_get_services_details', [ $this, 'get_services_details_ajax' ] );
 
-        // FASE 2: AJAX para exportação CSV da agenda (mantido por compatibilidade)
-        
-        // FASE 2: AJAX para exportação PDF da agenda
+        // FASE 2: AJAX para exportaÃƒÂ§ÃƒÂ£o PDF da agenda
         add_action( 'wp_ajax_dps_agenda_export_pdf', [ $this, 'export_pdf_ajax' ] );
 
-        // FASE 4: AJAX para calendário mensal
+        // FASE 4: AJAX para calendÃƒÂ¡rio mensal
         add_action( 'wp_ajax_dps_agenda_calendar_events', [ $this, 'calendar_events_ajax' ] );
 
-        // FASE 5: AJAX para ações administrativas avançadas
+        // FASE 5: AJAX para aÃƒÂ§ÃƒÂµes administrativas avanÃƒÂ§adas
         add_action( 'wp_ajax_dps_quick_reschedule', [ $this, 'quick_reschedule_ajax' ] );
         add_action( 'wp_ajax_dps_get_appointment_history', [ $this, 'get_appointment_history_ajax' ] );
         add_action( 'wp_ajax_dps_get_admin_kpis', [ $this, 'get_admin_kpis_ajax' ] );
@@ -312,21 +310,21 @@ class DPS_Agenda_Addon {
         add_action( 'wp_ajax_dps_checklist_rework', [ $this, 'checklist_rework_ajax' ] );
         add_action( 'wp_ajax_dps_get_checklist_panel', [ $this, 'get_checklist_panel_ajax' ] );
 
-        // Check-in / Check-out: AJAX para registrar entrada e saída
+        // Check-in / Check-out: AJAX para registrar entrada e saÃƒÂ­da
         add_action( 'wp_ajax_dps_appointment_checkin', [ $this, 'appointment_checkin_ajax' ] );
         add_action( 'wp_ajax_dps_appointment_checkout', [ $this, 'appointment_checkout_ajax' ] );
 
-        // FASE 5: Registra alterações de status no histórico
+        // FASE 5: Registra alteraÃƒÂ§ÃƒÂµes de status no histÃƒÂ³rico
         add_action( 'dps_appointment_status_changed', [ $this, 'log_status_change' ], 10, 4 );
 
-        // Agenda: agendamento de envio de lembretes diários
+        // Agenda: agendamento de envio de lembretes diÃƒÂ¡rios
         add_action( 'init', [ $this, 'maybe_schedule_reminders' ] );
         add_action( 'dps_agenda_send_reminders', [ $this, 'send_reminders' ] );
         
-        // FASE 4: Adiciona página de Dashboard no admin
+        // FASE 4: Adiciona pÃƒÂ¡gina de Dashboard no admin
         add_action( 'admin_menu', [ $this, 'register_dashboard_admin_page' ], 20 );
         
-        // FASE 5: Adiciona página de Configurações no admin
+        // FASE 5: Adiciona pÃƒÂ¡gina de ConfiguraÃƒÂ§ÃƒÂµes no admin
         add_action( 'admin_menu', [ $this, 'register_settings_admin_page' ], 21 );
         
         // FASE 4: Enfileira assets do Dashboard no admin
@@ -334,22 +332,22 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Verifica se o Finance Add-on está ativo após todos os plugins terem sido carregados.
+     * Verifica se o Finance Add-on estÃƒÂ¡ ativo apÃƒÂ³s todos os plugins terem sido carregados.
      *
-     * Este método é executado no hook 'plugins_loaded' para garantir que todos os plugins
-     * já tenham sido carregados antes de verificar a existência da classe DPS_Finance_API.
+     * Este mÃƒÂ©todo ÃƒÂ© executado no hook 'plugins_loaded' para garantir que todos os plugins
+     * jÃƒÂ¡ tenham sido carregados antes de verificar a existÃƒÂªncia da classe DPS_Finance_API.
      *
      * @since 1.0.1
      */
     public function check_finance_dependency() {
         if ( ! class_exists( 'DPS_Finance_API' ) ) {
             add_action( 'admin_notices', [ $this, 'finance_dependency_notice' ] );
-            // Continua a carregar para não quebrar completamente, mas funcionalidade financeira não estará disponível
+            // Continua a carregar para nÃƒÂ£o quebrar completamente, mas funcionalidade financeira nÃƒÂ£o estarÃƒÂ¡ disponÃƒÂ­vel
         }
     }
 
     /**
-     * Cria a página de agenda de atendimentos.
+     * Cria a pÃƒÂ¡gina de agenda de atendimentos.
      * 
      * @since 1.0.0
      * @return void
@@ -375,10 +373,10 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * FASE 4: Registra página de Dashboard no admin.
+     * FASE 4: Registra pÃƒÂ¡gina de Dashboard no admin.
      * 
-     * NOTA: Menu exibido como submenu de "desi.pet by PRObst" para alinhamento com a navegação unificada.
-     * Também acessível pelo hub em dps-agenda-hub (aba "Dashboard").
+     * NOTA: Menu exibido como submenu de "desi.pet by PRObst" para alinhamento com a navegaÃƒÂ§ÃƒÂ£o unificada.
+     * TambÃƒÂ©m acessÃƒÂ­vel pelo hub em dps-agenda-hub (aba "Dashboard").
      *
      * @since 1.3.0
      */
@@ -441,13 +439,13 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * FASE 4: Renderiza a página de Dashboard no admin.
+     * FASE 4: Renderiza a pÃƒÂ¡gina de Dashboard no admin.
      *
      * @since 1.3.0
      */
     public function render_dashboard_admin_page() {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'dps-agenda-addon' ) );
+            wp_die( esc_html__( 'VocÃƒÂª nÃƒÂ£o tem permissÃƒÂ£o para acessar esta pÃƒÂ¡gina.', 'dps-agenda-addon' ) );
         }
 
         echo '<div class="wrap dps-agenda-admin-shell">';
@@ -456,18 +454,18 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * FASE 5: Registra página de Configurações no admin.
+     * FASE 5: Registra pÃƒÂ¡gina de ConfiguraÃƒÂ§ÃƒÂµes no admin.
      * 
-     * NOTA: Menu exibido como submenu de "desi.pet by PRObst" para alinhamento com a navegação unificada.
-     * Também acessível pelo hub em dps-agenda-hub (aba "Configurações").
+     * NOTA: Menu exibido como submenu de "desi.pet by PRObst" para alinhamento com a navegaÃƒÂ§ÃƒÂ£o unificada.
+     * TambÃƒÂ©m acessÃƒÂ­vel pelo hub em dps-agenda-hub (aba "ConfiguraÃƒÂ§ÃƒÂµes").
      *
      * @since 1.5.0
      */
     public function register_settings_admin_page() {
         add_submenu_page(
             'desi-pet-shower',
-            __( 'Configurações da Agenda', 'dps-agenda-addon' ),
-            __( 'Configurações', 'dps-agenda-addon' ),
+            __( 'ConfiguraÃƒÂ§ÃƒÂµes da Agenda', 'dps-agenda-addon' ),
+            __( 'ConfiguraÃƒÂ§ÃƒÂµes', 'dps-agenda-addon' ),
             'manage_options',
             'dps-agenda-settings',
             [ $this, 'render_settings_admin_page' ]
@@ -475,13 +473,13 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * FASE 5: Renderiza a página de Configurações no admin.
+     * FASE 5: Renderiza a pÃƒÂ¡gina de ConfiguraÃƒÂ§ÃƒÂµes no admin.
      *
      * @since 1.5.0
      */
     public function render_settings_admin_page() {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'dps-agenda-addon' ) );
+            wp_die( esc_html__( 'VocÃƒÂª nÃƒÂ£o tem permissÃƒÂ£o para acessar esta pÃƒÂ¡gina.', 'dps-agenda-addon' ) );
         }
 
         $settings_saved = false;
@@ -500,20 +498,20 @@ class DPS_Agenda_Addon {
                     <div class="dps-agenda-admin-card__header">
                         <div>
                             <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'Agenda', 'dps-agenda-addon' ); ?></p>
-                            <h1 class="dps-agenda-admin-title"><?php esc_html_e( 'Configurações da Agenda', 'dps-agenda-addon' ); ?></h1>
+                            <h1 class="dps-agenda-admin-title"><?php esc_html_e( 'ConfiguraÃƒÂ§ÃƒÂµes da Agenda', 'dps-agenda-addon' ); ?></h1>
                             <p class="dps-agenda-admin-description">
-                                <?php esc_html_e( 'Padronize os dados operacionais usados na logística da agenda, nas rotas do GPS e nas integrações administrativas.', 'dps-agenda-addon' ); ?>
+                                <?php esc_html_e( 'Padronize os dados operacionais usados na logÃƒÂ­stica da agenda, nas rotas do GPS e nas integraÃƒÂ§ÃƒÂµes administrativas.', 'dps-agenda-addon' ); ?>
                             </p>
                         </div>
                         <div class="dps-agenda-admin-chips" aria-label="<?php esc_attr_e( 'Resumo do contexto', 'dps-agenda-addon' ); ?>">
-                            <span class="dps-agenda-admin-chip"><?php esc_html_e( 'Logística', 'dps-agenda-addon' ); ?></span>
+                            <span class="dps-agenda-admin-chip"><?php esc_html_e( 'LogÃƒÂ­stica', 'dps-agenda-addon' ); ?></span>
                             <span class="dps-agenda-admin-chip"><?php esc_html_e( 'GPS', 'dps-agenda-addon' ); ?></span>
                         </div>
                     </div>
 
                     <?php if ( $settings_saved ) : ?>
                         <div class="dps-agenda-admin-notice dps-agenda-admin-notice--success" role="status">
-                            <?php esc_html_e( 'Configurações salvas com sucesso!', 'dps-agenda-addon' ); ?>
+                            <?php esc_html_e( 'ConfiguraÃƒÂ§ÃƒÂµes salvas com sucesso!', 'dps-agenda-addon' ); ?>
                         </div>
                     <?php endif; ?>
 
@@ -523,40 +521,40 @@ class DPS_Agenda_Addon {
 
                             <div class="dps-agenda-admin-field dps-agenda-admin-field--full">
                                 <label class="dps-agenda-admin-field__label" for="dps_shop_address">
-                                    <?php esc_html_e( 'Endereço do Banho e Tosa', 'dps-agenda-addon' ); ?>
+                                    <?php esc_html_e( 'EndereÃƒÂ§o do Banho e Tosa', 'dps-agenda-addon' ); ?>
                                 </label>
                                 <p class="dps-agenda-admin-field__hint">
-                                    <?php esc_html_e( 'Use o endereço completo da operação para rotas, mapas e referências logísticas exibidas na Agenda.', 'dps-agenda-addon' ); ?>
+                                    <?php esc_html_e( 'Use o endereÃƒÂ§o completo da operaÃƒÂ§ÃƒÂ£o para rotas, mapas e referÃƒÂªncias logÃƒÂ­sticas exibidas na Agenda.', 'dps-agenda-addon' ); ?>
                                 </p>
                                 <textarea
                                     name="dps_shop_address"
                                     id="dps_shop_address"
                                     rows="5"
                                     class="dps-agenda-admin-textarea"
-                                    placeholder="<?php esc_attr_e( 'Ex: Rua Exemplo, 123, Centro, São Paulo - SP, CEP 01234-567', 'dps-agenda-addon' ); ?>"
+                                    placeholder="<?php esc_attr_e( 'Ex: Rua Exemplo, 123, Centro, SÃƒÂ£o Paulo - SP, CEP 01234-567', 'dps-agenda-addon' ); ?>"
                                 ><?php echo esc_textarea( $shop_address ); ?></textarea>
                                 <p class="dps-agenda-admin-field__description">
-                                    <?php esc_html_e( 'O valor será usado como origem nas rotas do GPS e como contexto operacional para os atendimentos com deslocamento.', 'dps-agenda-addon' ); ?>
+                                    <?php esc_html_e( 'O valor serÃƒÂ¡ usado como origem nas rotas do GPS e como contexto operacional para os atendimentos com deslocamento.', 'dps-agenda-addon' ); ?>
                                 </p>
                             </div>
 
                             <div class="dps-agenda-admin-form-actions">
                                 <button type="submit" name="dps_save_settings" class="dps-btn dps-btn--primary">
-                                    <?php esc_html_e( 'Salvar configurações', 'dps-agenda-addon' ); ?>
+                                    <?php esc_html_e( 'Salvar configuraÃƒÂ§ÃƒÂµes', 'dps-agenda-addon' ); ?>
                                 </button>
                             </div>
                         </form>
 
                         <aside class="dps-agenda-admin-card dps-agenda-admin-card--subtle dps-agenda-admin-sidecard">
                             <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'Impacto operacional', 'dps-agenda-addon' ); ?></p>
-                            <h2 class="dps-agenda-admin-subtitle"><?php esc_html_e( 'Onde esta configuração aparece', 'dps-agenda-addon' ); ?></h2>
+                            <h2 class="dps-agenda-admin-subtitle"><?php esc_html_e( 'Onde esta configuraÃƒÂ§ÃƒÂ£o aparece', 'dps-agenda-addon' ); ?></h2>
                             <ul class="dps-agenda-admin-list">
-                                <li><?php esc_html_e( 'Botão “Abrir rota” na aba de detalhes da Agenda.', 'dps-agenda-addon' ); ?></li>
-                                <li><?php esc_html_e( 'Referência de deslocamento para atendimentos com TaxiDog.', 'dps-agenda-addon' ); ?></li>
+                                <li><?php esc_html_e( 'BotÃƒÂ£o Ã¢â‚¬Å“Abrir rotaÃ¢â‚¬Â na aba de detalhes da Agenda.', 'dps-agenda-addon' ); ?></li>
+                                <li><?php esc_html_e( 'ReferÃƒÂªncia de deslocamento para atendimentos com TaxiDog.', 'dps-agenda-addon' ); ?></li>
                                 <li><?php esc_html_e( 'Fluxos operacionais que dependem do ponto de origem da loja.', 'dps-agenda-addon' ); ?></li>
                             </ul>
                             <p class="dps-agenda-admin-card__note">
-                                <?php esc_html_e( 'Mantenha esse endereço atualizado para evitar rotas incorretas na operação diária.', 'dps-agenda-addon' ); ?>
+                                <?php esc_html_e( 'Mantenha esse endereÃƒÂ§o atualizado para evitar rotas incorretas na operaÃƒÂ§ÃƒÂ£o diÃƒÂ¡ria.', 'dps-agenda-addon' ); ?>
                             </p>
                         </aside>
                     </div>
@@ -603,12 +601,12 @@ class DPS_Agenda_Addon {
                         <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'Agenda', 'dps-agenda-addon' ); ?></p>
                         <h2 class="dps-agenda-admin-subtitle"><?php esc_html_e( 'Dashboard operacional', 'dps-agenda-addon' ); ?></h2>
                         <p class="dps-dashboard-date-selector__description">
-                            <?php esc_html_e( 'Acompanhe volume, próximos atendimentos e capacidade semanal em uma leitura única e consistente com o padrão M3.', 'dps-agenda-addon' ); ?>
+                            <?php esc_html_e( 'Acompanhe volume, prÃƒÂ³ximos atendimentos e capacidade semanal em uma leitura ÃƒÂºnica e consistente com o padrÃƒÂ£o M3.', 'dps-agenda-addon' ); ?>
                         </p>
                     </div>
                     <div class="dps-agenda-admin-chips">
                         <span class="dps-agenda-admin-chip dps-agenda-admin-chip--primary"><?php echo esc_html( $selected_date_label ); ?></span>
-                        <span class="dps-agenda-admin-chip"><?php esc_html_e( 'Visão diária', 'dps-agenda-addon' ); ?></span>
+                        <span class="dps-agenda-admin-chip"><?php esc_html_e( 'VisÃƒÂ£o diÃƒÂ¡ria', 'dps-agenda-addon' ); ?></span>
                     </div>
                 </div>
 
@@ -618,7 +616,7 @@ class DPS_Agenda_Addon {
                     <div class="dps-dashboard-date-controls">
                         <button type="button" class="dps-btn dps-btn--ghost dps-dashboard-quick-date" data-days="-1"><?php esc_html_e( 'Ontem', 'dps-agenda-addon' ); ?></button>
                         <button type="button" class="dps-btn dps-btn--tonal dps-dashboard-quick-date" data-days="0"><?php esc_html_e( 'Hoje', 'dps-agenda-addon' ); ?></button>
-                        <button type="button" class="dps-btn dps-btn--ghost dps-dashboard-quick-date" data-days="1"><?php esc_html_e( 'Amanhã', 'dps-agenda-addon' ); ?></button>
+                        <button type="button" class="dps-btn dps-btn--ghost dps-dashboard-quick-date" data-days="1"><?php esc_html_e( 'AmanhÃƒÂ£', 'dps-agenda-addon' ); ?></button>
                         <input type="date" name="dashboard_date" value="<?php echo esc_attr( $selected_date ); ?>" class="dps-dashboard-date-input">
                         <button type="submit" class="dps-btn dps-btn--primary dps-dashboard-submit"><?php esc_html_e( 'Atualizar painel', 'dps-agenda-addon' ); ?></button>
                     </div>
@@ -633,7 +631,7 @@ class DPS_Agenda_Addon {
                         echo DPS_Agenda_Dashboard_Service::render_kpi_card(
                             __( 'Total', 'dps-agenda-addon' ),
                             $kpis['total_counts']['total'],
-                            sprintf( __( 'Manhã: %d | Tarde: %d', 'dps-agenda-addon' ), $kpis['total_counts']['morning'], $kpis['total_counts']['afternoon'] ),
+                            sprintf( __( 'ManhÃƒÂ£: %d | Tarde: %d', 'dps-agenda-addon' ), $kpis['total_counts']['morning'], $kpis['total_counts']['afternoon'] ),
                             'primary'
                         );
                         ?>
@@ -641,24 +639,24 @@ class DPS_Agenda_Addon {
                 </section>
 
                 <section class="dps-dashboard-kpi-section dps-agenda-admin-card dps-agenda-admin-card--subtle">
-                    <h3><?php esc_html_e( 'Confirmação', 'dps-agenda-addon' ); ?></h3>
+                    <h3><?php esc_html_e( 'ConfirmaÃƒÂ§ÃƒÂ£o', 'dps-agenda-addon' ); ?></h3>
                     <div class="dps-dashboard-cards">
                         <?php
                         echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'Confirmados', 'dps-agenda-addon' ), $kpis['confirmation_stats']['confirmed'], '', 'success' );
-                        echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'Não confirmados', 'dps-agenda-addon' ), $kpis['confirmation_stats']['not_confirmed'], '', 'warning' );
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'NÃƒÂ£o confirmados', 'dps-agenda-addon' ), $kpis['confirmation_stats']['not_confirmed'], '', 'warning' );
                         ?>
                     </div>
                 </section>
 
                 <section class="dps-dashboard-kpi-section dps-agenda-admin-card dps-agenda-admin-card--subtle">
-                    <h3><?php esc_html_e( 'Execução', 'dps-agenda-addon' ); ?></h3>
+                    <h3><?php esc_html_e( 'ExecuÃƒÂ§ÃƒÂ£o', 'dps-agenda-addon' ); ?></h3>
                     <div class="dps-dashboard-cards">
                         <?php
-                        echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'Concluídos', 'dps-agenda-addon' ), $kpis['execution_stats']['completed'], '', 'success' );
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'ConcluÃƒÂ­dos', 'dps-agenda-addon' ), $kpis['execution_stats']['completed'], '', 'success' );
                         echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'Cancelados', 'dps-agenda-addon' ), $kpis['execution_stats']['canceled'], '', 'error' );
 
                         if ( $kpis['execution_stats']['late'] > 0 ) {
-                            echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'Atrasados', 'dps-agenda-addon' ), $kpis['execution_stats']['late'], __( 'Pendentes após o horário previsto', 'dps-agenda-addon' ), 'warning' );
+                            echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'Atrasados', 'dps-agenda-addon' ), $kpis['execution_stats']['late'], __( 'Pendentes apÃƒÂ³s o horÃƒÂ¡rio previsto', 'dps-agenda-addon' ), 'warning' );
                         }
                         ?>
                     </div>
@@ -669,7 +667,7 @@ class DPS_Agenda_Addon {
                     <div class="dps-dashboard-cards">
                         <?php
                         echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'TaxiDog', 'dps-agenda-addon' ), $kpis['special_stats']['with_taxidog'], '', 'tertiary' );
-                        echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'Cobrança pendente', 'dps-agenda-addon' ), $kpis['special_stats']['pending_payment'], '', 'warning' );
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card( __( 'CobranÃƒÂ§a pendente', 'dps-agenda-addon' ), $kpis['special_stats']['pending_payment'], '', 'warning' );
                         ?>
                     </div>
                 </section>
@@ -679,8 +677,8 @@ class DPS_Agenda_Addon {
                 <section class="dps-dashboard-next-appointments dps-agenda-admin-card">
                     <div class="dps-dashboard-section-header">
                         <div>
-                            <h3><?php esc_html_e( 'Próximos atendimentos', 'dps-agenda-addon' ); ?></h3>
-                            <p><?php esc_html_e( 'Leitura rápida dos próximos horários para a operação do dia.', 'dps-agenda-addon' ); ?></p>
+                            <h3><?php esc_html_e( 'PrÃƒÂ³ximos atendimentos', 'dps-agenda-addon' ); ?></h3>
+                            <p><?php esc_html_e( 'Leitura rÃƒÂ¡pida dos prÃƒÂ³ximos horÃƒÂ¡rios para a operaÃƒÂ§ÃƒÂ£o do dia.', 'dps-agenda-addon' ); ?></p>
                         </div>
                     </div>
 
@@ -691,7 +689,7 @@ class DPS_Agenda_Addon {
                                     <th><?php esc_html_e( 'Hora', 'dps-agenda-addon' ); ?></th>
                                     <th><?php esc_html_e( 'Pet', 'dps-agenda-addon' ); ?></th>
                                     <th><?php esc_html_e( 'Tutor', 'dps-agenda-addon' ); ?></th>
-                                    <th><?php esc_html_e( 'Serviços', 'dps-agenda-addon' ); ?></th>
+                                    <th><?php esc_html_e( 'ServiÃƒÂ§os', 'dps-agenda-addon' ); ?></th>
                                     <th><?php esc_html_e( 'Status', 'dps-agenda-addon' ); ?></th>
                                 </tr>
                             </thead>
@@ -723,7 +721,7 @@ class DPS_Agenda_Addon {
                 </section>
             <?php else : ?>
                 <div class="dps-dashboard-empty dps-agenda-admin-card" role="status">
-                    <p><?php esc_html_e( 'Nenhum atendimento próximo encontrado para esta data.', 'dps-agenda-addon' ); ?></p>
+                    <p><?php esc_html_e( 'Nenhum atendimento prÃƒÂ³ximo encontrado para esta data.', 'dps-agenda-addon' ); ?></p>
                 </div>
             <?php endif; ?>
 
@@ -732,7 +730,7 @@ class DPS_Agenda_Addon {
                     <div class="dps-dashboard-section-header">
                         <div>
                             <h3><?php esc_html_e( 'Capacidade da semana', 'dps-agenda-addon' ); ?></h3>
-                            <p><?php esc_html_e( 'Use a capacidade como referência operacional para evitar sobrecarga e antecipar gargalos.', 'dps-agenda-addon' ); ?></p>
+                            <p><?php esc_html_e( 'Use a capacidade como referÃƒÂªncia operacional para evitar sobrecarga e antecipar gargalos.', 'dps-agenda-addon' ); ?></p>
                         </div>
                     </div>
 
@@ -748,17 +746,17 @@ class DPS_Agenda_Addon {
                         <span class="dps-capacity-week-label">
                             <?php echo esc_html( sprintf( __( 'Semana de %s a %s', 'dps-agenda-addon' ), date_i18n( 'd/m', strtotime( $week_dates['start'] ) ), date_i18n( 'd/m/Y', strtotime( $week_dates['end'] ) ) ) ); ?>
                         </span>
-                        <a href="<?php echo esc_url( $next_week_url ); ?>" class="dps-btn dps-btn--ghost dps-dashboard-week-nav-link"><?php esc_html_e( 'Próxima semana', 'dps-agenda-addon' ); ?></a>
+                        <a href="<?php echo esc_url( $next_week_url ); ?>" class="dps-btn dps-btn--ghost dps-dashboard-week-nav-link"><?php esc_html_e( 'PrÃƒÂ³xima semana', 'dps-agenda-addon' ); ?></a>
                     </div>
                 </div>
 
                 <div class="dps-capacity-config">
-                    <h4><?php esc_html_e( 'Configuração de capacidade máxima', 'dps-agenda-addon' ); ?></h4>
+                    <h4><?php esc_html_e( 'ConfiguraÃƒÂ§ÃƒÂ£o de capacidade mÃƒÂ¡xima', 'dps-agenda-addon' ); ?></h4>
                     <?php $capacity_config = DPS_Agenda_Capacity_Helper::get_capacity_config(); ?>
                     <form id="dps-capacity-config-form" class="dps-capacity-form">
                         <div class="dps-capacity-inputs">
                             <div class="dps-capacity-input-group">
-                                <label for="capacity_morning"><?php esc_html_e( 'Manhã (08:00-11:59)', 'dps-agenda-addon' ); ?></label>
+                                <label for="capacity_morning"><?php esc_html_e( 'ManhÃƒÂ£ (08:00-11:59)', 'dps-agenda-addon' ); ?></label>
                                 <input type="number" id="capacity_morning" name="morning" value="<?php echo esc_attr( $capacity_config['morning'] ); ?>" min="1" max="100">
                                 <span class="description"><?php esc_html_e( 'atendimentos', 'dps-agenda-addon' ); ?></span>
                             </div>
@@ -770,7 +768,7 @@ class DPS_Agenda_Addon {
                             <button type="submit" class="dps-btn dps-btn--primary dps-capacity-submit"><?php esc_html_e( 'Salvar capacidade', 'dps-agenda-addon' ); ?></button>
                         </div>
                     </form>
-                    <p class="description"><?php esc_html_e( 'A capacidade é uma referência operacional e não bloqueia agendamentos automaticamente.', 'dps-agenda-addon' ); ?></p>
+                    <p class="description"><?php esc_html_e( 'A capacidade ÃƒÂ© uma referÃƒÂªncia operacional e nÃƒÂ£o bloqueia agendamentos automaticamente.', 'dps-agenda-addon' ); ?></p>
                 </div>
 
                 <?php echo DPS_Agenda_Capacity_Helper::render_capacity_heatmap( $week_dates['start'], $week_dates['end'] ); ?>
@@ -830,11 +828,11 @@ class DPS_Agenda_Addon {
                             location.reload();
                         }, 1000);
                     } else {
-                        alert(resp.data ? resp.data.message : 'Erro ao salvar configuração.');
+                        alert(resp.data ? resp.data.message : 'Erro ao salvar configuraÃƒÂ§ÃƒÂ£o.');
                         submitBtn.prop('disabled', false).text(originalText);
                     }
                 }).fail(function(){
-                    alert('Erro de comunicação ao salvar configuração.');
+                    alert('Erro de comunicaÃƒÂ§ÃƒÂ£o ao salvar configuraÃƒÂ§ÃƒÂ£o.');
                     submitBtn.prop('disabled', false).text(originalText);
                 });
             });
@@ -846,7 +844,7 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Exibe aviso no admin se Finance Add-on não estiver ativo.
+     * Exibe aviso no admin se Finance Add-on nÃƒÂ£o estiver ativo.
      *
      * @since 1.1.0
      */
@@ -855,17 +853,17 @@ class DPS_Agenda_Addon {
         <div class="notice notice-warning">
             <p>
                 <strong><?php esc_html_e( 'Agenda Add-on:', 'dps-agenda-addon' ); ?></strong>
-                <?php esc_html_e( 'O Finance Add-on é recomendado para funcionalidade completa de cobranças. Algumas funcionalidades financeiras podem não estar disponíveis.', 'dps-agenda-addon' ); ?>
+                <?php esc_html_e( 'O Finance Add-on ÃƒÂ© recomendado para funcionalidade completa de cobranÃƒÂ§as. Algumas funcionalidades financeiras podem nÃƒÂ£o estar disponÃƒÂ­veis.', 'dps-agenda-addon' ); ?>
             </p>
         </div>
         <?php
     }
 
     /**
-     * Cria a página para listar cobranças e notas geradas pelo addon.
+     * Cria a pÃƒÂ¡gina para listar cobranÃƒÂ§as e notas geradas pelo addon.
      */
     public function create_charges_page() {
-        $title = __( 'Cobranças e Notas', 'dps-agenda-addon' );
+        $title = __( 'CobranÃƒÂ§as e Notas', 'dps-agenda-addon' );
         $slug  = sanitize_title( $title );
         $page  = get_page_by_path( $slug );
         if ( ! $page ) {
@@ -885,11 +883,11 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Garante que o meta de versão do agendamento seja inicializado.
+     * Garante que o meta de versÃƒÂ£o do agendamento seja inicializado.
      *
      * @param int     $post_id ID do post.
      * @param WP_Post $post    Objeto do post sendo salvo.
-     * @param bool    $update  Indica se é uma atualização.
+     * @param bool    $update  Indica se ÃƒÂ© uma atualizaÃƒÂ§ÃƒÂ£o.
      */
     public function ensure_appointment_version_meta( $post_id, $post, $update ) {
         if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
@@ -908,10 +906,10 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Enfileira os scripts e estilos necessários apenas quando a página de agenda for carregada.
+     * Enfileira os scripts e estilos necessÃƒÂ¡rios apenas quando a pÃƒÂ¡gina de agenda for carregada.
      * 
-     * CSS e JS agora são carregados de arquivos externos (assets/css e assets/js)
-     * para melhor cache do navegador, minificação e separação de responsabilidades.
+     * CSS e JS agora sÃƒÂ£o carregados de arquivos externos (assets/css e assets/js)
+     * para melhor cache do navegador, minificaÃƒÂ§ÃƒÂ£o e separaÃƒÂ§ÃƒÂ£o de responsabilidades.
      *
      * @since 1.0.0
      * @return void
@@ -958,7 +956,7 @@ class DPS_Agenda_Addon {
                 '1.1.0'
             );
             
-            // Modal de serviços (precisa ser carregado antes do agenda-addon.js)
+            // Modal de serviÃƒÂ§os (precisa ser carregado antes do agenda-addon.js)
             wp_enqueue_script( 
                 'dps-services-modal', 
                 plugin_dir_url( __FILE__ ) . 'assets/js/services-modal.js', 
@@ -967,7 +965,7 @@ class DPS_Agenda_Addon {
                 true 
             );
             
-            // Script principal da agenda (atualização de status e interações)
+            // Script principal da agenda (atualizaÃƒÂ§ÃƒÂ£o de status e interaÃƒÂ§ÃƒÂµes)
             wp_enqueue_script( 
                 'dps-agenda-addon', 
                 plugin_dir_url( __FILE__ ) . 'assets/js/agenda-addon.js', 
@@ -1010,7 +1008,7 @@ class DPS_Agenda_Addon {
                     'error'            => __( 'Erro ao salvar. Tente novamente.', 'dps-agenda-addon' ),
                     'checkin'          => __( 'Check-in', 'dps-agenda-addon' ),
                     'checkout'         => __( 'Check-out', 'dps-agenda-addon' ),
-                    'sendWhatsApp'     => __( 'Enviar relatório via WhatsApp', 'dps-agenda-addon' ),
+                    'sendWhatsApp'     => __( 'Enviar relatÃƒÂ³rio via WhatsApp', 'dps-agenda-addon' ),
                 ],
             ] );
             
@@ -1019,9 +1017,9 @@ class DPS_Agenda_Addon {
                 'nonce_status'  => wp_create_nonce( 'dps_update_status' ),
                 'nonce_services'=> wp_create_nonce( 'dps_get_services_details' ),
                 'nonce_export_pdf' => wp_create_nonce( 'dps_agenda_export_pdf' ),
-                // UX-1: Nonce para ações rápidas
+                // UX-1: Nonce para aÃƒÂ§ÃƒÂµes rÃƒÂ¡pidas
                 'nonce_quick_action' => wp_create_nonce( 'dps_agenda_quick_action' ),
-                // CONF-2: Nonce para confirmação
+                // CONF-2: Nonce para confirmaÃƒÂ§ÃƒÂ£o
                 'nonce_confirmation' => wp_create_nonce( 'dps_agenda_confirmation' ),
                 // FASE 3: Nonce para TaxiDog
                 'nonce_taxidog'      => wp_create_nonce( 'dps_agenda_taxidog' ),
@@ -1029,7 +1027,7 @@ class DPS_Agenda_Addon {
                 'nonce_capacity'     => wp_create_nonce( 'dps_agenda_capacity' ),
                 // FASE 5: Nonce para reenvio de pagamento
                 'nonce_resend_payment' => wp_create_nonce( 'dps_agenda_resend_payment' ),
-                // FASE 5: Nonces para funcionalidades administrativas avançadas
+                // FASE 5: Nonces para funcionalidades administrativas avanÃƒÂ§adas
                 'nonce_reschedule'=> wp_create_nonce( 'dps_quick_reschedule' ),
                 'nonce_history'   => wp_create_nonce( 'dps_appointment_history' ),
                 'nonce_kpis'      => wp_create_nonce( 'dps_admin_kpis' ),
@@ -1044,33 +1042,33 @@ class DPS_Agenda_Addon {
                 'messages'      => [
                     'updating' => __( 'Atualizando status...', 'dps-agenda-addon' ),
                     'updated'  => __( 'Status atualizado!', 'dps-agenda-addon' ),
-                    'error'    => __( 'Não foi possível atualizar o status.', 'dps-agenda-addon' ),
-                    'versionConflict' => __( 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.', 'dps-agenda-addon' ),
+                    'error'    => __( 'NÃƒÂ£o foi possÃƒÂ­vel atualizar o status.', 'dps-agenda-addon' ),
+                    'versionConflict' => __( 'Esse agendamento foi atualizado por outro usuÃƒÂ¡rio. Atualize a pÃƒÂ¡gina para ver as alteraÃƒÂ§ÃƒÂµes.', 'dps-agenda-addon' ),
                     // FASE 5: Mensagens para funcionalidades administrativas
                     'reschedule_title'  => __( 'Reagendar Agendamento', 'dps-agenda-addon' ),
                     'new_date'          => __( 'Nova data', 'dps-agenda-addon' ),
-                    'new_time'          => __( 'Novo horário', 'dps-agenda-addon' ),
+                    'new_time'          => __( 'Novo horÃƒÂ¡rio', 'dps-agenda-addon' ),
                     'cancel'            => __( 'Cancelar', 'dps-agenda-addon' ),
                     'save'              => __( 'Salvar', 'dps-agenda-addon' ),
                     'saving'            => __( 'Salvando...', 'dps-agenda-addon' ),
                     'fill_all_fields'   => __( 'Preencha todos os campos.', 'dps-agenda-addon' ),
-                    'no_history'        => __( 'Sem histórico de alterações.', 'dps-agenda-addon' ),
-                    'history_title'     => __( 'Histórico de Alterações', 'dps-agenda-addon' ),
+                    'no_history'        => __( 'Sem histÃƒÂ³rico de alteraÃƒÂ§ÃƒÂµes.', 'dps-agenda-addon' ),
+                    'history_title'     => __( 'HistÃƒÂ³rico de AlteraÃƒÂ§ÃƒÂµes', 'dps-agenda-addon' ),
                     'action_created'    => __( 'Criado', 'dps-agenda-addon' ),
                     'action_status_change' => __( 'Status alterado', 'dps-agenda-addon' ),
                     'action_rescheduled'   => __( 'Reagendado', 'dps-agenda-addon' ),
                     'close'           => __( 'Fechar', 'dps-agenda-addon' ),
                     'checklistTitle'  => __( 'Checklist Operacional', 'dps-agenda-addon' ),
                     'checklistLoading'=> __( 'Carregando checklist...', 'dps-agenda-addon' ),
-                    'checklistError'  => __( 'Não foi possível carregar o checklist.', 'dps-agenda-addon' ),
+                    'checklistError'  => __( 'NÃƒÂ£o foi possÃƒÂ­vel carregar o checklist.', 'dps-agenda-addon' ),
                     'historyDialogTitle' => __( 'Linha do tempo do atendimento', 'dps-agenda-addon' ),
-                    'historyEmptyTitle'  => __( 'Histórico indisponível', 'dps-agenda-addon' ),
-                    'historyClose'       => __( 'Fechar histórico', 'dps-agenda-addon' ),
-                    'confirmAction'      => __( 'Confirmar ação', 'dps-agenda-addon' ),
+                    'historyEmptyTitle'  => __( 'HistÃƒÂ³rico indisponÃƒÂ­vel', 'dps-agenda-addon' ),
+                    'historyClose'       => __( 'Fechar histÃƒÂ³rico', 'dps-agenda-addon' ),
+                    'confirmAction'      => __( 'Confirmar aÃƒÂ§ÃƒÂ£o', 'dps-agenda-addon' ),
                     'confirmResendPayment' => __( 'Deseja reenviar o link de pagamento para este atendimento?', 'dps-agenda-addon' ),
                     'confirmTaxidogRequest' => __( 'Deseja solicitar TaxiDog para este atendimento?', 'dps-agenda-addon' ),
                     'confirmProceed'     => __( 'Confirmar', 'dps-agenda-addon' ),
-                    'paymentDialogTitle' => __( 'Cobrança do atendimento', 'dps-agenda-addon' ),
+                    'paymentDialogTitle' => __( 'CobranÃƒÂ§a do atendimento', 'dps-agenda-addon' ),
                     'copyPaymentLink'    => __( 'Copiar link de pagamento', 'dps-agenda-addon' ),
                     'rescheduleDialogTitle' => __( 'Reagendar atendimento', 'dps-agenda-addon' ),
                     'operationPanelOpened' => __( 'Painel operacional aberto.', 'dps-agenda-addon' ),
@@ -1082,10 +1080,10 @@ class DPS_Agenda_Addon {
 
         // Charges/notes page: pode precisar de estilos extras
         if ( $is_charges_target_page || $has_charges_shortcode ) {
-            // carregue CSS para tabelas se necessário; podemos reutilizar estilos de dps-table se o tema os define.
+            // carregue CSS para tabelas se necessÃƒÂ¡rio; podemos reutilizar estilos de dps-table se o tema os define.
         }
 
-        // Base page (histórico, página do cliente): carrega CSS dos resumos operacionais
+        // Base page (histÃƒÂ³rico, pÃƒÂ¡gina do cliente): carrega CSS dos resumos operacionais
         $has_base_shortcode   = $current_post ? has_shortcode( $current_content, 'dps_base' ) : false;
         $has_portal_shortcode = $current_post ? has_shortcode( $current_content, 'dps_client_portal' ) : false;
         if ( $has_base_shortcode || $has_portal_shortcode ) {
@@ -1135,33 +1133,33 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Renderiza o conteúdo do shortcode [dps_agenda_page].
+     * Renderiza o conteÃƒÂºdo do shortcode [dps_agenda_page].
      */
     public function render_agenda_shortcode() {
-        // Desabilita cache da página para garantir dados sempre atualizados
+        // Desabilita cache da pÃƒÂ¡gina para garantir dados sempre atualizados
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();
         }
 
         ob_start();
         /*
-         * Verifica permissão: somente administradores (capacidade manage_options).
-         * Anteriormente, funcionários também tinham acesso à agenda, mas por questões
-         * de segurança e a pedido do cliente, o acesso agora é restrito aos
-         * administradores. Caso o usuário não esteja logado ou não possua a
+         * Verifica permissÃƒÂ£o: somente administradores (capacidade manage_options).
+         * Anteriormente, funcionÃƒÂ¡rios tambÃƒÂ©m tinham acesso ÃƒÂ  agenda, mas por questÃƒÂµes
+         * de seguranÃƒÂ§a e a pedido do cliente, o acesso agora ÃƒÂ© restrito aos
+         * administradores. Caso o usuÃƒÂ¡rio nÃƒÂ£o esteja logado ou nÃƒÂ£o possua a
          * capacidade de administrador, exibimos um link de login.
          */
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
             $login_url = wp_login_url( DPS_URL_Builder::safe_get_permalink() );
-            return '<p>' . esc_html__( 'Você precisa estar logado como administrador para acessar a agenda.', 'dps-agenda-addon' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'dps-agenda-addon' ) . '</a></p>';
+            return '<p>' . esc_html__( 'VocÃƒÂª precisa estar logado como administrador para acessar a agenda.', 'dps-agenda-addon' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'dps-agenda-addon' ) . '</a></p>';
         }
-        // Nenhum controle adicional de cookies é necessário; o acesso é controlado por permissões do usuário.
+        // Nenhum controle adicional de cookies ÃƒÂ© necessÃƒÂ¡rio; o acesso ÃƒÂ© controlado por permissÃƒÂµes do usuÃƒÂ¡rio.
         // Wrapper da agenda (CSS agora carregado de arquivo externo via enqueue_assets)
         echo '<div class="dps-agenda-wrapper">';
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado pelo helper
         echo DPS_Message_Helper::display_messages();
         // Acesso permitido: mostrar agenda
-        // Filtro de data e visualização
+        // Filtro de data e visualizaÃƒÂ§ÃƒÂ£o
         $selected_date = isset( $_GET['dps_date'] ) ? sanitize_text_field( $_GET['dps_date'] ) : '';
         if ( ! $selected_date ) {
             $selected_date = current_time( 'Y-m-d' );
@@ -1171,7 +1169,7 @@ class DPS_Agenda_Addon {
         $is_week_view = ( $view === 'week' || $view === 'calendar' );
         // Exibe todos os atendimentos? Se show_all=1, ignoramos view e data para a listagem principal
         $show_all = isset( $_GET['show_all'] ) ? sanitize_text_field( $_GET['show_all'] ) : '';
-        // Links para dia/semana anterior/próximo, preservando apenas o contexto da aba
+        // Links para dia/semana anterior/prÃƒÂ³ximo, preservando apenas o contexto da aba
         $date_obj = DateTime::createFromFormat( 'Y-m-d', $selected_date );
         if ( $is_week_view ) {
             // Para semana, calcula datas sete dias antes e depois
@@ -1248,11 +1246,11 @@ class DPS_Agenda_Addon {
         echo '</div>';
         echo '</div>';
 
-        // Carrega agendamentos conforme visualização ou modo "todos"
+        // Carrega agendamentos conforme visualizaÃƒÂ§ÃƒÂ£o ou modo "todos"
         $appointments = [];
         if ( $show_all ) {
             // Carrega todos os agendamentos a partir de hoje (inclusive)
-            // PERFORMANCE: Implementada paginação com limite de 50 registros por página
+            // PERFORMANCE: Implementada paginaÃƒÂ§ÃƒÂ£o com limite de 50 registros por pÃƒÂ¡gina
             $today = current_time( 'Y-m-d' );
             $paged = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
             
@@ -1274,10 +1272,10 @@ class DPS_Agenda_Addon {
                 'order'          => 'ASC',
             ] );
         } elseif ( $view === 'week' ) {
-            // Limite diário configurável via filtro
+            // Limite diÃƒÂ¡rio configurÃƒÂ¡vel via filtro
             $daily_limit = apply_filters( 'dps_agenda_daily_limit', self::DAILY_APPOINTMENTS_LIMIT );
             
-            // Calcula início (segunda-feira) da semana contendo $selected_date
+            // Calcula inÃƒÂ­cio (segunda-feira) da semana contendo $selected_date
             $dt      = DateTime::createFromFormat( 'Y-m-d', $selected_date );
             $weekday = (int) $dt->format( 'N' ); // 1 = seg, 7 = dom
             $start_of_week = clone $dt;
@@ -1299,14 +1297,14 @@ class DPS_Agenda_Addon {
                     'orderby'        => 'meta_value',
                     'meta_key'       => 'appointment_time',
                     'order'          => 'ASC',
-                    'no_found_rows'  => true, // PERFORMANCE: não conta total
+                    'no_found_rows'  => true, // PERFORMANCE: nÃƒÂ£o conta total
                 ] );
             }
         } else {
-            // Limite diário configurável via filtro
+            // Limite diÃƒÂ¡rio configurÃƒÂ¡vel via filtro
             $daily_limit = apply_filters( 'dps_agenda_daily_limit', self::DAILY_APPOINTMENTS_LIMIT );
             
-            // Visualização diária
+            // VisualizaÃƒÂ§ÃƒÂ£o diÃƒÂ¡ria
             $appointments[ $selected_date ] = get_posts( [
                 'post_type'      => 'dps_agendamento',
                 'posts_per_page' => $daily_limit,
@@ -1321,61 +1319,49 @@ class DPS_Agenda_Addon {
                 'orderby'        => 'meta_value',
                 'meta_key'       => 'appointment_time',
                 'order'          => 'ASC',
-                'no_found_rows'  => true, // PERFORMANCE: não conta total
+                'no_found_rows'  => true, // PERFORMANCE: nÃƒÂ£o conta total
             ] );
         }
         
-        // FASE 5: Filtrar pagamentos pendentes (pós-query para usar helper)
+        // FASE 5: Filtrar pagamentos pendentes (pÃƒÂ³s-query para usar helper)
         
-        // FASE 4: Renderiza calendário mensal se view=calendar
+        // FASE 4: Renderiza calendÃƒÂ¡rio mensal se view=calendar
         if ( $view === 'calendar' ) {
             $this->render_calendar_view( $selected_date );
             echo '</div>';
             return ob_get_clean();
         }
         
-        // FASE 6: Sistema de abas para reorganizar visualização
+        // FASE 6: Sistema de abas para reorganizar visualizaÃƒÂ§ÃƒÂ£o
         
-        // Definir abas com ícones e descrições
+        // Definir abas com descricoes operacionais enxutas.
         $tabs = [
-            'visao-rapida' => [
-                'label' => __( 'Leitura Rápida', 'dps-agenda-addon' ),
-                'icon'  => '◐',
-                'desc'  => __( 'Confirmações e próximos passos', 'dps-agenda-addon' ),
-            ],
-            'operacao'     => [
-                'label' => __( 'Operação', 'dps-agenda-addon' ),
-                'icon'  => '◆',
-                'desc'  => __( 'Checklist, check-in e cobrança', 'dps-agenda-addon' ),
-            ],
-            'detalhes'     => [
-                'label' => __( 'Contexto', 'dps-agenda-addon' ),
-                'icon'  => '◌',
-                'desc'  => __( 'Logística, notas e TaxiDog', 'dps-agenda-addon' ),
-            ],
+            'visao-rapida' => __( 'ConfirmaÃ§Ãµes e prÃ³ximos passos', 'dps-agenda-addon' ),
+            'operacao'     => __( 'Checklist, check-in e cobranÃ§a', 'dps-agenda-addon' ),
+            'detalhes'     => __( 'LogÃ­stica, notas e TaxiDog', 'dps-agenda-addon' ),
         ];
         
-        // Inicializa variáveis e coleta dados de todos os dias primeiro
+        // Inicializa variÃƒÂ¡veis e coleta dados de todos os dias primeiro
         $has_any = false;
         $all_visible_appointments = [];
-        $days_data = []; // Armazena dados processados de cada dia para renderização posterior
+        $days_data = []; // Armazena dados processados de cada dia para renderizaÃƒÂ§ÃƒÂ£o posterior
         $column_labels = [
             'date'          => __( 'Data', 'dps-agenda-addon' ),
             'time'          => __( 'Hora', 'dps-agenda-addon' ),
             'pet'           => __( 'Pet e tutor', 'dps-agenda-addon' ),
-            'service'       => __( 'Serviço', 'dps-agenda-addon' ),
+            'service'       => __( 'ServiÃƒÂ§o', 'dps-agenda-addon' ),
             'status'        => __( 'Status', 'dps-agenda-addon' ),
             'payment'       => __( 'Pagamento', 'dps-agenda-addon' ),
             'map'           => __( 'Mapa', 'dps-agenda-addon' ),
-            'confirmation'  => __( 'Confirmação', 'dps-agenda-addon' ),
-            'charge'        => __( 'Cobrança', 'dps-agenda-addon' ),
+            'confirmation'  => __( 'ConfirmaÃƒÂ§ÃƒÂ£o', 'dps-agenda-addon' ),
+            'charge'        => __( 'CobranÃƒÂ§a', 'dps-agenda-addon' ),
         ];
         
-        // FASE 1: Pré-processa todos os dias para coletar dados visíveis
+        // FASE 1: PrÃƒÂ©-processa todos os dias para coletar dados visÃƒÂ­veis
         foreach ( $appointments as $day => $appts ) {
             $has_any = $has_any || ! empty( $appts );
             
-            // Define título do bloco
+            // Define tÃƒÂ­tulo do bloco
             if ( $show_all ) {
                 $day_title = __( 'Todos os atendimentos futuros', 'dps-agenda-addon' );
             } elseif ( $view === 'week' ) {
@@ -1385,7 +1371,7 @@ class DPS_Agenda_Addon {
                 $day_title = ucfirst( date_i18n( 'l, d/m', strtotime( $day ) ) );
             }
             
-            // Se não houver appointments para o dia, pula se semanal
+            // Se nÃƒÂ£o houver appointments para o dia, pula se semanal
             if ( empty( $appts ) && $view === 'week' ) {
                 continue;
             }
@@ -1425,9 +1411,9 @@ class DPS_Agenda_Addon {
         }
         
 
-        // FASE 3: Define funções de renderização (uma vez, fora do loop de dias)
+        // FASE 3: Define funÃƒÂ§ÃƒÂµes de renderizaÃƒÂ§ÃƒÂ£o (uma vez, fora do loop de dias)
         
-        // Aba 1: Visão Rápida
+        // Aba 1: VisÃƒÂ£o RÃƒÂ¡pida
         $render_table_tab1 = function( $apts, $heading ) use ( $column_labels ) {
             if ( empty( $apts ) ) {
                 return;
@@ -1452,7 +1438,7 @@ class DPS_Agenda_Addon {
                 update_meta_cache( 'post', $related_ids );
             }
             
-            // Ordenação cronológica (próximo atendimento primeiro)
+            // OrdenaÃƒÂ§ÃƒÂ£o cronolÃƒÂ³gica (prÃƒÂ³ximo atendimento primeiro)
             usort(
                 $apts,
                 function( $a, $b ) {
@@ -1465,18 +1451,18 @@ class DPS_Agenda_Addon {
                     if ( $dt_a === $dt_b ) {
                         return $a->ID <=> $b->ID;
                     }
-                    return $dt_a <=> $dt_b; // ASC: próximo primeiro
+                    return $dt_a <=> $dt_b; // ASC: prÃƒÂ³ximo primeiro
                 }
             );
             
             echo '<h5>' . esc_html( $heading ) . '</h5>';
             echo '<div class="dps-agenda-table-container">';
             echo '<table class="dps-table dps-table--tab1"><thead><tr>';
-            echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'HorÃƒÂ¡rio', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Pet e tutor', 'dps-agenda-addon' ) . '</th>';
-            echo '<th>' . esc_html( $column_labels['service'] ?? __( 'Serviços', 'dps-agenda-addon' ) ) . '</th>';
-            echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '</th>';
-            echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html( $column_labels['service'] ?? __( 'ServiÃƒÂ§os', 'dps-agenda-addon' ) ) . '</th>';
+            echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'ConfirmaÃƒÂ§ÃƒÂ£o', 'dps-agenda-addon' ) ) . '</th>';
+            echo '<th>' . esc_html__( 'AÃƒÂ§ÃƒÂµes', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {
                 echo $this->render_appointment_row_tab1_m3( $appt, $column_labels );
@@ -1485,7 +1471,7 @@ class DPS_Agenda_Addon {
             echo '</div>';
         };
         
-        // Aba 2: Operação
+        // Aba 2: OperaÃƒÂ§ÃƒÂ£o
         $render_table_tab2 = function( $apts, $heading ) use ( $column_labels ) {
             if ( empty( $apts ) ) {
                 return;
@@ -1510,7 +1496,7 @@ class DPS_Agenda_Addon {
                 update_meta_cache( 'post', $related_ids );
             }
             
-            // Ordenação cronológica (próximo atendimento primeiro)
+            // OrdenaÃƒÂ§ÃƒÂ£o cronolÃƒÂ³gica (prÃƒÂ³ximo atendimento primeiro)
             usort(
                 $apts,
                 function( $a, $b ) {
@@ -1523,19 +1509,19 @@ class DPS_Agenda_Addon {
                     if ( $dt_a === $dt_b ) {
                         return $a->ID <=> $b->ID;
                     }
-                    return $dt_a <=> $dt_b; // ASC: próximo primeiro
+                    return $dt_a <=> $dt_b; // ASC: prÃƒÂ³ximo primeiro
                 }
             );
             
             echo '<h5>' . esc_html( $heading ) . '</h5>';
             echo '<div class="dps-agenda-table-container">';
             echo '<table class="dps-table dps-table--tab2"><thead><tr>';
-            echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'HorÃƒÂ¡rio', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Pet e tutor', 'dps-agenda-addon' ) . '</th>';
-            echo '<th>' . esc_html__( 'Status do Serviço', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Status do ServiÃƒÂ§o', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html( $column_labels['payment'] ?? __( 'Pagamento', 'dps-agenda-addon' ) ) . '</th>';
             echo '<th>' . esc_html__( 'Painel operacional', 'dps-agenda-addon' ) . '</th>';
-            echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'AÃƒÂ§ÃƒÂµes', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado por render_appointment_row_tab2_m3
@@ -1570,7 +1556,7 @@ class DPS_Agenda_Addon {
                 update_meta_cache( 'post', $related_ids );
             }
             
-            // Ordenação cronológica (próximo atendimento primeiro)
+            // OrdenaÃƒÂ§ÃƒÂ£o cronolÃƒÂ³gica (prÃƒÂ³ximo atendimento primeiro)
             usort(
                 $apts,
                 function( $a, $b ) {
@@ -1583,19 +1569,19 @@ class DPS_Agenda_Addon {
                     if ( $dt_a === $dt_b ) {
                         return $a->ID <=> $b->ID;
                     }
-                    return $dt_a <=> $dt_b; // ASC: próximo primeiro
+                    return $dt_a <=> $dt_b; // ASC: prÃƒÂ³ximo primeiro
                 }
             );
             
             echo '<h5>' . esc_html( $heading ) . '</h5>';
             echo '<div class="dps-agenda-table-container">';
             echo '<table class="dps-table dps-table--tab3"><thead><tr>';
-            echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'HorÃƒÂ¡rio', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Pet e tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>TaxiDog</th>';
-            echo '<th>' . esc_html__( 'Observações', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'ObservaÃƒÂ§ÃƒÂµes', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Operacional', 'dps-agenda-addon' ) . '</th>';
-            echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'AÃƒÂ§ÃƒÂµes', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {
                 echo $this->render_appointment_row_tab3_m3( $appt, $column_labels );
@@ -1613,44 +1599,37 @@ class DPS_Agenda_Addon {
                 'label'    => __( 'Total', 'dps-agenda-addon' ),
                 'value'    => $overview_stats['total'],
                 'tone'     => 'primary',
-                'icon'     => '◎',
                 'featured' => true,
             ],
             [
                 'label' => __( 'Pendentes', 'dps-agenda-addon' ),
                 'value' => $overview_stats['pending'],
                 'tone'  => 'warning',
-                'icon'  => '○',
             ],
             [
                 'label' => __( 'Finalizados', 'dps-agenda-addon' ),
                 'value' => $overview_stats['completed'],
                 'tone'  => 'success',
-                'icon'  => '✓',
             ],
             [
                 'label' => __( 'Cancelados', 'dps-agenda-addon' ),
                 'value' => $overview_stats['canceled'],
                 'tone'  => 'error',
-                'icon'  => '×',
             ],
             [
                 'label' => __( 'Atrasados', 'dps-agenda-addon' ),
                 'value' => $overview_stats['late'],
                 'tone'  => 'warning',
-                'icon'  => '!',
             ],
             [
                 'label' => __( 'Pagamento pendente', 'dps-agenda-addon' ),
                 'value' => $overview_stats['pending_payment'],
                 'tone'  => 'secondary',
-                'icon'  => 'R$',
             ],
             [
                 'label' => __( 'TaxiDog', 'dps-agenda-addon' ),
                 'value' => $overview_stats['taxidog'],
                 'tone'  => 'tertiary',
-                'icon'  => 'TD',
             ],
         ];
 
@@ -1662,9 +1641,6 @@ class DPS_Agenda_Addon {
             }
 
             echo '<article class="' . esc_attr( $card_classes ) . '">';
-            echo '<div class="dps-agenda-overview-card__top">';
-            echo '<span class="dps-agenda-overview-card__icon" aria-hidden="true">' . esc_html( $overview_card['icon'] ) . '</span>';
-            echo '</div>';
             echo '<div class="dps-agenda-overview-card__body">';
             echo '<strong class="dps-agenda-overview-card__value">' . esc_html( $overview_card['value'] ) . '</strong>';
             echo '<span class="dps-agenda-overview-card__label">' . esc_html( $overview_card['label'] ) . '</span>';
@@ -1677,21 +1653,19 @@ class DPS_Agenda_Addon {
         // Header da lista de atendimentos.
         echo '<div class="dps-agenda-tabs-header">';
         echo '<div>';
-        echo '<h3 class="dps-agenda-tabs-title">&#128203; ' . esc_html__( 'Lista de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
-        echo '<p class="dps-agenda-tabs-subtitle">' . esc_html__( 'Três leituras do mesmo fluxo operacional: confirmar, executar e revisar contexto.', 'dps-agenda-addon' ) . '</p>';
+        echo '<h3 class="dps-agenda-tabs-title">' . esc_html__( 'Lista de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
+        echo '<p class="dps-agenda-tabs-subtitle">' . esc_html__( 'TrÃƒÂªs leituras do mesmo fluxo operacional: confirmar, executar e revisar contexto.', 'dps-agenda-addon' ) . '</p>';
         echo '</div>';
         echo '</div>';
 
-        echo '<nav class="dps-agenda-tabs-nav" role="tablist" aria-label="' . esc_attr__( 'Modos de visualização da agenda', 'dps-agenda-addon' ) . '">';
+        echo '<nav class="dps-agenda-tabs-nav" role="tablist" aria-label="' . esc_attr__( 'Modos de visualizaÃƒÂ§ÃƒÂ£o da agenda', 'dps-agenda-addon' ) . '">';
 
         foreach ( $tabs as $tab_id => $tab_data ) {
             $is_active = ( $current_tab === $tab_id );
             $tab_class = 'dps-agenda-tab-button' . ( $is_active ? ' dps-agenda-tab-button--active' : '' );
 
-            echo '<button type="button" id="dps-agenda-tab-' . esc_attr( $tab_id ) . '" class="' . esc_attr( $tab_class ) . '" data-tab="' . esc_attr( $tab_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="dps-tab-content-' . esc_attr( $tab_id ) . '" title="' . esc_attr( $tab_data['desc'] ) . '" tabindex="' . ( $is_active ? '0' : '-1' ) . '">';
-            echo '<span class="dps-tab-icon">' . $tab_data['icon'] . '</span>';
-            echo '<span class="dps-tab-label">' . esc_html( $tab_data['label'] ) . '</span>';
-            echo '<span class="dps-tab-desc">' . esc_html( $tab_data['desc'] ) . '</span>';
+            echo '<button type="button" id="dps-agenda-tab-' . esc_attr( $tab_id ) . '" class="' . esc_attr( $tab_class ) . '" data-tab="' . esc_attr( $tab_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="dps-tab-content-' . esc_attr( $tab_id ) . '" title="' . esc_attr( $tab_data ) . '" tabindex="' . ( $is_active ? '0' : '-1' ) . '">';
+            echo '<span class="dps-tab-desc">' . esc_html( $tab_data ) . '</span>';
             echo '</button>';
         }
 
@@ -1718,7 +1692,7 @@ class DPS_Agenda_Addon {
                 echo '</div>';
                 echo '<div class="dps-agenda-day-panel__body">';
                 $render_table_tab1( $day_info['upcoming'], __( 'Fila ativa', 'dps-agenda-addon' ) );
-                $render_table_tab1( $day_info['completed'], __( 'Concluídos no período', 'dps-agenda-addon' ) );
+                $render_table_tab1( $day_info['completed'], __( 'ConcluÃƒÂ­dos no perÃƒÂ­odo', 'dps-agenda-addon' ) );
                 echo '</div>';
                 echo '</section>';
             }
@@ -1743,7 +1717,7 @@ class DPS_Agenda_Addon {
                 echo '</div>';
                 echo '<div class="dps-agenda-day-panel__body">';
                 $render_table_tab2( $day_info['upcoming'], __( 'Fila ativa', 'dps-agenda-addon' ) );
-                $render_table_tab2( $day_info['completed'], __( 'Concluídos no período', 'dps-agenda-addon' ) );
+                $render_table_tab2( $day_info['completed'], __( 'ConcluÃƒÂ­dos no perÃƒÂ­odo', 'dps-agenda-addon' ) );
                 echo '</div>';
                 echo '</section>';
             }
@@ -1768,7 +1742,7 @@ class DPS_Agenda_Addon {
                 echo '</div>';
                 echo '<div class="dps-agenda-day-panel__body">';
                 $render_table_tab3( $day_info['upcoming'], __( 'Fila ativa', 'dps-agenda-addon' ) );
-                $render_table_tab3( $day_info['completed'], __( 'Concluídos no período', 'dps-agenda-addon' ) );
+                $render_table_tab3( $day_info['completed'], __( 'ConcluÃƒÂ­dos no perÃƒÂ­odo', 'dps-agenda-addon' ) );
                 echo '</div>';
                 echo '</section>';
             }
@@ -1776,21 +1750,21 @@ class DPS_Agenda_Addon {
         if ( ! $has_visible_results ) {
             echo '<div class="dps-agenda-empty" role="status">';
             echo '<strong>' . esc_html__( 'Nenhum atendimento neste recorte.', 'dps-agenda-addon' ) . '</strong>';
-            echo '<p>' . esc_html__( 'Ajuste o período ou abra a agenda completa para continuar a operação.', 'dps-agenda-addon' ) . '</p>';
+            echo '<p>' . esc_html__( 'Ajuste o perÃƒÂ­odo ou abra a agenda completa para continuar a operaÃƒÂ§ÃƒÂ£o.', 'dps-agenda-addon' ) . '</p>';
             echo '</div>';
         }
         // Fecha container de tabs
         echo '</div>'; // .dps-agenda-tabs-content
         echo '</div>'; // .dps-agenda-tabs-wrapper
         
-        // PERFORMANCE: Controles de paginação para modo "Todos os Atendimentos"
+        // PERFORMANCE: Controles de paginaÃƒÂ§ÃƒÂ£o para modo "Todos os Atendimentos"
         if ( $show_all ) {
             $paged = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
             $prev_page = max( 1, $paged - 1 );
             $next_page = $paged + 1;
             
-            // Preserva parâmetros de filtro válidos na paginação
-            // Sanitiza cada parâmetro para prevenir injeção de código
+            // Preserva parÃƒÂ¢metros de filtro vÃƒÂ¡lidos na paginaÃƒÂ§ÃƒÂ£o
+            // Sanitiza cada parÃƒÂ¢metro para prevenir injeÃƒÂ§ÃƒÂ£o de cÃƒÂ³digo
             $pagination_args = [
                 'show_all'   => '1',
                 'dps_date'   => $selected_date,
@@ -1803,19 +1777,19 @@ class DPS_Agenda_Addon {
             if ( $paged > 1 ) {
                 $pagination_args['paged'] = $prev_page;
                 echo '<a href="' . esc_url( add_query_arg( $pagination_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft">';
-                echo '← ' . esc_html__( 'Página anterior', 'dps-agenda-addon' );
+                echo 'Ã¢â€ Â ' . esc_html__( 'PÃƒÂ¡gina anterior', 'dps-agenda-addon' );
                 echo '</a>';
             }
             
             echo '<span class="dps-pagination-info">';
-            echo sprintf( esc_html__( 'Página %d', 'dps-agenda-addon' ), $paged );
+            echo sprintf( esc_html__( 'PÃƒÂ¡gina %d', 'dps-agenda-addon' ), $paged );
             echo '</span>';
             
-            // Só mostra "Próxima" se retornou o máximo de registros (indicando que pode haver mais)
+            // SÃƒÂ³ mostra "PrÃƒÂ³xima" se retornou o mÃƒÂ¡ximo de registros (indicando que pode haver mais)
             if ( ! empty( $appointments['todos'] ) && count( $appointments['todos'] ) >= self::APPOINTMENTS_PER_PAGE ) {
                 $pagination_args['paged'] = $next_page;
                 echo '<a href="' . esc_url( add_query_arg( $pagination_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft">';
-                echo esc_html__( 'Próxima página', 'dps-agenda-addon' ) . ' →';
+                echo esc_html__( 'PrÃƒÂ³xima pÃƒÂ¡gina', 'dps-agenda-addon' ) . ' Ã¢â€ â€™';
                 echo '</a>';
             }
             
@@ -1830,7 +1804,7 @@ class DPS_Agenda_Addon {
      * Shortcode deprecated que redireciona para o Finance Add-on.
      *
      * @deprecated 1.1.0 Use [dps_fin_docs] do Finance Add-on
-     * @return string HTML do shortcode ou mensagem de depreciação
+     * @return string HTML do shortcode ou mensagem de depreciaÃƒÂ§ÃƒÂ£o
      */
     public function render_charges_notes_shortcode_deprecated() {
         _deprecated_function( 'Shortcode [dps_charges_notes]', '1.1.0', '[dps_fin_docs] (Finance Add-on)' );
@@ -1840,9 +1814,9 @@ class DPS_Agenda_Addon {
             return do_shortcode( '[dps_fin_docs]' );
         }
         
-        // Se Finance não estiver ativo, exibe mensagem
+        // Se Finance nÃƒÂ£o estiver ativo, exibe mensagem
         return '<div class="notice notice-warning" style="padding: 20px; margin: 20px 0; background: #fff3cd; border-left: 4px solid #ffc107;">' .
-               '<p><strong>' . esc_html__( 'Atenção:', 'dps-agenda-addon' ) . '</strong> ' .
+               '<p><strong>' . esc_html__( 'AtenÃƒÂ§ÃƒÂ£o:', 'dps-agenda-addon' ) . '</strong> ' .
                esc_html__( 'Este shortcode foi movido para o Finance Add-on. Por favor, use [dps_fin_docs] ou ative o Finance Add-on.', 'dps-agenda-addon' ) .
                '</p></div>';
     }
@@ -1850,28 +1824,28 @@ class DPS_Agenda_Addon {
     /**
      * AJAX handler para atualizar o status de um agendamento.
      *
-     * Espera campos 'id' e 'status' via POST. Somente usuários logados podem executar.
+     * Espera campos 'id' e 'status' via POST. Somente usuÃƒÂ¡rios logados podem executar.
      */
     public function update_status_ajax() {
-        // Verifica permissão do usuário. Apenas administradores podem alterar o status.
+        // Verifica permissÃƒÂ£o do usuÃƒÂ¡rio. Apenas administradores podem alterar o status.
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
         // Verifica nonce para evitar CSRF. O nonce deve ser enviado no campo 'nonce'.
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_update_status' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
         $id     = intval( $_POST['id'] ?? 0 );
         $status = sanitize_text_field( $_POST['status'] ?? '' );
         $version = isset( $_POST['version'] ) ? intval( $_POST['version'] ) : 0;
-        // Aceita variações do texto "finalizado e pago" além do slug sem espaços
+        // Aceita variaÃƒÂ§ÃƒÂµes do texto "finalizado e pago" alÃƒÂ©m do slug sem espaÃƒÂ§os
         if ( $status === 'finalizado e pago' ) {
             $status = 'finalizado_pago';
         }
         $valid_statuses = [ 'pendente', 'finalizado', 'finalizado_pago', 'cancelado' ];
         if ( ! $id || ! in_array( $status, $valid_statuses, true ) || $version < 1 ) {
-            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Dados invÃƒÂ¡lidos.', 'dps-agenda-addon' ) ] );
         }
         $current_version = intval( get_post_meta( $id, '_dps_appointment_version', true ) );
 
@@ -1883,22 +1857,22 @@ class DPS_Agenda_Addon {
         if ( $version !== $current_version ) {
             wp_send_json_error(
                 [
-                    'message'    => __( 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.', 'dps-agenda-addon' ),
+                    'message'    => __( 'Esse agendamento foi atualizado por outro usuÃƒÂ¡rio. Atualize a pÃƒÂ¡gina para ver as alteraÃƒÂ§ÃƒÂµes.', 'dps-agenda-addon' ),
                     'error_code' => 'version_conflict',
                 ]
             );
         }
-        // Atualiza meta de status. Remove entradas anteriores para garantir que não haja valores duplicados.
+        // Atualiza meta de status. Remove entradas anteriores para garantir que nÃƒÂ£o haja valores duplicados.
         delete_post_meta( $id, 'appointment_status' );
         add_post_meta( $id, 'appointment_status', $status, true );
         $new_version = $current_version + 1;
         update_post_meta( $id, '_dps_appointment_version', $new_version );
 
-        // AUDITORIA: Registra mudança de status no log
+        // AUDITORIA: Registra mudanÃƒÂ§a de status no log
         if ( class_exists( 'DPS_Logger' ) ) {
             DPS_Logger::info(
                 sprintf(
-                    'Agendamento #%d: Status alterado para "%s" por usuário #%d',
+                    'Agendamento #%d: Status alterado para "%s" por usuÃƒÂ¡rio #%d',
                     $id,
                     $status,
                     get_current_user_id()
@@ -1913,18 +1887,18 @@ class DPS_Agenda_Addon {
             );
         }
 
-        // A sincronização financeira é feita automaticamente pelo Finance Add-on via hook updated_post_meta
-        // O Finance monitora mudanças em appointment_status e cria/atualiza transações conforme necessário
-        // Não é necessário manipular dps_transacoes diretamente aqui
+        // A sincronizaÃƒÂ§ÃƒÂ£o financeira ÃƒÂ© feita automaticamente pelo Finance Add-on via hook updated_post_meta
+        // O Finance monitora mudanÃƒÂ§as em appointment_status e cria/atualiza transaÃƒÂ§ÃƒÂµes conforme necessÃƒÂ¡rio
+        // NÃƒÂ£o ÃƒÂ© necessÃƒÂ¡rio manipular dps_transacoes diretamente aqui
 
-        // Após atualizar a transação, aciona o hook dps_base_after_save_appointment para que
+        // ApÃƒÂ³s atualizar a transaÃƒÂ§ÃƒÂ£o, aciona o hook dps_base_after_save_appointment para que
         // outros add-ons (como o de pagamentos) possam processar o agendamento finalizado.
         // Isso garante que o link de pagamento seja criado automaticamente mesmo quando
-        // o status é alterado manualmente pela agenda.
+        // o status ÃƒÂ© alterado manualmente pela agenda.
         do_action( 'dps_base_after_save_appointment', $id, 'simple' );
 
-        // TODO: Implementar notificação via WhatsApp quando necessário
-        // Atualmente o código abaixo usa variáveis não definidas ($client_id, $pet_post, $date, $valor)
+        // TODO: Implementar notificaÃƒÂ§ÃƒÂ£o via WhatsApp quando necessÃƒÂ¡rio
+        // Atualmente o cÃƒÂ³digo abaixo usa variÃƒÂ¡veis nÃƒÂ£o definidas ($client_id, $pet_post, $date, $valor)
         // e precisa ser refatorado para obter esses dados do agendamento
 
         $updated_post = get_post( $id );
@@ -1941,23 +1915,23 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * AJAX handler para retornar detalhes de serviços de um agendamento.
-     * Retorna lista de serviços (nome e preço) para o agendamento.
+     * AJAX handler para retornar detalhes de serviÃƒÂ§os de um agendamento.
+     * Retorna lista de serviÃƒÂ§os (nome e preÃƒÂ§o) para o agendamento.
      *
-     * @deprecated 1.1.0 Lógica movida para Services Add-on (DPS_Services_API).
-     *                   Mantido por compatibilidade, mas delega para API quando disponível.
+     * @deprecated 1.1.0 LÃƒÂ³gica movida para Services Add-on (DPS_Services_API).
+     *                   Mantido por compatibilidade, mas delega para API quando disponÃƒÂ­vel.
      */
     public function get_services_details_ajax() {
         // Apenas administradores podem consultar detalhes de servi?os. Garante que usu?rios n?o
         // autenticados ou sem permiss?o n?o exponham dados. Caso contr?rio, retorna erro.
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
 
         // SEGURAN?A: verifica??o de nonce obrigat?ria para prevenir CSRF.
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_get_services_details' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
 
         $id_param = isset( $_POST['appt_id'] ) ? intval( wp_unslash( $_POST['appt_id'] ) ) : 0;
@@ -1966,19 +1940,19 @@ class DPS_Agenda_Addon {
             $id_param = isset( $_POST['id'] ) ? intval( wp_unslash( $_POST['id'] ) ) : 0;
         }
         if ( ! $id_param ) {
-            wp_send_json_error( [ 'message' => __( 'ID inválido.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'ID invÃƒÂ¡lido.', 'dps-agenda-addon' ) ] );
         }
 
         $appointment = get_post( $id_param );
         if ( ! $appointment || 'dps_agendamento' !== $appointment->post_type ) {
-            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Agendamento nÃƒÂ£o encontrado.', 'dps-agenda-addon' ) ] );
         }
 
         try {
             $payload = $this->build_services_details_payload( $id_param );
         } catch ( Throwable $exception ) {
             wp_send_json_error(
-                [ 'message' => __( 'Não foi possível carregar os serviços deste atendimento.', 'dps-agenda-addon' ) ],
+                [ 'message' => __( 'NÃƒÂ£o foi possÃƒÂ­vel carregar os serviÃƒÂ§os deste atendimento.', 'dps-agenda-addon' ) ],
                 500
             );
         }
@@ -2169,32 +2143,32 @@ class DPS_Agenda_Addon {
         return $duration;
     }
     /**
-     * Limpa cron jobs agendados quando o plugin é desativado.
+     * Limpa cron jobs agendados quando o plugin ÃƒÂ© desativado.
      */
     public function deactivate() {
         wp_clear_scheduled_hook( 'dps_agenda_send_reminders' );
     }
 
     /**
-     * Agenda envio diário de lembretes para clientes com agendamentos do dia.
-     * O evento é agendado apenas uma vez, no próximo horário configurado (padrão: 08:00).
+     * Agenda envio diÃƒÂ¡rio de lembretes para clientes com agendamentos do dia.
+     * O evento ÃƒÂ© agendado apenas uma vez, no prÃƒÂ³ximo horÃƒÂ¡rio configurado (padrÃƒÂ£o: 08:00).
      */
     public function maybe_schedule_reminders() {
         if ( ! function_exists( 'wp_next_scheduled' ) ) {
             return;
         }
-        // Verifica se já existe um evento programado
+        // Verifica se jÃƒÂ¡ existe um evento programado
         $timestamp = wp_next_scheduled( 'dps_agenda_send_reminders' );
         if ( ! $timestamp ) {
-            // Calcula timestamp para 08:00 do horário do site
+            // Calcula timestamp para 08:00 do horÃƒÂ¡rio do site
             $hour   = 8;
             $minute = 0;
             // Usa timezone do site
             $tz = wp_timezone();
             $now = new DateTime( 'now', $tz );
-            // Cria data para hoje às 08:00
+            // Cria data para hoje ÃƒÂ s 08:00
             $schedule_time = new DateTime( $now->format( 'Y-m-d' ) . ' ' . sprintf( '%02d:%02d', $hour, $minute ), $tz );
-            // Se já passou hoje, agenda para o dia seguinte
+            // Se jÃƒÂ¡ passou hoje, agenda para o dia seguinte
             if ( $schedule_time <= $now ) {
                 $schedule_time->modify( '+1 day' );
             }
@@ -2204,22 +2178,22 @@ class DPS_Agenda_Addon {
 
     /**
      * Envia lembretes de agendamentos para clientes.
-     * Este método é executado pelo cron diário configurado em maybe_schedule_reminders().
+     * Este mÃƒÂ©todo ÃƒÂ© executado pelo cron diÃƒÂ¡rio configurado em maybe_schedule_reminders().
      *
-     * NOTA: A lógica de ENVIO está delegada à Communications API.
+     * NOTA: A lÃƒÂ³gica de ENVIO estÃƒÂ¡ delegada ÃƒÂ  Communications API.
      * A Agenda apenas identifica quais agendamentos precisam de lembrete.
      * 
      * @since 1.0.0
      * @return void
      */
     public function send_reminders() {
-        // Determina a data atual no fuso horário do site
+        // Determina a data atual no fuso horÃƒÂ¡rio do site
         $date = current_time( 'Y-m-d' );
         
-        // Limite diário configurável (mesmo usado nas queries de visualização)
+        // Limite diÃƒÂ¡rio configurÃƒÂ¡vel (mesmo usado nas queries de visualizaÃƒÂ§ÃƒÂ£o)
         $daily_limit = apply_filters( 'dps_agenda_daily_limit', self::DAILY_APPOINTMENTS_LIMIT );
         
-        // PERFORMANCE: Busca agendamentos do dia com limite e otimização
+        // PERFORMANCE: Busca agendamentos do dia com limite e otimizaÃƒÂ§ÃƒÂ£o
         $appointments = get_posts( [
             'post_type'      => 'dps_agendamento',
             'posts_per_page' => $daily_limit,
@@ -2227,10 +2201,10 @@ class DPS_Agenda_Addon {
             'meta_query'     => [
                 [ 'key' => 'appointment_date', 'value' => $date, 'compare' => '=' ],
             ],
-            'no_found_rows'  => true, // Otimização: não conta total
+            'no_found_rows'  => true, // OtimizaÃƒÂ§ÃƒÂ£o: nÃƒÂ£o conta total
         ] );
         
-        // AUDITORIA: Registra início do envio de lembretes
+        // AUDITORIA: Registra inÃƒÂ­cio do envio de lembretes
         $total_appointments = count( $appointments );
         if ( class_exists( 'DPS_Logger' ) ) {
             DPS_Logger::info(
@@ -2255,7 +2229,7 @@ class DPS_Agenda_Addon {
         $reminders_sent = 0;
         $reminders_skipped = 0;
 
-        // Se Communications API estiver disponível, usa ela (método preferido)
+        // Se Communications API estiver disponÃƒÂ­vel, usa ela (mÃƒÂ©todo preferido)
         if ( class_exists( 'DPS_Communications_API' ) ) {
             $api = DPS_Communications_API::get_instance();
             
@@ -2320,7 +2294,7 @@ class DPS_Agenda_Addon {
                 $time    = $time ? $time : '';
                 $subject = sprintf( __( 'Lembrete de agendamento para %s', 'dps-agenda-addon' ), $client_name );
                 $message = sprintf(
-                    __( 'Olá %s,\n\nEste é um lembrete do agendamento para %s no dia %s às %s.\n\nEstamos aguardando você!\n\nAtenciosamente,\ndesi.pet by PRObst', 'dps-agenda-addon' ),
+                    __( 'OlÃƒÂ¡ %s,\n\nEste ÃƒÂ© um lembrete do agendamento para %s no dia %s ÃƒÂ s %s.\n\nEstamos aguardando vocÃƒÂª!\n\nAtenciosamente,\ndesi.pet by PRObst', 'dps-agenda-addon' ),
                     $client_name,
                     $pet_name ? $pet_name : __( 'seu pet', 'dps-agenda-addon' ),
                     date_i18n( 'd-m-Y', strtotime( $date ) ),
@@ -2342,7 +2316,7 @@ class DPS_Agenda_Addon {
         if ( class_exists( 'DPS_Logger' ) ) {
             DPS_Logger::info(
                 sprintf(
-                    'Cron de lembretes finalizado: %d enviados, %d ignorados (não pendentes ou sem dados)',
+                    'Cron de lembretes finalizado: %d enviados, %d ignorados (nÃƒÂ£o pendentes ou sem dados)',
                     $reminders_sent,
                     $reminders_skipped
                 ),
@@ -2359,10 +2333,10 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * UX-1: AJAX handler para ações rápidas de status.
-     * Permite mudança rápida de status em 1 clique sem modais.
+     * UX-1: AJAX handler para aÃƒÂ§ÃƒÂµes rÃƒÂ¡pidas de status.
+     * Permite mudanÃƒÂ§a rÃƒÂ¡pida de status em 1 clique sem modais.
      * 
-     * Ações suportadas:
+     * AÃƒÂ§ÃƒÂµes suportadas:
      * - finish: muda para 'finalizado'
      * - finish_and_paid: muda para 'finalizado_pago'
      * - cancel: muda para 'cancelado'
@@ -2371,31 +2345,31 @@ class DPS_Agenda_Addon {
      * @since 1.1.0
      */
     public function quick_action_ajax() {
-        // Verifica permissão do usuário
+        // Verifica permissÃƒÂ£o do usuÃƒÂ¡rio
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
         
         // Verifica nonce
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_quick_action' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
         
         $appt_id = isset( $_POST['appt_id'] ) ? intval( $_POST['appt_id'] ) : 0;
         $action  = isset( $_POST['action_type'] ) ? sanitize_text_field( $_POST['action_type'] ) : '';
         
         if ( ! $appt_id || ! $action ) {
-            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Dados invÃƒÂ¡lidos.', 'dps-agenda-addon' ) ] );
         }
         
-        // Valida que o post existe e é um agendamento
+        // Valida que o post existe e ÃƒÂ© um agendamento
         $post = get_post( $appt_id );
         if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
-            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Agendamento nÃƒÂ£o encontrado.', 'dps-agenda-addon' ) ] );
         }
         
-        // Mapeia ação para status
+        // Mapeia aÃƒÂ§ÃƒÂ£o para status
         $status_map = [
             'finish'          => 'finalizado',
             'finish_and_paid' => 'finalizado_pago',
@@ -2404,7 +2378,7 @@ class DPS_Agenda_Addon {
         ];
         
         if ( ! isset( $status_map[ $action ] ) ) {
-            wp_send_json_error( [ 'message' => __( 'Ação inválida.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'AÃƒÂ§ÃƒÂ£o invÃƒÂ¡lida.', 'dps-agenda-addon' ) ] );
         }
         
         $new_status = $status_map[ $action ];
@@ -2413,23 +2387,23 @@ class DPS_Agenda_Addon {
             $old_status = 'pendente';
         }
         
-        // Validações de negócio
-        // Não permite marcar como pago se não estiver finalizado
+        // ValidaÃƒÂ§ÃƒÂµes de negÃƒÂ³cio
+        // NÃƒÂ£o permite marcar como pago se nÃƒÂ£o estiver finalizado
         if ( $action === 'mark_paid' && $old_status !== 'finalizado' ) {
             wp_send_json_error( [ 'message' => __( 'Apenas atendimentos finalizados podem ser marcados como pagos.', 'dps-agenda-addon' ) ] );
         }
         
-        // Verifica se é assinatura (não deve ter status finalizado_pago)
+        // Verifica se ÃƒÂ© assinatura (nÃƒÂ£o deve ter status finalizado_pago)
         $is_subscription = ! empty( get_post_meta( $appt_id, 'subscription_id', true ) );
         if ( $is_subscription && $new_status === 'finalizado_pago' ) {
-            wp_send_json_error( [ 'message' => __( 'Agendamentos de assinatura não podem ser marcados como pagos.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Agendamentos de assinatura nÃƒÂ£o podem ser marcados como pagos.', 'dps-agenda-addon' ) ] );
         }
         
-        // Atualiza status usando mesma lógica do update_status_ajax
+        // Atualiza status usando mesma lÃƒÂ³gica do update_status_ajax
         delete_post_meta( $appt_id, 'appointment_status' );
         add_post_meta( $appt_id, 'appointment_status', $new_status, true );
         
-        // Incrementa versão
+        // Incrementa versÃƒÂ£o
         $current_version = intval( get_post_meta( $appt_id, '_dps_appointment_version', true ) );
         if ( $current_version < 1 ) {
             $current_version = 1;
@@ -2441,7 +2415,7 @@ class DPS_Agenda_Addon {
         if ( class_exists( 'DPS_Logger' ) ) {
             DPS_Logger::info(
                 sprintf(
-                    'Agendamento #%d: Ação rápida "%s" (status %s → %s) por usuário #%d',
+                    'Agendamento #%d: AÃƒÂ§ÃƒÂ£o rÃƒÂ¡pida "%s" (status %s Ã¢â€ â€™ %s) por usuÃƒÂ¡rio #%d',
                     $appt_id,
                     $action,
                     $old_status,
@@ -2460,7 +2434,7 @@ class DPS_Agenda_Addon {
             );
         }
         
-        // Aciona hook para sincronização com outros add-ons
+        // Aciona hook para sincronizaÃƒÂ§ÃƒÂ£o com outros add-ons
         do_action( 'dps_base_after_save_appointment', $appt_id, 'simple' );
         
         // UX-2: Renderiza HTML da linha atualizada
@@ -2477,54 +2451,54 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * CONF-2: AJAX handler para atualizar status de confirmação.
-     * Permite marcar confirmação de atendimento sem alterar o status principal.
+     * CONF-2: AJAX handler para atualizar status de confirmaÃƒÂ§ÃƒÂ£o.
+     * Permite marcar confirmaÃƒÂ§ÃƒÂ£o de atendimento sem alterar o status principal.
      * 
      * @since 1.2.0
      */
     public function update_confirmation_ajax() {
-        // Verifica permissão do usuário
+        // Verifica permissÃƒÂ£o do usuÃƒÂ¡rio
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
         
         // Verifica nonce
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_confirmation' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
         
         $appt_id = isset( $_POST['appt_id'] ) ? intval( $_POST['appt_id'] ) : 0;
         $confirmation_status = isset( $_POST['confirmation_status'] ) ? sanitize_text_field( $_POST['confirmation_status'] ) : '';
         
         if ( ! $appt_id || ! $confirmation_status ) {
-            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Dados invÃƒÂ¡lidos.', 'dps-agenda-addon' ) ] );
         }
         
-        // Valida que o post existe e é um agendamento
+        // Valida que o post existe e ÃƒÂ© um agendamento
         $post = get_post( $appt_id );
         if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
-            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Agendamento nÃƒÂ£o encontrado.', 'dps-agenda-addon' ) ] );
         }
         
-        // Valida status de confirmação
+        // Valida status de confirmaÃƒÂ§ÃƒÂ£o
         $valid_statuses = [ 'not_sent', 'sent', 'confirmed', 'denied', 'no_answer' ];
         if ( ! in_array( $confirmation_status, $valid_statuses, true ) ) {
-            wp_send_json_error( [ 'message' => __( 'Status de confirmação inválido.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Status de confirmaÃƒÂ§ÃƒÂ£o invÃƒÂ¡lido.', 'dps-agenda-addon' ) ] );
         }
         
-        // Atualiza status de confirmação usando helper
+        // Atualiza status de confirmaÃƒÂ§ÃƒÂ£o usando helper
         $success = $this->set_confirmation_status( $appt_id, $confirmation_status, get_current_user_id() );
         
         if ( ! $success ) {
-            wp_send_json_error( [ 'message' => __( 'Erro ao atualizar status de confirmação.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Erro ao atualizar status de confirmaÃƒÂ§ÃƒÂ£o.', 'dps-agenda-addon' ) ] );
         }
         
         // Log de auditoria
         if ( class_exists( 'DPS_Logger' ) ) {
             DPS_Logger::info(
                 sprintf(
-                    'Agendamento #%d: Status de confirmação alterado para "%s" por usuário #%d',
+                    'Agendamento #%d: Status de confirmaÃƒÂ§ÃƒÂ£o alterado para "%s" por usuÃƒÂ¡rio #%d',
                     $appt_id,
                     $confirmation_status,
                     get_current_user_id()
@@ -2543,7 +2517,7 @@ class DPS_Agenda_Addon {
                 $row_html = $this->render_row_html_for_active_tab( $updated_post );
         
         wp_send_json_success( [
-            'message'             => __( 'Confirmação atualizada com sucesso!', 'dps-agenda-addon' ),
+            'message'             => __( 'ConfirmaÃƒÂ§ÃƒÂ£o atualizada com sucesso!', 'dps-agenda-addon' ),
             'row_html'            => $row_html,
             'appointment_id'      => $appt_id,
             'confirmation_status' => $confirmation_status,
@@ -2551,41 +2525,41 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * FASE 3: AJAX handler para atualização de status de TaxiDog.
-     * Permite mudança de status do TaxiDog via ações rápidas.
+     * FASE 3: AJAX handler para atualizaÃƒÂ§ÃƒÂ£o de status de TaxiDog.
+     * Permite mudanÃƒÂ§a de status do TaxiDog via aÃƒÂ§ÃƒÂµes rÃƒÂ¡pidas.
      *
      * @since 1.2.0
      */
     public function update_taxidog_ajax() {
-        // Verifica permissão do usuário
+        // Verifica permissÃƒÂ£o do usuÃƒÂ¡rio
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
         
         // Verifica nonce
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_taxidog' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
         
         $appt_id = isset( $_POST['appt_id'] ) ? intval( $_POST['appt_id'] ) : 0;
         $new_status = isset( $_POST['taxidog_status'] ) ? sanitize_text_field( $_POST['taxidog_status'] ) : '';
         
         if ( ! $appt_id || ! $new_status ) {
-            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Dados invÃƒÂ¡lidos.', 'dps-agenda-addon' ) ] );
         }
         
-        // Valida que o post existe e é um agendamento
+        // Valida que o post existe e ÃƒÂ© um agendamento
         $post = get_post( $appt_id );
         if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
-            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Agendamento nÃƒÂ£o encontrado.', 'dps-agenda-addon' ) ] );
         }
         
         // Atualiza status usando o helper
         $success = DPS_Agenda_TaxiDog_Helper::update_taxidog_status( $appt_id, $new_status );
         
         if ( ! $success ) {
-            wp_send_json_error( [ 'message' => __( 'Status de TaxiDog inválido.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Status de TaxiDog invÃƒÂ¡lido.', 'dps-agenda-addon' ) ] );
         }
         
         // Renderiza HTML da linha atualizada
@@ -2603,32 +2577,32 @@ class DPS_Agenda_Addon {
     /**
      * FASE 7: AJAX handler para solicitar TaxiDog.
      *
-     * Habilita TaxiDog para um agendamento que não tinha solicitado.
+     * Habilita TaxiDog para um agendamento que nÃƒÂ£o tinha solicitado.
      *
      * @since 1.4.2
      */
     public function request_taxidog_ajax() {
-        // Verifica permissão do usuário
+        // Verifica permissÃƒÂ£o do usuÃƒÂ¡rio
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
         
         // Verifica nonce
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_taxidog' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
         
         $appt_id = isset( $_POST['appt_id'] ) ? intval( $_POST['appt_id'] ) : 0;
         
         if ( ! $appt_id ) {
-            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Dados invÃƒÂ¡lidos.', 'dps-agenda-addon' ) ] );
         }
         
-        // Valida que o post existe e é um agendamento
+        // Valida que o post existe e ÃƒÂ© um agendamento
         $post = get_post( $appt_id );
         if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
-            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Agendamento nÃƒÂ£o encontrado.', 'dps-agenda-addon' ) ] );
         }
         
         // Habilita TaxiDog no agendamento
@@ -2646,20 +2620,20 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * FASE 4: AJAX handler para salvar configuração de capacidade.
+     * FASE 4: AJAX handler para salvar configuraÃƒÂ§ÃƒÂ£o de capacidade.
      *
      * @since 1.4.0
      */
     public function save_capacity_ajax() {
-        // Verifica permissão
+        // Verifica permissÃƒÂ£o
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
 
         // Verifica nonce
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_capacity' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
 
         $morning = isset( $_POST['morning'] ) ? intval( $_POST['morning'] ) : 10;
@@ -2674,11 +2648,11 @@ class DPS_Agenda_Addon {
 
         if ( $success ) {
             wp_send_json_success( [
-                'message' => __( 'Configuração de capacidade salva com sucesso!', 'dps-agenda-addon' ),
+                'message' => __( 'ConfiguraÃƒÂ§ÃƒÂ£o de capacidade salva com sucesso!', 'dps-agenda-addon' ),
                 'config'  => $config,
             ] );
         } else {
-            wp_send_json_error( [ 'message' => __( 'Erro ao salvar configuração.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Erro ao salvar configuraÃƒÂ§ÃƒÂ£o.', 'dps-agenda-addon' ) ] );
         }
     }
 
@@ -2688,30 +2662,30 @@ class DPS_Agenda_Addon {
      * @since 1.5.0
      */
     public function resend_payment_ajax() {
-        // Verifica permissão
+        // Verifica permissÃƒÂ£o
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
 
         // Verifica nonce
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_resend_payment' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
 
         $appt_id = isset( $_POST['appt_id'] ) ? intval( $_POST['appt_id'] ) : 0;
 
         if ( ! $appt_id ) {
-            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Dados invÃƒÂ¡lidos.', 'dps-agenda-addon' ) ] );
         }
 
-        // Valida que o post existe e é um agendamento
+        // Valida que o post existe e ÃƒÂ© um agendamento
         $post = get_post( $appt_id );
         if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
-            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Agendamento nÃƒÂ£o encontrado.', 'dps-agenda-addon' ) ] );
         }
 
-        // Tenta reenviar via Payment Add-on se disponível
+        // Tenta reenviar via Payment Add-on se disponÃƒÂ­vel
         $success = false;
         $message = '';
 
@@ -2724,7 +2698,7 @@ class DPS_Agenda_Addon {
             update_post_meta( $appt_id, '_dps_payment_link_status', 'pending' );
             update_post_meta( $appt_id, '_dps_payment_resent_at', current_time( 'mysql' ) );
             $success = true;
-            $message = __( 'Link marcado para reenvio. Configure o Payment Add-on para envio automático.', 'dps-agenda-addon' );
+            $message = __( 'Link marcado para reenvio. Configure o Payment Add-on para envio automÃƒÂ¡tico.', 'dps-agenda-addon' );
         }
 
         if ( $success ) {
@@ -2743,23 +2717,23 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * FASE 2: Renderiza relatório de ocupação.
-     * Exibe métricas como taxa de ocupação, horários mais ocupados e cancelamentos.
+     * FASE 2: Renderiza relatÃƒÂ³rio de ocupaÃƒÂ§ÃƒÂ£o.
+     * Exibe mÃƒÂ©tricas como taxa de ocupaÃƒÂ§ÃƒÂ£o, horÃƒÂ¡rios mais ocupados e cancelamentos.
      *
-     * @deprecated 1.6.0 Funcionalidade movida para a aba Estatísticas. Use filtro de período na aba Estatísticas.
+     * @deprecated 1.6.0 Funcionalidade movida para a aba EstatÃƒÂ­sticas. Use filtro de perÃƒÂ­odo na aba EstatÃƒÂ­sticas.
      * @since 1.2.0
      * @param array  $appointments Lista de agendamentos.
      * @param string $selected_date Data selecionada.
-     * @param bool   $is_week_view Se é visualização semanal.
+     * @param bool   $is_week_view Se ÃƒÂ© visualizaÃƒÂ§ÃƒÂ£o semanal.
      */
     private function render_occupancy_report( $appointments, $selected_date, $is_week_view ) {
-        _deprecated_function( __METHOD__, '1.6.0', __( 'Aba Estatísticas', 'dps-agenda-addon' ) );
+        _deprecated_function( __METHOD__, '1.6.0', __( 'Aba EstatÃƒÂ­sticas', 'dps-agenda-addon' ) );
         
         if ( empty( $appointments ) ) {
             return;
         }
         
-        // Calcular métricas
+        // Calcular mÃƒÂ©tricas
         $total = count( $appointments );
         $pendente = 0;
         $finalizado = 0;
@@ -2799,10 +2773,10 @@ class DPS_Agenda_Addon {
             }
         }
         
-        // Ordenar horários
+        // Ordenar horÃƒÂ¡rios
         ksort( $horarios );
         
-        // Encontrar horário mais ocupado
+        // Encontrar horÃƒÂ¡rio mais ocupado
         $horario_pico = '';
         $max_count = 0;
         foreach ( $horarios as $hora => $count ) {
@@ -2812,12 +2786,12 @@ class DPS_Agenda_Addon {
             }
         }
         
-        // Calcular taxa de conclusão (excluindo cancelados)
+        // Calcular taxa de conclusÃƒÂ£o (excluindo cancelados)
         $total_nao_cancelado = $total - $cancelado;
         $taxa_conclusao = $total_nao_cancelado > 0 ? round( ( ( $finalizado + $finalizado_pago ) / $total_nao_cancelado ) * 100 ) : 0;
         $taxa_cancelamento = $total > 0 ? round( ( $cancelado / $total ) * 100 ) : 0;
         
-        // Período do relatório
+        // PerÃƒÂ­odo do relatÃƒÂ³rio
         if ( $is_week_view ) {
             $period_label = sprintf(
                 __( 'Semana de %s', 'dps-agenda-addon' ),
@@ -2828,16 +2802,16 @@ class DPS_Agenda_Addon {
         }
         
         echo '<details class="dps-occupancy-report">';
-        echo '<summary>' . esc_html__( '📊 Relatório de Ocupação', 'dps-agenda-addon' ) . ' - ' . esc_html( $period_label ) . '</summary>';
+        echo '<summary>' . esc_html__( 'Ã°Å¸â€œÅ  RelatÃƒÂ³rio de OcupaÃƒÂ§ÃƒÂ£o', 'dps-agenda-addon' ) . ' - ' . esc_html( $period_label ) . '</summary>';
         echo '<div class="dps-occupancy-content">';
         
-        // Cards de métricas
+        // Cards de mÃƒÂ©tricas
         echo '<div class="dps-occupancy-cards">';
         
-        // Taxa de conclusão
+        // Taxa de conclusÃƒÂ£o
         echo '<div class="dps-occupancy-card">';
         echo '<span class="dps-occupancy-value dps-occupancy-success">' . esc_html( $taxa_conclusao ) . '%</span>';
-        echo '<span class="dps-occupancy-label">' . esc_html__( 'Taxa de Conclusão', 'dps-agenda-addon' ) . '</span>';
+        echo '<span class="dps-occupancy-label">' . esc_html__( 'Taxa de ConclusÃƒÂ£o', 'dps-agenda-addon' ) . '</span>';
         echo '</div>';
         
         // Taxa de cancelamento
@@ -2846,25 +2820,25 @@ class DPS_Agenda_Addon {
         echo '<span class="dps-occupancy-label">' . esc_html__( 'Taxa de Cancelamento', 'dps-agenda-addon' ) . '</span>';
         echo '</div>';
         
-        // Horário de pico
+        // HorÃƒÂ¡rio de pico
         echo '<div class="dps-occupancy-card">';
         echo '<span class="dps-occupancy-value">' . esc_html( $horario_pico ?: '-' ) . '</span>';
-        echo '<span class="dps-occupancy-label">' . esc_html__( 'Horário de Pico', 'dps-agenda-addon' ) . '</span>';
+        echo '<span class="dps-occupancy-label">' . esc_html__( 'HorÃƒÂ¡rio de Pico', 'dps-agenda-addon' ) . '</span>';
         echo '</div>';
         
-        // Média por hora ativa (atendimentos ÷ horas com agendamentos)
+        // MÃƒÂ©dia por hora ativa (atendimentos ÃƒÂ· horas com agendamentos)
         $horas_com_atendimento = count( $horarios );
         $media_por_hora = $horas_com_atendimento > 0 ? round( $total / $horas_com_atendimento, 1 ) : 0;
         echo '<div class="dps-occupancy-card">';
         echo '<span class="dps-occupancy-value">' . esc_html( $media_por_hora ) . '</span>';
-        echo '<span class="dps-occupancy-label">' . esc_html__( 'Média/Hora Ativa', 'dps-agenda-addon' ) . '</span>';
+        echo '<span class="dps-occupancy-label">' . esc_html__( 'MÃƒÂ©dia/Hora Ativa', 'dps-agenda-addon' ) . '</span>';
         echo '</div>';
         
         echo '</div>';
         
-        // Distribuição por status
+        // DistribuiÃƒÂ§ÃƒÂ£o por status
         echo '<div class="dps-occupancy-status">';
-        echo '<h6>' . esc_html__( 'Distribuição por Status', 'dps-agenda-addon' ) . '</h6>';
+        echo '<h6>' . esc_html__( 'DistribuiÃƒÂ§ÃƒÂ£o por Status', 'dps-agenda-addon' ) . '</h6>';
         echo '<div class="dps-occupancy-bars">';
         
         if ( $pendente > 0 ) {
@@ -2901,17 +2875,17 @@ class DPS_Agenda_Addon {
 
 
     /**
-     * FASE 2: Exporta a agenda para PDF (página de impressão).
+     * FASE 2: Exporta a agenda para PDF (pÃƒÂ¡gina de impressÃƒÂ£o).
      *
-     * Gera uma página HTML otimizada para impressão e salvamento como PDF.
-     * Layout moderno e elegante, sem poluição visual.
+     * Gera uma pÃƒÂ¡gina HTML otimizada para impressÃƒÂ£o e salvamento como PDF.
+     * Layout moderno e elegante, sem poluiÃƒÂ§ÃƒÂ£o visual.
      *
      * @since 1.4.0
      */
     public function export_pdf_ajax() {
-        // Verificar nonce e permissão usando helper
+        // Verificar nonce e permissÃƒÂ£o usando helper
         if ( ! DPS_Request_Validator::verify_admin_action( 'dps_agenda_export_pdf', 'manage_options', 'nonce', false ) ) {
-            wp_die( esc_html__( 'Falha na verificação de segurança. Por favor, recarregue a página e tente novamente.', 'dps-agenda-addon' ), 403 );
+            wp_die( esc_html__( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a. Por favor, recarregue a pÃƒÂ¡gina e tente novamente.', 'dps-agenda-addon' ), 403 );
         }
         
         $date = isset( $_GET['date'] ) ? sanitize_text_field( $_GET['date'] ) : '';
@@ -2921,7 +2895,7 @@ class DPS_Agenda_Addon {
         if ( ! empty( $date ) ) {
             $date_obj = DateTime::createFromFormat( 'Y-m-d', $date );
             if ( ! $date_obj || $date_obj->format( 'Y-m-d' ) !== $date ) {
-                $date = ''; // Data inválida, ignora o filtro
+                $date = ''; // Data invÃƒÂ¡lida, ignora o filtro
             }
         }
         
@@ -2997,7 +2971,7 @@ class DPS_Agenda_Addon {
         // Nome do petshop
         $shop_name = get_option( 'dps_shop_name', get_bloginfo( 'name' ) );
         
-        // Formatar título do período
+        // Formatar tÃƒÂ­tulo do perÃƒÂ­odo
         if ( ! empty( $date ) ) {
             if ( $view === 'week' ) {
                 $start_date = $date;
@@ -3019,17 +2993,17 @@ class DPS_Agenda_Addon {
             $period_title = __( 'Agenda Completa', 'dps-agenda-addon' );
         }
         
-        // Renderizar página de impressão
+        // Renderizar pÃƒÂ¡gina de impressÃƒÂ£o
         $this->render_pdf_print_page( $appointments, $period_title, $shop_name, $status_labels );
         exit;
     }
 
     /**
-     * Renderiza a página de impressão PDF da agenda.
+     * Renderiza a pÃƒÂ¡gina de impressÃƒÂ£o PDF da agenda.
      *
      * @since 1.4.0
      * @param array  $appointments   Lista de agendamentos.
-     * @param string $period_title   Título do período.
+     * @param string $period_title   TÃƒÂ­tulo do perÃƒÂ­odo.
      * @param string $shop_name      Nome do petshop.
      * @param array  $status_labels  Labels de status traduzidos.
      */
@@ -3251,7 +3225,7 @@ class DPS_Agenda_Addon {
         </head>
         <body>
             <div class="print-actions no-print">
-                <button type="button" class="btn-print" id="dps-print-btn">🖨️ <?php esc_html_e( 'Imprimir / Salvar PDF', 'dps-agenda-addon' ); ?></button>
+                <button type="button" class="btn-print" id="dps-print-btn">Ã°Å¸â€“Â¨Ã¯Â¸Â <?php esc_html_e( 'Imprimir / Salvar PDF', 'dps-agenda-addon' ); ?></button>
                 <button type="button" class="btn-close" id="dps-close-btn"><?php esc_html_e( 'Fechar', 'dps-agenda-addon' ); ?></button>
             </div>
             <script>
@@ -3261,9 +3235,9 @@ class DPS_Agenda_Addon {
 
             <header class="print-header">
                 <div class="print-header__info">
-                    <div class="print-header__logo">🐾 <?php echo esc_html( $shop_name ); ?></div>
+                    <div class="print-header__logo">Ã°Å¸ÂÂ¾ <?php echo esc_html( $shop_name ); ?></div>
                     <div class="print-header__period"><?php echo esc_html( $period_title ); ?></div>
-                    <div class="print-header__date"><?php echo esc_html( sprintf( __( 'Gerado em %s', 'dps-agenda-addon' ), date_i18n( 'd/m/Y \à\s H:i' ) ) ); ?></div>
+                    <div class="print-header__date"><?php echo esc_html( sprintf( __( 'Gerado em %s', 'dps-agenda-addon' ), date_i18n( 'd/m/Y \ÃƒÂ \s H:i' ) ) ); ?></div>
                 </div>
             </header>
 
@@ -3292,13 +3266,13 @@ class DPS_Agenda_Addon {
                     </div>
                     <?php if ( $status_counts['pendente'] > 0 ) : ?>
                         <div class="print-summary__item">
-                            <span class="print-summary__label">🟡 <?php esc_html_e( 'Pendentes:', 'dps-agenda-addon' ); ?></span>
+                            <span class="print-summary__label">Ã°Å¸Å¸Â¡ <?php esc_html_e( 'Pendentes:', 'dps-agenda-addon' ); ?></span>
                             <span class="print-summary__value"><?php echo esc_html( $status_counts['pendente'] ); ?></span>
                         </div>
                     <?php endif; ?>
                     <?php if ( $status_counts['finalizado_pago'] > 0 ) : ?>
                         <div class="print-summary__item">
-                            <span class="print-summary__label">✅ <?php esc_html_e( 'Pagos:', 'dps-agenda-addon' ); ?></span>
+                            <span class="print-summary__label">Ã¢Å“â€¦ <?php esc_html_e( 'Pagos:', 'dps-agenda-addon' ); ?></span>
                             <span class="print-summary__value"><?php echo esc_html( $status_counts['finalizado_pago'] ); ?></span>
                         </div>
                     <?php endif; ?>
@@ -3307,7 +3281,7 @@ class DPS_Agenda_Addon {
                 <table class="appointments-table">
                     <thead>
                         <tr>
-                            <th><?php esc_html_e( 'Horário', 'dps-agenda-addon' ); ?></th>
+                            <th><?php esc_html_e( 'HorÃƒÂ¡rio', 'dps-agenda-addon' ); ?></th>
                             <th><?php esc_html_e( 'Cliente', 'dps-agenda-addon' ); ?></th>
                             <th><?php esc_html_e( 'Contato', 'dps-agenda-addon' ); ?></th>
                             <th><?php esc_html_e( 'Status', 'dps-agenda-addon' ); ?></th>
@@ -3339,13 +3313,13 @@ class DPS_Agenda_Addon {
                                     <div class="cell-date"><?php echo esc_html( date_i18n( 'd/m/Y', strtotime( $date_val ) ) ); ?></div>
                                 </td>
                                 <td>
-                                    <div class="cell-client"><?php echo esc_html( $client_name ?: '—' ); ?></div>
+                                    <div class="cell-client"><?php echo esc_html( $client_name ?: 'Ã¢â‚¬â€' ); ?></div>
                                     <?php if ( $pet_name ) : ?>
-                                        <div class="cell-pet">🐾 <?php echo esc_html( $pet_name ); ?></div>
+                                        <div class="cell-pet">Ã°Å¸ÂÂ¾ <?php echo esc_html( $pet_name ); ?></div>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <div class="cell-phone"><?php echo esc_html( $client_phone ?: '—' ); ?></div>
+                                    <div class="cell-phone"><?php echo esc_html( $client_phone ?: 'Ã¢â‚¬â€' ); ?></div>
                                 </td>
                                 <td>
                                     <span class="status-badge <?php echo esc_attr( $status_class ); ?>">
@@ -3358,8 +3332,8 @@ class DPS_Agenda_Addon {
                 </table>
             <?php else : ?>
                 <div class="empty-state">
-                    <div class="empty-state__icon">📋</div>
-                    <div class="empty-state__message"><?php esc_html_e( 'Nenhum agendamento encontrado para este período.', 'dps-agenda-addon' ); ?></div>
+                    <div class="empty-state__icon">Ã°Å¸â€œâ€¹</div>
+                    <div class="empty-state__message"><?php esc_html_e( 'Nenhum agendamento encontrado para este perÃƒÂ­odo.', 'dps-agenda-addon' ); ?></div>
                 </div>
             <?php endif; ?>
 
@@ -3372,7 +3346,7 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * FASE 4: Renderiza a visualização de calendário mensal.
+     * FASE 4: Renderiza a visualizaÃƒÂ§ÃƒÂ£o de calendÃƒÂ¡rio mensal.
      *
      * @since 1.3.0
      * @param string $selected_date Data selecionada no formato Y-m-d.
@@ -3387,15 +3361,15 @@ class DPS_Agenda_Addon {
             $selected_date = $date_obj->format( 'Y-m-d' );
         }
         
-        // Calcula mês anterior e próximo
+        // Calcula mÃƒÂªs anterior e prÃƒÂ³ximo
         $prev_month = ( clone $date_obj )->modify( 'first day of previous month' )->format( 'Y-m-d' );
         $next_month = ( clone $date_obj )->modify( 'first day of next month' )->format( 'Y-m-d' );
         
-        // Header do calendário
+        // Header do calendÃƒÂ¡rio
         echo '<div class="dps-calendar-header">';
-        echo '<a href="' . esc_url( add_query_arg( [ 'dps_date' => $prev_month, 'view' => 'calendar' ], $base_url ) ) . '" class="dps-calendar-nav-btn">← ' . esc_html__( 'Anterior', 'dps-agenda-addon' ) . '</a>';
+        echo '<a href="' . esc_url( add_query_arg( [ 'dps_date' => $prev_month, 'view' => 'calendar' ], $base_url ) ) . '" class="dps-calendar-nav-btn">Ã¢â€ Â ' . esc_html__( 'Anterior', 'dps-agenda-addon' ) . '</a>';
         
-        // Título e botão Hoje
+        // TÃƒÂ­tulo e botÃƒÂ£o Hoje
         $today = current_time( 'Y-m-d' );
         echo '<div class="dps-calendar-title-group">';
         echo '<h4 class="dps-calendar-title">' . esc_html( ucfirst( date_i18n( 'F Y', $date_obj->getTimestamp() ) ) ) . '</h4>';
@@ -3404,10 +3378,10 @@ class DPS_Agenda_Addon {
         }
         echo '</div>';
         
-        echo '<a href="' . esc_url( add_query_arg( [ 'dps_date' => $next_month, 'view' => 'calendar' ], $base_url ) ) . '" class="dps-calendar-nav-btn">' . esc_html__( 'Próximo', 'dps-agenda-addon' ) . ' →</a>';
+        echo '<a href="' . esc_url( add_query_arg( [ 'dps_date' => $next_month, 'view' => 'calendar' ], $base_url ) ) . '" class="dps-calendar-nav-btn">' . esc_html__( 'PrÃƒÂ³ximo', 'dps-agenda-addon' ) . ' Ã¢â€ â€™</a>';
         echo '</div>';
         
-        // Container do calendário
+        // Container do calendÃƒÂ¡rio
         $calendar_attrs = sprintf(
             'id="dps-calendar-container" class="dps-calendar" data-date="%s" data-ajax="%s" data-nonce="%s"',
             esc_attr( $selected_date ),
@@ -3416,7 +3390,7 @@ class DPS_Agenda_Addon {
         );
         echo '<div ' . $calendar_attrs . '>';
         
-        // Renderiza calendário HTML (fallback se JS não carregar)
+        // Renderiza calendÃƒÂ¡rio HTML (fallback se JS nÃƒÂ£o carregar)
         $this->render_calendar_grid( $selected_date );
         
         echo '</div>';
@@ -3431,7 +3405,7 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * FASE 4: Renderiza o grid HTML do calendário.
+     * FASE 4: Renderiza o grid HTML do calendÃƒÂ¡rio.
      *
      * @since 1.3.0
      * @param string $selected_date Data selecionada no formato Y-m-d.
@@ -3444,12 +3418,12 @@ class DPS_Agenda_Addon {
         $year = (int) $date_obj->format( 'Y' );
         $month = (int) $date_obj->format( 'm' );
         
-        // Primeiro dia do mês
+        // Primeiro dia do mÃƒÂªs
         $first_day = new DateTime( "$year-$month-01" );
         $days_in_month = (int) $first_day->format( 't' );
         $start_weekday = (int) $first_day->format( 'N' ); // 1=seg, 7=dom
         
-        // Busca agendamentos do mês
+        // Busca agendamentos do mÃƒÂªs
         $appointments = $this->get_month_appointments( $year, $month );
         
         // Header dos dias da semana
@@ -3459,7 +3433,7 @@ class DPS_Agenda_Addon {
             __( 'Qua', 'dps-agenda-addon' ),
             __( 'Qui', 'dps-agenda-addon' ),
             __( 'Sex', 'dps-agenda-addon' ),
-            __( 'Sáb', 'dps-agenda-addon' ),
+            __( 'SÃƒÂ¡b', 'dps-agenda-addon' ),
             __( 'Dom', 'dps-agenda-addon' ),
         ];
         
@@ -3475,7 +3449,7 @@ class DPS_Agenda_Addon {
         // Dias
         echo '<div class="dps-calendar-days">';
         
-        // Células vazias antes do primeiro dia
+        // CÃƒÂ©lulas vazias antes do primeiro dia
         for ( $i = 1; $i < $start_weekday; $i++ ) {
             echo '<div class="dps-calendar-day dps-calendar-day--empty"></div>';
         }
@@ -3483,7 +3457,7 @@ class DPS_Agenda_Addon {
         $base_url = remove_query_arg( [ 'dps_date', 'view', 'show_all' ] );
         $today = current_time( 'Y-m-d' );
         
-        // Dias do mês
+        // Dias do mÃƒÂªs
         for ( $day = 1; $day <= $days_in_month; $day++ ) {
             $date = sprintf( '%04d-%02d-%02d', $year, $month, $day );
             $is_today = ( $date === $today );
@@ -3540,7 +3514,7 @@ class DPS_Agenda_Addon {
             echo '</div>';
         }
         
-        // Células vazias após o último dia
+        // CÃƒÂ©lulas vazias apÃƒÂ³s o ÃƒÂºltimo dia
         $end_weekday = (int) ( new DateTime( "$year-$month-$days_in_month" ) )->format( 'N' );
         for ( $i = $end_weekday; $i < 7; $i++ ) {
             echo '<div class="dps-calendar-day dps-calendar-day--empty"></div>';
@@ -3551,11 +3525,11 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * FASE 4: Busca agendamentos do mês.
+     * FASE 4: Busca agendamentos do mÃƒÂªs.
      *
      * @since 1.3.0
      * @param int $year Ano.
-     * @param int $month Mês.
+     * @param int $month MÃƒÂªs.
      * @return array Agendamentos indexados por data.
      */
     private function get_month_appointments( $year, $month ) {
@@ -3597,19 +3571,19 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * FASE 4: Handler AJAX para buscar eventos do calendário.
+     * FASE 4: Handler AJAX para buscar eventos do calendÃƒÂ¡rio.
      *
      * @since 1.3.0
      */
     public function calendar_events_ajax() {
         // Verificar nonce
         if ( ! check_ajax_referer( 'dps_agenda_calendar', 'nonce', false ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
         
-        // Verificar permissões
+        // Verificar permissÃƒÂµes
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
         
         $start = isset( $_POST['start'] ) ? sanitize_text_field( $_POST['start'] ) : '';
@@ -3619,10 +3593,10 @@ class DPS_Agenda_Addon {
         if ( empty( $start ) || empty( $end ) || 
              ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $start ) || 
              ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $end ) ) {
-            wp_send_json_error( [ 'message' => __( 'Formato de data inválido.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Formato de data invÃƒÂ¡lido.', 'dps-agenda-addon' ) ] );
         }
         
-        // Busca agendamentos no período
+        // Busca agendamentos no perÃƒÂ­odo
         $appointments = get_posts( [
             'post_type'      => 'dps_agendamento',
             'posts_per_page' => -1,
@@ -3658,7 +3632,7 @@ class DPS_Agenda_Addon {
             }
         }
         
-        // Formata eventos para o calendário
+        // Formata eventos para o calendÃƒÂ¡rio
         $events = [];
         $status_colors = [
             'pendente'        => '#f59e0b',
@@ -3703,11 +3677,11 @@ class DPS_Agenda_Addon {
     }
 
     // =========================================================================
-    // FASE 5: Funcionalidades Administrativas Avançadas
+    // FASE 5: Funcionalidades Administrativas AvanÃƒÂ§adas
     // =========================================================================
 
     /**
-     * AJAX handler para reagendamento rápido.
+     * AJAX handler para reagendamento rÃƒÂ¡pido.
      *
      * Permite alterar apenas data e hora de um agendamento sem editar outros campos.
      *
@@ -3715,13 +3689,13 @@ class DPS_Agenda_Addon {
      * @return void
      */
     public function quick_reschedule_ajax() {
-        // Verificar nonce e permissões
+        // Verificar nonce e permissÃƒÂµes
         if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'dps_quick_reschedule' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
         
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
         
         $appt_id = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : 0;
@@ -3732,18 +3706,18 @@ class DPS_Agenda_Addon {
             wp_send_json_error( [ 'message' => __( 'Dados incompletos.', 'dps-agenda-addon' ) ] );
         }
         
-        // Validar que o post existe e é um agendamento
+        // Validar que o post existe e ÃƒÂ© um agendamento
         $post = get_post( $appt_id );
         if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
-            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Agendamento nÃƒÂ£o encontrado.', 'dps-agenda-addon' ) ] );
         }
         
         // Validar formato de data e hora
         if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $new_date ) ) {
-            wp_send_json_error( [ 'message' => __( 'Formato de data inválido.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Formato de data invÃƒÂ¡lido.', 'dps-agenda-addon' ) ] );
         }
         if ( ! preg_match( '/^\d{2}:\d{2}$/', $new_time ) ) {
-            wp_send_json_error( [ 'message' => __( 'Formato de hora inválido.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Formato de hora invÃƒÂ¡lido.', 'dps-agenda-addon' ) ] );
         }
         
         // Salvar data/hora anteriores para log
@@ -3754,11 +3728,11 @@ class DPS_Agenda_Addon {
         update_post_meta( $appt_id, 'appointment_date', $new_date );
         update_post_meta( $appt_id, 'appointment_time', $new_time );
         
-        // Incrementar versão
+        // Incrementar versÃƒÂ£o
         $version = intval( get_post_meta( $appt_id, '_dps_appointment_version', true ) );
         update_post_meta( $appt_id, '_dps_appointment_version', $version + 1 );
         
-        // Registrar no histórico
+        // Registrar no histÃƒÂ³rico
         $this->add_to_appointment_history( $appt_id, 'rescheduled', [
             'old_date' => $old_date,
             'old_time' => $old_time,
@@ -3766,7 +3740,7 @@ class DPS_Agenda_Addon {
             'new_time' => $new_time,
         ] );
         
-        // Disparar hook para notificações (pode ser usado por outros add-ons)
+        // Disparar hook para notificaÃƒÂ§ÃƒÂµes (pode ser usado por outros add-ons)
         do_action( 'dps_appointment_rescheduled', $appt_id, $new_date, $new_time, $old_date, $old_time );
         
         wp_send_json_success( [
@@ -3777,7 +3751,7 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * AJAX handler para obter histórico de alterações de um agendamento.
+     * AJAX handler para obter histÃƒÂ³rico de alteraÃƒÂ§ÃƒÂµes de um agendamento.
      *
      * @since 1.3.2
      * @return void
@@ -3785,17 +3759,17 @@ class DPS_Agenda_Addon {
     public function get_appointment_history_ajax() {
         // Verificar nonce
         if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'dps_appointment_history' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
         
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
         
         $appt_id = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : 0;
         
         if ( ! $appt_id ) {
-            wp_send_json_error( [ 'message' => __( 'ID inválido.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'ID invÃƒÂ¡lido.', 'dps-agenda-addon' ) ] );
         }
         
         $history = get_post_meta( $appt_id, '_dps_appointment_history', true );
@@ -3803,7 +3777,7 @@ class DPS_Agenda_Addon {
             $history = [];
         }
         
-        // Formatar para exibição
+        // Formatar para exibiÃƒÂ§ÃƒÂ£o
         $formatted = [];
         foreach ( $history as $entry ) {
             $user = get_userdata( $entry['user_id'] ?? 0 );
@@ -3821,7 +3795,7 @@ class DPS_Agenda_Addon {
     /**
      * AJAX handler para obter KPIs administrativos.
      *
-     * Retorna métricas consolidadas para o dashboard administrativo.
+     * Retorna mÃƒÂ©tricas consolidadas para o dashboard administrativo.
      *
      * @since 1.3.2
      * @return void
@@ -3829,11 +3803,11 @@ class DPS_Agenda_Addon {
     public function get_admin_kpis_ajax() {
         // Verificar nonce
         if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'dps_admin_kpis' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
         
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
         
         $date = isset( $_POST['date'] ) ? sanitize_text_field( $_POST['date'] ) : current_time( 'Y-m-d' );
@@ -3939,7 +3913,7 @@ class DPS_Agenda_Addon {
         }
         $cancel_rate = $week_total > 0 ? round( ( $week_canceled / $week_total ) * 100, 1 ) : 0;
         
-        // Média de atendimentos por dia (últimos 7 dias)
+        // MÃƒÂ©dia de atendimentos por dia (ÃƒÂºltimos 7 dias)
         $seven_days_ago = date( 'Y-m-d', strtotime( '-7 days', strtotime( $date ) ) );
         $recent_appointments = get_posts( [
             'post_type'      => 'dps_agendamento',
@@ -3978,13 +3952,13 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Registra alteração de status no histórico do agendamento.
+     * Registra alteraÃƒÂ§ÃƒÂ£o de status no histÃƒÂ³rico do agendamento.
      *
      * @since 1.3.2
      * @param int    $appt_id    ID do agendamento.
      * @param string $old_status Status anterior.
      * @param string $new_status Novo status.
-     * @param int    $user_id    ID do usuário que fez a alteração.
+     * @param int    $user_id    ID do usuÃƒÂ¡rio que fez a alteraÃƒÂ§ÃƒÂ£o.
      * @return void
      */
     public function log_status_change( $appt_id, $old_status, $new_status, $user_id ) {
@@ -3995,11 +3969,11 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Adiciona entrada ao histórico de um agendamento.
+     * Adiciona entrada ao histÃƒÂ³rico de um agendamento.
      *
      * @since 1.3.2
      * @param int    $appt_id ID do agendamento.
-     * @param string $action  Tipo de ação (created, status_change, rescheduled).
+     * @param string $action  Tipo de aÃƒÂ§ÃƒÂ£o (created, status_change, rescheduled).
      * @param array  $details Detalhes adicionais.
      * @return void
      */
@@ -4025,23 +3999,23 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Renderiza o dashboard de KPIs como seção colapsável no final da agenda.
+     * Renderiza o dashboard de KPIs como seÃƒÂ§ÃƒÂ£o colapsÃƒÂ¡vel no final da agenda.
      *
-     * @deprecated 1.6.0 Funcionalidade movida para a aba Estatísticas. Use filtro de período na aba Estatísticas.
+     * @deprecated 1.6.0 Funcionalidade movida para a aba EstatÃƒÂ­sticas. Use filtro de perÃƒÂ­odo na aba EstatÃƒÂ­sticas.
      * @since 1.3.2
-     * @since 1.4.1 Modificado para usar <details> colapsável, fechado por padrão
+     * @since 1.4.1 Modificado para usar <details> colapsÃƒÂ¡vel, fechado por padrÃƒÂ£o
      * @param string $date Data selecionada.
      * @return void
      */
     private function render_admin_dashboard( $date ) {
-        _deprecated_function( __METHOD__, '1.6.0', __( 'Aba Estatísticas', 'dps-agenda-addon' ) );
+        _deprecated_function( __METHOD__, '1.6.0', __( 'Aba EstatÃƒÂ­sticas', 'dps-agenda-addon' ) );
         
         $kpis = $this->calculate_admin_kpis( $date );
         $status_config = self::get_status_config();
         $date_formatted = date_i18n( 'd/m/Y', strtotime( $date ) );
         
         echo '<details class="dps-summary-report">';
-        echo '<summary>📊 ' . esc_html__( 'Resumo do Dia', 'dps-agenda-addon' ) . ' - ' . esc_html( $date_formatted ) . '</summary>';
+        echo '<summary>Ã°Å¸â€œÅ  ' . esc_html__( 'Resumo do Dia', 'dps-agenda-addon' ) . ' - ' . esc_html( $date_formatted ) . '</summary>';
         echo '<div class="dps-summary-content">';
         echo '<div class="dps-kpi-grid">';
         
@@ -4061,23 +4035,23 @@ class DPS_Agenda_Addon {
         
         // Card: Faturamento Estimado
         echo '<div class="dps-kpi-card dps-kpi-revenue">';
-        echo '<span class="dps-kpi-icon">💰</span>';
+        echo '<span class="dps-kpi-icon">Ã°Å¸â€™Â°</span>';
         echo '<span class="dps-kpi-value">' . esc_html( $kpis['revenue_formatted'] ) . '</span>';
         echo '<span class="dps-kpi-label">' . esc_html__( 'Faturamento Est.', 'dps-agenda-addon' ) . '</span>';
         echo '</div>';
         
         // Card: Taxa de Cancelamento
         echo '<div class="dps-kpi-card dps-kpi-cancel">';
-        echo '<span class="dps-kpi-icon">📉</span>';
+        echo '<span class="dps-kpi-icon">Ã°Å¸â€œâ€°</span>';
         echo '<span class="dps-kpi-value">' . esc_html( $kpis['cancel_rate'] ) . '%</span>';
         echo '<span class="dps-kpi-label">' . esc_html__( 'Cancelamentos (semana)', 'dps-agenda-addon' ) . '</span>';
         echo '</div>';
         
-        // Card: Média Diária
+        // Card: MÃƒÂ©dia DiÃƒÂ¡ria
         echo '<div class="dps-kpi-card dps-kpi-avg">';
-        echo '<span class="dps-kpi-icon">📈</span>';
+        echo '<span class="dps-kpi-icon">Ã°Å¸â€œË†</span>';
         echo '<span class="dps-kpi-value">' . esc_html( $kpis['avg_daily'] ) . '</span>';
-        echo '<span class="dps-kpi-label">' . esc_html__( 'Média/dia (7d)', 'dps-agenda-addon' ) . '</span>';
+        echo '<span class="dps-kpi-label">' . esc_html__( 'MÃƒÂ©dia/dia (7d)', 'dps-agenda-addon' ) . '</span>';
         echo '</div>';
         
         echo '</div>'; // .dps-kpi-grid
@@ -4086,7 +4060,7 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Retorna a URL da página atual.
+     * Retorna a URL da pÃƒÂ¡gina atual.
      *
      * @since 1.5.0
      * @return string
@@ -4119,7 +4093,7 @@ class DPS_Agenda_Addon {
     }
 
     /* ===========================
-       CHECKLIST OPERACIONAL — AJAX
+       CHECKLIST OPERACIONAL Ã¢â‚¬â€ AJAX
        =========================== */
 
     /**
@@ -4131,12 +4105,12 @@ class DPS_Agenda_Addon {
      */
     public function checklist_update_ajax() {
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
 
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checklist' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
 
         $appointment_id = isset( $_POST['appointment_id'] ) ? absint( $_POST['appointment_id'] ) : 0;
@@ -4144,13 +4118,13 @@ class DPS_Agenda_Addon {
         $status         = isset( $_POST['status'] ) ? sanitize_text_field( $_POST['status'] ) : '';
 
         if ( ! $appointment_id || ! $step_key || ! $status ) {
-            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Dados invÃƒÂ¡lidos.', 'dps-agenda-addon' ) ] );
         }
 
         $updated = DPS_Agenda_Checklist_Service::update_step( $appointment_id, $step_key, $status );
 
         if ( ! $updated ) {
-            wp_send_json_error( [ 'message' => __( 'Não foi possível atualizar o checklist.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'NÃƒÂ£o foi possÃƒÂ­vel atualizar o checklist.', 'dps-agenda-addon' ) ] );
         }
 
         wp_send_json_success( [
@@ -4169,12 +4143,12 @@ class DPS_Agenda_Addon {
      */
     public function checklist_rework_ajax() {
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
 
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checklist' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
 
         $appointment_id = isset( $_POST['appointment_id'] ) ? absint( $_POST['appointment_id'] ) : 0;
@@ -4182,19 +4156,19 @@ class DPS_Agenda_Addon {
         $reason         = isset( $_POST['reason'] ) ? sanitize_textarea_field( $_POST['reason'] ) : '';
 
         if ( ! $appointment_id || ! $step_key ) {
-            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Dados invÃƒÂ¡lidos.', 'dps-agenda-addon' ) ] );
         }
 
         $registered = DPS_Agenda_Checklist_Service::register_rework( $appointment_id, $step_key, $reason );
 
         if ( ! $registered ) {
-            wp_send_json_error( [ 'message' => __( 'Não foi possível registrar o retrabalho.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'NÃƒÂ£o foi possÃƒÂ­vel registrar o retrabalho.', 'dps-agenda-addon' ) ] );
         }
 
         if ( class_exists( 'DPS_Logger' ) ) {
             DPS_Logger::info(
                 sprintf(
-                    'Agendamento #%d: Retrabalho registrado na etapa "%s" — %s',
+                    'Agendamento #%d: Retrabalho registrado na etapa "%s" Ã¢â‚¬â€ %s',
                     $appointment_id,
                     $step_key,
                     $reason ?: '(sem motivo)'
@@ -4217,7 +4191,7 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * AJAX: Retorna o HTML do painel de checklist para exibição em popup.
+     * AJAX: Retorna o HTML do painel de checklist para exibiÃƒÂ§ÃƒÂ£o em popup.
      *
      * Espera POST: appointment_id, nonce (dps_checklist).
      *
@@ -4225,17 +4199,17 @@ class DPS_Agenda_Addon {
      */
     public function get_checklist_panel_ajax() {
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
 
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checklist' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
 
         $appointment_id = isset( $_POST['appointment_id'] ) ? absint( $_POST['appointment_id'] ) : 0;
         if ( ! $appointment_id ) {
-            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Dados invÃƒÂ¡lidos.', 'dps-agenda-addon' ) ] );
         }
 
         $html = self::render_checklist_panel( $appointment_id );
@@ -4244,7 +4218,7 @@ class DPS_Agenda_Addon {
     }
 
     /* ===========================
-       CHECK-IN / CHECK-OUT — AJAX
+       CHECK-IN / CHECK-OUT Ã¢â‚¬â€ AJAX
        =========================== */
 
     /**
@@ -4256,12 +4230,12 @@ class DPS_Agenda_Addon {
      */
     public function appointment_checkin_ajax() {
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
 
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checkin' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
 
         $appointment_id = isset( $_POST['appointment_id'] ) ? absint( $_POST['appointment_id'] ) : 0;
@@ -4269,13 +4243,13 @@ class DPS_Agenda_Addon {
         $safety_items   = isset( $_POST['safety_items'] ) && is_array( $_POST['safety_items'] ) ? $_POST['safety_items'] : [];
 
         if ( ! $appointment_id ) {
-            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Agendamento nÃƒÂ£o encontrado.', 'dps-agenda-addon' ) ] );
         }
 
         $saved = DPS_Agenda_Checkin_Service::checkin( $appointment_id, $observations, $safety_items );
 
         if ( ! $saved ) {
-            wp_send_json_error( [ 'message' => __( 'Não foi possível registrar o check-in.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'NÃƒÂ£o foi possÃƒÂ­vel registrar o check-in.', 'dps-agenda-addon' ) ] );
         }
 
         if ( class_exists( 'DPS_Logger' ) ) {
@@ -4301,12 +4275,12 @@ class DPS_Agenda_Addon {
      */
     public function appointment_checkout_ajax() {
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'PermissÃƒÂ£o negada.', 'dps-agenda-addon' ) ] );
         }
 
         $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
         if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checkin' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Falha na verificaÃƒÂ§ÃƒÂ£o de seguranÃƒÂ§a.', 'dps-agenda-addon' ) ] );
         }
 
         $appointment_id = isset( $_POST['appointment_id'] ) ? absint( $_POST['appointment_id'] ) : 0;
@@ -4314,24 +4288,24 @@ class DPS_Agenda_Addon {
         $safety_items   = isset( $_POST['safety_items'] ) && is_array( $_POST['safety_items'] ) ? $_POST['safety_items'] : [];
 
         if ( ! $appointment_id ) {
-            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Agendamento nÃƒÂ£o encontrado.', 'dps-agenda-addon' ) ] );
         }
 
         if ( ! DPS_Agenda_Checkin_Service::has_checkin( $appointment_id ) ) {
-            wp_send_json_error( [ 'message' => __( 'É necessário fazer o check-in antes do check-out.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Ãƒâ€° necessÃƒÂ¡rio fazer o check-in antes do check-out.', 'dps-agenda-addon' ) ] );
         }
 
         $saved = DPS_Agenda_Checkin_Service::checkout( $appointment_id, $observations, $safety_items );
 
         if ( ! $saved ) {
-            wp_send_json_error( [ 'message' => __( 'Não foi possível registrar o check-out.', 'dps-agenda-addon' ) ] );
+            wp_send_json_error( [ 'message' => __( 'NÃƒÂ£o foi possÃƒÂ­vel registrar o check-out.', 'dps-agenda-addon' ) ] );
         }
 
         if ( class_exists( 'DPS_Logger' ) ) {
             $duration = DPS_Agenda_Checkin_Service::get_duration_minutes( $appointment_id );
             DPS_Logger::info(
                 sprintf(
-                    'Agendamento #%d: Check-out registrado (duração: %s min)',
+                    'Agendamento #%d: Check-out registrado (duraÃƒÂ§ÃƒÂ£o: %s min)',
                     $appointment_id,
                     $duration !== false ? $duration : '?'
                 ),
@@ -4348,7 +4322,7 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Monta a resposta padrão do painel de check-in/check-out.
+     * Monta a resposta padrÃƒÂ£o do painel de check-in/check-out.
      *
      * @since 1.2.0
      * @param int $appointment_id ID do agendamento.
@@ -4380,7 +4354,7 @@ class DPS_Agenda_Addon {
             ];
         }
 
-        // Gera link WhatsApp se houver check-in e helpers disponíveis.
+        // Gera link WhatsApp se houver check-in e helpers disponÃƒÂ­veis.
         if ( $checkin && class_exists( 'DPS_WhatsApp_Helper' ) ) {
             $response['whatsapp_url'] = $this->build_checkin_whatsapp_url( $appointment_id );
         }
@@ -4389,11 +4363,11 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Monta a URL do WhatsApp com mensagem de relatório do check-in/check-out.
+     * Monta a URL do WhatsApp com mensagem de relatÃƒÂ³rio do check-in/check-out.
      *
      * @since 1.3.0
      * @param int $appointment_id ID do agendamento.
-     * @return string URL do WhatsApp ou string vazia se telefone indisponível.
+     * @return string URL do WhatsApp ou string vazia se telefone indisponÃƒÂ­vel.
      */
     private function build_checkin_whatsapp_url( $appointment_id ) {
         $client_id = get_post_meta( $appointment_id, 'appointment_client_id', true );
@@ -4443,13 +4417,13 @@ class DPS_Agenda_Addon {
     }
 
     /* ===========================
-       RENDER HELPERS — Checklist & Check-in/Check-out
+       RENDER HELPERS Ã¢â‚¬â€ Checklist & Check-in/Check-out
        =========================== */
 
     /**
      * Renderiza o painel do Checklist Operacional para um agendamento.
      *
-     * Pode ser chamado em templates de cartão de agendamento na agenda.
+     * Pode ser chamado em templates de cartÃƒÂ£o de agendamento na agenda.
      *
      * @since 1.2.0
      * @param int $appointment_id ID do agendamento.
@@ -4468,7 +4442,7 @@ class DPS_Agenda_Addon {
         ob_start();
         ?>
         <div class="dps-checklist-panel" data-appointment="<?php echo esc_attr( $appointment_id ); ?>">
-            <h4>📋 <?php esc_html_e( 'Checklist Operacional', 'dps-agenda-addon' ); ?></h4>
+            <h4>Ã°Å¸â€œâ€¹ <?php esc_html_e( 'Checklist Operacional', 'dps-agenda-addon' ); ?></h4>
 
             <div class="dps-checklist-progress">
                 <div class="dps-checklist-progress-bar">
@@ -4488,18 +4462,18 @@ class DPS_Agenda_Addon {
                     <span class="dps-checklist-step-label"><?php echo esc_html( $step['label'] ); ?></span>
 
                     <?php if ( $rework_count > 0 ) : ?>
-                        <span class="dps-checklist-rework-badge">🔄 <?php echo esc_html( $rework_count ); ?></span>
+                        <span class="dps-checklist-rework-badge">Ã°Å¸â€â€ž <?php echo esc_html( $rework_count ); ?></span>
                     <?php endif; ?>
 
                     <span class="dps-checklist-step-actions">
                         <?php if ( 'pending' === $status ) : ?>
-                            <button class="dps-checklist-btn dps-checklist-btn--done" type="button">✓ <?php esc_html_e( 'Concluir', 'dps-agenda-addon' ); ?></button>
+                            <button class="dps-checklist-btn dps-checklist-btn--done" type="button">Ã¢Å“â€œ <?php esc_html_e( 'Concluir', 'dps-agenda-addon' ); ?></button>
                             <button class="dps-checklist-btn dps-checklist-btn--skip" type="button"><?php esc_html_e( 'Pular', 'dps-agenda-addon' ); ?></button>
                         <?php elseif ( 'done' === $status ) : ?>
-                            <button class="dps-checklist-btn dps-checklist-btn--undo" type="button">↩ <?php esc_html_e( 'Desfazer', 'dps-agenda-addon' ); ?></button>
-                            <button class="dps-checklist-btn dps-checklist-btn--rework" type="button">🔄 <?php esc_html_e( 'Refazer', 'dps-agenda-addon' ); ?></button>
+                            <button class="dps-checklist-btn dps-checklist-btn--undo" type="button">Ã¢â€ Â© <?php esc_html_e( 'Desfazer', 'dps-agenda-addon' ); ?></button>
+                            <button class="dps-checklist-btn dps-checklist-btn--rework" type="button">Ã°Å¸â€â€ž <?php esc_html_e( 'Refazer', 'dps-agenda-addon' ); ?></button>
                         <?php elseif ( 'skipped' === $status ) : ?>
-                            <button class="dps-checklist-btn dps-checklist-btn--undo" type="button">↩ <?php esc_html_e( 'Desfazer', 'dps-agenda-addon' ); ?></button>
+                            <button class="dps-checklist-btn dps-checklist-btn--undo" type="button">Ã¢â€ Â© <?php esc_html_e( 'Desfazer', 'dps-agenda-addon' ); ?></button>
                         <?php endif; ?>
                     </span>
                 </li>
@@ -4513,7 +4487,7 @@ class DPS_Agenda_Addon {
     /**
      * Renderiza o painel de Check-in / Check-out para um agendamento.
      *
-     * Pode ser chamado em templates de cartão de agendamento na agenda.
+     * Pode ser chamado em templates de cartÃƒÂ£o de agendamento na agenda.
      *
      * @since 1.2.0
      * @param int $appointment_id ID do agendamento.
@@ -4534,24 +4508,24 @@ class DPS_Agenda_Addon {
         ob_start();
         ?>
         <div class="dps-checkin-panel" data-appointment="<?php echo esc_attr( $appointment_id ); ?>">
-            <h4>🏥 <?php esc_html_e( 'Check-in / Check-out', 'dps-agenda-addon' ); ?></h4>
+            <h4>Ã°Å¸ÂÂ¥ <?php esc_html_e( 'Check-in / Check-out', 'dps-agenda-addon' ); ?></h4>
 
             <div class="dps-checkin-status">
                 <?php if ( $checkin ) : ?>
                     <span class="dps-checkin-status-badge dps-checkin-status-badge--in">
-                        📥 Check-in: <?php echo esc_html( mysql2date( 'H:i', $checkin['time'] ) ); ?>
+                        Ã°Å¸â€œÂ¥ Check-in: <?php echo esc_html( mysql2date( 'H:i', $checkin['time'] ) ); ?>
                     </span>
                 <?php endif; ?>
 
                 <?php if ( $checkout ) : ?>
                     <span class="dps-checkin-status-badge dps-checkin-status-badge--out">
-                        📤 Check-out: <?php echo esc_html( mysql2date( 'H:i', $checkout['time'] ) ); ?>
+                        Ã°Å¸â€œÂ¤ Check-out: <?php echo esc_html( mysql2date( 'H:i', $checkout['time'] ) ); ?>
                     </span>
                 <?php endif; ?>
 
                 <?php if ( false !== $duration ) : ?>
                     <span class="dps-checkin-status-badge dps-checkin-status-badge--duration">
-                        ⏱️ <?php printf( esc_html__( '%d min', 'dps-agenda-addon' ), $duration ); ?>
+                        Ã¢ÂÂ±Ã¯Â¸Â <?php printf( esc_html__( '%d min', 'dps-agenda-addon' ), $duration ); ?>
                     </span>
                 <?php endif; ?>
 
@@ -4589,21 +4563,21 @@ class DPS_Agenda_Addon {
                 </div>
 
                 <div class="dps-checkin-observations">
-                    <label><?php esc_html_e( 'Observações gerais', 'dps-agenda-addon' ); ?></label>
+                    <label><?php esc_html_e( 'ObservaÃƒÂ§ÃƒÂµes gerais', 'dps-agenda-addon' ); ?></label>
                     <textarea placeholder="<?php esc_attr_e( 'Ex.: pet chegou agitado, tutor pediu corte mais curto...', 'dps-agenda-addon' ); ?>"></textarea>
                 </div>
             <?php endif; ?>
 
             <div class="dps-checkin-actions">
                 <?php if ( ! $checkin ) : ?>
-                    <button type="button" class="dps-checkin-btn dps-checkin-btn--checkin">📥 <?php esc_html_e( 'Check-in', 'dps-agenda-addon' ); ?></button>
+                    <button type="button" class="dps-checkin-btn dps-checkin-btn--checkin">Ã°Å¸â€œÂ¥ <?php esc_html_e( 'Check-in', 'dps-agenda-addon' ); ?></button>
                 <?php elseif ( ! $checkout ) : ?>
-                    <button type="button" class="dps-checkin-btn dps-checkin-btn--checkout">📤 <?php esc_html_e( 'Check-out', 'dps-agenda-addon' ); ?></button>
+                    <button type="button" class="dps-checkin-btn dps-checkin-btn--checkout">Ã°Å¸â€œÂ¤ <?php esc_html_e( 'Check-out', 'dps-agenda-addon' ); ?></button>
                 <?php endif; ?>
             </div>
 
             <?php
-            // Botão WhatsApp — exibido quando há check-in registrado.
+            // BotÃƒÂ£o WhatsApp Ã¢â‚¬â€ exibido quando hÃƒÂ¡ check-in registrado.
             if ( $checkin ) :
                 $instance   = self::get_instance();
                 $wa_url     = $instance->build_checkin_whatsapp_url( $appointment_id );
@@ -4614,7 +4588,7 @@ class DPS_Agenda_Addon {
                        target="_blank"
                        rel="noopener noreferrer"
                        class="dps-checkin-btn dps-checkin-btn--whatsapp">
-                        📱 <?php esc_html_e( 'Enviar relatório via WhatsApp', 'dps-agenda-addon' ); ?>
+                        Ã°Å¸â€œÂ± <?php esc_html_e( 'Enviar relatÃƒÂ³rio via WhatsApp', 'dps-agenda-addon' ); ?>
                     </a>
                 </div>
             <?php endif; ?>
@@ -4624,17 +4598,17 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Renderiza resumo compacto de Checklist e Check-in/Check-out para uso em históricos.
+     * Renderiza resumo compacto de Checklist e Check-in/Check-out para uso em histÃƒÂ³ricos.
      *
-     * Exibe informações somente-leitura sobre o progresso do checklist operacional,
-     * horários de check-in/check-out, duração e itens de segurança identificados.
-     * Projetado para ser chamado de qualquer view de histórico (aba histórico,
-     * página do cliente, portal do cliente, timeline).
+     * Exibe informaÃƒÂ§ÃƒÂµes somente-leitura sobre o progresso do checklist operacional,
+     * horÃƒÂ¡rios de check-in/check-out, duraÃƒÂ§ÃƒÂ£o e itens de seguranÃƒÂ§a identificados.
+     * Projetado para ser chamado de qualquer view de histÃƒÂ³rico (aba histÃƒÂ³rico,
+     * pÃƒÂ¡gina do cliente, portal do cliente, timeline).
      *
      * @since 1.3.0
      * @param int  $appointment_id ID do agendamento.
-     * @param bool $is_public      Se true, omite informações sensíveis (ex.: portal do cliente).
-     * @return string HTML do resumo ou string vazia se não houver dados.
+     * @param bool $is_public      Se true, omite informaÃƒÂ§ÃƒÂµes sensÃƒÂ­veis (ex.: portal do cliente).
+     * @return string HTML do resumo ou string vazia se nÃƒÂ£o houver dados.
      */
     public static function render_checkin_checklist_summary( $appointment_id, $is_public = false ) {
         $appointment_id = absint( $appointment_id );
@@ -4642,7 +4616,7 @@ class DPS_Agenda_Addon {
             return '';
         }
 
-        // Verifica se as service classes estão disponíveis.
+        // Verifica se as service classes estÃƒÂ£o disponÃƒÂ­veis.
         if ( ! class_exists( 'DPS_Agenda_Checklist_Service' ) || ! class_exists( 'DPS_Agenda_Checkin_Service' ) ) {
             return '';
         }
@@ -4654,7 +4628,7 @@ class DPS_Agenda_Addon {
         $duration     = DPS_Agenda_Checkin_Service::get_duration_minutes( $appointment_id );
         $summary      = DPS_Agenda_Checkin_Service::get_safety_summary( $appointment_id );
 
-        // Se não há dados relevantes, retorna vazio.
+        // Se nÃƒÂ£o hÃƒÂ¡ dados relevantes, retorna vazio.
         $has_checklist = $progress > 0;
         $has_checkin   = (bool) $checkin;
         if ( ! $has_checklist && ! $has_checkin ) {
@@ -4666,33 +4640,33 @@ class DPS_Agenda_Addon {
         <div class="dps-history-ops-summary">
             <?php if ( ! $is_public && $has_checklist ) : ?>
                 <div class="dps-history-ops-row">
-                    <span class="dps-history-ops-label">📋 <?php esc_html_e( 'Checklist', 'dps-agenda-addon' ); ?></span>
+                    <span class="dps-history-ops-label">Ã°Å¸â€œâ€¹ <?php esc_html_e( 'Checklist', 'dps-agenda-addon' ); ?></span>
                     <span class="dps-history-ops-value <?php echo 100 === $progress ? 'dps-history-ops-value--complete' : ''; ?>">
                         <?php echo esc_html( $progress ); ?>%
                     </span>
                     <?php if ( $rework_count > 0 ) : ?>
-                        <span class="dps-history-ops-badge dps-history-ops-badge--rework">🔄 <?php echo esc_html( $rework_count ); ?></span>
+                        <span class="dps-history-ops-badge dps-history-ops-badge--rework">Ã°Å¸â€â€ž <?php echo esc_html( $rework_count ); ?></span>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
 
             <?php if ( $has_checkin ) : ?>
                 <div class="dps-history-ops-row">
-                    <span class="dps-history-ops-label">📥 <?php esc_html_e( 'Check-in', 'dps-agenda-addon' ); ?></span>
+                    <span class="dps-history-ops-label">Ã°Å¸â€œÂ¥ <?php esc_html_e( 'Check-in', 'dps-agenda-addon' ); ?></span>
                     <span class="dps-history-ops-value"><?php echo esc_html( mysql2date( 'H:i', $checkin['time'] ) ); ?></span>
                 </div>
             <?php endif; ?>
 
             <?php if ( $checkout ) : ?>
                 <div class="dps-history-ops-row">
-                    <span class="dps-history-ops-label">📤 <?php esc_html_e( 'Check-out', 'dps-agenda-addon' ); ?></span>
+                    <span class="dps-history-ops-label">Ã°Å¸â€œÂ¤ <?php esc_html_e( 'Check-out', 'dps-agenda-addon' ); ?></span>
                     <span class="dps-history-ops-value"><?php echo esc_html( mysql2date( 'H:i', $checkout['time'] ) ); ?></span>
                 </div>
             <?php endif; ?>
 
             <?php if ( false !== $duration ) : ?>
                 <div class="dps-history-ops-row">
-                    <span class="dps-history-ops-label">⏱️ <?php esc_html_e( 'Duração', 'dps-agenda-addon' ); ?></span>
+                    <span class="dps-history-ops-label">Ã¢ÂÂ±Ã¯Â¸Â <?php esc_html_e( 'DuraÃƒÂ§ÃƒÂ£o', 'dps-agenda-addon' ); ?></span>
                     <span class="dps-history-ops-value"><?php printf( esc_html__( '%d min', 'dps-agenda-addon' ), $duration ); ?></span>
                 </div>
             <?php endif; ?>
@@ -4709,14 +4683,14 @@ class DPS_Agenda_Addon {
 
             <?php if ( $has_checkin && ! empty( $checkin['observations'] ) ) : ?>
                 <div class="dps-history-ops-obs">
-                    <span class="dps-history-ops-label">📝</span>
+                    <span class="dps-history-ops-label">Ã°Å¸â€œÂ</span>
                     <span class="dps-history-ops-obs-text"><?php echo esc_html( $checkin['observations'] ); ?></span>
                 </div>
             <?php endif; ?>
 
             <?php if ( $checkout && ! empty( $checkout['observations'] ) ) : ?>
                 <div class="dps-history-ops-obs">
-                    <span class="dps-history-ops-label">📝</span>
+                    <span class="dps-history-ops-label">Ã°Å¸â€œÂ</span>
                     <span class="dps-history-ops-obs-text"><?php echo esc_html( $checkout['observations'] ); ?></span>
                 </div>
             <?php endif; ?>
@@ -4747,19 +4721,19 @@ class DPS_Agenda_Addon {
         ob_start();
         ?>
         <span class="dps-checklist-compact" title="<?php esc_attr_e( 'Checklist Operacional', 'dps-agenda-addon' ); ?>">
-            📋 <?php echo esc_html( $progress ); ?>%
+            Ã°Å¸â€œâ€¹ <?php echo esc_html( $progress ); ?>%
             <?php if ( $rework_count > 0 ) : ?>
-                <span class="dps-checklist-rework-badge">🔄 <?php echo esc_html( $rework_count ); ?></span>
+                <span class="dps-checklist-rework-badge">Ã°Å¸â€â€ž <?php echo esc_html( $rework_count ); ?></span>
             <?php endif; ?>
         </span>
 
         <span class="dps-checkin-compact" title="<?php esc_attr_e( 'Check-in / Check-out', 'dps-agenda-addon' ); ?>">
             <?php if ( $has_checkout ) : ?>
-                ✅
+                Ã¢Å“â€¦
             <?php elseif ( $has_checkin ) : ?>
-                📥
+                Ã°Å¸â€œÂ¥
             <?php else : ?>
-                ⬜
+                Ã¢Â¬Å“
             <?php endif; ?>
         </span>
 
@@ -4776,15 +4750,15 @@ class DPS_Agenda_Addon {
 }
 
 /**
- * Inicializa o Agenda Add-on após o hook 'init' para garantir que o text domain seja carregado primeiro.
- * Usa prioridade 5 para rodar após o carregamento do text domain (prioridade 1) mas antes
+ * Inicializa o Agenda Add-on apÃƒÂ³s o hook 'init' para garantir que o text domain seja carregado primeiro.
+ * Usa prioridade 5 para rodar apÃƒÂ³s o carregamento do text domain (prioridade 1) mas antes
  * de outros registros (prioridade 10).
  */
 function dps_agenda_init_addon() {
     if ( class_exists( 'DPS_Agenda_Addon' ) ) {
         DPS_Agenda_Addon::get_instance();
         
-        // Inicializa o Hub centralizado de Agenda (Fase 2 - Reorganização de Menus)
+        // Inicializa o Hub centralizado de Agenda (Fase 2 - ReorganizaÃƒÂ§ÃƒÂ£o de Menus)
         if ( class_exists( 'DPS_Agenda_Hub' ) ) {
             DPS_Agenda_Hub::get_instance();
         }

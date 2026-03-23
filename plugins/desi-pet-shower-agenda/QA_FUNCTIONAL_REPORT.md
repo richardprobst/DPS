@@ -28,7 +28,6 @@
 | **Confirmar atendimento** | Tab 3 - Detalhes | Clicar botão ✅ | Confirmação marcada | ✅ OK |
 | **TaxiDog - Atualizar** | Tab 3 - Detalhes | Dropdown TaxiDog | Status TaxiDog atualizado | ✅ OK |
 | **TaxiDog - Solicitar** | Tab 3 - Detalhes | Botão "Solicitar TaxiDog" | TaxiDog habilitado para agendamento | ✅ OK |
-| **Exportar CSV** | Agenda | Botão "📥 Exportar" | Download de arquivo CSV | ✅ OK |
 | **Reagendar** | Agenda | Botão "📅 Reagendar" | Modal de reagendamento abre | ✅ OK |
 | **Reenviar pagamento** | Tab 2 - Operação | Botão "🔄 Reenviar" | Link de pagamento reenviado | ✅ OK |
 | Prevenção duplo clique | Todos os botões | - | Botões desabilitados durante request | ✅ OK |
@@ -55,7 +54,6 @@
 | **Modal de serviços** | Tab 1 | Clicar valor/serviço | Lista de serviços + total + observações | ✅ OK |
 | **Modal de pagamento** | Tab 2 | Clicar em "💳 Enviar" | Link WhatsApp + copiar link | ✅ OK |
 | **Modal de reagendamento** | Agenda | Botão reagendar | Inputs de data/hora + salvar | ✅ OK |
-| **Modal de novo agendamento** | Agenda | Botão "+ Novo" | Formulário de agendamento | ✅ OK |
 | Fechar com X | Modais | Clicar X | Modal fecha | ✅ OK |
 | Fechar clicando fora | Modais | Clicar backdrop | Modal fecha | ✅ OK |
 | Fechar com ESC | Modais | Tecla ESC | Modal fecha | ✅ OK |
@@ -81,7 +79,6 @@
 | `dps_agenda_save_capacity` | ✅ | `manage_options` | ✅ | ✅ OK |
 | `dps_agenda_resend_payment` | ✅ | `manage_options` | ✅ | ✅ OK |
 | `dps_get_services_details` | ✅ | `manage_options` | ✅ | ✅ OK |
-| `dps_agenda_export_csv` | ✅ | `manage_options` | ✅ | ✅ OK |
 | `dps_agenda_calendar_events` | ✅ | `manage_options` | ✅ | ✅ OK |
 | `dps_quick_reschedule` | ✅ | `manage_options` | ✅ | ✅ OK |
 | `dps_get_appointment_history` | ✅ | `manage_options` | ✅ | ✅ OK |
@@ -111,8 +108,7 @@ O código está bem estruturado e segue boas práticas de desenvolvimento WordPr
 ### Observações menores (não bloqueantes):
 
 1. **Histórico de alterações usa `alert()`** - Poderia usar modal personalizado para melhor UX
-2. **Aba "Capacidade" é placeholder** - Funcionalidade em desenvolvimento (documentada)
-3. **Mensagens de erro usam `alert()`** - Poderia ter UI mais elegante em alguns casos
+2. **Mensagens de erro usam `alert()`** - Poderia ter UI mais elegante em alguns casos
 
 ---
 
@@ -130,17 +126,7 @@ O código está bem estruturado e segue boas práticas de desenvolvimento WordPr
 | 5 | Verificar linha | Classe `status-finalizado` aplicada |
 | 6 | Recarregar página | Status persistido no banco |
 
-### Caso de Teste 2: Exportar CSV
-**Pré-condição:** Usuário logado, agendamentos existentes no dia
-
-| Passo | Ação | Resultado Esperado |
-|-------|------|---------------------|
-| 1 | Clicar botão "📥 Exportar" | Botão mostra "⏳ Exportando..." |
-| 2 | Aguardar processamento | Download inicia automaticamente |
-| 3 | Verificar arquivo | CSV válido com dados corretos |
-| 4 | Botão restaura estado | Texto "✅ Exportado!" por 2s |
-
-### Caso de Teste 3: Reagendamento Rápido
+### Caso de Teste 2: Reagendamento Rápido
 **Pré-condição:** Usuário logado, agendamento existente
 
 | Passo | Ação | Resultado Esperado |
@@ -151,7 +137,7 @@ O código está bem estruturado e segue boas práticas de desenvolvimento WordPr
 | 4 | Clicar "Salvar" | Modal fecha, feedback visual |
 | 5 | Verificar agendamento | Nova data/hora aplicada |
 
-### Caso de Teste 4: Modal de Serviços
+### Caso de Teste 3: Modal de Serviços
 **Pré-condição:** Agendamento com serviços
 
 | Passo | Ação | Resultado Esperado |
@@ -162,7 +148,7 @@ O código está bem estruturado e segue boas práticas de desenvolvimento WordPr
 | 4 | Verificar observações | Notas exibidas se existirem |
 | 5 | Pressionar ESC | Modal fecha |
 
-### Caso de Teste 6: Conflito de Versão
+### Caso de Teste 4: Conflito de Versão
 **Pré-condição:** Dois usuários editando mesmo agendamento
 
 | Passo | Ação | Resultado Esperado |
@@ -172,7 +158,7 @@ O código está bem estruturado e segue boas práticas de desenvolvimento WordPr
 | 3 | Mensagem exibida | "Atualizado por outro usuário" |
 | 4 | Status revertido | Dropdown volta ao anterior |
 
-### Caso de Teste 7: Permissões
+### Caso de Teste 5: Permissões
 **Pré-condição:** Usuário sem `manage_options`
 
 | Passo | Ação | Resultado Esperado |
@@ -208,20 +194,13 @@ describe('Agenda Add-on', () => {
     cy.get('.dps-services-modal').should('not.exist');
   });
 
-  it('should export CSV', () => {
-    cy.visit('/agenda-de-atendimentos');
-    cy.get('.dps-export-csv-btn').click();
-    cy.get('.dps-export-csv-btn').should('contain', 'Exportando');
-    // Verificar download
-  });
-
   it('should reschedule appointment', () => {
     cy.visit('/agenda-de-atendimentos');
     cy.get('.dps-quick-reschedule').first().click();
-    cy.get('.dps-reschedule-modal').should('be.visible');
+    cy.get('.dps-agenda-dialog').should('be.visible');
     cy.get('#dps-reschedule-date').clear().type('2026-01-10');
     cy.get('.dps-reschedule-btn--save').click();
-    cy.get('.dps-reschedule-modal').should('not.exist');
+    cy.get('.dps-agenda-dialog').should('not.exist');
   });
 
   it('should block unauthorized access', () => {
