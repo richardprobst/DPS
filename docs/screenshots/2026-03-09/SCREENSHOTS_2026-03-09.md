@@ -1,4 +1,4 @@
-# Screenshots 2026-03-09 - Portal do Cliente e Agenda
+﻿# Screenshots 2026-03-09 - Portal do Cliente e Agenda
 
 ## Portal do Cliente - login hibrido
 
@@ -49,8 +49,8 @@
 - Referencia de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
 
 ### Antes/Depois
-- Resumo do antes: topo com pouca hierarquia, filtros dispersos, leitura operacional concentrada apenas nas tabelas, empty state pouco orientado e perda de contexto em parte da navegacao.
-- Resumo do depois: header contextual, CTAs claros, painel unico de filtros, chips com filtros ativos, overview cards, paineis por dia e estado vazio com recuperacao objetiva.
+- Resumo do antes: topo com pouca hierarquia, leitura operacional concentrada apenas nas tabelas, empty state pouco orientado e perda de contexto em parte da navegacao.
+- Resumo do depois: header contextual, CTAs claros, overview cards, paineis por dia e estado vazio com recuperacao objetiva.
 - Arquivos de codigo alterados:
   - `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
   - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
@@ -70,11 +70,11 @@
 - `./agenda-refresh-tablet-840-fullpage.png`
 - `./agenda-refresh-desktop-1200-fullpage.png`
 - `./agenda-refresh-wide-1920-fullpage.png`
-- `./agenda-ux-refresh-preview.html`
 
 ### Observacoes
 - As capturas foram geradas a partir de um preview estatico para registrar a camada visual e responsiva usando o CSS real do add-on.
 - A validacao funcional completa em um WordPress local nao foi executada neste ambiente.
+
 ## Portal do Cliente - home autenticada refresh
 
 ### Contexto

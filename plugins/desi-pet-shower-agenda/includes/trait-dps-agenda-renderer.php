@@ -121,46 +121,6 @@ trait DPS_Agenda_Renderer {
     }
 
     /**
-     * Processa e sanitiza parâmetros da requisição.
-     *
-     * @since 1.3.0
-     * @return array Parâmetros sanitizados.
-     */
-    private function parse_request_params() {
-        $selected_date = isset( $_GET['dps_date'] ) ? sanitize_text_field( $_GET['dps_date'] ) : '';
-        if ( ! $selected_date ) {
-            $selected_date = current_time( 'Y-m-d' );
-        }
-
-        $view = isset( $_GET['view'] ) ? sanitize_text_field( $_GET['view'] ) : 'day';
-        $is_week_view = ( $view === 'week' || $view === 'calendar' );
-        $show_all = isset( $_GET['show_all'] ) ? sanitize_text_field( $_GET['show_all'] ) : '';
-        $group_by_client = isset( $_GET['group_by_client'] ) && $_GET['group_by_client'] === '1';
-
-        // Filtros
-        $filter_client = isset( $_GET['filter_client'] ) ? intval( $_GET['filter_client'] ) : 0;
-        $filter_status = isset( $_GET['filter_status'] ) ? sanitize_text_field( $_GET['filter_status'] ) : '';
-        $filter_service = isset( $_GET['filter_service'] ) ? intval( $_GET['filter_service'] ) : 0;
-        $filter_staff = isset( $_GET['filter_staff'] ) ? intval( $_GET['filter_staff'] ) : 0;
-
-        // Paginação
-        $paged = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
-
-        return [
-            'selected_date'    => $selected_date,
-            'view'             => $view,
-            'is_week_view'     => $is_week_view,
-            'show_all'         => $show_all,
-            'group_by_client'  => $group_by_client,
-            'filter_client'    => $filter_client,
-            'filter_status'    => $filter_status,
-            'filter_service'   => $filter_service,
-            'filter_staff'     => $filter_staff,
-            'paged'            => $paged,
-        ];
-    }
-
-    /**
      * Obtém labels das colunas da tabela.
      *
      * @since 1.3.0
@@ -178,52 +138,6 @@ trait DPS_Agenda_Renderer {
             'confirmation' => __( 'Confirmação', 'dps-agenda-addon' ),
             'charge'       => __( 'Cobrança', 'dps-agenda-addon' ),
         ];
-    }
-
-    /**
-     * Cache para configuração de status.
-     *
-     * @since 1.3.1
-     * @var array|null
-     */
-    private $status_config_cache = null;
-
-    /**
-     * Obtém opções de status para o filtro.
-     * Usa constantes centralizadas da classe principal.
-     *
-     * @since 1.3.0
-     * @since 1.3.1 Refatorado para usar constantes centralizadas com cache.
-     * @return array Opções de status.
-     */
-    private function get_status_options() {
-        if ( null === $this->status_config_cache ) {
-            $this->status_config_cache = DPS_Agenda_Addon::get_status_config();
-        }
-        $options = [ '' => __( 'Todos os status', 'dps-agenda-addon' ) ];
-        foreach ( $this->status_config_cache as $key => $data ) {
-            $options[ $key ] = $data['label'];
-        }
-        return $options;
-    }
-
-    /**
-     * Obtém opções de status para o dropdown na tabela.
-     * Usa constantes centralizadas da classe principal.
-     *
-     * @since 1.3.0
-     * @since 1.3.1 Refatorado para usar constantes centralizadas com cache.
-     * @return array Opções de status.
-     */
-    private function get_table_status_options() {
-        if ( null === $this->status_config_cache ) {
-            $this->status_config_cache = DPS_Agenda_Addon::get_status_config();
-        }
-        $options = [];
-        foreach ( $this->status_config_cache as $key => $data ) {
-            $options[ $key ] = $data['label'];
-        }
-        return $options;
     }
 
     /**
@@ -251,71 +165,6 @@ trait DPS_Agenda_Renderer {
             'prev' => $prev_date,
             'next' => $next_date,
         ];
-    }
-
-    /**
-     * Obtém lista de clientes para o filtro.
-     *
-     * @since 1.3.0
-     * @return array Lista de posts de clientes.
-     */
-    private function get_clients_for_filter() {
-        $clients_limit = apply_filters( 'dps_agenda_clients_limit', DPS_Agenda_Addon::CLIENTS_LIST_LIMIT );
-        
-        return get_posts( [
-            'post_type'      => 'dps_cliente',
-            'posts_per_page' => $clients_limit,
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-            'post_status'    => 'publish',
-        ] );
-    }
-
-    /**
-     * Obtém lista de serviços para o filtro.
-     *
-     * @since 1.3.0
-     * @return array Lista de posts de serviços.
-     */
-    private function get_services_for_filter() {
-        $services_limit = apply_filters( 'dps_agenda_services_limit', DPS_Agenda_Addon::SERVICES_LIST_LIMIT );
-        
-        return get_posts( [
-            'post_type'      => 'dps_service',
-            'posts_per_page' => $services_limit,
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-            'post_status'    => 'publish',
-        ] );
-    }
-
-    /**
-     * Return active staff members for the agenda filter.
-     *
-     * @return WP_User[]
-     */
-    private function get_staff_for_filter() {
-        $staff = get_users(
-            [
-                'role'    => 'dps_groomer',
-                'orderby' => 'display_name',
-                'order'   => 'ASC',
-            ]
-        );
-
-        if ( empty( $staff ) ) {
-            return [];
-        }
-
-        return array_values(
-            array_filter(
-                $staff,
-                function( $user ) {
-                    $status = get_user_meta( $user->ID, '_dps_groomer_status', true );
-                    return empty( $status ) || 'active' === $status;
-                }
-            )
-        );
     }
 
     /**
@@ -382,7 +231,7 @@ trait DPS_Agenda_Renderer {
             return __( 'Mapa mensal para localizar picos de agendamento e distribuir a operacao com antecedencia.', 'dps-agenda-addon' );
         }
 
-        return __( 'Visao do dia com foco em confirmacao, execucao e fechamento dos atendimentos.', 'dps-agenda-addon' );
+        return __( 'Confirmacoes, execucao e fechamento do dia com clareza.', 'dps-agenda-addon' );
     }
     /**
      * Summarize the filtered appointment set for the agenda overview.
@@ -438,67 +287,6 @@ trait DPS_Agenda_Renderer {
 
         return $stats;
     }
-    /**
-     * Aplica filtros aos agendamentos.
-     *
-     * @since 1.3.0
-     * @since 1.5.0 Adicionado filtro por profissional (staff).
-     * @param array $appointments Lista de agendamentos.
-     * @param int   $filter_client ID do cliente para filtrar.
-     * @param string $filter_status Status para filtrar.
-     * @param int   $filter_service ID do serviço para filtrar.
-     * @param int   $filter_staff ID do profissional para filtrar (opcional).
-     * @return array Agendamentos filtrados.
-     */
-    private function apply_filters_to_appointments( $appointments, $filter_client, $filter_status, $filter_service, $filter_staff = 0 ) {
-        $filtered = [];
-        
-        foreach ( $appointments as $appt ) {
-            $match = true;
-            
-            // Filtro por cliente
-            if ( $filter_client ) {
-                $cid = get_post_meta( $appt->ID, 'appointment_client_id', true );
-                if ( intval( $cid ) !== $filter_client ) {
-                    $match = false;
-                }
-            }
-            
-            // Filtro por status
-            if ( $filter_status ) {
-                $st_val = get_post_meta( $appt->ID, 'appointment_status', true );
-                if ( ! $st_val ) {
-                    $st_val = 'pendente';
-                }
-                if ( $st_val !== $filter_status ) {
-                    $match = false;
-                }
-            }
-            
-            // Filtro por serviço
-            if ( $filter_service ) {
-                $service_ids_meta = get_post_meta( $appt->ID, 'appointment_services', true );
-                if ( ! is_array( $service_ids_meta ) || ! in_array( $filter_service, $service_ids_meta ) ) {
-                    $match = false;
-                }
-            }
-            
-            // Filtro por profissional (integração com Groomers Add-on)
-            if ( $filter_staff ) {
-                $staff_ids = get_post_meta( $appt->ID, '_dps_groomers', true );
-                if ( ! is_array( $staff_ids ) || ! in_array( $filter_staff, array_map( 'intval', $staff_ids ) ) ) {
-                    $match = false;
-                }
-            }
-            
-            if ( $match ) {
-                $filtered[] = $appt;
-            }
-        }
-        
-        return $filtered;
-    }
-
     /**
      * Separa agendamentos em pendentes e finalizados.
      *

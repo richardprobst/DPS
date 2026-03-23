@@ -25,7 +25,7 @@ msgid "Agenda de Atendimentos"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Cobranças e Notas"
+msgid "CobranÃ§as e Notas"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
@@ -33,7 +33,7 @@ msgid "Agenda Add-on:"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "O Finance Add-on é recomendado para funcionalidade completa de cobranças. Algumas funcionalidades financeiras podem não estar disponíveis."
+msgid "O Finance Add-on Ã© recomendado para funcionalidade completa de cobranÃ§as. Algumas funcionalidades financeiras podem nÃ£o estar disponÃ­veis."
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
@@ -61,15 +61,15 @@ msgid "Status atualizado!"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Não foi possível atualizar o status."
+msgid "NÃ£o foi possÃ­vel atualizar o status."
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações."
+msgid "Esse agendamento foi atualizado por outro usuÃ¡rio. Atualize a pÃ¡gina para ver as alteraÃ§Ãµes."
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Você precisa estar logado como administrador para acessar a agenda."
+msgid "VocÃª precisa estar logado como administrador para acessar a agenda."
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
@@ -97,19 +97,19 @@ msgid "Hoje"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Ver próxima semana"
+msgid "Ver prÃ³xima semana"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Ver próximo dia"
+msgid "Ver prÃ³ximo dia"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Próximo"
+msgid "PrÃ³ximo"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Ver lista diária"
+msgid "Ver lista diÃ¡ria"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
@@ -157,7 +157,7 @@ msgid "Status"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Serviço"
+msgid "ServiÃ§o"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
@@ -169,15 +169,7 @@ msgid "Filtrar por status do agendamento"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Filtrar por serviço"
-msgstr ""
-
-#: desi-pet-shower-agenda-addon.php
-msgid "Aplicar filtros"
-msgstr ""
-
-#: desi-pet-shower-agenda-addon.php
-msgid "Limpar filtros"
+msgid "Filtrar por serviÃ§o"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
@@ -209,11 +201,11 @@ msgid "Mapa"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Confirmação"
+msgid "ConfirmaÃ§Ã£o"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Cobrança"
+msgid "CobranÃ§a"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
@@ -237,7 +229,7 @@ msgid "agendamentos no total"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Próximos Atendimentos"
+msgid "PrÃ³ximos Atendimentos"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
@@ -249,15 +241,15 @@ msgid "Nenhum agendamento."
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Página %d"
+msgid "PÃ¡gina %d"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Página anterior"
+msgid "PÃ¡gina anterior"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Próxima página"
+msgid "PrÃ³xima pÃ¡gina"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
@@ -269,11 +261,11 @@ msgid "Assinatura"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Ver detalhes dos serviços"
+msgid "Ver detalhes dos serviÃ§os"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Ver serviços"
+msgid "Ver serviÃ§os"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
@@ -289,7 +281,7 @@ msgid "Confirmar"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Enviar mensagem de confirmação via WhatsApp"
+msgid "Enviar mensagem de confirmaÃ§Ã£o via WhatsApp"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
@@ -297,19 +289,19 @@ msgid "Cobrar"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Enviar cobrança via WhatsApp"
+msgid "Enviar cobranÃ§a via WhatsApp"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Cobrança conjunta"
+msgid "CobranÃ§a conjunta"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Enviar cobrança conjunta via WhatsApp"
+msgid "Enviar cobranÃ§a conjunta via WhatsApp"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Atenção:"
+msgid "AtenÃ§Ã£o:"
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
@@ -317,19 +309,19 @@ msgid "Este shortcode foi movido para o Finance Add-on. Por favor, use [dps_fin_
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Permissão negada."
+msgid "PermissÃ£o negada."
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Falha na verificação de segurança."
+msgid "Falha na verificaÃ§Ã£o de seguranÃ§a."
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "Dados inválidos."
+msgid "Dados invÃ¡lidos."
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
-msgid "ID inválido."
+msgid "ID invÃ¡lido."
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php
@@ -341,11 +333,11 @@ msgid "seu pet"
 msgstr ""
 
 #: assets/js/services-modal.js
-msgid "Serviços do Agendamento"
+msgid "ServiÃ§os do Agendamento"
 msgstr ""
 
 #: assets/js/services-modal.js
-msgid "Nenhum serviço encontrado"
+msgid "Nenhum serviÃ§o encontrado"
 msgstr ""
 
 #: assets/js/services-modal.js

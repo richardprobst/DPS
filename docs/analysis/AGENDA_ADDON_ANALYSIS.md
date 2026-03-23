@@ -1,8 +1,8 @@
 # Análise Profunda do Add-on Agenda DPS
 
-**Data da Análise**: 2025-12-03  
-**Versão Analisada**: 1.0.1  
-**Analista**: GitHub Copilot Agent  
+**Data da Análise**: 2025-12-03
+**Versão Analisada**: 1.0.1
+**Analista**: GitHub Copilot Agent
 **Diretório**: `plugins/desi-pet-shower-agenda/`
 
 ---
@@ -153,7 +153,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 | Otimização | Implementação |
 |------------|---------------|
-| Cache de listas de filtros | Transients de 1 hora |
 | Limite de queries | `posts_per_page` definido (50-200) |
 | Pre-cache de metadados | `update_meta_cache('post', $ids)` |
 | Paginação no modo "Todos" | 50 registros por página |
@@ -164,17 +163,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 ```php
 const APPOINTMENTS_PER_PAGE = 50;        // Paginação modo "Todos"
 const DAILY_APPOINTMENTS_LIMIT = 200;    // Limite por dia
-const CLIENTS_LIST_LIMIT = 300;          // Lista de clientes nos filtros
-const SERVICES_LIST_LIMIT = 200;         // Lista de serviços nos filtros
 ```
 
 ### 4.3 Filtros de Performance
 
-| Filtro | Propósito |
+| Filtro | Proposito |
 |--------|-----------|
-| `dps_agenda_daily_limit` | Customizar limite diário |
-| `dps_agenda_clients_limit` | Customizar limite de clientes |
-| `dps_agenda_services_limit` | Customizar limite de serviços |
+| `dps_agenda_daily_limit` | Customizar limite diario |
 
 ### 4.4 Oportunidades de Melhoria
 
@@ -385,37 +380,33 @@ foreach ( $appointments as $appt ) {
 
 ```php
 class DPS_Agenda_Addon {
-    // Métodos extraídos
+    // Metodos extraidos
     private function render_navigation( $selected_date, $view, $is_week_view ) { ... }
     private function render_date_form( $selected_date, $view, $show_all ) { ... }
-    private function render_filters( $filter_client, $filter_status, $filter_service ) { ... }
     private function query_appointments( $view, $selected_date, $show_all ) { ... }
-    private function filter_appointments( $appointments, $filters ) { ... }
     private function render_appointments_table( $appointments, $heading, $labels ) { ... }
     private function render_appointment_row( $appointment, $labels ) { ... }
     private function render_pagination( $paged, $show_all ) { ... }
-    
-    // Método principal simplificado
+
+    // Metodo principal simplificado
     public function render_agenda_shortcode() {
         ob_start();
-        
+
         if ( ! $this->can_access() ) {
             return $this->render_access_denied();
         }
-        
-        $params = $this->parse_request_params();
-        
+
+        $params = [ 'selected_date' => $selected_date, 'view' => $view, 'show_all' => $show_all ];
+
         echo '<div class="dps-agenda-wrapper">';
         echo $this->render_navigation( ... );
         echo $this->render_date_form( ... );
-        echo $this->render_filters( ... );
-        
+
         $appointments = $this->query_appointments( ... );
-        $filtered = $this->filter_appointments( ... );
-        
-        // ... renderização
+
+        // ... renderizacao
         echo '</div>';
-        
+
         return ob_get_clean();
     }
 }
@@ -515,34 +506,34 @@ class DPS_Agenda_API {
 ```php
 // tests/test-agenda-addon.php
 class Test_DPS_Agenda_Addon extends WP_UnitTestCase {
-    
+
     public function test_update_status_requires_authentication() {
         // Simular requisição AJAX sem autenticação
         // Esperar erro de permissão
     }
-    
+
     public function test_update_status_requires_valid_nonce() {
         // Simular requisição com nonce inválido
         // Esperar erro de segurança
     }
-    
+
     public function test_update_status_changes_appointment_status() {
         // Criar agendamento de teste
         // Chamar handler AJAX
         // Verificar que status foi atualizado
     }
-    
+
     public function test_version_conflict_detection() {
         // Simular dois usuários editando mesmo agendamento
         // Esperar erro de conflito de versão
     }
-    
+
     public function test_create_agenda_page_on_activation() {
         // Ativar plugin
         // Verificar página criada
         // Verificar option salva
     }
-    
+
     public function test_clear_cron_on_deactivation() {
         // Ativar plugin (cron agendado)
         // Desativar plugin
@@ -594,7 +585,7 @@ class Test_DPS_Agenda_Addon extends WP_UnitTestCase {
 
 **Detalhes da implementação (2025-12-03):**
 - **Traits de refatoração**: Criados `includes/trait-dps-agenda-renderer.php` e `includes/trait-dps-agenda-query.php` com ~15 métodos auxiliares extraídos
-- **Métodos extraídos para Renderer**: `render_access_denied()`, `parse_request_params()`, `get_column_labels()`, `get_status_options()`, `calculate_nav_dates()`, `get_clients_for_filter()`, `get_services_for_filter()`, `apply_filters_to_appointments()`, `separate_appointments_by_status()`, `sort_appointments_by_datetime()`, `prime_related_caches()`
+- **Metodos extraidos para Renderer**: `render_access_denied()`, `get_column_labels()`, `calculate_nav_dates()`, `get_agenda_scope_label()`, `get_agenda_context_description()`, `get_agenda_overview_stats()`, `separate_appointments_by_status()`, `sort_appointments_by_datetime()`, `prime_related_caches()`
 - **Métodos extraídos para Query**: `query_appointments_for_date()`, `query_appointments_for_week()`, `query_all_appointments()`, `query_appointments_for_export()`, `get_client_group_data()`
 - **Testes**: Pendente para próxima iteração
 
@@ -660,7 +651,7 @@ O add-on Agenda está em bom estado após as melhorias implementadas em novembro
 
 ### Oportunidades Prioritárias
 1. ~~**Agrupamento por cliente**~~ ✅ Implementado
-2. ~~**Calendário mensal**~~ ✅ Implementado  
+2. ~~**Calendário mensal**~~ ✅ Implementado
 3. ~~**Relatório de ocupação**~~ ✅ Implementado
 4. **Ações em lote** (maior produtividade administrativa)
 5. **Dashboard de KPIs** (visão gerencial)

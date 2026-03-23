@@ -1,9 +1,9 @@
 # Relatório de Revisão de Código - Agenda Add-on
 
-**Data da Revisão:** 2026-01-03  
-**Versão Analisada:** 1.5.0+  
-**Diretório:** `plugins/desi-pet-shower-agenda/`  
-**Revisor:** Copilot Security Audit  
+**Data da Revisão:** 2026-01-03
+**Versão Analisada:** 1.5.0+
+**Diretório:** `plugins/desi-pet-shower-agenda/`
+**Revisor:** Copilot Security Audit
 
 ---
 
@@ -43,7 +43,7 @@ Todas as vulnerabilidades críticas identificadas em revisões anteriores foram 
 
 ### ✅ Todas as Vulnerabilidades Críticas Corrigidas
 
-#### 1.1 Controle de Acesso por Cookie 
+#### 1.1 Controle de Acesso por Cookie
 **Status:** ✅ **CORRIGIDO**
 
 **O que era:** O código permitia que usuários não autenticados obtivessem permissões de edição via cookie `dps_base_role=admin`.
@@ -52,7 +52,7 @@ Todas as vulnerabilidades críticas identificadas em revisões anteriores foram 
 
 ---
 
-#### 1.2 AJAX nopriv 
+#### 1.2 AJAX nopriv
 **Status:** ✅ **CORRIGIDO**
 
 **O que era:** Endpoints AJAX registrados com `wp_ajax_nopriv_` para usuários não autenticados.
@@ -61,7 +61,7 @@ Todas as vulnerabilidades críticas identificadas em revisões anteriores foram 
 
 ---
 
-#### 1.3 Verificação de Nonce Tolerante 
+#### 1.3 Verificação de Nonce Tolerante
 **Status:** ✅ **CORRIGIDO**
 
 **O que era:** Verificação de nonce não bloqueava requisições sem nonce válido.
@@ -70,7 +70,7 @@ Todas as vulnerabilidades críticas identificadas em revisões anteriores foram 
 
 ---
 
-#### 1.4 XSS em JavaScript 
+#### 1.4 XSS em JavaScript
 **Status:** ✅ **CORRIGIDO** (2026-01-03)
 
 **O que era:** Dados de usuário inseridos diretamente em HTML via jQuery sem escape.
@@ -84,7 +84,7 @@ Todas as vulnerabilidades críticas identificadas em revisões anteriores foram 
 
 ### 2. ARQUITETURA E ORGANIZAÇÃO
 
-#### 2.1 Código Morto/Deprecado 
+#### 2.1 Código Morto/Deprecado
 **Status:** ✅ **CORRIGIDO**
 
 Arquivos legados (`agenda-addon.js`, `agenda.js` na raiz) foram removidos.
@@ -192,8 +192,8 @@ O arquivo `uninstall.php` remove corretamente:
 #### 6.2 Uso Correto de $wpdb->prepare() ✅
 ```php
 $wpdb->query( $wpdb->prepare(
-    "DELETE FROM {$wpdb->options} 
-     WHERE option_name LIKE %s 
+    "DELETE FROM {$wpdb->options}
+     WHERE option_name LIKE %s
      OR option_name LIKE %s",
     $transient_like,
     $transient_timeout_like
@@ -290,28 +290,28 @@ if ( class_exists( 'DPS_Logger' ) ) {
 ```php
 // tests/test-agenda-addon.php
 class Test_DPS_Agenda_Addon extends WP_UnitTestCase {
-    
+
     public function test_update_status_ajax_requires_authentication() {
         // Simular requisição AJAX sem autenticação
         // Esperar erro de permissão
     }
-    
+
     public function test_update_status_ajax_requires_valid_nonce() {
         // Simular requisição com nonce inválido
         // Esperar erro de segurança
     }
-    
+
     public function test_update_status_changes_appointment_status() {
         // Criar agendamento de teste
         // Chamar handler AJAX
         // Verificar que status foi atualizado
     }
-    
+
     public function test_create_agenda_page_creates_page_on_activation() {
         // Verificar que página é criada
         // Verificar que option é salva
     }
-    
+
     public function test_version_conflict_detection() {
         // Simular dois usuários editando mesmo agendamento
         // Esperar erro de conflito de versão
@@ -336,7 +336,7 @@ public function enqueue_assets() { // Falta @since, @return
 ```php
 /**
  * Enfileira scripts e estilos necessários para a agenda.
- * 
+ *
  * Carrega assets apenas nas páginas de agenda e cobranças,
  * evitando impacto de performance no resto do site.
  *
@@ -352,7 +352,7 @@ public function enqueue_assets() {
 
 ### ✅ Prioridade ALTA (Segurança) - CONCLUÍDO
 
-1. **Remover controle de acesso por cookie** 
+1. **Remover controle de acesso por cookie**
    - ✅ CORRIGIDO - Lógica removida completamente
 
 2. **Remover handlers AJAX nopriv**
@@ -380,7 +380,7 @@ public function enqueue_assets() {
 
 1. **Extrair métodos do `render_agenda_shortcode()`**
    - Criar `render_navigation()`
-   - Criar `render_filters()`
+   - Organizar o shell principal da Agenda sem blocos legados extras
    - Criar `query_appointments()`
    - Criar `render_appointments_table()`
    - Criar `render_pagination()`
