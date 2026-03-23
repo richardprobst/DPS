@@ -27,6 +27,24 @@
             .replace(/\//g, '&#x2F;');
     }
 
+    function showFeedback(message, type, duration) {
+        if (window.DPSToast && typeof window.DPSToast.show === 'function') {
+            window.DPSToast.show(message, type || 'error', duration || 3200);
+            return;
+        }
+
+        window.console.error(message);
+    }
+
+    function closeReworkModal(target) {
+        if (window.DPSAgendaDialog && typeof window.DPSAgendaDialog.close === 'function') {
+            window.DPSAgendaDialog.close(target || $('.dps-agenda-dialog-overlay--rework').last(), 'dismiss');
+        }
+
+        $('.dps-rework-modal-overlay').remove();
+        $(document).off('keydown.dpsRework');
+    }
+
     /* ===========================
        CHECKLIST
        =========================== */
@@ -103,10 +121,10 @@
             if (response.success) {
                 updateStepUI($step, status, response.data.progress, response.data.rework_count);
             } else {
-                window.alert(response.data.message || cfg.messages.error);
+                showFeedback(response.data.message || cfg.messages.error, 'error');
             }
         }).fail(function () {
-            window.alert(cfg.messages.error);
+            showFeedback(cfg.messages.error, 'error');
         }).always(function () {
             $step.css('opacity', '1');
         });
@@ -173,6 +191,50 @@
         var safeCancel = escapeHtml(cfg.messages.cancel);
         var safeConfirmRework = escapeHtml(cfg.messages.confirmRework);
 
+        function submitRework(reason, dialogTarget) {
+            $.post(cfg.ajax, {
+                action: 'dps_checklist_rework',
+                nonce: cfg.nonce_checklist,
+                appointment_id: apptId,
+                step_key: stepKey,
+                reason: reason
+            }, function (response) {
+                if (response.success) {
+                    var $panel = $('.dps-checklist-panel[data-appointment="' + apptId + '"]');
+                    var $step = $panel.find('.dps-checklist-step[data-step="' + stepKey + '"]');
+                    updateStepUI($step, 'pending', response.data.progress, response.data.rework_count);
+                } else {
+                    showFeedback(response.data.message || cfg.messages.error, 'error');
+                }
+
+                closeReworkModal(dialogTarget);
+            }).fail(function () {
+                showFeedback(cfg.messages.error, 'error');
+                closeReworkModal(dialogTarget);
+            });
+        }
+
+        if (window.DPSAgendaDialog && typeof window.DPSAgendaDialog.open === 'function') {
+            var dialog = window.DPSAgendaDialog.open({
+                title: cfg.messages.reworkTitle,
+                subtitle: stepLabel,
+                size: 'small',
+                overlayClass: 'dps-agenda-dialog-overlay--rework',
+                bodyHtml: '<textarea id="dps-rework-reason" class="dps-agenda-dialog__textarea" placeholder="' + safeReworkPlaceholder + '"></textarea>',
+                footerHtml:
+                    '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + safeCancel + '</button>' +
+                    '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--primary dps-rework-confirm">' + safeConfirmRework + '</button>',
+                initialFocus: '#dps-rework-reason'
+            });
+
+            dialog.on('click', '.dps-rework-confirm', function () {
+                var reason = dialog.find('#dps-rework-reason').val();
+                submitRework(reason, dialog);
+            });
+
+            return;
+        }
+
         var html =
             '<div class="dps-rework-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dps-rework-title">' +
                 '<div class="dps-rework-modal">' +
@@ -192,43 +254,20 @@
 
         // Cancelar
         $('.dps-rework-cancel').on('click', function () {
-            $('.dps-rework-modal-overlay').remove();
-            $(document).off('keydown.dpsRework');
+            closeReworkModal();
         });
 
         // Fechar com Escape
         $(document).on('keydown.dpsRework', function (e) {
             if (e.key === 'Escape') {
-                $('.dps-rework-modal-overlay').remove();
-                $(document).off('keydown.dpsRework');
+                closeReworkModal();
             }
         });
 
         // Confirmar retrabalho
         $('.dps-rework-confirm').on('click', function () {
             var reason = $('#dps-rework-reason').val();
-
-            $.post(cfg.ajax, {
-                action: 'dps_checklist_rework',
-                nonce: cfg.nonce_checklist,
-                appointment_id: apptId,
-                step_key: stepKey,
-                reason: reason
-            }, function (response) {
-                if (response.success) {
-                    var $panel = $('.dps-checklist-panel[data-appointment="' + apptId + '"]');
-                    var $step = $panel.find('.dps-checklist-step[data-step="' + stepKey + '"]');
-                    updateStepUI($step, 'pending', response.data.progress, response.data.rework_count);
-                } else {
-                    window.alert(response.data.message || cfg.messages.error);
-                }
-                $('.dps-rework-modal-overlay').remove();
-                $(document).off('keydown.dpsRework');
-            }).fail(function () {
-                window.alert(cfg.messages.error);
-                $('.dps-rework-modal-overlay').remove();
-                $(document).off('keydown.dpsRework');
-            });
+            submitRework(reason);
         });
     }
 
@@ -264,11 +303,11 @@
             if (response.success) {
                 refreshCheckinPanel($panel, response.data);
             } else {
-                window.alert(response.data.message || cfg.messages.error);
+                showFeedback(response.data.message || cfg.messages.error, 'error');
                 $btn.prop('disabled', false).html('📥 ' + cfg.messages.checkin);
             }
         }).fail(function () {
-            window.alert(cfg.messages.error);
+            showFeedback(cfg.messages.error, 'error');
             $btn.prop('disabled', false).html('📥 ' + cfg.messages.checkin);
         });
     });
@@ -293,11 +332,11 @@
             if (response.success) {
                 refreshCheckinPanel($panel, response.data);
             } else {
-                window.alert(response.data.message || cfg.messages.error);
+                showFeedback(response.data.message || cfg.messages.error, 'error');
                 $btn.prop('disabled', false).html('📤 ' + cfg.messages.checkout);
             }
         }).fail(function () {
-            window.alert(cfg.messages.error);
+            showFeedback(cfg.messages.error, 'error');
             $btn.prop('disabled', false).html('📤 ' + cfg.messages.checkout);
         });
     });

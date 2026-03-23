@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda - dialog system unificado</title>
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-base.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/checklist-checkin.css">
+    <style>
+        :root { color-scheme: light; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top right, color-mix(in srgb, var(--dps-color-secondary-container) 72%, white) 0%, transparent 30%),
+                linear-gradient(180deg, #f5f7fb 0%, #edf1f7 100%);
+            color: var(--dps-color-on-surface);
+            font-family: var(--dps-font-system);
+        }
+        .preview-shell {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 32px 20px 72px;
+            display: grid;
+            gap: 24px;
+        }
+        .preview-surface {
+            padding: 28px;
+            border: 1px solid color-mix(in srgb, var(--dps-color-outline) 24%, transparent);
+            border-radius: 32px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 20px 48px rgba(31, 42, 59, 0.08);
+            backdrop-filter: blur(16px);
+        }
+        .preview-kicker {
+            margin: 0;
+            color: var(--dps-color-primary);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .preview-surface h1 {
+            margin: 12px 0 10px;
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            line-height: 1.03;
+        }
+        .preview-copy,
+        .preview-stage > p {
+            margin: 0;
+            color: var(--dps-color-on-surface-variant);
+            line-height: 1.65;
+        }
+        .preview-grid { display: grid; gap: 20px; }
+        .preview-stage { display: grid; gap: 14px; }
+        .preview-stage-label {
+            display: inline-flex;
+            width: fit-content;
+            align-items: center;
+            min-height: 2.1rem;
+            padding: 0 0.9rem;
+            border-radius: var(--dps-shape-full);
+            background: color-mix(in srgb, var(--dps-color-primary-container) 72%, white);
+            color: var(--dps-color-on-primary-container);
+            font-size: 0.92rem;
+        }
+        .preview-stage-shell {
+            position: relative;
+            min-height: 32rem;
+            overflow: hidden;
+            border: 1px solid var(--dps-color-outline-variant);
+            border-radius: 28px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.92)),
+                radial-gradient(circle at top left, color-mix(in srgb, var(--dps-color-primary-container) 56%, white) 0%, transparent 40%);
+        }
+        .preview-stage-bg {
+            position: absolute;
+            inset: 0;
+            padding: 22px;
+            display: grid;
+            gap: 14px;
+            opacity: 0.8;
+        }
+        .preview-bg-row {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .preview-bg-cell {
+            min-height: 4rem;
+            border-radius: 18px;
+            background: color-mix(in srgb, var(--dps-color-surface-container-high) 92%, white);
+            border: 1px solid color-mix(in srgb, var(--dps-color-outline) 18%, transparent);
+        }
+        .preview-stage-shell .dps-agenda-dialog-overlay {
+            position: absolute;
+            inset: 0;
+            padding: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+        .preview-stage-shell .dps-agenda-dialog { max-height: calc(100% - 1rem); }
+        @media (max-width: 900px) {
+            .preview-bg-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 840px) {
+            .preview-shell { padding-inline: 14px; }
+            .preview-surface { padding: 18px; border-radius: 24px; }
+            .preview-stage-shell { min-height: 28rem; }
+        }
+    </style>
+</head>
+<body>
+    <main class="preview-shell">
+        <section class="preview-surface">
+            <p class="preview-kicker">Agenda / Dialog system</p>
+            <h1>Dialogs padronizados para historico, cobranca, reagendamento e retrabalho</h1>
+            <p class="preview-copy">
+                Preview estatico do dialog system unificado da Agenda, implementado com base em
+                <code>docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md</code> e
+                <code>docs/visual/VISUAL_STYLE_GUIDE.md</code>.
+            </p>
+        </section>
+
+        <section class="preview-surface">
+            <div class="preview-grid">
+                <section class="preview-stage">
+                    <span class="preview-stage-label">Historico</span>
+                    <p>O historico deixa de usar <code>alert()</code> e passa a ter lista, cabecalho padronizado e fechamento consistente.</p>
+                    <div class="preview-stage-shell">
+                        <div class="preview-stage-bg" aria-hidden="true">
+                            <div class="preview-bg-row"><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div></div>
+                            <div class="preview-bg-row"><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div></div>
+                        </div>
+                        <div class="dps-agenda-dialog-overlay">
+                            <div class="dps-agenda-dialog dps-agenda-dialog--medium" role="dialog" aria-modal="true">
+                                <div class="dps-agenda-dialog__header"><div class="dps-agenda-dialog__heading"><span class="dps-agenda-dialog__eyebrow">Agenda</span><h2 class="dps-agenda-dialog__title">Historico do atendimento</h2><p class="dps-agenda-dialog__subtitle">Eventos operacionais e alteracoes mais recentes.</p></div><button type="button" class="dps-agenda-dialog__close">X</button></div>
+                                <div class="dps-agenda-dialog__body">
+                                    <div class="dps-agenda-history-list">
+                                        <article class="dps-agenda-history-item"><div class="dps-agenda-history-item__head"><strong>Confirmacao enviada</strong><span class="dps-agenda-history-item__meta">23/03 08:12</span></div><p class="dps-agenda-history-item__detail">Mensagem entregue no WhatsApp do tutor.</p></article>
+                                        <article class="dps-agenda-history-item"><div class="dps-agenda-history-item__head"><strong>Check-in registrado</strong><span class="dps-agenda-history-item__meta">23/03 10:18</span></div><p class="dps-agenda-history-item__detail">Pele sensivel sinalizada e nota operacional adicionada.</p></article>
+                                    </div>
+                                </div>
+                                <div class="dps-agenda-dialog__footer"><button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary">Fechar</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="preview-stage">
+                    <span class="preview-stage-label">Cobranca</span>
+                    <p>O envio de pagamento passa a usar o mesmo shell do add-on, com resumo do atendimento e acoes para WhatsApp e copia do link.</p>
+                    <div class="preview-stage-shell">
+                        <div class="preview-stage-bg" aria-hidden="true">
+                            <div class="preview-bg-row"><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div></div>
+                            <div class="preview-bg-row"><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div></div>
+                        </div>
+                        <div class="dps-agenda-dialog-overlay">
+                            <div class="dps-agenda-dialog dps-agenda-dialog--medium" role="dialog" aria-modal="true">
+                                <div class="dps-agenda-dialog__header"><div class="dps-agenda-dialog__heading"><span class="dps-agenda-dialog__eyebrow">Pagamento</span><h2 class="dps-agenda-dialog__title">Cobrar cliente</h2><p class="dps-agenda-dialog__subtitle">Resumo operacional antes do envio do link.</p></div><button type="button" class="dps-agenda-dialog__close">X</button></div>
+                                <div class="dps-agenda-dialog__body">
+                                    <div class="dps-payment-info">
+                                        <div class="dps-payment-info-item"><span class="dps-payment-info-label">Pet</span><strong class="dps-payment-info-value">Theo</strong></div>
+                                        <div class="dps-payment-info-item"><span class="dps-payment-info-label">Tutor</span><strong class="dps-payment-info-value">Carla Dias</strong></div>
+                                        <div class="dps-payment-info-item"><span class="dps-payment-info-label">Valor</span><strong class="dps-payment-info-value">R$ 145,00</strong></div>
+                                        <div class="dps-payment-info-item"><span class="dps-payment-info-label">Link</span><strong class="dps-payment-info-value">link.mercadopago.com.br/desipetshower</strong></div>
+                                    </div>
+                                    <div class="dps-payment-actions">
+                                        <a href="#" class="dps-payment-action-btn dps-payment-action-btn--whatsapp">Enviar via WhatsApp</a>
+                                        <button type="button" class="dps-payment-action-btn dps-payment-action-btn--copy">Copiar link</button>
+                                    </div>
+                                </div>
+                                <div class="dps-agenda-dialog__footer"><button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary">Fechar</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="preview-stage">
+                    <span class="preview-stage-label">Reagendamento e retrabalho</span>
+                    <p>O mesmo shell cobre fields de reagendamento e coleta de contexto para retrabalho, substituindo fluxos isolados e prompts nativos.</p>
+                    <div class="preview-stage-shell">
+                        <div class="preview-stage-bg" aria-hidden="true">
+                            <div class="preview-bg-row"><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div></div>
+                            <div class="preview-bg-row"><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div><div class="preview-bg-cell"></div></div>
+                        </div>
+                        <div class="dps-agenda-dialog-overlay">
+                            <div class="dps-agenda-dialog dps-agenda-dialog--small" role="dialog" aria-modal="true">
+                                <div class="dps-agenda-dialog__header"><div class="dps-agenda-dialog__heading"><span class="dps-agenda-dialog__eyebrow">Agenda</span><h2 class="dps-agenda-dialog__title">Reagendar atendimento</h2><p class="dps-agenda-dialog__subtitle">Fields padronizados para nova data e horario.</p></div><button type="button" class="dps-agenda-dialog__close">X</button></div>
+                                <div class="dps-agenda-dialog__body">
+                                    <div class="dps-reschedule-fields">
+                                        <div class="dps-reschedule-field"><label for="reschedule-date">Nova data</label><input id="reschedule-date" type="date" value="2026-03-26"></div>
+                                        <div class="dps-reschedule-field"><label for="reschedule-time">Novo horario</label><input id="reschedule-time" type="time" value="14:30"></div>
+                                    </div>
+                                    <textarea class="dps-agenda-dialog__textarea" rows="4">Tutor pediu ajuste no acabamento da pata traseira e nova revisao de secagem.</textarea>
+                                </div>
+                                <div class="dps-agenda-dialog__footer"><button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary">Cancelar</button><button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--primary">Confirmar</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

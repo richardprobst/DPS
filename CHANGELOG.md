@@ -175,6 +175,9 @@ Antes de criar uma nova versão oficial:
 - **Leitura operacional**: a lista foi reorganizada em paineis por dia com cards de overview, contagem por status e persistencia da aba ativa na URL e na sessao.
 - **Simplificacao estrutural**: o bloco operacional legado foi aposentado para manter a Agenda alinhada ao shell principal do add-on.
 - **Agenda sem criacao direta**: removido da agenda o botao **Novo agendamento** e todo o fluxo associado no add-on (modal, template e submissao AJAX do formulario).
+- **Lista de Atendimentos em workspace M3**: shell, overview, tabs, linhas e microcopy da lista foram redesenhados para leitura operacional mais limpa, consistente e responsiva.
+- **Operacao com profundidade unica**: checklist operacional e check-in/check-out agora vivem no mesmo painel expansivel inline da aba Operacao, eliminando a quebra de contexto entre grid e modal.
+- **Dialogs padronizados na Agenda**: reagendamento, historico, cobranca, confirmacoes sensiveis e retrabalho passaram a usar o mesmo dialog system do add-on, removendo `confirm()`/`alert()` do fluxo principal da lista.
 **Client Portal ? Tela inicial e administra??o de logins**
 
 - **Landing p?blica refeita no padr?o M3**: a p?gina inicial do portal agora apresenta lado a lado as op??es de link direto e e-mail com senha, com suporte contextual para WhatsApp quando o e-mail n?o estiver cadastrado.

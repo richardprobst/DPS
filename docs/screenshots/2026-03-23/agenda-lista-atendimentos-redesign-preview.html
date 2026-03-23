@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda - Lista de Atendimentos redesign M3</title>
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-base.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/checklist-checkin.css">
+    <style>
+        :root { color-scheme: light; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, color-mix(in srgb, var(--dps-color-primary-container) 72%, white) 0%, transparent 32%),
+                linear-gradient(180deg, #f6f8fc 0%, #edf1f7 100%);
+            color: var(--dps-color-on-surface);
+            font-family: var(--dps-font-system);
+        }
+        .preview-shell {
+            max-width: 1780px;
+            margin: 0 auto;
+            padding: 32px 20px 72px;
+            display: grid;
+            gap: 24px;
+        }
+        .preview-surface {
+            padding: 28px;
+            border: 1px solid color-mix(in srgb, var(--dps-color-outline) 24%, transparent);
+            border-radius: 32px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 20px 48px rgba(31, 42, 59, 0.08);
+            backdrop-filter: blur(16px);
+        }
+        .preview-kicker {
+            margin: 0;
+            color: var(--dps-color-primary);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .preview-surface h1 {
+            margin: 12px 0 10px;
+            font-size: clamp(2.1rem, 4vw, 3.4rem);
+            line-height: 1.03;
+        }
+        .preview-copy {
+            margin: 0;
+            max-width: 72rem;
+            color: var(--dps-color-on-surface-variant);
+            line-height: 1.65;
+        }
+        .preview-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .preview-meta span,
+        .preview-section-label {
+            display: inline-flex;
+            align-items: center;
+            min-height: 2.1rem;
+            padding: 0 0.9rem;
+            border-radius: var(--dps-shape-full);
+            border: 1px solid color-mix(in srgb, var(--dps-color-outline) 24%, transparent);
+            background: rgba(255, 255, 255, 0.88);
+            color: var(--dps-color-on-surface-variant);
+            font-size: 0.92rem;
+        }
+        .preview-section-label {
+            width: fit-content;
+            background: color-mix(in srgb, var(--dps-color-primary-container) 72%, white);
+            color: var(--dps-color-on-primary-container);
+        }
+        .preview-stack { display: grid; gap: 24px; }
+        .preview-shell .dps-agenda-wrapper { padding: 0; background: transparent; max-width: none; }
+        .dps-agenda-header { margin-bottom: 18px; }
+        .dps-agenda-controls-wrapper { margin: 0 0 18px; }
+        .dps-agenda-overview { margin-top: 0; margin-bottom: 18px; }
+        .dps-agenda-tabs-content { display: block; }
+        .dps-tab-content { display: block !important; }
+        .dps-agenda-day-panel { margin-top: 0; }
+        .dps-agenda-day-panel__header h4,
+        .dps-agenda-day-panel__header p { margin: 0; }
+        .dps-agenda-wrapper table.dps-table th,
+        .dps-agenda-wrapper table.dps-table td { white-space: normal; }
+        .dps-detail-row { display: table-row !important; }
+        .dps-services-popup-btn,
+        .dps-payment-popup-btn,
+        .dps-confirmation-dropdown,
+        .dps-status-dropdown,
+        .dps-taxidog-map-btn { width: 100%; }
+        .dps-taxidog-map-btn { justify-content: center; min-height: 2.75rem; }
+        .dps-history-ops-summary { display: grid; gap: 0.5rem; width: 100%; }
+        .dps-history-ops-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; }
+        .dps-history-ops-label,
+        .dps-history-ops-value,
+        .dps-history-ops-badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 1.95rem;
+            padding: 0 0.7rem;
+            border-radius: var(--dps-shape-full);
+            font-size: var(--dps-typescale-label-medium-size);
+            line-height: var(--dps-typescale-label-medium-line);
+            font-weight: var(--dps-typescale-label-medium-weight);
+        }
+        .dps-history-ops-label { background: var(--dps-color-surface-container-low); color: var(--dps-color-on-surface-variant); }
+        .dps-history-ops-value { background: var(--dps-color-primary-container); color: var(--dps-color-on-primary-container); }
+        .dps-history-ops-badge { background: var(--dps-color-tertiary-container); color: var(--dps-color-on-tertiary-container); }
+        @media (max-width: 840px) {
+            .preview-shell { padding-inline: 14px; }
+            .preview-surface { padding: 18px; border-radius: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="preview-shell">
+        <section class="preview-surface">
+            <p class="preview-kicker">Agenda / Lista de Atendimentos</p>
+            <h1>Workspace operacional M3 com tres leituras do mesmo fluxo</h1>
+            <p class="preview-copy">
+                Preview estatico criado para registrar a implementacao visual da Lista de Atendimentos
+                seguindo <code>docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md</code> e
+                <code>docs/visual/VISUAL_STYLE_GUIDE.md</code> como fonte de verdade do padrao M3.
+            </p>
+            <div class="preview-meta">
+                <span>Tabs compactas</span>
+                <span>Linha unificada</span>
+                <span>Painel inline de operacao</span>
+                <span>Checkboxes e estados M3</span>
+                <span>Empty state padronizado</span>
+            </div>
+        </section>
+
+        <section class="preview-surface">
+            <div class="dps-agenda-wrapper">
+                <header class="dps-agenda-header dps-agenda-header--refresh">
+                    <div class="dps-agenda-title">
+                        <span class="dps-agenda-kicker">Agenda</span>
+                        <h3>Agenda de Atendimentos</h3>
+                        <p class="dps-current-date dps-current-date--header">
+                            <span class="dps-current-date__label">Periodo ativo</span>
+                            <strong>Semana de 23/03 a 29/03</strong>
+                        </p>
+                        <p class="dps-agenda-subtitle">Leitura operacional completa para confirmar, executar e revisar contexto sem quebrar o fluxo.</p>
+                    </div>
+                    <div class="dps-agenda-header-actions">
+                        <button type="button" class="dps-btn dps-btn--tonal">Exportar CSV</button>
+                    </div>
+                </header>
+
+                <div class="dps-agenda-controls-wrapper">
+                    <div class="dps-agenda-nav dps-agenda-nav--primary">
+                        <div class="dps-agenda-nav-group dps-agenda-nav-group--views">
+                            <span class="dps-nav-label">Ver:</span>
+                            <div class="dps-view-buttons">
+                                <a href="#" class="dps-view-btn">Dia</a>
+                                <a href="#" class="dps-view-btn dps-view-btn--active">Semana</a>
+                                <a href="#" class="dps-view-btn">Mes</a>
+                                <a href="#" class="dps-view-btn">Agenda completa</a>
+                            </div>
+                            <div class="dps-view-buttons dps-view-buttons--date-nav">
+                                <a href="#" class="dps-nav-btn dps-nav-btn--prev">&larr;</a>
+                                <a href="#" class="dps-nav-btn dps-nav-btn--today">Hoje</a>
+                                <a href="#" class="dps-nav-btn dps-nav-btn--next">&rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="dps-agenda-overview" aria-label="Resumo da agenda">
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--primary"><span class="dps-agenda-overview-card__label">Total</span><strong class="dps-agenda-overview-card__value">18</strong></article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--warning"><span class="dps-agenda-overview-card__label">Pendentes</span><strong class="dps-agenda-overview-card__value">6</strong></article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--success"><span class="dps-agenda-overview-card__label">Finalizados</span><strong class="dps-agenda-overview-card__value">8</strong></article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--error"><span class="dps-agenda-overview-card__label">Atrasados</span><strong class="dps-agenda-overview-card__value">2</strong></article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--secondary"><span class="dps-agenda-overview-card__label">Pagamento pendente</span><strong class="dps-agenda-overview-card__value">3</strong></article>
+                    <article class="dps-agenda-overview-card dps-agenda-overview-card--tertiary"><span class="dps-agenda-overview-card__label">TaxiDog</span><strong class="dps-agenda-overview-card__value">5</strong></article>
+                </section>
+
+                <div class="preview-stack">
+                    <section>
+                        <span class="preview-section-label">Estado 1: Leitura Rapida</span>
+                        <div class="dps-agenda-tabs-wrapper">
+                            <div class="dps-agenda-tabs-header">
+                                <div>
+                                    <h3 class="dps-agenda-tabs-title">Lista de Atendimentos</h3>
+                                    <p class="dps-agenda-tabs-subtitle">Tres leituras do mesmo fluxo operacional: confirmar, executar e revisar contexto.</p>
+                                </div>
+                            </div>
+                            <nav class="dps-agenda-tabs-nav" role="tablist" aria-label="Abas da agenda">
+                                <button type="button" class="dps-agenda-tab-button dps-agenda-tab-button--active" role="tab" aria-selected="true"><span class="dps-tab-icon">◐</span><span class="dps-tab-label">Leitura Rapida</span><span class="dps-tab-desc">Confirmacoes e proximos passos</span></button>
+                                <button type="button" class="dps-agenda-tab-button" role="tab" aria-selected="false"><span class="dps-tab-icon">◆</span><span class="dps-tab-label">Operacao</span><span class="dps-tab-desc">Checklist, check-in e cobranca</span></button>
+                                <button type="button" class="dps-agenda-tab-button" role="tab" aria-selected="false"><span class="dps-tab-icon">◌</span><span class="dps-tab-label">Contexto</span><span class="dps-tab-desc">Logistica, notas e TaxiDog</span></button>
+                            </nav>
+                            <section class="dps-agenda-day-panel">
+                                <div class="dps-agenda-day-panel__header"><div><h4>Segunda-feira, 23/03</h4><p>6 atendimentos no periodo</p></div><div class="dps-agenda-day-panel__stats"><span class="dps-context-pill dps-context-pill--warning">4 pendentes</span><span class="dps-context-pill dps-context-pill--success">2 finalizados</span></div></div>
+                                <div class="dps-agenda-day-panel__body">
+                                    <h5>Fila ativa</h5>
+                                    <div class="dps-agenda-table-container">
+                                        <table class="dps-table dps-table--tab1">
+                                            <thead><tr><th>Horario</th><th>Pet e tutor</th><th>Servicos</th><th>Confirmacao</th><th>Acoes</th></tr></thead>
+                                            <tbody>
+                                                <tr class="status-pendente is-late">
+                                                    <td class="dps-agenda-cell"><div class="dps-agenda-time-block"><strong class="dps-agenda-time-block__value">09:10</strong><span class="dps-agenda-time-block__meta">Atrasado</span></div></td>
+                                                    <td class="dps-agenda-cell"><div class="dps-agenda-pet-stack"><button type="button" class="dps-pet-profile-trigger"><span class="dps-pet-profile-trigger__name">Luna</span><span class="dps-pet-profile-trigger__icon">&gt;</span></button><span class="dps-agenda-pet-client">Rafael Torres</span><div class="dps-agenda-pet-flags"><span class="dps-pet-badge dps-pet-badge--aggressive">Agressivo</span></div></div></td>
+                                                    <td class="dps-agenda-cell"><button type="button" class="dps-services-popup-btn"><span class="dps-services-popup-btn__eyebrow">Servicos</span><span class="dps-services-popup-btn__text">2 servicos</span><span class="dps-services-popup-btn__icon">Abrir</span></button></td>
+                                                    <td class="dps-agenda-cell"><div class="dps-confirmation-dropdown-wrapper"><select class="dps-confirmation-dropdown dps-dropdown--not-confirmed"><option>Confirmado</option><option selected>Nao confirmado</option><option>Cancelado</option></select></div></td>
+                                                    <td class="dps-agenda-cell"><div class="dps-agenda-row-actions"><button type="button" class="dps-agenda-action-link dps-agenda-action-link--secondary"><span class="dps-agenda-action-link__label">Reagendar</span></button></div></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </section>
+
+                    <section>
+                        <span class="preview-section-label">Estado 2: Operacao</span>
+                        <div class="dps-agenda-tabs-wrapper">
+                            <div class="dps-agenda-tabs-header"><div><h3 class="dps-agenda-tabs-title">Lista de Atendimentos</h3><p class="dps-agenda-tabs-subtitle">A aba principal da operacao agora usa um unico nivel de profundidade: painel inline.</p></div></div>
+                            <nav class="dps-agenda-tabs-nav" role="tablist" aria-label="Abas da agenda">
+                                <button type="button" class="dps-agenda-tab-button" role="tab" aria-selected="false"><span class="dps-tab-icon">◐</span><span class="dps-tab-label">Leitura Rapida</span><span class="dps-tab-desc">Confirmacoes e proximos passos</span></button>
+                                <button type="button" class="dps-agenda-tab-button dps-agenda-tab-button--active" role="tab" aria-selected="true"><span class="dps-tab-icon">◆</span><span class="dps-tab-label">Operacao</span><span class="dps-tab-desc">Checklist, check-in e cobranca</span></button>
+                                <button type="button" class="dps-agenda-tab-button" role="tab" aria-selected="false"><span class="dps-tab-icon">◌</span><span class="dps-tab-label">Contexto</span><span class="dps-tab-desc">Logistica, notas e TaxiDog</span></button>
+                            </nav>
+                            <section class="dps-agenda-day-panel">
+                                <div class="dps-agenda-day-panel__header"><div><h4>Terca-feira, 24/03</h4><p>5 atendimentos no periodo</p></div><div class="dps-agenda-day-panel__stats"><span class="dps-context-pill dps-context-pill--warning">3 pendentes</span><span class="dps-context-pill dps-context-pill--success">2 finalizados</span></div></div>
+                                <div class="dps-agenda-day-panel__body">
+                                    <h5>Fila ativa</h5>
+                                    <div class="dps-agenda-table-container">
+                                        <table class="dps-table dps-table--tab2">
+                                            <thead><tr><th>Horario</th><th>Pet e tutor</th><th>Status do servico</th><th>Pagamento</th><th>Painel operacional</th><th>Acoes</th></tr></thead>
+                                            <tbody>
+                                                <tr class="status-finalizado">
+                                                    <td class="dps-agenda-cell"><div class="dps-agenda-time-block"><strong class="dps-agenda-time-block__value">10:30</strong></div></td>
+                                                    <td class="dps-agenda-cell"><div class="dps-agenda-pet-stack"><button type="button" class="dps-pet-profile-trigger"><span class="dps-pet-profile-trigger__name">Theo</span><span class="dps-pet-profile-trigger__icon">&gt;</span></button><span class="dps-agenda-pet-client">Carla Dias</span></div></td>
+                                                    <td class="dps-agenda-cell"><div class="dps-status-dropdown-wrapper"><select class="dps-status-dropdown dps-dropdown--finished"><option>Pendente</option><option selected>Finalizado</option><option>Pago</option><option>Cancelado</option></select></div></td>
+                                                    <td class="dps-agenda-cell"><button type="button" class="dps-payment-popup-btn">Cobrar cliente</button></td>
+                                                    <td class="dps-agenda-cell"><div class="dps-operational-indicators"><button type="button" class="dps-expand-panels-btn dps-expand-panels-btn--checkin" aria-expanded="true"><span class="dps-expand-panels-btn__icon">→</span><span class="dps-expand-panels-btn__label">Continuar operacao</span><span class="dps-expand-panels-btn__label-short">Continuar</span><span class="dps-expand-panels-btn__arrow">▾</span></button><span class="dps-safety-tag dps-safety-tag--warning">!</span><span class="dps-safety-tag dps-safety-tag--alert">*</span></div></td>
+                                                    <td class="dps-agenda-cell"><div class="dps-agenda-row-actions"><button type="button" class="dps-agenda-action-link dps-agenda-action-link--secondary"><span class="dps-agenda-action-link__label">Reagendar</span></button></div></td>
+                                                </tr>
+                                                <tr class="dps-detail-row">
+                                                    <td colspan="6">
+                                                        <div class="dps-detail-panels">
+                                                            <div class="dps-checklist-panel"><h4>Checklist Operacional</h4><div class="dps-checklist-progress"><div class="dps-checklist-progress-bar"><div class="dps-checklist-progress-fill" style="width: 67%;"></div></div><span class="dps-checklist-progress-text">67%</span></div><ul class="dps-checklist-steps"><li class="dps-checklist-step" data-status="done"><span class="dps-checklist-step-icon">1</span><span class="dps-checklist-step-label">Pre-check concluido</span><span class="dps-checklist-step-actions"><button class="dps-checklist-btn dps-checklist-btn--undo" type="button">Desfazer</button><button class="dps-checklist-btn dps-checklist-btn--rework" type="button">Refazer</button></span></li><li class="dps-checklist-step" data-status="pending"><span class="dps-checklist-step-icon">2</span><span class="dps-checklist-step-label">Comunicar retorno ao tutor</span><span class="dps-checklist-step-actions"><button class="dps-checklist-btn dps-checklist-btn--done" type="button">Concluir</button><button class="dps-checklist-btn dps-checklist-btn--skip" type="button">Pular</button></span></li></ul></div>
+                                                            <div class="dps-checkin-panel"><h4>Check-in / Check-out</h4><div class="dps-checkin-status"><span class="dps-checkin-status-badge dps-checkin-status-badge--in">Check-in 10:18</span><span class="dps-checkin-status-badge dps-checkin-status-badge--duration">46 min</span></div><div class="dps-safety-summary"><span class="dps-safety-tag dps-safety-tag--warning">Pele sensivel</span><span class="dps-safety-tag dps-safety-tag--alert">Secagem baixa</span></div><div class="dps-safety-items"><div class="dps-safety-item"><span class="dps-safety-item-icon">!</span><div class="dps-safety-item-content"><label class="dps-safety-item-label"><input type="checkbox" checked>Pele sensivel</label><textarea class="dps-safety-item-notes" rows="1">Evitar shampoo perfumado.</textarea></div></div><div class="dps-safety-item"><span class="dps-safety-item-icon">*</span><div class="dps-safety-item-content"><label class="dps-safety-item-label"><input type="checkbox">Precisa de pausa curta</label><textarea class="dps-safety-item-notes" rows="1" placeholder="Detalhes..."></textarea></div></div></div><div class="dps-checkin-actions"><button type="button" class="dps-checkin-btn dps-checkin-btn--checkout">Registrar check-out</button></div></div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </section>
+
+                    <section>
+                        <span class="preview-section-label">Estado 3: Contexto</span>
+                        <div class="dps-agenda-tabs-wrapper">
+                            <div class="dps-agenda-tabs-header"><div><h3 class="dps-agenda-tabs-title">Lista de Atendimentos</h3><p class="dps-agenda-tabs-subtitle">A terceira leitura concentra logistica, excecoes e memoria operacional em um grid mais claro.</p></div></div>
+                            <nav class="dps-agenda-tabs-nav" role="tablist" aria-label="Abas da agenda">
+                                <button type="button" class="dps-agenda-tab-button" role="tab" aria-selected="false"><span class="dps-tab-icon">◐</span><span class="dps-tab-label">Leitura Rapida</span><span class="dps-tab-desc">Confirmacoes e proximos passos</span></button>
+                                <button type="button" class="dps-agenda-tab-button" role="tab" aria-selected="false"><span class="dps-tab-icon">◆</span><span class="dps-tab-label">Operacao</span><span class="dps-tab-desc">Checklist, check-in e cobranca</span></button>
+                                <button type="button" class="dps-agenda-tab-button dps-agenda-tab-button--active" role="tab" aria-selected="true"><span class="dps-tab-icon">◌</span><span class="dps-tab-label">Contexto</span><span class="dps-tab-desc">Logistica, notas e TaxiDog</span></button>
+                            </nav>
+                            <section class="dps-agenda-day-panel">
+                                <div class="dps-agenda-day-panel__header"><div><h4>Quarta-feira, 25/03</h4><p>4 atendimentos no periodo</p></div><div class="dps-agenda-day-panel__stats"><span class="dps-context-pill dps-context-pill--warning">2 pendentes</span><span class="dps-context-pill dps-context-pill--success">2 finalizados</span></div></div>
+                                <div class="dps-agenda-day-panel__body">
+                                    <h5>Fila ativa</h5>
+                                    <div class="dps-agenda-table-container">
+                                        <table class="dps-table dps-table--tab3">
+                                            <thead><tr><th>Horario</th><th>Pet e tutor</th><th>TaxiDog</th><th>Observacoes</th><th>Operacional</th><th>Acoes</th></tr></thead>
+                                            <tbody>
+                                                <tr class="status-pendente">
+                                                    <td class="dps-agenda-cell"><div class="dps-agenda-time-block"><strong class="dps-agenda-time-block__value">09:50</strong></div></td>
+                                                    <td class="dps-agenda-cell"><div class="dps-agenda-pet-stack"><button type="button" class="dps-pet-profile-trigger"><span class="dps-pet-profile-trigger__name">Pipoca</span><span class="dps-pet-profile-trigger__icon">&gt;</span></button><span class="dps-agenda-pet-client">Luana Mota</span></div></td>
+                                                    <td class="dps-agenda-cell"><div class="dps-taxidog-wrapper"><span class="dps-taxidog-label dps-taxidog-label--requested">Solicitado</span><a href="#" class="dps-taxidog-map-btn">Abrir mapa</a></div></td>
+                                                    <td class="dps-agenda-cell"><span class="dps-notes-preview" title="Tutor pediu foco em corte higienico e retorno ate 16:30.">Tutor pediu foco em corte higienico e retorno ate 16:30...</span></td>
+                                                    <td class="dps-agenda-cell"><div class="dps-agenda-operational-summary"><div class="dps-history-ops-summary"><div class="dps-history-ops-row"><span class="dps-history-ops-label">Checklist</span><span class="dps-history-ops-value">67%</span><span class="dps-history-ops-badge">1 ajuste</span></div><div class="dps-history-ops-row"><span class="dps-history-ops-label">Check-in</span><span class="dps-history-ops-value">09:44</span></div></div></div></td>
+                                                    <td class="dps-agenda-cell"><div class="dps-agenda-row-actions"><button type="button" class="dps-agenda-action-link dps-agenda-action-link--secondary"><span class="dps-agenda-action-link__label">Reagendar</span></button></div></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="dps-agenda-empty"><strong>Nenhum atendimento neste recorte.</strong><p>Ajuste o periodo ou abra a agenda completa para continuar a operacao.</p></div>
+                                </div>
+                            </section>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

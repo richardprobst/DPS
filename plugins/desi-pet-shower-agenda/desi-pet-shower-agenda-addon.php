@@ -947,7 +947,7 @@ class DPS_Agenda_Addon {
                 'dps-agenda-addon-css',
                 plugin_dir_url( __FILE__ ) . 'assets/css/agenda-addon.css',
                 [ 'dps-design-tokens' ],
-                '2.1.1'
+                '2.2.0'
             );
 
             // CSS do Checklist Operacional e Check-in/Check-out
@@ -955,7 +955,7 @@ class DPS_Agenda_Addon {
                 'dps-checklist-checkin-css',
                 plugin_dir_url( __FILE__ ) . 'assets/css/checklist-checkin.css',
                 [ 'dps-design-tokens' ],
-                '1.0.0'
+                '1.1.0'
             );
             
             // Modal de serviços (precisa ser carregado antes do agenda-addon.js)
@@ -972,7 +972,7 @@ class DPS_Agenda_Addon {
                 'dps-agenda-addon', 
                 plugin_dir_url( __FILE__ ) . 'assets/js/agenda-addon.js', 
                 [ 'jquery', 'dps-services-modal' ],
-                '1.4.1',
+                '1.5.0',
                 true 
             );
 
@@ -988,8 +988,8 @@ class DPS_Agenda_Addon {
             wp_enqueue_script(
                 'dps-checklist-checkin',
                 plugin_dir_url( __FILE__ ) . 'assets/js/checklist-checkin.js',
-                [ 'jquery' ],
-                '1.0.0',
+                [ 'jquery', 'dps-agenda-addon' ],
+                '1.1.0',
                 true
             );
 
@@ -1063,6 +1063,18 @@ class DPS_Agenda_Addon {
                     'checklistTitle'  => __( 'Checklist Operacional', 'dps-agenda-addon' ),
                     'checklistLoading'=> __( 'Carregando checklist...', 'dps-agenda-addon' ),
                     'checklistError'  => __( 'Não foi possível carregar o checklist.', 'dps-agenda-addon' ),
+                    'historyDialogTitle' => __( 'Linha do tempo do atendimento', 'dps-agenda-addon' ),
+                    'historyEmptyTitle'  => __( 'Histórico indisponível', 'dps-agenda-addon' ),
+                    'historyClose'       => __( 'Fechar histórico', 'dps-agenda-addon' ),
+                    'confirmAction'      => __( 'Confirmar ação', 'dps-agenda-addon' ),
+                    'confirmResendPayment' => __( 'Deseja reenviar o link de pagamento para este atendimento?', 'dps-agenda-addon' ),
+                    'confirmTaxidogRequest' => __( 'Deseja solicitar TaxiDog para este atendimento?', 'dps-agenda-addon' ),
+                    'confirmProceed'     => __( 'Confirmar', 'dps-agenda-addon' ),
+                    'paymentDialogTitle' => __( 'Cobrança do atendimento', 'dps-agenda-addon' ),
+                    'copyPaymentLink'    => __( 'Copiar link de pagamento', 'dps-agenda-addon' ),
+                    'rescheduleDialogTitle' => __( 'Reagendar atendimento', 'dps-agenda-addon' ),
+                    'operationPanelOpened' => __( 'Painel operacional aberto.', 'dps-agenda-addon' ),
+                    'operationPanelContinue' => __( 'Continue o checklist e o check-in no painel expandido.', 'dps-agenda-addon' ),
                 ],
                 'reloadDelay'  => 700,
             ] );
@@ -1087,7 +1099,7 @@ class DPS_Agenda_Addon {
                 'dps-checklist-checkin-css',
                 plugin_dir_url( __FILE__ ) . 'assets/css/checklist-checkin.css',
                 [ 'dps-design-tokens' ],
-                '1.0.0'
+                '1.1.0'
             );
         }
     }
@@ -1112,14 +1124,14 @@ class DPS_Agenda_Addon {
         $column_labels = $this->get_column_labels();
 
         if ( 'operacao' === $agenda_tab ) {
-            return $this->render_appointment_row_tab2( $appointment, $column_labels );
+            return $this->render_appointment_row_tab2_m3( $appointment, $column_labels );
         }
 
         if ( 'detalhes' === $agenda_tab ) {
-            return $this->render_appointment_row_tab3( $appointment, $column_labels );
+            return $this->render_appointment_row_tab3_m3( $appointment, $column_labels );
         }
 
-        return $this->render_appointment_row_tab1( $appointment, $column_labels );
+        return $this->render_appointment_row_tab1_m3( $appointment, $column_labels );
     }
 
     /**
@@ -1331,19 +1343,19 @@ class DPS_Agenda_Addon {
         // Definir abas com ícones e descrições
         $tabs = [
             'visao-rapida' => [
-                'label' => __( 'Visão Rápida', 'dps-agenda-addon' ),
-                'icon'  => '👁️',
-                'desc'  => __( 'Check rápido de status', 'dps-agenda-addon' ),
+                'label' => __( 'Leitura Rápida', 'dps-agenda-addon' ),
+                'icon'  => '◐',
+                'desc'  => __( 'Confirmações e próximos passos', 'dps-agenda-addon' ),
             ],
             'operacao'     => [
                 'label' => __( 'Operação', 'dps-agenda-addon' ),
-                'icon'  => '⚙️',
-                'desc'  => __( 'Ações e pagamentos', 'dps-agenda-addon' ),
+                'icon'  => '◆',
+                'desc'  => __( 'Checklist, check-in e cobrança', 'dps-agenda-addon' ),
             ],
             'detalhes'     => [
-                'label' => __( 'Detalhes', 'dps-agenda-addon' ),
-                'icon'  => '📍',
-                'desc'  => __( 'Logística e TaxiDog', 'dps-agenda-addon' ),
+                'label' => __( 'Contexto', 'dps-agenda-addon' ),
+                'icon'  => '◌',
+                'desc'  => __( 'Logística, notas e TaxiDog', 'dps-agenda-addon' ),
             ],
         ];
         
@@ -1354,7 +1366,7 @@ class DPS_Agenda_Addon {
         $column_labels = [
             'date'          => __( 'Data', 'dps-agenda-addon' ),
             'time'          => __( 'Hora', 'dps-agenda-addon' ),
-            'pet'           => __( 'Pet (Cliente)', 'dps-agenda-addon' ),
+            'pet'           => __( 'Pet e tutor', 'dps-agenda-addon' ),
             'service'       => __( 'Serviço', 'dps-agenda-addon' ),
             'status'        => __( 'Status', 'dps-agenda-addon' ),
             'payment'       => __( 'Pagamento', 'dps-agenda-addon' ),
@@ -1465,13 +1477,13 @@ class DPS_Agenda_Addon {
             echo '<div class="dps-agenda-table-container">';
             echo '<table class="dps-table dps-table--tab1"><thead><tr>';
             echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
-            echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Pet e tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html( $column_labels['service'] ?? __( 'Serviços', 'dps-agenda-addon' ) ) . '</th>';
             echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '</th>';
             echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {
-                echo $this->render_appointment_row_tab1( $appt, $column_labels );
+                echo $this->render_appointment_row_tab1_m3( $appt, $column_labels );
             }
             echo '</tbody></table>';
             echo '</div>';
@@ -1523,15 +1535,15 @@ class DPS_Agenda_Addon {
             echo '<div class="dps-agenda-table-container">';
             echo '<table class="dps-table dps-table--tab2"><thead><tr>';
             echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
-            echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Pet e tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Status do Serviço', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html( $column_labels['payment'] ?? __( 'Pagamento', 'dps-agenda-addon' ) ) . '</th>';
-            echo '<th>' . esc_html__( 'Check-in / Check-out', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Painel operacional', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {
-                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado por render_appointment_row_tab2
-                echo $this->render_appointment_row_tab2( $appt, $column_labels );
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado por render_appointment_row_tab2_m3
+                echo $this->render_appointment_row_tab2_m3( $appt, $column_labels );
             }
             echo '</tbody></table>';
             echo '</div>';
@@ -1583,14 +1595,14 @@ class DPS_Agenda_Addon {
             echo '<div class="dps-agenda-table-container">';
             echo '<table class="dps-table dps-table--tab3"><thead><tr>';
             echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
-            echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Pet e tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>TaxiDog</th>';
             echo '<th>' . esc_html__( 'Observações', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Operacional', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {
-                echo $this->render_appointment_row_tab3( $appt, $column_labels );
+                echo $this->render_appointment_row_tab3_m3( $appt, $column_labels );
             }
             echo '</tbody></table>';
             echo '</div>';
@@ -1606,7 +1618,7 @@ class DPS_Agenda_Addon {
             [ 'label' => __( 'Finalizados', 'dps-agenda-addon' ), 'value' => $overview_stats['completed'], 'tone' => 'success' ],
             [ 'label' => __( 'Cancelados', 'dps-agenda-addon' ), 'value' => $overview_stats['canceled'], 'tone' => 'error' ],
             [ 'label' => __( 'Atrasados', 'dps-agenda-addon' ), 'value' => $overview_stats['late'], 'tone' => 'warning' ],
-            [ 'label' => __( 'PG pendente', 'dps-agenda-addon' ), 'value' => $overview_stats['pending_payment'], 'tone' => 'secondary' ],
+            [ 'label' => __( 'Pagamento pendente', 'dps-agenda-addon' ), 'value' => $overview_stats['pending_payment'], 'tone' => 'secondary' ],
             [ 'label' => __( 'TaxiDog', 'dps-agenda-addon' ), 'value' => $overview_stats['taxidog'], 'tone' => 'tertiary' ],
         ];
 
@@ -1624,6 +1636,7 @@ class DPS_Agenda_Addon {
         echo '<div class="dps-agenda-tabs-header">';
         echo '<div>';
         echo '<h3 class="dps-agenda-tabs-title">&#128203; ' . esc_html__( 'Lista de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
+        echo '<p class="dps-agenda-tabs-subtitle">' . esc_html__( 'Três leituras do mesmo fluxo operacional: confirmar, executar e revisar contexto.', 'dps-agenda-addon' ) . '</p>';
         echo '</div>';
         echo '</div>';
 
@@ -1662,8 +1675,8 @@ class DPS_Agenda_Addon {
                 echo '</div>';
                 echo '</div>';
                 echo '<div class="dps-agenda-day-panel__body">';
-                $render_table_tab1( $day_info['upcoming'], __( 'Proximos Atendimentos', 'dps-agenda-addon' ) );
-                $render_table_tab1( $day_info['completed'], __( 'Atendimentos Finalizados', 'dps-agenda-addon' ) );
+                $render_table_tab1( $day_info['upcoming'], __( 'Fila ativa', 'dps-agenda-addon' ) );
+                $render_table_tab1( $day_info['completed'], __( 'Concluídos no período', 'dps-agenda-addon' ) );
                 echo '</div>';
                 echo '</section>';
             }
@@ -1687,8 +1700,8 @@ class DPS_Agenda_Addon {
                 echo '</div>';
                 echo '</div>';
                 echo '<div class="dps-agenda-day-panel__body">';
-                $render_table_tab2( $day_info['upcoming'], __( 'Proximos Atendimentos', 'dps-agenda-addon' ) );
-                $render_table_tab2( $day_info['completed'], __( 'Atendimentos Finalizados', 'dps-agenda-addon' ) );
+                $render_table_tab2( $day_info['upcoming'], __( 'Fila ativa', 'dps-agenda-addon' ) );
+                $render_table_tab2( $day_info['completed'], __( 'Concluídos no período', 'dps-agenda-addon' ) );
                 echo '</div>';
                 echo '</section>';
             }
@@ -1712,16 +1725,16 @@ class DPS_Agenda_Addon {
                 echo '</div>';
                 echo '</div>';
                 echo '<div class="dps-agenda-day-panel__body">';
-                $render_table_tab3( $day_info['upcoming'], __( 'Proximos Atendimentos', 'dps-agenda-addon' ) );
-                $render_table_tab3( $day_info['completed'], __( 'Atendimentos Finalizados', 'dps-agenda-addon' ) );
+                $render_table_tab3( $day_info['upcoming'], __( 'Fila ativa', 'dps-agenda-addon' ) );
+                $render_table_tab3( $day_info['completed'], __( 'Concluídos no período', 'dps-agenda-addon' ) );
                 echo '</div>';
                 echo '</section>';
             }
         echo '</div>';
         if ( ! $has_visible_results ) {
             echo '<div class="dps-agenda-empty" role="status">';
-            echo '<strong>' . esc_html__( 'Nenhum atendimento encontrado.', 'dps-agenda-addon' ) . '</strong>';
-            echo '<p>' . esc_html__( 'Altere o periodo para continuar a operacao.', 'dps-agenda-addon' ) . '</p>';
+            echo '<strong>' . esc_html__( 'Nenhum atendimento neste recorte.', 'dps-agenda-addon' ) . '</strong>';
+            echo '<p>' . esc_html__( 'Ajuste o período ou abra a agenda completa para continuar a operação.', 'dps-agenda-addon' ) . '</p>';
             echo '</div>';
         }
         // Fecha container de tabs

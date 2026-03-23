@@ -911,6 +911,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - `assets/js/agenda-addon.js`: interaÃ§Ãµes AJAX e feedback visual
 - `assets/js/checklist-checkin.js`: interaÃ§Ãµes do checklist operacional e check-in/check-out
 - `assets/css/checklist-checkin.css`: estilos M3 para checklist e check-in/check-out
+- `assets/css/agenda-addon.css`: shell M3 da Agenda, linhas por aba, overview, tabs compactas e dialog system unificado
 - **[Deprecated]** `agenda-addon.js` e `agenda.js` na raiz (devem ser removidos)
 
 **Classes de serviÃ§o**:
@@ -922,6 +923,9 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - **[v1.1.0]** LÃ³gica de serviÃ§os movida para Services Add-on; Agenda delega cÃ¡lculos para `DPS_Services_API`
 - **DocumentaÃ§Ã£o completa**: `docs/analysis/AGENDA_ADDON_ANALYSIS.md` (anÃ¡lise profunda de cÃ³digo, funcionalidades, layout e melhorias propostas)
 - **DocumentaÃ§Ã£o de layout**: `docs/analysis/AGENDA_ADDON_ANALYSIS.md` (seÃ§Ãµes de UX, responsividade e acessibilidade)
+- **[2026-03-23] Lista de Atendimentos redesenhada**: shell M3 unificado com overview mais contido, tabs compactas e microcopy operacional orientada a decisao.
+- **[2026-03-23] Operacao inline unificada**: checklist operacional e check-in/check-out passam a compartilhar o mesmo painel expansivel da aba Operacao.
+- **[2026-03-23] Dialog system da Agenda**: historico, cobranca, reagendamento, confirmacoes sensiveis e retrabalho convergem para o mesmo shell modal.
 
 ---
 

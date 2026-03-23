@@ -1,24 +1,26 @@
-﻿# Screenshots 2026-03-23 - Agenda
+# Screenshots 2026-03-23 - Agenda (Lista de Atendimentos redesign M3)
 
 ## Contexto
-- Objetivo da mudanca: remover definitivamente o bloco operacional legado da Agenda no frontend, backend e documentacao auxiliar.
-- Fonte de verdade visual (padrao M3): `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
-- Escopo principal: `plugins/desi-pet-shower-agenda/`.
+- Objetivo da mudanca: implementar o redesign completo da Lista de Atendimentos da Agenda, incluindo shell, tabs, linhas, painel operacional inline, checkboxes e dialog system.
+- Ambiente: previews estaticos servidos localmente a partir do workspace.
+- Referencia de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
 
-## Resultado
-- O shell principal da Agenda permanece com header contextual, overview cards, tabs e listas por dia.
-- O bloco legado foi removido do shortcode, da trait de renderizacao, do CSS e dos artefatos estaticos de apoio.
-- A paginacao agora preserva apenas o contexto indispensavel da aba ativa.
-- O texto auxiliar do estado diario foi reduzido e o header recebeu refinamento visual com superficie mais elegante e animacao de fundo mais suave, mantendo aderencia ao padrao M3.
+## Antes/Depois
+- Antes: a Lista de Atendimentos misturava shells visuais, tabs altas demais, profundidade fragmentada entre grid e modal, e dialogs inconsistentes entre historico, cobranca, reagendamento e retrabalho.
+- Depois: a area opera como um unico workspace M3 com overview mais contido, tabs compactas, linhas padronizadas entre as tres leituras, painel inline unificado na aba Operacao e dialogs compartilhando o mesmo shell visual.
+- Arquivos de codigo alterados:
+  - `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
+  - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+  - `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+  - `plugins/desi-pet-shower-agenda/assets/css/checklist-checkin.css`
+  - `plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js`
+  - `plugins/desi-pet-shower-agenda/assets/js/checklist-checkin.js`
 
-## Arquivos afetados
-- `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
-- `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
-- `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
-- `docs/layout/agenda/AGENDA_UX_UI_REFRESH_2026-03.md`
-- `docs/analysis/AGENDA_ADDON_ANALYSIS.md`
+## Previews base
+- `./agenda-lista-atendimentos-redesign-preview.html`
+- `./agenda-lista-atendimentos-dialogs-preview.html`
 
-## Breakpoints de referencia
+## Breakpoints validados
 - `375`
 - `600`
 - `840`
@@ -26,8 +28,17 @@
 - `1920`
 
 ## Capturas
-- Nenhuma captura nova foi gerada neste workspace.
+- `./agenda-lista-atendimentos-redesign-375-fullpage.png`
+- `./agenda-lista-atendimentos-redesign-600-fullpage.png`
+- `./agenda-lista-atendimentos-redesign-840-fullpage.png`
+- `./agenda-lista-atendimentos-redesign-1200-fullpage.png`
+- `./agenda-lista-atendimentos-redesign-1920-fullpage.png`
+- `./agenda-lista-atendimentos-dialogs-375-fullpage.png`
+- `./agenda-lista-atendimentos-dialogs-600-fullpage.png`
+- `./agenda-lista-atendimentos-dialogs-840-fullpage.png`
+- `./agenda-lista-atendimentos-dialogs-1200-fullpage.png`
+- `./agenda-lista-atendimentos-dialogs-1920-fullpage.png`
 
-## Limitacoes
-- Nao havia instancia WordPress ativa nem preview estatico atualizado disponivel para gerar capturas completas nesta entrega.
-- O registro foi mantido para documentar a remocao estrutural e a adesao ao padrao visual M3.
+## Observacoes
+- Os previews usam os CSS reais do add-on para registrar o redesign mesmo sem uma instancia WordPress ativa no momento da captura.
+- O registro cobre a shell principal, as tres abas, o painel operacional inline e o dialog system unificado, em conformidade com o padrao M3 adotado em `docs/visual/`.

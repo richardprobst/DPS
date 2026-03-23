@@ -67,6 +67,241 @@
   // ExpÃµe globalmente para uso em outros mÃ³dulos
   window.DPSToast = { show: showToast };
 
+  var AGENDA_DIALOG_SELECTOR = '.dps-agenda-dialog-overlay';
+  var AGENDA_DIALOG_FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])';
+  var agendaDialogCounter = 0;
+
+  function getAgendaDialogFocusables(dialog) {
+    return dialog.find(AGENDA_DIALOG_FOCUSABLE_SELECTOR).filter(':visible');
+  }
+
+  function trapAgendaDialogFocus(event, dialog) {
+    var focusables = getAgendaDialogFocusables(dialog);
+    if (!focusables.length) {
+      event.preventDefault();
+      dialog.find('.dps-agenda-dialog').trigger('focus');
+      return;
+    }
+
+    var first = focusables.first()[0];
+    var last = focusables.last()[0];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+      return;
+    }
+
+    if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function closeAgendaDialog(target, reason) {
+    var dialog = target ? $(target).closest(AGENDA_DIALOG_SELECTOR) : $(AGENDA_DIALOG_SELECTOR).last();
+    if (!dialog.length) {
+      return;
+    }
+
+    var dialogOptions = dialog.data('dialogOptions') || {};
+    var trigger = dialog.data('dialogTrigger');
+
+    if (typeof dialogOptions.onClose === 'function') {
+      dialogOptions.onClose(reason || 'dismiss', dialog);
+    }
+
+    dialog.remove();
+
+    if (!$(AGENDA_DIALOG_SELECTOR).length) {
+      $('body').removeClass('dps-agenda-dialog-open');
+    }
+
+    if (trigger && trigger.length) {
+      trigger.trigger('focus');
+    }
+  }
+
+  function openAgendaDialog(options) {
+    var settings = $.extend({
+      title: '',
+      eyebrow: '',
+      subtitle: '',
+      bodyHtml: '',
+      footerHtml: '',
+      size: 'medium',
+      trigger: null,
+      overlayClass: '',
+      dialogClass: '',
+      showClose: true,
+      initialFocus: ''
+    }, options || {});
+
+    agendaDialogCounter += 1;
+
+    var dialogId = 'dps-agenda-dialog-' + agendaDialogCounter;
+    var titleId = dialogId + '-title';
+    var bodyId = dialogId + '-body';
+    var overlayClass = 'dps-agenda-dialog-overlay';
+    var dialogClass = 'dps-agenda-dialog dps-agenda-dialog--' + settings.size;
+
+    if (settings.overlayClass) {
+      overlayClass += ' ' + settings.overlayClass;
+    }
+
+    if (settings.dialogClass) {
+      dialogClass += ' ' + settings.dialogClass;
+    }
+
+    var headerHtml = '<div class="dps-agenda-dialog__header">' +
+      '<div class="dps-agenda-dialog__heading">' +
+        (settings.eyebrow ? '<span class="dps-agenda-dialog__eyebrow">' + escapeHtml(settings.eyebrow) + '</span>' : '') +
+        '<h3 id="' + titleId + '" class="dps-agenda-dialog__title">' + escapeHtml(settings.title) + '</h3>' +
+        (settings.subtitle ? '<p class="dps-agenda-dialog__subtitle">' + escapeHtml(settings.subtitle) + '</p>' : '') +
+      '</div>' +
+      (settings.showClose ? '<button type="button" class="dps-agenda-dialog__close" aria-label="' + escapeHtml(getMessage('close', 'Fechar')) + '">&times;</button>' : '') +
+    '</div>';
+
+    var footerHtml = settings.footerHtml ? '<div class="dps-agenda-dialog__footer">' + settings.footerHtml + '</div>' : '';
+    var dialog = $('<div class="' + overlayClass + '" role="dialog" aria-modal="true" aria-labelledby="' + titleId + '" aria-describedby="' + bodyId + '">' +
+      '<div class="' + dialogClass + '" role="document" tabindex="-1">' +
+        headerHtml +
+        '<div id="' + bodyId + '" class="dps-agenda-dialog__body">' + settings.bodyHtml + '</div>' +
+        footerHtml +
+      '</div>' +
+    '</div>');
+
+    dialog.data('dialogOptions', settings);
+    dialog.data('dialogTrigger', settings.trigger && settings.trigger.length ? settings.trigger : $(document.activeElement));
+
+    $('body').addClass('dps-agenda-dialog-open').append(dialog);
+
+    if (typeof settings.onReady === 'function') {
+      settings.onReady(dialog);
+    }
+
+    window.setTimeout(function() {
+      var initialTarget = settings.initialFocus ? dialog.find(settings.initialFocus).filter(':visible').first() : $();
+      var focusTarget = initialTarget.length ? initialTarget : getAgendaDialogFocusables(dialog).first();
+      if (focusTarget.length) {
+        focusTarget.trigger('focus');
+      } else {
+        dialog.find('.dps-agenda-dialog').trigger('focus');
+      }
+    }, 0);
+
+    return dialog;
+  }
+
+  function showAgendaContentDialog(options) {
+    return openAgendaDialog($.extend({
+      footerHtml: '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + escapeHtml(getMessage('close', 'Fechar')) + '</button>'
+    }, options || {}));
+  }
+
+  function showAgendaConfirmDialog(options) {
+    var settings = $.extend({
+      title: getMessage('confirmAction', 'Confirmar acao'),
+      subtitle: '',
+      bodyHtml: '',
+      confirmLabel: getMessage('confirmProceed', 'Confirmar'),
+      cancelLabel: getMessage('cancel', 'Cancelar'),
+      onConfirm: null,
+      onCancel: null
+    }, options || {});
+
+    var dialog = openAgendaDialog({
+      title: settings.title,
+      subtitle: settings.subtitle,
+      bodyHtml: settings.bodyHtml,
+      size: settings.size || 'small',
+      trigger: settings.trigger || null,
+      overlayClass: settings.overlayClass || '',
+      dialogClass: settings.dialogClass || '',
+      footerHtml:
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-action="cancel">' + escapeHtml(settings.cancelLabel) + '</button>' +
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--primary" data-dialog-action="confirm">' + escapeHtml(settings.confirmLabel) + '</button>'
+    });
+
+    dialog.on('click', '[data-dialog-action="cancel"]', function() {
+      if (typeof settings.onCancel === 'function') {
+        settings.onCancel(dialog);
+      }
+      closeAgendaDialog(dialog, 'cancel');
+    });
+
+    dialog.on('click', '[data-dialog-action="confirm"]', function() {
+      if (typeof settings.onConfirm === 'function') {
+        settings.onConfirm(dialog);
+      }
+      closeAgendaDialog(dialog, 'confirm');
+    });
+
+    return dialog;
+  }
+
+  function openOperationPanel(apptId, options) {
+    var settings = $.extend({
+      focusPanel: false,
+      toast: ''
+    }, options || {});
+    var row = $('tr[data-appt-id="' + apptId + '"]').first();
+    var trigger = row.find('.dps-expand-panels-btn').first();
+    var detailRow = row.next('.dps-detail-row[data-appt-id="' + apptId + '"]');
+
+    if (!row.length || !trigger.length || !detailRow.length) {
+      return false;
+    }
+
+    if (trigger.attr('aria-expanded') !== 'true') {
+      var isCardLayout = detailRow.closest('tbody').css('display') === 'flex';
+      var expandedDisplay = isCardLayout ? 'flex' : 'table-row';
+      detailRow.stop(true, true).slideDown(200, function() {
+        $(this).css('display', expandedDisplay);
+      });
+      trigger.attr('aria-expanded', 'true');
+    }
+
+    if (settings.toast) {
+      showToast(settings.toast, 'info', 2200);
+    }
+
+    if (settings.focusPanel) {
+      window.setTimeout(function() {
+        var focusable = detailRow.find(AGENDA_DIALOG_FOCUSABLE_SELECTOR).filter(':visible').first();
+        if (focusable.length) {
+          focusable.trigger('focus');
+        }
+      }, 220);
+    }
+
+    return true;
+  }
+
+  window.DPSAgendaDialog = {
+    open: openAgendaDialog,
+    close: closeAgendaDialog,
+    content: showAgendaContentDialog,
+    confirm: showAgendaConfirmDialog
+  };
+
+  $(document).on('click', '.dps-agenda-dialog__close, [data-dialog-close="true"]', function(event) {
+    event.preventDefault();
+    closeAgendaDialog($(this), 'dismiss');
+  });
+
+  $(document).on('click', AGENDA_DIALOG_SELECTOR, function(event) {
+    if ($(event.target).is(AGENDA_DIALOG_SELECTOR)) {
+      closeAgendaDialog($(this), 'backdrop');
+    }
+  });
+
+  $(document).on('keydown', AGENDA_DIALOG_SELECTOR, function(event) {
+    if (event.key === 'Tab') {
+      trapAgendaDialogFocus(event, $(this));
+    }
+  });
+
   /**
    * ObtÃ©m o label e Ã­cone do porte do pet.
    * @param {string} size Porte do pet (pequeno, medio, grande, small, medium, large).
@@ -274,14 +509,21 @@
             if ( typeof window.DPSServicesModal !== 'undefined' ) {
               window.DPSServicesModal.show(services);
             } else {
-              // Fallback para alert() caso o modal n?o esteja carregado
-              var message = '';
-              for ( var i=0; i < services.length; i++ ) {
+              var bodyHtml = '<div class="dps-agenda-dialog-list">';
+              for ( var i = 0; i < services.length; i++ ) {
                 var srv = services[i];
-                message += srv.name + ' - R$ ' + parseFloat(srv.price).toFixed(2);
-                if ( i < services.length - 1 ) message += "\n";
+                bodyHtml += '<div class="dps-agenda-dialog-list__item">' +
+                  '<span class="dps-agenda-dialog-list__label">' + escapeHtml(srv.name || 'Servico') + '</span>' +
+                  '<strong class="dps-agenda-dialog-list__value">R$ ' + parseFloat(srv.price || 0).toFixed(2) + '</strong>' +
+                '</div>';
               }
-              alert(message);
+              bodyHtml += '</div>';
+              showAgendaContentDialog({
+                title: 'Servicos do atendimento',
+                size: 'medium',
+                bodyHtml: bodyHtml,
+                trigger: link
+              });
             }
           } else {
             // Lista vazia - exibe modal com mensagem apropriada se dispon?vel
@@ -542,7 +784,7 @@
   // FASE 5: Reagendamento RÃ¡pido
   // =========================================================================
 
-  // Abrir modal de reagendamento
+  // Abrir dialog de reagendamento
   $(document).on('click', '.dps-quick-reschedule', function(e){
     e.preventDefault();
     var btn = $(this);
@@ -550,52 +792,36 @@
     var currentDate = btn.data('date');
     var currentTime = btn.data('time');
 
-    // XSS FIX: Escape dos valores que serÃ£o inseridos no HTML
-    var modal = $('<div class="dps-reschedule-modal">' +
-      '<div class="dps-reschedule-content">' +
-        '<div class="dps-reschedule-header">' +
-          '<h3 class="dps-reschedule-title">ðŸ“… ' + getMessage('reschedule_title', 'Reagendar') + '</h3>' +
-          '<button type="button" class="dps-reschedule-close">&times;</button>' +
-        '</div>' +
-        '<div class="dps-reschedule-body">' +
+    openAgendaDialog({
+      title: getMessage('rescheduleDialogTitle', getMessage('reschedule_title', 'Reagendar atendimento')),
+      subtitle: 'Atualize data e horario sem sair da lista.',
+      size: 'small',
+      trigger: btn,
+      bodyHtml:
+        '<div class="dps-reschedule-fields">' +
           '<div class="dps-reschedule-field">' +
-            '<label>' + getMessage('new_date', 'Nova data') + '</label>' +
+            '<label>' + escapeHtml(getMessage('new_date', 'Nova data')) + '</label>' +
             '<input type="date" id="dps-reschedule-date" value="' + escapeHtml(currentDate) + '" required>' +
           '</div>' +
           '<div class="dps-reschedule-field">' +
-            '<label>' + getMessage('new_time', 'Novo horÃ¡rio') + '</label>' +
+            '<label>' + escapeHtml(getMessage('new_time', 'Novo horario')) + '</label>' +
             '<input type="time" id="dps-reschedule-time" value="' + escapeHtml(currentTime) + '" required>' +
           '</div>' +
-        '</div>' +
-        '<div class="dps-reschedule-footer">' +
-          '<button type="button" class="dps-reschedule-btn dps-reschedule-btn--cancel">' + getMessage('cancel', 'Cancelar') + '</button>' +
-          '<button type="button" class="dps-reschedule-btn dps-reschedule-btn--save" data-appt-id="' + parseInt(apptId, 10) + '">' + getMessage('save', 'Salvar') + '</button>' +
-        '</div>' +
-      '</div>' +
-    '</div>');
-
-    $('body').append(modal);
-    modal.find('#dps-reschedule-date').focus();
-  });
-
-  // Fechar modal de reagendamento
-  $(document).on('click', '.dps-reschedule-close, .dps-reschedule-btn--cancel', function(){
-    $('.dps-reschedule-modal').remove();
-  });
-
-  // Fechar ao clicar fora do modal
-  $(document).on('click', '.dps-reschedule-modal', function(e){
-    if ( $(e.target).hasClass('dps-reschedule-modal') ) {
-      $(this).remove();
-    }
+        '</div>',
+      footerHtml:
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + escapeHtml(getMessage('cancel', 'Cancelar')) + '</button>' +
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--primary dps-reschedule-btn--save" data-appt-id="' + parseInt(apptId, 10) + '">' + escapeHtml(getMessage('save', 'Salvar')) + '</button>',
+      initialFocus: '#dps-reschedule-date'
+    });
   });
 
   // Salvar reagendamento
   $(document).on('click', '.dps-reschedule-btn--save', function(){
     var btn = $(this);
     var apptId = btn.data('appt-id');
-    var newDate = $('#dps-reschedule-date').val();
-    var newTime = $('#dps-reschedule-time').val();
+    var dialog = btn.closest(AGENDA_DIALOG_SELECTOR);
+    var newDate = dialog.find('#dps-reschedule-date').val();
+    var newTime = dialog.find('#dps-reschedule-time').val();
 
     if ( ! newDate || ! newTime ) {
       showToast(getMessage('fill_all_fields', 'Preencha todos os campos.'), 'warning');
@@ -612,6 +838,7 @@
       time: newTime
     }, function(resp){
       if ( resp && resp.success ) {
+        closeAgendaDialog(dialog, 'saved');
         showToast(resp.data.message, 'success');
         // Aguarda 2 segundos para o usuÃ¡rio ver a mensagem de sucesso antes de recarregar
         setTimeout(function(){ location.reload(); }, 2000);
@@ -625,16 +852,38 @@
     });
   });
 
-  // Tecla ESC fecha modal
-  $(document).on('keydown', function(e){
-    if ( e.key === 'Escape' && $('.dps-reschedule-modal').length ) {
-      $('.dps-reschedule-modal').remove();
-    }
-  });
-
   // =========================================================================
   // FASE 5: HistÃ³rico de AlteraÃ§Ãµes
   // =========================================================================
+
+  function buildHistoryDialogBody(history) {
+    var html = '<div class="dps-agenda-history-list">';
+
+    history.forEach(function(entry){
+      var actionLabel = getActionLabel(entry.action);
+      html += '<article class="dps-agenda-history-item">' +
+        '<div class="dps-agenda-history-item__head">' +
+          '<strong>' + escapeHtml(actionLabel) + '</strong>' +
+          '<span>' + escapeHtml(entry.date || '') + '</span>' +
+        '</div>' +
+        '<div class="dps-agenda-history-item__meta">' + escapeHtml(entry.user || '') + '</div>';
+
+      if ( entry.details ) {
+        if ( entry.details.old_status && entry.details.new_status ) {
+          html += '<div class="dps-agenda-history-item__detail">De ' + escapeHtml(entry.details.old_status) + ' para ' + escapeHtml(entry.details.new_status) + '</div>';
+        }
+        if ( entry.details.old_date && entry.details.new_date ) {
+          html += '<div class="dps-agenda-history-item__detail">De ' + escapeHtml(entry.details.old_date + ' ' + (entry.details.old_time || '')) + '</div>';
+          html += '<div class="dps-agenda-history-item__detail">Para ' + escapeHtml(entry.details.new_date + ' ' + (entry.details.new_time || '')) + '</div>';
+        }
+      }
+
+      html += '</article>';
+    });
+
+    html += '</div>';
+    return html;
+  }
 
   $(document).on('click', '.dps-history-indicator', function(e){
     e.preventDefault();
@@ -649,31 +898,22 @@
       if ( resp && resp.success ) {
         var history = resp.data.history || [];
         if ( history.length === 0 ) {
-          showToast(getMessage('no_history', 'Sem histÃ³rico de alteraÃ§Ãµes.'), 'info');
+          showToast(getMessage('no_history', 'Sem historico de alteracoes.'), 'info');
           return;
         }
 
-        var content = getMessage('history_title', 'HistÃ³rico de AlteraÃ§Ãµes') + ':\n\n';
-        history.forEach(function(entry){
-          var actionLabel = getActionLabel(entry.action);
-          content += 'â€¢ ' + entry.date + ' - ' + actionLabel + ' (' + entry.user + ')\n';
-          if ( entry.details ) {
-            if ( entry.details.old_status && entry.details.new_status ) {
-              content += '  De: ' + entry.details.old_status + ' â†’ Para: ' + entry.details.new_status + '\n';
-            }
-            if ( entry.details.old_date && entry.details.new_date ) {
-              content += '  De: ' + entry.details.old_date + ' ' + entry.details.old_time + '\n';
-              content += '  Para: ' + entry.details.new_date + ' ' + entry.details.new_time + '\n';
-            }
-          }
+        showAgendaContentDialog({
+          title: getMessage('historyDialogTitle', getMessage('history_title', 'Linha do tempo do atendimento')),
+          size: 'medium',
+          trigger: btn,
+          bodyHtml: buildHistoryDialogBody(history),
+          footerHtml: '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + escapeHtml(getMessage('historyClose', getMessage('close', 'Fechar'))) + '</button>'
         });
-
-        // Exibe histÃ³rico em alert - formato de texto longo requer modal dedicado
-        // TODO: Criar modal genÃ©rico de conteÃºdo para substituir alert em histÃ³rico
-        alert(content);
       } else {
-        showToast(resp.data ? resp.data.message : getMessage('error', 'Erro ao buscar histÃ³rico.'), 'error');
+        showToast(resp.data ? resp.data.message : getMessage('error', 'Erro ao buscar historico.'), 'error');
       }
+    }).fail(function(xhr){
+      showToast(getAjaxErrorMessage(xhr, getMessage('error', 'Erro ao buscar historico.')), 'error');
     });
   });
 
@@ -754,31 +994,35 @@
     var apptId = btn.data('appt-id');
     var row = btn.closest('tr');
 
-    if (!confirm('Deseja realmente reenviar o link de pagamento?')) {
-      return;
-    }
+    showAgendaConfirmDialog({
+      title: getMessage('confirmAction', 'Confirmar acao'),
+      subtitle: 'Cobranca',
+      bodyHtml: '<p class="dps-agenda-dialog-copy">' + escapeHtml(getMessage('confirmResendPayment', 'Deseja reenviar o link de pagamento para este atendimento?')) + '</p>',
+      trigger: btn,
+      onConfirm: function() {
+        btn.prop('disabled', true).text('Reenviando...');
 
-    btn.prop('disabled', true).text('Reenviando...');
-
-    $.post(DPS_AG_Addon.ajax, {
-      action: 'dps_agenda_resend_payment',
-      appt_id: apptId,
-      nonce: DPS_AG_Addon.nonce_resend_payment,
-      agenda_tab: getCurrentAgendaTab()
-    }, function(resp){
-      if (resp && resp.success) {
-        if (resp.data && resp.data.row_html) {
-          replaceAgendaRow(row, resp.data.row_html);
-        } else {
-          location.reload();
-        }
-      } else {
-        showToast(resp && resp.data ? resp.data.message : 'Erro ao reenviar link.', 'error');
-        btn.prop('disabled', false).text('Reenviar');
+        $.post(DPS_AG_Addon.ajax, {
+          action: 'dps_agenda_resend_payment',
+          appt_id: apptId,
+          nonce: DPS_AG_Addon.nonce_resend_payment,
+          agenda_tab: getCurrentAgendaTab()
+        }, function(resp){
+          if (resp && resp.success) {
+            if (resp.data && resp.data.row_html) {
+              replaceAgendaRow(row, resp.data.row_html);
+            } else {
+              location.reload();
+            }
+          } else {
+            showToast(resp && resp.data ? resp.data.message : 'Erro ao reenviar link.', 'error');
+            btn.prop('disabled', false).text('Reenviar');
+          }
+        }).fail(function(xhr){
+          showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao ao reenviar link.'), 'error');
+          btn.prop('disabled', false).text('Reenviar');
+        });
       }
-    }).fail(function(xhr){
-      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao ao reenviar link.'), 'error');
-      btn.prop('disabled', false).text('Reenviar');
     });
   });
 
@@ -922,7 +1166,10 @@
           replaceAgendaRow(row, resp.data.row_html);
           if (status === 'finalizado' || status === 'finalizado_pago') {
             setTimeout(function(){
-              openChecklistPopup(apptId);
+              openOperationPanel(apptId, {
+              focusPanel: true,
+              toast: getMessage('operationPanelContinue', 'Continue no painel operacional.')
+            });
             }, 150);
           } else {
             showToast(resp.data.message || 'Status atualizado.', 'success', 1600);
@@ -944,7 +1191,10 @@
           setTimeout(function(){
             row.css('background-color', '');
             if (status === 'finalizado' || status === 'finalizado_pago') {
-              openChecklistPopup(apptId);
+              openOperationPanel(apptId, {
+              focusPanel: true,
+              toast: getMessage('operationPanelContinue', 'Continue no painel operacional.')
+            });
             } else {
               location.reload();
             }
@@ -1298,7 +1548,6 @@
   $(document).on('click', '.dps-payment-popup-btn', function(e){
     e.preventDefault();
     var btn = $(this);
-    var apptId = btn.data('appt-id');
     var paymentLink = btn.data('payment-link');
     var clientPhone = btn.data('client-phone');
     var whatsappMsg = btn.data('whatsapp-msg');
@@ -1306,90 +1555,54 @@
     var petName = btn.data('pet-name');
     var totalValue = btn.data('total-value');
 
-    // Formata o nÃºmero de WhatsApp (Brasil)
-    // Remove todos os caracteres nÃ£o numÃ©ricos
     var whatsappNumber = (clientPhone || '').replace(/\D/g, '');
-    // Adiciona cÃ³digo do paÃ­s apenas se necessÃ¡rio
-    // 10 dÃ­gitos = DDD (2) + nÃºmero fixo (8) - formato antigo celular
-    // 11 dÃ­gitos = DDD (2) + nÃºmero celular (9)
-    // 12 dÃ­gitos = cÃ³digo paÃ­s (2) + DDD (2) + nÃºmero fixo (8)
-    // 13 dÃ­gitos = cÃ³digo paÃ­s (2) + DDD (2) + nÃºmero celular (9)
     if (whatsappNumber.length === 10 || whatsappNumber.length === 11) {
-      // NÃºmero brasileiro sem cÃ³digo do paÃ­s
       whatsappNumber = '55' + whatsappNumber;
-    } else if (whatsappNumber.length >= 12 && whatsappNumber.substring(0, 2) === '55') {
-      // NÃºmero jÃ¡ tem cÃ³digo do paÃ­s (mantÃ©m como estÃ¡)
-    } else if (whatsappNumber.length < 10) {
-      // NÃºmero muito curto - mantÃ©m para o usuÃ¡rio corrigir
     }
 
     var whatsappUrl = 'https://wa.me/' + whatsappNumber + '?text=' + encodeURIComponent(whatsappMsg);
-
-    // Monta o HTML do modal
-    // XSS FIX: Escape de dados de texto inseridos no HTML
-    // URLs em href nÃ£o precisam de escapeHtml (jÃ¡ sÃ£o URL-encoded), mas data-attributes sim
-    var modalHtml = '<div class="dps-payment-modal">' +
-      '<div class="dps-payment-modal-content">' +
-        '<div class="dps-payment-modal-header">' +
-          '<h3 class="dps-payment-modal-title">ðŸ’³ Enviar Link de Pagamento</h3>' +
-          '<button type="button" class="dps-payment-modal-close">&times;</button>' +
-        '</div>' +
-        '<div class="dps-payment-modal-body">' +
-          '<div class="dps-payment-info">' +
-            '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Cliente:</span><span class="dps-payment-info-value">' + escapeHtml(clientName) + '</span></div>' +
-            '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Pet:</span><span class="dps-payment-info-value">' + escapeHtml(petName) + '</span></div>' +
-            '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Valor:</span><span class="dps-payment-info-value">R$ ' + escapeHtml(totalValue) + '</span></div>' +
-          '</div>' +
-          '<div class="dps-payment-actions">' +
-            '<a href="' + whatsappUrl + '" target="_blank" class="dps-payment-action-btn dps-payment-action-btn--whatsapp">' +
-              'ðŸ“± Enviar por WhatsApp' +
-            '</a>' +
-            '<button type="button" class="dps-payment-action-btn dps-payment-action-btn--copy" data-link="' + escapeHtml(paymentLink) + '">' +
-              'ðŸ“‹ Copiar Link de Pagamento' +
-            '</button>' +
-          '</div>' +
-        '</div>' +
+    var bodyHtml = '<div class="dps-payment-info">' +
+      '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Cliente</span><span class="dps-payment-info-value">' + escapeHtml(clientName || '') + '</span></div>' +
+      '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Pet</span><span class="dps-payment-info-value">' + escapeHtml(petName || '') + '</span></div>' +
+      '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Valor</span><span class="dps-payment-info-value">R$ ' + escapeHtml(totalValue || '') + '</span></div>' +
       '</div>' +
-    '</div>';
+      '<div class="dps-payment-actions">' +
+        '<a href="' + whatsappUrl + '" target="_blank" rel="noopener noreferrer" class="dps-payment-action-btn dps-payment-action-btn--whatsapp">Enviar por WhatsApp</a>' +
+        '<button type="button" class="dps-payment-action-btn dps-payment-action-btn--copy" data-link="' + escapeHtml(paymentLink || '') + '">' + escapeHtml(getMessage('copyPaymentLink', 'Copiar link de pagamento')) + '</button>' +
+      '</div>';
 
-    $('body').append(modalHtml);
-  });
-
-  // Fechar modal de pagamento
-  $(document).on('click', '.dps-payment-modal-close', function(){
-    $('.dps-payment-modal').remove();
-  });
-
-  $(document).on('click', '.dps-payment-modal', function(e){
-    if ($(e.target).hasClass('dps-payment-modal')) {
-      $(this).remove();
-    }
+    openAgendaDialog({
+      title: getMessage('paymentDialogTitle', 'Cobranca do atendimento'),
+      subtitle: 'Envie o link pelo canal preferido do cliente.',
+      size: 'small',
+      trigger: btn,
+      bodyHtml: bodyHtml,
+      footerHtml: '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + escapeHtml(getMessage('close', 'Fechar')) + '</button>'
+    });
   });
 
   // Copiar link de pagamento
   $(document).on('click', '.dps-payment-action-btn--copy', function(){
     var btn = $(this);
     var link = btn.data('link');
+    var defaultLabel = getMessage('copyPaymentLink', 'Copiar link de pagamento');
 
-    // Copia para clipboard
+    function markCopied() {
+      btn.addClass('copied').text('Link copiado!');
+      setTimeout(function(){
+        btn.removeClass('copied').text(defaultLabel);
+      }, 2000);
+    }
+
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(link).then(function(){
-        btn.addClass('copied').text('âœ… Link Copiado!');
-        setTimeout(function(){
-          btn.removeClass('copied').text('ðŸ“‹ Copiar Link de Pagamento');
-        }, 2000);
-      });
+      navigator.clipboard.writeText(link).then(markCopied);
     } else {
-      // Fallback para navegadores antigos
       var tempInput = $('<input>');
       $('body').append(tempInput);
       tempInput.val(link).select();
       document.execCommand('copy');
       tempInput.remove();
-      btn.addClass('copied').text('âœ… Link Copiado!');
-      setTimeout(function(){
-        btn.removeClass('copied').text('ðŸ“‹ Copiar Link de Pagamento');
-      }, 2000);
+      markCopied();
     }
   });
 
@@ -1438,32 +1651,36 @@
     var apptId = btn.data('appt-id');
     var row = btn.closest('tr');
 
-    if (!confirm('Deseja solicitar TaxiDog para este atendimento?')) {
-      return;
-    }
+    showAgendaConfirmDialog({
+      title: getMessage('confirmAction', 'Confirmar acao'),
+      subtitle: 'TaxiDog',
+      bodyHtml: '<p class="dps-agenda-dialog-copy">' + escapeHtml(getMessage('confirmTaxidogRequest', 'Deseja solicitar TaxiDog para este atendimento?')) + '</p>',
+      trigger: btn,
+      onConfirm: function() {
+        btn.prop('disabled', true).text('Solicitando...');
 
-    btn.prop('disabled', true).text('Solicitando...');
-
-    $.post(DPS_AG_Addon.ajax, {
-      action: 'dps_agenda_request_taxidog',
-      appt_id: apptId,
-      nonce: DPS_AG_Addon.nonce_taxidog,
-      agenda_tab: getCurrentAgendaTab()
-    }, function(resp){
-      if (resp && resp.success) {
-        if (resp.data && resp.data.row_html) {
-          replaceAgendaRow(row, resp.data.row_html);
-          showToast(resp.data.message || 'TaxiDog solicitado com sucesso!', 'success', 1600);
-        } else {
-          location.reload();
-        }
-      } else {
-        showToast(resp && resp.data ? resp.data.message : 'Erro ao solicitar TaxiDog.', 'error');
-        btn.prop('disabled', false).text('Solicitar TaxiDog');
+        $.post(DPS_AG_Addon.ajax, {
+          action: 'dps_agenda_request_taxidog',
+          appt_id: apptId,
+          nonce: DPS_AG_Addon.nonce_taxidog,
+          agenda_tab: getCurrentAgendaTab()
+        }, function(resp){
+          if (resp && resp.success) {
+            if (resp.data && resp.data.row_html) {
+              replaceAgendaRow(row, resp.data.row_html);
+              showToast(resp.data.message || 'TaxiDog solicitado com sucesso!', 'success', 1600);
+            } else {
+              location.reload();
+            }
+          } else {
+            showToast(resp && resp.data ? resp.data.message : 'Erro ao solicitar TaxiDog.', 'error');
+            btn.prop('disabled', false).text('Solicitar TaxiDog');
+          }
+        }).fail(function(xhr){
+          showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
+          btn.prop('disabled', false).text('Solicitar TaxiDog');
+        });
       }
-    }).fail(function(xhr){
-      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
-      btn.prop('disabled', false).text('Solicitar TaxiDog');
     });
   });
 
@@ -1477,75 +1694,45 @@
    * @param {number} apptId ID do agendamento.
    */
   function openChecklistPopup(apptId) {
-    // Remove popup existente
-    $('.dps-checklist-modal-overlay').remove();
+    if (openOperationPanel(apptId, {
+      focusPanel: true,
+      toast: getMessage('operationPanelOpened', 'Painel operacional aberto.')
+    })) {
+      return;
+    }
 
     var loadingMsg = escapeHtml(getMessage('checklistLoading', 'Carregando checklist...'));
-    var titleMsg = escapeHtml(getMessage('checklistTitle', 'Checklist Operacional'));
-    var closeMsg = escapeHtml(getMessage('close', 'Fechar'));
+    var dialog = showAgendaContentDialog({
+      title: getMessage('checklistTitle', 'Checklist operacional'),
+      size: 'large',
+      bodyHtml: '<p class="dps-checklist-modal-loading">' + loadingMsg + '</p>'
+    });
 
-    var html =
-      '<div class="dps-checklist-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dps-checklist-modal-title">' +
-        '<div class="dps-checklist-modal">' +
-          '<div class="dps-checklist-modal-header">' +
-            '<h3 id="dps-checklist-modal-title">ðŸ“‹ ' + titleMsg + '</h3>' +
-            '<button type="button" class="dps-checklist-modal-close" title="' + closeMsg + '">&times;</button>' +
-          '</div>' +
-          '<div class="dps-checklist-modal-body">' +
-            '<p class="dps-checklist-modal-loading">' + loadingMsg + '</p>' +
-          '</div>' +
-          '<div class="dps-checklist-modal-footer">' +
-            '<button type="button" class="dps-checklist-btn dps-checklist-modal-close-btn">' + closeMsg + '</button>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-
-    $('body').append(html);
-
-    // Carrega o painel do checklist via AJAX
     $.post(DPS_AG_Addon.ajax, {
       action: 'dps_get_checklist_panel',
       appointment_id: apptId,
       nonce: DPS_AG_Addon.nonce_checklist
     }, function(resp) {
       if (resp && resp.success && resp.data && resp.data.html) {
-        $('.dps-checklist-modal-body').html(resp.data.html);
+        dialog.find('.dps-agenda-dialog__body').html(resp.data.html);
       } else {
-        var errorMsg = getMessage('checklistError', 'NÃ£o foi possÃ­vel carregar o checklist.');
-        $('.dps-checklist-modal-body').html('<p class="dps-checklist-modal-error">' + escapeHtml(errorMsg) + '</p>');
+        dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Nao foi possivel carregar o checklist.')) + '</p>');
       }
     }).fail(function() {
-      var errorMsg = getMessage('checklistError', 'NÃ£o foi possÃ­vel carregar o checklist.');
-      $('.dps-checklist-modal-body').html('<p class="dps-checklist-modal-error">' + escapeHtml(errorMsg) + '</p>');
+      dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Nao foi possivel carregar o checklist.')) + '</p>');
     });
   }
 
-  // Fechar popup do checklist
-  $(document).on('click', '.dps-checklist-modal-close, .dps-checklist-modal-close-btn', function() {
-    $('.dps-checklist-modal-overlay').remove();
-    location.reload();
-  });
-
-  // Fechar popup do checklist clicando fora
-  $(document).on('click', '.dps-checklist-modal-overlay', function(e) {
-    if ($(e.target).hasClass('dps-checklist-modal-overlay')) {
-      $('.dps-checklist-modal-overlay').remove();
-      location.reload();
-    }
-  });
-
-  // Fechar modais com ESC
   $(document).on('keydown', function(e){
     if (e.key === 'Escape') {
-      if ($('.dps-checklist-modal-overlay').length) {
-        $('.dps-checklist-modal-overlay').remove();
-        location.reload();
+      if ($(AGENDA_DIALOG_SELECTOR).length) {
+        e.preventDefault();
+        closeAgendaDialog($(AGENDA_DIALOG_SELECTOR).last(), 'escape');
         return;
       }
       if ($('.dps-services-modal').length) {
         closeServicesModal();
       }
-      $('.dps-payment-modal').remove();
     }
   });
 
