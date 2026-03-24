@@ -13,6 +13,9 @@
 - Refinamento visual complementar 2: removido o espaco morto no topo dos cards de overview, que ainda permanecia como heranca da antiga faixa de icones.
 - Alinhamento final do preview: removido o resquicio do botao legado de exportacao, para manter o registro visual sincronizado com o runtime atual da Agenda.
 - Refinamento visual complementar 3: as abas da Lista de Atendimentos perderam iconografia e rotulos redundantes, mantendo apenas o texto operacional principal em um layout mais limpo e silencioso.
+- Refinamento visual complementar 4: os estados `Atrasado` e `Agressivo` foram reduzidos para badges tonais mais discretos, com menor interferencia na malha da tabela e na hierarquia do conteudo.
+- Refinamento visual complementar 5: os badges `Atrasado` e `Agressivo` foram ancorados no canto inferior esquerdo das colunas `Horario` e `Pet e tutor`, preservando a leitura principal no topo util de cada celula.
+- Refinamento visual complementar 6: a coluna `Servico` foi simplificada para um CTA unico `Ver servicos`, e a coluna `Pet e tutor` passou a exibir apenas o nome do pet, mantendo o tutor no perfil rapido aberto pelo clique.
 - Arquivos de codigo alterados:
   - `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
   - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
