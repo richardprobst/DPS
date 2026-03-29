@@ -318,7 +318,7 @@ class DPS_Google_Calendar_Webhook {
             return new WP_Error( 'fetch_events_failed', 'Failed to fetch events', [ 'code' => $code ] );
         }
         
-        return $data['items'] ? [];
+        return $data['items'] ?? [];
     }
     
     /**
@@ -330,7 +330,7 @@ class DPS_Google_Calendar_Webhook {
      */
     private function sync_event_to_dps( $event ) {
         // Verifica se é evento criado pelo DPS
-        $dps_appt_id = $event['extendedProperties']['private']['dps_appointment_id'] ? null;
+        $dps_appt_id = $event['extendedProperties']['private']['dps_appointment_id'] ?? null;
         
         if ( empty( $dps_appt_id ) ) {
             return; // Não é evento do DPS, ignora
@@ -351,7 +351,7 @@ class DPS_Google_Calendar_Webhook {
         }
         
         // Extrai data/hora do evento
-        $start = $event['start']['dateTime'] ? null;
+        $start = $event['start']['dateTime'] ?? null;
         
         if ( empty( $start ) ) {
             return; // Evento sem horário (all-day), não suportado
