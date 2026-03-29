@@ -16,6 +16,7 @@
 - Refinamento visual complementar 4: os estados `Atrasado` e `Agressivo` foram reduzidos para badges tonais mais discretos, com menor interferencia na malha da tabela e na hierarquia do conteudo.
 - Refinamento visual complementar 5: os badges `Atrasado` e `Agressivo` foram ancorados no canto inferior esquerdo das colunas `Horario` e `Pet e tutor`, preservando a leitura principal no topo util de cada celula.
 - Refinamento visual complementar 6: a coluna `Servico` foi simplificada para um CTA unico `Ver servicos`, e a coluna `Pet e tutor` passou a exibir apenas o nome do pet, mantendo o tutor no perfil rapido aberto pelo clique.
+- Correcao textual complementar: os textos da Agenda passaram por normalizacao de encoding nos arquivos de runtime, eliminando caracteres embaralhados em labels, badges, botoes, mensagens e comentarios de apoio do add-on.
 - Arquivos de codigo alterados:
   - `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
   - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
@@ -51,3 +52,4 @@
 - Os previews usam os CSS reais do add-on para registrar o redesign mesmo sem uma instancia WordPress ativa no momento da captura.
 - O registro cobre a shell principal, as tres abas, o painel operacional inline e o dialog system unificado, em conformidade com o padrao M3 adotado em `docs/visual/`.
 - Esta rodada tambem revalidou a responsividade apos a limpeza estrutural do CSS em `agenda-addon.css` e `checklist-checkin.css`.
+- Nesta rodada de correcao textual nao houve nova captura full-page, porque a validacao foi feita por leitura direta dos arquivos de runtime e por validacao de sintaxe local, sem instancia WordPress ativa para reproduzir a tela real.
