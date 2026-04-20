@@ -673,7 +673,8 @@
       return currentRow;
     }
 
-    var parsedRows = $($.parseHTML($.trim(rowHtml), document, true)).filter('tr');
+    var normalizedRowHtml = String(rowHtml).trim();
+    var parsedRows = $($.parseHTML(normalizedRowHtml, document, true)).filter('tr');
     if ( ! parsedRows.length ) {
       parsedRows = $(rowHtml).filter('tr');
     }
@@ -1011,7 +1012,9 @@
           if (resp && resp.success) {
             if (resp.data && resp.data.row_html) {
               replaceAgendaRow(row, resp.data.row_html);
+              showToast(resp.data.message || 'Link de pagamento reenviado.', 'success', 1800);
             } else {
+              showToast(resp && resp.data ? resp.data.message : 'Link de pagamento reenviado.', 'success', 1800);
               location.reload();
             }
           } else {
@@ -1038,8 +1041,8 @@
       .attr('aria-selected', 'true')
       .attr('tabindex', '0');
 
-    $('.dps-tab-content').removeClass('dps-tab-content--active').attr('hidden', true);
-    $('#dps-tab-content-' + targetTab).addClass('dps-tab-content--active').removeAttr('hidden');
+    $('.dps-tab-content').removeClass('dps-tab-content--active').prop('hidden', true);
+    $('#dps-tab-content-' + targetTab).addClass('dps-tab-content--active').prop('hidden', false);
 
     try {
       sessionStorage.setItem('dps_agenda_current_tab', targetTab);

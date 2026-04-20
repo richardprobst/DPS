@@ -376,11 +376,7 @@ trait DPS_Agenda_Renderer {
             $status = 'pendente';
         }
         
-        $appt_version = intval( get_post_meta( $appt->ID, '_dps_appointment_version', true ) );
-        if ( $appt_version < 1 ) {
-            $appt_version = 1;
-            update_post_meta( $appt->ID, '_dps_appointment_version', $appt_version );
-        }
+        $appt_version = $this->get_render_appointment_version( $appt->ID );
         
         // Detecta se o atendimento está atrasado (UX-3)
         $is_late = $this->is_appointment_late( $date, $time, $status );
@@ -445,7 +441,7 @@ trait DPS_Agenda_Renderer {
         
         // Status (editable if admin)
         echo '<td data-label="' . esc_attr( ! empty( $column_labels['status'] ) ? __( 'Status', 'dps-agenda-addon' ) : '' ) . '">';
-        $can_edit = is_user_logged_in() && current_user_can( 'manage_options' );
+        $can_edit = DPS_Agenda_Access::can_operate();
         
         // Define lista de status padrão
         $statuses = [
@@ -462,7 +458,6 @@ trait DPS_Agenda_Renderer {
             // Se o status atual for finalizado_pago, normaliza para finalizado
             if ( $status === 'finalizado_pago' ) {
                 $status = 'finalizado';
-                update_post_meta( $appt->ID, 'appointment_status', $status );
             }
         }
         
@@ -482,6 +477,7 @@ trait DPS_Agenda_Renderer {
         echo DPS_Agenda_Payment_Helper::render_payment_badge( $appt->ID );
         echo DPS_Agenda_Payment_Helper::render_payment_tooltip( $appt->ID );
         echo DPS_Agenda_Payment_Helper::render_resend_button( $appt->ID );
+        echo DPS_Agenda_Payment_Helper::render_payment_attempt_summary( $appt->ID, 1 );
         echo '</td>';
         
         // FASE 3: Mapa + TaxiDog + GPS
@@ -530,8 +526,8 @@ trait DPS_Agenda_Renderer {
         echo '<div class="dps-confirmation-wrapper">';
         echo $this->render_confirmation_badge( $confirmation_status );
         
-        // CONF-2: Botões de confirmação (apenas para admins)
-        if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+        // CONF-2: Botões de confirmação para a operação diária
+        if ( DPS_Agenda_Access::can_operate() ) {
             echo '<div class="dps-confirmation-actions">';
             
             // Botão "Confirmado"
@@ -619,8 +615,8 @@ trait DPS_Agenda_Renderer {
                 // Exibe aviso de erro com tooltip
                 echo '<span style="color: #ef4444; font-size: 14px;" title="' . esc_attr__( 'Houve erro ao gerar o link de pagamento. Tente novamente ou verifique o log.', 'dps-agenda-addon' ) . '">⚠️ ' . esc_html__( 'Erro ao gerar link', 'dps-agenda-addon' ) . '</span>';
                 
-                // Mostra detalhes do erro se disponíveis (somente para admins)
-                if ( current_user_can( 'manage_options' ) ) {
+                // Mostra detalhes do erro se disponíveis para a operação diária
+                if ( DPS_Agenda_Access::can_operate() ) {
                     $last_error = get_post_meta( $appt->ID, '_dps_payment_last_error', true );
                     if ( $last_error && is_array( $last_error ) ) {
                         $error_msg = isset( $last_error['message'] ) ? $last_error['message'] : __( 'Erro desconhecido', 'dps-agenda-addon' );
@@ -1052,11 +1048,7 @@ trait DPS_Agenda_Renderer {
             $status = 'pendente';
         }
 
-        $appt_version = intval( get_post_meta( $appt->ID, '_dps_appointment_version', true ) );
-        if ( $appt_version < 1 ) {
-            $appt_version = 1;
-            update_post_meta( $appt->ID, '_dps_appointment_version', $appt_version );
-        }
+        $appt_version = $this->get_render_appointment_version( $appt->ID );
 
         $sub_id_meta      = get_post_meta( $appt->ID, 'subscription_id', true );
         $is_subscription  = ! empty( $sub_id_meta );
@@ -1075,7 +1067,6 @@ trait DPS_Agenda_Renderer {
             unset( $status_config['finalizado_pago'] );
             if ( 'finalizado_pago' === $status ) {
                 $status = 'finalizado';
-                update_post_meta( $appt->ID, 'appointment_status', $status );
             }
         }
 
@@ -1093,7 +1084,7 @@ trait DPS_Agenda_Renderer {
         echo $this->render_agenda_pet_cell( $pet_post, $client_post );
 
         echo '<td class="dps-agenda-cell dps-agenda-cell--status" data-label="' . esc_attr( ! empty( $column_labels['status'] ) ? __( 'Status do serviço', 'dps-agenda-addon' ) : '' ) . '">';
-        if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+        if ( DPS_Agenda_Access::can_operate() ) {
             echo '<div class="dps-status-dropdown-wrapper">';
             echo '<select class="dps-status-dropdown dps-dropdown--' . esc_attr( $current_status['class'] ) . '" data-appt-id="' . esc_attr( $appt->ID ) . '" data-current-status="' . esc_attr( $status ) . '" data-appt-version="' . esc_attr( $appt_version ) . '">';
             foreach ( $status_config as $value => $config ) {
@@ -1138,6 +1129,7 @@ trait DPS_Agenda_Renderer {
         } else {
             echo '<span class="dps-payment-status dps-payment-status--pending">' . esc_html__( 'Em aberto', 'dps-agenda-addon' ) . '</span>';
         }
+        echo DPS_Agenda_Payment_Helper::render_payment_attempt_summary( $appt->ID );
         echo '</td>';
 
         echo '<td class="dps-agenda-cell dps-agenda-cell--operational" data-label="' . esc_attr__( 'Operação', 'dps-agenda-addon' ) . '">';
@@ -1410,11 +1402,7 @@ trait DPS_Agenda_Renderer {
             $status = 'pendente';
         }
         
-        $appt_version = intval( get_post_meta( $appt->ID, '_dps_appointment_version', true ) );
-        if ( $appt_version < 1 ) {
-            $appt_version = 1;
-            update_post_meta( $appt->ID, '_dps_appointment_version', $appt_version );
-        }
+        $appt_version = $this->get_render_appointment_version( $appt->ID );
         
         $is_late = $this->is_appointment_late( $date, $time, $status );
         $row_classes = [ 'status-' . $status ];
@@ -1448,7 +1436,7 @@ trait DPS_Agenda_Renderer {
         
         // Status do serviço (dropdown elegante com ícones)
         echo '<td data-label="' . esc_attr( ! empty( $column_labels['status'] ) ? __( 'Status do Serviço', 'dps-agenda-addon' ) : '' ) . '">';
-        $can_edit = is_user_logged_in() && current_user_can( 'manage_options' );
+        $can_edit = DPS_Agenda_Access::can_operate();
         
         // Config de status com ícones
         $status_config = [
@@ -1465,7 +1453,6 @@ trait DPS_Agenda_Renderer {
             unset( $status_config['finalizado_pago'] );
             if ( $status === 'finalizado_pago' ) {
                 $status = 'finalizado';
-                update_post_meta( $appt->ID, 'appointment_status', $status );
             }
         }
         
@@ -1522,6 +1509,7 @@ trait DPS_Agenda_Renderer {
         } else {
             echo '<span class="dps-payment-status dps-payment-status--pending">⏳ ' . esc_html__( 'Aguardando', 'dps-agenda-addon' ) . '</span>';
         }
+        echo DPS_Agenda_Payment_Helper::render_payment_attempt_summary( $appt->ID );
         echo '</td>';
 
         // Coluna Check-in / Check-out (botão claro com estado + indicadores de segurança)

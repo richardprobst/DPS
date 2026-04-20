@@ -38,7 +38,7 @@
   }
 
   function normalizeValue(value) {
-    var normalized = $.trim(String(value || ''));
+    var normalized = String(value || '').trim();
     return normalized.length ? applyAccentFixes(normalized) : '\u2014';
   }
 

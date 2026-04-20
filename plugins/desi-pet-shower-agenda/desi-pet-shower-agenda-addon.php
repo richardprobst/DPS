@@ -106,6 +106,8 @@ require_once __DIR__ . '/includes/trait-dps-agenda-renderer.php';
 
 require_once __DIR__ . '/includes/trait-dps-agenda-query.php';
 
+require_once __DIR__ . '/includes/class-dps-agenda-access.php';
+
 
 
 // FASE 3: Carrega helpers para Pagamento, TaxiDog e GPS
@@ -586,8 +588,6 @@ class DPS_Agenda_Addon {
 
         add_action( 'wp_ajax_dps_get_services_details', [ $this, 'get_services_details_ajax' ] );
 
-        add_action( 'wp_ajax_nopriv_dps_get_services_details', [ $this, 'get_services_details_ajax' ] );
-
 
 
         // FASE 2: AJAX para exportação PDF da agenda
@@ -659,6 +659,10 @@ class DPS_Agenda_Addon {
         // FASE 4: Enfileira assets do Dashboard no admin
 
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_dashboard_assets' ] );
+        add_action( 'admin_enqueue_scripts', [ $this, 'sanitize_agenda_admin_runtime' ], 1 );
+        add_action( 'admin_head', [ $this, 'sanitize_agenda_admin_print_phase' ], 1 );
+        add_action( 'admin_print_footer_scripts', [ $this, 'sanitize_agenda_admin_print_phase' ], 1 );
+        add_action( 'admin_footer', [ $this, 'sanitize_agenda_admin_footer' ], 999 );
 
     }
 
@@ -785,6 +789,22 @@ class DPS_Agenda_Addon {
 
 
     /**
+     * Returns a cache-busting version for Agenda assets.
+     *
+     * @param string $relative_path Path relative to the add-on root.
+     * @return string
+     */
+    private function get_agenda_asset_version( $relative_path ) {
+        $file_path = plugin_dir_path( __FILE__ ) . ltrim( (string) $relative_path, '/\\' );
+
+        if ( file_exists( $file_path ) ) {
+            return (string) filemtime( $file_path );
+        }
+
+        return DPS_BASE_VERSION;
+    }
+
+    /**
 
      * FASE 4: Enfileira assets do Dashboard no admin.
 
@@ -800,11 +820,11 @@ class DPS_Agenda_Addon {
 
 
 
-        $is_dashboard_page = 'desi-pet-shower_page_dps-agenda-dashboard' === $hook;
+        $is_dashboard_page = 1 === preg_match( '/(?:^admin_page_|_page_)dps-agenda-dashboard$/', $hook );
 
-        $is_settings_page  = 'desi-pet-shower_page_dps-agenda-settings' === $hook;
+        $is_settings_page  = 1 === preg_match( '/(?:^admin_page_|_page_)dps-agenda-settings$/', $hook );
 
-        $is_hub_page       = 'desi-pet-shower_page_dps-agenda-hub' === $hook;
+        $is_hub_page       = 1 === preg_match( '/(?:^admin_page_|_page_)dps-agenda-hub$/', $hook );
 
 
 
@@ -848,7 +868,7 @@ class DPS_Agenda_Addon {
 
             [ 'dps-design-tokens' ],
 
-            '2.1.0'
+            $this->get_agenda_asset_version( 'assets/css/agenda-admin.css' )
 
         );
 
@@ -864,16 +884,199 @@ class DPS_Agenda_Addon {
 
                 [ 'dps-design-tokens', 'dps-agenda-admin-css' ],
 
-                '2.1.0'
+                $this->get_agenda_asset_version( 'assets/css/dashboard.css' )
 
             );
 
 
 
+            wp_enqueue_script(
+                'dps-dashboard-admin',
+                plugin_dir_url( __FILE__ ) . 'assets/js/dashboard-admin.js',
+                [],
+                $this->get_agenda_asset_version( 'assets/js/dashboard-admin.js' ),
+                true
+            );
+
+            wp_localize_script(
+                'dps-dashboard-admin',
+                'DPS_Agenda_Admin',
+                [
+                    'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
+                    'nonceCapacity' => wp_create_nonce( 'dps_agenda_capacity' ),
+                    'messages'      => [
+                        'submit' => __( 'Salvar capacidade', 'dps-agenda-addon' ),
+                        'saving' => __( 'Salvando capacidade...', 'dps-agenda-addon' ),
+                        'saved'  => __( 'Capacidade salva com sucesso.', 'dps-agenda-addon' ),
+                        'error'  => __( 'Não foi possível salvar a capacidade agora.', 'dps-agenda-addon' ),
+                    ],
+                ]
+            );
+
             wp_enqueue_script( 'jquery' );
 
         }
 
+    }
+
+    /**
+     * Remove assets administrativos externos que poluem a Agenda.
+     *
+     * Mantém o saneamento restrito às telas da própria Agenda no admin para não
+     * interferir no restante do WordPress.
+     *
+     * @param string $hook Hook atual do admin.
+     * @return void
+     */
+    public function sanitize_agenda_admin_runtime( $hook ) {
+        if ( ! $this->is_agenda_admin_hook( $hook ) ) {
+            return;
+        }
+
+        foreach ( [ 'admin_enqueue_scripts', 'admin_print_scripts', 'admin_print_footer_scripts', 'admin_footer' ] as $admin_hook ) {
+            $this->remove_matching_hook_callbacks( $admin_hook );
+        }
+
+        $this->dequeue_matching_admin_assets( 'script' );
+        $this->dequeue_matching_admin_assets( 'style' );
+    }
+
+    /**
+     * Remove mounts residuais de widgets externos no rodapé do admin.
+     *
+     * @return void
+     */
+    public function sanitize_agenda_admin_footer() {
+        $screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+        $hook   = is_object( $screen ) && isset( $screen->base ) ? (string) $screen->base : '';
+
+        if ( ! $this->is_agenda_admin_hook( $hook ) ) {
+            return;
+        }
+
+        echo '<style id="dps-agenda-admin-runtime-guard">#vue-app,.hostinger-ai-assistant,.kodee-widget,.kodee-button,[data-plugin="hostinger-ai-assistant"],#setting-error-tgmpa,.wp-pointer{display:none !important;}</style>';
+        echo '<script id="dps-agenda-admin-runtime-cleanup">(function(){var selectors=["#vue-app",".hostinger-ai-assistant",".kodee-widget",".kodee-button","[data-plugin=\\"hostinger-ai-assistant\\"]","#setting-error-tgmpa",".wp-pointer"];selectors.forEach(function(selector){document.querySelectorAll(selector).forEach(function(node){node.remove();});});})();</script>';
+    }
+
+    /**
+     * Reforça o saneamento na fase de impressão do admin.
+     *
+     * @return void
+     */
+    public function sanitize_agenda_admin_print_phase() {
+        $screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+        $hook   = is_object( $screen ) && isset( $screen->base ) ? (string) $screen->base : '';
+
+        if ( ! $this->is_agenda_admin_hook( $hook ) ) {
+            return;
+        }
+
+        foreach ( [ 'admin_print_footer_scripts', 'admin_footer' ] as $admin_hook ) {
+            $this->remove_matching_hook_callbacks( $admin_hook );
+        }
+
+        $this->dequeue_matching_admin_assets( 'script' );
+        $this->dequeue_matching_admin_assets( 'style' );
+    }
+
+    /**
+     * Indica se o hook atual pertence ao admin da Agenda.
+     *
+     * @param string $hook Hook atual do admin.
+     * @return bool
+     */
+    private function is_agenda_admin_hook( $hook ) {
+        $hook = (string) $hook;
+
+        return 1 === preg_match( '/(?:^admin_page_|_page_)dps-agenda-(dashboard|settings|hub)$/', $hook );
+    }
+
+    /**
+     * Remove handles externos do admin identificados por handle ou src.
+     *
+     * @param string $type Tipo de asset: script|style.
+     * @return void
+     */
+    private function dequeue_matching_admin_assets( $type ) {
+        global $wp_scripts, $wp_styles;
+
+        $registry = ( 'style' === $type ) ? $wp_styles : $wp_scripts;
+        if ( ! $registry || ! is_object( $registry ) || empty( $registry->registered ) ) {
+            return;
+        }
+
+        foreach ( array_keys( $registry->registered ) as $handle ) {
+            $registered = $registry->registered[ $handle ];
+            $src        = isset( $registered->src ) ? (string) $registered->src : '';
+            $signature  = strtolower( $handle . ' ' . $src );
+
+            if ( false === strpos( $signature, 'hostinger' ) && false === strpos( $signature, 'kodee' ) ) {
+                continue;
+            }
+
+            if ( 'style' === $type ) {
+                wp_dequeue_style( $handle );
+                wp_deregister_style( $handle );
+                continue;
+            }
+
+            wp_dequeue_script( $handle );
+            wp_deregister_script( $handle );
+        }
+    }
+
+    /**
+     * Remove callbacks de hooks administrativos externos por assinatura.
+     *
+     * @param string $hook_name Hook administrativo.
+     * @return void
+     */
+    private function remove_matching_hook_callbacks( $hook_name ) {
+        global $wp_filter;
+
+        if ( empty( $wp_filter[ $hook_name ] ) || ! is_object( $wp_filter[ $hook_name ] ) || empty( $wp_filter[ $hook_name ]->callbacks ) ) {
+            return;
+        }
+
+        foreach ( $wp_filter[ $hook_name ]->callbacks as $priority => $callbacks ) {
+            foreach ( $callbacks as $callback ) {
+                if ( empty( $callback['function'] ) || ! $this->is_matching_external_admin_callback( $callback['function'] ) ) {
+                    continue;
+                }
+
+                remove_action( $hook_name, $callback['function'], (int) $priority );
+            }
+        }
+    }
+
+    /**
+     * Indica se um callback pertence a widgets externos do admin.
+     *
+     * @param mixed $callback Callback registrado no hook.
+     * @return bool
+     */
+    private function is_matching_external_admin_callback( $callback ) {
+        $signature = '';
+
+        if ( is_string( $callback ) ) {
+            $signature = $callback;
+        } elseif ( is_array( $callback ) ) {
+            $target = $callback[0] ?? '';
+            $method = $callback[1] ?? '';
+            $class  = is_object( $target ) ? get_class( $target ) : ( is_string( $target ) ? $target : '' );
+            $signature = trim( $class . ' ' . $method );
+        } elseif ( $callback instanceof Closure ) {
+            try {
+                $reflection = new ReflectionFunction( $callback );
+                $signature  = (string) $reflection->getFileName();
+            } catch ( Throwable $exception ) {
+                return false;
+            }
+        }
+
+        $signature = strtolower( $signature );
+
+        return false !== strpos( $signature, 'hostinger' ) || false !== strpos( $signature, 'kodee' );
     }
 
 
@@ -1508,6 +1711,8 @@ class DPS_Agenda_Addon {
 
                     <?php $capacity_config = DPS_Agenda_Capacity_Helper::get_capacity_config(); ?>
 
+                    <div class="dps-agenda-admin-notice dps-capacity-feedback dps-agenda-admin-notice--info" hidden aria-live="polite"></div>
+
                     <form id="dps-capacity-config-form" class="dps-capacity-form">
 
                         <div class="dps-capacity-inputs">
@@ -1580,107 +1785,7 @@ class DPS_Agenda_Addon {
 
         </div>
 
-
-
-        <script>
-
-        jQuery(document).ready(function($){
-
-            $('.dps-dashboard-quick-date').on('click', function(){
-
-                var days = parseInt($(this).data('days'), 10);
-
-                var today = new Date();
-
-                today.setDate(today.getDate() + days);
-
-
-
-                var year = today.getFullYear();
-
-                var month = String(today.getMonth() + 1).padStart(2, '0');
-
-                var day = String(today.getDate()).padStart(2, '0');
-
-                var dateStr = year + '-' + month + '-' + day;
-
-
-
-                $('.dps-dashboard-date-input').val(dateStr);
-
-                $('.dps-dashboard-form').submit();
-
-            });
-
-
-
-            $('#dps-capacity-config-form').on('submit', function(e){
-
-                e.preventDefault();
-
-
-
-                var morning = $('#capacity_morning').val();
-
-                var afternoon = $('#capacity_afternoon').val();
-
-                var submitBtn = $(this).find('button[type="submit"]');
-
-                var originalText = submitBtn.text();
-
-
-
-                submitBtn.prop('disabled', true).text('Salvando...');
-
-
-
-                $.post(ajaxurl, {
-
-                    action: 'dps_agenda_save_capacity',
-
-                    nonce: DPS_AG_Addon.nonce_capacity,
-
-                    morning: morning,
-
-                    afternoon: afternoon
-
-                }, function(resp){
-
-                    if (resp && resp.success) {
-
-                        submitBtn.text('Salvo!');
-
-                        setTimeout(function(){
-
-                            location.reload();
-
-                        }, 1000);
-
-                    } else {
-
-                        alert(resp.data ? resp.data.message : 'Erro ao salvar configuração.');
-
-                        submitBtn.prop('disabled', false).text(originalText);
-
-                    }
-
-                }).fail(function(){
-
-                    alert('Erro de comunicação ao salvar configuração.');
-
-                    submitBtn.prop('disabled', false).text(originalText);
-
-                });
-
-            });
-
-        });
-
-        </script>
-
-
-
-        <?php
+<?php
 
         return ob_get_clean();
 
@@ -1810,6 +1915,67 @@ class DPS_Agenda_Addon {
 
     }
 
+    /**
+     * Retorna a versão atual do agendamento.
+     *
+     * A leitura em renderização deve ser somente leitura. Persistência do valor
+     * mínimo fica restrita a fluxos mutáveis.
+     *
+     * @param int  $appointment_id      ID do agendamento.
+     * @param bool $persist_if_missing  Se true, grava a versão mínima quando
+     *                                  ainda não existir.
+     * @return int
+     */
+    private function get_appointment_version_value( $appointment_id, $persist_if_missing = false ) {
+        $appointment_id = absint( $appointment_id );
+        if ( ! $appointment_id ) {
+            return 1;
+        }
+
+        $current_version = intval( get_post_meta( $appointment_id, '_dps_appointment_version', true ) );
+        if ( $current_version >= 1 ) {
+            return $current_version;
+        }
+
+        if ( $persist_if_missing ) {
+            update_post_meta( $appointment_id, '_dps_appointment_version', 1 );
+        }
+
+        return 1;
+    }
+
+    /**
+     * Retorna a versão do agendamento para leitura em renderização.
+     *
+     * @param int $appointment_id ID do agendamento.
+     * @return int
+     */
+    private function get_render_appointment_version( $appointment_id ) {
+        return $this->get_appointment_version_value( $appointment_id, false );
+    }
+
+    /**
+     * Garante que o versionamento esteja inicializado para fluxos mutáveis.
+     *
+     * @param int $appointment_id ID do agendamento.
+     * @return int
+     */
+    private function ensure_mutable_appointment_version( $appointment_id ) {
+        return $this->get_appointment_version_value( $appointment_id, true );
+    }
+
+    /**
+     * Incrementa a versão do agendamento após mutação bem-sucedida.
+     *
+     * @param int $appointment_id ID do agendamento.
+     * @return int
+     */
+    private function increment_appointment_version( $appointment_id ) {
+        $new_version = $this->ensure_mutable_appointment_version( $appointment_id ) + 1;
+        update_post_meta( $appointment_id, '_dps_appointment_version', $new_version );
+        return $new_version;
+    }
+
 
 
     /**
@@ -1892,7 +2058,7 @@ class DPS_Agenda_Addon {
 
                 [ 'dps-design-tokens' ],
 
-                '2.2.0'
+                $this->get_agenda_asset_version( 'assets/css/agenda-addon.css' )
 
             );
 
@@ -1908,7 +2074,7 @@ class DPS_Agenda_Addon {
 
                 [ 'dps-design-tokens' ],
 
-                '1.1.0'
+                $this->get_agenda_asset_version( 'assets/css/checklist-checkin.css' )
 
             );
 
@@ -1924,7 +2090,7 @@ class DPS_Agenda_Addon {
 
                 [ 'jquery' ], 
 
-                '1.0.0', 
+                $this->get_agenda_asset_version( 'assets/js/services-modal.js' ),
 
                 true 
 
@@ -1942,7 +2108,7 @@ class DPS_Agenda_Addon {
 
                 [ 'jquery', 'dps-services-modal' ],
 
-                '1.5.0',
+                $this->get_agenda_asset_version( 'assets/js/agenda-addon.js' ),
 
                 true 
 
@@ -1958,7 +2124,7 @@ class DPS_Agenda_Addon {
 
                 [ 'jquery', 'dps-agenda-addon' ],
 
-                '1.0.2',
+                $this->get_agenda_asset_version( 'assets/js/pet-profile-modal.js' ),
 
                 true
 
@@ -1976,7 +2142,7 @@ class DPS_Agenda_Addon {
 
                 [ 'jquery', 'dps-agenda-addon' ],
 
-                '1.1.0',
+                $this->get_agenda_asset_version( 'assets/js/checklist-checkin.js' ),
 
                 true
 
@@ -2196,7 +2362,7 @@ class DPS_Agenda_Addon {
 
                 [ 'dps-design-tokens' ],
 
-                '1.1.0'
+                $this->get_agenda_asset_version( 'assets/css/checklist-checkin.css' )
 
             );
 
@@ -2287,24 +2453,18 @@ class DPS_Agenda_Addon {
         ob_start();
 
         /*
-
-         * Verifica permissão: somente administradores (capacidade manage_options).
-
-         * Anteriormente, funcionários também tinham acesso à agenda, mas por questões
-
-         * de segurança e a pedido do cliente, o acesso agora é restrito aos
-
-         * administradores. Caso o usuário não esteja logado ou não possua a
-
-         * capacidade de administrador, exibimos um link de login.
-
+         * Verifica se o usuário possui acesso operacional à Agenda.
+         *
+         * A operação diária aceita administradores e perfis com a capability
+         * dedicada `dps_manage_appointments`. Superfícies sensíveis continuam
+         * restritas em handlers próprios.
          */
 
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+        if ( ! is_user_logged_in() || ! DPS_Agenda_Access::can_operate() ) {
 
             $login_url = wp_login_url( DPS_URL_Builder::safe_get_permalink() );
 
-            return '<p>' . esc_html__( 'Você precisa estar logado como administrador para acessar a agenda.', 'dps-agenda-addon' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'dps-agenda-addon' ) . '</a></p>';
+            return '<p>' . esc_html__( 'Você precisa estar logado com permissão para operar a agenda.', 'dps-agenda-addon' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'dps-agenda-addon' ) . '</a></p>';
 
         }
 
@@ -3656,23 +3816,7 @@ class DPS_Agenda_Addon {
 
     public function update_status_ajax() {
 
-        // Verifica permissão do usuário. Apenas administradores podem alterar o status.
-
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
-
-        // Verifica nonce para evitar CSRF. O nonce deve ser enviado no campo 'nonce'.
-
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
-
-        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_update_status' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_update_status' );
 
         $id     = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : 0;
 
@@ -3696,17 +3840,7 @@ class DPS_Agenda_Addon {
 
         }
 
-        $current_version = intval( get_post_meta( $id, '_dps_appointment_version', true ) );
-
-
-
-        if ( $current_version < 1 ) {
-
-            $current_version = 1;
-
-            update_post_meta( $id, '_dps_appointment_version', $current_version );
-
-        }
+        $current_version = $this->ensure_mutable_appointment_version( $id );
 
 
 
@@ -3732,9 +3866,7 @@ class DPS_Agenda_Addon {
 
         add_post_meta( $id, 'appointment_status', $status, true );
 
-        $new_version = $current_version + 1;
-
-        update_post_meta( $id, '_dps_appointment_version', $new_version );
+        $new_version = $this->increment_appointment_version( $id );
 
 
 
@@ -3846,27 +3978,7 @@ class DPS_Agenda_Addon {
 
     public function get_services_details_ajax() {
 
-        // Apenas administradores podem consultar detalhes de serviços. Garante que usuários não
-
-        // autenticados ou sem permissão não exponham dados. Caso contrário, retorna erro.
-
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
-
-
-
-        // SEGURANÇA: verificação de nonce obrigatória para prevenir CSRF.
-
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
-
-        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_get_services_details' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_get_services_details' );
 
 
 
@@ -4692,25 +4804,7 @@ class DPS_Agenda_Addon {
 
     public function quick_action_ajax() {
 
-        // Verifica permissão do usuário
-
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
-
-        
-
-        // Verifica nonce
-
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
-
-        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_quick_action' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_agenda_quick_action' );
 
         
 
@@ -4810,17 +4904,7 @@ class DPS_Agenda_Addon {
 
         // Incrementa versão
 
-        $current_version = intval( get_post_meta( $appt_id, '_dps_appointment_version', true ) );
-
-        if ( $current_version < 1 ) {
-
-            $current_version = 1;
-
-        }
-
-        $new_version = $current_version + 1;
-
-        update_post_meta( $appt_id, '_dps_appointment_version', $new_version );
+        $new_version = $this->increment_appointment_version( $appt_id );
 
         
 
@@ -4916,25 +5000,7 @@ class DPS_Agenda_Addon {
 
     public function update_confirmation_ajax() {
 
-        // Verifica permissão do usuário
-
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
-
-        
-
-        // Verifica nonce
-
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
-
-        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_confirmation' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_agenda_confirmation' );
 
         
 
@@ -5064,25 +5130,7 @@ class DPS_Agenda_Addon {
 
     public function update_taxidog_ajax() {
 
-        // Verifica permissão do usuário
-
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
-
-        
-
-        // Verifica nonce
-
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
-
-        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_taxidog' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_agenda_taxidog' );
 
         
 
@@ -5166,25 +5214,7 @@ class DPS_Agenda_Addon {
 
     public function request_taxidog_ajax() {
 
-        // Verifica permissão do usuário
-
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
-
-        
-
-        // Verifica nonce
-
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
-
-        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_taxidog' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_agenda_taxidog' );
 
         
 
@@ -5252,25 +5282,7 @@ class DPS_Agenda_Addon {
 
     public function save_capacity_ajax() {
 
-        // Verifica permissão
-
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
-
-
-
-        // Verifica nonce
-
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
-
-        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_capacity' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_sensitive_ajax( 'dps_agenda_capacity' );
 
 
 
@@ -5326,25 +5338,7 @@ class DPS_Agenda_Addon {
 
     public function resend_payment_ajax() {
 
-        // Verifica permissão
-
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
-
-
-
-        // Verifica nonce
-
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
-
-        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_resend_payment' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_agenda_resend_payment' );
 
 
 
@@ -5404,7 +5398,18 @@ class DPS_Agenda_Addon {
 
 
 
+        DPS_Agenda_Payment_Helper::record_payment_attempt(
+            $appt_id,
+            'resend_payment_link',
+            $success ? 'success' : 'error',
+            $message
+        );
+
         if ( $success ) {
+
+            update_post_meta( $appt_id, '_dps_payment_resent_at', current_time( 'mysql' ) );
+            update_post_meta( $appt_id, '_dps_payment_link_status', 'pending' );
+            delete_post_meta( $appt_id, '_dps_payment_last_error' );
 
             // Renderiza HTML da linha atualizada
 
@@ -5425,6 +5430,11 @@ class DPS_Agenda_Addon {
             ] );
 
         } else {
+
+            update_post_meta( $appt_id, '_dps_payment_link_status', 'error' );
+            if ( $message ) {
+                update_post_meta( $appt_id, '_dps_payment_last_error', $message );
+            }
 
             wp_send_json_error( [ 'message' => $message ?: __( 'Erro ao reenviar link de pagamento.', 'dps-agenda-addon' ) ] );
 
@@ -7154,23 +7164,7 @@ class DPS_Agenda_Addon {
 
     public function calendar_events_ajax() {
 
-        // Verificar nonce
-
-        if ( ! check_ajax_referer( 'dps_agenda_calendar', 'nonce', false ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
-
-        
-
-        // Verificar permissões
-
-        if ( ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_agenda_calendar' );
 
         
 
@@ -7380,21 +7374,7 @@ class DPS_Agenda_Addon {
 
     public function quick_reschedule_ajax() {
 
-        // Verificar nonce e permissões
-
-        if ( ! wp_verify_nonce( isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '', 'dps_quick_reschedule' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
-
-        
-
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_quick_reschedule' );
 
         
 
@@ -7460,9 +7440,7 @@ class DPS_Agenda_Addon {
 
         // Incrementar versão
 
-        $version = intval( get_post_meta( $appt_id, '_dps_appointment_version', true ) );
-
-        update_post_meta( $appt_id, '_dps_appointment_version', $version + 1 );
+        $this->increment_appointment_version( $appt_id );
 
         
 
@@ -7516,21 +7494,7 @@ class DPS_Agenda_Addon {
 
     public function get_appointment_history_ajax() {
 
-        // Verificar nonce
-
-        if ( ! wp_verify_nonce( isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '', 'dps_appointment_history' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
-
-        
-
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_appointment_history' );
 
         
 
@@ -7604,21 +7568,7 @@ class DPS_Agenda_Addon {
 
     public function get_admin_kpis_ajax() {
 
-        // Verificar nonce
-
-        if ( ! wp_verify_nonce( isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '', 'dps_admin_kpis' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
-
-        
-
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_sensitive_ajax( 'dps_admin_kpis' );
 
         
 
@@ -8210,21 +8160,7 @@ class DPS_Agenda_Addon {
 
     public function checklist_update_ajax() {
 
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
-
-
-
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
-
-        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checklist' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_checklist' );
 
 
 
@@ -8286,21 +8222,7 @@ class DPS_Agenda_Addon {
 
     public function checklist_rework_ajax() {
 
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
-
-
-
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
-
-        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checklist' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_checklist' );
 
 
 
@@ -8398,21 +8320,7 @@ class DPS_Agenda_Addon {
 
     public function get_checklist_panel_ajax() {
 
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
-
-
-
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
-
-        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checklist' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_checklist' );
 
 
 
@@ -8460,21 +8368,7 @@ class DPS_Agenda_Addon {
 
     public function appointment_checkin_ajax() {
 
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
-
-
-
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
-
-        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checkin' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_checkin' );
 
 
 
@@ -8550,21 +8444,7 @@ class DPS_Agenda_Addon {
 
     public function appointment_checkout_ajax() {
 
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
-
-        }
-
-
-
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
-
-        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_checkin' ) ) {
-
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
-
-        }
+        DPS_Agenda_Access::enforce_operational_ajax( 'dps_checkin' );
 
 
 
@@ -8864,7 +8744,7 @@ class DPS_Agenda_Addon {
 
         $appointment_id = absint( $appointment_id );
 
-        if ( ! $appointment_id || ! current_user_can( 'manage_options' ) ) {
+        if ( ! $appointment_id || ! DPS_Agenda_Access::can_operate() ) {
 
             return '';
 
@@ -8992,7 +8872,7 @@ class DPS_Agenda_Addon {
 
         $appointment_id = absint( $appointment_id );
 
-        if ( ! $appointment_id || ! current_user_can( 'manage_options' ) ) {
+        if ( ! $appointment_id || ! DPS_Agenda_Access::can_operate() ) {
 
             return '';
 
