@@ -1,337 +1,303 @@
 /**
- * DPS Design Tokens — Material 3 Expressive
+ * DPS Design Tokens — DPS Signature
  *
- * Tokens de design baseados no Material 3 Expressive do Google,
- * adaptados para o contexto WordPress do desi.pet by PRObst.
+ * Sistema de tokens visuais do DPS baseado na identidade proprietária
+ * consolidada no projeto: premium, sóbria, moderna, minimalista e
+ * predominantemente reta.
  *
- * Referência: https://m3.material.io/
+ * IMPORTANTE:
+ * - Este arquivo substitui definitivamente a base visual anterior.
+ * - Os nomes de vários tokens legados foram preservados por compatibilidade.
+ * - O significado visual desses tokens agora segue o DPS Signature.
  *
- * Versão: 2.0
- * Última atualização: 07/02/2026
+ * Versão: 3.0
+ * Última atualização: 17/04/2026
  *
  * COMO USAR:
- *   1. Importe este arquivo ANTES de qualquer outro CSS do DPS.
- *   2. Use as variáveis via var(--dps-*) em seus componentes.
- *   3. Para temas escuros, sobrescreva com [data-dps-theme="dark"].
- *   4. Nunca use valores hex literais — sempre referencie tokens.
+ *   1. Importe este arquivo antes de qualquer CSS do DPS.
+ *   2. Prefira os tokens semânticos `--dps-color-*`, `--dps-font-*`,
+ *      `--dps-space-*`, `--dps-shape-*` e `--dps-motion-*`.
+ *   3. Os aliases legados continuam disponíveis para migração gradual.
+ *   4. Evite valores hardcoded quando existir token equivalente.
  */
 
 /* ==========================================================================
-   1. COLOR TOKENS — Sistema de Cores M3 Expressive
+   1. COLOR TOKENS — DPS Signature
    ========================================================================== */
 
 :root {
+    /* Base cromática do sistema */
+    --dps-color-ink:                    #11161c;
+    --dps-color-ink-soft:               #1e2830;
+    --dps-color-muted:                  #676056;
+    --dps-color-petrol:                 #173042;
+    --dps-color-petrol-deep:            #0d141b;
+    --dps-color-paper:                  #fff9f1;
+    --dps-color-paper-strong:           #fffdf8;
+    --dps-color-bone:                   #f3ece1;
+    --dps-color-bone-deep:              #ede3d6;
+    --dps-color-line:                   #d9cdbd;
+    --dps-color-line-strong:            #b9ab98;
+    --dps-color-accent:                 #8fd6f4;
+    --dps-color-accent-soft:            #e8f6fc;
+    --dps-color-action:                 #1f8c57;
+    --dps-color-action-deep:            #166540;
+    --dps-color-danger:                 #a6463c;
+    --dps-color-danger-soft:            #f7ddd8;
+    --dps-color-warning:                #8f6a24;
+    --dps-color-warning-soft:           #f3e5c7;
+    --dps-color-success-soft:           #dcefe4;
 
-    /* -----------------------------------------------------------------------
-       1.1 Primary — Ações principais, botões, links, FABs
-       ----------------------------------------------------------------------- */
-    --dps-color-primary:               #0b6bcb;
-    --dps-color-on-primary:            #ffffff;
-    --dps-color-primary-container:     #d4e4ff;
-    --dps-color-on-primary-container:  #001c3a;
-    --dps-color-primary-hover:         #0959a5;
-    --dps-color-primary-pressed:       #084a8a;
+    /* Roles semânticos preservados */
+    --dps-color-primary:                var(--dps-color-petrol);
+    --dps-color-on-primary:             #ffffff;
+    --dps-color-primary-container:      var(--dps-color-accent-soft);
+    --dps-color-on-primary-container:   var(--dps-color-petrol-deep);
+    --dps-color-primary-hover:          #112735;
+    --dps-color-primary-pressed:        #0c1d28;
 
-    /* -----------------------------------------------------------------------
-       1.2 Secondary — Ações de suporte, chips, filtros
-       ----------------------------------------------------------------------- */
-    --dps-color-secondary:              #545f70;
+    --dps-color-secondary:              #4c5b67;
     --dps-color-on-secondary:           #ffffff;
-    --dps-color-secondary-container:    #d8e3f8;
-    --dps-color-on-secondary-container: #111c2b;
+    --dps-color-secondary-container:    #e4edf2;
+    --dps-color-on-secondary-container: var(--dps-color-ink);
 
-    /* -----------------------------------------------------------------------
-       1.3 Tertiary — Destaques expressivos, badges, acentos criativos
-       ----------------------------------------------------------------------- */
-    --dps-color-tertiary:               #6d5e78;
+    --dps-color-tertiary:               #7a6552;
     --dps-color-on-tertiary:            #ffffff;
-    --dps-color-tertiary-container:     #f5d9ff;
-    --dps-color-on-tertiary-container:  #271432;
+    --dps-color-tertiary-container:     var(--dps-color-bone);
+    --dps-color-on-tertiary-container:  var(--dps-color-ink);
 
-    /* -----------------------------------------------------------------------
-       1.4 Error — Erros, alertas críticos, ações destrutivas
-       ----------------------------------------------------------------------- */
-    --dps-color-error:                  #ba1a1a;
+    --dps-color-error:                  var(--dps-color-danger);
     --dps-color-on-error:               #ffffff;
-    --dps-color-error-container:        #ffdad6;
-    --dps-color-on-error-container:     #410002;
+    --dps-color-error-container:        var(--dps-color-danger-soft);
+    --dps-color-on-error-container:     #4e1e18;
 
-    /* -----------------------------------------------------------------------
-       1.5 Success — Confirmações, ações concluídas
-       ----------------------------------------------------------------------- */
-    --dps-color-success:                #1a7a3a;
+    --dps-color-success:                var(--dps-color-action);
     --dps-color-on-success:             #ffffff;
-    --dps-color-success-container:      #a8f5b5;
-    --dps-color-on-success-container:   #00210a;
+    --dps-color-success-container:      var(--dps-color-success-soft);
+    --dps-color-on-success-container:   #123624;
 
-    /* -----------------------------------------------------------------------
-       1.6 Warning — Pendências, atenção necessária
-       ----------------------------------------------------------------------- */
-    --dps-color-warning:                #8b6914;
+    --dps-color-warning:                var(--dps-color-warning);
     --dps-color-on-warning:             #ffffff;
-    --dps-color-warning-container:      #ffdea3;
-    --dps-color-on-warning-container:   #2c1f00;
+    --dps-color-warning-container:      var(--dps-color-warning-soft);
+    --dps-color-on-warning-container:   #4a3412;
 
-    /* -----------------------------------------------------------------------
-       1.7 Surface — Fundos, containers, elevação tonal
-       ----------------------------------------------------------------------- */
-    --dps-color-surface:                    #f8f9ff;
-    --dps-color-on-surface:                 #191c20;
-    --dps-color-on-surface-variant:         #43474e;
-    --dps-color-surface-container-lowest:   #ffffff;
-    --dps-color-surface-container-low:      #f2f3fa;
-    --dps-color-surface-container:          #ecedf4;
-    --dps-color-surface-container-high:     #e6e8ef;
-    --dps-color-surface-container-highest:  #e1e2e9;
-    --dps-color-surface-dim:                #d8dae0;
-    --dps-color-surface-bright:             #f8f9ff;
+    --dps-color-surface:                    var(--dps-color-paper);
+    --dps-color-on-surface:                 var(--dps-color-ink);
+    --dps-color-on-surface-variant:         var(--dps-color-muted);
+    --dps-color-surface-container-lowest:   var(--dps-color-paper-strong);
+    --dps-color-surface-container-low:      rgba(255, 252, 247, 0.98);
+    --dps-color-surface-container:          rgba(248, 243, 236, 0.98);
+    --dps-color-surface-container-high:     var(--dps-color-bone);
+    --dps-color-surface-container-highest:  var(--dps-color-bone-deep);
+    --dps-color-surface-dim:                #efe6db;
+    --dps-color-surface-bright:             #fffdf8;
 
-    /* -----------------------------------------------------------------------
-       1.8 Outline — Bordas, divisores
-       ----------------------------------------------------------------------- */
-    --dps-color-outline:                #73777f;
-    --dps-color-outline-variant:        #c3c6cf;
+    --dps-color-outline:                var(--dps-color-line-strong);
+    --dps-color-outline-variant:        rgba(217, 205, 189, 0.78);
 
-    /* -----------------------------------------------------------------------
-       1.9 Inverse — Snackbars, tooltips
-       ----------------------------------------------------------------------- */
-    --dps-color-inverse-surface:        #2e3036;
-    --dps-color-inverse-on-surface:     #eff0f7;
-    --dps-color-inverse-primary:        #a5c8ff;
+    --dps-color-inverse-surface:        var(--dps-color-petrol-deep);
+    --dps-color-inverse-on-surface:     #f7f3ec;
+    --dps-color-inverse-primary:        var(--dps-color-accent);
 
-    /* -----------------------------------------------------------------------
-       1.10 Scrim e Shadow
-       ----------------------------------------------------------------------- */
-    --dps-color-scrim:                  #000000;
-    --dps-color-shadow:                 #000000;
+    --dps-color-scrim:                  rgba(13, 20, 27, 0.72);
+    --dps-color-shadow:                 rgba(8, 12, 18, 0.22);
 }
 
 /* ==========================================================================
-   2. TYPOGRAPHY TOKENS — Escala Tipográfica M3 Expressive
+   2. TYPOGRAPHY TOKENS — DPS Signature
    ========================================================================== */
 
 :root {
-
-    /* -----------------------------------------------------------------------
-       2.1 Font Families
-       ----------------------------------------------------------------------- */
-
-    /* Admin: fontes do sistema — máxima performance */
+    /* Fontes */
     --dps-font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
                        "Helvetica Neue", Arial, sans-serif;
+    --dps-font-display: "Sora", var(--dps-font-system);
+    --dps-font-body: "Manrope", var(--dps-font-system);
+    --dps-font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
 
-    /* Portal/Público: fontes com personalidade (Google Fonts) */
-    --dps-font-display: 'Outfit', var(--dps-font-system);
-    --dps-font-body:    'Source Sans 3', var(--dps-font-system);
+    /* Display */
+    --dps-typescale-display-large-size:      72px;
+    --dps-typescale-display-large-line:      74px;
+    --dps-typescale-display-large-tracking:  -2px;
+    --dps-typescale-display-large-weight:    700;
 
-    /* Mono: código, dados tabulares */
-    --dps-font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    --dps-typescale-display-medium-size:     56px;
+    --dps-typescale-display-medium-line:     58px;
+    --dps-typescale-display-medium-tracking: -1.4px;
+    --dps-typescale-display-medium-weight:   700;
 
-    /* -----------------------------------------------------------------------
-       2.2 Type Scale — 5 papéis × 3 tamanhos (Large, Medium, Small)
-       Valores adaptados do M3 para contexto web (px em vez de sp)
-       ----------------------------------------------------------------------- */
+    --dps-typescale-display-small-size:      42px;
+    --dps-typescale-display-small-line:      46px;
+    --dps-typescale-display-small-tracking:  -1px;
+    --dps-typescale-display-small-weight:    700;
 
-    /* Display — Textos heróicos, landing pages */
-    --dps-typescale-display-large-size:      57px;
-    --dps-typescale-display-large-line:       64px;
-    --dps-typescale-display-large-tracking:  -0.25px;
-    --dps-typescale-display-large-weight:     400;
+    /* Headline */
+    --dps-typescale-headline-large-size:     36px;
+    --dps-typescale-headline-large-line:     40px;
+    --dps-typescale-headline-large-tracking: -0.8px;
+    --dps-typescale-headline-large-weight:   700;
 
-    --dps-typescale-display-medium-size:      45px;
-    --dps-typescale-display-medium-line:       52px;
-    --dps-typescale-display-medium-tracking:   0px;
-    --dps-typescale-display-medium-weight:     400;
+    --dps-typescale-headline-medium-size:    30px;
+    --dps-typescale-headline-medium-line:    34px;
+    --dps-typescale-headline-medium-tracking: -0.5px;
+    --dps-typescale-headline-medium-weight:  600;
 
-    --dps-typescale-display-small-size:       36px;
-    --dps-typescale-display-small-line:        44px;
-    --dps-typescale-display-small-tracking:    0px;
-    --dps-typescale-display-small-weight:      400;
+    --dps-typescale-headline-small-size:     24px;
+    --dps-typescale-headline-small-line:     30px;
+    --dps-typescale-headline-small-tracking: -0.3px;
+    --dps-typescale-headline-small-weight:   600;
 
-    /* Headline — Títulos de seção, introduções */
-    --dps-typescale-headline-large-size:      32px;
-    --dps-typescale-headline-large-line:       40px;
-    --dps-typescale-headline-large-tracking:   0px;
-    --dps-typescale-headline-large-weight:     400;
+    /* Title */
+    --dps-typescale-title-large-size:        22px;
+    --dps-typescale-title-large-line:        28px;
+    --dps-typescale-title-large-tracking:    -0.2px;
+    --dps-typescale-title-large-weight:      600;
 
-    --dps-typescale-headline-medium-size:      28px;
-    --dps-typescale-headline-medium-line:       36px;
-    --dps-typescale-headline-medium-tracking:   0px;
-    --dps-typescale-headline-medium-weight:     400;
+    --dps-typescale-title-medium-size:       17px;
+    --dps-typescale-title-medium-line:       24px;
+    --dps-typescale-title-medium-tracking:   -0.1px;
+    --dps-typescale-title-medium-weight:     600;
 
-    --dps-typescale-headline-small-size:       24px;
-    --dps-typescale-headline-small-line:        32px;
-    --dps-typescale-headline-small-tracking:    0px;
-    --dps-typescale-headline-small-weight:      400;
+    --dps-typescale-title-small-size:        14px;
+    --dps-typescale-title-small-line:        20px;
+    --dps-typescale-title-small-tracking:    0.08px;
+    --dps-typescale-title-small-weight:      600;
 
-    /* Title — Títulos de card, cabeçalhos de lista */
-    --dps-typescale-title-large-size:          22px;
-    --dps-typescale-title-large-line:           28px;
-    --dps-typescale-title-large-tracking:       0px;
-    --dps-typescale-title-large-weight:         500;
+    /* Body */
+    --dps-typescale-body-large-size:         18px;
+    --dps-typescale-body-large-line:         30px;
+    --dps-typescale-body-large-tracking:     0px;
+    --dps-typescale-body-large-weight:       400;
 
-    --dps-typescale-title-medium-size:          16px;
-    --dps-typescale-title-medium-line:           24px;
-    --dps-typescale-title-medium-tracking:       0.15px;
-    --dps-typescale-title-medium-weight:         500;
+    --dps-typescale-body-medium-size:        16px;
+    --dps-typescale-body-medium-line:        26px;
+    --dps-typescale-body-medium-tracking:    0px;
+    --dps-typescale-body-medium-weight:      400;
 
-    --dps-typescale-title-small-size:            14px;
-    --dps-typescale-title-small-line:             20px;
-    --dps-typescale-title-small-tracking:         0.1px;
-    --dps-typescale-title-small-weight:           500;
+    --dps-typescale-body-small-size:         14px;
+    --dps-typescale-body-small-line:         22px;
+    --dps-typescale-body-small-tracking:     0px;
+    --dps-typescale-body-small-weight:       400;
 
-    /* Body — Parágrafos, descrições, conteúdo longo */
-    --dps-typescale-body-large-size:             16px;
-    --dps-typescale-body-large-line:              24px;
-    --dps-typescale-body-large-tracking:          0.5px;
-    --dps-typescale-body-large-weight:            400;
+    /* Label */
+    --dps-typescale-label-large-size:        14px;
+    --dps-typescale-label-large-line:        20px;
+    --dps-typescale-label-large-tracking:    0.12em;
+    --dps-typescale-label-large-weight:      600;
 
-    --dps-typescale-body-medium-size:             14px;
-    --dps-typescale-body-medium-line:              20px;
-    --dps-typescale-body-medium-tracking:          0.25px;
-    --dps-typescale-body-medium-weight:            400;
+    --dps-typescale-label-medium-size:       12px;
+    --dps-typescale-label-medium-line:       16px;
+    --dps-typescale-label-medium-tracking:   0.12em;
+    --dps-typescale-label-medium-weight:     600;
 
-    --dps-typescale-body-small-size:              12px;
-    --dps-typescale-body-small-line:               16px;
-    --dps-typescale-body-small-tracking:           0.4px;
-    --dps-typescale-body-small-weight:             400;
-
-    /* Label — Botões, chips, campos, captions */
-    --dps-typescale-label-large-size:             14px;
-    --dps-typescale-label-large-line:              20px;
-    --dps-typescale-label-large-tracking:          0.1px;
-    --dps-typescale-label-large-weight:            500;
-
-    --dps-typescale-label-medium-size:             12px;
-    --dps-typescale-label-medium-line:              16px;
-    --dps-typescale-label-medium-tracking:          0.5px;
-    --dps-typescale-label-medium-weight:            500;
-
-    --dps-typescale-label-small-size:              11px;
-    --dps-typescale-label-small-line:               16px;
-    --dps-typescale-label-small-tracking:           0.5px;
-    --dps-typescale-label-small-weight:             500;
+    --dps-typescale-label-small-size:        11px;
+    --dps-typescale-label-small-line:        16px;
+    --dps-typescale-label-small-tracking:    0.14em;
+    --dps-typescale-label-small-weight:      600;
 }
 
 /* ==========================================================================
-   3. SHAPE TOKENS — Sistema de Formas M3 Expressive
+   3. SHAPE TOKENS — DPS Signature
    ========================================================================== */
 
 :root {
-
-    /* -----------------------------------------------------------------------
-       Escala de arredondamento (corner radius)
-       M3 Expressive: formas mais expressivas e orgânicas
-       ----------------------------------------------------------------------- */
+    /*
+     * O sistema atual privilegia cantos retos.
+     * Os nomes antigos foram mantidos por compatibilidade.
+     */
     --dps-shape-none:        0px;
-    --dps-shape-extra-small: 4px;
-    --dps-shape-small:       8px;
-    --dps-shape-medium:      12px;
-    --dps-shape-large:       16px;
-    --dps-shape-extra-large: 28px;
-    --dps-shape-full:        9999px;  /* Pill / totalmente arredondado */
+    --dps-shape-extra-small: 0px;
+    --dps-shape-small:       0px;
+    --dps-shape-medium:      0px;
+    --dps-shape-large:       2px;
+    --dps-shape-extra-large: 4px;
+    --dps-shape-full:        0px;
+    --dps-shape-circle:      9999px;
 
-    /* Formas por componente */
-    --dps-shape-button:      var(--dps-shape-full);
-    --dps-shape-fab:         var(--dps-shape-large);
-    --dps-shape-card:        var(--dps-shape-medium);
-    --dps-shape-dialog:      var(--dps-shape-extra-large);
-    --dps-shape-input:       var(--dps-shape-extra-small);
-    --dps-shape-chip:        var(--dps-shape-small);
-    --dps-shape-badge:       var(--dps-shape-full);
-    --dps-shape-tooltip:     var(--dps-shape-extra-small);
-    --dps-shape-snackbar:    var(--dps-shape-extra-small);
-    --dps-shape-menu:        var(--dps-shape-extra-small);
-    --dps-shape-sheet:       var(--dps-shape-extra-large);
-    --dps-shape-surface:     var(--dps-shape-medium);
+    --dps-shape-button:      var(--dps-shape-none);
+    --dps-shape-fab:         var(--dps-shape-none);
+    --dps-shape-card:        var(--dps-shape-none);
+    --dps-shape-dialog:      var(--dps-shape-large);
+    --dps-shape-input:       var(--dps-shape-none);
+    --dps-shape-chip:        var(--dps-shape-none);
+    --dps-shape-badge:       var(--dps-shape-none);
+    --dps-shape-tooltip:     var(--dps-shape-small);
+    --dps-shape-snackbar:    var(--dps-shape-small);
+    --dps-shape-menu:        var(--dps-shape-small);
+    --dps-shape-sheet:       var(--dps-shape-none);
+    --dps-shape-surface:     var(--dps-shape-none);
 }
 
 /* ==========================================================================
-   4. ELEVATION TOKENS — Sistema de Elevação Tonal M3
+   4. ELEVATION TOKENS — DPS Signature
    ========================================================================== */
 
 :root {
-    /* Sombras por nível de elevação (0–5) */
     --dps-elevation-0: none;
-    --dps-elevation-1: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --dps-elevation-2: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
-                       0 1px 2px -1px rgba(0, 0, 0, 0.1);
-    --dps-elevation-3: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-                       0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    --dps-elevation-4: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-                       0 4px 6px -4px rgba(0, 0, 0, 0.1);
-    --dps-elevation-5: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-                       0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    --dps-elevation-1: 0 10px 24px rgba(17, 22, 28, 0.04);
+    --dps-elevation-2: 0 16px 36px rgba(17, 22, 28, 0.06);
+    --dps-elevation-3: 0 24px 56px rgba(17, 22, 28, 0.1);
+    --dps-elevation-4: 0 30px 72px rgba(8, 12, 18, 0.14);
+    --dps-elevation-5: 0 40px 92px rgba(8, 12, 18, 0.18);
 
-    /* Elevação por componente */
-    --dps-elevation-surface:   var(--dps-elevation-0);
-    --dps-elevation-card:      var(--dps-elevation-1);
-    --dps-elevation-button:    var(--dps-elevation-1);
-    --dps-elevation-fab:       var(--dps-elevation-3);
-    --dps-elevation-menu:      var(--dps-elevation-2);
-    --dps-elevation-dialog:    var(--dps-elevation-3);
-    --dps-elevation-tooltip:   var(--dps-elevation-2);
-    --dps-elevation-snackbar:  var(--dps-elevation-3);
-    --dps-elevation-nav-rail:  var(--dps-elevation-0);
-    --dps-elevation-app-bar:   var(--dps-elevation-0);
+    --dps-elevation-surface:  var(--dps-elevation-0);
+    --dps-elevation-card:     var(--dps-elevation-0);
+    --dps-elevation-button:   var(--dps-elevation-0);
+    --dps-elevation-fab:      var(--dps-elevation-1);
+    --dps-elevation-menu:     var(--dps-elevation-2);
+    --dps-elevation-dialog:   var(--dps-elevation-3);
+    --dps-elevation-tooltip:  var(--dps-elevation-2);
+    --dps-elevation-snackbar: var(--dps-elevation-2);
+    --dps-elevation-nav-rail: var(--dps-elevation-0);
+    --dps-elevation-app-bar:  var(--dps-elevation-0);
 }
 
 /* ==========================================================================
-   5. MOTION TOKENS — Sistema de Movimento M3 Expressive
+   5. MOTION TOKENS — DPS Signature
    ========================================================================== */
 
 :root {
+    /*
+     * O sistema atual remove bounce e overshoot do padrão anterior.
+     * As curvas "expressive" permanecem disponíveis por compatibilidade,
+     * mas foram realinhadas para uma resposta mais seca.
+     */
+    --dps-motion-easing-expressive-fast:       cubic-bezier(0.22, 1, 0.36, 1);
+    --dps-motion-easing-expressive-default:    cubic-bezier(0.22, 1, 0.36, 1);
+    --dps-motion-easing-expressive-slow:       cubic-bezier(0.22, 1, 0.36, 1);
 
-    /* -----------------------------------------------------------------------
-       5.1 Easing — Curvas com overshoot sutil (expressivas)
-       Baseadas nas spring curves do M3 Expressive
-       ----------------------------------------------------------------------- */
+    --dps-motion-easing-standard:              ease;
+    --dps-motion-easing-standard-decelerate:   ease-out;
+    --dps-motion-easing-standard-accelerate:   ease-in;
 
-    /* Expressive: com bounce sutil — para momentos importantes */
-    --dps-motion-easing-expressive-fast:     cubic-bezier(0.42, 1.67, 0.21, 0.90);
-    --dps-motion-easing-expressive-default:  cubic-bezier(0.38, 1.21, 0.22, 1.00);
-    --dps-motion-easing-expressive-slow:     cubic-bezier(0.39, 1.29, 0.35, 0.98);
+    --dps-motion-easing-emphasized:            cubic-bezier(0.22, 1, 0.36, 1);
+    --dps-motion-easing-emphasized-decelerate: cubic-bezier(0.22, 1, 0.36, 1);
+    --dps-motion-easing-emphasized-accelerate: cubic-bezier(0.4, 0, 1, 1);
 
-    /* Standard: sem bounce — para ações utilitárias */
-    --dps-motion-easing-standard:            cubic-bezier(0.2, 0.0, 0.0, 1.0);
-    --dps-motion-easing-standard-decelerate: cubic-bezier(0.0, 0.0, 0.0, 1.0);
-    --dps-motion-easing-standard-accelerate: cubic-bezier(0.3, 0.0, 1.0, 1.0);
-
-    /* Emphasis: entrada/saída de elementos */
-    --dps-motion-easing-emphasized:          cubic-bezier(0.2, 0.0, 0.0, 1.0);
-    --dps-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1.0);
-    --dps-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0.0, 0.8, 0.15);
-
-    /* -----------------------------------------------------------------------
-       5.2 Duration — Tempos por tipo de interação
-       ----------------------------------------------------------------------- */
-    --dps-motion-duration-short-1:  50ms;
+    --dps-motion-duration-short-1:  60ms;
     --dps-motion-duration-short-2:  100ms;
-    --dps-motion-duration-short-3:  150ms;
-    --dps-motion-duration-short-4:  200ms;
-    --dps-motion-duration-medium-1: 250ms;
-    --dps-motion-duration-medium-2: 300ms;
-    --dps-motion-duration-medium-3: 350ms;
-    --dps-motion-duration-medium-4: 400ms;
-    --dps-motion-duration-long-1:   450ms;
-    --dps-motion-duration-long-2:   500ms;
-    --dps-motion-duration-long-3:   550ms;
-    --dps-motion-duration-long-4:   600ms;
-    --dps-motion-duration-extra-long: 800ms;
+    --dps-motion-duration-short-3:  140ms;
+    --dps-motion-duration-short-4:  180ms;
+    --dps-motion-duration-medium-1: 220ms;
+    --dps-motion-duration-medium-2: 260ms;
+    --dps-motion-duration-medium-3: 300ms;
+    --dps-motion-duration-medium-4: 340ms;
+    --dps-motion-duration-long-1:   380ms;
+    --dps-motion-duration-long-2:   420ms;
+    --dps-motion-duration-long-3:   480ms;
+    --dps-motion-duration-long-4:   560ms;
+    --dps-motion-duration-extra-long: 700ms;
 
-    /* -----------------------------------------------------------------------
-       5.3 Atalhos de transição por uso comum
-       ----------------------------------------------------------------------- */
     --dps-motion-hover:   var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
     --dps-motion-press:   var(--dps-motion-duration-short-3) var(--dps-motion-easing-standard);
-    --dps-motion-enter:   var(--dps-motion-duration-medium-2) var(--dps-motion-easing-emphasized-decelerate);
+    --dps-motion-enter:   var(--dps-motion-duration-medium-2) var(--dps-motion-easing-emphasized);
     --dps-motion-exit:    var(--dps-motion-duration-short-4) var(--dps-motion-easing-emphasized-accelerate);
-    --dps-motion-expand:  var(--dps-motion-duration-medium-3) var(--dps-motion-easing-expressive-default);
-    --dps-motion-morph:   var(--dps-motion-duration-medium-4) var(--dps-motion-easing-expressive-fast);
+    --dps-motion-expand:  var(--dps-motion-duration-medium-2) var(--dps-motion-easing-emphasized);
+    --dps-motion-morph:   var(--dps-motion-duration-medium-2) var(--dps-motion-easing-emphasized);
 }
 
 /* ==========================================================================
-   6. SPACING TOKENS — Escala de Espaçamento
+   6. SPACING TOKENS — DPS Signature
    ========================================================================== */
 
 :root {
@@ -349,90 +315,113 @@
     --dps-space-12:   48px;
     --dps-space-14:   56px;
     --dps-space-16:   64px;
+    --dps-space-20:   80px;
+    --dps-space-24:   96px;
 }
 
 /* ==========================================================================
-   7. STATE LAYER TOKENS — Opacidades de estado interativo
+   7. STATE LAYER TOKENS — DPS Signature
    ========================================================================== */
 
 :root {
-    --dps-state-hover-opacity:    0.08;
-    --dps-state-focus-opacity:    0.10;
-    --dps-state-pressed-opacity:  0.10;
-    --dps-state-dragged-opacity:  0.16;
-    --dps-state-disabled-opacity: 0.38;
-    --dps-state-disabled-container-opacity: 0.12;
+    --dps-state-hover-opacity:                0.06;
+    --dps-state-focus-opacity:                0.12;
+    --dps-state-pressed-opacity:              0.1;
+    --dps-state-dragged-opacity:              0.14;
+    --dps-state-disabled-opacity:             0.42;
+    --dps-state-disabled-container-opacity:   0.14;
 }
 
 /* ==========================================================================
-   8. BREAKPOINTS (referência — usar em media queries)
+   8. BREAKPOINTS (referência)
    ========================================================================== */
 
 /*
-   --dps-breakpoint-compact:  0px     (mobile)
-   --dps-breakpoint-medium:   600px   (tablet portrait)
-   --dps-breakpoint-expanded: 840px   (tablet landscape)
-   --dps-breakpoint-large:    1200px  (desktop)
-   --dps-breakpoint-xlarge:   1600px  (wide desktop)
+   --dps-breakpoint-compact:  0px
+   --dps-breakpoint-medium:   600px
+   --dps-breakpoint-expanded: 840px
+   --dps-breakpoint-large:    1200px
+   --dps-breakpoint-xlarge:   1920px
 */
 
 /* ==========================================================================
-   9. DARK THEME — Sobreposição para tema escuro
+   9. DARK THEME — DPS Signature
    ========================================================================== */
 
 [data-dps-theme="dark"] {
-    --dps-color-primary:               #a5c8ff;
-    --dps-color-on-primary:            #003060;
-    --dps-color-primary-container:     #00468a;
-    --dps-color-on-primary-container:  #d4e4ff;
-    --dps-color-primary-hover:         #b8d4ff;
-    --dps-color-primary-pressed:       #c5dcff;
+    --dps-color-ink:                    #f2ede6;
+    --dps-color-ink-soft:               #e7ddd1;
+    --dps-color-muted:                  #b6aca1;
+    --dps-color-petrol:                 #8fd6f4;
+    --dps-color-petrol-deep:            #0d141b;
+    --dps-color-paper:                  #11161c;
+    --dps-color-paper-strong:           #171d24;
+    --dps-color-bone:                   #1b232b;
+    --dps-color-bone-deep:              #222c35;
+    --dps-color-line:                   #3e4b57;
+    --dps-color-line-strong:            #55636f;
+    --dps-color-accent:                 #8fd6f4;
+    --dps-color-accent-soft:            rgba(143, 214, 244, 0.16);
+    --dps-color-action:                 #45a96f;
+    --dps-color-action-deep:            #358459;
+    --dps-color-danger:                 #d27c70;
+    --dps-color-danger-soft:            rgba(210, 124, 112, 0.18);
+    --dps-color-warning:                #d7a650;
+    --dps-color-warning-soft:           rgba(215, 166, 80, 0.18);
+    --dps-color-success-soft:           rgba(69, 169, 111, 0.18);
 
-    --dps-color-secondary:              #bcc7db;
-    --dps-color-on-secondary:           #263141;
-    --dps-color-secondary-container:    #3c4858;
-    --dps-color-on-secondary-container: #d8e3f8;
+    --dps-color-primary:                #8fd6f4;
+    --dps-color-on-primary:             #0d141b;
+    --dps-color-primary-container:      rgba(143, 214, 244, 0.16);
+    --dps-color-on-primary-container:   #dff5ff;
+    --dps-color-primary-hover:          #b6e5f8;
+    --dps-color-primary-pressed:        #d6f1fd;
 
-    --dps-color-tertiary:               #d9bde5;
-    --dps-color-on-tertiary:            #3d2948;
-    --dps-color-tertiary-container:     #553f60;
-    --dps-color-on-tertiary-container:  #f5d9ff;
+    --dps-color-secondary:              #c4d1dc;
+    --dps-color-on-secondary:           #11161c;
+    --dps-color-secondary-container:    #27333d;
+    --dps-color-on-secondary-container: #e8eef2;
 
-    --dps-color-error:                  #ffb4ab;
-    --dps-color-on-error:               #690005;
-    --dps-color-error-container:        #93000a;
-    --dps-color-on-error-container:     #ffdad6;
+    --dps-color-tertiary:               #d2b48c;
+    --dps-color-on-tertiary:            #1b160f;
+    --dps-color-tertiary-container:     #31271f;
+    --dps-color-on-tertiary-container:  #efe0ce;
 
-    --dps-color-success:                #8cd8a0;
-    --dps-color-on-success:             #003914;
-    --dps-color-success-container:      #005320;
-    --dps-color-on-success-container:   #a8f5b5;
+    --dps-color-error:                  #d27c70;
+    --dps-color-on-error:               #20110f;
+    --dps-color-error-container:        rgba(210, 124, 112, 0.18);
+    --dps-color-on-error-container:     #f9d9d3;
 
-    --dps-color-warning:                #f0c04a;
-    --dps-color-on-warning:             #4a3800;
-    --dps-color-warning-container:      #6a5100;
-    --dps-color-on-warning-container:   #ffdea3;
+    --dps-color-success:                #45a96f;
+    --dps-color-on-success:             #0d1b13;
+    --dps-color-success-container:      rgba(69, 169, 111, 0.18);
+    --dps-color-on-success-container:   #d9f1e2;
 
-    --dps-color-surface:                    #111318;
-    --dps-color-on-surface:                 #e1e2e9;
-    --dps-color-on-surface-variant:         #c3c6cf;
-    --dps-color-surface-container-lowest:   #0c0e13;
-    --dps-color-surface-container-low:      #191c20;
-    --dps-color-surface-container:          #1d2024;
-    --dps-color-surface-container-high:     #282a2f;
-    --dps-color-surface-container-highest:  #333539;
-    --dps-color-surface-dim:                #111318;
-    --dps-color-surface-bright:             #37393e;
+    --dps-color-warning:                #d7a650;
+    --dps-color-on-warning:             #211708;
+    --dps-color-warning-container:      rgba(215, 166, 80, 0.18);
+    --dps-color-on-warning-container:   #f7e7c8;
 
-    --dps-color-outline:                #8d9199;
-    --dps-color-outline-variant:        #43474e;
+    --dps-color-surface:                    #11161c;
+    --dps-color-on-surface:                 #f2ede6;
+    --dps-color-on-surface-variant:         #b6aca1;
+    --dps-color-surface-container-lowest:   #0d141b;
+    --dps-color-surface-container-low:      #171d24;
+    --dps-color-surface-container:          #1b232b;
+    --dps-color-surface-container-high:     #222c35;
+    --dps-color-surface-container-highest:  #2a3641;
+    --dps-color-surface-dim:                #0d141b;
+    --dps-color-surface-bright:             #222c35;
 
-    --dps-color-inverse-surface:        #e1e2e9;
-    --dps-color-inverse-on-surface:     #2e3036;
-    --dps-color-inverse-primary:        #0b6bcb;
+    --dps-color-outline:                #55636f;
+    --dps-color-outline-variant:        #3e4b57;
 
-    --dps-color-scrim:                  #000000;
-    --dps-color-shadow:                 #000000;
+    --dps-color-inverse-surface:        #f7f3ec;
+    --dps-color-inverse-on-surface:     #11161c;
+    --dps-color-inverse-primary:        #173042;
+
+    --dps-color-scrim:                  rgba(0, 0, 0, 0.82);
+    --dps-color-shadow:                 rgba(0, 0, 0, 0.34);
 }
 
 /* ==========================================================================
@@ -451,21 +440,22 @@
 }
 
 /* ==========================================================================
-   11. COMPAT — Aliases para transição do sistema legado
-   Mapeia os tokens antigos (--dps-bg-*, --dps-accent, etc.)
-   para os novos tokens M3. Remover após migração completa.
+   11. COMPAT — Aliases legados
    ========================================================================== */
 
 :root {
-    /* Cores legadas → novos tokens */
     --dps-bg-primary:       var(--dps-color-surface);
     --dps-bg-white:         var(--dps-color-surface-container-lowest);
+    --dps-bg-muted:         var(--dps-color-surface-container-high);
     --dps-border:           var(--dps-color-outline-variant);
     --dps-text-primary:     var(--dps-color-on-surface);
     --dps-text-secondary:   var(--dps-color-on-surface-variant);
     --dps-accent:           var(--dps-color-primary);
     --dps-accent-hover:     var(--dps-color-primary-hover);
+    --dps-accent-soft:      var(--dps-color-primary-container);
     --dps-success:          var(--dps-color-success);
     --dps-error:            var(--dps-color-error);
     --dps-warning:          var(--dps-color-warning);
+    --dps-shadow-soft:      var(--dps-elevation-1);
+    --dps-shadow-strong:    var(--dps-elevation-4);
 }

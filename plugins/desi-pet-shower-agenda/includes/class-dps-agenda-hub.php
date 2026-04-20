@@ -106,7 +106,8 @@ class DPS_Agenda_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
 
-            echo wp_kses_post( $content );
+            // Conteúdo gerado internamente pela Agenda; preservar formulários e scripts inline do dashboard.
+            echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         }
     }
 
@@ -124,7 +125,8 @@ class DPS_Agenda_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
 
-            echo wp_kses_post( $content );
+            // Conteúdo gerado internamente pela Agenda; preservar a marcação administrativa completa.
+            echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         }
     }
 }

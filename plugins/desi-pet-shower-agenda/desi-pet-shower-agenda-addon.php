@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 /**
 
@@ -533,6 +533,10 @@ class DPS_Agenda_Addon {
         // Enfileira scripts e estilos somente quando páginas específicas forem exibidas
 
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+        add_action( 'wp_enqueue_scripts', [ $this, 'suppress_external_frontend_assets' ], 999 );
+        add_action( 'wp_print_scripts', [ $this, 'suppress_external_frontend_assets' ], 0 );
+        add_action( 'wp_print_footer_scripts', [ $this, 'suppress_external_frontend_assets' ], 0 );
+        add_action( 'template_redirect', [ $this, 'start_frontend_output_buffer' ], 0 );
 
         // AJAX para atualizar status de agendamento (apenas usuários autenticados)
 
@@ -659,6 +663,8 @@ class DPS_Agenda_Addon {
         // FASE 4: Enfileira assets do Dashboard no admin
 
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_dashboard_assets' ] );
+        add_action( 'admin_enqueue_scripts', [ $this, 'suppress_external_admin_assets' ], 999 );
+        add_action( 'current_screen', [ $this, 'start_admin_output_buffer' ] );
 
     }
 
@@ -798,13 +804,12 @@ class DPS_Agenda_Addon {
 
         $hook = (string) $hook;
 
+        // O slug do menu pai pode variar entre instalações; o importante é o suffix da tela da Agenda.
+        $is_dashboard_page = $this->is_agenda_admin_hook( $hook, 'dps-agenda-dashboard' );
 
+        $is_settings_page  = $this->is_agenda_admin_hook( $hook, 'dps-agenda-settings' );
 
-        $is_dashboard_page = 'desi-pet-shower_page_dps-agenda-dashboard' === $hook;
-
-        $is_settings_page  = 'desi-pet-shower_page_dps-agenda-settings' === $hook;
-
-        $is_hub_page       = 'desi-pet-shower_page_dps-agenda-hub' === $hook;
+        $is_hub_page       = $this->is_agenda_admin_hook( $hook, 'dps-agenda-hub' );
 
 
 
@@ -834,7 +839,7 @@ class DPS_Agenda_Addon {
 
             [],
 
-            DPS_BASE_VERSION
+            $this->get_base_asset_version( 'assets/css/dps-design-tokens.css' )
 
         );
 
@@ -848,7 +853,7 @@ class DPS_Agenda_Addon {
 
             [ 'dps-design-tokens' ],
 
-            '2.1.0'
+            $this->get_agenda_asset_version( 'assets/css/agenda-admin.css' )
 
         );
 
@@ -864,7 +869,7 @@ class DPS_Agenda_Addon {
 
                 [ 'dps-design-tokens', 'dps-agenda-admin-css' ],
 
-                '2.1.0'
+                $this->get_agenda_asset_version( 'assets/css/dashboard.css' )
 
             );
 
@@ -872,6 +877,483 @@ class DPS_Agenda_Addon {
 
             wp_enqueue_script( 'jquery' );
 
+        }
+
+    }
+
+
+
+    /**
+     * Verifica se o hook atual pertence a uma tela administrativa da Agenda.
+     *
+     * @since 1.5.1
+     *
+     * @param string $hook      Hook recebido do WordPress.
+     * @param string $page_slug Suffix do slug da página.
+     *
+     * @return bool
+     */
+    private function is_agenda_admin_hook( $hook, $page_slug ) {
+
+        $hook      = (string) $hook;
+        $page_slug = (string) $page_slug;
+
+        if ( '' === $hook || '' === $page_slug ) {
+            return false;
+        }
+
+        return str_contains( $hook, '_page_' . $page_slug );
+
+    }
+
+
+
+    /**
+     * Retorna uma versão baseada em filemtime para assets do plugin base.
+     *
+     * Evita que CSS compartilhado do DPS fique preso em cache quando a Agenda
+     * depende de tokens ou estilos recém-atualizados.
+     *
+     * @since 1.5.1
+     *
+     * @param string $relative_path Caminho relativo dentro do plugin base.
+     *
+     * @return string
+     */
+    private function get_base_asset_version( $relative_path ) {
+
+        $relative_path = ltrim( (string) $relative_path, '/' );
+        $file_path     = trailingslashit( DPS_BASE_DIR ) . $relative_path;
+        $mtime         = file_exists( $file_path ) ? filemtime( $file_path ) : false;
+
+        return $mtime ? (string) $mtime : DPS_BASE_VERSION;
+
+    }
+
+
+
+    /**
+     * Retorna uma versão baseada em filemtime para assets do add-on da Agenda.
+     *
+     * @since 1.5.1
+     *
+     * @param string $relative_path Caminho relativo dentro do add-on.
+     *
+     * @return string
+     */
+    private function get_agenda_asset_version( $relative_path ) {
+
+        $relative_path = ltrim( (string) $relative_path, '/' );
+        $file_path     = plugin_dir_path( __FILE__ ) . $relative_path;
+        $mtime         = file_exists( $file_path ) ? filemtime( $file_path ) : false;
+
+        return $mtime ? (string) $mtime : DPS_AGENDA_ADDON_VERSION;
+
+    }
+
+
+
+    /**
+     * Verifica se a requisição atual está renderizando a Agenda no frontend.
+     *
+     * @since 1.5.2
+     *
+     * @return bool
+     */
+    private function is_agenda_frontend_context() {
+
+        if ( is_admin() || wp_doing_ajax() || ! is_singular() ) {
+            return false;
+        }
+
+        $agenda_page_id = (int) get_option( 'dps_agenda_page_id' );
+        $current_post   = get_post();
+
+        if ( ! ( $current_post instanceof WP_Post ) ) {
+            return false;
+        }
+
+        $current_content      = (string) $current_post->post_content;
+        $has_agenda_shortcode = has_shortcode( $current_content, 'dps_agenda_page' );
+        $is_agenda_page       = $agenda_page_id > 0 && is_page( $agenda_page_id );
+
+        return $is_agenda_page || $has_agenda_shortcode;
+
+    }
+
+
+
+    /**
+     * Remove hints e scripts externos ruidosos apenas na página pública da Agenda.
+     *
+     * @since 1.5.2
+     *
+     * @return void
+     */
+    public function suppress_external_frontend_assets() {
+
+        if ( ! $this->is_agenda_frontend_context() ) {
+            return;
+        }
+
+        wp_dequeue_script( 'google_gtagjs' );
+        wp_deregister_script( 'google_gtagjs' );
+
+        $this->dequeue_assets_by_src_fragment(
+            'script',
+            [
+                '/plugins/elementor/',
+                '/plugins/elementor-pro/',
+            ]
+        );
+
+        add_filter( 'wp_resource_hints', [ $this, 'filter_agenda_resource_hints' ], 10, 2 );
+
+    }
+
+
+
+    /**
+     * Inicia buffer de saída para limpar snippets externos injetados diretamente no head.
+     *
+     * O Site Kit imprime o snippet do AdSense fora da fila padrão de assets. Na Agenda,
+     * removemos esse bloco para preservar foco operacional e reduzir ruído de console.
+     *
+     * @since 1.5.2
+     *
+     * @return void
+     */
+    public function start_frontend_output_buffer() {
+
+        if ( ! $this->is_agenda_frontend_context() ) {
+            return;
+        }
+
+        ob_start( [ $this, 'filter_agenda_frontend_markup' ] );
+
+    }
+
+
+
+    /**
+     * Remove marcação externa que não deve aparecer no frontend da Agenda.
+     *
+     * @since 1.5.2
+     *
+     * @param string $content HTML completo da resposta.
+     *
+     * @return string
+     */
+    public function filter_agenda_frontend_markup( $content ) {
+
+        if ( ! is_string( $content ) || '' === $content ) {
+            return $content;
+        }
+
+        $patterns = [
+            '#<!-- Meta tags do Google AdSense adicionadas pelo Site Kit -->.*?<!-- Fim das meta tags do Google AdSense adicionadas pelo Site Kit -->#si',
+            '#<!-- Snippet do Google AdSense adicionado pelo Site Kit -->.*?<!-- Fim do snippet do Google AdSense adicionado pelo Site Kit -->#si',
+        ];
+
+        $filtered = preg_replace( $patterns, '', $content );
+
+        return is_string( $filtered ) ? $filtered : $content;
+
+    }
+
+
+
+    /**
+     * Remove prefetch/dns-prefetch de terceiros que não agregam na página da Agenda.
+     *
+     * @since 1.5.2
+     *
+     * @param array  $urls          Lista de URLs sugeridas ao navegador.
+     * @param string $relation_type Tipo do hint.
+     *
+     * @return array
+     */
+    public function filter_agenda_resource_hints( $urls, $relation_type ) {
+
+        if ( 'dns-prefetch' !== $relation_type || ! is_array( $urls ) ) {
+            return $urls;
+        }
+
+        $blocked_hosts = [
+            'www.googletagmanager.com',
+            'pagead2.googlesyndication.com',
+        ];
+
+        return array_values(
+            array_filter(
+                $urls,
+                static function( $url ) use ( $blocked_hosts ) {
+                    $url_string = is_string( $url ) ? $url : '';
+                    $host       = (string) wp_parse_url( $url_string, PHP_URL_HOST );
+
+                    return '' === $host || ! in_array( $host, $blocked_hosts, true );
+                }
+            )
+        );
+
+    }
+
+
+
+    /**
+     * Remove assets globais de terceiros nas telas administrativas da Agenda.
+     *
+     * O objetivo é preservar a leitura operacional da Agenda e evitar widgets/scripts
+     * de plugins não relacionados interferindo na UI, no foco e no console.
+     *
+     * @since 1.5.2
+     *
+     * @param string $hook Hook da tela administrativa atual.
+     *
+     * @return void
+     */
+    public function suppress_external_admin_assets( $hook ) {
+
+        $hook = (string) $hook;
+
+        $is_agenda_admin = (
+            $this->is_agenda_admin_hook( $hook, 'dps-agenda-dashboard' )
+            || $this->is_agenda_admin_hook( $hook, 'dps-agenda-settings' )
+            || $this->is_agenda_admin_hook( $hook, 'dps-agenda-hub' )
+        );
+
+        if ( ! $is_agenda_admin ) {
+            return;
+        }
+
+        $this->remove_registered_action_by_class_method( 'admin_footer', 'Hostinger_Ai_Assistant_Helper', 'add_vue_instance' );
+
+        $this->dequeue_assets_by_handle(
+            'style',
+            [
+                'hostinger_chatbot',
+                'hostinger_surveys_styles',
+                'hostinger_menu_styles',
+                'hostinger_tools_global_styles',
+                'hostinger-ai-assistant',
+            ]
+        );
+
+        $this->dequeue_assets_by_handle(
+            'script',
+            [
+                'hostinger_chatbot',
+                'hostinger_surveys_scripts',
+                'hostinger_menu_scripts',
+                'hostinger_tools_main_scripts',
+                'custom-link-in-toolbar',
+                'hostinger-ai-assistant',
+            ]
+        );
+
+        $this->dequeue_assets_by_src_fragment(
+            'style',
+            [
+                '/plugins/hostinger/',
+                '/plugins/hostinger-ai-assistant/',
+                '/plugins/elementor/',
+                '/plugins/elementor-pro/',
+            ]
+        );
+
+        $this->dequeue_assets_by_src_fragment(
+            'script',
+            [
+                '/plugins/hostinger/',
+                '/plugins/hostinger-ai-assistant/',
+                '/plugins/elementor/',
+                '/plugins/elementor-pro/',
+            ]
+        );
+
+    }
+
+
+
+    /**
+     * Inicia buffer de saída para limpar markup global não relacionado nas telas da Agenda.
+     *
+     * @since 1.5.2
+     *
+     * @param WP_Screen $screen Tela administrativa atual.
+     *
+     * @return void
+     */
+    public function start_admin_output_buffer( $screen ) {
+
+        if ( ! ( $screen instanceof WP_Screen ) ) {
+            return;
+        }
+
+        $screen_id = (string) $screen->id;
+        $is_agenda = (
+            $this->is_agenda_admin_hook( $screen_id, 'dps-agenda-dashboard' )
+            || $this->is_agenda_admin_hook( $screen_id, 'dps-agenda-settings' )
+            || $this->is_agenda_admin_hook( $screen_id, 'dps-agenda-hub' )
+        );
+
+        if ( ! $is_agenda ) {
+            return;
+        }
+
+        ob_start( [ $this, 'filter_agenda_admin_markup' ] );
+
+    }
+
+
+
+    /**
+     * Remove placeholders e estilos globais que poluem o admin da Agenda.
+     *
+     * @since 1.5.2
+     *
+     * @param string $content HTML completo da resposta administrativa.
+     *
+     * @return string
+     */
+    public function filter_agenda_admin_markup( $content ) {
+
+        if ( ! is_string( $content ) || '' === $content ) {
+            return $content;
+        }
+
+        $patterns = [
+            '#<div id="vue-app"></div>#i',
+            '#<style[^>]*>\s*body\.hostinger-hide-main-menu-item\s+#toplevel_page_hostinger.*?</style>#si',
+        ];
+
+        $filtered = preg_replace( $patterns, '', $content );
+
+        if ( ! is_string( $filtered ) ) {
+            return $content;
+        }
+
+        return str_replace( 'hostinger-hide-main-menu-item', '', $filtered );
+
+    }
+
+
+
+    /**
+     * Remove assets enfileirados por handle.
+     *
+     * @since 1.5.2
+     *
+     * @param string $type    Tipo do asset: script ou style.
+     * @param array  $handles Lista de handles.
+     *
+     * @return void
+     */
+    private function dequeue_assets_by_handle( $type, array $handles ) {
+
+        foreach ( $handles as $handle ) {
+            $handle = (string) $handle;
+
+            if ( '' === $handle ) {
+                continue;
+            }
+
+            if ( 'style' === $type ) {
+                wp_dequeue_style( $handle );
+                wp_deregister_style( $handle );
+                continue;
+            }
+
+            wp_dequeue_script( $handle );
+            wp_deregister_script( $handle );
+        }
+
+    }
+
+
+
+    /**
+     * Remove assets enfileirados com base em fragmentos do src registrado.
+     *
+     * @since 1.5.2
+     *
+     * @param string $type          Tipo do asset: script ou style.
+     * @param array  $src_fragments Fragmentos que identificam o asset.
+     *
+     * @return void
+     */
+    private function dequeue_assets_by_src_fragment( $type, array $src_fragments ) {
+
+        $registry = 'style' === $type ? wp_styles() : wp_scripts();
+
+        if ( ! $registry || empty( $registry->queue ) ) {
+            return;
+        }
+
+        foreach ( $registry->queue as $handle ) {
+            if ( ! isset( $registry->registered[ $handle ] ) ) {
+                continue;
+            }
+
+            $src = (string) $registry->registered[ $handle ]->src;
+
+            if ( '' === $src ) {
+                continue;
+            }
+
+            foreach ( $src_fragments as $fragment ) {
+                $fragment = (string) $fragment;
+
+                if ( '' === $fragment || ! str_contains( $src, $fragment ) ) {
+                    continue;
+                }
+
+                $this->dequeue_assets_by_handle( $type, [ $handle ] );
+                break;
+            }
+        }
+
+    }
+
+
+
+    /**
+     * Remove callbacks registrados por uma combinação específica de classe e método.
+     *
+     * @since 1.5.2
+     *
+     * @param string $hook_name   Hook do WordPress.
+     * @param string $class_name  Nome da classe alvo.
+     * @param string $method_name Nome do método alvo.
+     *
+     * @return void
+     */
+    private function remove_registered_action_by_class_method( $hook_name, $class_name, $method_name ) {
+
+        global $wp_filter;
+
+        if ( ! isset( $wp_filter[ $hook_name ] ) || ! ( $wp_filter[ $hook_name ] instanceof WP_Hook ) ) {
+            return;
+        }
+
+        foreach ( $wp_filter[ $hook_name ]->callbacks as $priority => $callbacks ) {
+            foreach ( $callbacks as $callback ) {
+                $function = $callback['function'] ?? null;
+
+                if ( ! is_array( $function ) || 2 !== count( $function ) ) {
+                    continue;
+                }
+
+                if ( ! is_object( $function[0] ) || ! ( $function[0] instanceof $class_name ) ) {
+                    continue;
+                }
+
+                if ( $method_name !== $function[1] ) {
+                    continue;
+                }
+
+                remove_action( $hook_name, [ $function[0], $method_name ], $priority );
+            }
         }
 
     }
@@ -1866,7 +2348,7 @@ class DPS_Agenda_Addon {
 
                 [],
 
-                DPS_BASE_VERSION
+                $this->get_base_asset_version( 'assets/css/dps-design-tokens.css' )
 
             );
 
@@ -1878,7 +2360,7 @@ class DPS_Agenda_Addon {
 
                 [ 'dps-design-tokens' ],
 
-                DPS_BASE_VERSION
+                $this->get_base_asset_version( 'assets/css/dps-base.css' )
 
             );
 
@@ -1892,7 +2374,7 @@ class DPS_Agenda_Addon {
 
                 [ 'dps-design-tokens' ],
 
-                '2.2.0'
+                $this->get_agenda_asset_version( 'assets/css/agenda-addon.css' )
 
             );
 
@@ -1908,7 +2390,7 @@ class DPS_Agenda_Addon {
 
                 [ 'dps-design-tokens' ],
 
-                '1.1.0'
+                $this->get_agenda_asset_version( 'assets/css/checklist-checkin.css' )
 
             );
 
@@ -1924,7 +2406,7 @@ class DPS_Agenda_Addon {
 
                 [ 'jquery' ],
 
-                '1.0.0',
+                $this->get_agenda_asset_version( 'assets/js/services-modal.js' ),
 
                 true
 
@@ -1942,7 +2424,7 @@ class DPS_Agenda_Addon {
 
                 [ 'jquery', 'dps-services-modal' ],
 
-                '1.5.0',
+                $this->get_agenda_asset_version( 'assets/js/agenda-addon.js' ),
 
                 true
 
@@ -1958,7 +2440,7 @@ class DPS_Agenda_Addon {
 
                 [ 'jquery', 'dps-agenda-addon' ],
 
-                '1.0.2',
+                $this->get_agenda_asset_version( 'assets/js/pet-profile-modal.js' ),
 
                 true
 
@@ -1976,7 +2458,7 @@ class DPS_Agenda_Addon {
 
                 [ 'jquery', 'dps-agenda-addon' ],
 
-                '1.1.0',
+                $this->get_agenda_asset_version( 'assets/js/checklist-checkin.js' ),
 
                 true
 
@@ -2184,7 +2666,7 @@ class DPS_Agenda_Addon {
 
                 [],
 
-                DPS_BASE_VERSION
+                $this->get_base_asset_version( 'assets/css/dps-design-tokens.css' )
 
             );
 
@@ -2196,7 +2678,7 @@ class DPS_Agenda_Addon {
 
                 [ 'dps-design-tokens' ],
 
-                '1.1.0'
+                $this->get_agenda_asset_version( 'assets/css/checklist-checkin.css' )
 
             );
 
@@ -2398,9 +2880,9 @@ class DPS_Agenda_Addon {
 
         echo '<h3>' . esc_html__( 'Agenda de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
 
-        echo '<p class="dps-current-date dps-current-date--header" title="' . esc_attr__( 'Periodo em foco', 'dps-agenda-addon' ) . '">';
+        echo '<p class="dps-current-date dps-current-date--header" title="' . esc_attr__( 'Período em foco', 'dps-agenda-addon' ) . '">';
 
-        echo '<span class="dps-current-date__label">' . esc_html__( 'Periodo ativo', 'dps-agenda-addon' ) . '</span>';
+        echo '<span class="dps-current-date__label">' . esc_html__( 'Período ativo', 'dps-agenda-addon' ) . '</span>';
 
         echo '<strong>' . esc_html( $scope_label ) . '</strong>';
 
@@ -2452,7 +2934,7 @@ class DPS_Agenda_Addon {
 
         if ( $show_all ) {
 
-            $view_buttons[] = '<a href="' . esc_url( add_query_arg( $focused_view_args, $base_url ) ) . '" class="dps-view-btn dps-view-btn--active" title="' . esc_attr__( 'Voltar para o periodo atual', 'dps-agenda-addon' ) . '" aria-current="page">' . esc_html__( 'Agenda completa', 'dps-agenda-addon' ) . '</a>';
+            $view_buttons[] = '<a href="' . esc_url( add_query_arg( $focused_view_args, $base_url ) ) . '" class="dps-view-btn dps-view-btn--active" title="' . esc_attr__( 'Voltar para o período atual', 'dps-agenda-addon' ) . '" aria-current="page">' . esc_html__( 'Agenda completa', 'dps-agenda-addon' ) . '</a>';
 
         } else {
 
@@ -2466,7 +2948,7 @@ class DPS_Agenda_Addon {
 
         echo '<div class="dps-view-buttons dps-view-buttons--date-nav">';
 
-        echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--prev" title="' . esc_attr( $is_week_view ? __( 'Ver periodo anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '" aria-label="' . esc_attr( $is_week_view ? __( 'Ver periodo anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '">';
+        echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--prev" title="' . esc_attr( $is_week_view ? __( 'Ver período anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '" aria-label="' . esc_attr( $is_week_view ? __( 'Ver período anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '">';
 
         echo '&larr;';
 
@@ -2478,7 +2960,7 @@ class DPS_Agenda_Addon {
 
         echo '</a>';
 
-        echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--next" title="' . esc_attr( $is_week_view ? __( 'Ver proximo periodo', 'dps-agenda-addon' ) : __( 'Ver proximo dia', 'dps-agenda-addon' ) ) . '" aria-label="' . esc_attr( $is_week_view ? __( 'Ver proximo periodo', 'dps-agenda-addon' ) : __( 'Ver proximo dia', 'dps-agenda-addon' ) ) . '">';
+        echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--next" title="' . esc_attr( $is_week_view ? __( 'Ver próximo período', 'dps-agenda-addon' ) : __( 'Ver próximo dia', 'dps-agenda-addon' ) ) . '" aria-label="' . esc_attr( $is_week_view ? __( 'Ver próximo período', 'dps-agenda-addon' ) : __( 'Ver próximo dia', 'dps-agenda-addon' ) ) . '">';
 
         echo '&rarr;';
 
@@ -3368,7 +3850,7 @@ class DPS_Agenda_Addon {
 
                 echo '<h4>' . esc_html( $day_info['title'] ) . '</h4>';
 
-                echo '<p>' . sprintf( _n( '%d atendimento no periodo', '%d atendimentos no periodo', $day_total, 'dps-agenda-addon' ), $day_total ) . '</p>';
+                echo '<p>' . sprintf( _n( '%d atendimento no período', '%d atendimentos no período', $day_total, 'dps-agenda-addon' ), $day_total ) . '</p>';
 
                 echo '</div>';
 
@@ -3418,7 +3900,7 @@ class DPS_Agenda_Addon {
 
                 echo '<h4>' . esc_html( $day_info['title'] ) . '</h4>';
 
-                echo '<p>' . sprintf( _n( '%d atendimento no periodo', '%d atendimentos no periodo', $day_total, 'dps-agenda-addon' ), $day_total ) . '</p>';
+                echo '<p>' . sprintf( _n( '%d atendimento no período', '%d atendimentos no período', $day_total, 'dps-agenda-addon' ), $day_total ) . '</p>';
 
                 echo '</div>';
 
@@ -3468,7 +3950,7 @@ class DPS_Agenda_Addon {
 
                 echo '<h4>' . esc_html( $day_info['title'] ) . '</h4>';
 
-                echo '<p>' . sprintf( _n( '%d atendimento no periodo', '%d atendimentos no periodo', $day_total, 'dps-agenda-addon' ), $day_total ) . '</p>';
+                echo '<p>' . sprintf( _n( '%d atendimento no período', '%d atendimentos no período', $day_total, 'dps-agenda-addon' ), $day_total ) . '</p>';
 
                 echo '</div>';
 

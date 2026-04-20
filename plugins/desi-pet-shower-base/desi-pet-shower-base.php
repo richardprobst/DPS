@@ -26,12 +26,12 @@ define( 'DPS_BASE_PETS_PER_PAGE', 20 );
 
 /**
  * Verifica se o cache do DPS está desabilitado.
- * 
+ *
  * Para desabilitar o cache, defina a constante DPS_DISABLE_CACHE como true
  * no wp-config.php:
- * 
+ *
  *     define( 'DPS_DISABLE_CACHE', true );
- * 
+ *
  * @since 1.0.2
  * @return bool True se o cache está desabilitado, false caso contrário.
  */
@@ -116,7 +116,7 @@ DPS_Cache_Control::init();
 if ( ! function_exists( 'dps_load_textdomain' ) ) {
     /**
      * Carrega o text domain do plugin base.
-     * 
+     *
      * Usa hook 'init' conforme WordPress 6.7+ para garantir que strings
      * traduzíveis sejam carregadas corretamente antes de qualquer uso.
      */
@@ -159,16 +159,16 @@ class DPS_Base_Plugin {
         add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
         add_action( 'save_post_dps_pet', [ $this, 'clear_pets_cache' ], 10, 2 );
         add_action( 'delete_post', [ $this, 'maybe_clear_pets_cache_on_delete' ] );
-        
+
         // AJAX handlers para funcionalidades do formulário de agendamento
         add_action( 'wp_ajax_dps_render_appointment_form', [ 'DPS_Base_Frontend', 'ajax_render_appointment_form' ] );
         add_action( 'wp_ajax_dps_modal_save_appointment', [ 'DPS_Base_Frontend', 'ajax_save_appointment_modal' ] );
         add_action( 'wp_ajax_dps_get_available_times', [ 'DPS_Base_Frontend', 'ajax_get_available_times' ] );
         // Nota: Endpoint nopriv removido - busca de horários requer autenticação para prevenir enumeração de dados
-        
+
         // AJAX handler para salvar notas internas do cliente
         add_action( 'wp_ajax_dps_save_client_notes', [ 'DPS_Base_Frontend', 'ajax_save_client_notes' ] );
-        
+
         // Handler para exportação de clientes
         add_action( 'admin_post_dps_export_clients', [ $this, 'export_clients_csv' ] );
         // Handler para exportação de pets
@@ -484,7 +484,7 @@ class DPS_Base_Plugin {
 
         $enqueued = true;
 
-        // CSS — Design Tokens M3 Expressive (carregado antes de qualquer outro CSS do DPS)
+        // CSS — Design Tokens DPS Signature (carregado antes de qualquer outro CSS do DPS)
         wp_enqueue_style( 'dps-design-tokens', DPS_BASE_URL . 'assets/css/dps-design-tokens.css', [], self::get_asset_version( 'assets/css/dps-design-tokens.css' ) );
         wp_enqueue_style( 'dps-base-style', DPS_BASE_URL . 'assets/css/dps-base.css', [ 'dps-design-tokens' ], self::get_asset_version( 'assets/css/dps-base.css' ) );
         wp_enqueue_style( 'dps-form-validation', DPS_BASE_URL . 'assets/css/dps-form-validation.css', [], self::get_asset_version( 'assets/css/dps-form-validation.css' ) );
@@ -492,7 +492,7 @@ class DPS_Base_Plugin {
         wp_enqueue_script( 'dps-base-script', DPS_BASE_URL . 'assets/js/dps-base.js', [ 'jquery' ], self::get_asset_version( 'assets/js/dps-base.js' ), true );
         wp_enqueue_script( 'dps-appointment-form', DPS_BASE_URL . 'assets/js/dps-appointment-form.js', [ 'jquery' ], self::get_asset_version( 'assets/js/dps-appointment-form.js' ), true );
         wp_enqueue_script( 'dps-form-validation', DPS_BASE_URL . 'assets/js/dps-form-validation.js', [], self::get_asset_version( 'assets/js/dps-form-validation.js' ), true );
-        
+
         // Localização para o script de agendamento
         wp_localize_script( 'dps-appointment-form', 'dpsAppointmentData', [
             'ajaxurl'         => self::get_frontend_ajax_url(),
@@ -522,7 +522,7 @@ class DPS_Base_Plugin {
                 'tosaConsentConfirm'  => __( 'Este cliente não possui consentimento de tosa com máquina. Deseja continuar mesmo assim?', 'desi-pet-shower' ),
             ],
         ] );
-        
+
         wp_localize_script( 'dps-base-script', 'dpsBaseData', [
             'restUrl'     => esc_url_raw( rest_url( 'dps/v1/pets' ) ),
             'restNonce'   => wp_create_nonce( 'wp_rest' ),

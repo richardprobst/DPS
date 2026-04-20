@@ -182,13 +182,13 @@ trait DPS_Agenda_Renderer {
 
         $timestamp = strtotime( $selected_date );
         if ( ! $timestamp ) {
-            return __( 'Visao diaria', 'dps-agenda-addon' );
+            return __( 'Visão diária', 'dps-agenda-addon' );
         }
 
         if ( 'week' === $view ) {
             $date = DateTime::createFromFormat( 'Y-m-d', $selected_date );
             if ( ! $date ) {
-                return __( 'Visao semanal', 'dps-agenda-addon' );
+                return __( 'Visão semanal', 'dps-agenda-addon' );
             }
 
             $start = clone $date;
@@ -1157,7 +1157,7 @@ trait DPS_Agenda_Renderer {
         echo '<span class="dps-expand-panels-btn__icon">' . esc_html( $btn_icon ) . '</span>';
         echo '<span class="dps-expand-panels-btn__label">' . esc_html( $btn_label ) . '</span>';
         echo '<span class="dps-expand-panels-btn__label-short">' . esc_html( $btn_short ) . '</span>';
-        echo '<span class="dps-expand-panels-btn__arrow">▾</span>';
+        echo '<span class="dps-expand-panels-btn__arrow" aria-hidden="true">▾</span>';
         echo '</button>';
 
         foreach ( $summary as $item ) {
@@ -1544,7 +1544,7 @@ trait DPS_Agenda_Renderer {
         echo '<button type="button" class="dps-expand-panels-btn ' . esc_attr( $btn_class ) . '" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Abrir painel de Check-in / Check-out', 'dps-agenda-addon' ) . '" aria-expanded="false">';
         echo '<span class="dps-expand-panels-btn__label">' . esc_html( $btn_label ) . '</span>';
         echo '<span class="dps-expand-panels-btn__label-short">' . esc_html( $btn_label_short ) . '</span>';
-        echo '<span class="dps-expand-panels-btn__arrow" aria-hidden="true">+</span>';
+        echo '<span class="dps-expand-panels-btn__arrow" aria-hidden="true">▾</span>';
         echo '</button>';
 
         foreach ( $summary as $item ) :
