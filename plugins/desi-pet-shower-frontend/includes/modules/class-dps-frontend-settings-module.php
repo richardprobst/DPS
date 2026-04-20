@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Módulo de Configurações do Frontend Add-on (Fase 4).
  *
@@ -101,12 +101,12 @@ final class DPS_Frontend_Settings_Module {
         $modules = [
             'registration' => [
                 'label'       => __( 'Cadastro (v1)', 'dps-frontend-addon' ),
-                'description' => __( 'Assume shortcode [dps_registration_form] com wrapper M3 sobre o add-on legado.', 'dps-frontend-addon' ),
+                'description' => __( 'Assume shortcode [dps_registration_form] com wrapper DPS Signature sobre o add-on legado.', 'dps-frontend-addon' ),
                 'phase'       => __( 'Fase 2', 'dps-frontend-addon' ),
             ],
             'booking' => [
                 'label'       => __( 'Agendamento (v1)', 'dps-frontend-addon' ),
-                'description' => __( 'Assume shortcode [dps_booking_form] com wrapper M3 sobre o add-on legado.', 'dps-frontend-addon' ),
+                'description' => __( 'Assume shortcode [dps_booking_form] com wrapper DPS Signature sobre o add-on legado.', 'dps-frontend-addon' ),
                 'phase'       => __( 'Fase 3', 'dps-frontend-addon' ),
             ],
             'settings' => [
@@ -116,12 +116,12 @@ final class DPS_Frontend_Settings_Module {
             ],
             'registration_v2' => [
                 'label'       => __( 'Cadastro (v2 Nativo)', 'dps-frontend-addon' ),
-                'description' => __( 'Shortcode [dps_registration_v2] — formulário nativo M3 Expressive, independente do legado.', 'dps-frontend-addon' ),
+                'description' => __( 'Shortcode [dps_registration_v2] — formulário nativo DPS Signature, independente do legado.', 'dps-frontend-addon' ),
                 'phase'       => __( 'Fase 7', 'dps-frontend-addon' ),
             ],
             'booking_v2' => [
                 'label'       => __( 'Agendamento (v2 Nativo)', 'dps-frontend-addon' ),
-                'description' => __( 'Shortcode [dps_booking_v2] — wizard nativo M3 Expressive, independente do legado.', 'dps-frontend-addon' ),
+                'description' => __( 'Shortcode [dps_booking_v2] — wizard nativo DPS Signature, independente do legado.', 'dps-frontend-addon' ),
                 'phase'       => __( 'Fase 7', 'dps-frontend-addon' ),
             ],
         ];

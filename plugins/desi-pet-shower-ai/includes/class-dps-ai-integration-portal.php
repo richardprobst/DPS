@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Integração do Assistente de IA com o Portal do Cliente.
  *
@@ -59,7 +59,7 @@ class DPS_AI_Integration_Portal {
 
     /**
      * Renderiza o widget de IA no Portal do Cliente.
-     * 
+     *
      * Design v2.0.0: Layout moderno full-width integrado ao estilo das tabs.
      *
      * @param int $client_id ID do cliente logado.
@@ -310,10 +310,10 @@ class DPS_AI_Integration_Portal {
         // Salva resposta da IA (com sugestão, se aplicável)
         if ( $conversation_id && class_exists( 'DPS_AI_Conversations_Repository' ) ) {
             $repo = DPS_AI_Conversations_Repository::get_instance();
-            
+
             // Extrai metadados da resposta original
             $answer_data = $this->extract_answer_data( $answer );
-            
+
             $repo->add_message( $conversation_id, [
                 'sender_type'       => 'assistant',
                 'sender_identifier' => 'ai',
@@ -390,7 +390,7 @@ class DPS_AI_Integration_Portal {
 
         if ( ! empty( $conversations ) ) {
             $conversation = $conversations[0];
-            
+
             // Se a última atividade foi há menos de 24 horas, reutiliza
             $last_activity = strtotime( $conversation->last_activity_at );
             if ( ( current_time( 'timestamp' ) - $last_activity ) < DAY_IN_SECONDS ) {
@@ -424,7 +424,7 @@ class DPS_AI_Integration_Portal {
             return;
         }
 
-        // CSS do widget (depende dos design tokens M3)
+        // CSS do widget (depende dos design tokens DPS Signature)
         wp_enqueue_style(
             'dps-ai-portal',
             DPS_AI_ADDON_URL . 'assets/css/dps-ai-portal.css',

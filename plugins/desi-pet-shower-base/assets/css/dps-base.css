@@ -1,8 +1,8 @@
-/**
+﻿/**
  * Estilos do Base Plugin - DPS
  * Material Design 3 Expressive
  *
- * Este arquivo segue o sistema de design M3 Expressive do DPS:
+ * Este arquivo segue o sistema de design DPS Signature do DPS:
  * - Todas as cores via var(--dps-color-*) / var(--dps-*) tokens
  * - Formas via var(--dps-shape-*) tokens
  * - Elevação via var(--dps-elevation-*) tokens
@@ -29,7 +29,7 @@
  *
  * @package Desi_Pet_Shower_Base
  * @since 1.0.0
- * @version 2.0.0 Migração completa para Material 3 Expressive design tokens
+ * @version 2.0.0 Migração completa para DPS Signature design tokens
  */
 
 .dps-base-wrapper {
@@ -131,7 +131,7 @@
     .dps-base-wrapper .dps-nav-container .dps-nav-mobile-toggle {
         display: none !important;
     }
-    
+
     /* Garantir que abas estejam visíveis em desktop */
     .dps-base-wrapper .dps-nav-container .dps-nav {
         display: flex !important;
@@ -634,7 +634,7 @@
     text-decoration: none;
 }
 
-/* Link de Excluir com cor vermelha 
+/* Link de Excluir com cor vermelha
    Nota: Usa seletor de onclick como fallback para templates existentes.
    Preferir usar a classe .dps-action-delete quando possível. */
 .dps-table td a[onclick*="confirm"],
@@ -1270,7 +1270,7 @@
     .dps-table-wrapper .dps-table {
         min-width: 620px;
     }
-    
+
     /* Ajustar espaçamento em grupos de agendamentos */
     .dps-appointments-group {
         margin-top: 16px;
@@ -1278,12 +1278,12 @@
         padding: 14px;
         border-radius: var(--dps-shape-small);
     }
-    
+
     .dps-appointments-group h4 {
         font-size: 1.05rem;
         margin-bottom: 12px;
     }
-    
+
     /* Campo de busca em telas menores */
     .dps-appointments .dps-appointments-search {
         padding-left: 36px;
@@ -1297,33 +1297,33 @@
         overflow-x: hidden;
         max-width: 100%;
     }
-    
+
     .dps-section {
         overflow-x: hidden;
         max-width: 100%;
     }
-    
+
     .dps-form {
         max-width: 100%;
         overflow-x: hidden;
     }
-    
+
     .dps-surface {
         max-width: 100%;
         box-sizing: border-box;
     }
-    
+
     .dps-section-grid {
         max-width: 100%;
     }
-    
+
     /* === NAVEGAÇÃO RESPONSIVA - DROPDOWN EM MOBILE === */
     /* Mostrar o botão toggle em mobile - !important para garantir sobrescrita de temas */
     .dps-base-wrapper .dps-nav-container .dps-nav-mobile-toggle {
         display: block !important;
         margin-bottom: 0;
     }
-    
+
     /* Ocultar abas por padrão em mobile (apenas mostrar quando toggle está aberto) */
     /* !important para garantir que sobrescreva estilos base e de temas */
     .dps-base-wrapper .dps-nav-container .dps-nav {
@@ -1341,22 +1341,22 @@
         max-height: 300px;
         overflow-y: auto;
     }
-    
+
     /* Mostrar abas quando container está aberto */
     .dps-base-wrapper .dps-nav-container.is-open .dps-nav {
         display: flex !important;
     }
-    
+
     .dps-base-wrapper .dps-nav-container.is-open .dps-nav-mobile-toggle {
         border-radius: var(--dps-shape-extra-small) var(--dps-shape-extra-small) 0 0;
         border-bottom: none;
     }
-    
+
     .dps-base-wrapper .dps-nav-container .dps-nav li {
         margin: 0;
         width: 100%;
     }
-    
+
     .dps-base-wrapper .dps-nav-container .dps-nav .dps-tab-link {
         display: block;
         width: 100%;
@@ -1368,54 +1368,54 @@
         text-align: left;
         font-size: 15px;
     }
-    
+
     .dps-base-wrapper .dps-nav-container .dps-nav li:last-child .dps-tab-link {
         border-bottom: none;
     }
-    
+
     .dps-base-wrapper .dps-nav-container .dps-nav .dps-tab-link:hover,
     .dps-base-wrapper .dps-nav-container .dps-nav .dps-tab-link:focus {
         background: var(--dps-color-surface-container-low);
         color: var(--dps-color-primary);
     }
-    
+
     .dps-base-wrapper .dps-nav-container .dps-nav .dps-tab-link.active {
         background: var(--dps-color-primary-container);
         color: var(--dps-color-primary);
         font-weight: 500;
     }
     /* === FIM NAVEGAÇÃO RESPONSIVA === */
-    
+
     /* Ajustar padding das células em mobile */
     .dps-table th,
     .dps-table td {
         padding: 8px 6px;
         font-size: 0.875rem;
     }
-    
+
     /* Esconder colunas menos importantes em mobile */
     .dps-table .hide-mobile {
         display: none;
     }
-    
+
     /* Ajustar tabela dentro do wrapper */
     .dps-table-wrapper .dps-table {
         min-width: 600px;
         white-space: nowrap;
     }
-    
+
     /* Grid de formulários empilha em coluna única */
     .dps-form-row--2col,
     .dps-form-row--3col {
         grid-template-columns: 1fr;
     }
-    
+
     /* Ajustes para fieldsets */
     .dps-fieldset {
         padding: var(--dps-space-4);
         margin-bottom: var(--dps-space-4);
     }
-    
+
     /* Reduzir padding em inputs e selects para mobile */
     .dps-form input[type="text"],
     .dps-form input[type="email"],
@@ -1429,13 +1429,13 @@
         font-size: 16px; /* iOS: prevents auto-zoom on input focus (Apple HIG requires ≥16px) */
         min-height: 44px;
     }
-    
+
     /* Inputs de valor em mobile */
     .dps-form input.dps-input-money {
         width: 100%;
         max-width: 180px;
     }
-    
+
     /* Compactar grupos de agendamentos em mobile */
     .dps-appointments-group {
         padding: 12px;
@@ -1451,11 +1451,11 @@
         padding: 6px 4px;
         font-size: 0.8125rem;
     }
-    
+
     .dps-table-wrapper .dps-table {
         min-width: 450px;
     }
-    
+
     /* Reduzir ainda mais o espaçamento dos grupos */
     .dps-appointments-group {
         padding: 12px;
@@ -1463,23 +1463,23 @@
         margin-bottom: 12px;
         border-radius: var(--dps-shape-extra-small);
     }
-    
+
     .dps-appointments-group h4 {
         font-size: 0.95rem;
         margin-bottom: 10px;
         flex-wrap: wrap;
     }
-    
+
     .dps-appointments-group h4::before {
         font-size: 0.9em;
     }
-    
+
     .dps-group-badge {
         font-size: 0.7rem;
         min-width: 18px;
         height: 18px;
     }
-    
+
     /* Campo de busca em mobile pequeno */
     .dps-appointments .dps-appointments-search {
         padding: 10px 12px 10px 34px;
@@ -1487,13 +1487,13 @@
         background-size: 14px;
         background-position: 10px center;
     }
-    
+
     /* Título principal em mobile */
     .dps-appointments > h3 {
         font-size: 1.15rem;
         padding-bottom: 10px;
     }
-    
+
     .dps-appointments > h3::before {
         font-size: 1em;
     }
@@ -1525,7 +1525,7 @@
 
 /* === FORMULÁRIO DE AGENDAMENTO - LAYOUT MELHORADO === */
 
-/* Fieldsets padronizados — M3 field-group pattern */
+/* Fieldsets padronizados — DPS Signature field-group pattern */
 .dps-fieldset {
     border: none;
     border-left: 3px solid var(--dps-color-primary);
@@ -1562,7 +1562,7 @@
     margin: 0 0 var(--dps-space-4);
 }
 
-/* Labels de formulário — M3 Label Large */
+/* Labels de formulário — DPS Signature label scale */
 .dps-form label {
     display: block;
     font-size: var(--dps-typescale-label-large-size);
@@ -1641,7 +1641,7 @@
     font-weight: 500;
 }
 
-/* Checkbox melhorado — M3: inline-flex, 18px, accent-color, weight 400 */
+/* Checkbox melhorado — DPS Signature: inline-flex, 18px, accent-color, weight 400 */
 .dps-checkbox-label {
     display: inline-flex;
     align-items: center;
@@ -1673,7 +1673,7 @@
     flex: 1;
 }
 
-/* Upload de arquivo estilizado — M3 card-like container */
+/* Upload de arquivo estilizado — DPS Signature card-like container */
 .dps-file-upload {
     margin-bottom: var(--dps-space-4);
 }
@@ -1726,7 +1726,7 @@
     border: 1px solid var(--dps-color-outline-variant);
 }
 
-/* Botão de submit — M3 filled button (pill) */
+/* Botão de submit — DPS Signature primary action */
 .dps-submit-btn {
     display: inline-flex;
     align-items: center;
@@ -1767,7 +1767,7 @@
     transform: none;
 }
 
-/* Variante secundária — M3 outlined/tonal */
+/* Variante secundária — DPS Signature secondary action */
 .dps-submit-btn--secondary {
     background: var(--dps-color-surface-container-high);
     color: var(--dps-color-on-surface);
@@ -2097,11 +2097,11 @@
     .dps-tosa-card {
         padding: 16px;
     }
-    
+
     .dps-tosa-card__fields {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-tosa-title {
         font-size: 16px;
     }
@@ -2527,12 +2527,12 @@
     .dps-summary-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-form-actions {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .dps-form-actions .dps-btn {
         width: 100%;
     }
@@ -2542,7 +2542,7 @@
     .dps-pet-list {
         grid-template-columns: 1fr;
     }
-    
+
     /* Ajustar todos os inputs de formulário em mobile pequeno */
     .dps-form input[type="text"],
     .dps-form input[type="email"],
@@ -2553,64 +2553,64 @@
         font-size: 16px;
         padding: 10px 8px;
     }
-    
+
     /* Textarea também precisa de ajuste */
     .dps-form textarea {
         font-size: 16px;
         padding: 10px 8px;
     }
-    
+
     .dps-alert {
         padding: 12px 16px;
         font-size: 14px;
     }
-    
+
     .dps-submit-btn {
         width: 100%;
     }
-    
+
     .dps-conditional-field {
         padding-left: 12px;
     }
-    
+
     .dps-appointment-summary {
         padding: 16px;
         margin: 24px auto 16px auto;
     }
-    
+
     .dps-appointment-summary__list {
         grid-template-columns: 1fr;
         gap: 8px;
     }
-    
+
     /* Reduzir largura mínima dos labels em telas pequenas */
     .dps-appointment-summary__list strong {
         min-width: 100px;
         font-size: 13px;
     }
-    
+
     .dps-appointment-summary__list li {
         font-size: 13px;
         justify-content: flex-start;
     }
-    
+
     .dps-appointment-summary h3 {
         font-size: 16px;
     }
-    
+
     /* Inputs de valor em mobile pequeno */
     .dps-form input.dps-input-money {
         width: 100%;
         max-width: 150px;
         font-size: 16px; /* Evita zoom automático no iOS */
     }
-    
+
     /* Reduzir padding em fieldsets para aproveitar espaço */
     .dps-fieldset {
         padding: 12px;
         margin-bottom: 12px;
     }
-    
+
     /* Labels e textos menores em telas muito pequenas */
     .dps-fieldset__legend {
         font-size: 15px;
@@ -2627,16 +2627,16 @@
         padding: 8px;
         margin-top: 8px;
     }
-    
+
     .dps-pet-list::-webkit-scrollbar {
         width: 8px;
     }
-    
+
     .dps-pet-list::-webkit-scrollbar-thumb {
         background: var(--dps-color-outline-variant);
         border-radius: var(--dps-shape-extra-small);
     }
-    
+
     .dps-pet-list::-webkit-scrollbar-track {
         background: var(--dps-color-surface-container-low);
     }
@@ -2806,12 +2806,12 @@
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .dps-quick-action-group__content .dps-btn-action {
         width: 100%;
         justify-content: center;
     }
-    
+
     .dps-quick-action-group__content .dps-consent-link-container,
     .dps-quick-action-group__content .dps-profile-update-link-container {
         flex-direction: column;
@@ -3355,44 +3355,44 @@
     .dps-client-detail {
         padding: 0 12px;
     }
-    
+
     .dps-client-header {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .dps-client-header__title {
         order: -1;
         width: 100%;
     }
-    
+
     .dps-client-header__actions {
         width: 100%;
         justify-content: flex-start;
     }
-    
+
     .dps-client-summary {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .dps-pet-cards {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-info-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-client-section__header {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
-    
+
     .dps-client-section__actions {
         width: 100%;
     }
-    
+
     .dps-client-section__actions .button {
         flex: 1;
     }
@@ -3402,19 +3402,19 @@
     .dps-client-summary {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-summary-card {
         padding: 12px;
     }
-    
+
     .dps-pet-card__info {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-pet-card__actions {
         flex-direction: column;
     }
-    
+
     .dps-btn-action {
         width: 100%;
         justify-content: center;
@@ -3696,11 +3696,11 @@
     .dps-history-cards {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .dps-history-filters__row {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .dps-history-filter--checkbox {
         grid-column: 1 / -1;
         padding-top: 0;
@@ -3712,52 +3712,52 @@
         grid-template-columns: 1fr 1fr;
         gap: 12px;
     }
-    
+
     .dps-history-card {
         padding: 16px;
         gap: 12px;
     }
-    
+
     .dps-history-card__icon {
         width: 40px;
         height: 40px;
         font-size: 22px;
     }
-    
+
     .dps-history-card__value {
         font-size: 20px;
     }
-    
+
     .dps-history-card__label {
         font-size: 11px;
     }
-    
+
     .dps-history-toolbar {
         padding: 16px;
     }
-    
+
     .dps-history-toolbar__header {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
-    
+
     .dps-history-toolbar__actions {
         width: 100%;
     }
-    
+
     .dps-history-toolbar__actions .button {
         flex: 1;
     }
-    
+
     .dps-history-filters__row {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-history-quick-filters {
         flex-wrap: wrap;
     }
-    
+
     .dps-history-quick-btn {
         flex: 1 1 calc(50% - 8px);
         min-width: 80px;
@@ -3769,15 +3769,15 @@
     .dps-history-cards {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-history-card {
         padding: 14px;
     }
-    
+
     .dps-history-card__value {
         font-size: 18px;
     }
-    
+
     .dps-history-quick-btn {
         flex: 1 1 100%;
     }
@@ -4283,43 +4283,43 @@
         padding-top: 16px;
         font-size: 16px;
     }
-    
+
     .dps-list-toolbar {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .dps-list-toolbar .dps-search {
         min-width: 0;
         width: 100%;
     }
-    
+
     .dps-list-toolbar .button {
         width: 100%;
         text-align: center;
     }
-    
+
     .dps-actions {
         flex-wrap: nowrap;
     }
-    
+
     .dps-action-link {
         font-size: 12px;
         padding: 2px 2px;
     }
-    
+
     /* Botões de ação inline em mobile - manter tamanho adequado para toque */
     .dps-actions--inline .button {
         padding: 12px 20px;
         font-size: 15px;
         min-height: 44px; /* Área mínima de toque recomendada */
     }
-    
+
     /* Cards de estatísticas em 2 colunas para tablet */
     .dps-inline-stats--panel {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     /* Surface cards ajustados */
     .dps-surface {
         padding: 20px;
@@ -4337,76 +4337,76 @@
         overflow-x: hidden;
         box-sizing: border-box;
     }
-    
+
     .dps-section-title {
         font-size: 18px;
         margin-bottom: 16px;
         padding-bottom: 12px;
     }
-    
+
     .dps-list-header {
         font-size: 15px;
     }
-    
+
     .dps-size-badge,
     .dps-pets-badge {
         font-size: 11px;
         padding: 2px 6px;
     }
-    
+
     /* === CORREÇÕES DE RESPONSIVIDADE PARA MOBILE === */
-    
+
     /* Cards de estatísticas empilhados verticalmente em mobile */
     .dps-inline-stats--panel {
         grid-template-columns: 1fr;
         gap: 8px;
     }
-    
+
     .dps-inline-stats--panel li {
         flex-direction: row;
         padding: 12px 14px;
         max-width: 100%;
         box-sizing: border-box;
     }
-    
+
     .dps-inline-stats__value {
         font-size: 18px;
     }
-    
+
     .dps-inline-stats__label small {
         display: none;
     }
-    
+
     /* Ações de tabela mais compactas */
     .dps-action-separator {
         display: none;
     }
-    
+
     .dps-actions {
         flex-direction: column;
         gap: 4px;
         align-items: flex-start;
     }
-    
+
     .dps-action-link {
         padding: 4px 0;
         font-size: 12px;
     }
-    
+
     /* Surface cards com menos padding */
     .dps-surface {
         padding: 16px;
     }
-    
+
     .dps-surface__title {
         font-size: 14px;
     }
-    
+
     /* Lista de toolbar empilhada */
     .dps-list-toolbar {
         gap: 8px;
     }
-    
+
     .dps-list-toolbar .dps-search,
     .dps-list-toolbar .dps-filter-control,
     .dps-list-toolbar .button {
@@ -4479,12 +4479,12 @@
         gap: 16px;
         padding: 16px 20px;
     }
-    
+
     .dps-card__actions {
         width: 100%;
         justify-content: flex-start;
     }
-    
+
     .dps-card__body {
         padding: 16px 20px 20px;
     }
@@ -4494,11 +4494,11 @@
     .dps-card__header {
         padding: 12px 16px;
     }
-    
+
     .dps-card__body {
         padding: 12px 16px 16px;
     }
-    
+
     .dps-card__title {
         font-size: 18px;
     }
@@ -4610,7 +4610,7 @@
     .dps-action-link .dps-action-text {
         display: inline;
     }
-    
+
     .dps-action-link .dps-action-icon {
         display: none;
     }
@@ -4633,11 +4633,11 @@
     .dps-history-cards--five {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-action-link .dps-action-text {
         display: none !important;
     }
-    
+
     .dps-action-link .dps-action-icon {
         display: inline !important;
     }
@@ -4717,13 +4717,13 @@
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .dps-history-summary__content {
         flex-direction: column;
         align-items: flex-start;
         gap: 4px;
     }
-    
+
     .dps-history-summary__separator {
         display: none;
     }
@@ -4980,19 +4980,19 @@
     .dps-settings-wrapper {
         padding: 0 16px;
     }
-    
+
     .dps-settings-wrapper .dps-page-title {
         font-size: 22px;
     }
-    
+
     .dps-settings-section {
         padding: 16px;
     }
-    
+
     .dps-settings-section .dps-fieldset {
         padding: 16px;
     }
-    
+
     .dps-settings-section .dps-form-row input[type="text"],
     .dps-settings-section .dps-form-row input[type="password"],
     .dps-settings-section .dps-form-row input[type="email"],

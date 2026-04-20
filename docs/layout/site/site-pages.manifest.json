@@ -1,0 +1,137 @@
+{
+  "baseUrl": "https://desi.pet",
+  "generatedAt": "2026-04-17",
+  "publicationMode": "wordpress-page-html-plus-flatsome-additional-css",
+  "sharedCssFile": "docs/layout/site/flatsome/flatsome-additional-css.css",
+  "templates": [
+    {
+      "title": "Template de materia breaking news / blog",
+      "slug": "materia-breaking-news",
+      "htmlFile": "docs/layout/site/templates/materia-breaking-news/page-content.html",
+      "wrapperClass": "dps-site-page dps-site-page--materia",
+      "purpose": "base-editorial-reutilizavel-para-materias-informativas",
+      "status": "ready-for-reuse"
+    }
+  ],
+  "pages": [
+    {
+      "title": "Pagina inicial",
+      "route": "/",
+      "slug": "home",
+      "htmlFile": "docs/layout/site/pages/home/page-content.html",
+      "wrapperClass": "dps-site-page dps-site-page--home",
+      "pasteTarget": "WordPress page HTML editor",
+      "status": "ready-for-wordpress"
+    },
+    {
+      "title": "Materia piloto - Cinco sinais de que a rotina de banho do seu pet pode pedir um ajuste",
+      "route": "/materias/cinco-sinais-ajuste-rotina-banho/",
+      "slug": "materias/cinco-sinais-ajuste-rotina-banho",
+      "htmlFile": "docs/layout/site/pages/materias/cinco-sinais-ajuste-rotina-banho/page-content.html",
+      "wrapperClass": "dps-site-page dps-site-page--materia",
+      "pasteTarget": "WordPress page HTML editor",
+      "contentType": "editorial-article",
+      "status": "ready-for-wordpress"
+    },
+    {
+      "title": "Materia - Carrapatos e pulgas no cachorro: riscos para o pet, para a familia e o que fazer",
+      "route": "/materias/carrapatos-e-pulgas-no-cachorro-riscos-e-cuidados/",
+      "slug": "materias/carrapatos-e-pulgas-no-cachorro-riscos-e-cuidados",
+      "htmlFile": "docs/layout/site/pages/materias/carrapatos-e-pulgas-no-cachorro-riscos-e-cuidados/page-content.html",
+      "wrapperClass": "dps-site-page dps-site-page--materia",
+      "pasteTarget": "WordPress page HTML editor",
+      "contentType": "editorial-article",
+      "status": "ready-for-wordpress"
+    },
+    {
+      "title": "Quem somos",
+      "route": "/quem-somos/",
+      "slug": "quem-somos",
+      "htmlFile": "docs/layout/site/pages/quem-somos/page-content.html",
+      "wrapperClass": "dps-site-page dps-site-page--quem-somos",
+      "pasteTarget": "WordPress page HTML editor",
+      "status": "ready-for-wordpress"
+    },
+    {
+      "title": "Banho e tosa",
+      "route": "/banho-e-tosa/",
+      "slug": "banho-e-tosa",
+      "htmlFile": "docs/layout/site/pages/banho-e-tosa/page-content.html",
+      "wrapperClass": "dps-site-page dps-site-page--banho-e-tosa",
+      "pasteTarget": "WordPress page HTML editor",
+      "status": "ready-for-wordpress"
+    },
+    {
+      "title": "Perguntas frequentes",
+      "route": "/perguntas-frequentes/",
+      "slug": "perguntas-frequentes",
+      "htmlFile": "docs/layout/site/pages/perguntas-frequentes/page-content.html",
+      "wrapperClass": "dps-site-page dps-site-page--perguntas-frequentes",
+      "pasteTarget": "WordPress page HTML editor",
+      "status": "ready-for-wordpress"
+    },
+    {
+      "title": "Primeira visita",
+      "route": "/primeira-visita/",
+      "slug": "primeira-visita",
+      "htmlFile": "docs/layout/site/pages/primeira-visita/page-content.html",
+      "wrapperClass": "dps-site-page dps-site-page--primeira-visita",
+      "pasteTarget": "WordPress page HTML editor",
+      "status": "ready-for-wordpress"
+    },
+    {
+      "title": "TaxiDog",
+      "route": "/taxidog/",
+      "slug": "taxidog",
+      "htmlFile": "docs/layout/site/pages/taxidog/page-content.html",
+      "wrapperClass": "dps-site-page dps-site-page--taxidog",
+      "pasteTarget": "WordPress page HTML editor",
+      "status": "ready-for-wordpress"
+    },
+    {
+      "title": "Contato e localizacao",
+      "route": "/contato-e-localizacao/",
+      "slug": "contato-e-localizacao",
+      "htmlFile": "docs/layout/site/pages/contato-e-localizacao/page-content.html",
+      "wrapperClass": "dps-site-page dps-site-page--contato-e-localizacao",
+      "pasteTarget": "WordPress page HTML editor",
+      "status": "ready-for-wordpress"
+    },
+    {
+      "title": "Frequencia e cuidados",
+      "route": "/frequencia-e-cuidados/",
+      "slug": "frequencia-e-cuidados",
+      "htmlFile": "docs/layout/site/pages/frequencia-e-cuidados/page-content.html",
+      "wrapperClass": "dps-site-page dps-site-page--frequencia-e-cuidados",
+      "pasteTarget": "WordPress page HTML editor",
+      "status": "ready-for-wordpress"
+    },
+    {
+      "title": "Nossos diferenciais",
+      "route": "/nossos-diferenciais/",
+      "slug": "nossos-diferenciais",
+      "htmlFile": "docs/layout/site/pages/nossos-diferenciais/page-content.html",
+      "wrapperClass": "dps-site-page dps-site-page--nossos-diferenciais",
+      "pasteTarget": "WordPress page HTML editor",
+      "status": "ready-for-wordpress"
+    },
+    {
+      "title": "Regras e termos de atendimento",
+      "route": "/regras-e-termos-de-atendimento/",
+      "slug": "regras-e-termos-de-atendimento",
+      "htmlFile": "docs/layout/site/pages/regras-e-termos-de-atendimento/page-content.html",
+      "wrapperClass": "dps-site-page dps-site-page--regras-e-termos-de-atendimento",
+      "pasteTarget": "WordPress page HTML editor",
+      "status": "ready-for-wordpress"
+    },
+    {
+      "title": "Politica de privacidade",
+      "route": "/politica-de-privacidade/",
+      "slug": "politica-de-privacidade",
+      "htmlFile": "docs/layout/site/pages/politica-de-privacidade/page-content.html",
+      "wrapperClass": "dps-site-page dps-site-page--politica-de-privacidade",
+      "pasteTarget": "WordPress page HTML editor",
+      "status": "ready-for-wordpress"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Diretrizes para agentes do desi.pet by PRObst
 
-**Autor:** PRObst  
+**Autor:** PRObst
 **Site:** <a href="https://www.probst.pro">www.probst.pro</a>
 
 ## Filosofia (guardrails, não algemas)
@@ -92,7 +92,7 @@ Toda documentação adicional deve ser organizada nas seguintes subpastas:
 | `docs/forms/` | Formulários e inputs | Análises de UX, melhorias de campos |
 | `docs/implementation/` | Resumos de implementação | Sumários de features implementadas |
 | `docs/improvements/` | Melhorias gerais | Propostas e análises de melhoria |
-| `docs/layout/` | Layout e UX (com subpastas) | `admin/`, `agenda/`, `client-portal/`, `forms/` |
+| `docs/layout/` | Layout e UX (com subpastas) | `admin/`, `agenda/`, `client-portal/`, `forms/`, `site/` |
 | `docs/performance/` | Otimizações de performance | Análises e guias de performance |
 | `docs/refactoring/` | Refatoração de código | Planos, análises, diagramas |
 | `docs/review/` | Revisões de código e PRs | Verificações de PRs (ex: `pr-161/`) |
@@ -128,7 +128,7 @@ Antes de finalizar qualquer tarefa, execute validações proporcionais ao impact
 - **Refatoração/auditoria ampla de PHP:** em `tools/php`, executar `composer run ci` (ou `composer run phpcs`, `composer run phpstan`, `composer run psalm` individualmente).
 - **Plugin com `composer.json` e testes:** no diretório do plugin alterado, executar `composer test` quando o script existir.
 - **Mudança funcional relevante:** validação local no WordPress dos fluxos afetados.
-- **Mudança visual/layout:** seguir `docs/visual/` (padrão M3) + validar responsividade nos breakpoints definidos pelo sistema + registrar screenshots conforme `docs/screenshots/README.md`.
+- **Mudança visual/layout:** seguir `docs/visual/` (sistema visual `DPS Signature`) + validar responsividade nos breakpoints definidos pelo sistema + registrar screenshots conforme `docs/screenshots/README.md`.
 
 Sempre registrar no fechamento os comandos executados e o status (passou/falhou/limitação de ambiente).
 
@@ -216,11 +216,11 @@ Todos os plugins/add-ons DEVEM declarar:
 - Em mudanças visuais, tratar como defeito: overflow horizontal, conteúdo cortado, CTA inacessível, tabela sem estratégia mobile, modal que excede a viewport, targets de toque insuficientes e hierarquia comprometida entre breakpoints.
 - **Obrigatório:** qualquer tarefa de **layout/design/frontend** (criar, recriar, corrigir ou ajustar UI) **DEVE** seguir as especificações de `docs/visual/` (ver referências abaixo).
 
-Referências de design e layout (padrão visual **M3** do sistema):
+Referências de design e layout (sistema visual **DPS Signature** do sistema):
 - `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` — **instruções completas de design frontend** (metodologia, contextos de uso, acessibilidade, performance, checklist)
 - `docs/visual/VISUAL_STYLE_GUIDE.md` — paleta, componentes e espaçamento
 
-**Regra de comunicação obrigatória:** sempre que uma tarefa envolver visual/layout/frontend (criação, ajuste, correção, refatoração ou revisão), o agente **deve indicar explicitamente** que seguiu `docs/visual/` como fonte de verdade do padrão M3.
+**Regra de comunicação obrigatória:** sempre que uma tarefa envolver visual/layout/frontend (criação, ajuste, correção, refatoração ou revisão), o agente **deve indicar explicitamente** que seguiu `docs/visual/` como fonte de verdade do sistema visual `DPS Signature`.
 
 **Registro obrigatório para mudanças visuais:** qualquer alteração visual/layout/frontend deve ser documentada com:
 - descrição objetiva do que mudou (antes/depois, impacto e arquivos afetados);
@@ -229,9 +229,9 @@ Referências de design e layout (padrão visual **M3** do sistema):
 
 Sempre orientar e confirmar no fechamento/PR onde os prints e o documento de registro foram salvos.
 
-### Fluxo obrigatório para mudanças visuais (M3)
+### Fluxo obrigatório para mudanças visuais (DPS Signature)
 1. Consultar `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` antes de implementar.
-2. Implementar a mudança mantendo coerência com o padrão M3 e com responsividade real para small/medium/large screens.
+2. Implementar a mudança mantendo coerência com o sistema visual `DPS Signature` e com responsividade real para small/medium/large screens.
 3. Gerar capturas completas das telas alteradas.
 4. Salvar artefatos em `docs/screenshots/YYYY-MM-DD/`.
 5. Criar/atualizar o documento do dia (`SCREENSHOTS_YYYY-MM-DD.md`) com contexto, antes/depois, breakpoints validados e lista dos arquivos.

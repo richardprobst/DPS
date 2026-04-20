@@ -1,4 +1,4 @@
-# Plano de Implementação em Fases — Melhorias do Sistema DPS
+﻿# Plano de Implementação em Fases — Melhorias do Sistema DPS
 
 > **Data de criação:** 2026-02-18
 > **Baseado em:** Relatório de Sugestões de Melhoria para o Sistema DPS
@@ -293,10 +293,10 @@ Melhorar a experiência do usuário final no Portal do Cliente, tornando o fluxo
 
 **Ação:**
 - [x] Mapear todas as etapas do fluxo de agendamento (pedido de agendamento → data/período → detalhes → confirmação) — fluxo mapeado: modal com 3 etapas (Data/Pet → Detalhes → Revisão/Confirmar)
-- [x] Implementar componente de barra de progresso (`dps-progress-bar`) seguindo padrão M3 — círculos numerados com conectores, estados active/completed, labels por etapa
+- [x] Implementar componente de barra de progresso (`dps-progress-bar`) seguindo sistema visual DPS Signature — círculos numerados com conectores, estados active/completed, labels por etapa
 - [x] Integrar com os formulários existentes (CSS + JS) — `createRequestModal()` refatorado para wizard multi-etapa com navegação next/prev
 - [x] Adicionar texto "Passo X de Y" para acessibilidade (`role="progressbar"`, `aria-valuenow`, `aria-valuemax`, `aria-live="polite"`)
-- [x] Seguir `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` — tokens M3 (cores, espaçamento, shapes, motion), responsive, `prefers-reduced-motion`
+- [x] Seguir `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` — tokens DPS Signature (cores, espaçamento, shapes, motion), responsive, `prefers-reduced-motion`
 
 **Implementação:**
 - CSS: `.dps-progress-bar` com `.dps-progress-bar__step`, `.dps-progress-bar__circle`, `.dps-progress-bar__connector`, `.dps-progress-bar__label`, `.dps-step-panel`, `.dps-review-summary`
@@ -311,7 +311,7 @@ Melhorar a experiência do usuário final no Portal do Cliente, tornando o fluxo
 - [x] Mostrar mensagens inline de erro/sucesso abaixo de cada campo — `<span class="dps-field-error" role="alert">`
 - [x] Manter validação server-side como backup (nunca confiar apenas em client-side)
 - [x] Seguir padrão acessível: `aria-invalid`, `aria-describedby`, `aria-required`, `role="alert"` para mensagens de erro
-- [x] Adicionar CSS `.is-invalid`/`.is-valid` com cores M3 (error: `#ba1a1a`, success: `#1a7a3a`)
+- [x] Adicionar CSS `.is-invalid`/`.is-valid` com cores DPS Signature (error: `#ba1a1a`, success: `#1a7a3a`)
 - [x] Adicionar `inputmode="numeric"` no CEP, `max` no campo de data e peso
 
 **Nota:** Validação de CPF não implementada pois o campo não existe nos formulários do portal.
@@ -674,7 +674,7 @@ Fase 1 (Segurança Crítica)
 | Análise Portal | `docs/analysis/CLIENT_PORTAL_ADDON_DEEP_ANALYSIS.md` | Arquitetura do portal |
 | Tabs do Portal | `docs/analysis/CLIENT_PORTAL_TABS_STRUCTURE.md` | Estrutura de abas |
 | Análise do Plugin Base | `docs/analysis/BASE_PLUGIN_DEEP_ANALYSIS.md` | Arquitetura do núcleo |
-| Guia visual M3 | `docs/visual/VISUAL_STYLE_GUIDE.md` | Padrão visual obrigatório |
+| Guia visual DPS Signature | `docs/visual/VISUAL_STYLE_GUIDE.md` | Padrão visual obrigatório |
 | Design frontend | `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` | Instruções de implementação |
 | Referência de funções | `docs/FUNCTIONS_REFERENCE.md` | Todas as funções documentadas |
 

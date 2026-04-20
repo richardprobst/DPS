@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 /**
- * Component: Text Field (M3 Expressive)
+ * Component: Text Field (DPS Signature)
  *
  * @package DPS_Frontend_Addon
  * @since   2.0.0

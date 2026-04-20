@@ -127,6 +127,12 @@ Documentação de layout e UX, organizada em subpastas:
 - `AGENDA_VISUAL_COMPARISON.md` - Comparação visual de versões
 - `AGENDA_VISUAL_SUMMARY.md` - Resumo visual da agenda
 
+#### `/docs/layout/site`
+- `README.md` - Guia da área de páginas públicas para WordPress + Flatsome
+- `site-pages.manifest.json` - Manifesto central com mapeamento URL -> slug -> arquivo HTML local
+- `flatsome/flatsome-additional-css.css` - CSS compartilhado para colar no CSS adicional do tema
+- `pages/` - Páginas públicas editáveis organizadas por slug, cada uma com `page-content.html` pronto para colar no WordPress
+
 #### `/docs/layout/client-portal`
 - `CLIENT_PORTAL_IMPLEMENTATION_SUMMARY.md` - Resumo de implementação
 - `CLIENT_PORTAL_SUMMARY.md` - Sumário geral do portal
@@ -167,7 +173,7 @@ Análises e planos de refatoração de código.
 - `FRONTEND_ADDON_PHASED_ROADMAP.md` - Plano amplo e faseado para criação do add-on FRONTEND com compatibilidade, rollout e preparação para remoção futura de legado (Fase 1-6 concluídas)
 - `FRONTEND_DEPRECATION_POLICY.md` - Política formal de depreciação (janela mínima, comunicação, critérios de aceite, procedimento)
 - `FRONTEND_REMOVAL_TARGETS.md` - Lista de alvos de remoção com dependências, risco, esforço e plano de reversão
-- `FRONTEND_NATIVE_IMPLEMENTATION_PLAN.md` - **🆕 FASE 7:** Plano completo para implementação nativa (from-scratch) com páginas 100% novas, substituindo estratégia dual-run por código nativo Material 3 Expressive
+- `FRONTEND_NATIVE_IMPLEMENTATION_PLAN.md` - **🆕 FASE 7:** Plano completo para implementação nativa (from-scratch) com páginas 100% novas, substituindo estratégia dual-run por código nativo da fase visual anterior
 
 ### 📁 /docs/review
 
@@ -217,12 +223,12 @@ Documentação de segurança e auditoria.
 
 ### 📁 /docs/visual
 
-Guia de estilo visual (cores, tipografia, componentes) e instruções de design frontend.
+Sistema visual proprietário do DPS: identidade, tokens, componentes e instruções completas de design frontend.
 
 **Arquivos:**
-- `FRONTEND_DESIGN_INSTRUCTIONS.md` - **🆕 Instruções completas de design frontend** (metodologia, contextos de uso, tipografia, motion, acessibilidade, performance, checklists)
-- `VISUAL_STYLE_GUIDE.md` - Guia oficial de estilo visual minimalista
-- `registro-rebranding.md` - Registro do rebranding visual do sistema
+- `FRONTEND_DESIGN_INSTRUCTIONS.md` - **🆕 Instruções completas do sistema visual `DPS Signature`** (metodologia, contextos de uso, composição, tipografia, cor, motion, acessibilidade, performance e checklist)
+- `VISUAL_STYLE_GUIDE.md` - Guia oficial de estilo visual do `DPS Signature` com tokens, componentes e exemplos
+- `registro-rebranding.md` - Registro da transição da linguagem visual do sistema
 
 ## Documentos Centrais na Raiz do Repositório
 

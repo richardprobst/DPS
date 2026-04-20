@@ -1,665 +1,828 @@
-# Instruções de Design Frontend — DPS (Material 3 Expressive)
+# Instruções de Design Frontend — DPS Signature
 
-**Versão:** 2.0  
-**Última atualização:** 07/02/2026  
-**Base:** [Material 3 Expressive](https://m3.material.io/) do Google  
-**Complementa:** `VISUAL_STYLE_GUIDE.md` (tokens, componentes, paleta)
+**Versão:** 3.0
+**Última atualização:** 17/04/2026
+**Sistema visual ativo:** `DPS Signature`
+**Complementa:** `VISUAL_STYLE_GUIDE.md`
 
 ---
 
 ## 1. Propósito
 
-Este documento define as **instruções completas** para criação de interfaces frontend no sistema DPS, baseadas no **Material 3 Expressive** do Google. Deve ser consultado **sempre que** um agente (humano ou IA) criar ou modificar:
-- Páginas administrativas (admin dashboard)
-- Portal do cliente (client-facing)
-- Formulários públicos (agendamento, consentimento)
-- Componentes reutilizáveis (surfaces, cards, tabelas)
+Este documento define a fonte de verdade para qualquer trabalho de frontend, layout, UI e UX no ecossistema DPS.
 
-### Relação com documentos existentes
+Ele substitui o uso de referências genéricas de framework como direção visual principal. O DPS agora adota um sistema próprio, com identidade deliberadamente:
 
-| Documento | O que cobre | Quando consultar |
-|-----------|------------|-----------------|
-| Este documento | Metodologia, contextos de uso, decisões criativas, princípios M3 | **Sempre** — antes de codar qualquer frontend |
-| `VISUAL_STYLE_GUIDE.md` | Tokens, paleta de cores, tipografia, componentes CSS, formas, elevação | Implementação de estilos e componentes |
-| `dps-design-tokens.css` | CSS custom properties — implementação dos tokens M3 | Referência técnica durante codificação |
-| `ADMIN_LAYOUT_ANALYSIS.md` | Análise de problemas de layout admin | Refatoração de telas admin |
+- premium;
+- moderna;
+- minimalista;
+- sóbria;
+- reta;
+- editorial;
+- orientada por contraste, ritmo e hierarquia.
 
----
+Consulte este documento sempre que criar ou alterar:
 
-## 2. O que é Material 3 Expressive?
-
-O **Material 3 Expressive** é a evolução mais recente do Material Design do Google (2025), focada em:
-
-1. **Expressividade emocional** — interfaces que criam conexão com o usuário, não apenas funcionalidade
-2. **Usabilidade comprovada** — pesquisa UX mostrou identificação de ações-chave até 4× mais rápida
-3. **Formas orgânicas** — cantos mais arredondados, botões pill, shapes expressivos
-4. **Motion com personalidade** — transições baseadas em springs (física) que parecem naturais
-5. **Sistema de cor tonal** — hierarquia visual via tons de superfície em vez de sombras pesadas
-6. **Design tokens** — todas as decisões visuais centralizadas em variáveis reutilizáveis
-
-### Por que M3 Expressive no DPS?
-
-O DPS é um sistema para **pet shops** — um negócio que depende de **confiança**, **carinho** e **profissionalismo**. O M3 Expressive é ideal porque:
-
-- **Formas arredondadas** comunicam acolhimento e cuidado (como o próprio serviço pet)
-- **Cores tonais** criam atmosfera serena e profissional
-- **Motion expressivo** (bounce sutil) traz personalidade sem perder seriedade
-- **Tokens centralizados** garantem consistência visual em 17 plugins/add-ons
-- **Acessibilidade nativa** — contraste e `prefers-reduced-motion` incluídos por design
+- páginas públicas;
+- portal do cliente;
+- telas administrativas;
+- formulários;
+- componentes reutilizáveis;
+- demos visuais;
+- previews HTML;
+- CSS compartilhado;
+- documentação visual de novas features.
 
 ---
 
-## 3. Design Thinking — Antes de Codar
+## 2. O que é o DPS Signature
 
-Antes de escrever qualquer HTML/CSS/PHP, responda estas perguntas:
+`DPS Signature` é um sistema visual proprietário do DPS. Ele não tenta reproduzir Material, Bootstrap, shadcn, Ant ou qualquer outra linguagem pronta. A referência vem da identidade construída no próprio projeto.
 
-### 3.1 Contexto
+### 2.1 Tese visual
 
-- **Quem usa?** Staff (admin), cliente final (portal), visitante (público)?
-- **Qual o objetivo?** Gestão de dados, consulta rápida, cadastro, tomada de decisão?
-- **Qual o volume de informação?** Poucos campos vs. tabelas densas vs. dashboards?
-- **Qual dispositivo predominante?** Desktop (admin) vs. mobile-first (portal/público)?
+O sistema comunica:
 
-### 3.2 Direção Estética — M3 Expressive por Contexto
+- cuidado sem excesso;
+- sofisticação sem ostentação;
+- clareza sem frieza;
+- proximidade sem infantilização.
 
-O DPS utiliza **dois perfis expressivos**, definidos pelo contexto:
+### 2.2 Como isso aparece na interface
 
-| Contexto | Perfil M3 | Expressividade | Tokens |
-|----------|-----------|----------------|--------|
-| **Admin/Dashboard** | **Standard** — funcional, limpo, eficiente | Baixa — motion standard, formas consistentes, cores neutras | Easing standard, elevation 0-1 |
-| **Portal do Cliente** | **Expressive** — acolhedor, moderno, confiável | Média — motion com bounce, stagger de cards, cores tonais | Easing expressive, elevation 1-2 |
-| **Páginas Públicas** | **Expressive** — adaptável ao tema, identidade DPS | Média-alta — animações de entrada, formas expressivas | Font display, easing expressive |
-| **Formulários de Consentimento** | **Standard** — formal, limpo, legível | Baixa — sem animações, tipografia clara, contraste alto | Body large, elevation 0 |
+- base cromática clara e quente, com contraste alto;
+- massas escuras bem controladas em heros e áreas de destaque;
+- uma única cor de acento fria para orientação e foco;
+- verde reservado para ação real, especialmente WhatsApp;
+- cantos predominantemente retos;
+- bordas finas e honestas, em vez de relevos decorativos;
+- tipografia forte na hierarquia e contida no corpo;
+- pouca ornamentação;
+- espaçamento rigoroso;
+- blocos com função clara;
+- composições mais próximas de página editorial do que de mosaico de cards.
 
-### 3.3 Diferenciação — O que torna memorável?
+### 2.3 Regra central
 
-Para cada interface, identifique **um elemento diferenciador M3 Expressive**:
-
-- **Shape morphing** — um botão que muda de forma ao ser pressionado (ex.: ícone → chip)
-- **Stagger expressivo** — cards que entram em cascata com timing natural
-- **Container colorido** — usar `primary-container` ou `tertiary-container` para destacar
-- **Elevation responsiva** — card que ganha sombra ao hover, comunicando interatividade
-- **Feedback tátil visual** — ripple effect ou pulse ao completar uma ação
-
-**Princípio M3:** Expressividade a serviço da função. Um detalhe bem orquestrado vale mais que dez efeitos dispersos.
+Quando houver dúvida entre adicionar e remover, remova.
 
 ---
 
-## 4. Tipografia — M3 Expressive
+## 3. Princípios do sistema
 
-### 4.1 Admin (obrigatório)
+### 3.1 Contenção premium
+
+O DPS não usa excesso de cor, sombra, ícone, badge ou microefeito para parecer valioso. O valor percebido vem de:
+
+- proporção;
+- contraste;
+- silêncio visual;
+- alinhamento;
+- texto enxuto;
+- consistência.
+
+### 3.2 Geometria reta
+
+A geometria padrão do sistema é reta. Arredondamento não é proibido, mas é exceção funcional, não linguagem dominante.
+
+### 3.3 Cor com função
+
+Cor serve para orientar:
+
+- ação;
+- prioridade;
+- estado;
+- foco;
+- leitura de hierarquia.
+
+Cor não deve ser usada como decoração solta.
+
+### 3.4 Hierarquia editorial
+
+Cada seção precisa dizer, à primeira leitura:
+
+- o que é;
+- por que importa;
+- o que fazer em seguida.
+
+### 3.5 Ritmo acima de ornamento
+
+Um layout bonito no DPS depende mais de:
+
+- largura da coluna;
+- relação entre blocos;
+- respiro vertical;
+- cadência entre títulos e conteúdo;
+
+do que de gradiente, sombra ou shape.
+
+### 3.6 Marca antes do componente
+
+O sistema não deve parecer uma biblioteca de componentes. Deve parecer uma marca com interfaces coerentes.
+
+---
+
+## 4. Perfis de aplicação
+
+O sistema é único, mas sua intensidade muda conforme o contexto.
+
+| Contexto | Perfil | Característica dominante | Densidade | Ênfase visual |
+|---|---|---|---|---|
+| Páginas públicas | `Brand` | presença editorial e confiança | média | alta |
+| Portal do cliente | `Operational` | clareza, leitura rápida e orientação | média-alta | média |
+| Formulários e fluxos críticos | `Transactional` | foco, legibilidade e baixa distração | alta | baixa-média |
+| Admin interno | `Administrative` | controle, eficiência e estabilidade | alta | baixa |
+
+### 4.1 Perfil Brand
+
+Usar quando o objetivo for:
+
+- apresentar a marca;
+- converter;
+- explicar serviços;
+- construir confiança;
+- orientar a jornada comercial.
+
+Preferências:
+
+- hero forte;
+- composição mais aberta;
+- massas escuras e superfícies claras;
+- títulos curtos;
+- CTA evidente;
+- links auxiliares bem organizados.
+
+### 4.2 Perfil Operational
+
+Usar quando o usuário precisa:
+
+- consultar;
+- decidir;
+- navegar;
+- atualizar informações;
+- entender status.
+
+Preferências:
+
+- layout mais funcional;
+- títulos menos publicitários;
+- texto objetivo;
+- menos hero e menos “clima”;
+- mais estrutura e scanning.
+
+### 4.3 Perfil Transactional
+
+Usar quando o usuário precisa completar uma tarefa:
+
+- cadastro;
+- login;
+- agendamento;
+- aceite;
+- pagamento;
+- confirmação.
+
+Preferências:
+
+- distração mínima;
+- passos claros;
+- uma ação principal por tela;
+- menos variação cromática;
+- textos curtos e instrutivos.
+
+### 4.4 Perfil Administrative
+
+Usar no WordPress/admin e em interfaces densas de operação.
+
+Preferências:
+
+- menos impacto visual;
+- mais legibilidade;
+- consistência estrutural;
+- controle de densidade;
+- feedbacks claros;
+- interfaces sólidas e previsíveis.
+
+---
+
+## 5. Processo obrigatório antes de desenhar
+
+Antes de implementar, responda:
+
+### 5.1 Contexto
+
+- Quem usa essa tela?
+- O que essa pessoa precisa resolver?
+- A decisão é emocional, operacional ou transacional?
+- O uso principal é desktop, mobile ou ambos?
+- O que precisa ficar óbvio em 3 segundos?
+
+### 5.2 Visual thesis
+
+Escreva uma frase com:
+
+- humor;
+- materialidade;
+- energia.
+
+Exemplo:
+
+> “Clareza premium, com massa escura controlada, superfícies claras quentes e contraste seco.”
+
+### 5.3 Content plan
+
+Defina a ordem do conteúdo:
+
+1. hero ou entrada;
+2. bloco de orientação;
+3. profundidade;
+4. prova/confiança;
+5. fechamento/ação.
+
+### 5.4 Interaction thesis
+
+Defina no máximo 2 ou 3 comportamentos de movimento:
+
+- entrada do hero;
+- hover de links/CTA;
+- transição de painéis ou navegação.
+
+Se não houver motivo claro, não anime.
+
+---
+
+## 6. Regras de composição
+
+### 6.1 Um bloco, uma função
+
+Cada seção precisa ter apenas uma função principal:
+
+- explicar;
+- provar;
+- aprofundar;
+- converter;
+- orientar.
+
+Se uma seção faz duas coisas mal resolvidas, ela precisa ser dividida.
+
+### 6.2 Hero
+
+O hero precisa:
+
+- deixar a marca clara;
+- expor a proposta principal;
+- sustentar um CTA inequívoco;
+- evitar excesso de elementos paralelos.
+
+#### Hero: obrigatório
+
+- marca visível;
+- título curto e dominante;
+- uma linha de apoio;
+- CTA principal;
+- apoio operacional quando necessário.
+
+#### Hero: evitar
+
+- 4 ou 5 botões grandes competindo;
+- cards aleatórios flutuando;
+- prova social genérica;
+- excesso de pills;
+- slogan e subtítulo dizendo a mesma coisa.
+
+### 6.3 Seções
+
+A sequência preferencial para páginas públicas é:
+
+1. impacto;
+2. orientação;
+3. serviços ou proposta;
+4. confiança;
+5. dúvidas;
+6. ação final.
+
+### 6.4 Grids
+
+Use grid para organizar, não para “encher”.
+
+Preferências:
+
+- 2 colunas quando há contraste entre conteúdo e apoio;
+- 3 colunas para fatos curtos;
+- 1 coluna quando o texto exige ritmo;
+- destaque assimétrico para um item principal quando fizer sentido.
+
+### 6.5 Cardless by default
+
+No DPS, não se deve empilhar cards por hábito.
+
+Use card apenas quando houver necessidade real de:
+
+- isolar um conteúdo;
+- reforçar clicabilidade;
+- separar uma unidade de leitura;
+- estruturar um bloco legal, FAQ, contato ou formulário.
+
+### 6.6 Espaçamento
+
+O sistema depende de respiro preciso.
+
+Regras:
+
+- evitar blocos “colados”;
+- evitar vazios excessivos sem função;
+- manter consistência entre seções equivalentes;
+- aumentar respiro antes de títulos importantes;
+- reduzir gap em áreas de leitura utilitária.
+
+---
+
+## 7. Tipografia
+
+### 7.1 Famílias oficiais
+
+Use no máximo duas famílias:
+
+- `Sora` para display e títulos;
+- `Manrope` para texto, UI, labels e apoio.
+
+Fallback:
 
 ```css
-/* Stack do sistema — sem fontes externas */
-font-family: var(--dps-font-system);
+font-family: "Sora", "Segoe UI", sans-serif;
+font-family: "Manrope", "Segoe UI", sans-serif;
 ```
 
-Usar **exclusivamente** a stack do sistema no admin. A escala tipográfica M3 (Display → Label) se aplica nos tamanhos, não nas fontes.
+### 7.2 Papel de cada fonte
 
-### 4.2 Portal do Cliente e Páginas Públicas
+`Sora`:
+
+- títulos;
+- hero headings;
+- títulos de seção;
+- chamadas curtas.
+
+`Manrope`:
+
+- parágrafos;
+- labels;
+- botões;
+- FAQs;
+- painéis operacionais;
+- tabelas;
+- conteúdo legal.
+
+### 7.3 Pesos recomendados
+
+- `400` para corpo;
+- `500` para UI e subtítulos;
+- `600` para títulos médios;
+- `700` apenas em headlines realmente dominantes.
+
+Evite bold pesado em excesso. O sistema precisa parecer firme, não agressivo.
+
+### 7.4 Escala recomendada
+
+| Papel | Uso | Faixa sugerida |
+|---|---|---|
+| Display XL | hero principal | `56–88px` |
+| Display L | heros internos | `40–64px` |
+| Heading L | título de seção | `28–40px` |
+| Heading M | subtítulo forte | `22–28px` |
+| Body L | subtítulo/apoio | `18–20px` |
+| Body M | texto padrão | `16–18px` |
+| Body S | apoio e detalhe | `14–15px` |
+| Label | botões, kicker, meta | `11–14px` |
+
+### 7.5 Regras tipográficas
+
+- H1 único por página;
+- kicker sempre curto e em caixa alta;
+- evitar linhas muito longas;
+- preferir blocos de texto de 45 a 75 caracteres por linha;
+- usar `text-wrap: balance` em títulos quando possível;
+- evitar repetição de palavras entre kicker, título e subtítulo.
+
+---
+
+## 8. Cor
+
+### 8.1 Base cromática oficial
+
+| Papel | Valor | Uso |
+|---|---|---|
+| Ink | `#11161C` | texto principal, títulos, massa escura |
+| Petrol | `#173042` | fundo institucional, estrutura, links fortes |
+| Petrol Deep | `#0D141B` | hero, contraste máximo |
+| Paper | `#FFF9F1` | fundo principal |
+| Bone | `#F3ECE1` | superfícies secundárias |
+| Line | `#D9CDBD` | bordas e divisores |
+| Sky Accent | `#8FD6F4` | acento frio e foco |
+| Sky Accent Soft | `#E8F6FC` | fundo de destaque suave |
+| Action Green | `#1F8C57` | ação real, especialmente WhatsApp |
+
+### 8.2 Estratégia de uso
+
+- `Ink`, `Petrol`, `Paper` e `Bone` sustentam quase toda a interface;
+- `Sky Accent` entra pouco e com intenção;
+- `Action Green` fica reservado para ação;
+- as cores da logo não devem contaminar toda a UI.
+
+### 8.3 Regra de prioridade cromática
+
+1. neutros estruturam;
+2. azul orienta;
+3. verde converte.
+
+### 8.4 O que evitar
+
+- amarelo e vermelho da logo espalhados na interface;
+- múltiplas cores vibrantes competindo;
+- fundo branco frio puro como padrão principal;
+- gradientes saturados;
+- roxo genérico de UI pronta.
+
+---
+
+## 9. Formas, bordas e superfícies
+
+### 9.1 Forma padrão
+
+O padrão é reto.
+
+Use:
+
+- `0px` como shape dominante;
+- `2px` ou `4px` apenas em casos funcionais e discretos;
+- cantos suaves apenas se houver motivo claro de ergonomia, nunca como linguagem dominante.
+
+### 9.2 Borda
+
+O DPS usa borda para estruturar leitura.
+
+Preferências:
+
+- `1px solid` com tons de `Line`;
+- divisores finos;
+- top border ou left border apenas quando fizer sentido semântico.
+
+### 9.3 Superfícies
+
+Superfícies devem parecer materiais leves e claros, não caixas pesadas.
+
+Use:
+
+- fundo principal em `Paper`;
+- containers em `Paper` ou `Bone`;
+- contraste escuro apenas em áreas de ênfase;
+- sombra suave e rara.
+
+### 9.4 Sombras
+
+Sombra existe, mas não deve ser a linguagem principal.
+
+Use sombra apenas para:
+
+- hero;
+- elevação real;
+- overlay;
+- CTA muito importante;
+- componentes sobre fundo muito plano.
+
+---
+
+## 10. Motion
+
+### 10.1 Filosofia
+
+O sistema usa motion discreto e seco.
+
+Não usar:
+
+- bounce;
+- overshoot;
+- parallax ornamental;
+- animar tudo na entrada;
+- hover chamando mais atenção que o conteúdo.
+
+### 10.2 Motion permitido
+
+- fade/translate curto na entrada;
+- hover com leve deslocamento ou mudança de borda;
+- destaque de foco;
+- transição simples de expansão/colapso.
+
+### 10.3 Duração
+
+- rápida: `160–180ms`;
+- média: `220–260ms`;
+- rara: até `320ms`.
+
+### 10.4 Easing
+
+Preferir:
 
 ```css
-/* Fontes expressivas com personalidade */
---dps-font-display: 'Outfit', var(--dps-font-system);
---dps-font-body:    'Source Sans 3', var(--dps-font-system);
+ease;
+cubic-bezier(0.22, 1, 0.36, 1);
 ```
 
-**Regras M3:**
-- **Máximo 2 famílias** — uma display (títulos) + uma body (texto)
-- **Apenas pesos 400 e 500** — evitar bold (700) no M3 Expressive
-- **`font-display: swap`** — performance e fallback garantidos
-- **Fontes self-hosted ou Google Fonts** — nunca CDNs sem fallback
+### 10.5 Reduced motion
 
-**Fontes recomendadas para o contexto pet:**
-
-```css
-/* Padrão DPS — Moderno e acolhedor */
-'Outfit' (display) + 'Source Sans 3' (body)
-
-/* Alternativa 1 — Amigável */
-'Nunito' (display) + 'Lato' (body)
-
-/* Alternativa 2 — Profissional */
-'DM Sans' (display) + 'Work Sans' (body)
-```
-
-### 4.3 Escala de Uso
-
-Consultar o mapeamento prático completo no `VISUAL_STYLE_GUIDE.md`, seção 3.3.
-
-- **H1 único** por página — Headline Large (32px)
-- **H2 para seções** — Headline Small (24px)
-- **H3 para subseções** — Title Large (22px)
-- **Corpo** — Body Medium (14px)
-- **Auxiliar** — Body Small (12px)
-- **Botões e labels** — Label Large (14px, weight 500)
+Toda animação precisa respeitar `prefers-reduced-motion`.
 
 ---
 
-## 5. Cor e Tema — M3 Expressive
+## 11. Estratégia de componentes
 
-### 5.1 Sistema de Papéis de Cor (Color Roles)
+### 11.1 CTA principal
 
-O M3 Expressive organiza cores em **papéis semânticos**, não em valores fixos:
+Precisa:
 
-```
-Primary      → ações principais (botões, links, FABs)
-Secondary    → ações de suporte (filtros, chips)
-Tertiary     → destaques expressivos (badges, acentos)
-Error        → erros e ações destrutivas
-Success      → confirmações (extensão DPS)
-Warning      → pendências (extensão DPS)
-Surface      → fundos e containers (com variação tonal)
-Outline      → bordas e divisores
-```
+- ser imediatamente visível;
+- usar contraste claro;
+- não competir com 3 outras ações equivalentes;
+- ter área de clique confortável;
+- usar verde apenas quando a ação for realmente de contato/agendamento.
 
-Cada papel tem 4 tokens: `color`, `on-color`, `color-container`, `on-color-container`.
+### 11.2 CTA secundário
 
-### 5.2 Estratégia de Cor M3
+Preferir:
 
-1. **Dominância tonal** — superfícies em tons neutros (`surface-container-*`), cor apenas em ações e status
-2. **Pareamento obrigatório** — `on-primary` sobre `primary`, nunca combinar arbitrariamente
-3. **Containers para destaque suave** — usar `primary-container` em vez de `primary` para cards destacados
-4. **Contraste WCAG AA** — garantido pelo sistema de pareamento M3
-5. **Tema escuro** — todos os tokens possuem variante dark (ver `dps-design-tokens.css`)
+- link forte;
+- botão fantasma;
+- outlined seco;
+- menos peso que o CTA principal.
 
-### 5.3 O que evitar
+### 11.3 Links de jornada
 
-- ❌ Hex literais no código — sempre `var(--dps-color-*)`
-- ❌ Mais de 3 papéis de cor por tela (excluindo neutros e status)
-- ❌ Cores sem pareamento (`primary` sem `on-primary`)
-- ❌ Gradientes em containers (reservar para casos especiais de portal)
-- ❌ Opacidade que comprometa contraste
+Blocos de caminho precisam parecer:
 
----
+- organizados;
+- legíveis;
+- consistentes;
+- parte da narrativa.
 
-## 6. Formas — M3 Expressive
+Evite que pareçam uma grade aleatória de promoções.
 
-### 6.1 Filosofia
+### 11.4 FAQ
 
-O M3 Expressive usa formas **mais arredondadas e orgânicas** que transmitem suavidade:
+FAQ no DPS deve:
 
-- **Botões pill** (totalmente arredondados) — `border-radius: var(--dps-shape-full)`
-- **Cards com cantos generosos** — `border-radius: var(--dps-shape-medium)` (12px)
-- **Chips expressivos** — `border-radius: var(--dps-shape-small)` (8px)
-- **Diálogos acolhedores** — `border-radius: var(--dps-shape-extra-large)` (28px)
+- ser rapidamente escaneável;
+- separar bem pergunta de resposta;
+- manter altura coerente;
+- evitar grandes blocos de texto.
 
-### 6.2 Regras
+### 11.5 Blocos legais
 
-1. **Sempre via token** — nunca usar `border-radius: 8px` literal, usar `var(--dps-shape-small)`
-2. **Consistência por tipo** — todos os botões com o mesmo shape, todos os cards com o mesmo shape
-3. **Hierarquia via forma** — elementos mais importantes podem ter formas mais expressivas
-4. **Sem misturar** — não combinar cantos sharp e round no mesmo componente
+Páginas legais devem ter:
 
-### 6.3 Transição do Sistema Anterior
+- ritmo mais calmo;
+- largura de leitura controlada;
+- menos ornamento;
+- destaque claro para títulos e subtítulos;
+- navegação complementar no final.
 
-| Antes (v1.x) | Agora (M3 Expressive) |
-|-------------|----------------------|
-| `border-radius: 4px` (containers) | `var(--dps-shape-medium)` → 12px |
-| `border-radius: 8px` (botões) | `var(--dps-shape-full)` → pill |
-| Sem variação | Escala completa: 0–4–8–12–16–28–pill |
+### 11.6 Formulários
 
----
+Formulários devem priorizar:
 
-## 7. Elevação — M3 Expressive
+- clareza;
+- ordem;
+- feedback;
+- espaçamento;
+- labels permanentes.
 
-### 7.1 Elevação Tonal (Preferida)
+Evitar:
 
-O M3 usa **variação tonal** para criar profundidade, não sombras:
+- placeholder como única label;
+- bordas exageradas;
+- campos com muitos estilos concorrentes.
 
-```
-Mais elevado → surface-container-highest (mais escuro)
-                ↕
-Menos elevado → surface (mais claro)
-```
+### 11.7 Tabelas e dados
 
-### 7.2 Quando usar sombras
+Em interfaces operacionais:
 
-Sombras são **complementares** à elevação tonal:
-
-| Componente | Elevação Tonal | Sombra |
-|-----------|---------------|--------|
-| Página (fundo) | `surface` | Nenhuma |
-| Card estático | `surface-container-lowest` | Nenhuma ou `elevation-1` |
-| Card interativo | `surface-container-low` | `elevation-1` → `elevation-2` no hover |
-| Menu/dropdown | `surface-container` | `elevation-2` |
-| Diálogo/modal | `surface-container-high` | `elevation-3` |
-| FAB | `primary-container` | `elevation-3` → `elevation-4` no hover |
-| Tooltip | `inverse-surface` | `elevation-2` |
-
-### 7.3 Admin vs. Portal
-
-- **Admin**: elevação tonal mínima, sombras apenas em menus e tooltips
-- **Portal**: elevação expressiva, cards podem usar `elevation-1` com hover para `elevation-2`
+- use divisores claros;
+- preserve hierarquia tipográfica;
+- reduza ruído decorativo;
+- trate densidade como parte do UX.
 
 ---
 
-## 8. Motion — M3 Expressive
+## 12. Tom de voz e conteúdo
 
-### 8.1 Filosofia M3
+O DPS adota a combinação:
 
-Motion no M3 Expressive é **baseado em springs** (molas físicas), criando transições que:
-- **Respondem** — movimento começa imediatamente ao input
-- **São naturais** — overshoot sutil que imita física real
-- **Comunicam** — feedback, orientação e continuidade
+- `Afeto Organizado`;
+- `Premium Sereno`.
 
-### 8.2 Admin (Standard)
+Isso significa:
 
-```css
-/* Apenas transições básicas em estados interativos */
-.dps-admin-element {
-    transition: background var(--dps-motion-hover);
-    /* → 200ms cubic-bezier(0.2, 0, 0, 1) */
-}
+- linguagem humana;
+- frase curta;
+- promessa contida;
+- segurança sem rigidez;
+- proximidade sem excesso de entusiasmo.
 
-/* NÃO usar no admin: */
-/* ❌ Animações de entrada de página */
-/* ❌ Stagger effects */
-/* ❌ Scroll-triggered animations */
-/* ❌ Shape morphing */
-```
+### 12.1 O texto deve soar
 
-### 8.3 Portal (Expressive)
+- claro;
+- calmo;
+- criterioso;
+- confiável.
 
-```css
-/* Entrada de cards com bounce sutil */
-.dps-portal-card {
-    animation: dps-enter-from-below
-               var(--dps-motion-duration-medium-2)
-               var(--dps-motion-easing-emphasized-decelerate)
-               both;
-}
+### 12.2 O texto não deve soar
 
-/* Stagger para lista de cards */
-.dps-portal-card:nth-child(1) { animation-delay: 0ms; }
-.dps-portal-card:nth-child(2) { animation-delay: 50ms; }
-.dps-portal-card:nth-child(3) { animation-delay: 100ms; }
+- infantil;
+- genérico;
+- publicitário demais;
+- corporativo frio;
+- autoexplicação de layout.
 
-/* Hover expressivo em cards */
-.dps-portal-card:hover {
-    box-shadow: var(--dps-elevation-2);
-    transform: translateY(-2px);
-    transition: all var(--dps-motion-duration-short-4)
-                var(--dps-motion-easing-expressive-fast);
-}
+### 12.3 Remover sempre
 
-/* Feedback de ação concluída */
-@keyframes dps-success-pulse {
-    0%   { box-shadow: 0 0 0 0 rgba(26, 122, 58, 0.3); }
-    70%  { box-shadow: 0 0 0 10px rgba(26, 122, 58, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(26, 122, 58, 0); }
-}
-```
-
-### 8.4 Regras de Implementação
-
-1. **CSS puro** — `@keyframes` e `transition`. Sem bibliotecas JS de animação no WP admin.
-2. **`prefers-reduced-motion`** — **obrigatório**. Já incluído globalmente no `dps-design-tokens.css`.
-3. **Duração máxima** — 500ms para micro-interações, 800ms para transições de página.
-4. **Um momento orquestrado** — em portal, investir em **uma** animação expressiva bem feita.
-5. **Easing por contexto** — standard para admin, expressive para portal.
+- texto de wireframe;
+- texto que descreve o próprio componente;
+- repetição entre seções;
+- frases longas sem ganho real.
 
 ---
 
-## 9. State Layers — M3 Expressive
+## 13. Responsividade
 
-O M3 Expressive usa **camadas de opacidade** sobre a cor do componente para comunicar estados interativos, em vez de mudanças de cor bruscas.
+### 13.1 Breakpoints obrigatórios
 
-### 9.1 Como funciona
+Validar sempre:
 
-```
-Estado normal:  cor base
-Hover:          cor base + 8% da cor de conteúdo
-Focus:          cor base + 10% da cor de conteúdo
-Pressed:        cor base + 10% da cor de conteúdo
-Disabled:       38% de opacidade no conteúdo, 12% no container
-```
+- `375px`
+- `600px`
+- `840px`
+- `1200px`
+- `1920px`
 
-### 9.2 Implementação
+### 13.2 O que validar
 
-```css
-/* State layer via pseudo-elemento (M3 pattern) */
-.dps-interactive {
-    position: relative;
-    overflow: hidden;
-}
+- overflow horizontal;
+- corte de conteúdo;
+- peso visual do hero;
+- ordem dos blocos;
+- densidade de grid;
+- tamanho de CTA;
+- legibilidade de títulos;
+- equilíbrio entre texto e superfície;
+- targets de toque.
 
-.dps-interactive::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: currentColor;
-    opacity: 0;
-    transition: opacity var(--dps-motion-hover);
-    pointer-events: none;
-}
+### 13.3 Estratégia mobile
 
-.dps-interactive:hover::before    { opacity: 0.08; }
-.dps-interactive:focus-visible::before { opacity: 0.10; }
-.dps-interactive:active::before   { opacity: 0.10; }
-```
+No mobile:
 
-### 9.3 Quando usar
-
-- **Botões** — state layer nativo (via background color change ou pseudo-elemento)
-- **Cards interativos** — hover + pressed state layers
-- **Chips** — hover e selected states
-- **Linhas de tabela** — hover state layer sutil
+- reduzir competição visual;
+- empilhar conteúdos por prioridade;
+- manter CTA visível;
+- simplificar grids;
+- não forçar colunas pequenas demais.
 
 ---
 
-## 10. Composição Espacial e Layout
+## 14. Acessibilidade
 
-### 10.1 Admin — Cards Empilhados
+Obrigatório:
 
-O admin usa **cards empilhados verticalmente** (`.dps-surface`). Padrão M3 Expressive:
+- contraste AA;
+- `focus-visible` perceptível;
+- ordem semântica correta;
+- H1 único;
+- áreas de toque adequadas;
+- motion opcional para quem reduz animação;
+- texto nunca dependente só de cor para ser entendido.
 
-```css
-.dps-section-stack {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dps-space-6); /* 24px */
-}
-```
+Boas práticas:
 
-### 10.2 Portal — Grid Expressivo
-
-```css
-/* Grid responsivo M3 — auto-fit com mínimo generoso */
-.dps-portal-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--dps-space-6);
-    padding: var(--dps-space-8); /* padding generoso no portal */
-}
-```
-
-### 10.3 Regras Universais
-
-- **Mobile-first** — CSS base para mobile, expandir com `min-width`
-- **Breakpoints M3** — compact (0), medium (600px), expanded (840px), large (1200px)
-- **Container** — `max-width: 1200px` em páginas públicas
-- **Espaço negativo** — portal usa padding `32px` vs. admin `20px`
-- **Touch targets** — `48×48px` mínimo em mobile (M3 Expressive recomenda 48px)
-- **Responsividade como critério de aceite** — toda UI deve funcionar de forma intencional em telas pequenas, médias e grandes; não deixar ajustes de layout para “depois”
-- **Baseline de validação** — revisar no mínimo em `375px`, `600px`, `840px`, `1200px` e `1920px`, mesmo quando a tarefa parecer “desktop-first”
-- **Falhas bloqueadoras** — scroll horizontal, conteúdo cortado, CTA fora da viewport, modal maior que a tela, tabela sem estratégia mobile e alvo de toque insuficiente devem ser tratados como defeito
+- links sublinhados em textos corridos;
+- labels permanentes;
+- `aria-label` quando a ação não for explícita;
+- estados visuais consistentes entre mouse, teclado e toque.
 
 ---
 
-## 11. Fundos e Detalhes Visuais
+## 15. Performance e implementação
 
-### 11.1 Admin
-
-```css
-/* Fundo: surface puro, sem texturas */
-background: var(--dps-color-surface);
-
-/* Separação: bordas outline-variant e espaçamento */
-border: 1px solid var(--dps-color-outline-variant);
-```
-
-### 11.2 Portal do Cliente
-
-```css
-/* Fundo com gradiente tonal sutil (M3 Expressive) */
-.dps-portal-wrapper {
-    background: var(--dps-color-surface);
-    background-image:
-        radial-gradient(ellipse at 20% 50%,
-            rgba(11, 107, 203, 0.03) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%,
-            rgba(26, 122, 58, 0.03) 0%, transparent 50%);
-}
-
-/* Separador decorativo M3 */
-.dps-portal-divider {
-    height: 1px;
-    background: linear-gradient(
-        to right,
-        transparent,
-        var(--dps-color-outline-variant) 20%,
-        var(--dps-color-outline-variant) 80%,
-        transparent
-    );
-    margin: var(--dps-space-8) 0;
-}
-```
-
-### 11.3 Limites
-
-- Texturas e gradientes **apenas** em containers raiz do portal
-- Opacidade máxima de decoração: `0.05`
-- Admin: **nunca** texturas, gradientes ou padrões de fundo
-- Sem grain, noise, ou efeitos pesados
+- carregar poucas fontes e poucos pesos;
+- evitar dependências visuais desnecessárias;
+- preferir CSS simples e robusto;
+- limitar blur e sombras pesadas;
+- evitar bibliotecas visuais inteiras para resolver pouco;
+- implementar tokens e padrões reutilizáveis.
 
 ---
 
-## 12. Acessibilidade — M3 Expressive
+## 16. Anti-padrões
 
-### 12.1 Requisitos Obrigatórios (todos os contextos)
+Nunca fazer:
 
-- **Contraste WCAG AA** — 4.5:1 para texto, 3:1 para gráficos. O sistema de pareamento M3 (`on-*` sobre `*`) garante isso por design.
-- **Focus visible** — outline de 2px em cor primary com offset de 2px:
-  ```css
-  :focus-visible {
-      outline: 2px solid var(--dps-color-primary);
-      outline-offset: 2px;
-  }
-  ```
-- **Semântica HTML** — `<button>`, `<nav>`, `<main>`, `<section>`, `<fieldset>`, `<dialog>`
-- **Labels** — todo input com `<label>` associado (`for`/`id`)
-- **ARIA** — `aria-label`, `aria-describedby`, `aria-live="polite"` para feedback dinâmico
-- **`prefers-reduced-motion`** — incluído globalmente no `dps-design-tokens.css`
-- **Touch targets M3** — mínimo `48×48px` para elementos interativos em mobile
-- **Zoom iOS** — inputs com `font-size: 16px` em mobile
-
-### 12.2 Testes Recomendados
-
-- Validar contraste com [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
-- Navegar por tab e verificar ordem lógica de foco
-- Testar com `prefers-reduced-motion: reduce` ativo
-- Verificar em leitor de tela (VoiceOver, NVDA) para fluxos críticos
-- Verificar touch targets em dispositivos reais
+- voltar a um visual claramente herdado do sistema anterior como padrão principal;
+- encher a tela de cards equivalentes;
+- usar botões pill como linguagem dominante;
+- arredondar tudo;
+- usar 3 ou 4 acentos fortes ao mesmo tempo;
+- repetir a mesma mensagem em hero, subtítulo e FAQ;
+- fazer hero fraco com texto genérico e sem hierarquia;
+- transformar toda seção em painel com borda grossa;
+- exagerar em blur, glow e transparência;
+- usar microbadges por todo lado para compensar falta de estrutura;
+- usar gradiente para simular sofisticação;
+- criar UI “fofa” quando o objetivo for confiança.
 
 ---
 
-## 13. Performance de Assets
+## 17. Checklist de revisão
 
-### 13.1 CSS
+Antes de finalizar qualquer trabalho visual, confirme:
 
-- **`dps-design-tokens.css`** deve ser o **primeiro** stylesheet importado
-- Carregar condicionalmente via `wp_enqueue_style()` apenas nas páginas necessárias
-- Versionamento: `filemtime()` com fallback `DPS_BASE_VERSION`
-- **Sem bibliotecas CSS externas** no admin (sem Bootstrap, Tailwind, etc.)
-- CSS custom properties (`var(--dps-*)`) para todos os tokens
-
-### 13.2 JavaScript
-
-- **Vanilla JS** — sem frameworks no WP admin
-- Padrão IIFE com `'use strict'`
-- Eventos delegados em containers pai
-- `wp_enqueue_script()` com dependências explícitas
-
-### 13.3 Fontes
-
-- **Admin**: zero fontes externas (stack do sistema)
-- **Portal**: Google Fonts self-hosted ou `<link>` com `font-display: swap`
-- Máximo 2 famílias, apenas pesos 400 + 500
-- Preload para fontes críticas: `<link rel="preload" as="font">`
-
-### 13.4 Imagens e Ícones
-
-- **SVG inline** para ícones (preferível a icon fonts)
-- **Material Symbols Rounded** para portal (via Google Fonts) — carregar apenas glifos usados
-- `loading="lazy"` em imagens below-the-fold
-- WebP como formato preferido
-- Limite: 50KB por imagem, 200KB total por página
+- a marca está clara no primeiro screen;
+- existe uma ação principal inequívoca;
+- cada seção tem uma função só;
+- o layout está mais próximo de composição do que de biblioteca de componentes;
+- a cor de acento aparece com moderação;
+- o verde está reservado para ação;
+- os cantos continuam predominantemente retos;
+- o espaçamento está coerente;
+- os títulos escaneiam bem;
+- o mobile continua elegante e não apenas “quebrando menos”.
 
 ---
 
-## 14. Checklist de Implementação Frontend M3
+## 18. Exemplos práticos
 
-### Antes de codar
-- [ ] Contexto identificado (admin / portal / público / consentimento)
-- [ ] Perfil M3 escolhido (Standard para admin / Expressive para portal)
-- [ ] Elemento diferenciador M3 definido (shape, motion, container colorido)
-- [ ] `VISUAL_STYLE_GUIDE.md` consultado para tokens e componentes
-- [ ] `dps-design-tokens.css` será importado como primeiro stylesheet
-
-### Durante a implementação
-- [ ] Cores via `var(--dps-color-*)`
-- [ ] Tipografia via `var(--dps-typescale-*)`
-- [ ] Formas via `var(--dps-shape-*)`
-- [ ] Espaçamento via `var(--dps-space-*)`
-- [ ] Motion via `var(--dps-motion-*)`
-- [ ] Elevação via `var(--dps-elevation-*)`
-- [ ] State layers com opacidades M3
-- [ ] Semântica HTML correta
-- [ ] Assets carregados condicionalmente
-- [ ] `prefers-reduced-motion` respeitado (automático via tokens)
-
-### Validação
-- [ ] Testado em 375px, 600px, 840px, 1200px, 1920px
-- [ ] Sem scroll horizontal ou conteúdo cortado em nenhum breakpoint validado
-- [ ] CTA primária e ações críticas acessíveis sem bloqueio visual em compact e medium
-- [ ] Tabelas/listagens com estratégia explícita para compact (`overflow-x`, cards, colapso ou priorização)
-- [ ] Modais, drawers e popovers cabem na viewport com rolagem interna quando necessário
-- [ ] Contraste WCAG AA verificado (sistema de pareamento M3)
-- [ ] Navegação por teclado funcional
-- [ ] Focus visible em elementos interativos
-- [ ] Touch targets ≥ 48×48px em mobile
-- [ ] Performance — sem bloqueio de renderização
-
----
-
-## 15. Anti-padrões M3 Expressive (NUNCA fazer)
-
-### Visual
-- ❌ Hex literais — usar `var(--dps-color-*)`
-- ❌ Radius ad-hoc — usar `var(--dps-shape-*)`
-- ❌ Sombras decorativas sem comunicar elevação real
-- ❌ Mais de 2 famílias tipográficas
-- ❌ Animações sem `prefers-reduced-motion`
-- ❌ Ícones sem label de texto
-- ❌ Combinar cantos sharp e round no mesmo componente
-- ❌ `font-weight: 700/bold` — M3 Expressive usa 400 e 500
-
-### Técnico
-- ❌ CSS inline em PHP (`style="..."`)
-- ❌ `!important` exceto override de tema WordPress
-- ❌ Bibliotecas CSS/JS sem justificativa
-- ❌ Fontes de CDN sem fallback local
-- ❌ `<div>` onde `<button>`, `<nav>`, `<section>` é mais semântico
-
-### UX
-- ❌ Páginas "all-in-one" sem agrupamento
-- ❌ Formulários longos sem progressão
-- ❌ Ações destrutivas sem confirmação
-- ❌ Feedback silencioso (ações sem resposta visual)
-- ❌ Scroll horizontal em mobile
-
----
-
-## 16. Exemplos de Aplicação M3 Expressive
-
-### 16.1 Card Admin (Standard)
+### 18.1 Hero correto
 
 ```html
-<div class="dps-surface dps-surface--primary">
-    <div class="dps-surface__title">
-        <span>📊</span>
-        Estatísticas do Mês
-    </div>
-    <p class="dps-surface__description">
-        Resumo de agendamentos e faturamento
-    </p>
-    <ul class="dps-inline-stats">
-        <li>
-            <span class="dps-badge">42</span>
-            <span class="dps-caption">Agendamentos</span>
-        </li>
-        <li>
-            <span class="dps-badge">R$ 3.150</span>
-            <span class="dps-caption">Faturamento</span>
-        </li>
-    </ul>
-</div>
+<section class="dps-hero">
+  <div class="dps-hero__main">
+    <p class="dps-kicker">Banho e tosa com calma e critério</p>
+    <h1>Seu pet bem cuidado, do primeiro contato à entrega.</h1>
+    <p>Agenda organizada, conversa clara e atenção real ao ritmo de cada pet.</p>
+    <a class="dps-button dps-button--primary" href="#">Agendar pelo WhatsApp</a>
+  </div>
+  <aside class="dps-hero__aside">
+    <h2>Tudo mais simples para você</h2>
+    <p>Horários, contato e localização visíveis logo de cara.</p>
+  </aside>
+</section>
 ```
 
-### 16.2 Card Portal (Expressive)
+Por que funciona:
+
+- uma tese clara;
+- uma ação principal;
+- apoio operacional separado;
+- contraste forte;
+- sem excesso de elementos concorrentes.
+
+### 18.2 Grade de jornada correta
 
 ```html
-<div class="dps-card dps-card--elevated dps-card-enter">
-    <div class="dps-card__header">
-        <h3 style="font-size: var(--dps-typescale-title-medium-size);
-                   font-weight: var(--dps-typescale-title-medium-weight);">
-            Próximo Agendamento
-        </h3>
-        <span class="dps-badge--success">Confirmado</span>
-    </div>
-    <div class="dps-card__body">
-        <p><strong>Rex</strong> — Banho e Tosa Completa</p>
-        <p class="dps-caption">Sábado, 15 de Fevereiro às 10:00</p>
-    </div>
-    <div class="dps-card__actions">
-        <button class="dps-btn-outlined">Reagendar</button>
-        <button class="dps-btn-filled">Ver Detalhes</button>
-    </div>
-</div>
+<section class="dps-journey">
+  <header>
+    <p class="dps-kicker">Se quiser decidir com mais segurança</p>
+    <h2>Estes caminhos ajudam a chegar no WhatsApp com mais clareza.</h2>
+  </header>
+
+  <div class="dps-journey__grid">
+    <a href="#">Nossos diferenciais</a>
+    <a href="#">Primeira visita</a>
+    <a href="#">Perguntas frequentes</a>
+    <a href="#">TaxiDog</a>
+    <a href="#">Contato e localização</a>
+  </div>
+</section>
 ```
 
-### 16.3 Alerta M3 Expressive
+Por que funciona:
 
-```html
-<div class="dps-alert dps-alert--success">
-    <span>✓</span>
-    <div>
-        <strong>Agendamento confirmado!</strong>
-        <p>Rex está agendado para Sábado às 10:00.</p>
-    </div>
-</div>
-```
+- blocos com função clara;
+- leitura linear;
+- jornada guiada;
+- destaque principal e apoio secundário.
 
-### 16.4 Formulário M3
+### 18.3 O que evitar
 
-```html
-<div class="dps-field-group">
-    <span class="dps-field-group-title">Dados do Pet</span>
+Não fazer algo como:
 
-    <label class="dps-field-label" for="pet-name">Nome do Pet</label>
-    <input class="dps-input" type="text" id="pet-name"
-           placeholder="Ex.: Rex, Luna, Mel...">
-
-    <label class="dps-field-label" for="pet-breed">Raça</label>
-    <input class="dps-input" type="text" id="pet-breed"
-           placeholder="Ex.: Golden Retriever">
-</div>
-
-<div class="dps-card__actions">
-    <button class="dps-btn-text">Cancelar</button>
-    <button class="dps-btn-filled">Salvar Pet</button>
-</div>
-```
+- quatro botões grandes lado a lado;
+- cinco badges sem hierarquia;
+- hero com estatísticas, carrossel, FAQ e CTA no primeiro screen;
+- cards arredondados e coloridos sem função.
 
 ---
 
-## 17. Manutenção
+## 19. Regra final
 
-**Atualizar este documento quando:**
-- Novo contexto de frontend for criado (ex.: app mobile, PWA)
-- Mudança no sistema de design M3 Expressive do Google
-- Nova família tipográfica for adotada
-- Novo padrão de componente M3 for estabelecido
-- Mudança na paleta (sincronizar com `VISUAL_STYLE_GUIDE.md` e `dps-design-tokens.css`)
+Se a interface parecer pronta demais, genérica demais ou “bonita demais” para a função que resolve, ela ainda não está no padrão DPS Signature.
 
-**Hierarquia de autoridade:**
-1. `dps-design-tokens.css` — valores técnicos autoritativos
-2. `VISUAL_STYLE_GUIDE.md` — especificações de componentes e tokens
-3. Este documento — metodologia e contextos de uso
-
-Em caso de conflito: tokens CSS > Style Guide > Instructions.
+O objetivo não é impressionar pelo excesso. É transmitir critério.
 
 ---
 
-**Fim das Instruções de Design Frontend DPS v2.0 — Material 3 Expressive**
+**Fim das Instruções de Design Frontend DPS Signature v3.0**

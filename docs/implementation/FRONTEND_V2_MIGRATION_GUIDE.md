@@ -1,4 +1,4 @@
-# Guia de Migração — Frontend V1 para V2
+﻿# Guia de Migração — Frontend V1 para V2
 
 > **Versão**: 1.0.0
 > **Data**: 2026-02-12
@@ -11,15 +11,15 @@
 
 ### O que é V1 (dual-run)
 
-O Frontend V1 opera como **wrapper de dual-run** sobre os add-ons legados (`DPS_Registration_Addon` e `DPS_Booking_Addon`). Ele aplica uma camada visual M3 sobre a renderização original, mas continua dependendo do código, lógica e hooks dos plugins legados para funcionar.
+O Frontend V1 opera como **wrapper de dual-run** sobre os add-ons legados (`DPS_Registration_Addon` e `DPS_Booking_Addon`). Ele aplica uma camada visual DPS Signature sobre a renderização original, mas continua dependendo do código, lógica e hooks dos plugins legados para funcionar.
 
 **Shortcodes V1:**
 - `[dps_registration_form]` — flag: `registration`
 - `[dps_booking_form]` — flag: `booking`
 
-### O que é V2 (nativo M3 Expressive)
+### O que é V2 (nativo DPS Signature)
 
-O Frontend V2 é uma **reimplementação 100% nativa**, sem qualquer dependência dos add-ons legados. Toda a lógica de formulários, validação, AJAX e integração de hooks foi reescrita do zero, seguindo o padrão M3 Expressive e eliminando jQuery.
+O Frontend V2 é uma **reimplementação 100% nativa**, sem qualquer dependência dos add-ons legados. Toda a lógica de formulários, validação, AJAX e integração de hooks foi reescrita do zero, seguindo o padrão DPS Signature e eliminando jQuery.
 
 **Shortcodes V2:**
 - `[dps_registration_v2]` — flag: `registration_v2`
@@ -31,7 +31,7 @@ O Frontend V2 é uma **reimplementação 100% nativa**, sem qualquer dependênci
 |-----------|---------|
 | **Independência** | V2 não requer `desi-pet-shower-registration` nem `desi-pet-shower-booking` ativos |
 | **Performance** | Zero jQuery, JS nativo com lazy loading |
-| **UX nativa M3** | Componentes M3 Expressive nativos (não wrappers sobre legado) |
+| **UX nativa DPS Signature** | Componentes DPS Signature nativos (não wrappers sobre legado) |
 | **Manutenibilidade** | Código único — sem camada de compatibilidade dual-run |
 | **Segurança** | Validações nativas (CPF mod-11, nonce, reCAPTCHA v3) sem depender de implementações legadas |
 
@@ -78,7 +78,7 @@ wp option get dps_frontend_feature_flags --format=json
 
 | Feature | V1 (dual-run) | V2 (nativo) |
 |---------|---------------|-------------|
-| Renderização do form | Legado com superfície M3 | 100% nativo M3 Expressive |
+| Renderização do form | Legado com superfície antiga | 100% nativo DPS Signature |
 | Validação de CPF | Via `DPS_Registration_Addon` | Nativa (algoritmo mod-11) |
 | Detecção de duplicatas | Via add-on legado | Nativa (baseada em telefone) |
 | reCAPTCHA v3 | Via add-on legado | Nativo (integração direta) |
@@ -93,14 +93,14 @@ wp option get dps_frontend_feature_flags --format=json
 
 | Feature | V1 (dual-run) | V2 (nativo) |
 |---------|---------------|-------------|
-| Wizard de etapas | Legado com superfície M3 | 100% nativo M3 Expressive |
+| Wizard de etapas | Legado com superfície antiga | 100% nativo DPS Signature |
 | Requisições AJAX | Via add-on legado (jQuery) | Nativo (Fetch API) |
 | TaxiDog / Tosa | Lógica legada | Implementação nativa |
 | 3 tipos de agendamento | Via `DPS_Booking_Addon` | Nativo (banho, tosa, banho+tosa) |
 | Verificação de conflito de horário | Via add-on legado | Nativa (AJAX em tempo real) |
-| Seleção de horário | Legado com wrapper | Nativo (slot picker M3) |
+| Seleção de horário | Legado com wrapper | Nativo (slot picker DPS Signature) |
 | Integração com 8 add-ons | Via hooks legados | Via Hook Bridge (compatibilidade total) |
-| Calendário visual | Legado | Nativo M3 |
+| Calendário visual | Legado | Nativo DPS Signature |
 | Dependência de jQuery | Sim | Não |
 | Dependência do add-on legado | **Obrigatória** | **Nenhuma** |
 
@@ -324,7 +324,7 @@ wp eval "global \$wp_filter; var_dump(isset(\$wp_filter['dps_base_after_save_app
 
 **Solução:** Verificar se o Frontend add-on está ativo e atualizado. O Hook Bridge registra callbacks com prioridade específica (legado primeiro, V2 depois).
 
-### Estilos M3 não carregam no V2
+### Estilos DPS Signature não carregam no V2
 
 **Causa provável:** Design tokens CSS não está enfileirado.
 
@@ -418,6 +418,6 @@ wp eval "update_option('dps_frontend_feature_flags', [
 | Guia de Rollout | `docs/implementation/FRONTEND_ROLLOUT_GUIDE.md` | Procedimentos operacionais de ativação por ambiente |
 | Runbook de Incidentes | `docs/implementation/FRONTEND_RUNBOOK.md` | Diagnóstico e rollback para incidentes |
 | Análise Arquitetural | `ANALYSIS.md` | Visão completa de contratos, hooks e integrações |
-| Design Frontend | `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` | Instruções de design M3 Expressive |
+| Design Frontend | `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` | Instruções de design DPS Signature |
 | Guia Visual | `docs/visual/VISUAL_STYLE_GUIDE.md` | Paleta, componentes e espaçamento |
 | Changelog | `CHANGELOG.md` | Histórico de versões e releases |

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Plugin Name:       desi.pet by PRObst – Cadastro Add-on
  * Plugin URI:        https://www.probst.pro
@@ -150,7 +150,7 @@ class DPS_Registration_Addon {
 
     /**
      * Construtor privado.
-     * 
+     *
      * @since 1.0.1
      */
     private function __construct() {
@@ -224,7 +224,7 @@ class DPS_Registration_Addon {
             $painel_page_id = get_option( 'dps_painel_page_id', 0 );
             $painel_permalink = $painel_page_id ? get_permalink( $painel_page_id ) : false;
             $base_url = $painel_permalink ? $painel_permalink : admin_url( 'edit.php?post_type=dps_cliente' );
-            
+
             $view_url = add_query_arg(
                 [
                     'dps_view' => 'client',
@@ -263,22 +263,22 @@ class DPS_Registration_Addon {
         if ( class_exists( 'DPS_IP_Helper' ) ) {
             return DPS_IP_Helper::get_ip_hash( 'dps_reg_' );
         }
-        
+
         // Fallback para retrocompatibilidade
         $ip = '';
-        
+
         // Prioriza REMOTE_ADDR por segurança
         if ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
             $ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
         }
-        
+
         // Fallback para X-Forwarded-For (primeiro IP apenas) se REMOTE_ADDR for localhost/proxy
         if ( ( empty( $ip ) || in_array( $ip, [ '127.0.0.1', '::1' ], true ) ) && ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
             $forwarded = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
             $ips = explode( ',', $forwarded );
             $ip = trim( $ips[0] );
         }
-        
+
         // Hash para não armazenar IP diretamente (sha256 mais seguro que md5)
         return hash( 'sha256', 'dps_reg_' . $ip );
     }
@@ -344,9 +344,9 @@ class DPS_Registration_Addon {
     private function check_rate_limit() {
         $ip_hash = $this->get_client_ip_hash();
         $transient_key = 'dps_reg_rate_' . substr( $ip_hash, 0, 32 ); // Limita tamanho da chave
-        
+
         $data = get_transient( $transient_key );
-        
+
         if ( false === $data ) {
             // Primeira tentativa - salva count e timestamp de início
             set_transient( $transient_key, [
@@ -355,7 +355,7 @@ class DPS_Registration_Addon {
             ], HOUR_IN_SECONDS );
             return true;
         }
-        
+
         // Verifica formato antigo (apenas count) ou novo (array)
         if ( is_array( $data ) ) {
             $count = (int) $data['count'];
@@ -369,16 +369,16 @@ class DPS_Registration_Addon {
             // Limite atingido
             return false;
         }
-        
+
         // Incrementa contador mantendo expiração original (calcula tempo restante)
         $elapsed = time() - $start;
         $remaining = max( HOUR_IN_SECONDS - $elapsed, 60 ); // Mínimo 60 segundos
-        
+
         set_transient( $transient_key, [
             'count' => $count + 1,
             'start' => $start,
         ], $remaining );
-        
+
         return true;
     }
 
@@ -406,17 +406,17 @@ class DPS_Registration_Addon {
      */
     private function validate_cpf( $cpf ) {
         $cpf = $this->normalize_cpf( $cpf );
-        
+
         // CPF deve ter 11 dígitos
         if ( strlen( $cpf ) !== 11 ) {
             return false;
         }
-        
+
         // Rejeita sequências conhecidas de dígitos repetidos
         if ( preg_match( '/^(\d)\1{10}$/', $cpf ) ) {
             return false;
         }
-        
+
         // Calcula primeiro dígito verificador
         $sum = 0;
         for ( $i = 0; $i < 9; $i++ ) {
@@ -424,11 +424,11 @@ class DPS_Registration_Addon {
         }
         $remainder = $sum % 11;
         $digit1 = ( $remainder < 2 ) ? 0 : ( 11 - $remainder );
-        
+
         if ( (int) $cpf[9] !== $digit1 ) {
             return false;
         }
-        
+
         // Calcula segundo dígito verificador
         $sum = 0;
         for ( $i = 0; $i < 10; $i++ ) {
@@ -436,7 +436,7 @@ class DPS_Registration_Addon {
         }
         $remainder = $sum % 11;
         $digit2 = ( $remainder < 2 ) ? 0 : ( 11 - $remainder );
-        
+
         return (int) $cpf[10] === $digit2;
     }
 
@@ -453,14 +453,14 @@ class DPS_Registration_Addon {
      */
     private function normalize_phone( $phone ) {
         $digits = preg_replace( '/\D/', '', (string) $phone );
-        
+
         // Remove código do país (55) apenas se tiver 12 ou 13 dígitos (formato internacional completo)
         // 12 dígitos = 55 + DDD(2) + fixo(8), 13 dígitos = 55 + DDD(2) + celular(9)
         $length = strlen( $digits );
         if ( ( $length === 12 || $length === 13 ) && substr( $digits, 0, 2 ) === '55' ) {
             $digits = substr( $digits, 2 );
         }
-        
+
         return $digits;
     }
 
@@ -476,22 +476,22 @@ class DPS_Registration_Addon {
         if ( class_exists( 'DPS_Phone_Helper' ) && method_exists( 'DPS_Phone_Helper', 'is_valid_brazilian_phone' ) ) {
             return DPS_Phone_Helper::is_valid_brazilian_phone( $phone );
         }
-        
+
         // Fallback: validação própria
         $digits = $this->normalize_phone( $phone );
         $length = strlen( $digits );
-        
+
         // Telefone válido deve ter 10 (fixo) ou 11 (celular) dígitos
         if ( $length !== 10 && $length !== 11 ) {
             return false;
         }
-        
+
         // DDD deve estar entre 11 e 99
         $ddd = (int) substr( $digits, 0, 2 );
         if ( $ddd < 11 || $ddd > 99 ) {
             return false;
         }
-        
+
         return true;
     }
 
@@ -501,13 +501,13 @@ class DPS_Registration_Addon {
 
     /**
      * Busca cliente existente por telefone.
-     * 
+     *
      * NOTA: A verificação de duplicatas é feita APENAS pelo telefone para evitar
      * bloqueios indevidos quando o mesmo email ou CPF é compartilhado em famílias.
      *
      * @since 1.1.0
      * @since 1.3.0 Modificado para verificar apenas telefone (não mais email/CPF).
-     * 
+     *
      * @param string $email Email normalizado. Mantido apenas por compatibilidade e ignorado desde 1.3.0.
      * @param string $phone Telefone normalizado (apenas dígitos).
      * @param string $cpf   CPF normalizado. Mantido apenas por compatibilidade e ignorado desde 1.3.0.
@@ -522,7 +522,7 @@ class DPS_Registration_Addon {
         if ( empty( $phone ) ) {
             return 0;
         }
-        
+
         $clients = get_posts( [
             'post_type'      => 'dps_cliente',
             'posts_per_page' => 1,
@@ -622,21 +622,21 @@ class DPS_Registration_Addon {
             DPS_Message_Helper::add_error( $message );
             return;
         }
-        
+
         // Fallback: usa transient baseado em IP
         $ip_hash = $this->get_client_ip_hash();
         $transient_key = 'dps_reg_msg_' . $ip_hash;
-        
+
         $messages = get_transient( $transient_key );
         if ( ! is_array( $messages ) ) {
             $messages = [];
         }
-        
+
         $messages[] = [
             'type' => 'error',
             'text' => $message,
         ];
-        
+
         set_transient( $transient_key, $messages, self::ERROR_MESSAGE_TTL );
     }
 
@@ -650,33 +650,33 @@ class DPS_Registration_Addon {
         if ( class_exists( 'DPS_Message_Helper' ) ) {
             return DPS_Message_Helper::display_messages();
         }
-        
+
         // Fallback: usa transient baseado em IP
         $ip_hash = $this->get_client_ip_hash();
         $transient_key = 'dps_reg_msg_' . $ip_hash;
-        
+
         $messages = get_transient( $transient_key );
         if ( ! is_array( $messages ) || empty( $messages ) ) {
             return '';
         }
-        
+
         $html = '';
         foreach ( $messages as $msg ) {
             $class = 'dps-reg-message';
-            
+
             if ( $msg['type'] === 'error' ) {
                 $class .= ' dps-reg-message--error';
             } elseif ( $msg['type'] === 'success' ) {
                 $class .= ' dps-reg-message--success';
             }
-            
+
             $html .= '<div class="' . esc_attr( $class ) . '" role="alert">';
             $html .= esc_html( $msg['text'] );
             $html .= '</div>';
         }
-        
+
         delete_transient( $transient_key );
-        
+
         return $html;
     }
 
@@ -701,7 +701,7 @@ class DPS_Registration_Addon {
         $registration_page_id = get_option( 'dps_registration_page_id' );
         $current_post = get_post();
         $post_content = $current_post ? (string) $current_post->post_content : '';
-        
+
         if ( ! is_page( $registration_page_id ) && ! has_shortcode( $post_content, 'dps_registration_form' ) ) {
             return;
         }
@@ -722,7 +722,7 @@ class DPS_Registration_Addon {
             );
         }
 
-        // Design tokens M3 Expressive (devem ser carregados antes de qualquer CSS)
+        // Design tokens DPS Signature (devem ser carregados antes de qualquer CSS)
         wp_enqueue_style(
             'dps-design-tokens',
             DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
@@ -730,7 +730,7 @@ class DPS_Registration_Addon {
             DPS_BASE_VERSION
         );
 
-        // CSS responsivo (M3 Expressive)
+        // CSS responsivo (DPS Signature)
         wp_enqueue_style(
             'dps-registration-addon',
             $addon_url . 'assets/css/registration-addon.css',
@@ -819,7 +819,7 @@ class DPS_Registration_Addon {
 
     /**
      * Adiciona a página de configurações no menu principal "desi.pet by PRObst"
-     * 
+     *
      * NOTA: Menu exibido como submenu de "desi.pet by PRObst" para alinhamento com a navegação unificada.
      * Também acessível pelo hub em dps-tools-hub (aba "Formulário de Cadastro").
      */
@@ -1964,7 +1964,7 @@ class DPS_Registration_Addon {
         // =====================================================================
         $duplicate_id = $this->find_duplicate_client( '', $client_phone, '' );
         $admin_confirmed_duplicate = isset( $_POST['dps_confirm_duplicate'] ) && '1' === $_POST['dps_confirm_duplicate'];
-        
+
         if ( $duplicate_id > 0 ) {
             if ( ! $is_admin ) {
                 // Não-admin: sempre bloqueia
@@ -2225,7 +2225,7 @@ class DPS_Registration_Addon {
             $created_timestamp = (int) $token_created;
             if ( $created_timestamp > 0 && $created_timestamp <= time() ) {
                 $token_age = time() - $created_timestamp;
-                
+
                 if ( $token_age > self::TOKEN_EXPIRATION_SECONDS ) {
                     // Token expirado - limpa e mostra erro
                     delete_post_meta( $client_id, 'dps_email_confirm_token' );
@@ -2429,7 +2429,7 @@ class DPS_Registration_Addon {
         }
 
         // F2.9: Removido session_start() - não é mais necessário pois usamos transients/cookies
-        
+
         $success = false;
         if ( isset( $_GET['registered'] ) && '1' === $_GET['registered'] ) {
             $success = true;
@@ -2442,14 +2442,14 @@ class DPS_Registration_Addon {
         $placeholder_json = wp_json_encode( $placeholder_html );
         ob_start();
         echo '<div class="dps-registration-form">';
-        
+
         // F1.8: Exibe mensagens de erro/sucesso armazenadas
         $messages_html = $this->display_messages();
         if ( ! empty( $messages_html ) ) {
             // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML já escapado no método
             echo $messages_html;
         }
-        
+
         // F2.3/F2.8: Mensagem de sucesso melhorada com próximo passo
         if ( $success ) {
             echo '<div class="dps-success-box dps-reg-success" role="status">';
@@ -2580,7 +2580,7 @@ class DPS_Registration_Addon {
         echo '</div>';
         echo '</div>';
         echo '</form>';
-        
+
         // F2.5: Template de pet para JS externo (via elemento script type="text/template")
         echo '<script type="text/template" id="dps-pet-template">' . $placeholder_json . '</script>';
 

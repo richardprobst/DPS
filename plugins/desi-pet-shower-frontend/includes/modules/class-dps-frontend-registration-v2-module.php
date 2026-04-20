@@ -1,8 +1,8 @@
-<?php
+﻿<?php
 /**
  * Módulo de Cadastro V2 nativo do Frontend Add-on (Fase 7).
  *
- * Implementação 100% nativa do formulário de cadastro com Material 3 Expressive.
+ * Implementação 100% nativa do formulário de cadastro com DPS Signature.
  * Completamente independente do add-on legado DPS_Registration_Addon.
  *
  * Shortcode: [dps_registration_v2]
@@ -136,7 +136,7 @@ final class DPS_Frontend_Registration_V2_Module extends DPS_Abstract_Module_V2 {
 
         $this->hookBridge->afterRender( $html );
 
-        $this->logger->info( 'Shortcode dps_registration_v2 renderizado (nativo M3).' );
+        $this->logger->info( 'Shortcode dps_registration_v2 renderizado (nativo DPS Signature).' );
         $this->logger->track( 'registration_v2' );
 
         return $html;

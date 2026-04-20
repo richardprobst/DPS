@@ -210,7 +210,7 @@ Referências obrigatórias:
 
 - Ao alterar contratos, hooks ou fluxo de autenticação, documente impacto em `ANALYSIS.md`.
 - Para mudanças user-facing relevantes, atualize `CHANGELOG.md`.
-- Para mudanças visuais, seguir padrão M3 em `docs/visual/` e registrar evidências em `docs/screenshots/`.
+- Para mudanças visuais, seguir o sistema visual `DPS Signature` em `docs/visual/` e registrar evidências em `docs/screenshots/`.
 - Este add-on contém documentação complementar em `TOKEN_AUTH_SYSTEM.md` e `HOOKS.md`.
 
 ---

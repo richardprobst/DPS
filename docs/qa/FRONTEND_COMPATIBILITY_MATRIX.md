@@ -1,4 +1,4 @@
-# Matriz de Compatibilidade — Frontend Add-on
+﻿# Matriz de Compatibilidade — Frontend Add-on
 
 > **Versão**: 1.3.0 (Fase 5)
 > **Última atualização**: 2026-02-11
@@ -46,8 +46,8 @@ Esta matriz documenta a compatibilidade do add-on `desi-pet-shower-frontend` com
 
 | Shortcode | Origem legada | Módulo Frontend | Estratégia | Status |
 |-----------|---------------|-----------------|------------|--------|
-| `dps_registration_form` | `desi-pet-shower-registration` | Registration | Dual-run: `remove_shortcode` + wrapper M3 | ✅ |
-| `dps_booking_form` | `desi-pet-shower-booking` | Booking | Dual-run: `remove_shortcode` + wrapper M3 | ✅ |
+| `dps_registration_form` | `desi-pet-shower-registration` | Registration | Dual-run: `remove_shortcode` + wrapper DPS Signature | ✅ |
+| `dps_booking_form` | `desi-pet-shower-booking` | Booking | Dual-run: `remove_shortcode` + wrapper DPS Signature | ✅ |
 
 ---
 

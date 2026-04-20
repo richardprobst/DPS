@@ -1,10 +1,10 @@
-# Space Groomers - Fase 3
+﻿# Space Groomers - Fase 3
 
 ## Objetivo da fase
 Adicionar engajamento de retorno com baixo risco tecnico, agora com persistencia sincronizada no ecossistema DPS quando o cliente estiver autenticado no portal.
 
 ## Referencia visual aplicada
-As mudancas de frontend seguiram o padrao M3 descrito em:
+As mudancas de frontend seguiram o sistema visual DPS Signature descrito em:
 - `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`
 - `docs/visual/VISUAL_STYLE_GUIDE.md`
 

@@ -1,8 +1,8 @@
-# Plano de Implementação Nativa — Frontend Add-on (Fase 7)
+﻿# Plano de Implementação Nativa — Frontend Add-on (Fase 7)
 
-> **Versão**: 1.4.0  
-> **Data**: 2026-02-12  
-> **Autor**: PRObst  
+> **Versão**: 1.4.0
+> **Data**: 2026-02-12
+> **Autor**: PRObst
 > **Site**: [www.probst.pro](https://www.probst.pro)
 
 ---
@@ -36,10 +36,10 @@ O Frontend Add-on criado nas Fases 1-6 (PR #581) implementa uma **estratégia du
 ❌ **Limitações atuais:**
 - Reutiliza código legado dos add-ons `desi-pet-shower-registration` e `desi-pet-shower-booking`
 - Apenas envolve o output legado em wrapper `.dps-frontend`
-- Adiciona CSS M3 por cima do HTML legado (estrutura antiga permanece)
+- Adiciona CSS da fase visual anterior por cima do HTML legado (estrutura antiga permanece)
 - Mantém dependências fortes dos add-ons legados
 - Não permite refatoração completa da UX/UI
-- Compromete o potencial completo do Material 3 Expressive
+- Compromete o potencial completo do DPS Signature
 - HTML gerado continua com padrões antigos (estrutura, acessibilidade limitada)
 
 ✅ **O que funciona bem:**
@@ -53,7 +53,7 @@ O Frontend Add-on criado nas Fases 1-6 (PR #581) implementa uma **estratégia du
 
 **Queremos criar páginas 100% novas:**
 - ✨ HTML semântico moderno (PHP 8.4)
-- ✨ Estrutura nativa Material 3 Expressive
+- ✨ Estrutura nativa DPS Signature
 - ✨ UX redesenhada do zero
 - ✨ Acessibilidade WCAG 2.1 AA nativa
 - ✨ Performance otimizada (lazy load, code splitting)
@@ -62,7 +62,7 @@ O Frontend Add-on criado nas Fases 1-6 (PR #581) implementa uma **estratégia du
 - ✨ Código limpo seguindo padrões modernos
 
 **Resultado esperado:**
-> Páginas de cadastro e agendamento completamente novas, construídas from-scratch com Material 3 Expressive, sem nenhuma dependência ou reutilização de código legado.
+> Páginas de cadastro e agendamento completamente novas, construídas from-scratch com DPS Signature, sem nenhuma dependência ou reutilização de código legado.
 
 ---
 
@@ -71,7 +71,7 @@ O Frontend Add-on criado nas Fases 1-6 (PR #581) implementa uma **estratégia du
 ### Fase 1 — Fundação ✅
 - Estrutura do add-on criada
 - Feature flags implementadas
-- Assets M3 carregados condicionalmente
+- Assets DPS Signature carregados condicionalmente
 - Logger e telemetria funcionais
 
 ### Fase 2 — Registration Dual-Run ✅
@@ -246,8 +246,8 @@ O add-on `desi-pet-shower-booking` (v1.3.0) possui funcionalidades especializada
 
 Criar shortcodes completamente novos que não dependam dos legados:
 
-- `[dps_registration_v2]` — cadastro nativo M3
-- `[dps_booking_v2]` — agendamento nativo M3
+- `[dps_registration_v2]` — cadastro nativo DPS Signature
+- `[dps_booking_v2]` — agendamento nativo DPS Signature
 - `[dps_client_portal]` — portal do cliente (futuro)
 
 #### 2. Templates Modernos
@@ -315,13 +315,13 @@ includes/
     └── class-dps-ajax-validate-step.php       ← Validação de step server-side
 ```
 
-#### 4. Assets Nativos M3 Completos
+#### 4. Assets Nativos DPS Signature Completos
 
 ```
 assets/
 ├── css/
-│   ├── registration-v2.css        ← CSS nativo cadastro M3
-│   ├── booking-v2.css             ← CSS nativo agendamento M3
+│   ├── registration-v2.css        ← CSS nativo cadastro DPS Signature
+│   ├── booking-v2.css             ← CSS nativo agendamento DPS Signature
 │   └── components.css             ← Componentes reutilizáveis
 └── js/
     ├── registration-v2.js         ← JS nativo cadastro
@@ -362,7 +362,7 @@ assets/
    - Return types
    - Enums para estados
 
-4. **Material 3 Expressive Native**
+4. **DPS Signature Native**
    - HTML semântico desde o início
    - Design tokens CSS em todos os componentes
    - Acessibilidade ARIA nativa
@@ -493,7 +493,7 @@ A hook bridge é o mecanismo que garante **compatibilidade retroativa** durante 
 
 ```php
 class DPS_Registration_Hook_Bridge {
-    
+
     /**
      * Dispara hooks após criação de cliente no v2.
      * Mantém compatibilidade com Loyalty e outros add-ons.
@@ -513,7 +513,7 @@ class DPS_Registration_Hook_Bridge {
             $email,
             $phone
         );
-        
+
         // 2. Hook NOVO v2 (para novos consumidores futuros)
         do_action( 'dps_registration_v2_client_created', $client_id, [
             'email'         => $email,
@@ -521,7 +521,7 @@ class DPS_Registration_Hook_Bridge {
             'referral_code' => $referral_code,
         ] );
     }
-    
+
     /**
      * Dispara hook de campos adicionais no formulário.
      * Permite que Loyalty injete campo de referral code.
@@ -530,7 +530,7 @@ class DPS_Registration_Hook_Bridge {
         // Hook legado (Loyalty: render_registration_field)
         do_action( 'dps_registration_after_fields' );
     }
-    
+
     /**
      * Aplica filtro anti-spam.
      * Permite validações externas adicionais.
@@ -545,7 +545,7 @@ class DPS_Registration_Hook_Bridge {
 
 ```php
 class DPS_Booking_Hook_Bridge {
-    
+
     /**
      * Dispara hooks após criação de agendamento no v2.
      * CRÍTICO: 8 add-ons consomem dps_base_after_save_appointment.
@@ -559,11 +559,11 @@ class DPS_Booking_Hook_Bridge {
         // Consumidores: Stock, Payment, Groomers, Calendar,
         //               Communications, Push, Services, Booking
         do_action( 'dps_base_after_save_appointment', $appointment_id, $meta );
-        
+
         // 2. Hook NOVO v2 (para extensões futuras)
         do_action( 'dps_booking_v2_appointment_created', $appointment_id, $meta );
     }
-    
+
     /**
      * Dispara hooks de campos do agendamento.
      * Permite que Services e Groomers injetem campos.
@@ -572,7 +572,7 @@ class DPS_Booking_Hook_Bridge {
         do_action( 'dps_base_appointment_fields', $edit_id, $meta );
         do_action( 'dps_base_appointment_assignment_fields', $edit_id, $meta );
     }
-    
+
     /**
      * Dispara hooks de validação de step (filtro novo).
      * Permite validações externas por step.
@@ -657,7 +657,7 @@ class DPS_Booking_Hook_Bridge {
 
 4. **Email e Confirmação:**
    - Confirmação de email 48h (reutilizar lógica de token UUID)
-   - HTML template de email M3 para confirmação
+   - HTML template de email DPS Signature para confirmação
    - Cron de lembretes (registrar `CONFIRMATION_REMINDER_CRON` se não existir)
    - Respeitar option `dps_registration_confirm_email_enabled`
 
@@ -669,7 +669,7 @@ class DPS_Booking_Hook_Bridge {
    - Testes de integração com Loyalty add-on
 
 6. **Assets Nativos:**
-   - `registration-v2.css` — estilos M3 puros
+   - `registration-v2.css` — estilos DPS Signature puros
    - `registration-v2.js` — comportamento nativo (validação client-side, repeater de pets, datalist de raças)
    - Integração com design tokens
    - Condicional: Google Maps Places API se `dps_google_api_key` configurada
@@ -700,7 +700,7 @@ class DPS_Booking_Hook_Bridge {
    - Teste de email confirmation flow
 
 ✅ **Critérios de Aceite:**
-- [x] Formulário renderiza 100% nativo (HTML M3)
+- [x] Formulário renderiza 100% nativo (HTML DPS Signature)
 - [x] Processa cadastro sem chamar add-on legado
 - [x] Cria cliente e pet corretamente (wp_insert_post + metas)
 - [x] Valida todos os campos (client-side + server-side): nome, email, telefone, CPF (mod-11)
@@ -711,7 +711,7 @@ class DPS_Booking_Hook_Bridge {
 - [ ] Google Maps autocomplete funciona (quando API key presente) — *P2 Desejável, adiado para futuro*
 - [x] Dispara hooks de integração via bridge (Loyalty referral funcional)
 - [x] Anti-spam filter `dps_registration_spam_check` aplicado
-- [x] CSS 100% design tokens M3
+- [x] CSS 100% design tokens DPS Signature
 - [x] JavaScript vanilla (zero jQuery)
 - [x] Acessibilidade WCAG 2.1 AA
 - [x] Rollback instantâneo (flag `registration_v2`)
@@ -758,7 +758,7 @@ class DPS_Booking_Hook_Bridge {
    - TaxiDog: checkbox + campo de preço (metas: `appointment_taxidog`, `appointment_taxidog_price`)
    - Tosa: apenas para `subscription` — checkbox + preço (default R$30) + dropdown de ocorrência
    - Metas: `appointment_tosa`, `appointment_tosa_price`, `appointment_tosa_occurrence`
-   - UI: card estilizado M3 com ícones e descrição
+   - UI: card estilizado DPS Signature com ícones e descrição
 
 6. **AJAX Endpoints:**
    - `wp_ajax_dps_search_client` — busca cliente por telefone
@@ -769,7 +769,7 @@ class DPS_Booking_Hook_Bridge {
    - Todos com nonce + capability check + sanitização
 
 7. **Assets Nativos:**
-   - `booking-v2.css` — estilos M3 wizard
+   - `booking-v2.css` — estilos DPS Signature wizard
    - `booking-v2.js` — wizard state machine (vanilla JS)
    - Animações de transição entre steps (`prefers-reduced-motion` respeitado)
 
@@ -817,7 +817,7 @@ class DPS_Booking_Hook_Bridge {
 - [x] Cria appointment corretamente com TODAS as metas
 - [x] Dispara **TODOS** os hooks críticos via bridge (8 add-ons)
 - [ ] Email de confirmação enviado
-- [x] CSS 100% M3 (wizard expressivo)
+- [x] CSS 100% DPS Signature (wizard expressivo)
 - [x] Animações de transição suaves (respeita `prefers-reduced-motion`)
 - [x] Validação robusta (client + server)
 - [x] Acessibilidade WCAG 2.1 AA
@@ -897,10 +897,10 @@ class DPS_Booking_Hook_Bridge {
 ```php
 /**
  * Shortcode: [dps_registration_v2]
- * 
- * Exibe formulário nativo de cadastro Material 3 Expressive.
+ *
+ * Exibe formulário nativo de cadastro DPS Signature.
  * Completamente independente do add-on legado.
- * 
+ *
  * @param array $atts Atributos do shortcode
  * @return string HTML renderizado
  */
@@ -927,11 +927,11 @@ class DPS_Booking_Hook_Bridge {
 ```php
 /**
  * Shortcode: [dps_booking_v2]
- * 
- * Exibe wizard nativo de agendamento Material 3 Expressive.
+ *
+ * Exibe wizard nativo de agendamento DPS Signature.
  * Multi-step com state management robusto.
  * Completamente independente do add-on legado.
- * 
+ *
  * @param array $atts Atributos do shortcode
  * @return string HTML renderizado
  */
@@ -964,8 +964,8 @@ class DPS_Booking_Hook_Bridge {
 |---------|---------------|-------------|
 | **Shortcode** | `[dps_registration_form]` | `[dps_registration_v2]` |
 | **Dependência Legado** | ✅ Sim (obrigatório) | ❌ Não (independente) |
-| **HTML** | Legado (estrutura antiga) | Nativo M3 (semântico) |
-| **CSS** | Legado + wrapper | 100% M3 Expressive |
+| **HTML** | Legado (estrutura antiga) | Nativo DPS Signature (semântico) |
+| **CSS** | Legado + wrapper | 100% DPS Signature |
 | **JavaScript** | Legado (jQuery) | Vanilla JS (moderno) |
 | **Acessibilidade** | Limitada | WCAG 2.1 AA |
 | **Performance** | ~3-4s render | ~1-2s render |
@@ -1056,32 +1056,32 @@ Criar engine simples inspirado em WordPress template hierarchy:
 
 ```php
 class DPS_Template_Engine {
-    
+
     private string $template_path;
-    
+
     public function __construct( string $base_path ) {
         $this->template_path = trailingslashit( $base_path ) . 'templates/';
     }
-    
+
     /**
      * Renderiza template com dados
      */
     public function render( string $template, array $data = [] ): string {
         $file = $this->locate_template( $template );
-        
+
         if ( ! $file ) {
             return '';
         }
-        
+
         // Extrai dados para scope local
         extract( $data, EXTR_SKIP );
-        
+
         // Captura output
         ob_start();
         include $file;
         return ob_get_clean();
     }
-    
+
     /**
      * Localiza template (permite override via tema)
      */
@@ -1091,13 +1091,13 @@ class DPS_Template_Engine {
         if ( file_exists( $theme_template ) ) {
             return $theme_template;
         }
-        
+
         // 2. Busca no plugin
         $plugin_template = $this->template_path . $template;
         if ( file_exists( $plugin_template ) ) {
             return $plugin_template;
         }
-        
+
         return false;
     }
 }
@@ -1126,28 +1126,28 @@ templates/
 │   ├── form-login-required.php       ← NOVO: redirecionamento para login
 │   └── form-type-selector.php        ← NOVO: seletor tipo (simple/subscription/past)
 ├── emails/
-│   ├── registration-confirmation.php ← NOVO: email confirmação M3
-│   └── booking-confirmation.php      ← NOVO: email confirmação agendamento M3
+│   ├── registration-confirmation.php ← NOVO: email confirmação DPS Signature
+│   └── booking-confirmation.php      ← NOVO: email confirmação agendamento DPS Signature
 └── components/
-    ├── field-text.php                ← Input text M3
-    ├── field-email.php               ← Input email M3
-    ├── field-phone.php               ← Input phone M3
-    ├── field-cpf.php                 ← NOVO: Input CPF M3 (máscara + validação)
-    ├── field-address.php             ← NOVO: Input endereço M3 (Google Maps autocomplete)
-    ├── field-select.php              ← Select M3
-    ├── field-datalist.php            ← NOVO: Input com datalist M3 (raças)
-    ├── field-textarea.php            ← Textarea M3
-    ├── field-checkbox.php            ← Checkbox M3
-    ├── field-currency.php            ← NOVO: Input moeda M3 (preço TaxiDog/Tosa)
-    ├── button-primary.php            ← Botão primário M3
-    ├── button-secondary.php          ← Botão secundário M3
-    ├── button-text.php               ← Botão texto M3
-    ├── card.php                      ← Card M3
-    ├── alert.php                     ← Alert M3
-    ├── loader.php                    ← Loader M3
+    ├── field-text.php                ← Input text DPS Signature
+    ├── field-email.php               ← Input email DPS Signature
+    ├── field-phone.php               ← Input phone DPS Signature
+    ├── field-cpf.php                 ← NOVO: Input CPF DPS Signature (máscara + validação)
+    ├── field-address.php             ← NOVO: Input endereço DPS Signature (Google Maps autocomplete)
+    ├── field-select.php              ← Select DPS Signature
+    ├── field-datalist.php            ← NOVO: Input com datalist DPS Signature (raças)
+    ├── field-textarea.php            ← Textarea DPS Signature
+    ├── field-checkbox.php            ← Checkbox DPS Signature
+    ├── field-currency.php            ← NOVO: Input moeda DPS Signature (preço TaxiDog/Tosa)
+    ├── button-primary.php            ← Botão primário DPS Signature
+    ├── button-secondary.php          ← Botão secundário DPS Signature
+    ├── button-text.php               ← Botão texto DPS Signature
+    ├── card.php                      ← Card DPS Signature
+    ├── alert.php                     ← Alert DPS Signature
+    ├── loader.php                    ← Loader DPS Signature
     ├── progress-bar.php              ← Barra de progresso
     ├── wizard-steps.php              ← Indicador de steps
-    └── recaptcha-badge.php           ← NOVO: reCAPTCHA v3 badge M3
+    └── recaptcha-badge.php           ← NOVO: reCAPTCHA v3 badge DPS Signature
 ```
 
 ### Exemplo de Template — Registration Form Main
@@ -1156,7 +1156,7 @@ templates/
 <?php
 /**
  * Template: Registration Form Main
- * 
+ *
  * @package DPS_Frontend_Addon
  * @version 2.0.0
  */
@@ -1170,7 +1170,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <div class="dps-registration-v2" data-theme="<?php echo esc_attr( $theme ?? 'light' ); ?>">
-    
+
     <!-- Header -->
     <div class="dps-registration-header">
         <h1 class="dps-typescale-headline-large">
@@ -1180,7 +1180,7 @@ if ( ! defined( 'ABSPATH' ) ) {
             <?php esc_html_e( 'Preencha os dados abaixo para criar sua conta', 'dps-frontend-addon' ); ?>
         </p>
     </div>
-    
+
     <!-- Alerts -->
     <?php if ( ! empty( $errors ) ) : ?>
         <?php echo $this->render( 'components/alert.php', [
@@ -1188,25 +1188,25 @@ if ( ! defined( 'ABSPATH' ) ) {
             'message' => implode( '<br>', $errors ),
         ] ); ?>
     <?php endif; ?>
-    
+
     <!-- Form -->
-    <form 
-        method="post" 
+    <form
+        method="post"
         action="<?php echo esc_url( $form_action ); ?>"
         class="dps-registration-form"
         novalidate
     >
-        
+
         <?php echo $nonce_field; ?>
-        
+
         <!-- Seção Cliente -->
         <?php echo $this->render( 'registration/form-client-data.php', $data ); ?>
-        
+
         <!-- Seção Pet (condicional) -->
         <?php if ( $show_pets ) : ?>
             <?php echo $this->render( 'registration/form-pet-data.php', $data ); ?>
         <?php endif; ?>
-        
+
         <!-- Marketing Opt-in -->
         <?php if ( $show_marketing ) : ?>
             <div class="dps-field-group">
@@ -1217,7 +1217,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 ] ); ?>
             </div>
         <?php endif; ?>
-        
+
         <!-- Submit -->
         <div class="dps-form-actions">
             <?php echo $this->render( 'components/button-primary.php', [
@@ -1226,9 +1226,9 @@ if ( ! defined( 'ABSPATH' ) ) {
                 'loading' => true, // Mostra loader ao submeter
             ] ); ?>
         </div>
-        
+
     </form>
-    
+
 </div>
 ```
 
@@ -1237,8 +1237,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 ```php
 <?php
 /**
- * Component: Text Field (M3 Expressive)
- * 
+ * Component: Text Field (DPS Signature)
+ *
  * @package DPS_Frontend_Addon
  * @version 2.0.0
  */
@@ -1252,14 +1252,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <div class="dps-field dps-field--text <?php echo $error ? 'dps-field--error' : ''; ?>">
-    
+
     <label for="dps-<?php echo esc_attr( $name ); ?>" class="dps-field-label">
         <?php echo esc_html( $label ); ?>
         <?php if ( $required ) : ?>
             <span class="dps-field-required" aria-label="<?php esc_attr_e( 'Obrigatório', 'dps-frontend-addon' ); ?>">*</span>
         <?php endif; ?>
     </label>
-    
+
     <input
         type="<?php echo esc_attr( $type ?? 'text' ); ?>"
         id="dps-<?php echo esc_attr( $name ); ?>"
@@ -1271,17 +1271,17 @@ if ( ! defined( 'ABSPATH' ) ) {
         <?php echo $autocomplete ? 'autocomplete="' . esc_attr( $autocomplete ) . '"' : ''; ?>
         aria-describedby="<?php echo $error ? 'dps-' . esc_attr( $name ) . '-error' : ''; ?>"
     />
-    
+
     <?php if ( $error ) : ?>
-        <span 
-            id="dps-<?php echo esc_attr( $name ); ?>-error" 
+        <span
+            id="dps-<?php echo esc_attr( $name ); ?>-error"
             class="dps-field-error"
             role="alert"
         >
             <?php echo esc_html( $error ); ?>
         </span>
     <?php endif; ?>
-    
+
 </div>
 ```
 
@@ -1451,7 +1451,7 @@ Medição via `performance.mark()` / `performance.measure()` no JS e `microtime(
    - Hooks de integração OK
    - Rollback testado
 
-3. **M3 — Booking V2 Funcional** (fim Sprint 10)
+3. **DPS Signature — Booking V2 Funcional** (fim Sprint 10)
    - Wizard completo 5 steps
    - AJAX endpoints OK
    - Integrações críticas preservadas
@@ -1490,7 +1490,7 @@ Medição via `performance.mark()` / `performance.measure()` no JS e `microtime(
 - [ ] Conformidade com AGENTS.md e PLAYBOOK.md
 - [ ] Text domain consistente: `dps-frontend-addon`
 
-✅ **Visual (M3 Expressive):**
+✅ **Visual (DPS Signature):**
 - [ ] 100% design tokens CSS
 - [ ] Zero hex/rgb hardcoded
 - [ ] HTML semântico
@@ -1696,7 +1696,7 @@ Medição via `performance.mark()` / `performance.measure()` no JS e `microtime(
 3. **Kickoff Fase 7.1**
    - [ ] Criar estrutura de diretórios
    - [ ] Implementar classes base abstratas
-   - [ ] Criar primeiros componentes M3
+   - [ ] Criar primeiros componentes DPS Signature
    - [ ] Documentar padrões de código
 
 4. **Comunicação**
@@ -1711,8 +1711,8 @@ Medição via `performance.mark()` / `performance.measure()` no JS e `microtime(
 
 A **Fase 7** representa a **evolução definitiva** do Frontend Add-on:
 
-**De:** Wrappers que reutilizam código legado  
-**Para:** Implementações nativas 100% modernas e alinhadas ao Material 3 Expressive
+**De:** Wrappers que reutilizam código legado
+**Para:** Implementações nativas 100% modernas e alinhadas ao DPS Signature
 
 **Benefícios esperados:**
 - ✨ UX/UI completamente redesenhada do zero
@@ -1733,9 +1733,9 @@ Este plano estabelece as bases para que o Frontend Add-on atinja seu **potencial
 
 ---
 
-**Versão:** 1.4.0  
-**Status:** ✅ Fase 7 Completa (todas as subfases de código implementadas)  
-**Fase 7.5 — Depreciação:** Aviso admin implementado. Remoção do legado aguarda pré-requisitos (90+ dias V2 produção, 80%+ migração, zero bugs críticos, telemetria <5% v1)  
+**Versão:** 1.4.0
+**Status:** ✅ Fase 7 Completa (todas as subfases de código implementadas)
+**Fase 7.5 — Depreciação:** Aviso admin implementado. Remoção do legado aguarda pré-requisitos (90+ dias V2 produção, 80%+ migração, zero bugs críticos, telemetria <5% v1)
 **Revisão:** v1.4.0 — Fase 7.5 parcial: aviso de depreciação admin com dismissal 30 dias, documentação visual completa (2026-02-12)
 
 ---
@@ -1745,8 +1745,8 @@ Este plano estabelece as bases para que o Frontend Add-on atinja seu **potencial
 - `FRONTEND_DEPRECATION_POLICY.md` — Política de 180 dias
 - `FRONTEND_REMOVAL_TARGETS.md` — Alvos de remoção
 - `AGENT_ENGINEERING_PLAYBOOK.md` — Padrões de código
-- `VISUAL_STYLE_GUIDE.md` — Design tokens M3
-- `FRONTEND_DESIGN_INSTRUCTIONS.md` — Metodologia M3
+- `VISUAL_STYLE_GUIDE.md` — Design tokens DPS Signature
+- `FRONTEND_DESIGN_INSTRUCTIONS.md` — Metodologia DPS Signature
 
 **Aprovação necessária de:**
 - [ ] Product Owner

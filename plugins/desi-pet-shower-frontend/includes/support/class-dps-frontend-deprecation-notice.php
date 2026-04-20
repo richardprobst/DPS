@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Aviso de depreciação do dual-run (v1) do Frontend Add-on.
  *
@@ -92,7 +92,7 @@ final class DPS_Frontend_Deprecation_Notice {
                 echo wp_kses(
                     sprintf(
                         /* translators: %s: list of v1 modules */
-                        __( 'Os módulos %s utilizam o modo dual-run (v1) que será descontinuado em versão futura. Recomendamos migrar para os módulos nativos V2, que oferecem melhor desempenho, independência do legado e design M3 Expressive completo.', 'dps-frontend-addon' ),
+                        __( 'Os módulos %s utilizam o modo dual-run (v1) que será descontinuado em versão futura. Recomendamos migrar para os módulos nativos V2, que oferecem melhor desempenho, independência do legado e design DPS Signature completo.', 'dps-frontend-addon' ),
                         '<strong>' . esc_html( $modules_list ) . '</strong>'
                     ),
                     [ 'strong' => [] ]

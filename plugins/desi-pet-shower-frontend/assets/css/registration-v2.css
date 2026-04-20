@@ -1,5 +1,5 @@
-/**
- * Registration V2 — Styles (M3 Expressive)
+﻿/**
+ * Registration V2 — Styles (DPS Signature)
  *
  * Estilos nativos para o formulário de cadastro V2.
  * Utiliza design tokens do DPS base.
@@ -33,7 +33,7 @@
     gap: var(--dps-v2-spacing-md);
 }
 
-/* === Typography (M3 tokens) === */
+/* === Typography (DPS Signature tokens) === */
 .dps-v2-typescale-headline-large {
     font-size: var(--dps-typescale-headline-large-size, 2rem);
     font-weight: var(--dps-typescale-headline-large-weight, 400);

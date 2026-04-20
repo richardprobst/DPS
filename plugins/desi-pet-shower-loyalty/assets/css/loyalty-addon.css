@@ -1,12 +1,12 @@
-/**
- * Estilos do Loyalty Add-on — M3 Expressive
+﻿/**
+ * Estilos do Loyalty Add-on — DPS Signature
  *
  * @package Desi_Pet_Shower_Loyalty
  * @since   2.0.0
  */
 
 /* ==========================================================================
-   Semantic Token Mapping (M3 Expressive)
+   Semantic Token Mapping (DPS Signature)
    ========================================================================== */
 
 .dps-loyalty-wrap,
@@ -147,7 +147,7 @@
     line-height: 1.5;
 }
 
-/* Toggle Switch — M3 style */
+/* Toggle Switch — DPS Signature style */
 .dps-campaign-toggle-switch {
     display: flex;
     align-items: center;
@@ -215,7 +215,7 @@
 }
 
 /* ==========================================================================
-   Dashboard de Métricas — M3
+   Dashboard de Métricas — DPS Signature
    ========================================================================== */
 
 .dps-loyalty-dashboard {
@@ -317,7 +317,7 @@
 .dps-tier-ouro { background: #d97706; }
 
 /* ==========================================================================
-   Tabela de Indicações — M3
+   Tabela de Indicações — DPS Signature
    ========================================================================== */
 
 .dps-referrals-header {
@@ -374,7 +374,7 @@
     font-size: 13px;
 }
 
-/* Status badges — M3 */
+/* Status badges — DPS Signature */
 .dps-status-badge {
     display: inline-block;
     padding: 4px 12px;
@@ -394,7 +394,7 @@
 }
 
 /* ==========================================================================
-   Formulário de Configurações — M3
+   Formulário de Configurações — DPS Signature
    ========================================================================== */
 
 .dps-loyalty-settings-form {
@@ -494,7 +494,7 @@
 }
 
 /* ==========================================================================
-   Barra de Progresso de Pontos — M3
+   Barra de Progresso de Pontos — DPS Signature
    ========================================================================== */
 
 .dps-points-progress-wrapper {
@@ -558,7 +558,7 @@
 }
 
 /* ==========================================================================
-   Seção de Indicações — M3
+   Seção de Indicações — DPS Signature
    ========================================================================== */
 
 .dps-portal-referral-section {
@@ -715,7 +715,7 @@
 }
 
 /* ==========================================================================
-   Filtros — M3
+   Filtros — DPS Signature
    ========================================================================== */
 
 .dps-referrals-filters {
@@ -735,7 +735,7 @@
 }
 
 /* ==========================================================================
-   Histórico de Pontos — M3
+   Histórico de Pontos — DPS Signature
    ========================================================================== */
 
 .dps-points-history {
@@ -793,7 +793,7 @@
 }
 
 /* ==========================================================================
-   Paginação — M3
+   Paginação — DPS Signature
    ========================================================================== */
 
 .dps-pagination {
@@ -856,7 +856,7 @@
 }
 
 /* ==========================================================================
-   Autocomplete de Busca de Clientes — M3
+   Autocomplete de Busca de Clientes — DPS Signature
    ========================================================================== */
 
 .dps-client-search-container {
@@ -974,7 +974,7 @@
 }
 
 /* ==========================================================================
-   Botões — M3 Expressive (Pill Shape)
+   Botões — DPS Signature (Pill Shape)
    ========================================================================== */
 
 .dps-loyalty-btn-primary,

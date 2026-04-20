@@ -1,10 +1,10 @@
-# Space Groomers - Fase 2
+﻿# Space Groomers - Fase 2
 
 ## Objetivo da fase
 Deixar o jogo mais vivo e mais claro no momento a momento, com impacto suficiente para estimular replay sem sacrificar performance mobile.
 
 ## Referencia visual aplicada
-As mudancas visuais e de HUD desta fase seguiram o padrao M3 descrito em:
+As mudancas visuais e de HUD desta fase seguiram o sistema visual DPS Signature descrito em:
 - `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`
 - `docs/visual/VISUAL_STYLE_GUIDE.md`
 

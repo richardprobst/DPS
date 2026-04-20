@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Página administrativa do Push Add-on.
  *
@@ -56,7 +56,7 @@ class DPS_Push_Admin {
         $addon_url = plugin_dir_url( dirname( __DIR__ ) . '/desi-pet-shower-push-addon.php' );
         $version   = '2.0.0';
 
-        // Design tokens M3 Expressive.
+        // Design tokens DPS Signature.
         $css_deps = [];
         if ( defined( 'DPS_BASE_URL' ) ) {
             wp_register_style(

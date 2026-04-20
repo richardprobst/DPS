@@ -1,10 +1,10 @@
-# Space Groomers — Fase 1 (mobile-first)
+﻿# Space Groomers — Fase 1 (mobile-first)
 
 ## Objetivo da fase
 Evoluir o add-on para uma experiência mobile-first com entrada rápida, controle confortável com uma mão, retry instantâneo e estabilidade de performance.
 
 ## Referência visual aplicada
-As mudanças de layout/frontend seguiram o padrão M3 descrito em:
+As mudanças de layout/frontend seguiram o sistema visual DPS Signature descrito em:
 - `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`
 - `docs/visual/VISUAL_STYLE_GUIDE.md`
 

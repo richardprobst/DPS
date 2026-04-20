@@ -2,7 +2,7 @@
 
 Sistema modular de gestão para pet shops, construído como monorepo WordPress com um plugin base e add-ons especializados.
 
-**Autor:** PRObst  
+**Autor:** PRObst
 **Site:** [www.probst.pro](https://www.probst.pro)
 
 ---
@@ -145,7 +145,7 @@ Referência obrigatória: [AGENTS.md](AGENTS.md).
 
 - Use commits curtos em português (imperativo).
 - Não adicione arquivos `.md` soltos na raiz além dos documentos centrais.
-- Para mudanças visuais, siga o padrão M3 em `docs/visual/` e registre evidências em `docs/screenshots/YYYY-MM-DD/`.
+- Para mudanças visuais, siga o sistema visual `DPS Signature` em `docs/visual/` e registre evidências em `docs/screenshots/YYYY-MM-DD/`.
 - Para mudanças estruturais, reflita impactos em `ANALYSIS.md` e, quando necessário, em `CHANGELOG.md`.
 
 ---

@@ -1,8 +1,8 @@
-<?php
+﻿<?php
 /**
  * Módulo de Agendamento V2 nativo do Frontend Add-on (Fase 7).
  *
- * Implementação 100% nativa do wizard de agendamento com Material 3 Expressive.
+ * Implementação 100% nativa do wizard de agendamento com DPS Signature.
  * Completamente independente do add-on legado DPS_Booking_Addon.
  *
  * Shortcode: [dps_booking_v2]
@@ -129,7 +129,7 @@ final class DPS_Frontend_Booking_V2_Module extends DPS_Abstract_Module_V2 {
 
         $this->hookBridge->stepRender( $currentStep, [ 'atts' => $atts ] );
 
-        $this->logger->info( 'Shortcode dps_booking_v2 renderizado (nativo M3).' );
+        $this->logger->info( 'Shortcode dps_booking_v2 renderizado (nativo DPS Signature).' );
         $this->logger->track( 'booking_v2' );
 
         return $html;

@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 /**
- * Component: Phone Field (M3 Expressive)
+ * Component: Phone Field (DPS Signature)
  *
  * @package DPS_Frontend_Addon
  * @since   2.0.0

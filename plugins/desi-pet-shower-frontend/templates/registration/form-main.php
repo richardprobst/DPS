@@ -1,8 +1,8 @@
-<?php
+﻿<?php
 /**
  * Template: Registration V2 — Form Main
  *
- * Wrapper principal do formulário nativo de cadastro M3 Expressive.
+ * Wrapper principal do formulário nativo de cadastro DPS Signature.
  *
  * @package DPS_Frontend_Addon
  * @since   2.0.0

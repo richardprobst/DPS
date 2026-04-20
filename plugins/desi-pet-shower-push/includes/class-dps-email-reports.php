@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Classe de Relatórios por Email para o DPS.
  *
@@ -72,7 +72,7 @@ class DPS_Email_Reports {
 
     /**
      * Agenda crons se estiverem faltando (fallback).
-     * 
+     *
      * Este método garante que os crons sejam agendados mesmo que o hook
      * de ativação não tenha sido executado corretamente.
      *
@@ -698,7 +698,7 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Gera o cabeçalho padrão M3 do email.
+     * Gera o cabeçalho sistema visual DPS Signature do email.
      *
      * @since 1.4.0
      * @param string $icon     Emoji do ícone.
@@ -742,7 +742,7 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Gera o rodapé padrão M3 do email.
+     * Gera o rodapé sistema visual DPS Signature do email.
      *
      * @since 1.4.0
      * @return string HTML.

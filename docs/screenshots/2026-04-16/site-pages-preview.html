@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Preview - Paginas Publicas</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="../../layout/site/flatsome/flatsome-additional-css.css">
+    <style>
+        :root {
+            color-scheme: light;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Manrope", "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(143, 214, 244, 0.12) 0%, transparent 28%),
+                radial-gradient(circle at top right, rgba(23, 48, 66, 0.06) 0%, transparent 22%),
+                linear-gradient(180deg, #fff9f1 0%, #f3ece1 100%);
+            color: #11161c;
+        }
+
+        .preview-shell {
+            width: min(100%, 1480px);
+            margin: 0 auto;
+            padding: 24px 16px 72px;
+        }
+
+        .preview-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: grid;
+            gap: 14px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(17, 22, 28, 0.08);
+            background: rgba(255, 249, 241, 0.86);
+            backdrop-filter: blur(12px);
+        }
+
+        .preview-toolbar__title {
+            margin: 0;
+            font-family: "Sora", "Segoe UI", sans-serif;
+            font-size: clamp(1.4rem, 2.6vw, 2rem);
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        .preview-toolbar__meta {
+            margin: 0;
+            color: #676056;
+            line-height: 1.6;
+        }
+
+        .preview-toolbar__nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .preview-toolbar__nav a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding: 10px 14px;
+            border: 1px solid rgba(17, 22, 28, 0.08);
+            border-radius: 0;
+            background: rgba(255, 252, 247, 0.88);
+            color: #11161c;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+        }
+
+        .preview-toolbar__nav a:hover,
+        .preview-toolbar__nav a:focus-visible,
+        .preview-toolbar__nav a[aria-current="page"] {
+            transform: translateY(-1px);
+            border-color: rgba(23, 48, 66, 0.18);
+            box-shadow: 0 16px 30px rgba(17, 22, 28, 0.08);
+        }
+
+        .preview-mount {
+            min-height: 60vh;
+        }
+
+        body.preview-clean .preview-shell {
+            width: 100%;
+            max-width: none;
+            padding-top: 0;
+        }
+
+        body.preview-clean .preview-toolbar {
+            display: none;
+        }
+
+        .preview-empty {
+            padding: 28px;
+            border: 1px solid rgba(17, 22, 28, 0.08);
+            border-radius: 0;
+            background: rgba(255, 252, 247, 0.9);
+        }
+
+        @media (max-width: 600px) {
+            .preview-shell {
+                padding: 14px 10px 56px;
+            }
+
+            .preview-toolbar {
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-shell">
+        <header class="preview-toolbar">
+            <div>
+                <h1 class="preview-toolbar__title">Preview - Paginas Publicas</h1>
+                <p class="preview-toolbar__meta">Shell local para revisar os fragments do WordPress com o CSS compartilhado do Flatsome.</p>
+            </div>
+            <nav class="preview-toolbar__nav" aria-label="Selecionar pagina">
+                <a href="?page=home" data-preview-link="home">Home</a>
+                <a href="?page=materia-piloto" data-preview-link="materia-piloto">Materia piloto</a>
+                <a href="?page=materia-carrapatos-pulgas" data-preview-link="materia-carrapatos-pulgas">Materia: carrapatos e pulgas</a>
+                <a href="?page=quem-somos" data-preview-link="quem-somos">Quem somos</a>
+                <a href="?page=banho-e-tosa" data-preview-link="banho-e-tosa">Banho e tosa</a>
+                <a href="?page=perguntas-frequentes" data-preview-link="perguntas-frequentes">Perguntas frequentes</a>
+                <a href="?page=primeira-visita" data-preview-link="primeira-visita">Primeira visita</a>
+                <a href="?page=taxidog" data-preview-link="taxidog">TaxiDog</a>
+                <a href="?page=contato-e-localizacao" data-preview-link="contato-e-localizacao">Contato e localizacao</a>
+                <a href="?page=frequencia-e-cuidados" data-preview-link="frequencia-e-cuidados">Frequencia e cuidados</a>
+                <a href="?page=nossos-diferenciais" data-preview-link="nossos-diferenciais">Nossos diferenciais</a>
+                <a href="?page=materia-breaking-news" data-preview-link="materia-breaking-news">Modelo de materia</a>
+                <a href="?page=regras-e-termos-de-atendimento" data-preview-link="regras-e-termos-de-atendimento">Regras e termos</a>
+                <a href="?page=politica-de-privacidade" data-preview-link="politica-de-privacidade">Politica de privacidade</a>
+            </nav>
+        </header>
+
+        <main class="preview-mount" id="preview-mount" aria-live="polite">
+            <div class="preview-empty">Carregando preview...</div>
+        </main>
+    </div>
+
+    <script>
+        const pages = {
+            "home": {
+                label: "Home",
+                path: "../../layout/site/pages/home/page-content.html"
+            },
+            "materia-piloto": {
+                label: "Materia piloto",
+                path: "../../layout/site/pages/materias/cinco-sinais-ajuste-rotina-banho/page-content.html"
+            },
+            "materia-carrapatos-pulgas": {
+                label: "Materia: carrapatos e pulgas",
+                path: "../../layout/site/pages/materias/carrapatos-e-pulgas-no-cachorro-riscos-e-cuidados/page-content.html"
+            },
+            "quem-somos": {
+                label: "Quem somos",
+                path: "../../layout/site/pages/quem-somos/page-content.html"
+            },
+            "banho-e-tosa": {
+                label: "Banho e tosa",
+                path: "../../layout/site/pages/banho-e-tosa/page-content.html"
+            },
+            "perguntas-frequentes": {
+                label: "Perguntas frequentes",
+                path: "../../layout/site/pages/perguntas-frequentes/page-content.html"
+            },
+            "primeira-visita": {
+                label: "Primeira visita",
+                path: "../../layout/site/pages/primeira-visita/page-content.html"
+            },
+            "taxidog": {
+                label: "TaxiDog",
+                path: "../../layout/site/pages/taxidog/page-content.html"
+            },
+            "contato-e-localizacao": {
+                label: "Contato e localizacao",
+                path: "../../layout/site/pages/contato-e-localizacao/page-content.html"
+            },
+            "frequencia-e-cuidados": {
+                label: "Frequencia e cuidados",
+                path: "../../layout/site/pages/frequencia-e-cuidados/page-content.html"
+            },
+            "nossos-diferenciais": {
+                label: "Nossos diferenciais",
+                path: "../../layout/site/pages/nossos-diferenciais/page-content.html"
+            },
+            "materia-breaking-news": {
+                label: "Modelo de materia",
+                path: "../../layout/site/templates/materia-breaking-news/page-content.html"
+            },
+            "regras-e-termos-de-atendimento": {
+                label: "Regras e termos",
+                path: "../../layout/site/pages/regras-e-termos-de-atendimento/page-content.html"
+            },
+            "politica-de-privacidade": {
+                label: "Politica de privacidade",
+                path: "../../layout/site/pages/politica-de-privacidade/page-content.html"
+            }
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        const pageKey = pages[params.get("page")] ? params.get("page") : "home";
+        const currentPage = pages[pageKey];
+        const mount = document.getElementById("preview-mount");
+        const cleanMode = params.get("clean") === "1";
+
+        if (cleanMode) {
+            document.body.classList.add("preview-clean");
+        }
+
+        document.querySelectorAll("[data-preview-link]").forEach((link) => {
+            if (link.dataset.previewLink === pageKey) {
+                link.setAttribute("aria-current", "page");
+            }
+        });
+
+        document.title = `Preview - ${currentPage.label}`;
+
+        fetch(currentPage.path)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`Falha ao carregar ${currentPage.path}`);
+                }
+
+                return response.text();
+            })
+            .then((html) => {
+                mount.innerHTML = html;
+            })
+            .catch((error) => {
+                mount.innerHTML = `<div class="preview-empty"><strong>Falha ao carregar o preview.</strong><br>${error.message}</div>`;
+            });
+    </script>
+</body>
+</html>

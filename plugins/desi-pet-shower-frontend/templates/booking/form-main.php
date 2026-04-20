@@ -1,8 +1,8 @@
-<?php
+﻿<?php
 /**
  * Template: Booking V2 — Form Main (Wizard Container)
  *
- * Wrapper principal do wizard nativo de agendamento M3 Expressive.
+ * Wrapper principal do wizard nativo de agendamento DPS Signature.
  * Renderiza os steps do wizard baseado no estado atual.
  *
  * @package DPS_Frontend_Addon

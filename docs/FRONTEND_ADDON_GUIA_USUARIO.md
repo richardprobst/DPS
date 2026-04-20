@@ -1,8 +1,8 @@
-# Guia do Usuário: Frontend Add-on (desi.pet by PRObst)
+﻿# Guia do Usuário: Frontend Add-on (desi.pet by PRObst)
 
-> **Versão**: 1.0.0  
-> **Última atualização**: 2026-02-12  
-> **Autor**: PRObst  
+> **Versão**: 1.0.0
+> **Última atualização**: 2026-02-12
+> **Autor**: PRObst
 > **Site**: [www.probst.pro](https://www.probst.pro)
 
 ---
@@ -32,7 +32,7 @@ O **Frontend Add-on** (`desi-pet-shower-frontend`) é um complemento modular do 
 ### ✨ Principais características
 
 - **Arquitetura moderna PHP 8.4**: Código otimizado e seguro
-- **Design Material 3 Expressive**: Interface visual moderna e consistente
+- **Design DPS Signature**: Interface visual moderna e consistente
 - **Feature Flags**: Controle granular de ativação por módulo
 - **Rollback instantâneo**: Desative módulos sem impactar o sistema
 - **Dual-run**: Funciona em paralelo com add-ons legados durante a migração
@@ -89,17 +89,17 @@ Após ativar o plugin, você verá:
 
 O Frontend Add-on é composto por **3 módulos independentes**, cada um controlado por uma feature flag. Você pode ativar ou desativar cada módulo conforme sua necessidade.
 
-Além disso, os **módulos nativos V2** (Fase 7) oferecem formulários 100% independentes dos add-ons legados, com implementação Material 3 Expressive nativa.
+Além disso, os **módulos nativos V2** (Fase 7) oferecem formulários 100% independentes dos add-ons legados, com implementação DPS Signature nativa.
 
 ### 📋 Módulo Registration (Cadastro)
 
-**Status:** Operacional (Fase 2)  
-**Feature Flag:** `registration`  
+**Status:** Operacional (Fase 2)
+**Feature Flag:** `registration`
 **Shortcode assumido:** `[dps_registration_form]`
 
 **O que faz:**
 - Exibe formulário público de cadastro para clientes e pets
-- Aplica estilos modernos Material 3 Expressive
+- Aplica estilos modernos DPS Signature
 - Mantém compatibilidade total com o add-on legado de cadastro
 - Preserva todos os hooks de integração (ex: integração com Loyalty)
 
@@ -110,13 +110,13 @@ Além disso, os **módulos nativos V2** (Fase 7) oferecem formulários 100% inde
 
 ### 📅 Módulo Booking (Agendamento)
 
-**Status:** Operacional (Fase 3)  
-**Feature Flag:** `booking`  
+**Status:** Operacional (Fase 3)
+**Feature Flag:** `booking`
 **Shortcode assumido:** `[dps_booking_form]`
 
 **O que faz:**
 - Exibe formulário público de agendamento de serviços
-- Aplica estilos modernos Material 3 Expressive
+- Aplica estilos modernos DPS Signature
 - Mantém compatibilidade total com o add-on legado de agendamento
 - Preserva todos os hooks críticos consumidos por 7+ add-ons
 
@@ -127,8 +127,8 @@ Além disso, os **módulos nativos V2** (Fase 7) oferecem formulários 100% inde
 
 ### ⚙️ Módulo Settings (Configurações)
 
-**Status:** Operacional (Fase 4)  
-**Feature Flag:** `settings`  
+**Status:** Operacional (Fase 4)
+**Feature Flag:** `settings`
 **Hooks consumidos:** `dps_settings_register_tabs`, `dps_settings_save_save_frontend`
 
 **O que faz:**
@@ -144,12 +144,12 @@ Além disso, os **módulos nativos V2** (Fase 7) oferecem formulários 100% inde
 
 ### 📋 Módulo Registration V2 (Cadastro Nativo)
 
-**Status:** Operacional (Fase 7.2)  
-**Feature Flag:** `registration_v2`  
+**Status:** Operacional (Fase 7.2)
+**Feature Flag:** `registration_v2`
 **Shortcode:** `[dps_registration_v2]`
 
 **O que faz:**
-- Formulário de cadastro 100% nativo M3 Expressive — não depende do add-on legado
+- Formulário de cadastro 100% nativo DPS Signature — não depende do add-on legado
 - Validação completa: nome, email, telefone, CPF (mod-11), pets
 - Detecção de duplicatas por telefone com override para admin
 - reCAPTCHA v3 integrado (quando habilitado)
@@ -166,12 +166,12 @@ Além disso, os **módulos nativos V2** (Fase 7) oferecem formulários 100% inde
 
 ### 📅 Módulo Booking V2 (Agendamento Nativo)
 
-**Status:** Operacional (Fase 7.3)  
-**Feature Flag:** `booking_v2`  
+**Status:** Operacional (Fase 7.3)
+**Feature Flag:** `booking_v2`
 **Shortcode:** `[dps_booking_v2]`
 
 **O que faz:**
-- Wizard de agendamento nativo M3 com 5 steps:
+- Wizard de agendamento nativo DPS Signature com 5 steps:
   1. **Busca e seleção de cliente** (AJAX por telefone)
   2. **Seleção de pets** (múltiplos, com paginação)
   3. **Seleção de serviços** (com preços por porte e total acumulado)
@@ -311,12 +311,12 @@ Para minimizar riscos, siga esta ordem de ativação:
 
 O Frontend Add-on trabalha com shortcodes existentes (v1, em dual-run com legado) e novos shortcodes nativos (v2, independentes). Abaixo, a lista completa de shortcodes utilizados e como aplicá-los.
 
-> **v1 (dual-run):** `[dps_registration_form]` e `[dps_booking_form]` — envolvem o legado com surface M3  
+> **v1 (dual-run):** `[dps_registration_form]` e `[dps_booking_form]` — envolvem o legado com surface DPS Signature
 > **v2 (nativo):** `[dps_registration_v2]` e `[dps_booking_v2]` — implementação 100% independente
 
 ### 🔖 `[dps_registration_form]`
 
-**Descrição:** Exibe o formulário de cadastro de clientes e pets com design Material 3 Expressive.
+**Descrição:** Exibe o formulário de cadastro de clientes e pets com design DPS Signature.
 
 **Módulo requerido:** Registration (`registration` flag habilitada)
 
@@ -359,7 +359,7 @@ add_filter( 'dps_registration_agenda_url', 'minha_funcao', 10, 2 );
 
 ### 🔖 `[dps_booking_form]`
 
-**Descrição:** Exibe o formulário de agendamento de serviços com design Material 3 Expressive.
+**Descrição:** Exibe o formulário de agendamento de serviços com design DPS Signature.
 
 **Módulo requerido:** Booking (`booking` flag habilitada)
 
@@ -402,7 +402,7 @@ add_action( 'dps_base_appointment_assignment_fields', 'minha_funcao', 10, 1 );
 
 ### 🔖 `[dps_registration_v2]`
 
-**Descrição:** Formulário nativo de cadastro Material 3 Expressive. **100% independente do add-on legado** — não requer `DPS_Registration_Addon`.
+**Descrição:** Formulário nativo de cadastro DPS Signature. **100% independente do add-on legado** — não requer `DPS_Registration_Addon`.
 
 **Módulo requerido:** Registration V2 (`registration_v2` flag habilitada)
 
@@ -450,9 +450,9 @@ add_action( 'dps_registration_v2_pet_created', 'minha_funcao', 10, 3 );
 
 ### 🔖 `[dps_booking_v2]`
 
-**Descrição:** Wizard nativo de agendamento Material 3 Expressive com 5 steps. **100% independente do add-on legado** — não requer `DPS_Booking_Addon`.
+**Descrição:** Wizard nativo de agendamento DPS Signature com 5 steps. **100% independente do add-on legado** — não requer `DPS_Booking_Addon`.
 
-**Módulo requerido:** Booking V2 (`booking_v2` flag habilitada)  
+**Módulo requerido:** Booking V2 (`booking_v2` flag habilitada)
 **Requisito:** Usuário logado com capability `manage_options`, `dps_manage_clients`, `dps_manage_pets` ou `dps_manage_appointments`
 
 **Parâmetros:**
@@ -676,7 +676,7 @@ Para uma experiência ideal, crie a seguinte estrutura de páginas:
 
 ## Personalização Visual
 
-O Frontend Add-on utiliza o **Design System Material 3 Expressive** para garantir uma experiência visual moderna e consistente.
+O Frontend Add-on utiliza o **Design System DPS Signature** para garantir uma experiência visual moderna e consistente.
 
 ### 🎨 Sistema de Design Tokens
 
@@ -716,7 +716,7 @@ Todos os estilos são baseados em **CSS Custom Properties** (variáveis CSS), fa
 #### 2. Tipografia
 
 ```css
-/* Escala tipográfica Material 3 */
+/* Escala tipográfica DPS Signature */
 --dps-typescale-display-large: 57px;
 --dps-typescale-headline-large: 32px;
 --dps-typescale-title-large: 22px;
@@ -772,10 +772,10 @@ Adicione CSS customizado no seu tema que sobrescreve os tokens:
     --dps-color-primary: #1976D2;
     --dps-color-on-primary: #FFFFFF;
     --dps-color-primary-container: #BBDEFB;
-    
+
     /* Mudar arredondamento padrão */
     --dps-shape-medium: 8px;
-    
+
     /* Acelerar animações */
     --dps-motion-duration-medium: 200ms;
 }
@@ -1080,7 +1080,7 @@ O sistema foi projetado para rollback instantâneo desabilitando feature flags.
 - ✅ Sem perda de dados
 - ✅ Sem necessidade de reconfigurar
 
-Apenas os estilos M3 Expressive deixam de ser aplicados, voltando ao visual legado.
+Apenas os estilos DPS Signature deixam de ser aplicados, voltando ao visual legado.
 
 ---
 
@@ -1176,7 +1176,7 @@ Não há dependência entre módulos.
 - ✅ **Fase 4:** Módulo Settings (aba admin) — Concluída
 - ✅ **Fase 5:** Consolidação e documentação — Concluída
 - ✅ **Fase 6:** Governança de depreciação — Concluída
-- ✅ **Fase 7.1:** Preparação V2 (abstracts, template engine, hook bridges, componentes M3) — Concluída
+- ✅ **Fase 7.1:** Preparação V2 (abstracts, template engine, hook bridges, componentes DPS Signature) — Concluída
 - ✅ **Fase 7.2:** Registration V2 nativo (formulário independente) — Concluída
 - ✅ **Fase 7.3:** Booking V2 nativo (wizard 5-step independente) — Concluída
 - ✅ **Fase 7.4:** Coexistência e migração (toggle admin, documentação, telemetria) — Concluída
@@ -1228,7 +1228,7 @@ Este aviso:
 | `docs/refactoring/FRONTEND_ADDON_PHASED_ROADMAP.md` | Roadmap completo das 6 fases |
 | `docs/refactoring/FRONTEND_NATIVE_IMPLEMENTATION_PLAN.md` | Plano da Fase 7 (implementação nativa V2) |
 | `docs/refactoring/FRONTEND_DEPRECATION_POLICY.md` | Política de depreciação |
-| `docs/visual/VISUAL_STYLE_GUIDE.md` | Guia de estilos visuais M3 |
+| `docs/visual/VISUAL_STYLE_GUIDE.md` | Guia de estilos visuais DPS Signature |
 | `ANALYSIS.md` | Arquitetura e contratos internos |
 | `CHANGELOG.md` | Histórico de versões e mudanças |
 
@@ -1250,6 +1250,6 @@ Frontend Add-on é parte do **desi.pet by PRObst** e é licenciado sob GPL-2.0+.
 
 ---
 
-**Última atualização:** 2026-02-12  
-**Versão do documento:** 1.0.0  
+**Última atualização:** 2026-02-12
+**Versão do documento:** 1.0.0
 **Versão do add-on:** 1.5.0 (todas as 6 fases concluídas)

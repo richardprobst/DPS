@@ -1,15 +1,15 @@
-/* ========================================
+﻿/* ========================================
    PORTAL DO CLIENTE - Estilo Minimalista
    ======================================== */
 
 /* ========================================
-   CSS VARIABLES — M3 Expressive Tokens
+   CSS VARIABLES — DPS Signature Tokens
    Mapeamento semântico via dps-design-tokens.css
-   
+
    Requer: dps-design-tokens.css carregado antes deste arquivo.
    ======================================== */
 
-/* Tokens semânticos do portal, mapeados para M3 (via dps-design-tokens.css) */
+/* Tokens semânticos do portal, resolvidos por dps-design-tokens.css */
 .dps-client-portal,
 .dps-client-portal-access-page,
 .dps-chat-widget {
@@ -18,7 +18,7 @@
     --dps-primary-hover: var(--dps-color-primary-hover);
     --dps-primary-active: var(--dps-color-primary-pressed);
     --dps-primary-light: var(--dps-color-primary-container);
-    
+
     /* Cores de estado */
     --dps-success: var(--dps-color-success);
     --dps-success-bg: var(--dps-color-success-container);
@@ -30,7 +30,7 @@
     --dps-info: var(--dps-color-primary);
     --dps-error: var(--dps-color-error);
     --dps-error-bg: var(--dps-color-error-container);
-    
+
     /* Cores neutras */
     --dps-white: var(--dps-color-surface-container-lowest);
     --dps-gray-50: var(--dps-color-surface-bright);
@@ -43,16 +43,16 @@
     --dps-gray-700: var(--dps-color-on-surface);
     --dps-gray-800: var(--dps-color-on-surface);
     --dps-gray-900: var(--dps-color-on-surface);
-    
+
     /* Bordas */
     --dps-border-color: var(--dps-color-outline-variant);
-    
+
     /* Sombras */
     --dps-shadow-sm: var(--dps-elevation-1);
     --dps-shadow: var(--dps-elevation-2);
     --dps-shadow-md: var(--dps-elevation-3);
     --dps-shadow-lg: var(--dps-elevation-4);
-    
+
     /* Tipografia */
     --dps-font-base: var(--dps-font-body);
     --dps-font-mono: var(--dps-font-mono);
@@ -60,10 +60,10 @@
 
 /* ========================================
    TELA DE ACESSO (Portal Access Screen)
-   M3 Expressive — Acolhedor, moderno, confiável
+   DPS Signature — Acolhedor, moderno, confiável
    ======================================== */
 
-/* Animação de entrada M3 Expressive para o card principal */
+/* Animação de entrada DPS Signature para o card principal */
 @keyframes dps-access-card-enter {
     from {
         opacity: 0;
@@ -75,7 +75,7 @@
     }
 }
 
-/* Feedback de sucesso — pulse verde M3 */
+/* Feedback de sucesso — pulse verde de acao */
 @keyframes dps-access-success-pulse {
     0%   { box-shadow: 0 0 0 0 rgba(26, 122, 58, 0.3); }
     70%  { box-shadow: 0 0 0 10px rgba(26, 122, 58, 0); }
@@ -243,7 +243,7 @@
     color: var(--dps-danger);
 }
 
-/* Feedback de solicitação de acesso — M3 */
+/* Feedback de solicitação de acesso — DPS Signature */
 .dps-portal-access__feedback {
     font-size: var(--dps-typescale-body-medium-size);
     text-align: center;
@@ -619,7 +619,7 @@
     .dps-portal-review-text {
         display: none;
     }
-    
+
     .dps-portal-review-link {
         padding: var(--dps-space-2) var(--dps-space-3);
     }
@@ -2245,7 +2245,7 @@ html {
     .dps-reviews-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-metrics-grid {
         grid-template-columns: repeat(3, 1fr);
     }
@@ -2255,20 +2255,20 @@ html {
     .dps-metrics-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-star-label {
         font-size: 32px;
     }
-    
+
     .dps-review-form-card,
     .dps-review-google-card {
         padding: 20px;
     }
-    
+
     .dps-review-list {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-review-social__header {
         flex-direction: column;
         align-items: flex-start;
@@ -2444,15 +2444,15 @@ html {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .dps-financial-summary__icon {
         font-size: 64px;
     }
-    
+
     .dps-financial-summary__action {
         width: 100%;
     }
-    
+
     .dps-financial-summary__action .button {
         width: 100%;
     }
@@ -2763,11 +2763,11 @@ html {
         text-align: center;
         align-items: center;
     }
-    
+
     .dps-suggestion-card__icon {
         font-size: 48px;
     }
-    
+
     .dps-suggestion-card__button {
         width: 100%;
         justify-content: center;
@@ -3368,33 +3368,33 @@ html {
     .dps-gallery-metrics {
         grid-template-columns: 1fr 1fr;
     }
-    
+
     .dps-gallery-metric-card {
         padding: 16px;
     }
-    
+
     .dps-gallery-metric-card__icon {
         font-size: 28px;
     }
-    
+
     .dps-gallery-metric-card__value {
         font-size: 20px;
     }
-    
+
     .dps-gallery-filter {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .dps-gallery-photo-grid {
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 12px;
     }
-    
+
     .dps-gallery-pet-card__header {
         padding: 12px 16px;
     }
-    
+
     .dps-gallery-pet-card__content {
         padding: 16px;
     }
@@ -3404,25 +3404,25 @@ html {
     .dps-gallery-metrics {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-gallery-photo-grid {
         grid-template-columns: 1fr 1fr;
         gap: 10px;
     }
-    
+
     .dps-gallery-photo__info {
         padding: 8px;
     }
-    
+
     .dps-gallery-photo__label {
         font-size: 12px;
     }
-    
+
     .dps-gallery-photo__action {
         width: 32px;
         height: 32px;
     }
-    
+
     .dps-gallery-photo__action-icon {
         font-size: 16px;
     }
@@ -3607,14 +3607,14 @@ html {
     .dps-lightbox__container {
         max-width: 95vw;
     }
-    
+
     .dps-lightbox__close {
         top: -44px;
         width: 36px;
         height: 36px;
         font-size: 28px;
     }
-    
+
     .dps-lightbox__caption {
         font-size: 14px;
         padding: 0 16px;
@@ -3627,7 +3627,7 @@ html {
         height: 36px;
         font-size: 18px;
     }
-    
+
     .dps-gallery-photo-grid--multi {
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 8px;
@@ -4153,7 +4153,7 @@ html {
         padding: 8px 0;
         margin-bottom: 12px;
     }
-    
+
     /* Tabs em mobile - scroll horizontal com snap */
     .dps-portal-tabs {
         overflow-x: auto;
@@ -4164,46 +4164,46 @@ html {
         scroll-snap-type: x proximity;
         scroll-behavior: smooth;
     }
-    
+
     .dps-portal-tabs::-webkit-scrollbar {
         display: none;
     }
-    
+
     .dps-portal-tabs__item {
         flex: 0 0 auto;
         min-width: max-content;
         scroll-snap-align: start;
     }
-    
+
     .dps-portal-tabs__link {
         padding: 12px 16px;
         font-size: 13px;
         min-height: 48px; /* Mínimo para tocabilidade */
     }
-    
+
     .dps-portal-tabs__text {
         display: inline;
     }
-    
+
     .dps-portal-tabs__icon {
         font-size: 18px;
     }
-    
+
     .dps-portal-tab-content {
         padding: 16px;
         border-radius: 0 0 var(--dps-shape-extra-small) var(--dps-shape-extra-small);
     }
-    
+
     /* Seções do portal com espaçamento adequado */
     .dps-portal-section {
         margin-bottom: 24px; /* Mais espaço entre seções */
     }
-    
+
     .dps-portal-section h2 {
         font-size: 20px; /* Título menor mas legível */
         margin-bottom: 16px;
     }
-    
+
     /* Chat widget em mobile */
     .dps-chat-window {
         position: fixed;
@@ -4216,14 +4216,14 @@ html {
         max-height: none;
         border-radius: var(--dps-shape-large) var(--dps-shape-large) 0 0;
     }
-    
+
     .dps-chat-toggle {
         width: 56px; /* Maior para melhor tocabilidade */
         height: 56px;
         bottom: 16px;
         right: 16px;
     }
-    
+
     /* Navegação sticky em mobile para acesso rápido */
     .dps-portal-nav {
         position: sticky;
@@ -4241,25 +4241,25 @@ html {
         border-left: none;
         border-right: none;
     }
-    
+
     .dps-portal-nav__link {
         text-align: center;
         padding: 12px 16px; /* Aumentado para tocabilidade */
         font-size: 15px;
         min-height: 48px;
     }
-    
+
     /* Container do portal ajustado para navegação sticky */
     .dps-client-portal {
         padding-top: 0;
     }
-    
+
     /* Grid forms em mobile - 1 coluna */
     .dps-form-row--2col,
     .dps-form-row--3col {
         grid-template-columns: 1fr;
     }
-    
+
     /* Botões 100% largura em mobile com altura mínima para tocabilidade */
     .dps-submit-btn,
     .button {
@@ -4267,7 +4267,7 @@ html {
         min-height: 48px;
         font-size: 16px;
     }
-    
+
     /* Card de agendamento em mobile - mais visual */
     .dps-appointment-card {
         flex-direction: row; /* Horizontal é melhor que vertical */
@@ -4276,38 +4276,38 @@ html {
         padding: 16px;
         gap: 16px;
     }
-    
+
     .dps-appointment-card__date {
         flex-shrink: 0;
         width: 80px;
         height: 80px;
     }
-    
+
     .dps-appointment-card__day {
         font-size: 32px;
     }
-    
+
     .dps-appointment-card__month {
         font-size: 14px;
     }
-    
+
     .dps-appointment-card__details {
         flex: 1;
         align-items: flex-start;
     }
-    
+
     .dps-appointment-card__time,
     .dps-appointment-card__pet,
     .dps-appointment-card__services {
         font-size: 15px;
         margin-bottom: 8px;
     }
-    
+
     /* ================================================
        TABELAS → CARDS EM MOBILE
        Layout card-based para melhor legibilidade
        ================================================ */
-    
+
     /* Esconde o cabeçalho da tabela */
     .dps-table thead {
         position: absolute;
@@ -4320,12 +4320,12 @@ html {
         white-space: nowrap;
         border-width: 0;
     }
-    
+
     /* Remove border da tbody */
     .dps-table tbody {
         border: none;
     }
-    
+
     /* Cada linha vira um card */
     .dps-table tr {
         display: block;
@@ -4336,7 +4336,7 @@ html {
         border-radius: var(--dps-shape-small);
         box-shadow: var(--dps-elevation-1);
     }
-    
+
     /* Células em layout grid com label */
     .dps-table td {
         display: grid;
@@ -4348,12 +4348,12 @@ html {
         text-align: left;
         font-size: 15px;
     }
-    
+
     /* Linha divisória entre campos */
     .dps-table td:not(:last-child) {
         border-bottom: 1px solid var(--dps-gray-100);
     }
-    
+
     /* Label dinâmico via data-label */
     .dps-table td::before {
         content: attr(data-label);
@@ -4362,13 +4362,13 @@ html {
         font-size: 14px;
         letter-spacing: 0.02em;
     }
-    
+
     /* Valor da célula com contraste adequado */
     .dps-table td {
         color: var(--dps-gray-800);
         font-weight: 500;
     }
-    
+
     /* Botão de ação ocupa linha inteira */
     .dps-table td form {
         grid-column: 1 / -1;
@@ -4377,7 +4377,7 @@ html {
         padding-top: 12px;
         border-top: 1px solid var(--dps-gray-100);
     }
-    
+
     /* Botões em mobile - largura total e tocáveis */
     .dps-table td button,
     .dps-table td .button {
@@ -4390,7 +4390,7 @@ html {
         justify-content: center;
         gap: 8px;
     }
-    
+
     /* Ações de tabela em cards mobile */
     .dps-table-actions {
         grid-column: 1 / -1 !important;
@@ -4400,13 +4400,13 @@ html {
         padding-top: 12px;
         border-top: 1px solid var(--dps-gray-100);
     }
-    
+
     .dps-table-actions .dps-btn {
         flex: 1;
         min-height: 44px;
         font-size: 14px;
     }
-    
+
     /* Galeria em mobile - limitar altura */
     .dps-portal-gallery-grid {
         grid-template-columns: 1fr;
@@ -4414,37 +4414,37 @@ html {
         overflow-y: auto;
         padding-right: 8px;
     }
-    
+
     /* Scrollbar estilizado para galeria */
     .dps-portal-gallery-grid::-webkit-scrollbar {
         width: 6px;
     }
-    
+
     .dps-portal-gallery-grid::-webkit-scrollbar-track {
         background: var(--dps-gray-100);
         border-radius: var(--dps-shape-extra-small);
     }
-    
+
     .dps-portal-gallery-grid::-webkit-scrollbar-thumb {
         background: var(--dps-gray-300);
         border-radius: var(--dps-shape-extra-small);
     }
-    
+
     .dps-portal-gallery-grid::-webkit-scrollbar-thumb:hover {
         background: var(--dps-gray-400);
     }
-    
+
     /* Seções do portal com mais espaço */
     .dps-portal-section {
         padding: 16px;
         margin-bottom: 16px;
     }
-    
+
     .dps-portal-section h2 {
         font-size: 18px;
         margin-bottom: 16px;
     }
-    
+
     /* Centro de mensagens mais compacto */
     .dps-portal-messages__list {
         max-height: 300px;
@@ -4487,23 +4487,23 @@ html {
     .dps-client-portal {
         padding: 0 20px;
     }
-    
+
     .dps-portal-tabs {
         flex-wrap: nowrap;
     }
-    
+
     .dps-portal-tabs__item {
         flex: 0 1 auto;
     }
-    
+
     .dps-portal-tabs__link {
         padding: 1rem 1.5rem;
     }
-    
+
     .dps-portal-tab-content {
         padding: 32px;
     }
-    
+
     .dps-portal-section {
         padding: 28px;
     }
@@ -4732,16 +4732,16 @@ html {
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         gap: 0.5rem;
     }
-    
+
     /* Tela de acesso em mobile */
     .dps-portal-access__title {
         font-size: 20px;
     }
-    
+
     .dps-portal-access__description {
         font-size: 14px;
     }
-    
+
     .dps-portal-access__button {
         font-size: 15px;
         padding: 12px 20px;
@@ -4876,7 +4876,7 @@ html {
         left: 10px;
         max-width: none;
     }
-    
+
     .dps-toast {
         max-width: 100%;
     }
@@ -5037,7 +5037,7 @@ html {
         gap: 8px;
         align-items: flex-start;
     }
-    
+
     .dps-btn--small {
         width: 100%;
         text-align: center;
@@ -6441,20 +6441,20 @@ html {
     .dps-timeline-item {
         padding-left: 30px;
     }
-    
+
     .dps-timeline-marker {
         width: 20px;
         height: 20px;
     }
-    
+
     .dps-appointment-actions {
         flex-direction: column;
     }
-    
+
     .dps-form-actions {
         flex-direction: column-reverse;
     }
-    
+
     .dps-form-actions button {
         width: 100%;
     }
@@ -6698,11 +6698,11 @@ html {
     .dps-preferences-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-portal-hero {
         height: 150px;
     }
-    
+
     .dps-portal-logo {
         max-width: 150px;
     }
@@ -7402,44 +7402,44 @@ html {
         padding: var(--dps-space-3);
         gap: var(--dps-space-2);
     }
-    
+
     .dps-overview-card__icon {
         font-size: var(--dps-typescale-title-large-size, 22px);
     }
-    
+
     .dps-overview-card__value {
         font-size: var(--dps-typescale-title-large-size, 22px);
     }
-    
+
     .dps-overview-card__label {
         font-size: var(--dps-typescale-body-small-size, 12px);
     }
-    
+
     /* Section header responsivo */
     .dps-section-header {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     /* Appointment card responsivo */
     .dps-appointment-card {
         flex-direction: row;
         gap: var(--dps-space-3);
     }
-    
+
     .dps-appointment-card__date {
         min-width: 48px;
         height: 48px;
     }
-    
+
     .dps-appointment-card__details {
         align-items: flex-start;
     }
-    
+
     .dps-appointment-card__actions {
         justify-content: flex-start;
     }
-    
+
     .dps-appointment-card__status {
         align-self: center;
     }
@@ -7450,21 +7450,21 @@ html {
     .dps-overview-cards {
         gap: var(--dps-space-2);
     }
-    
+
     .dps-overview-card__label {
         font-size: 11px;
     }
-    
+
     /* Pets cards empilhados */
     .dps-pets-cards {
         grid-template-columns: 1fr;
         gap: var(--dps-space-2);
     }
-    
+
     .dps-pet-card {
         padding: var(--dps-space-2);
     }
-    
+
     .dps-pet-card__photo {
         width: 48px;
         height: 48px;
@@ -8171,36 +8171,36 @@ html {
     .dps-loyalty-hero {
         padding: 20px;
     }
-    
+
     .dps-loyalty-tier__icon {
         font-size: 40px;
     }
-    
+
     .dps-loyalty-tier__name {
         font-size: 24px;
     }
-    
+
     .dps-loyalty-stats {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-loyalty-card__value {
         font-size: 24px;
     }
-    
+
     .dps-loyalty-how-it-works__grid {
         grid-template-columns: 1fr;
         gap: 16px;
     }
-    
+
     .dps-loyalty-achievements__grid {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-loyalty-card__actions {
         flex-direction: column;
     }
-    
+
     .dps-loyalty-referral-input {
         width: 100%;
     }
@@ -8214,75 +8214,75 @@ html {
         grid-template-columns: 1fr;
         gap: 12px;
     }
-    
+
     .dps-messages-metric-card {
         padding: 16px;
     }
-    
+
     .dps-messages-metric-card__icon {
         font-size: 28px;
     }
-    
+
     .dps-messages-metric-card__value {
         font-size: 20px;
     }
-    
+
     .dps-messages-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-messages-inbox__header,
     .dps-messages-compose__header {
         padding: 16px 20px;
     }
-    
+
     .dps-messages-inbox__title,
     .dps-messages-compose__title {
         font-size: 16px;
     }
-    
+
     .dps-messages-inbox__subtitle,
     .dps-messages-compose__subtitle {
         font-size: 13px;
     }
-    
+
     .dps-portal-messages__list {
         max-height: 400px;
     }
-    
+
     .dps-portal-message {
         padding: 16px;
         gap: 12px;
     }
-    
+
     .dps-portal-message__avatar {
         width: 40px;
         height: 40px;
         font-size: 20px;
     }
-    
+
     .dps-portal-message__meta {
         flex-direction: column;
         align-items: flex-start;
         gap: 4px;
     }
-    
+
     .dps-portal-message__author {
         font-size: 14px;
     }
-    
+
     .dps-portal-message__date {
         font-size: 12px;
     }
-    
+
     .dps-messages-compose__content {
         padding: 16px;
     }
-    
+
     .dps-messages-compose textarea.dps-form-control {
         min-height: 120px;
     }
-    
+
     .dps-messages-compose__submit {
         width: 100%;
     }
@@ -8292,28 +8292,28 @@ html {
     .dps-messages-metric-card {
         gap: 12px;
     }
-    
+
     .dps-messages-metric-card__icon {
         font-size: 24px;
     }
-    
+
     .dps-messages-metric-card__value {
         font-size: 18px;
     }
-    
+
     .dps-messages-metric-card__label {
         font-size: 12px;
     }
-    
+
     .dps-messages-inbox__icon,
     .dps-messages-compose__icon {
         font-size: 24px;
     }
-    
+
     .dps-portal-message__body {
         width: 100%;
     }
-    
+
     .dps-portal-message__unread-badge {
         top: 8px;
         right: 8px;
@@ -8470,24 +8470,24 @@ html {
     .dps-portal-upcoming {
         padding: 16px;
     }
-    
+
     .dps-portal-history {
         padding: 16px;
     }
-    
+
     .dps-history-table-wrapper {
         margin: 0 -16px;
         padding: 0 16px;
     }
-    
+
     .dps-appointments-metrics .dps-metric-card {
         padding: 14px;
     }
-    
+
     .dps-appointments-metrics .dps-metric-card__value {
         font-size: 22px;
     }
-    
+
     .dps-appointments-metrics .dps-metric-card__label {
         font-size: 12px;
     }
@@ -8782,29 +8782,29 @@ html {
     .dps-meus-dados .dps-section-title {
         font-size: 20px;
     }
-    
+
     .dps-meus-dados-form .dps-form-row--2col,
     .dps-meus-dados-form .dps-form-row--3col {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-meus-dados-card.dps-surface {
         padding: 16px;
     }
-    
+
     .dps-meus-dados-form .dps-fieldset {
         padding: 16px;
     }
-    
+
     .dps-pet-form-header {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .dps-pet-form-header__info .dps-surface__title {
         justify-content: center;
     }
-    
+
     .dps-meus-dados-form .dps-btn-submit {
         width: 100%;
         justify-content: center;
@@ -8815,11 +8815,11 @@ html {
     .dps-meus-dados-header {
         margin-bottom: 16px;
     }
-    
+
     .dps-meus-dados .dps-section-subtitle {
         font-size: 14px;
     }
-    
+
     .dps-meus-dados-stacked {
         gap: 16px;
     }
@@ -9482,7 +9482,7 @@ html {
 }
 
 /* ========================================
-   PORTAL HOME REFRESH - M3 EXPRESSIVE
+   PORTAL HOME REFRESH - DPS SIGNATURE
    Home contextual com hero, cards acionaveis e atalhos claros
    ======================================== */
 

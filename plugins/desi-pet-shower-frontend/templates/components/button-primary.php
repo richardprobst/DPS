@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 /**
- * Component: Primary Button (M3 Expressive)
+ * Component: Primary Button (DPS Signature)
  *
  * @package DPS_Frontend_Addon
  * @since   2.0.0

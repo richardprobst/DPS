@@ -1,4 +1,4 @@
-# Playbook de engenharia para agentes (Core + Add-ons)
+﻿# Playbook de engenharia para agentes (Core + Add-ons)
 
 Este documento complementa o `AGENTS.md` da raiz com diretrizes práticas para implementação e refatoração.
 Objetivo: manter código limpo, sustentável e escalável para o plugin base e add-ons, preservando compatibilidade com WordPress.
@@ -65,12 +65,12 @@ Ao encerrar:
 - registrar trade-offs e alternativas consideradas, quando houver;
 - se alguma regra precisar ser violada por motivo técnico, justificar no PR.
 
-## Regra para demandas visuais (M3)
+## Regra para demandas visuais (DPS Signature)
 
 Quando a tarefa envolver UI, frontend ou layout:
 - seguir obrigatoriamente as referências em `docs/visual/`;
-- tratar `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do padrão visual M3;
-- declarar na resposta/PR que as orientações M3 foram aplicadas;
+- tratar `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do sistema visual DPS Signature;
+- declarar na resposta/PR que as orientações do DPS Signature foram aplicadas;
 - documentar a mudança com resumo de antes/depois e arquivos impactados;
 - capturar prints completos das telas alteradas e salvar em `docs/screenshots/YYYY-MM-DD/`;
 - informar no fechamento/PR o caminho exato onde os registros e prints foram salvos.
@@ -80,7 +80,7 @@ Quando a tarefa envolver UI, frontend ou layout:
 - **Documentação apenas:** `git diff --check` e revisão de apontamentos/paths citados.
 - **PHP alterado:** executar `php -l` por arquivo modificado.
 - **Mudança funcional:** validar fluxo crítico no WordPress local.
-- **Mudança visual (M3):** validar aderência com `docs/visual/` + registrar prints em `docs/screenshots/YYYY-MM-DD/`.
+- **Mudança visual (DPS Signature):** validar aderência com `docs/visual/` + registrar prints em `docs/screenshots/YYYY-MM-DD/`.
 
 ## Checklist rápido de fechamento
 

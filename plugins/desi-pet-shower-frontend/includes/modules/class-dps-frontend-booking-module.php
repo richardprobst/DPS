@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Módulo de Agendamento do Frontend Add-on (Fase 3).
  *
@@ -72,7 +72,7 @@ final class DPS_Frontend_Booking_Module {
      * Renderiza o shortcode [dps_booking_form].
      *
      * Delega para o legado e envolve o output na surface do frontend add-on
-     * para aplicar estilos M3 Expressive adicionais.
+     * para aplicar estilos DPS Signature adicionais.
      *
      * @param array|string $atts    Atributos do shortcode.
      * @param string|null  $content Conteúdo encapsulado.

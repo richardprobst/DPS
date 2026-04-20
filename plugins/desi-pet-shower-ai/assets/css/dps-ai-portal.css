@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Estilos do Assistente de IA no Portal do Cliente.
  *
- * Design v3.0.0: M3 Expressive — Rebranding completo.
+ * Design v3.0.0: DPS Signature — Rebranding completo.
  * Usa exclusivamente tokens de dps-design-tokens.css.
  *
  * Regras:
@@ -40,7 +40,7 @@
 }
 
 /* =====================================================
-   HEADER — M3 Expressive
+   HEADER — DPS Signature
    ===================================================== */
 .dps-ai-assistant__header {
     display: flex;
