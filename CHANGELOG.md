@@ -171,6 +171,8 @@ Antes de criar uma nova versão oficial:
 
 **Agenda Add-on - revisao UX/UI operacional**
 
+- **Agenda migrada para DPS Signature**: reescrita visual controlada da Agenda, dashboard, hub admin, configuracoes, checklist/check-in, status, modais, toasts, TaxiDog/GPS e pagamento, preservando shortcodes, hooks, AJAX, nonces, capabilities, schema e fluxo de dados.
+- **Remocao da heranca M3 visual da Agenda**: substituidos os CSS acumulados por uma camada propria com cantos retos, superficies sobrias, tokens DPS Signature, foco visivel, responsividade explicita e microcopy revisada em portugues brasileiro.
 - **Shell da agenda**: reestruturado o cabecalho com contexto do periodo, CTAs principais e navegacao temporal mais clara.
 - **Leitura operacional**: a lista foi reorganizada em paineis por dia com cards de overview, contagem por status e persistencia da aba ativa na URL e na sessao.
 - **Simplificacao estrutural**: o bloco operacional legado foi aposentado para manter a Agenda alinhada ao shell principal do add-on.

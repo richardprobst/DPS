@@ -63,37 +63,25 @@ class DPS_Agenda_Payment_Helper {
      * Retorna a configuração de badge para um status de pagamento.
      *
      * @param string $status Status retornado por get_payment_status().
-     * @return array Configuração com 'label', 'class', 'icon'.
+     * @return array Configuração com 'label' e 'class'.
      */
     public static function get_payment_badge_config( $status ) {
         $config = [
             'paid' => [
                 'label' => __( 'Pago', 'dps-agenda-addon' ),
                 'class' => 'dps-payment-badge--paid',
-                'icon'  => '✅',
-                'color' => '#10b981',
-                'bg'    => '#d1fae5',
             ],
             'pending' => [
                 'label' => __( 'Aguardando pagamento', 'dps-agenda-addon' ),
                 'class' => 'dps-payment-badge--pending',
-                'icon'  => '⏳',
-                'color' => '#f59e0b',
-                'bg'    => '#fef3c7',
             ],
             'error' => [
                 'label' => __( 'Erro na cobrança', 'dps-agenda-addon' ),
                 'class' => 'dps-payment-badge--error',
-                'icon'  => '⚠️',
-                'color' => '#ef4444',
-                'bg'    => '#fee2e2',
             ],
             'not_requested' => [
                 'label' => __( 'Sem cobrança', 'dps-agenda-addon' ),
                 'class' => 'dps-payment-badge--none',
-                'icon'  => '–',
-                'color' => '#6b7280',
-                'bg'    => '#f3f4f6',
             ],
         ];
 
@@ -145,11 +133,8 @@ class DPS_Agenda_Payment_Helper {
         $config = self::get_payment_badge_config( $status );
 
         $html = sprintf(
-            '<span class="dps-payment-badge %s" style="background: %s; color: %s; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem;">%s %s</span>',
+            '<span class="dps-payment-badge %s">%s</span>',
             esc_attr( $config['class'] ),
-            esc_attr( $config['bg'] ),
-            esc_attr( $config['color'] ),
-            $config['icon'],
             esc_html( $config['label'] )
         );
 
@@ -169,17 +154,17 @@ class DPS_Agenda_Payment_Helper {
             return '';
         }
 
-        $html = '<div class="dps-payment-tooltip" style="display: none;">';
+        $html = '<div class="dps-payment-tooltip" hidden>';
         
         if ( ! empty( $details['link_url'] ) ) {
             $html .= '<div class="dps-payment-tooltip__item">';
             $html .= '<strong>' . esc_html__( 'Link de pagamento:', 'dps-agenda-addon' ) . '</strong><br>';
-            $html .= '<a href="' . esc_url( $details['link_url'] ) . '" target="_blank" style="word-break: break-all; font-size: 0.75rem;">' . esc_html( $details['link_url'] ) . '</a>';
+            $html .= '<a class="dps-payment-tooltip__link" href="' . esc_url( $details['link_url'] ) . '" target="_blank" rel="noopener">' . esc_html( $details['link_url'] ) . '</a>';
             $html .= '</div>';
         }
 
         if ( ! empty( $details['error_message'] ) ) {
-            $html .= '<div class="dps-payment-tooltip__item" style="color: #ef4444;">';
+            $html .= '<div class="dps-payment-tooltip__item dps-payment-tooltip__item--error">';
             $html .= '<strong>' . esc_html__( 'Erro:', 'dps-agenda-addon' ) . '</strong><br>';
             $html .= esc_html( $details['error_message'] );
             $html .= '</div>';
@@ -217,7 +202,7 @@ class DPS_Agenda_Payment_Helper {
                 class="dps-resend-payment-btn" 
                 data-appt-id="<?php echo esc_attr( $appointment_id ); ?>"
                 title="<?php esc_attr_e( 'Reenviar link de pagamento', 'dps-agenda-addon' ); ?>">
-            🔄 <?php esc_html_e( 'Reenviar', 'dps-agenda-addon' ); ?>
+            <?php esc_html_e( 'Reenviar', 'dps-agenda-addon' ); ?>
         </button>
         <?php
         return ob_get_clean();

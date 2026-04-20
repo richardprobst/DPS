@@ -230,7 +230,7 @@ class DPS_Google_Calendar_Sync {
         
         // Monta título do evento
         $title = sprintf(
-            '🐾 %s - %s (%s)',
+            '%s - %s (%s)',
             $services_text,
             $pet_name,
             $client_name

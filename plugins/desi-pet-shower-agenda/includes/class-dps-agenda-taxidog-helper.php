@@ -105,7 +105,7 @@ class DPS_Agenda_TaxiDog_Helper {
      * Retorna a configuração de badge para um status de TaxiDog.
      *
      * @param string $status Status do TaxiDog.
-     * @return array Configuração com 'label', 'class', 'icon', 'color', 'bg'.
+     * @return array Configuração com 'label' e 'class'.
      */
     public static function get_taxidog_badge_config( $status ) {
         $config = [
@@ -119,30 +119,18 @@ class DPS_Agenda_TaxiDog_Helper {
             self::STATUS_REQUESTED => [
                 'label' => __( 'TaxiDog solicitado', 'dps-agenda-addon' ),
                 'class' => 'dps-taxidog-badge--requested',
-                'icon'  => '🚗',
-                'color' => '#f59e0b',
-                'bg'    => '#fef3c7',
             ],
             self::STATUS_DRIVER_ON_WAY => [
                 'label' => __( 'Motorista a caminho', 'dps-agenda-addon' ),
                 'class' => 'dps-taxidog-badge--on-way',
-                'icon'  => '🚗',
-                'color' => '#3b82f6',
-                'bg'    => '#dbeafe',
             ],
             self::STATUS_PET_ON_BOARD => [
                 'label' => __( 'Pet a bordo', 'dps-agenda-addon' ),
                 'class' => 'dps-taxidog-badge--on-board',
-                'icon'  => '🐾',
-                'color' => '#f97316',
-                'bg'    => '#ffedd5',
             ],
             self::STATUS_COMPLETED => [
                 'label' => __( 'TaxiDog concluído', 'dps-agenda-addon' ),
                 'class' => 'dps-taxidog-badge--completed',
-                'icon'  => '✅',
-                'color' => '#10b981',
-                'bg'    => '#d1fae5',
             ],
         ];
 
@@ -165,12 +153,8 @@ class DPS_Agenda_TaxiDog_Helper {
         $config = self::get_taxidog_badge_config( $status );
 
         $html = sprintf(
-            '<span class="dps-taxidog-badge %s" style="background: %s; color: %s; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem; border: 1px solid %s;">%s %s</span>',
+            '<span class="dps-taxidog-badge %s">%s</span>',
             esc_attr( $config['class'] ),
-            esc_attr( $config['bg'] ),
-            esc_attr( $config['color'] ),
-            esc_attr( $config['color'] ),
-            $config['icon'],
             esc_html( $config['label'] )
         );
 
@@ -187,27 +171,22 @@ class DPS_Agenda_TaxiDog_Helper {
         $all_actions = [
             'requested' => [
                 'label' => __( 'Solicitar TaxiDog', 'dps-agenda-addon' ),
-                'icon'  => '🚗',
                 'next_status' => self::STATUS_REQUESTED,
             ],
             'driver_on_way' => [
                 'label' => __( 'Motorista a caminho', 'dps-agenda-addon' ),
-                'icon'  => '🚗',
                 'next_status' => self::STATUS_DRIVER_ON_WAY,
             ],
             'pet_on_board' => [
                 'label' => __( 'Pet a bordo', 'dps-agenda-addon' ),
-                'icon'  => '🐾',
                 'next_status' => self::STATUS_PET_ON_BOARD,
             ],
             'completed' => [
                 'label' => __( 'Finalizar TaxiDog', 'dps-agenda-addon' ),
-                'icon'  => '✅',
                 'next_status' => self::STATUS_COMPLETED,
             ],
             'cancel' => [
                 'label' => __( 'Cancelar TaxiDog', 'dps-agenda-addon' ),
-                'icon'  => '❌',
                 'next_status' => self::STATUS_NONE,
             ],
         ];
@@ -247,7 +226,7 @@ class DPS_Agenda_TaxiDog_Helper {
             return '';
         }
 
-        $html = '<div class="dps-taxidog-actions" style="display: inline-flex; gap: 0.25rem; margin-left: 0.5rem;">';
+        $html = '<div class="dps-taxidog-actions">';
 
         foreach ( $actions as $action_key => $action ) {
             $button_class = 'dps-taxidog-action-btn';
@@ -256,12 +235,13 @@ class DPS_Agenda_TaxiDog_Helper {
             }
 
             $html .= sprintf(
-                '<button class="%s" data-appt-id="%d" data-action="%s" title="%s" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border: none; background: #f3f4f6; color: #374151; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem;">%s</button>',
+                '<button type="button" class="%s" data-appt-id="%d" data-action="%s" title="%s" aria-label="%s">%s</button>',
                 esc_attr( $button_class ),
                 esc_attr( $appointment_id ),
                 esc_attr( $action['next_status'] ),
                 esc_attr( $action['label'] ),
-                $action['icon']
+                esc_attr( $action['label'] ),
+                esc_html( $action['label'] )
             );
         }
 

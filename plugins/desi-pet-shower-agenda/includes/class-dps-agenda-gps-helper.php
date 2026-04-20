@@ -111,7 +111,7 @@ class DPS_Agenda_GPS_Helper {
         }
 
         $html = sprintf(
-            '<a href="%s" target="_blank" class="dps-route-btn" style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.5rem; background: #3b82f6; color: #fff; text-decoration: none; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">📍 %s</a>',
+            '<a href="%s" target="_blank" rel="noopener" class="dps-route-btn">%s</a>',
             esc_url( $route_url ),
             esc_html__( 'Abrir rota', 'dps-agenda-addon' )
         );
@@ -138,7 +138,7 @@ class DPS_Agenda_GPS_Helper {
         $map_url = 'https://www.google.com/maps/search/?api=1&query=' . urlencode( $client_address );
 
         $html = sprintf(
-            '<a href="%s" target="_blank">%s</a>',
+            '<a href="%s" target="_blank" rel="noopener" class="dps-taxidog-map-btn">%s</a>',
             esc_url( $map_url ),
             esc_html__( 'Mapa', 'dps-agenda-addon' )
         );
@@ -172,7 +172,7 @@ class DPS_Agenda_GPS_Helper {
 
         $settings_url = admin_url( 'admin.php?page=dps-settings' );
 
-        $html = '<div class="notice notice-warning" style="padding: 15px; margin: 20px 0; background: #fff3cd; border-left: 4px solid #ffc107;">';
+        $html = '<div class="notice notice-warning dps-agenda-admin-notice dps-agenda-admin-notice--warning">';
         $html .= '<p><strong>' . esc_html__( 'Configuração necessária:', 'dps-agenda-addon' ) . '</strong> ';
         $html .= esc_html__( 'Para usar o botão "Abrir rota", configure o endereço do Banho e Tosa em', 'dps-agenda-addon' );
         $html .= ' <a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Configurações', 'dps-agenda-addon' ) . '</a>.</p>';

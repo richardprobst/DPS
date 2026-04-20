@@ -144,17 +144,17 @@
 
         if (status === 'pending') {
             $actions.append(
-                '<button class="dps-checklist-btn dps-checklist-btn--done" type="button">✓ ' + cfg.messages.markDone + '</button>' +
+                '<button class="dps-checklist-btn dps-checklist-btn--done" type="button">' + cfg.messages.markDone + '</button>' +
                 '<button class="dps-checklist-btn dps-checklist-btn--skip" type="button">' + cfg.messages.skip + '</button>'
             );
         } else if (status === 'done') {
             $actions.append(
-                '<button class="dps-checklist-btn dps-checklist-btn--undo" type="button">↩ ' + cfg.messages.undo + '</button>' +
-                '<button class="dps-checklist-btn dps-checklist-btn--rework" type="button">🔄 ' + cfg.messages.rework + '</button>'
+                '<button class="dps-checklist-btn dps-checklist-btn--undo" type="button">' + cfg.messages.undo + '</button>' +
+                '<button class="dps-checklist-btn dps-checklist-btn--rework" type="button">' + cfg.messages.rework + '</button>'
             );
         } else if (status === 'skipped') {
             $actions.append(
-                '<button class="dps-checklist-btn dps-checklist-btn--undo" type="button">↩ ' + cfg.messages.undo + '</button>'
+                '<button class="dps-checklist-btn dps-checklist-btn--undo" type="button">' + cfg.messages.undo + '</button>'
             );
         }
 
@@ -162,10 +162,10 @@
         var $badge = $step.find('.dps-checklist-rework-badge');
         if (reworkCount > 0) {
             if ($badge.length) {
-                $badge.text('🔄 ' + reworkCount);
+                $badge.text(reworkCount + ' refazer');
             } else {
                 $step.find('.dps-checklist-step-label').after(
-                    '<span class="dps-checklist-rework-badge">🔄 ' + reworkCount + '</span>'
+                    '<span class="dps-checklist-rework-badge">' + reworkCount + ' refazer</span>'
                 );
             }
         }
@@ -238,7 +238,7 @@
         var html =
             '<div class="dps-rework-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dps-rework-title">' +
                 '<div class="dps-rework-modal">' +
-                    '<h4 id="dps-rework-title">🔄 ' + safeReworkTitle + ': ' + safeStepLabel + '</h4>' +
+                    '<h4 id="dps-rework-title">' + safeReworkTitle + ': ' + safeStepLabel + '</h4>' +
                     '<textarea id="dps-rework-reason" placeholder="' + safeReworkPlaceholder + '"></textarea>' +
                     '<div class="dps-rework-modal-actions">' +
                         '<button class="dps-checklist-btn dps-checklist-btn--undo dps-rework-cancel" type="button">' + safeCancel + '</button>' +
@@ -304,11 +304,11 @@
                 refreshCheckinPanel($panel, response.data);
             } else {
                 showFeedback(response.data.message || cfg.messages.error, 'error');
-                $btn.prop('disabled', false).html('📥 ' + cfg.messages.checkin);
+                $btn.prop('disabled', false).text(cfg.messages.checkin);
             }
         }).fail(function () {
             showFeedback(cfg.messages.error, 'error');
-            $btn.prop('disabled', false).html('📥 ' + cfg.messages.checkin);
+            $btn.prop('disabled', false).text(cfg.messages.checkin);
         });
     });
 
@@ -333,11 +333,11 @@
                 refreshCheckinPanel($panel, response.data);
             } else {
                 showFeedback(response.data.message || cfg.messages.error, 'error');
-                $btn.prop('disabled', false).html('📤 ' + cfg.messages.checkout);
+                $btn.prop('disabled', false).text(cfg.messages.checkout);
             }
         }).fail(function () {
             showFeedback(cfg.messages.error, 'error');
-            $btn.prop('disabled', false).html('📤 ' + cfg.messages.checkout);
+            $btn.prop('disabled', false).text(cfg.messages.checkout);
         });
     });
 
@@ -373,15 +373,15 @@
         var statusHtml = '';
 
         if (data.checkin_time) {
-            statusHtml += '<span class="dps-checkin-status-badge dps-checkin-status-badge--in">📥 Check-in: ' + escapeHtml(data.checkin_time) + '</span>';
+            statusHtml += '<span class="dps-checkin-status-badge dps-checkin-status-badge--in">Check-in: ' + escapeHtml(data.checkin_time) + '</span>';
         }
 
         if (data.checkout_time) {
-            statusHtml += '<span class="dps-checkin-status-badge dps-checkin-status-badge--out">📤 Check-out: ' + escapeHtml(data.checkout_time) + '</span>';
+            statusHtml += '<span class="dps-checkin-status-badge dps-checkin-status-badge--out">Check-out: ' + escapeHtml(data.checkout_time) + '</span>';
         }
 
         if (data.duration) {
-            statusHtml += '<span class="dps-checkin-status-badge dps-checkin-status-badge--duration">⏱️ ' + escapeHtml(data.duration) + '</span>';
+            statusHtml += '<span class="dps-checkin-status-badge dps-checkin-status-badge--duration">' + escapeHtml(data.duration) + '</span>';
         }
 
         $panel.find('.dps-checkin-status').html(statusHtml);
@@ -391,16 +391,16 @@
         $actions.empty();
 
         if (!data.has_checkin) {
-            $actions.append('<button type="button" class="dps-checkin-btn dps-checkin-btn--checkin">📥 ' + escapeHtml(cfg.messages.checkin) + '</button>');
+            $actions.append('<button type="button" class="dps-checkin-btn dps-checkin-btn--checkin">' + escapeHtml(cfg.messages.checkin) + '</button>');
         } else if (!data.has_checkout) {
-            $actions.append('<button type="button" class="dps-checkin-btn dps-checkin-btn--checkout">📤 ' + escapeHtml(cfg.messages.checkout) + '</button>');
+            $actions.append('<button type="button" class="dps-checkin-btn dps-checkin-btn--checkout">' + escapeHtml(cfg.messages.checkout) + '</button>');
         }
 
         // Mostra resumo de safety items se check-in foi feito
         if (data.safety_summary && data.safety_summary.length > 0) {
             var summaryHtml = '<div class="dps-safety-summary">';
             $.each(data.safety_summary, function (_, item) {
-                summaryHtml += '<span class="dps-safety-tag dps-safety-tag--' + escapeHtml(item.severity) + '">' + escapeHtml(item.icon) + ' ' + escapeHtml(item.label) + '</span>';
+                summaryHtml += '<span class="dps-safety-tag dps-safety-tag--' + escapeHtml(item.severity) + '">' + escapeHtml(item.label) + '</span>';
             });
             summaryHtml += '</div>';
 
@@ -427,7 +427,7 @@
             } else {
                 var waHtml = '<div class="dps-checkin-whatsapp">' +
                     '<a href="' + data.whatsapp_url + '" target="_blank" rel="noopener noreferrer" class="dps-checkin-btn dps-checkin-btn--whatsapp">' +
-                    '📱 ' + escapeHtml(cfg.messages.sendWhatsApp) +
+                    escapeHtml(cfg.messages.sendWhatsApp) +
                     '</a></div>';
                 $panel.find('.dps-checkin-actions').after(waHtml);
             }
@@ -440,9 +440,9 @@
             var $checkinCompact = $compactRow.find('.dps-checkin-compact');
             if ($checkinCompact.length) {
                 if (data.has_checkout) {
-                    $checkinCompact.html('✅');
+                    $checkinCompact.text('Concluído');
                 } else if (data.has_checkin) {
-                    $checkinCompact.html('📥');
+                    $checkinCompact.text('Em atendimento');
                 }
             }
         }

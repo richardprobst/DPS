@@ -45,37 +45,37 @@ class DPS_Agenda_Checkin_Service {
         $items = [
             'pulgas'      => [
                 'label'    => __( 'Pulgas', 'dps-agenda-addon' ),
-                'icon'     => '🪲',
+                'icon'     => '',
                 'severity' => 'warning',
             ],
             'carrapatos'  => [
                 'label'    => __( 'Carrapatos', 'dps-agenda-addon' ),
-                'icon'     => '🕷️',
+                'icon'     => '',
                 'severity' => 'warning',
             ],
             'feridinhas'  => [
                 'label'    => __( 'Feridinhas / Lesões', 'dps-agenda-addon' ),
-                'icon'     => '🩹',
+                'icon'     => '',
                 'severity' => 'alert',
             ],
             'alergia'     => [
                 'label'    => __( 'Alergia / Irritação', 'dps-agenda-addon' ),
-                'icon'     => '⚠️',
+                'icon'     => '',
                 'severity' => 'alert',
             ],
             'otite'       => [
                 'label'    => __( 'Otite / Orelha inflamada', 'dps-agenda-addon' ),
-                'icon'     => '👂',
+                'icon'     => '',
                 'severity' => 'alert',
             ],
             'nos'         => [
                 'label'    => __( 'Nós / Pelos embolados', 'dps-agenda-addon' ),
-                'icon'     => '🧶',
+                'icon'     => '',
                 'severity' => 'info',
             ],
             'comportamento' => [
                 'label'    => __( 'Agressivo / Ansioso', 'dps-agenda-addon' ),
-                'icon'     => '😤',
+                'icon'     => '',
                 'severity' => 'warning',
             ],
         ];

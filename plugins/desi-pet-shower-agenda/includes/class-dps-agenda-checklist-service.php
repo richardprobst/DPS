@@ -36,27 +36,27 @@ class DPS_Agenda_Checklist_Service {
         $steps = [
             'pre_bath'   => [
                 'label' => __( 'Pré-banho (desembaraçar / escovação)', 'dps-agenda-addon' ),
-                'icon'  => '🧹',
+                'icon'  => '',
             ],
             'bath'       => [
                 'label' => __( 'Banho', 'dps-agenda-addon' ),
-                'icon'  => '🛁',
+                'icon'  => '',
             ],
             'drying'     => [
                 'label' => __( 'Secagem', 'dps-agenda-addon' ),
-                'icon'  => '💨',
+                'icon'  => '',
             ],
             'cutting'    => [
                 'label' => __( 'Tosa / Corte', 'dps-agenda-addon' ),
-                'icon'  => '✂️',
+                'icon'  => '',
             ],
             'ears_nails' => [
                 'label' => __( 'Orelhas / Unhas', 'dps-agenda-addon' ),
-                'icon'  => '👂',
+                'icon'  => '',
             ],
             'finishing'  => [
                 'label' => __( 'Acabamento (perfume / laço)', 'dps-agenda-addon' ),
-                'icon'  => '🎀',
+                'icon'  => '',
             ],
         ];
 

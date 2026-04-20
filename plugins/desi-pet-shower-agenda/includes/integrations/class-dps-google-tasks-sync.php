@@ -101,7 +101,7 @@ class DPS_Google_Tasks_Sync {
                 esc_html( $services_text )
             ),
             'notes'  => sprintf(
-                "Cliente: %s\nPet: %s\nServiços: %s\n\n✅ Atendimento finalizado - fazer contato para avaliar satisfação e agendar retorno.\n\n🔗 Ver agendamento no DPS: %s",
+                "Cliente: %s\nPet: %s\nServiços: %s\n\nAtendimento finalizado - fazer contato para avaliar satisfação e agendar retorno.\n\nVer agendamento no DPS: %s",
                 esc_html( $client_name ?: __( 'Cliente', 'desi-pet-shower' ) ),
                 esc_html( $pet_name ?: __( 'Pet', 'desi-pet-shower' ) ),
                 esc_html( $services_text ),
@@ -183,12 +183,12 @@ class DPS_Google_Tasks_Sync {
 
         $task_data = [
             'title'  => sprintf(
-                '💰 Cobrança: %s - %s',
+                'Cobrança: %s - %s',
                 esc_html( $client_name ?: __( 'Cliente', 'desi-pet-shower' ) ),
                 esc_html( $valor_formatado )
             ),
             'notes'  => sprintf(
-                "Cliente: %s\nValor: %s\nVencimento: %s\nDescrição: %s\n\n⚠️ Cobrança pendente - entrar em contato para solicitar pagamento.\n\n🔗 Ver agendamento no DPS: %s",
+                "Cliente: %s\nValor: %s\nVencimento: %s\nDescrição: %s\n\nCobrança pendente - entrar em contato para solicitar pagamento.\n\nVer agendamento no DPS: %s",
                 esc_html( $client_name ?: __( 'Cliente', 'desi-pet-shower' ) ),
                 esc_html( $valor_formatado ),
                 esc_html( date_i18n( 'd/m/Y', strtotime( $due_date ) ) ),
@@ -299,7 +299,7 @@ class DPS_Google_Tasks_Sync {
                 esc_html( $subject )
             ),
             'notes'  => sprintf(
-                "Cliente: %s\nAssunto: %s\n\nMensagem:\n%s\n\n📱 Responder no Portal: %s",
+                "Cliente: %s\nAssunto: %s\n\nMensagem:\n%s\n\nResponder no Portal: %s",
                 esc_html( $client_name ),
                 esc_html( $subject ),
                 esc_html( wp_trim_words( $message, 50 ) ),

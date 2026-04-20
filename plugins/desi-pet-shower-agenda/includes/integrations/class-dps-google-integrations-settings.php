@@ -1,9 +1,9 @@
-<?php
+﻿<?php
 /**
  * Google Integrations Settings Page
  *
  * Interface administrativa para configurar integrações com Google Calendar e Tasks.
- * 
+ *
  * @package    DPS_Agenda_Addon
  * @subpackage Integrations
  * @since      2.0.0
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 2.0.0
  */
 class DPS_Google_Integrations_Settings {
-    
+
     /**
      * Inicializa a classe.
      *
@@ -32,14 +32,14 @@ class DPS_Google_Integrations_Settings {
     public function __construct() {
         // Adiciona aba ao hub da Agenda
         add_filter( 'dps_agenda_hub_tabs', [ $this, 'add_tab' ], 20 );
-        
+
         // Renderiza conteúdo da aba
         add_action( 'dps_agenda_hub_tab_content_google-integrations', [ $this, 'render_tab_content' ] );
-        
+
         // Processa ações (conectar, desconectar, salvar configurações)
         add_action( 'admin_init', [ $this, 'handle_actions' ] );
     }
-    
+
     /**
      * Adiciona aba "Integrações Google" ao hub da Agenda.
      *
@@ -80,7 +80,7 @@ class DPS_Google_Integrations_Settings {
                         <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'Agenda + Google Workspace', 'dps-agenda-addon' ); ?></p>
                         <h2 class="dps-agenda-admin-subtitle"><?php esc_html_e( 'Integrações com Google Workspace', 'dps-agenda-addon' ); ?></h2>
                         <p class="dps-agenda-admin-description">
-                            <?php esc_html_e( 'Conecte o DPS com Google Calendar e Google Tasks para sincronizar agendamentos e tarefas administrativas seguindo o padrão visual M3 da Agenda.', 'dps-agenda-addon' ); ?>
+                            <?php esc_html_e( 'Conecte o DPS com Google Calendar e Google Tasks para sincronizar agendamentos e tarefas administrativas seguindo o sistema visual DPS Signature da Agenda.', 'dps-agenda-addon' ); ?>
                         </p>
                     </div>
                     <div class="dps-agenda-admin-chips">
@@ -388,17 +388,17 @@ class DPS_Google_Integrations_Settings {
         $tab    = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : '';
         $action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
         // phpcs:enable
-        
+
         // Callback OAuth
         if ( 'dps-agenda-hub' === $page && 'google-integrations' === $tab && 'oauth_callback' === $action ) {
             $this->handle_oauth_callback();
         }
-        
+
         // Desconectar
         if ( 'dps_google_disconnect' === $action ) {
             $this->handle_disconnect();
         }
-        
+
         // Salvar configurações
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verificado em handle_save_settings
         $post_action = isset( $_POST['dps_action'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_action'] ) ) : '';
@@ -406,7 +406,7 @@ class DPS_Google_Integrations_Settings {
             $this->handle_save_settings();
         }
     }
-    
+
     /**
      * Processa salvamento de configurações.
      *
@@ -427,16 +427,16 @@ class DPS_Google_Integrations_Settings {
                 wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
             }
         }
-        
+
         // Obtém settings atuais
         $settings = get_option( DPS_Google_Auth::OPTION_NAME, [] );
-        
+
         // Atualiza configurações
         $settings['sync_calendar'] = ! empty( $_POST['sync_calendar'] ) ? 1 : 0;
         $settings['sync_tasks'] = ! empty( $_POST['sync_tasks'] ) ? 1 : 0;
-        
+
         update_option( DPS_Google_Auth::OPTION_NAME, $settings );
-        
+
         // Redireciona com mensagem de sucesso
         $redirect_url = add_query_arg(
             [
@@ -446,11 +446,11 @@ class DPS_Google_Integrations_Settings {
             ],
             admin_url( 'admin.php' )
         );
-        
+
         wp_safe_redirect( $redirect_url );
         exit;
     }
-    
+
     /**
      * Processa callback OAuth após autorização.
      *
@@ -460,14 +460,14 @@ class DPS_Google_Integrations_Settings {
         if ( ! current_user_can( 'manage_options' ) ) {
             wp_die( esc_html__( 'Permissão negada.', 'dps-agenda-addon' ) );
         }
-        
+
         // Verifica state (nonce)
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- State é o nonce que será verificado
         $state = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : '';
         if ( empty( $state ) || ! wp_verify_nonce( $state, 'dps_google_oauth' ) ) {
             wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
         }
-        
+
         // Verifica erro
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Já verificamos o nonce acima
         if ( ! empty( $_GET['error'] ) ) {
@@ -478,21 +478,21 @@ class DPS_Google_Integrations_Settings {
             );
             wp_die( esc_html( $error_msg ) );
         }
-        
+
         // Troca code por tokens
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Já verificamos o nonce acima
         if ( empty( $_GET['code'] ) ) {
             wp_die( esc_html__( 'Authorization code não recebido.', 'dps-agenda-addon' ) );
         }
-        
+
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Já verificamos o nonce acima
         $code   = sanitize_text_field( wp_unslash( $_GET['code'] ) );
         $result = DPS_Google_Auth::exchange_code_for_tokens( $code );
-        
+
         if ( is_wp_error( $result ) ) {
             wp_die( esc_html( $result->get_error_message() ) );
         }
-        
+
         // Redireciona de volta para a página de configurações com mensagem de sucesso
         $redirect_url = add_query_arg(
             [
@@ -502,11 +502,11 @@ class DPS_Google_Integrations_Settings {
             ],
             admin_url( 'admin.php' )
         );
-        
+
         wp_safe_redirect( $redirect_url );
         exit;
     }
-    
+
     /**
      * Processa desconexão.
      *
@@ -528,9 +528,9 @@ class DPS_Google_Integrations_Settings {
                 wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
             }
         }
-        
+
         DPS_Google_Auth::disconnect();
-        
+
         // Redireciona de volta
         $redirect_url = add_query_arg(
             [
@@ -540,11 +540,11 @@ class DPS_Google_Integrations_Settings {
             ],
             admin_url( 'admin.php' )
         );
-        
+
         wp_safe_redirect( $redirect_url );
         exit;
     }
-    
+
     /**
      * Obtém URL de desconexão com nonce.
      *

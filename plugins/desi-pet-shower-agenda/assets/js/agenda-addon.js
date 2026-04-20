@@ -27,17 +27,7 @@
     // Remove toast existente
     $('.dps-toast').remove();
 
-    var icons = {
-      error: '❌',
-      success: '✅',
-      warning: '⚠️',
-      info: 'ℹ️'
-    };
-
-    var icon = icons[type] || icons.info;
-
-    var toast = $('<div class="dps-toast dps-toast--' + type + '">' +
-      '<span class="dps-toast-icon">' + icon + '</span>' +
+    var toast = $('<div class="dps-toast dps-toast--' + type + '" role="status" aria-live="polite">' +
       '<span class="dps-toast-message">' + escapeHtml(message) + '</span>' +
       '<button type="button" class="dps-toast-close" aria-label="Fechar">&times;</button>' +
     '</div>');
@@ -163,8 +153,8 @@
     '</div>';
 
     var footerHtml = settings.footerHtml ? '<div class="dps-agenda-dialog__footer">' + settings.footerHtml + '</div>' : '';
-    var dialog = $('<div class="' + overlayClass + '" role="dialog" aria-modal="true" aria-labelledby="' + titleId + '" aria-describedby="' + bodyId + '">' +
-      '<div class="' + dialogClass + '" role="document" tabindex="-1">' +
+    var dialog = $('<div class="' + overlayClass + '">' +
+      '<div class="' + dialogClass + '" role="dialog" aria-modal="true" aria-labelledby="' + titleId + '" aria-describedby="' + bodyId + '" tabindex="-1">' +
         headerHtml +
         '<div id="' + bodyId + '" class="dps-agenda-dialog__body">' + settings.bodyHtml + '</div>' +
         footerHtml +
@@ -201,7 +191,7 @@
 
   function showAgendaConfirmDialog(options) {
     var settings = $.extend({
-      title: getMessage('confirmAction', 'Confirmar acao'),
+      title: getMessage('confirmAction', 'Confirmar ação'),
       subtitle: '',
       bodyHtml: '',
       confirmLabel: getMessage('confirmProceed', 'Confirmar'),
@@ -305,44 +295,35 @@
   /**
    * Obtém o label e ícone do porte do pet.
    * @param {string} size Porte do pet (pequeno, medio, grande, small, medium, large).
-   * @return {object} Objeto com label e icon.
+   * @return {object} Objeto com label.
    */
   function getPetSizeInfo(size) {
-    if (!size) return { label: '', icon: '🐕' };
+    if (!size) return { label: '' };
 
     var sizeLower = size.toLowerCase();
     var sizeMap = {
-      'pequeno': { label: 'Pequeno', icon: '🐕' },
-      'small': { label: 'Pequeno', icon: '🐕' },
-      'medio': { label: 'Médio', icon: '🦮' },
-      'médio': { label: 'Médio', icon: '🦮' },
-      'medium': { label: 'Médio', icon: '🦮' },
-      'grande': { label: 'Grande', icon: '🐕‍🦺' },
-      'large': { label: 'Grande', icon: '🐕‍🦺' }
+      'pequeno': { label: 'Pequeno' },
+      'small': { label: 'Pequeno' },
+      'medio': { label: 'Médio' },
+      'médio': { label: 'Médio' },
+      'medium': { label: 'Médio' },
+      'grande': { label: 'Grande' },
+      'large': { label: 'Grande' }
     };
 
-    return sizeMap[sizeLower] || { label: '', icon: '🐕' };
+    return sizeMap[sizeLower] || { label: '' };
   }
 
   /**
-   * Obtém informações visuais do serviço (ícone, classe, label).
+   * Obtém informações visuais do serviço (classe e label).
    * @param {object} service Objeto do serviço com name, type, category, is_taxidog.
-   * @return {object} Objeto com icon, typeClass, typeLabel.
+   * @return {object} Objeto com typeClass e typeLabel.
    */
   function getServiceVisualInfo(service) {
-    // Mapas de ícones por tipo e categoria
     var typeIcons = {
-      'taxidog': { icon: '🚐', typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' },
-      'extra': { icon: '✨', typeClass: 'dps-service-type-extra', typeLabel: 'Extra' },
-      'package': { icon: '📦', typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' }
-    };
-
-    var categoryIcons = {
-      'banho': '🛁',
-      'tosa': '✂️',
-      'unha': '💅',
-      'ouvido': '👂',
-      'dente': '🦷'
+      'taxidog': { typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' },
+      'extra': { typeClass: 'dps-service-type-extra', typeLabel: 'Extra' },
+      'package': { typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' }
     };
 
     // Verifica TaxiDog primeiro
@@ -353,43 +334,14 @@
     // Verifica tipo
     if (service.type && typeIcons[service.type]) {
       var info = Object.assign({}, typeIcons[service.type]);
-      // Determina ícone pela categoria ou nome
-      info.icon = getCategoryIcon(service, categoryIcons);
       return info;
     }
 
     // Serviço padrão
     return {
-      icon: getCategoryIcon(service, categoryIcons),
       typeClass: 'dps-service-type-padrao',
       typeLabel: 'Serviço'
     };
-  }
-
-  /**
-   * Obtém o ícone baseado na categoria ou nome do serviço.
-   * @param {object} service Objeto do serviço.
-   * @param {object} categoryIcons Mapa de ícones por categoria.
-   * @return {string} Ícone emoji.
-   */
-  function getCategoryIcon(service, categoryIcons) {
-    // Verifica categoria diretamente
-    if (service.category && categoryIcons[service.category]) {
-      return categoryIcons[service.category];
-    }
-
-    // Verifica pelo nome do serviço
-    if (service.name) {
-      var nameLower = service.name.toLowerCase();
-      for (var cat in categoryIcons) {
-        if (nameLower.indexOf(cat) !== -1) {
-          return categoryIcons[cat];
-        }
-      }
-    }
-
-    // Ícone padrão
-    return '✂️';
   }
 
   $(document).ready(function(){
@@ -435,7 +387,7 @@
         select.after(feedback);
       }
 
-      feedback.removeClass('dps-status-feedback--error').text(getMessage('updating', 'Atualizando status...'));
+      feedback.removeClass('dps-status-feedback--error').text(getMessage('updating', 'Atualizando status…'));
       select.addClass('is-loading').prop('disabled', true);
 
       $.post(DPS_AG_Addon.ajax, {
@@ -513,13 +465,13 @@
               for ( var i = 0; i < services.length; i++ ) {
                 var srv = services[i];
                 bodyHtml += '<div class="dps-agenda-dialog-list__item">' +
-                  '<span class="dps-agenda-dialog-list__label">' + escapeHtml(srv.name || 'Servico') + '</span>' +
+                  '<span class="dps-agenda-dialog-list__label">' + escapeHtml(srv.name || 'Serviço') + '</span>' +
                   '<strong class="dps-agenda-dialog-list__value">R$ ' + parseFloat(srv.price || 0).toFixed(2) + '</strong>' +
                 '</div>';
               }
               bodyHtml += '</div>';
               showAgendaContentDialog({
-                title: 'Servicos do atendimento',
+                title: 'Serviços do atendimento',
                 size: 'medium',
                 bodyHtml: bodyHtml,
                 trigger: link
@@ -537,7 +489,7 @@
           showToast(resp && resp.data ? resp.data.message : 'Erro ao buscar serviços.', 'error');
         }
       }).fail(function(xhr){
-        showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
+        showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
       });
     });
     $(document).on('click', '.dps-quick-action-btn', function(e){
@@ -575,7 +527,7 @@
       });
 
       function handleQuickActionError(response){
-        showToast(getAjaxErrorMessage(response, 'Erro ao executar a acao. Tente novamente.'), 'error');
+        showToast(getAjaxErrorMessage(response, 'Erro ao executar a ação. Tente novamente.'), 'error');
         row.find('.dps-quick-action-btn').prop('disabled', false).removeClass('is-loading');
         setTimeout(function(){
           location.reload();
@@ -619,7 +571,7 @@
       });
 
       function handleConfirmationError(response){
-        showToast(getAjaxErrorMessage(response, 'Erro ao atualizar confirmacao. Tente novamente.'), 'error');
+        showToast(getAjaxErrorMessage(response, 'Erro ao atualizar confirmação. Tente novamente.'), 'error');
         row.find('.dps-confirmation-btn').prop('disabled', false).removeClass('is-loading');
       }
     });
@@ -794,17 +746,17 @@
 
     openAgendaDialog({
       title: getMessage('rescheduleDialogTitle', getMessage('reschedule_title', 'Reagendar atendimento')),
-      subtitle: 'Atualize data e horario sem sair da lista.',
+      subtitle: 'Atualize data e horário sem sair da lista.',
       size: 'small',
       trigger: btn,
       bodyHtml:
         '<div class="dps-reschedule-fields">' +
           '<div class="dps-reschedule-field">' +
-            '<label>' + escapeHtml(getMessage('new_date', 'Nova data')) + '</label>' +
+            '<label for="dps-reschedule-date">' + escapeHtml(getMessage('new_date', 'Nova data')) + '</label>' +
             '<input type="date" id="dps-reschedule-date" value="' + escapeHtml(currentDate) + '" required>' +
           '</div>' +
           '<div class="dps-reschedule-field">' +
-            '<label>' + escapeHtml(getMessage('new_time', 'Novo horario')) + '</label>' +
+            '<label for="dps-reschedule-time">' + escapeHtml(getMessage('new_time', 'Novo horário')) + '</label>' +
             '<input type="time" id="dps-reschedule-time" value="' + escapeHtml(currentTime) + '" required>' +
           '</div>' +
         '</div>',
@@ -828,7 +780,7 @@
       return;
     }
 
-    btn.prop('disabled', true).text(getMessage('saving', 'Salvando...'));
+    btn.prop('disabled', true).text(getMessage('saving', 'Salvando…'));
 
     $.post(DPS_AG_Addon.ajax, {
       action: 'dps_quick_reschedule',
@@ -955,7 +907,7 @@
         row.find('.dps-taxidog-action-btn').prop('disabled', false).css('opacity', 1);
       }
     }).fail(function(xhr){
-      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao ao atualizar TaxiDog.'), 'error');
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação ao atualizar TaxiDog.'), 'error');
       row.find('.dps-taxidog-action-btn').prop('disabled', false).css('opacity', 1);
     });
   });
@@ -965,25 +917,14 @@
     var badge = $(this);
     var tooltip = badge.siblings('.dps-payment-tooltip');
     if ( tooltip.length && tooltip.html().trim() !== '' ) {
-      tooltip.css({
-        display: 'block',
-        position: 'absolute',
-        background: '#fff',
-        border: '1px solid #e2e8f0',
-        padding: '8px 12px',
-        borderRadius: '4px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        zIndex: 1000,
-        minWidth: '200px',
-        marginTop: '5px'
-      });
+      tooltip.removeAttr('hidden').addClass('is-visible');
     }
   });
 
   $(document).on('mouseleave', '.dps-payment-badge', function(){
     var badge = $(this);
     var tooltip = badge.siblings('.dps-payment-tooltip');
-    tooltip.css('display', 'none');
+    tooltip.attr('hidden', true).removeClass('is-visible');
   });
 
   // FASE 5: Reenviar link de pagamento
@@ -995,12 +936,12 @@
     var row = btn.closest('tr');
 
     showAgendaConfirmDialog({
-      title: getMessage('confirmAction', 'Confirmar acao'),
+      title: getMessage('confirmAction', 'Confirmar ação'),
       subtitle: 'Cobranca',
       bodyHtml: '<p class="dps-agenda-dialog-copy">' + escapeHtml(getMessage('confirmResendPayment', 'Deseja reenviar o link de pagamento para este atendimento?')) + '</p>',
       trigger: btn,
       onConfirm: function() {
-        btn.prop('disabled', true).text('Reenviando...');
+        btn.prop('disabled', true).text('Reenviando…');
 
         $.post(DPS_AG_Addon.ajax, {
           action: 'dps_agenda_resend_payment',
@@ -1019,7 +960,7 @@
             btn.prop('disabled', false).text('Reenviar');
           }
         }).fail(function(xhr){
-          showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao ao reenviar link.'), 'error');
+          showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação ao reenviar link.'), 'error');
           btn.prop('disabled', false).text('Reenviar');
         });
       }
@@ -1111,7 +1052,7 @@
       if (resp && resp.success) {
         if (resp.data && resp.data.row_html) {
           replaceAgendaRow(row, resp.data.row_html);
-          showToast(resp.data.message || 'Confirmacao atualizada.', 'success', 1600);
+          showToast(resp.data.message || 'Confirmação atualizada.', 'success', 1600);
         } else {
           select.removeClass('dps-dropdown--confirmed dps-dropdown--not-confirmed dps-dropdown--cancelled');
           if (confirmationStatus === 'confirmed') {
@@ -1121,16 +1062,16 @@
           } else {
             select.addClass('dps-dropdown--not-confirmed');
           }
-          row.css('background-color', '#d1fae5');
+          row.addClass('dps-row-flash');
           setTimeout(function(){
-            row.css('background-color', '');
+            row.removeClass('dps-row-flash');
           }, 1000);
         }
       } else {
-        showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar confirmacao.', 'error');
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar confirmação.', 'error');
       }
     }).fail(function(xhr){
-      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
     }).always(function(){
       select.prop('disabled', false).removeClass('is-loading');
     });
@@ -1187,9 +1128,9 @@
           }
           row.removeClass('status-pendente status-finalizado status-finalizado_pago status-cancelado')
              .addClass('status-' + status);
-          row.css('background-color', '#d1fae5');
+          row.addClass('dps-row-flash');
           setTimeout(function(){
-            row.css('background-color', '');
+            row.removeClass('dps-row-flash');
             if (status === 'finalizado' || status === 'finalizado_pago') {
               openOperationPanel(apptId, {
               focusPanel: true,
@@ -1209,7 +1150,7 @@
         select.val(previous);
       }
     }).fail(function(xhr){
-      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
       select.val(previous);
     }).always(function(){
       select.prop('disabled', false).removeClass('is-loading');
@@ -1246,18 +1187,18 @@
 
   function getServiceCardVisual(service) {
     if (service && service.is_taxidog) {
-      return { icon: '\uD83D\uDE90', typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' };
+      return { typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' };
     }
 
     if (service && service.type === 'extra') {
-      return { icon: '\u2728', typeClass: 'dps-service-type-extra', typeLabel: 'Extra' };
+      return { typeClass: 'dps-service-type-extra', typeLabel: 'Extra' };
     }
 
     if (service && service.type === 'package') {
-      return { icon: '\uD83D\uDCE6', typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' };
+      return { typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' };
     }
 
-    return { icon: '\u2702\uFE0F', typeClass: 'dps-service-type-padrao', typeLabel: 'Servi\u00E7o' };
+    return { typeClass: 'dps-service-type-padrao', typeLabel: 'Servi\u00E7o' };
   }
 
   function getPetSizeLabel(size) {
@@ -1340,10 +1281,10 @@
     var descId = 'dps-services-modal-desc-' + servicesModalCounter;
     var total = 0;
     var durationText = formatServiceDuration(totalDuration);
-    var modalHtml = '<div class="dps-services-modal" role="dialog" aria-modal="true" aria-labelledby="' + titleId + '" aria-describedby="' + descId + '">' +
-      '<div class="dps-services-modal-content" role="document" tabindex="-1">' +
+    var modalHtml = '<div class="dps-services-modal">' +
+      '<div class="dps-services-modal-content" role="dialog" aria-modal="true" aria-labelledby="' + titleId + '" aria-describedby="' + descId + '" tabindex="-1">' +
         '<div class="dps-services-modal-header">' +
-          '<h3 id="' + titleId + '" class="dps-services-modal-title">\uD83D\uDCCB Servi\u00E7os do atendimento</h3>' +
+          '<h3 id="' + titleId + '" class="dps-services-modal-title">Servi\u00E7os do atendimento</h3>' +
           '<button type="button" class="dps-services-modal-close" aria-label="Fechar modal">&times;</button>' +
         '</div>' +
         '<div class="dps-services-modal-body" id="' + descId + '">';
@@ -1363,7 +1304,6 @@
       }
 
       modalHtml += '<div class="dps-services-pet-info">' +
-        '<span class="dps-services-pet-icon" aria-hidden="true">\uD83D\uDC15</span>' +
         '<div class="dps-services-pet-details">' +
           '<span class="dps-services-pet-name">' + escapeHtml(pet.name) + '</span>';
 
@@ -1377,14 +1317,12 @@
     if (services.length > 0 || durationText) {
       modalHtml += '<div class="dps-services-summary">';
       modalHtml += '<div class="dps-services-summary-item">' +
-        '<span class="dps-services-summary-icon" aria-hidden="true">\uD83D\uDCCB</span>' +
         '<span class="dps-services-summary-value">' + services.length + '</span>' +
         '<span class="dps-services-summary-label">servi\u00E7o' + (services.length !== 1 ? 's' : '') + '</span>' +
       '</div>';
 
       if (durationText) {
         modalHtml += '<div class="dps-services-summary-item">' +
-          '<span class="dps-services-summary-icon" aria-hidden="true">\u23F1\uFE0F</span>' +
           '<span class="dps-services-summary-value">' + escapeHtml(durationText) + '</span>' +
           '<span class="dps-services-summary-label">tempo estimado</span>' +
         '</div>';
@@ -1415,7 +1353,6 @@
 
         modalHtml += '<div class="dps-service-card ' + visualInfo.typeClass + '">' +
           '<div class="dps-service-card-header">' +
-            '<span class="dps-service-card-icon" aria-hidden="true">' + visualInfo.icon + '</span>' +
             '<div class="dps-service-card-info">' +
               '<span class="dps-service-card-name">' + escapeHtml(serviceName) + '</span>' +
               '<span class="dps-service-card-meta">' + (cardMeta.length ? escapeHtml(cardMeta.join(' \u2022 ')) : '') + '</span>' +
@@ -1425,7 +1362,6 @@
 
         if (srv.description && String(srv.description).trim()) {
           modalHtml += '<div class="dps-service-card-description">' +
-            '<span class="dps-service-card-desc-icon" aria-hidden="true">\uD83D\uDCA1</span>' +
             '<span>' + escapeHtml(String(srv.description)).replace(/\n/g, '<br>') + '</span>' +
           '</div>';
         }
@@ -1441,7 +1377,6 @@
       modalHtml += '</div>';
     } else {
       modalHtml += '<div class="dps-services-empty">' +
-        '<span class="dps-services-empty-icon" aria-hidden="true">\uD83D\uDCCB</span>' +
         '<span>Nenhum servi\u00E7o registrado para este atendimento.</span>' +
       '</div>';
     }
@@ -1449,7 +1384,6 @@
     if (notes && String(notes).trim()) {
       modalHtml += '<div class="dps-services-notes dps-services-notes-highlight">' +
         '<div class="dps-services-notes-title">' +
-          '<span class="dps-services-notes-icon" aria-hidden="true">\u26A0\uFE0F</span>' +
           '<span>Observa\u00E7\u00F5es do cliente</span>' +
         '</div>' +
         '<div class="dps-services-notes-content">' + escapeHtml(String(notes)).replace(/\n/g, '<br>') + '</div>' +
@@ -1628,16 +1562,16 @@
           replaceAgendaRow(row, resp.data.row_html);
           showToast(resp.data.message || 'TaxiDog atualizado.', 'success', 1600);
         } else {
-          row.css('background-color', '#d1fae5');
+          row.addClass('dps-row-flash');
           setTimeout(function(){
-            row.css('background-color', '');
+            row.removeClass('dps-row-flash');
           }, 1000);
         }
       } else {
         showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar TaxiDog.', 'error');
       }
     }).fail(function(xhr){
-      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
     }).always(function(){
       select.prop('disabled', false).removeClass('is-loading');
     });
@@ -1652,12 +1586,12 @@
     var row = btn.closest('tr');
 
     showAgendaConfirmDialog({
-      title: getMessage('confirmAction', 'Confirmar acao'),
+      title: getMessage('confirmAction', 'Confirmar ação'),
       subtitle: 'TaxiDog',
       bodyHtml: '<p class="dps-agenda-dialog-copy">' + escapeHtml(getMessage('confirmTaxidogRequest', 'Deseja solicitar TaxiDog para este atendimento?')) + '</p>',
       trigger: btn,
       onConfirm: function() {
-        btn.prop('disabled', true).text('Solicitando...');
+        btn.prop('disabled', true).text('Solicitando…');
 
         $.post(DPS_AG_Addon.ajax, {
           action: 'dps_agenda_request_taxidog',
@@ -1677,7 +1611,7 @@
             btn.prop('disabled', false).text('Solicitar TaxiDog');
           }
         }).fail(function(xhr){
-          showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
+          showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
           btn.prop('disabled', false).text('Solicitar TaxiDog');
         });
       }
@@ -1701,7 +1635,7 @@
       return;
     }
 
-    var loadingMsg = escapeHtml(getMessage('checklistLoading', 'Carregando checklist...'));
+    var loadingMsg = escapeHtml(getMessage('checklistLoading', 'Carregando checklist…'));
     var dialog = showAgendaContentDialog({
       title: getMessage('checklistTitle', 'Checklist operacional'),
       size: 'large',
@@ -1716,10 +1650,10 @@
       if (resp && resp.success && resp.data && resp.data.html) {
         dialog.find('.dps-agenda-dialog__body').html(resp.data.html);
       } else {
-        dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Nao foi possivel carregar o checklist.')) + '</p>');
+        dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Não foi possível carregar o checklist.')) + '</p>');
       }
     }).fail(function() {
-      dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Nao foi possivel carregar o checklist.')) + '</p>');
+      dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Não foi possível carregar o checklist.')) + '</p>');
     });
   }
 

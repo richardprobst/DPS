@@ -1,1095 +1,503 @@
 /**
- * Estilos para Checklist Operacional e Check-in / Check-out.
+ * Agenda checklist and check-in - DPS Signature.
  *
- * Usa design tokens M3 Expressive definidos em dps-design-tokens.css.
+ * Visual rewrite for operational panels. Business state remains controlled by
+ * PHP/JS; this file owns spacing, hierarchy, status treatment and interaction.
  *
  * @package DPS_Agenda_Addon
  * @since   1.2.0
  */
 
-/* ===========================
-   CHECKLIST OPERACIONAL
-   =========================== */
+.dps-checklist-panel,
+.dps-checkin-panel {
+    --dps-agenda-ink: var(--dps-color-ink, #11161c);
+    --dps-agenda-muted: var(--dps-color-muted, #676056);
+    --dps-agenda-petrol: var(--dps-color-petrol, #173042);
+    --dps-agenda-paper: var(--dps-color-paper-strong, #fffdf8);
+    --dps-agenda-bone: var(--dps-color-bone, #f3ece1);
+    --dps-agenda-line: var(--dps-color-line, #d9cdbd);
+    --dps-agenda-accent: var(--dps-color-accent, #8fd6f4);
+    --dps-agenda-action: var(--dps-color-action, #1f8c57);
+    --dps-agenda-danger: var(--dps-color-danger, #a6463c);
+    --dps-agenda-warning: var(--dps-color-warning, #8f6a24);
 
-.dps-checklist-panel {
-    margin-top: 12px;
+    display: grid;
+    gap: 18px;
+    min-width: 0;
+    color: var(--dps-agenda-ink);
+    font-family: var(--dps-font-body, "Manrope", "Segoe UI", sans-serif);
+}
+
+.dps-checklist-panel h4,
+.dps-checkin-panel h4 {
+    margin: 0;
+    color: var(--dps-agenda-ink);
+    font-family: var(--dps-font-display, "Sora", "Segoe UI", sans-serif);
+    font-size: clamp(1rem, 1.6vw, 1.2rem);
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    text-wrap: balance;
 }
 
 .dps-checklist-progress {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: 12px;
+    min-width: 0;
 }
 
 .dps-checklist-progress-bar {
-    flex: 1;
-    height: 6px;
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-    border-radius: 3px;
+    position: relative;
+    min-width: 0;
+    height: 8px;
     overflow: hidden;
+    background: rgba(217, 205, 189, 0.68);
+    border: 1px solid rgba(185, 171, 152, 0.45);
 }
 
 .dps-checklist-progress-fill {
+    width: 0;
     height: 100%;
-    background: var(--md-sys-color-primary, #6750a4);
-    border-radius: 3px;
-    transition: width 0.3s ease;
+    background: linear-gradient(90deg, var(--dps-agenda-petrol), var(--dps-agenda-action));
+    transform-origin: left center;
+    transition: width 180ms ease;
 }
 
 .dps-checklist-progress-text {
-    font-size: 12px;
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    min-width: 36px;
+    min-width: 44px;
+    color: var(--dps-agenda-ink);
+    font-family: var(--dps-font-mono, "JetBrains Mono", monospace);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    line-height: 1;
     text-align: right;
 }
 
 .dps-checklist-steps {
-    list-style: none;
+    display: grid;
+    gap: 0;
     margin: 0;
     padding: 0;
+    list-style: none;
+    border: 1px solid rgba(217, 205, 189, 0.9);
+    background: rgba(255, 253, 248, 0.84);
 }
 
 .dps-checklist-step {
-    display: flex;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
     align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: 8px;
-    transition: background 0.15s;
+    min-width: 0;
+    padding: 14px 16px 14px 40px;
+    border-bottom: 1px solid rgba(217, 205, 189, 0.68);
+}
+
+.dps-checklist-step:last-child {
+    border-bottom: 0;
+}
+
+.dps-checklist-step::before {
+    position: absolute;
+    top: 18px;
+    left: 16px;
+    width: 10px;
+    height: 10px;
+    background: transparent;
+    border: 1px solid var(--dps-agenda-line);
+    content: "";
+}
+
+.dps-checklist-step[data-status="done"]::before {
+    background: var(--dps-agenda-action);
+    border-color: var(--dps-agenda-action);
+}
+
+.dps-checklist-step[data-status="skipped"]::before {
+    background: var(--dps-agenda-bone);
+    border-color: var(--dps-agenda-muted);
 }
 
 .dps-checklist-step:hover {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
+    background: rgba(232, 246, 252, 0.52);
 }
 
-.dps-checklist-step-icon {
-    font-size: 18px;
-    flex-shrink: 0;
-    width: 28px;
-    text-align: center;
+.dps-checklist-step-icon,
+.dps-safety-item-icon {
+    display: none;
 }
 
 .dps-checklist-step-label {
-    flex: 1;
-    font-size: 13px;
-    color: var(--md-sys-color-on-surface, #1d1b20);
+    min-width: 0;
+    color: var(--dps-agenda-ink);
+    font-size: 0.92rem;
+    font-weight: 650;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
 }
 
-.dps-checklist-step[data-status="done"] .dps-checklist-step-label {
-    text-decoration: line-through;
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-}
-
+.dps-checklist-step[data-status="done"] .dps-checklist-step-label,
 .dps-checklist-step[data-status="skipped"] .dps-checklist-step-label {
-    text-decoration: line-through;
-    opacity: 0.5;
+    color: var(--dps-agenda-muted);
 }
 
 .dps-checklist-step-actions {
     display: flex;
-    gap: 4px;
-    flex-shrink: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    min-width: 0;
 }
 
-.dps-checklist-btn {
-    border: none;
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 11px;
+.dps-checklist-btn,
+.dps-checkin-btn,
+.dps-expand-panels-btn,
+.dps-checklist-modal-close,
+.dps-checklist-modal-close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0.68rem 0.92rem;
+    border: 1px solid rgba(185, 171, 152, 0.86);
+    border-radius: 0;
+    background: rgba(255, 253, 248, 0.92);
+    color: var(--dps-agenda-ink);
     cursor: pointer;
-    transition: opacity 0.15s, background 0.15s;
-    line-height: 1.4;
+    font-family: var(--dps-font-body, "Manrope", "Segoe UI", sans-serif);
+    font-size: 0.8rem;
+    font-weight: 750;
+    line-height: 1.1;
+    text-decoration: none;
+    touch-action: manipulation;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
 }
 
-.dps-checklist-btn:hover {
-    opacity: 0.85;
-}
-
-.dps-checklist-btn:disabled,
-.dps-checklist-btn[aria-disabled="true"] {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
+.dps-checklist-btn:hover,
+.dps-checkin-btn:hover,
+.dps-expand-panels-btn:hover,
+.dps-checklist-modal-close:hover,
+.dps-checklist-modal-close-btn:hover {
+    border-color: var(--dps-agenda-petrol);
+    background: var(--dps-agenda-bone);
+    color: var(--dps-agenda-petrol);
+    transform: translateY(-1px);
 }
 
 .dps-checklist-btn:focus-visible,
 .dps-checkin-btn:focus-visible,
 .dps-expand-panels-btn:focus-visible,
 .dps-checklist-modal-close:focus-visible,
-.dps-checklist-modal-close-btn:focus-visible {
-    outline: 2px solid var(--md-sys-color-primary, #6750a4);
-    outline-offset: 2px;
+.dps-checklist-modal-close-btn:focus-visible,
+.dps-rework-modal textarea:focus-visible {
+    outline: 2px solid var(--dps-agenda-accent);
+    outline-offset: 3px;
 }
 
-.dps-checklist-btn--done {
-    background: var(--md-sys-color-primary, #6750a4);
-    color: var(--md-sys-color-on-primary, #fff);
+.dps-checklist-btn:disabled,
+.dps-checklist-btn[aria-disabled="true"],
+.dps-checkin-btn:disabled,
+.dps-checkin-btn[aria-disabled="true"] {
+    opacity: 0.52;
+    cursor: not-allowed;
+    transform: none;
 }
 
-.dps-checklist-btn--undo {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-    color: var(--md-sys-color-on-surface-variant, #49454f);
+.dps-checklist-btn--done,
+.dps-checkin-btn--checkin,
+.dps-checkin-btn--checkout,
+.dps-checkin-btn--whatsapp,
+.dps-checklist-modal-close-btn {
+    border-color: var(--dps-agenda-action);
+    background: var(--dps-agenda-action);
+    color: #ffffff;
+}
+
+.dps-checklist-btn--done:hover,
+.dps-checkin-btn--checkin:hover,
+.dps-checkin-btn--checkout:hover,
+.dps-checkin-btn--whatsapp:hover,
+.dps-checklist-modal-close-btn:hover {
+    border-color: var(--dps-color-action-deep, #166540);
+    background: var(--dps-color-action-deep, #166540);
+    color: #ffffff;
 }
 
 .dps-checklist-btn--rework {
-    background: var(--md-sys-color-error-container, #f9dedc);
-    color: var(--md-sys-color-on-error-container, #410e0b);
+    border-color: rgba(166, 70, 60, 0.62);
+    background: var(--dps-color-danger-soft, #f7ddd8);
+    color: var(--dps-agenda-danger);
 }
 
-.dps-checklist-btn--skip {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    font-size: 10px;
+.dps-checklist-btn--rework:hover {
+    border-color: var(--dps-agenda-danger);
+    background: var(--dps-agenda-danger);
+    color: #ffffff;
 }
 
-/* Rework badge */
+.dps-checklist-btn--skip,
+.dps-checklist-btn--undo {
+    background: transparent;
+}
+
 .dps-checklist-rework-badge {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
-    background: var(--md-sys-color-error-container, #f9dedc);
-    color: var(--md-sys-color-on-error-container, #410e0b);
-    border-radius: 10px;
-    padding: 1px 6px;
-    font-size: 10px;
-    font-weight: 600;
-}
-
-/* Rework modal */
-.dps-rework-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 99999;
-    display: flex;
-    align-items: center;
     justify-content: center;
-}
-
-.dps-rework-modal {
-    background: var(--md-sys-color-surface, #fff);
-    border-radius: 16px;
-    padding: 24px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-}
-
-.dps-rework-modal h4 {
-    margin: 0 0 12px;
-    font-size: 16px;
-}
-
-.dps-rework-modal textarea {
-    width: 100%;
-    min-height: 80px;
-    border: 1px solid var(--md-sys-color-outline, #79747e);
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 13px;
-    resize: vertical;
-    box-sizing: border-box;
-}
-
-.dps-rework-modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 12px;
-}
-
-/* ===========================
-   CHECK-IN / CHECK-OUT
-   =========================== */
-
-.dps-checkin-panel {
-    margin-top: 12px;
+    min-height: 24px;
+    margin-left: 8px;
+    padding: 0.24rem 0.48rem;
+    border: 1px solid rgba(166, 70, 60, 0.42);
+    background: var(--dps-color-danger-soft, #f7ddd8);
+    color: var(--dps-agenda-danger);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .dps-checkin-status {
     display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
     flex-wrap: wrap;
-}
-
-.dps-checkin-status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.dps-checkin-status-badge--pending {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
-    font-weight: 600;
-}
-
-.dps-checkin-status-badge--in {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.dps-checkin-status-badge--out {
-    background: #dbeafe;
-    color: #1e40af;
-}
-
-.dps-checkin-status-badge--duration {
-    background: var(--md-sys-color-tertiary-container, #ffd8e4);
-    color: var(--md-sys-color-on-tertiary-container, #31111d);
-}
-
-/* Safety items grid */
-.dps-safety-items {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 10px;
-    margin: 12px 0;
-}
-
-.dps-safety-item {
-    display: flex;
-    align-items: flex-start;
     gap: 8px;
-    padding: 8px 10px;
-    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
-    border-radius: 8px;
-    transition: border-color 0.15s, background 0.15s;
-    cursor: pointer;
-}
-
-.dps-safety-item:hover {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-}
-
-.dps-safety-item--checked {
-    border-color: var(--md-sys-color-error, #b3261e);
-    background: var(--md-sys-color-error-container, #f9dedc);
-}
-
-.dps-safety-item--checked[data-severity="info"] {
-    border-color: var(--md-sys-color-outline, #79747e);
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-}
-
-.dps-safety-item--checked[data-severity="warning"] {
-    border-color: #f59e0b;
-    background: #fffbeb;
-}
-
-.dps-safety-item-icon {
-    font-size: 18px;
-    flex-shrink: 0;
-}
-
-.dps-safety-item-content {
-    flex: 1;
     min-width: 0;
 }
 
-.dps-safety-item-label {
-    font-size: 12px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.dps-safety-item-label input[type="checkbox"] {
-    margin: 0;
-}
-
-.dps-safety-item-notes {
-    width: 100%;
-    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
-    border-radius: 4px;
-    padding: 4px 6px;
-    font-size: 11px;
-    margin-top: 4px;
-    resize: none;
-    display: none;
-    box-sizing: border-box;
-}
-
-.dps-safety-item--checked .dps-safety-item-notes {
-    display: block;
-}
-
-/* Observations field */
-.dps-checkin-observations {
-    margin: 12px 0;
-}
-
-.dps-checkin-observations label {
-    display: block;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    margin-bottom: 4px;
-}
-
-.dps-checkin-observations textarea {
-    width: 100%;
-    min-height: 60px;
-    border: 1px solid var(--md-sys-color-outline, #79747e);
-    border-radius: 8px;
-    padding: 8px 10px;
-    font-size: 13px;
-    resize: vertical;
-    box-sizing: border-box;
-}
-
-/* Action buttons */
-.dps-checkin-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-    flex-wrap: wrap;
-}
-
-.dps-checkin-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: none;
-    border-radius: 20px;
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
-}
-
-.dps-checkin-btn:hover {
-    opacity: 0.9;
-}
-
-.dps-checkin-btn:active {
-    transform: scale(0.97);
-}
-
-.dps-checkin-btn--checkin {
-    background: #16a34a;
-    color: #fff;
-}
-
-.dps-checkin-btn--checkout {
-    background: #2563eb;
-    color: #fff;
-}
-
-.dps-checkin-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* WhatsApp report button */
-.dps-checkin-whatsapp {
-    margin-top: 8px;
-}
-
-.dps-checkin-whatsapp--hidden {
-    display: none;
-}
-
-.dps-checkin-btn--whatsapp {
-    background: #25d366;
-    color: #fff;
-    text-decoration: none;
-}
-
-.dps-checkin-btn--whatsapp:hover {
-    background: #1ebe57;
-    color: #fff;
-}
-
-/* Safety summary (read-only, after check-in) */
-.dps-safety-summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 8px 0;
-}
-
-.dps-safety-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 500;
-}
-
-.dps-safety-tag--alert {
-    background: var(--md-sys-color-error-container, #f9dedc);
-    color: var(--md-sys-color-on-error-container, #410e0b);
-}
-
-.dps-safety-tag--warning {
-    background: #fffbeb;
-    color: #92400e;
-}
-
-.dps-safety-tag--info {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-}
-
-/* Checklist modal popup (triggered on status change to FINALIZADO / FINALIZADO E PAGO) */
-.dps-checklist-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.dps-checklist-modal {
-    background: var(--md-sys-color-surface, #fff);
-    border-radius: 16px;
-    width: 90%;
-    max-width: 520px;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    animation: dps-checklist-modal-in 0.2s ease-out;
-}
-
-@keyframes dps-checklist-modal-in {
-    from { opacity: 0; transform: translateY(20px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.dps-checklist-modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
-}
-
-.dps-checklist-modal-header h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--md-sys-color-on-surface, #1d1b20);
-}
-
-.dps-checklist-modal-close {
-    background: none;
-    border: none;
-    font-size: 22px;
-    cursor: pointer;
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    padding: 4px 8px;
-    border-radius: 50%;
-    line-height: 1;
-    transition: background 0.15s;
-}
-
-.dps-checklist-modal-close:hover {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-}
-
-.dps-checklist-modal-body {
-    padding: 16px 20px;
-    overflow-y: auto;
-    flex: 1;
-}
-
-.dps-checklist-modal-body .dps-checklist-panel {
-    border: none;
-    padding: 0;
-    margin-top: 0;
-}
-
-.dps-checklist-modal-loading,
-.dps-checklist-modal-error {
-    text-align: center;
-    padding: 24px 0;
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    font-size: 14px;
-}
-
-.dps-checklist-modal-error {
-    color: var(--md-sys-color-error, #b3261e);
-}
-
-.dps-checklist-modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    padding: 12px 20px;
-    border-top: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
-}
-
-.dps-checklist-modal-close-btn {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    padding: 8px 16px;
-    font-size: 13px;
-}
-
-/* Compact view for appointment cards */
+.dps-checkin-status-badge,
+.dps-checklist-compact,
 .dps-checkin-compact {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    font-size: 11px;
-}
-
-.dps-checklist-compact {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-}
-
-
-.dps-operational-cell {
-    min-width: 176px;
-}
-
-/* Operational indicators wrapper in Tab 2 */
-.dps-operational-indicators {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    width: 100%;
-}
-
-/* Expand/collapse button for detail panels */
-.dps-expand-panels-btn {
-    display: inline-flex;
-    align-items: center;
     gap: 6px;
-    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
-    border-radius: 20px;
-    background: var(--md-sys-color-surface, #fff);
-    color: var(--md-sys-color-on-surface, #1d1b20);
-    padding: 5px 12px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
-    white-space: nowrap;
-    line-height: 1.4;
+    min-height: 28px;
+    padding: 0.32rem 0.56rem;
+    border: 1px solid rgba(217, 205, 189, 0.92);
+    background: rgba(255, 253, 248, 0.78);
+    color: var(--dps-agenda-muted);
+    font-size: 0.75rem;
+    font-weight: 750;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
 }
 
-.dps-expand-panels-btn__label-short {
+.dps-checkin-status-badge--in {
+    border-color: rgba(143, 106, 36, 0.38);
+    background: var(--dps-color-warning-soft, #f3e5c7);
+    color: var(--dps-agenda-warning);
+}
+
+.dps-checkin-status-badge--out,
+.dps-checkin-status-badge--duration {
+    border-color: rgba(31, 140, 87, 0.34);
+    background: var(--dps-color-success-soft, #dcefe4);
+    color: var(--dps-agenda-action);
+}
+
+.dps-checkin-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.dps-checkin-whatsapp {
+    margin-top: 4px;
+}
+
+.dps-checkin-whatsapp--hidden,
+.dps-checkin-loading,
+.dps-checklist-loading {
     display: none;
-    font-size: 12px;
 }
 
-.dps-expand-panels-btn__icon {
-    font-size: 14px;
-    line-height: 1;
-}
-
-.dps-expand-panels-btn__label {
-    font-size: 12px;
-}
-
-
-.dps-expand-panels-btn__arrow {
-    font-size: 10px;
-    transition: transform 0.2s;
-    opacity: 0.6;
-}
-
-.dps-expand-panels-btn:hover {
-    background: var(--md-sys-color-primary-container, #eaddff);
-    border-color: var(--md-sys-color-primary, #6750a4);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.dps-expand-panels-btn[aria-expanded="true"] {
-    background: var(--md-sys-color-primary-container, #eaddff);
-    border-color: var(--md-sys-color-primary, #6750a4);
-}
-
-.dps-expand-panels-btn[aria-expanded="true"] .dps-expand-panels-btn__arrow {
-    transform: rotate(180deg);
-}
-
-/* State-specific button styles */
-.dps-expand-panels-btn--pending {
-    border-color: var(--md-sys-color-primary, #6750a4);
-    background: var(--md-sys-color-primary-container, #eaddff);
-    color: var(--md-sys-color-on-primary-container, #21005d);
-}
-
-.dps-expand-panels-btn--checkin {
-    border-color: #2563eb;
-    background: #eff6ff;
-    color: #1e40af;
-}
-
-.dps-expand-panels-btn--done {
-    border-color: #16a34a;
-    background: #f0fdf4;
-    color: #166534;
-}
-
-/* Detail row with full panels */
-.dps-detail-row td {
-    padding: 0 !important;
-    background: var(--md-sys-color-surface-variant, #f5f0fa);
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-    .dps-safety-items {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .dps-safety-item-label {
-        align-items: flex-start;
-        line-height: 1.35;
-    }
-}
-
-@media (max-width: 600px) {
-    .dps-safety-items {
-        grid-template-columns: 1fr;
-    }
-
-    .dps-checkin-actions {
-        flex-direction: column;
-    }
-
-    .dps-checkin-btn {
-        justify-content: center;
-        width: 100%;
-    }
-
-    .dps-operational-cell {
-        min-width: 0;
-    }
-
-    .dps-operational-indicators {
-        justify-content: flex-end;
-    }
-
-    .dps-expand-panels-btn {
-        width: 100%;
-        justify-content: space-between;
-        padding: 7px 10px;
-        border-radius: 14px;
-    }
-
-    .dps-expand-panels-btn__label {
-        display: none;
-    }
-
-    .dps-expand-panels-btn__label-short {
-        display: inline;
-    }
-
-}
-
-/* ===========================
-   HISTORY OPS SUMMARY (read-only, used in history views)
-   =========================== */
-
-.dps-history-ops-summary {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 12px;
-    line-height: 1.4;
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-}
-
-.dps-history-ops-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.dps-history-ops-label {
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-.dps-history-ops-value {
-    color: var(--md-sys-color-on-surface, #1d1b20);
-}
-
-.dps-history-ops-value--complete {
-    color: var(--md-sys-color-primary, #6750a4);
-    font-weight: 600;
-}
-
-.dps-history-ops-badge--rework {
-    font-size: 11px;
-    background: var(--md-sys-color-error-container, #f9dedc);
-    color: var(--md-sys-color-on-error-container, #410e0b);
-    border-radius: 10px;
-    padding: 1px 6px;
-}
-
-.dps-history-ops-safety {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-top: 2px;
-}
-
-.dps-history-ops-obs {
-    display: flex;
-    gap: 4px;
-    margin-top: 2px;
-}
-
-.dps-history-ops-obs-text {
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    font-style: italic;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 200px;
-}
-
-/* M3 detail panels normalization */
-.dps-checkin-status-badge--pending,
-.dps-safety-tag--info {
-    background: var(--dps-color-surface-container);
-    color: var(--dps-color-on-surface-variant);
-    border: 1px solid var(--dps-color-outline-variant);
-}
-
-.dps-checkin-status-badge--in,
-.dps-safety-tag--success {
-    background: var(--dps-color-success-container);
-    color: var(--dps-color-on-success-container);
-}
-
-.dps-checkin-status-badge--out {
-    background: var(--dps-color-primary-container);
-    color: var(--dps-color-on-primary-container);
-}
-
-.dps-checkin-status-badge--duration,
-.dps-safety-tag--warning {
-    background: var(--dps-color-warning-container);
-    color: var(--dps-color-on-warning-container);
-}
-
-.dps-safety-tag--alert {
-    background: var(--dps-color-error-container);
-    color: var(--dps-color-on-error-container);
-}
-
-.dps-expand-panels-btn {
-    background: var(--dps-color-surface-container-lowest);
-    border-color: var(--dps-color-outline-variant);
-    color: var(--dps-color-on-surface);
-}
-
-.dps-expand-panels-btn:hover,
-.dps-expand-panels-btn[aria-expanded="true"] {
-    background: var(--dps-color-primary-container);
-    border-color: var(--dps-color-primary);
-    color: var(--dps-color-on-primary-container);
-    box-shadow: var(--dps-elevation-1);
-}
-
-/* ==========================================================================
-   Lista de Atendimentos - Painel operacional M3 unificado
-   Fonte de verdade visual: docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md
-   + docs/visual/VISUAL_STYLE_GUIDE.md
-   ========================================================================== */
-
-.dps-detail-panels {
+.dps-safety-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-    gap: var(--dps-space-4);
-    padding: var(--dps-space-4);
-    background: var(--dps-color-surface-container-low);
-    border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-large);
-}
-
-.dps-checklist-panel,
-.dps-checkin-panel {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: var(--dps-space-4);
-    padding: var(--dps-space-5);
-    border-radius: var(--dps-shape-large);
-    background: var(--dps-color-surface-container-lowest);
-    border: 1px solid var(--dps-color-outline-variant);
-}
-
-.dps-checklist-panel h4,
-.dps-checkin-panel h4 {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--dps-color-on-surface);
-    font-size: var(--dps-typescale-title-small-size);
-    line-height: var(--dps-typescale-title-small-line);
-    font-weight: var(--dps-typescale-title-small-weight);
-}
-
-.dps-checklist-progress {
-    gap: var(--dps-space-3);
-}
-
-.dps-checklist-progress-bar {
-    height: 0.6rem;
-    border-radius: var(--dps-shape-full);
-    background: var(--dps-color-surface-container);
-}
-
-.dps-checklist-progress-fill {
-    border-radius: inherit;
-    background: linear-gradient(90deg, var(--dps-color-primary), var(--dps-color-secondary));
-}
-
-.dps-checklist-steps {
-    display: grid;
-    gap: 0.75rem;
+    gap: 8px;
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-.dps-checklist-step {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 0.75rem;
-    align-items: center;
-    padding: 0.9rem 1rem;
-    border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-medium);
-    background: var(--dps-color-surface-container-low);
-}
-
-.dps-checklist-step[data-status="done"] {
-    background: var(--dps-color-success-container);
-    border-color: color-mix(in srgb, var(--dps-color-success) 34%, var(--dps-color-outline-variant));
-}
-
-.dps-checklist-step[data-status="skipped"] {
-    background: var(--dps-color-warning-container);
-    border-color: color-mix(in srgb, var(--dps-color-warning) 36%, var(--dps-color-outline-variant));
-}
-
-.dps-checklist-step-actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 0.5rem;
-}
-
-.dps-checklist-btn,
-.dps-checkin-btn,
-.dps-expand-panels-btn {
-    min-height: 2.75rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    padding: 0.6rem 1rem;
-    border-radius: var(--dps-shape-full);
-    font-size: var(--dps-typescale-label-large-size);
-    line-height: var(--dps-typescale-label-large-line);
-    font-weight: var(--dps-typescale-label-large-weight);
-}
-
-.dps-checkin-status {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.dps-safety-summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-}
-
-.dps-safety-items {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--dps-space-3);
-}
-
 .dps-safety-item {
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.85rem;
-    align-items: start;
-    padding: 1rem;
-    border-radius: var(--dps-shape-large);
-    background: var(--dps-color-surface-container-low);
-    border: 1px solid var(--dps-color-outline-variant);
+    gap: 6px;
+    padding: 12px 14px;
+    border: 1px solid rgba(217, 205, 189, 0.9);
+    background: rgba(255, 253, 248, 0.78);
 }
 
-.dps-safety-item:hover {
-    border-color: var(--dps-color-primary);
-    box-shadow: var(--dps-elevation-1);
-}
-
-.dps-safety-item-content {
-    display: grid;
-    gap: 0.65rem;
+.dps-safety-item--checked {
+    border-color: rgba(31, 140, 87, 0.34);
+    background: var(--dps-color-success-soft, #dcefe4);
 }
 
 .dps-safety-item-label {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    color: var(--dps-color-on-surface);
-    font-weight: var(--dps-typescale-label-large-weight);
-    cursor: pointer;
+    color: var(--dps-agenda-ink);
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.35;
 }
 
-.dps-safety-item-label input[type="checkbox"] {
-    appearance: none;
-    width: 1.25rem;
-    height: 1.25rem;
-    margin: 0;
-    flex: 0 0 1.25rem;
-    border: 2px solid var(--dps-color-outline);
-    border-radius: var(--dps-shape-small);
-    background: var(--dps-color-surface-container-lowest);
-    position: relative;
-    transition: background var(--dps-motion-hover), border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
-}
-
-.dps-safety-item-label input[type="checkbox"]:checked {
-    background: var(--dps-color-primary);
-    border-color: var(--dps-color-primary);
-}
-
-.dps-safety-item-label input[type="checkbox"]:checked::after {
-    content: "";
-    position: absolute;
-    left: 0.26rem;
-    top: 0.02rem;
-    width: 0.3rem;
-    height: 0.62rem;
-    border-right: 2px solid var(--dps-color-on-primary);
-    border-bottom: 2px solid var(--dps-color-on-primary);
-    transform: rotate(45deg);
-}
-
-.dps-safety-item-label input[type="checkbox"]:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--dps-color-primary) 26%, transparent);
-    outline-offset: 2px;
-}
-
-.dps-safety-item-notes,
-.dps-checkin-observations textarea {
-    width: 100%;
-    min-height: 2.8rem;
-    padding: 0.8rem 0.95rem;
-    border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-medium);
-    background: var(--dps-color-surface-container-lowest);
-    color: var(--dps-color-on-surface);
-    box-sizing: border-box;
-}
-
-.dps-checkin-observations {
-    display: grid;
-    gap: 0.55rem;
-}
-
-.dps-checkin-observations label {
-    color: var(--dps-color-on-surface-variant);
-    font-size: var(--dps-typescale-label-medium-size);
-    line-height: var(--dps-typescale-label-medium-line);
-    font-weight: var(--dps-typescale-label-medium-weight);
-}
-
-.dps-checkin-actions,
-.dps-checkin-whatsapp {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
+.dps-safety-item-note {
+    color: var(--dps-agenda-muted);
+    font-size: 0.8rem;
+    line-height: 1.45;
 }
 
 .dps-expand-panels-btn {
-    min-width: 11rem;
-    justify-content: space-between;
+    justify-self: start;
 }
 
-.dps-operational-indicators {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
-    justify-content: flex-start;
+.dps-detail-panels {
+    display: grid;
+    gap: 18px;
+    min-width: 0;
 }
 
-.dps-detail-row td {
-    padding: 0 !important;
-    border-top: 0;
-    background: transparent;
+.dps-detail-panel {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid rgba(217, 205, 189, 0.9);
+    background: rgba(255, 253, 248, 0.9);
 }
 
 .dps-rework-modal-overlay,
-.dps-rework-modal {
-    border-radius: var(--dps-shape-dialog);
+.dps-checklist-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+    background: rgba(13, 20, 27, 0.72);
+    overscroll-behavior: contain;
 }
 
-@media (max-width: 1200px) {
-    .dps-detail-panels {
-        grid-template-columns: 1fr;
-    }
+.dps-rework-modal,
+.dps-checklist-modal {
+    display: grid;
+    gap: 18px;
+    width: min(100%, 460px);
+    max-height: min(720px, calc(100vh - 40px));
+    overflow: auto;
+    padding: 24px;
+    border: 1px solid rgba(217, 205, 189, 0.72);
+    background: var(--dps-agenda-paper);
+    box-shadow: 0 28px 72px rgba(8, 12, 18, 0.22);
+    overscroll-behavior: contain;
+}
+
+.dps-rework-modal h4,
+.dps-checklist-modal h4 {
+    margin: 0;
+    color: var(--dps-agenda-ink);
+    font-family: var(--dps-font-display, "Sora", "Segoe UI", sans-serif);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.dps-rework-modal p,
+.dps-checklist-modal p {
+    margin: 0;
+    color: var(--dps-agenda-muted);
+    font-size: 0.92rem;
+    line-height: 1.55;
+}
+
+.dps-rework-modal textarea {
+    width: 100%;
+    min-height: 108px;
+    padding: 12px 14px;
+    border: 1px solid rgba(185, 171, 152, 0.9);
+    border-radius: 0;
+    background: #ffffff;
+    color: var(--dps-agenda-ink);
+    font-family: var(--dps-font-body, "Manrope", "Segoe UI", sans-serif);
+    font-size: 0.92rem;
+    line-height: 1.45;
+    resize: vertical;
+}
+
+.dps-rework-modal-actions,
+.dps-checklist-modal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.dps-checklist-modal-loading,
+.dps-checklist-modal-error {
+    margin: 0;
+    padding: 14px 16px;
+    border: 1px solid rgba(217, 205, 189, 0.9);
+    background: rgba(255, 253, 248, 0.78);
+}
+
+.dps-checklist-modal-error {
+    border-color: rgba(166, 70, 60, 0.5);
+    background: var(--dps-color-danger-soft, #f7ddd8);
+    color: var(--dps-agenda-danger);
 }
 
 @media (max-width: 840px) {
     .dps-checklist-step {
-        grid-template-columns: auto minmax(0, 1fr);
-    }
-
-    .dps-checklist-step-actions {
-        grid-column: 1 / -1;
-        justify-content: flex-start;
-    }
-
-    .dps-safety-items {
         grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 600px) {
-    .dps-detail-panels {
-        padding: var(--dps-space-3);
-        gap: var(--dps-space-3);
+        gap: 12px;
     }
 
-    .dps-checklist-panel,
-    .dps-checkin-panel {
-        padding: var(--dps-space-4);
+    .dps-checklist-step-actions,
+    .dps-checkin-actions,
+    .dps-rework-modal-actions,
+    .dps-checklist-modal-actions {
+        justify-content: stretch;
     }
 
     .dps-checklist-btn,
     .dps-checkin-btn,
-    .dps-expand-panels-btn {
+    .dps-expand-panels-btn,
+    .dps-checklist-modal-close,
+    .dps-checklist-modal-close-btn {
         width: 100%;
     }
+}
 
-    .dps-checkin-actions,
-    .dps-checkin-whatsapp {
-        flex-direction: column;
+@media (max-width: 600px) {
+    .dps-checklist-panel,
+    .dps-checkin-panel {
+        gap: 14px;
+    }
+
+    .dps-checklist-progress {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-checklist-progress-text {
+        min-width: 0;
+        text-align: left;
+    }
+
+    .dps-detail-panel,
+    .dps-rework-modal,
+    .dps-checklist-modal {
+        padding: 18px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dps-checklist-progress-fill,
+    .dps-checklist-btn,
+    .dps-checkin-btn,
+    .dps-expand-panels-btn,
+    .dps-checklist-modal-close,
+    .dps-checklist-modal-close-btn {
+        transition: none;
     }
 }
