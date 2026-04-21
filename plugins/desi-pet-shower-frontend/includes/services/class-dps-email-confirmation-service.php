@@ -53,16 +53,31 @@ final class DPS_Email_Confirmation_Service {
      * @return bool
      */
     public function verifyToken( int $clientId, string $token ): bool {
+        return 'valid' === $this->getTokenStatus( $clientId, $token );
+    }
+
+    /**
+     * Retorna o status do token de confirmação.
+     *
+     * @param int    $clientId ID do cliente.
+     * @param string $token    Token a verificar.
+     * @return string
+     */
+    public function getTokenStatus( int $clientId, string $token ): string {
         $storedToken = get_post_meta( $clientId, self::TOKEN_META, true );
 
         if ( '' === $storedToken || $storedToken !== $token ) {
-            return false;
+            return 'invalid';
         }
 
         $createdAt = (int) get_post_meta( $clientId, self::TOKEN_CREATED_META, true );
         $expiresAt = $createdAt + ( self::TOKEN_TTL_HOURS * HOUR_IN_SECONDS );
 
-        return time() <= $expiresAt;
+        if ( time() > $expiresAt ) {
+            return 'expired';
+        }
+
+        return 'valid';
     }
 
     /**
@@ -72,6 +87,7 @@ final class DPS_Email_Confirmation_Service {
      */
     public function confirm( int $clientId ): void {
         update_post_meta( $clientId, self::CONFIRMED_META, '1' );
+        update_post_meta( $clientId, 'dps_is_active', '1' );
         delete_post_meta( $clientId, self::TOKEN_META );
         delete_post_meta( $clientId, self::TOKEN_CREATED_META );
     }

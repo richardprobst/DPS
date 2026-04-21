@@ -1,25 +1,12 @@
 <?php
 /**
- * Módulo de Cadastro do Frontend Add-on (Fase 2).
+ * Compatibility module for the legacy registration shortcode.
  *
- * Consolida o formulário público de cadastro de clientes e pets.
- * Quando habilitado via feature flag, assume o shortcode [dps_registration_form]
- * delegando renderização para o add-on legado DPS_Registration_Addon (dual-run).
- *
- * Estratégia: intervenção mínima. O legado continua processando formulário,
- * emails, REST, AJAX, settings e cron. O módulo apenas:
- *   1. Assume o shortcode para envolver output na surface do frontend add-on.
- *   2. Acrescenta CSS do frontend add-on sobre os assets do legado.
- *
- * Todos os hooks existentes são preservados:
- *   - dps_registration_after_fields (consumido pelo Loyalty)
- *   - dps_registration_after_client_created (consumido pelo Loyalty)
- *   - dps_registration_spam_check
- *   - dps_registration_agenda_url
+ * Keeps `[dps_registration_form]` available while delegating all rendering and
+ * processing to the canonical DPS Signature implementation.
  *
  * @package DPS_Frontend_Addon
  * @since   1.0.0
- * @since   1.1.0 Fase 2 — módulo operacional com dual-run.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,105 +16,71 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class DPS_Frontend_Registration_Module {
 
     /**
-     * Option key da página de cadastro (legado).
+     * Option key for the public registration page.
      */
     private const PAGE_OPTION = 'dps_registration_page_id';
 
-    /**
-     * Indica se o legado está disponível.
-     */
-    private bool $legacyAvailable = false;
-
     public function __construct(
-        private readonly DPS_Frontend_Logger $logger,
+        private readonly DPS_Frontend_Logger                 $logger,
+        private readonly DPS_Frontend_Registration_V2_Module $registrationV2,
     ) {}
 
     /**
-     * Inicializa o módulo quando habilitado pela feature flag.
-     *
-     * Estratégia dual-run com intervenção mínima:
-     * - Assume o shortcode (envolve output do legado na surface do add-on)
-     * - Adiciona CSS do frontend add-on como camada sobre o legado
-     * - Mantém todo o processamento (form, email, REST, AJAX) no legado
+     * Registers the compatibility shortcode and its asset bridge.
      */
     public function boot(): void {
-        $this->legacyAvailable = class_exists( 'DPS_Registration_Addon' );
-
-        if ( ! $this->legacyAvailable ) {
-            $this->logger->warning( 'Módulo Registration ativado mas add-on legado não encontrado.' );
-            return;
-        }
-
-        // Assume o shortcode: remove do legado e registra o nosso wrapper
         remove_shortcode( 'dps_registration_form' );
         add_shortcode( 'dps_registration_form', [ $this, 'renderShortcode' ] );
+        add_action( 'wp_enqueue_scripts', [ $this, 'maybeEnqueueCompatibilityAssets' ] );
 
-        // Enfileira CSS extra do frontend add-on (sobre os assets do legado)
-        add_action( 'wp_enqueue_scripts', [ $this, 'enqueueFrontendCss' ] );
-
-        $this->logger->debug( 'Módulo Registration ativado (dual-run com legado).' );
+        $this->logger->debug( 'Módulo Registration ativado como alias compatível do DPS Signature.' );
     }
 
     /**
-     * Renderiza o shortcode [dps_registration_form].
+     * Renders the legacy shortcode using the canonical Signature renderer.
      *
-     * Delega para o legado e envolve o output na surface do frontend add-on
-     * para aplicar estilos M3 Expressive adicionais.
-     *
-     * @param array|string $atts  Atributos do shortcode.
-     * @param string|null  $content Conteúdo encapsulado.
-     * @return string HTML renderizado.
+     * @param array<string, string>|string $atts    Shortcode attributes.
+     * @param string|null                  $content Nested shortcode content.
+     * @return string
      */
     public function renderShortcode( array|string $atts = [], ?string $content = null ): string {
-        if ( ! $this->legacyAvailable ) {
-            return '';
-        }
+        $atts = shortcode_atts(
+            [
+                'redirect_url'   => '',
+                'show_pets'      => 'true',
+                'show_marketing' => 'true',
+                'theme'          => 'light',
+                'compact'        => 'false',
+            ],
+            $atts,
+            'dps_registration_form'
+        );
 
-        $legacy = DPS_Registration_Addon::get_instance();
+        $this->logger->info( 'Shortcode dps_registration_form renderizado via motor canônico DPS Signature.' );
+        $this->logger->track( 'registration_signature_alias' );
 
-        if ( ! method_exists( $legacy, 'render_registration_form' ) ) {
-            $this->logger->error( 'Método render_registration_form não encontrado no legado.' );
-            return '';
-        }
-
-        $html = $legacy->render_registration_form();
-
-        $this->logger->info( 'Shortcode dps_registration_form renderizado via módulo Frontend.' );
-        $this->logger->track( 'registration' );
-
-        return '<div class="dps-frontend">' . $html . '</div>';
+        return $this->registrationV2->renderShortcode( $atts, $content );
     }
 
     /**
-     * Enfileira CSS do frontend add-on sobre os assets do legado.
-     *
-     * O legado enfileira dps-design-tokens + registration-addon.css + dps-registration.js
-     * no seu próprio enqueue_assets (que continua ativo). Este método apenas adiciona
-     * o CSS do frontend add-on como camada extra.
+     * Enqueues the Signature assets when the legacy shortcode is present.
      */
-    public function enqueueFrontendCss(): void {
+    public function maybeEnqueueCompatibilityAssets(): void {
         if ( ! $this->shouldEnqueue() ) {
             return;
         }
 
-        // O legado já enfileira dps-design-tokens e registration-addon.css
-        // Adiciona frontend-addon.css por cima
-        wp_enqueue_style(
-            'dps-frontend-addon',
-            DPS_FRONTEND_URL . 'assets/css/frontend-addon.css',
-            [ 'dps-design-tokens' ],
-            DPS_FRONTEND_VERSION
-        );
+        $this->registrationV2->enqueueCompatibilityAssets();
     }
 
     /**
-     * Determina se o CSS deve ser carregado na página atual.
+     * Checks whether the current request contains the legacy shortcode.
      */
     private function shouldEnqueue(): bool {
-        $page_id = get_option( self::PAGE_OPTION );
+        $pageId  = (int) get_option( self::PAGE_OPTION );
         $post    = get_post();
         $content = $post instanceof \WP_Post ? $post->post_content : '';
 
-        return is_page( $page_id ) || has_shortcode( $content, 'dps_registration_form' );
+        return is_page( $pageId ) || has_shortcode( $content, 'dps_registration_form' );
     }
 }

@@ -1,0 +1,73 @@
+/**
+ * DPS Signature auth screens for the client portal.
+ *
+ * @package DPS_Client_Portal
+ */
+
+.dps-portal-signature {
+    width: min(100%, 1200px);
+}
+
+.dps-portal-signature__grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.25rem;
+}
+
+.dps-portal-signature__hero-copy {
+    display: grid;
+    gap: 1rem;
+}
+
+.dps-portal-signature__feedback {
+    display: none;
+}
+
+.dps-portal-signature__feedback.is-success,
+.dps-portal-signature__feedback.is-error {
+    display: block;
+    padding: 0.95rem 1rem;
+    border-radius: var(--dps-shape-large, 20px);
+    border: 1px solid transparent;
+    line-height: 1.5;
+}
+
+.dps-portal-signature__feedback.is-success {
+    background: var(--dps-color-success-container, #ddf8e2);
+    border-color: color-mix(in srgb, var(--dps-color-success, #15803d) 20%, transparent);
+    color: var(--dps-color-on-success-container, #14532d);
+}
+
+.dps-portal-signature__feedback.is-error {
+    background: var(--dps-color-error-container, #fee2e2);
+    border-color: color-mix(in srgb, var(--dps-color-error, #dc2626) 20%, transparent);
+    color: var(--dps-color-on-error-container, #7f1d1d);
+}
+
+.dps-portal-entry__panel[data-dps-whatsapp-card].is-highlighted {
+    border-color: var(--dps-color-primary, #2563eb);
+    box-shadow: 0 18px 34px rgba(37, 99, 235, 0.12);
+}
+
+.dps-portal-signature .dps-signature-panel {
+    min-height: 100%;
+}
+
+.dps-portal-signature .dps-signature-actions {
+    margin-top: auto;
+}
+
+.dps-portal-signature__reset-layout {
+    margin-bottom: 1rem;
+}
+
+@media (min-width: 840px) {
+    .dps-portal-signature__grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+    }
+
+    .dps-portal-entry__grid--single {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

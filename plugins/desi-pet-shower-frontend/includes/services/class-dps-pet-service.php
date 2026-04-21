@@ -35,11 +35,18 @@ final class DPS_Pet_Service extends DPS_Abstract_Service {
         ];
 
         $meta = [
-            'owner_id'    => $clientId,
-            'pet_species' => sanitize_text_field( $data['pet_species'] ?? '' ),
-            'pet_breed'   => sanitize_text_field( $data['pet_breed'] ?? '' ),
-            'pet_size'    => sanitize_text_field( $data['pet_size'] ?? '' ),
-            'pet_obs'     => sanitize_textarea_field( $data['pet_obs'] ?? '' ),
+            'owner_id'       => $clientId,
+            'pet_species'    => sanitize_text_field( $data['pet_species'] ?? '' ),
+            'pet_breed'      => sanitize_text_field( $data['pet_breed'] ?? '' ),
+            'pet_sex'        => sanitize_text_field( $data['pet_sex'] ?? '' ),
+            'pet_size'       => sanitize_text_field( $data['pet_size'] ?? '' ),
+            'pet_weight'     => sanitize_text_field( $data['pet_weight'] ?? '' ),
+            'pet_birth'      => sanitize_text_field( $data['pet_birth'] ?? '' ),
+            'pet_coat'       => sanitize_text_field( $data['pet_coat'] ?? '' ),
+            'pet_color'      => sanitize_text_field( $data['pet_color'] ?? '' ),
+            'pet_care'       => sanitize_textarea_field( $data['pet_care'] ?? '' ),
+            'pet_aggressive' => ! empty( $data['pet_aggressive'] ) ? '1' : '',
+            'pet_obs'        => sanitize_textarea_field( $data['pet_obs'] ?? '' ),
         ];
 
         return $this->createPost( $postData, $meta );

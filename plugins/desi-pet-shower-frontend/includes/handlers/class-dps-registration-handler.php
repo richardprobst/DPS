@@ -36,6 +36,14 @@ final class DPS_Registration_Handler extends DPS_Abstract_Handler {
     public function process( array $data ): array {
         $this->hookBridge->beforeProcess( $data );
 
+        $startedAt = isset( $data['form_started_at'] ) ? (int) $data['form_started_at'] : 0;
+        if ( $startedAt > 0 && ( time() - $startedAt ) < 2 ) {
+            return $this->error(
+                [ __( 'Cadastro bloqueado por filtro de segurança. Aguarde alguns segundos e tente novamente.', 'dps-frontend-addon' ) ],
+                $data
+            );
+        }
+
         // 1. reCAPTCHA
         $recaptchaResult = $this->recaptchaService->verify( $data['recaptcha_token'] ?? '' );
         if ( true !== $recaptchaResult ) {
@@ -55,7 +63,13 @@ final class DPS_Registration_Handler extends DPS_Abstract_Handler {
         // 3. Validação do formulário
         $validation = $this->formValidator->validate( $data );
         if ( true !== $validation ) {
-            return $this->error( $validation, $data );
+            return $this->error(
+                $validation['messages'],
+                array_merge(
+                    $data,
+                    [ 'field_errors' => $validation['field_errors'] ]
+                )
+            );
         }
 
         // 4. Normalizar telefone
@@ -68,7 +82,16 @@ final class DPS_Registration_Handler extends DPS_Abstract_Handler {
         if ( $duplicateCheck['duplicate'] && ! $duplicateCheck['can_override'] ) {
             return $this->error(
                 [ __( 'Já existe um cadastro com este telefone. Se precisar de ajuda, entre em contato conosco.', 'dps-frontend-addon' ) ],
-                array_merge( $data, [ 'duplicate' => true, 'duplicate_client_id' => $duplicateCheck['client_id'] ] )
+                array_merge(
+                    $data,
+                    [
+                        'duplicate'           => true,
+                        'duplicate_client_id' => $duplicateCheck['client_id'],
+                        'field_errors'        => [
+                            'client_phone' => __( 'Já existe um cadastro ativo com este telefone.', 'dps-frontend-addon' ),
+                        ],
+                    ]
+                )
             );
         }
 
@@ -79,6 +102,8 @@ final class DPS_Registration_Handler extends DPS_Abstract_Handler {
                 array_merge( $data, [ 'duplicate_warning' => true, 'duplicate_client_id' => $duplicateCheck['client_id'] ] )
             );
         }
+
+        $data['requires_email_confirmation'] = $this->emailService->isEnabled() && ! empty( $data['client_email'] );
 
         // 7. Criar cliente
         $clientId = $this->clientService->create( $data );
@@ -111,7 +136,8 @@ final class DPS_Registration_Handler extends DPS_Abstract_Handler {
         }
 
         // 10. Email de confirmação
-        if ( $this->emailService->isEnabled() && ! empty( $data['client_email'] ) ) {
+        $emailPending = false;
+        if ( $data['requires_email_confirmation'] ) {
             $token = $this->emailService->generateToken( $clientId );
             $this->emailService->sendConfirmationEmail(
                 $clientId,
@@ -119,11 +145,13 @@ final class DPS_Registration_Handler extends DPS_Abstract_Handler {
                 $data['client_name'] ?? '',
                 $token
             );
+            $emailPending = true;
         }
 
         $result = $this->success( [
-            'client_id' => $clientId,
-            'pet_ids'   => $petIds,
+            'client_id'                => $clientId,
+            'pet_ids'                  => $petIds,
+            'email_confirmation_sent'  => $emailPending,
         ] );
 
         $this->hookBridge->afterProcess( $result, $data );

@@ -169,8 +169,17 @@ Antes de criar uma nova versão oficial:
 
 #### Changed (Alterado)
 
+**Cadastro e Portal - DPS Signature**
+
+- **Cadastro publico consolidado**: `[dps_registration_v2]` passa a ser o motor canonico do cadastro DPS Signature e `[dps_registration_form]` permanece apenas como alias de compatibilidade sobre o mesmo renderer nativo.
+- **Formularios alinhados ao novo padrao visual**: cadastro publico, formularios internos de cliente/pet, acesso do portal, reset de senha e atualizacao de perfil passam a compartilhar a mesma linguagem visual DPS Signature, com foco visivel, mensagens inline e comportamento mobile-first.
+- **Escopo funcional ampliado no cadastro**: o fluxo publico agora cobre tutor e pets com conjunto completo de campos, mascaras, autocomplete, multiplos pets, reCAPTCHA e confirmacao por e-mail na mesma experiencia.
+
 **Agenda Add-on - revisao UX/UI operacional**
 
+- **Operacao por modal compartilhado**: checklist, check-in e check-out passam a abrir no mesmo shell DPS Signature tambem quando o status do atendimento muda para `finalizado`, preservando a tabela mais limpa.
+- **Perfil rapido do pet no dialog system da Agenda**: o clique no nome do pet agora reutiliza o modal compartilhado do add-on, com alinhamento e espacamento consistentes entre desktop e mobile.
+- **Reagendamento alinhado ao shell principal**: o modal de reagendamento recebeu header, fechamento e espacamentos coerentes com a mesma linguagem visual da Agenda.
 - **Shell da agenda**: reestruturado o cabecalho com contexto do periodo, CTAs principais e navegacao temporal mais clara.
 - **Leitura operacional**: a lista foi reorganizada em paineis por dia com cards de overview, contagem por status e persistencia da aba ativa na URL e na sessao.
 - **Simplificacao estrutural**: o bloco operacional legado foi aposentado para manter a Agenda alinhada ao shell principal do add-on.
@@ -224,6 +233,19 @@ Antes de criar uma nova versão oficial:
 - **Atalhos mais resilientes**: quick actions passam a descobrir as abas disponiveis no DOM e aceitam `data-portal-nav-target`, evitando quebra quando a ordem das tabs muda ou quando add-ons adicionam novas entradas.
 #### Fixed (Corrigido)
 
+**Cadastro e Portal - robustez operacional**
+
+- **Sem cache/transient no cadastro publico**: anti-spam, duplicate warning e estados de confirmacao passaram a operar por nonce, honeypot, timestamp e tokens persistidos, eliminando a dependencia de cache proibido no fluxo de cadastro.
+- **Link de atualizacao de perfil em tempo real**: a geracao do link do portal deixa de depender de transient e passa a responder sob demanda via AJAX, mantendo o mesmo contrato externo para a operacao administrativa.
+- **Assets contextuais no portal**: acesso, reset e profile update agora carregam CSS/JS dedicados por contexto, reduzindo divergencias entre o runtime publicado e o renderer local.
+
+**Agenda Add-on - acabamento funcional e visual**
+
+- **Modal do pet**: corrigida a abertura do perfil rapido na lista de atendimentos, removendo a quebra de layout do modal legado.
+- **Modal de reagendamento**: corrigido o posicionamento do botao de fechar e o shell visual do reagendamento, eliminando o aspecto solto que deformava o dialogo.
+- **Alinhamentos e overflow**: padronizados margens, alinhamentos e contencao de overflow na aba Operacao e nos dialogos, com revalidacao nos breakpoints `375`, `600`, `840`, `1200` e `1920`.
+- **Check-in e check-out editaveis**: os registros operacionais agora podem ser editados sem estourar a tabela, continuam gravados no atendimento e deixam rastros em historico para auditoria.
+
 - **Agenda vazia**: corrigida a condicao de empty state para refletir o conjunto exibido de fato e oferecer recuperacao objetiva ao usuario.
 - **Paginacao e acessibilidade das tabs**: preservado apenas o contexto necessario da aba ativa ao paginar a agenda completa; os paineis agora expoem `aria-labelledby`, `hidden` e navegacao por teclado consistente.
 - **Segurança**: corrigida verificação de propriedade do pet na impressão de histórico — usava meta key incorreta `pet_client_id` ao invés de `owner_id`, impedindo acesso legítimo à funcionalidade.
@@ -252,6 +274,16 @@ Antes de criar uma nova versão oficial:
 - **Auditoria**: criado documento completo de auditoria em `docs/security/AUDIT_FASE1.md` com mapeamento de todas as queries, nonces, capabilities, REST permissions e sanitização de entrada.
 
 #### Refactoring (Interno)
+
+**Cadastro e Portal - fundacao compartilhada**
+
+- **Fundacao unica de formularios**: criada a camada compartilhada `dps-signature-forms.css/js` no base plugin para concentrar tokens, estados de campo, mascara, autocomplete, disclosures e comportamentos reutilizados por cadastro, portal e formularios internos.
+- **Reescrita estrutural sem wrapper legado**: o alias `[dps_registration_form]` foi reduzido a compatibilidade de entrada, enquanto o motor nativo do frontend assumiu a renderizacao e o pipeline efetivo do cadastro publico.
+- **Portal profile update desacoplado de inline code**: template, CSS e JavaScript do update de perfil foram extraidos para assets dedicados, removendo scripts/estilos inline e bridges temporarias.
+
+**Agenda Add-on - fluxo operacional consolidado**
+
+- **Renderer, AJAX e JavaScript reorganizados**: a aba Operacao passa a reutilizar um unico modal DPS Signature, reduzindo acoplamento entre tabela, modais avulsos e paineis operacionais legados.
 
 **Fase 2 — Refatoração Estrutural (Plano de Implementação)**
 

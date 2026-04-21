@@ -1,0 +1,106 @@
+/**
+ * DPS Signature profile update flows.
+ *
+ * @package DPS_Client_Portal
+ */
+
+.dps-profile-update-signature {
+    width: min(100%, 1240px);
+}
+
+.dps-profile-update-signature__hero-copy {
+    display: grid;
+    gap: 1rem;
+}
+
+.dps-profile-update-signature__messages {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.dps-profile-update-signature__messages .dps-alert {
+    margin: 0;
+    padding: 1rem 1.1rem;
+    border-radius: var(--dps-shape-large, 20px);
+    border: 1px solid transparent;
+    line-height: 1.5;
+}
+
+.dps-profile-update-signature__messages .dps-alert--success {
+    background: var(--dps-color-success-container, #ddf8e2);
+    border-color: color-mix(in srgb, var(--dps-color-success, #15803d) 20%, transparent);
+    color: var(--dps-color-on-success-container, #14532d);
+}
+
+.dps-profile-update-signature__messages .dps-alert--danger,
+.dps-profile-update-signature__messages .dps-alert--error {
+    background: var(--dps-color-error-container, #fee2e2);
+    border-color: color-mix(in srgb, var(--dps-color-error, #dc2626) 20%, transparent);
+    color: var(--dps-color-on-error-container, #7f1d1d);
+}
+
+.dps-profile-update-signature__messages .dps-alert--pending {
+    background: var(--dps-color-warning-container, #fff2cf);
+    border-color: color-mix(in srgb, var(--dps-color-warning, #b45309) 20%, transparent);
+    color: var(--dps-color-on-warning-container, #7c2d12);
+}
+
+.dps-profile-update-signature__form {
+    gap: 1.25rem;
+}
+
+.dps-profile-update-signature__pet-card--new {
+    border-style: dashed;
+}
+
+.dps-profile-update-link-generator {
+    gap: 0.75rem;
+}
+
+.dps-profile-update-link-generator__hint {
+    margin: 0;
+    color: var(--dps-color-on-surface-variant, #60707f);
+    line-height: 1.45;
+}
+
+.dps-profile-update-link-generator__result {
+    display: grid;
+    gap: 0.65rem;
+    padding: 0.9rem 1rem;
+    border-radius: var(--dps-shape-large, 20px);
+    background: var(--dps-color-surface-container-low, #f3f5fa);
+    border: 1px solid var(--dps-color-outline-variant, #d6dbe3);
+    color: var(--dps-color-on-surface, #132321);
+}
+
+.dps-profile-update-link-generator__result.is-success {
+    background: var(--dps-color-success-container, #ddf8e2);
+    border-color: color-mix(in srgb, var(--dps-color-success, #15803d) 20%, transparent);
+}
+
+.dps-profile-update-link-generator__result.is-error {
+    background: var(--dps-color-error-container, #fee2e2);
+    border-color: color-mix(in srgb, var(--dps-color-error, #dc2626) 20%, transparent);
+}
+
+.dps-profile-update-link-generator__url {
+    padding: 0.8rem 0.9rem;
+    border-radius: var(--dps-shape-large, 20px);
+    background: color-mix(in srgb, var(--dps-color-surface-container-lowest, #ffffff) 92%, transparent);
+    border: 1px solid color-mix(in srgb, var(--dps-color-outline-variant, #d6dbe3) 75%, transparent);
+    word-break: break-word;
+}
+
+.dps-profile-update-error {
+    width: min(100%, 720px);
+    margin: 2rem auto;
+}
+
+.dps-profile-update-error .dps-alert {
+    margin: 0;
+    padding: 1rem 1.1rem;
+    border-radius: var(--dps-shape-large, 20px);
+    background: var(--dps-color-error-container, #fee2e2);
+    border: 1px solid color-mix(in srgb, var(--dps-color-error, #dc2626) 20%, transparent);
+    color: var(--dps-color-on-error-container, #7f1d1d);
+}

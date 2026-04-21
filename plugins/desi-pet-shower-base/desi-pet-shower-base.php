@@ -486,12 +486,14 @@ class DPS_Base_Plugin {
 
         // CSS — Design Tokens M3 Expressive (carregado antes de qualquer outro CSS do DPS)
         wp_enqueue_style( 'dps-design-tokens', DPS_BASE_URL . 'assets/css/dps-design-tokens.css', [], self::get_asset_version( 'assets/css/dps-design-tokens.css' ) );
-        wp_enqueue_style( 'dps-base-style', DPS_BASE_URL . 'assets/css/dps-base.css', [ 'dps-design-tokens' ], self::get_asset_version( 'assets/css/dps-base.css' ) );
+        wp_enqueue_style( 'dps-signature-forms', DPS_BASE_URL . 'assets/css/dps-signature-forms.css', [ 'dps-design-tokens' ], self::get_asset_version( 'assets/css/dps-signature-forms.css' ) );
+        wp_enqueue_style( 'dps-base-style', DPS_BASE_URL . 'assets/css/dps-base.css', [ 'dps-design-tokens', 'dps-signature-forms' ], self::get_asset_version( 'assets/css/dps-base.css' ) );
         wp_enqueue_style( 'dps-form-validation', DPS_BASE_URL . 'assets/css/dps-form-validation.css', [], self::get_asset_version( 'assets/css/dps-form-validation.css' ) );
         // JS
         wp_enqueue_script( 'dps-base-script', DPS_BASE_URL . 'assets/js/dps-base.js', [ 'jquery' ], self::get_asset_version( 'assets/js/dps-base.js' ), true );
         wp_enqueue_script( 'dps-appointment-form', DPS_BASE_URL . 'assets/js/dps-appointment-form.js', [ 'jquery' ], self::get_asset_version( 'assets/js/dps-appointment-form.js' ), true );
         wp_enqueue_script( 'dps-form-validation', DPS_BASE_URL . 'assets/js/dps-form-validation.js', [], self::get_asset_version( 'assets/js/dps-form-validation.js' ), true );
+        wp_enqueue_script( 'dps-signature-forms', DPS_BASE_URL . 'assets/js/dps-signature-forms.js', [], self::get_asset_version( 'assets/js/dps-signature-forms.js' ), false );
         
         // Localização para o script de agendamento
         wp_localize_script( 'dps-appointment-form', 'dpsAppointmentData', [
@@ -527,6 +529,7 @@ class DPS_Base_Plugin {
             'restUrl'     => esc_url_raw( rest_url( 'dps/v1/pets' ) ),
             'restNonce'   => wp_create_nonce( 'wp_rest' ),
             'petsPerPage' => DPS_BASE_PETS_PER_PAGE,
+            'googleMapsApiKey' => sanitize_text_field( (string) get_option( 'dps_google_api_key', '' ) ),
         ] );
         wp_localize_script( 'dps-base-script', 'dpsBaseL10n', [
             'summarySingle'     => __( 'Pet selecionado: %s', 'desi-pet-shower' ),

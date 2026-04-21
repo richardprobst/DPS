@@ -1,415 +1,526 @@
-/**
- * Registration V2 — JavaScript (Vanilla)
- *
- * Comportamento nativo para o formulário de cadastro V2.
- * Zero dependência de jQuery.
- *
- * Features:
- * - Client-side validation
- * - Pet repeater (add/remove pets)
- * - Breed datalist (species-dependent)
- * - Phone mask
- * - CPF mask
- * - reCAPTCHA v3 integration
- * - Form submit loader
- * - Dismissible alerts
- *
- * @package DPS_Frontend_Addon
- * @since   2.0.0
- */
-
 ( function() {
     'use strict';
 
-    /**
-     * Inicializa comportamentos do formulário de cadastro V2.
-     */
-    function init() {
-        var forms = document.querySelectorAll( '.dps-v2-registration__form' );
+    function toArray( nodeList ) {
+        return Array.prototype.slice.call( nodeList || [] );
+    }
 
-        forms.forEach( function( form ) {
-            initPetRepeater( form );
-            initBreedDatalist( form );
-            initPhoneMask( form );
-            initCpfMask( form );
-            initFormValidation( form );
-            initFormSubmitLoader( form );
-            initRecaptcha( form );
-            initDismissibleAlerts( form.closest( '.dps-v2-registration' ) );
+    function getI18n() {
+        return window.dpsRegistrationV2 && window.dpsRegistrationV2.i18n ? window.dpsRegistrationV2.i18n : {};
+    }
+
+    function scrollToElement( element ) {
+        if ( ! element ) {
+            return;
+        }
+
+        element.scrollIntoView( {
+            behavior: window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches ? 'auto' : 'smooth',
+            block: 'start',
         } );
     }
 
-    /**
-     * Pet repeater — add/remove pet entries.
-     *
-     * @param {HTMLFormElement} form
-     */
-    function initPetRepeater( form ) {
-        var addBtn = document.getElementById( 'dps-v2-add-pet' );
-        if ( ! addBtn ) {
+    function getShell( form ) {
+        return form.closest( '.dps-registration-signature' );
+    }
+
+    function showFormNotice( form, type, message ) {
+        var shell = getShell( form );
+        var stack = shell ? shell.querySelector( '.dps-signature-form__notice-stack' ) : null;
+        var notice;
+        var title;
+        var text;
+
+        if ( ! stack || ! message ) {
             return;
         }
 
-        var repeater = document.getElementById( 'dps-v2-pet-repeater' );
-        if ( ! repeater ) {
-            return;
+        notice = stack.querySelector( '[data-dps-runtime-notice]' );
+        if ( ! notice ) {
+            notice = document.createElement( 'article' );
+            notice.setAttribute( 'data-dps-runtime-notice', '1' );
+            notice.className = 'dps-signature-notice';
+            title = document.createElement( 'h3' );
+            title.className = 'dps-signature-notice__title';
+            text = document.createElement( 'p' );
+            text.className = 'dps-signature-notice__text';
+            notice.appendChild( title );
+            notice.appendChild( text );
+            stack.appendChild( notice );
+        } else {
+            title = notice.querySelector( '.dps-signature-notice__title' );
+            text = notice.querySelector( '.dps-signature-notice__text' );
         }
 
-        addBtn.addEventListener( 'click', function() {
-            var entries = repeater.querySelectorAll( '.dps-v2-pet-entry' );
-            var newIndex = entries.length;
-            var template = entries[0];
+        notice.className = 'dps-signature-notice dps-signature-notice--' + ( type || 'error' );
+        if ( title ) {
+            title.textContent = type === 'warning' ? 'Atenção' : 'Não foi possível continuar';
+        }
+        if ( text ) {
+            text.textContent = message;
+        }
+    }
 
-            if ( ! template ) {
+    function getPetCards( form ) {
+        return toArray( form.querySelectorAll( '[data-pet-index]' ) );
+    }
+
+    function buildPetSummary( card ) {
+        var speciesField = card.querySelector( '[data-dps-pet-species]' );
+        var sizeField = card.querySelector( '[data-dps-pet-size]' );
+        var speciesLabel = speciesField && speciesField.selectedOptions.length ? speciesField.selectedOptions[ 0 ].textContent.trim() : '';
+        var sizeLabel = sizeField && sizeField.selectedOptions.length ? sizeField.selectedOptions[ 0 ].textContent.trim() : '';
+        var parts = [];
+
+        if ( speciesField && speciesField.value && speciesLabel ) {
+            parts.push( speciesLabel );
+        }
+
+        if ( sizeField && sizeField.value && sizeLabel ) {
+            parts.push( sizeLabel );
+        }
+
+        return parts.length ? parts.join( ' • ' ) : 'Revise os campos do pet antes de enviar.';
+    }
+
+    function refreshPetCard( card, index, total ) {
+        var title = card.querySelector( '[data-dps-pet-title]' );
+        var nameField = card.querySelector( '[data-dps-pet-name]' );
+        var summary = card.querySelector( '[data-dps-pet-summary]' );
+        var eyebrow = card.querySelector( '.dps-signature-card__eyebrow' );
+        var removeButton = card.querySelector( '[data-dps-remove-pet]' );
+        var toggle = card.querySelector( '[data-dps-pet-toggle]' );
+        var body = card.querySelector( '.dps-signature-card__body' );
+
+        card.setAttribute( 'data-pet-index', String( index ) );
+
+        if ( eyebrow ) {
+            eyebrow.textContent = 'Pet ' + ( index + 1 );
+        }
+
+        if ( title ) {
+            title.textContent = nameField && nameField.value.trim() ? nameField.value.trim() : 'Pet ' + ( index + 1 );
+        }
+
+        if ( summary ) {
+            summary.textContent = buildPetSummary( card );
+        }
+
+        if ( removeButton ) {
+            removeButton.hidden = total <= 1;
+        }
+
+        if ( toggle && body ) {
+            var bodyId = 'dps-registration-pet-body-' + index;
+            toggle.setAttribute( 'aria-controls', bodyId );
+            body.id = bodyId;
+        }
+
+        toArray( card.querySelectorAll( 'input, select, textarea, datalist' ) ).forEach( function( field ) {
+            var name = field.getAttribute( 'name' );
+            var id = field.getAttribute( 'id' );
+            var list = field.getAttribute( 'list' );
+            var describedBy = field.getAttribute( 'aria-describedby' );
+            var breedTarget = field.getAttribute( 'data-dps-breed-target' );
+
+            if ( name ) {
+                field.setAttribute( 'name', name.replace( /pets\[\d+\]/, 'pets[' + index + ']' ) );
+            }
+
+            if ( id ) {
+                field.id = id.replace( /-\d+$/, '-' + index );
+            }
+
+            if ( list ) {
+                field.setAttribute( 'list', list.replace( /-\d+$/, '-' + index ) );
+            }
+
+            if ( describedBy ) {
+                field.setAttribute( 'aria-describedby', describedBy.replace( /-\d+$/, '-' + index ) );
+            }
+
+            if ( breedTarget ) {
+                field.setAttribute( 'data-dps-breed-target', breedTarget.replace( /-\d+$/, '-' + index ) );
+            }
+        } );
+    }
+
+    function clearClonedCard( card ) {
+        toArray( card.querySelectorAll( '[aria-invalid="true"]' ) ).forEach( function( field ) {
+            field.removeAttribute( 'aria-invalid' );
+            field.removeAttribute( 'aria-describedby' );
+        } );
+
+        toArray( card.querySelectorAll( '.dps-signature-field__error' ) ).forEach( function( error ) {
+            error.remove();
+        } );
+
+        toArray( card.querySelectorAll( 'input, select, textarea' ) ).forEach( function( field ) {
+            if ( field.type === 'hidden' ) {
+                field.value = '';
                 return;
             }
 
-            var clone = template.cloneNode( true );
-            clone.setAttribute( 'data-pet-index', newIndex );
-
-            // Update names, ids, clear values
-            var inputs = clone.querySelectorAll( 'input, select, textarea' );
-            inputs.forEach( function( input ) {
-                var name = input.getAttribute( 'name' );
-                if ( name ) {
-                    input.setAttribute( 'name', name.replace( /pets\[\d+\]/, 'pets[' + newIndex + ']' ) );
-                }
-                var id = input.getAttribute( 'id' );
-                if ( id ) {
-                    input.setAttribute( 'id', id.replace( /_\d+$/, '_' + newIndex ) );
-                }
-                // Clear values
-                if ( 'SELECT' === input.tagName ) {
-                    input.selectedIndex = 0;
-                } else {
-                    input.value = '';
-                }
-            } );
-
-            // Update labels
-            var labels = clone.querySelectorAll( 'label' );
-            labels.forEach( function( label ) {
-                var forAttr = label.getAttribute( 'for' );
-                if ( forAttr ) {
-                    label.setAttribute( 'for', forAttr.replace( /_\d+$/, '_' + newIndex ) );
-                }
-            } );
-
-            // Update datalist id
-            var datalist = clone.querySelector( 'datalist' );
-            if ( datalist ) {
-                datalist.id = 'dps-v2-breed-list-' + newIndex;
-                var breedInput = clone.querySelector( '.dps-v2-breed-input' );
-                if ( breedInput ) {
-                    breedInput.setAttribute( 'list', datalist.id );
-                }
+            if ( field.type === 'checkbox' || field.type === 'radio' ) {
+                field.checked = false;
+                return;
             }
 
-            // Add header with pet number and remove button
-            var header = clone.querySelector( '.dps-v2-pet-entry__header' );
-            if ( ! header ) {
-                header = document.createElement( 'div' );
-                header.className = 'dps-v2-pet-entry__header';
-                clone.insertBefore( header, clone.firstChild );
+            if ( field.tagName === 'SELECT' ) {
+                field.selectedIndex = 0;
+                return;
             }
-            header.innerHTML = '<span class="dps-v2-typescale-title-medium">Pet #' + ( newIndex + 1 ) + '</span>' +
-                '<button type="button" class="dps-v2-button dps-v2-button--text dps-v2-pet-remove">' +
-                '<span class="dps-v2-button__text">Remover</span></button>';
 
-            repeater.appendChild( clone );
-
-            // Bind remove
-            initRemoveButtons( repeater );
-            // Rebind breed datalist
-            initBreedDatalist( form );
+            field.value = '';
         } );
 
-        initRemoveButtons( repeater );
-    }
-
-    /**
-     * Bind remove buttons for pet entries.
-     *
-     * @param {HTMLElement} repeater
-     */
-    function initRemoveButtons( repeater ) {
-        var removeBtns = repeater.querySelectorAll( '.dps-v2-pet-remove' );
-        removeBtns.forEach( function( btn ) {
-            btn.onclick = function() {
-                var entry = btn.closest( '.dps-v2-pet-entry' );
-                if ( entry && repeater.querySelectorAll( '.dps-v2-pet-entry' ).length > 1 ) {
-                    entry.remove();
-                    reindexPets( repeater );
-                }
-            };
+        toArray( card.querySelectorAll( 'datalist' ) ).forEach( function( datalist ) {
+            datalist.innerHTML = '';
         } );
     }
 
-    /**
-     * Reindex pet entries after removal.
-     *
-     * @param {HTMLElement} repeater
-     */
-    function reindexPets( repeater ) {
-        var entries = repeater.querySelectorAll( '.dps-v2-pet-entry' );
-        entries.forEach( function( entry, index ) {
-            entry.setAttribute( 'data-pet-index', index );
-            var inputs = entry.querySelectorAll( 'input, select, textarea' );
-            inputs.forEach( function( input ) {
-                var name = input.getAttribute( 'name' );
-                if ( name ) {
-                    input.setAttribute( 'name', name.replace( /pets\[\d+\]/, 'pets[' + index + ']' ) );
-                }
-            } );
+    function refreshAllPetCards( form ) {
+        var cards = getPetCards( form );
+        cards.forEach( function( card, index ) {
+            refreshPetCard( card, index, cards.length );
         } );
     }
 
-    /**
-     * Breed datalist — updates options based on selected species.
-     *
-     * @param {HTMLFormElement} form
-     */
-    function initBreedDatalist( form ) {
-        var repeater = document.getElementById( 'dps-v2-pet-repeater' );
-        if ( ! repeater ) {
-            return;
-        }
-
-        var breedsData = {};
-        try {
-            breedsData = JSON.parse( repeater.getAttribute( 'data-breeds' ) || '{}' );
-        } catch ( e ) {
-            return;
-        }
-
-        var speciesSelects = form.querySelectorAll( '.dps-v2-species-select' );
-        speciesSelects.forEach( function( select ) {
-            select.addEventListener( 'change', function() {
-                updateBreedList( select, breedsData );
-            } );
-            // Initial populate
-            if ( select.value ) {
-                updateBreedList( select, breedsData );
-            }
-        } );
-    }
-
-    /**
-     * @param {HTMLSelectElement} select
-     * @param {Object} breedsData
-     */
-    function updateBreedList( select, breedsData ) {
-        var entry = select.closest( '.dps-v2-pet-entry' );
-        if ( ! entry ) {
-            return;
-        }
-
-        var breedInput = entry.querySelector( '.dps-v2-breed-input' );
-        var datalist = entry.querySelector( 'datalist' );
-        if ( ! breedInput || ! datalist ) {
-            return;
-        }
-
-        var species = select.value;
-        var breeds = breedsData[ species ] || [];
-
-        datalist.innerHTML = '';
-        breeds.forEach( function( breed ) {
-            var option = document.createElement( 'option' );
-            option.value = breed;
-            datalist.appendChild( option );
-        } );
-    }
-
-    /**
-     * Phone mask — formats as (XX) XXXXX-XXXX.
-     *
-     * @param {HTMLFormElement} form
-     */
-    function initPhoneMask( form ) {
-        var phoneInput = form.querySelector( '#dps-v2-client_phone' );
-        if ( ! phoneInput ) {
-            return;
-        }
-
-        phoneInput.addEventListener( 'input', function() {
-            var digits = phoneInput.value.replace( /\D/g, '' );
-            if ( digits.length > 11 ) {
-                digits = digits.substring( 0, 11 );
+    function initPetCards( form ) {
+        function bindCard( card ) {
+            if ( card.dataset.dpsPetCardReady === '1' ) {
+                return;
             }
 
-            if ( digits.length > 6 ) {
-                phoneInput.value = '(' + digits.substring( 0, 2 ) + ') ' + digits.substring( 2, 7 ) + '-' + digits.substring( 7 );
-            } else if ( digits.length > 2 ) {
-                phoneInput.value = '(' + digits.substring( 0, 2 ) + ') ' + digits.substring( 2 );
-            } else if ( digits.length > 0 ) {
-                phoneInput.value = '(' + digits;
-            }
-        } );
-    }
+            card.dataset.dpsPetCardReady = '1';
 
-    /**
-     * CPF mask — formats as XXX.XXX.XXX-XX.
-     *
-     * @param {HTMLFormElement} form
-     */
-    function initCpfMask( form ) {
-        var cpfInput = form.querySelector( '[data-mask="cpf"]' );
-        if ( ! cpfInput ) {
-            return;
-        }
+            var removeButton = card.querySelector( '[data-dps-remove-pet]' );
+            var nameField = card.querySelector( '[data-dps-pet-name]' );
+            var speciesField = card.querySelector( '[data-dps-pet-species]' );
+            var sizeField = card.querySelector( '[data-dps-pet-size]' );
+            var summary = card.querySelector( '[data-dps-pet-summary]' );
+            var title = card.querySelector( '[data-dps-pet-title]' );
+            var toggle = card.querySelector( '[data-dps-pet-toggle]' );
+            var body = card.querySelector( '.dps-signature-card__body' );
 
-        cpfInput.addEventListener( 'input', function() {
-            var digits = cpfInput.value.replace( /\D/g, '' );
-            if ( digits.length > 11 ) {
-                digits = digits.substring( 0, 11 );
-            }
-
-            if ( digits.length > 9 ) {
-                cpfInput.value = digits.substring( 0, 3 ) + '.' + digits.substring( 3, 6 ) + '.' + digits.substring( 6, 9 ) + '-' + digits.substring( 9 );
-            } else if ( digits.length > 6 ) {
-                cpfInput.value = digits.substring( 0, 3 ) + '.' + digits.substring( 3, 6 ) + '.' + digits.substring( 6 );
-            } else if ( digits.length > 3 ) {
-                cpfInput.value = digits.substring( 0, 3 ) + '.' + digits.substring( 3 );
-            }
-        } );
-    }
-
-    /**
-     * Client-side validation.
-     *
-     * @param {HTMLFormElement} form
-     */
-    function initFormValidation( form ) {
-        form.addEventListener( 'submit', function( e ) {
-            var errors = [];
-
-            var name = form.querySelector( '#dps-v2-client_name' );
-            if ( name && '' === name.value.trim() ) {
-                errors.push( { field: name, message: 'Nome é obrigatório.' } );
-            }
-
-            var email = form.querySelector( '#dps-v2-client_email' );
-            if ( email && '' === email.value.trim() ) {
-                errors.push( { field: email, message: 'Email é obrigatório.' } );
-            } else if ( email && ! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test( email.value ) ) {
-                errors.push( { field: email, message: 'Email não é válido.' } );
-            }
-
-            var phone = form.querySelector( '#dps-v2-client_phone' );
-            if ( phone && '' === phone.value.trim() ) {
-                errors.push( { field: phone, message: 'Telefone é obrigatório.' } );
-            }
-
-            // Validate pet names
-            var petNames = form.querySelectorAll( '[name$="[pet_name]"]' );
-            petNames.forEach( function( input, idx ) {
-                if ( '' === input.value.trim() ) {
-                    errors.push( { field: input, message: 'Nome do pet #' + ( idx + 1 ) + ' é obrigatório.' } );
-                }
-            } );
-
-            if ( errors.length > 0 ) {
-                e.preventDefault();
-
-                // Clear previous errors
-                form.querySelectorAll( '.dps-v2-field--error' ).forEach( function( el ) {
-                    el.classList.remove( 'dps-v2-field--error' );
+            if ( nameField && title ) {
+                nameField.addEventListener( 'input', function() {
+                    title.textContent = nameField.value.trim() || 'Pet ' + ( Number( card.getAttribute( 'data-pet-index' ) ) + 1 );
                 } );
-                form.querySelectorAll( '.dps-v2-field__error[data-js]' ).forEach( function( el ) {
-                    el.remove();
-                } );
+            }
 
-                // Show errors
-                errors.forEach( function( err ) {
-                    var field = err.field.closest( '.dps-v2-field' );
-                    if ( field ) {
-                        field.classList.add( 'dps-v2-field--error' );
-                        var errSpan = document.createElement( 'span' );
-                        errSpan.className = 'dps-v2-field__error';
-                        errSpan.setAttribute( 'role', 'alert' );
-                        errSpan.setAttribute( 'data-js', '1' );
-                        errSpan.textContent = err.message;
-                        field.appendChild( errSpan );
+            [ speciesField, sizeField ].forEach( function( field ) {
+                if ( field && summary ) {
+                    field.addEventListener( 'change', function() {
+                        summary.textContent = buildPetSummary( card );
+                    } );
+                }
+            } );
+
+            if ( removeButton ) {
+                removeButton.addEventListener( 'click', function() {
+                    var cards = getPetCards( form );
+                    if ( cards.length <= 1 ) {
+                        return;
+                    }
+
+                    card.remove();
+                    refreshAllPetCards( form );
+                } );
+            }
+
+            if ( toggle && body ) {
+                toggle.addEventListener( 'click', function() {
+                    if ( toggle.getAttribute( 'aria-expanded' ) === 'true' ) {
+                        scrollToElement( card );
                     }
                 } );
-
-                // Scroll to first error
-                errors[0].field.scrollIntoView( { behavior: 'smooth', block: 'center' } );
-                errors[0].field.focus();
             }
-        } );
-    }
+        }
 
-    /**
-     * Mostra loader no botão ao submeter o formulário.
-     *
-     * @param {HTMLFormElement} form
-     */
-    function initFormSubmitLoader( form ) {
-        form.addEventListener( 'submit', function() {
-            var buttons = form.querySelectorAll( '.dps-v2-button--loading' );
-            buttons.forEach( function( btn ) {
-                btn.classList.add( 'dps-v2-button--submitting' );
-                btn.setAttribute( 'disabled', 'disabled' );
+        getPetCards( form ).forEach( bindCard );
+
+        var addButton = form.querySelector( '[data-dps-add-pet]' );
+        if ( addButton && addButton.dataset.dpsAddPetReady !== '1' ) {
+            addButton.dataset.dpsAddPetReady = '1';
+            addButton.addEventListener( 'click', function() {
+                var cards = getPetCards( form );
+                var source = cards[ cards.length - 1 ];
+                if ( ! source ) {
+                    return;
+                }
+
+                var clone = source.cloneNode( true );
+                clearClonedCard( clone );
+                form.querySelector( '[data-dps-registration-pets]' ).appendChild( clone );
+                refreshAllPetCards( form );
+                bindCard( clone );
+
+                var toggle = clone.querySelector( '[data-dps-pet-toggle]' );
+                var body = clone.querySelector( '.dps-signature-card__body' );
+                if ( toggle && body ) {
+                    toggle.setAttribute( 'aria-expanded', 'true' );
+                    body.hidden = false;
+                }
+
+                document.dispatchEvent( new CustomEvent( 'dps:signature-refresh', { detail: { root: clone } } ) );
+                var nameField = clone.querySelector( '[data-dps-pet-name]' );
+                if ( nameField ) {
+                    scrollToElement( clone );
+                    nameField.focus();
+                }
             } );
-        } );
+        }
     }
 
-    /**
-     * reCAPTCHA v3 — execute before submit.
-     *
-     * @param {HTMLFormElement} form
-     */
-    function initRecaptcha( form ) {
-        var siteKey = form.getAttribute( 'data-recaptcha-site-key' );
-        if ( ! siteKey || typeof grecaptcha === 'undefined' ) {
+    function setFieldError( field, message ) {
+        var wrapper = field.closest( '.dps-signature-field' );
+        if ( ! wrapper ) {
             return;
         }
 
-        form.addEventListener( 'submit', function( e ) {
-            var tokenInput = document.getElementById( 'dps-v2-recaptcha-token' );
-            if ( ! tokenInput || tokenInput.value ) {
-                return; // Already has token
+        var errorId = field.id ? field.id + '-client-error' : '';
+        var error = document.createElement( 'p' );
+        error.className = 'dps-signature-field__error';
+        error.setAttribute( 'role', 'alert' );
+        error.setAttribute( 'data-dps-client-error', '1' );
+        if ( errorId ) {
+            error.id = errorId;
+            field.setAttribute( 'aria-describedby', errorId );
+        }
+        field.setAttribute( 'aria-invalid', 'true' );
+        error.textContent = message;
+        wrapper.appendChild( error );
+    }
+
+    function clearClientValidation( form ) {
+        toArray( form.querySelectorAll( '.dps-signature-field__error[data-dps-client-error="1"]' ) ).forEach( function( error ) {
+            error.remove();
+        } );
+
+        toArray( form.querySelectorAll( '[data-dps-client-validated]' ) ).forEach( function( field ) {
+            field.removeAttribute( 'aria-invalid' );
+            field.removeAttribute( 'data-dps-client-validated' );
+            if ( field.getAttribute( 'aria-describedby' ) && field.getAttribute( 'aria-describedby' ).indexOf( '-client-error' ) !== -1 ) {
+                field.removeAttribute( 'aria-describedby' );
+            }
+        } );
+    }
+
+    function validateForm( form ) {
+        clearClientValidation( form );
+
+        var i18n = getI18n();
+        var errors = [];
+        var requiredFields = [
+            {
+                field: form.querySelector( '#dps-registration-client-name' ),
+                message: i18n.nameRequired || 'Informe o nome completo do tutor.',
+            },
+            {
+                field: form.querySelector( '#dps-registration-client-email' ),
+                message: i18n.emailRequired || 'Informe um e-mail válido para o cadastro.',
+            },
+            {
+                field: form.querySelector( '#dps-registration-client-phone' ),
+                message: i18n.phoneRequired || 'Informe o telefone ou WhatsApp do tutor.',
+            },
+        ];
+
+        requiredFields.forEach( function( item ) {
+            if ( item.field && ! item.field.value.trim() ) {
+                errors.push( item );
+            }
+        } );
+
+        var emailField = form.querySelector( '#dps-registration-client-email' );
+        if ( emailField && emailField.value.trim() && ! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test( emailField.value.trim() ) ) {
+            errors.push( {
+                field: emailField,
+                message: i18n.emailInvalid || 'O e-mail informado não é válido.',
+            } );
+        }
+
+        getPetCards( form ).forEach( function( card, index ) {
+            var nameField = card.querySelector( '[data-dps-pet-name]' );
+            var speciesField = card.querySelector( '[data-dps-pet-species]' );
+            var toggle = card.querySelector( '[data-dps-pet-toggle]' );
+            var body = card.querySelector( '.dps-signature-card__body' );
+
+            if ( nameField && ! nameField.value.trim() ) {
+                errors.push( {
+                    field: nameField,
+                    message: 'Pet ' + ( index + 1 ) + ': ' + ( i18n.petNameRequired || 'Informe o nome do pet.' ),
+                } );
+                if ( toggle && body ) {
+                    toggle.setAttribute( 'aria-expanded', 'true' );
+                    body.hidden = false;
+                }
             }
 
-            e.preventDefault();
+            if ( speciesField && ! speciesField.value.trim() ) {
+                errors.push( {
+                    field: speciesField,
+                    message: 'Pet ' + ( index + 1 ) + ': ' + ( i18n.petSpeciesRequired || 'Selecione a espécie do pet.' ),
+                } );
+                if ( toggle && body ) {
+                    toggle.setAttribute( 'aria-expanded', 'true' );
+                    body.hidden = false;
+                }
+            }
+        } );
 
-            grecaptcha.ready( function() {
-                grecaptcha.execute( siteKey, { action: 'dps_registration' } ).then( function( token ) {
-                    tokenInput.value = token;
+        errors.forEach( function( error ) {
+            if ( ! error.field ) {
+                return;
+            }
+
+            error.field.setAttribute( 'data-dps-client-validated', '1' );
+            setFieldError( error.field, error.message );
+        } );
+
+        if ( errors.length ) {
+            scrollToElement( errors[ 0 ].field );
+            errors[ 0 ].field.focus();
+        }
+
+        return errors.length === 0;
+    }
+
+    function initSubmitState( form ) {
+        var button = form.querySelector( '[data-dps-submit-button]' );
+        if ( ! button || button.dataset.dpsSubmitReady === '1' ) {
+            return;
+        }
+
+        button.dataset.dpsSubmitReady = '1';
+        button.dataset.originalLabel = button.querySelector( '.dps-signature-button__text' ) ? button.querySelector( '.dps-signature-button__text' ).textContent : '';
+    }
+
+    function startSubmitState( form ) {
+        var button = form.querySelector( '[data-dps-submit-button]' );
+        var labelNode = button ? button.querySelector( '.dps-signature-button__text' ) : null;
+
+        if ( ! button || button.classList.contains( 'is-loading' ) ) {
+            return;
+        }
+
+        if ( labelNode ) {
+            labelNode.textContent = button.getAttribute( 'data-loading-label' ) || labelNode.textContent;
+        }
+
+        button.classList.add( 'is-loading' );
+        button.disabled = true;
+    }
+
+    function resetSubmitState( form ) {
+        var button = form.querySelector( '[data-dps-submit-button]' );
+        var labelNode = button ? button.querySelector( '.dps-signature-button__text' ) : null;
+
+        if ( ! button ) {
+            return;
+        }
+
+        if ( labelNode && button.dataset.originalLabel ) {
+            labelNode.textContent = button.dataset.originalLabel;
+        }
+
+        button.classList.remove( 'is-loading' );
+        button.disabled = false;
+    }
+
+    function initRecaptcha( form ) {
+        if ( form.dataset.dpsRecaptchaReady === '1' ) {
+            return;
+        }
+
+        form.dataset.dpsRecaptchaReady = '1';
+        var siteKey = form.getAttribute( 'data-recaptcha-site-key' );
+        if ( ! siteKey || typeof window.grecaptcha === 'undefined' ) {
+            return;
+        }
+
+        form.addEventListener( 'submit', function( event ) {
+            var tokenField = document.getElementById( 'dps-registration-recaptcha-token' );
+            if ( ! tokenField || tokenField.value ) {
+                return;
+            }
+
+            event.preventDefault();
+
+            window.grecaptcha.ready( function() {
+                window.grecaptcha.execute( siteKey, { action: 'dps_registration' } ).then( function( token ) {
+                    tokenField.value = token;
                     form.submit();
+                } ).catch( function() {
+                    resetSubmitState( form );
+                    showFormNotice( form, 'warning', getI18n().recaptchaUnavailable || 'Não foi possível validar o anti-spam. Tente novamente.' );
                 } );
             } );
         } );
     }
 
-    /**
-     * Habilita fechar alertas dismissíveis.
-     *
-     * @param {HTMLElement|null} container
-     */
-    function initDismissibleAlerts( container ) {
-        if ( ! container ) {
+    function initStepNavigation( form ) {
+        var shell = getShell( form );
+        var buttons;
+        if ( ! shell ) {
             return;
         }
 
-        var dismissBtns = container.querySelectorAll( '.dps-v2-alert__dismiss' );
-        dismissBtns.forEach( function( btn ) {
-            btn.addEventListener( 'click', function() {
-                var alert = btn.closest( '.dps-v2-alert' );
-                if ( alert ) {
-                    alert.remove();
+        buttons = toArray( shell.querySelectorAll( '[data-dps-registration-section]' ) );
+
+        buttons.forEach( function( button, index ) {
+            if ( button.dataset.dpsStepReady === '1' ) {
+                return;
+            }
+
+            button.dataset.dpsStepReady = '1';
+            if ( index === 0 ) {
+                button.classList.add( 'is-current' );
+            }
+            button.addEventListener( 'click', function() {
+                var targetId = button.getAttribute( 'data-dps-registration-section' );
+                var target = targetId ? document.getElementById( targetId ) : null;
+                buttons.forEach( function( stepButton ) {
+                    stepButton.classList.remove( 'is-current' );
+                } );
+                button.classList.add( 'is-current' );
+                if ( target ) {
+                    scrollToElement( target );
                 }
             } );
         } );
     }
 
-    // Init on DOM ready
-    if ( 'loading' === document.readyState ) {
+    function initForm( form ) {
+        if ( form.dataset.dpsRegistrationReady === '1' ) {
+            return;
+        }
+
+        form.dataset.dpsRegistrationReady = '1';
+        initPetCards( form );
+        refreshAllPetCards( form );
+        initSubmitState( form );
+        initRecaptcha( form );
+        initStepNavigation( form );
+
+        form.addEventListener( 'submit', function( event ) {
+            if ( ! validateForm( form ) ) {
+                event.preventDefault();
+                return;
+            }
+
+            startSubmitState( form );
+        } );
+    }
+
+    function init() {
+        toArray( document.querySelectorAll( '#dps-registration-signature-form' ) ).forEach( initForm );
+    }
+
+    if ( document.readyState === 'loading' ) {
         document.addEventListener( 'DOMContentLoaded', init );
     } else {
         init();
     }
-
-} )();
+}() );

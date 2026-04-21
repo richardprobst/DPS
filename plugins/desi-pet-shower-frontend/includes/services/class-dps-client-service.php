@@ -41,14 +41,14 @@ final class DPS_Client_Service extends DPS_Abstract_Service {
             'client_birth'     => sanitize_text_field( $data['client_birth'] ?? '' ),
             'client_instagram' => sanitize_text_field( $data['client_instagram'] ?? '' ),
             'client_facebook'  => sanitize_text_field( $data['client_facebook'] ?? '' ),
-            'client_photo_auth' => sanitize_text_field( $data['client_photo_auth'] ?? '' ),
+            'client_photo_auth' => ! empty( $data['client_photo_auth'] ) ? '1' : '',
             'client_address'   => sanitize_text_field( $data['client_address'] ?? '' ),
             'client_referral'  => sanitize_text_field( $data['client_referral'] ?? '' ),
             'client_lat'       => sanitize_text_field( $data['client_lat'] ?? '' ),
             'client_lng'       => sanitize_text_field( $data['client_lng'] ?? '' ),
-            'dps_email_confirmed'     => '0',
-            'dps_is_active'           => '1',
-            'dps_registration_source' => 'frontend_v2',
+            'dps_email_confirmed'     => ! empty( $data['requires_email_confirmation'] ) ? '0' : '1',
+            'dps_is_active'           => ! empty( $data['requires_email_confirmation'] ) ? '0' : '1',
+            'dps_registration_source' => 'frontend_signature',
         ];
 
         // Referral code (para Loyalty)

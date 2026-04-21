@@ -33,6 +33,7 @@
      */
     function init() {
         cleanTokenFromURL();
+        normalizePortalCopy();
         handlePortalAccess();
         handleTabNavigation();
         handleFormValidation(); // Fase 4.2: validaÃ§Ã£o em tempo real
@@ -52,6 +53,106 @@
         handleExportPdf(); // Funcionalidade 3: Export PDF
         handleLoadMorePetHistory(); // Load more pet history items
         handleTimelinePeriodFilter(); // Fase 4.4: Filtro de perÃ­odo no histÃ³rico
+    }
+
+    /**
+     * Corrige labels corrompidas do shell autenticado do portal em runtime.
+     * O arquivo PHP legado ainda tem trechos com encoding inconsistente.
+     */
+    function normalizePortalCopy() {
+        var portalRoot = document.querySelector('.dps-client-portal');
+        var title = document.querySelector('.dps-portal-title');
+        var activeBreadcrumb = document.querySelector('[data-breadcrumb-active]');
+        var breadcrumbSeparator = document.querySelector('.dps-portal-breadcrumb__separator');
+        var reviewIcon = document.querySelector('.dps-portal-review-icon');
+        var petSummaryTitle = document.querySelector('.dps-portal-pets-summary .dps-section-header h2');
+        var petSummaryButton = document.querySelector('.dps-portal-pets-summary .dps-link-button[data-tab=\"historico-pets\"]');
+        var tabLabels = {
+            inicio: 'Inicio',
+            fidelidade: 'Fidelidade',
+            avaliacoes: 'Avaliacoes',
+            mensagens: 'Mensagens',
+            agendamentos: 'Agendamentos',
+            pagamentos: 'Pagamentos',
+            'historico-pets': 'Historico dos Pets',
+            galeria: 'Galeria',
+            dados: 'Meus Dados'
+        };
+
+        if (!portalRoot) {
+            return;
+        }
+
+        if (title) {
+            title.textContent = normalizeBrokenPortalText(title.textContent);
+        }
+
+        if (activeBreadcrumb) {
+            activeBreadcrumb.textContent = 'Inicio';
+        }
+
+        if (breadcrumbSeparator) {
+            breadcrumbSeparator.textContent = '>';
+        }
+
+        if (reviewIcon) {
+            reviewIcon.textContent = '*';
+        }
+
+        Object.keys(tabLabels).forEach(function(tabId) {
+            var button = document.querySelector('.dps-portal-tabs__link[data-tab=\"' + tabId + '\"]');
+            if (!button) {
+                return;
+            }
+
+            var icon = button.querySelector('.dps-portal-tabs__icon');
+            var text = button.querySelector('.dps-portal-tabs__text');
+
+            if (icon) {
+                icon.textContent = '';
+                icon.setAttribute('aria-hidden', 'true');
+            }
+
+            if (text) {
+                text.textContent = tabLabels[tabId];
+            }
+        });
+
+        if (petSummaryTitle) {
+            petSummaryTitle.textContent = 'Meus Pets';
+        }
+
+        if (petSummaryButton) {
+            petSummaryButton.textContent = 'Ver Historico Completo';
+        }
+    }
+
+    function normalizeBrokenPortalText(text) {
+        var safeText = String(text || '').trim();
+        var replacements = [
+            ['OlÃ¡', 'Ola'],
+            ['OlÃƒÂ¡', 'Ola'],
+            ['InÃ­cio', 'Inicio'],
+            ['InÃƒÂ­cio', 'Inicio'],
+            ['AvaliaÃ§Ãµes', 'Avaliacoes'],
+            ['AvaliaÃƒÂ§ÃƒÂµes', 'Avaliacoes'],
+            ['HistÃ³rico dos Pets', 'Historico dos Pets'],
+            ['HistÃƒÂ³rico dos Pets', 'Historico dos Pets'],
+            ['Ver HistÃ³rico Completo', 'Ver Historico Completo'],
+            ['Ver HistÃƒÂ³rico Completo', 'Ver Historico Completo'],
+            ['Ã¢â‚¬Âº', '>'],
+            ['Ã°Å¸â€˜â€¹', ''],
+            ['ðŸ‘‹', ''],
+            ['Ã°Å¸ÂÂ¾', '']
+        ];
+
+        replacements.forEach(function(entry) {
+            safeText = safeText.split(entry[0]).join(entry[1]);
+        });
+
+        safeText = safeText.replace(/\s{2,}/g, ' ').trim();
+
+        return safeText;
     }
 
     /**

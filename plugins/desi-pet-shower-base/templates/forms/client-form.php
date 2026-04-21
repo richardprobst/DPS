@@ -1,198 +1,137 @@
 <?php
 /**
- * Template de formulário de cadastro/edição de cliente.
+ * Client create/edit form aligned to DPS Signature.
  *
- * Sobrescreva em wp-content/themes/SEU_TEMA/dps-templates/forms/client-form.php
- * para personalizar o HTML mantendo a lógica do plugin.
+ * Override path:
+ * wp-content/themes/SEU_TEMA/dps-templates/forms/client-form.php
  *
  * @package DesiPetShower
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+    exit;
 }
 
-// Extrai variáveis passadas para o template
-$edit_id      = isset( $edit_id ) ? $edit_id : 0;
-$editing      = isset( $editing ) ? $editing : null;
-$meta         = isset( $meta ) && is_array( $meta ) ? $meta : [];
-$api_key      = isset( $api_key ) ? $api_key : '';
-
-// Valores do formulário
-$name_value   = $editing ? $editing->post_title : '';
-$cpf_val      = $meta['cpf'] ?? '';
-$birth_val    = $meta['birth'] ?? '';
-$phone_val    = $meta['phone'] ?? '';
-$email_val    = $meta['email'] ?? '';
-$insta_val    = $meta['instagram'] ?? '';
-$fb_val       = $meta['facebook'] ?? '';
-$addr_val     = $meta['address'] ?? '';
-$ref_val      = $meta['referral'] ?? '';
-$auth         = $meta['photo_auth'] ?? '';
-$checked      = $auth ? 'checked' : '';
-$lat_admin    = $meta['lat'] ?? '';
-$lng_admin    = $meta['lng'] ?? '';
-$btn_text     = $edit_id ? esc_html__( 'Atualizar Cliente', 'desi-pet-shower' ) : esc_html__( 'Salvar Cliente', 'desi-pet-shower' );
+$edit_id    = isset( $edit_id ) ? (int) $edit_id : 0;
+$editing    = isset( $editing ) ? $editing : null;
+$meta       = isset( $meta ) && is_array( $meta ) ? $meta : [];
+$api_key    = isset( $api_key ) ? (string) $api_key : '';
+$name_value = $editing ? $editing->post_title : '';
+$btn_text   = $edit_id ? esc_html__( 'Atualizar Cliente', 'desi-pet-shower' ) : esc_html__( 'Salvar Cliente', 'desi-pet-shower' );
 ?>
 
-<form method="post" class="dps-form">
-	<!-- Hidden fields -->
-	<input type="hidden" name="dps_action" value="save_client">
-	<?php wp_nonce_field( 'dps_action', 'dps_nonce_client_form' ); ?>
-	<?php if ( $edit_id ) : ?>
-		<input type="hidden" name="client_id" value="<?php echo esc_attr( $edit_id ); ?>">
-	<?php endif; ?>
+<form method="post" class="dps-form dps-signature-form">
+    <input type="hidden" name="dps_action" value="save_client" />
+    <?php wp_nonce_field( 'dps_action', 'dps_nonce_client_form' ); ?>
+    <?php if ( $edit_id ) : ?>
+        <input type="hidden" name="client_id" value="<?php echo esc_attr( (string) $edit_id ); ?>" />
+    <?php endif; ?>
 
-	<!-- Grupo: Dados Pessoais -->
-	<fieldset class="dps-fieldset">
-		<legend class="dps-fieldset__legend"><?php echo esc_html__( 'Dados Pessoais', 'desi-pet-shower' ); ?></legend>
+    <section class="dps-signature-section">
+        <div class="dps-signature-section__header">
+            <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Cadastro interno', 'desi-pet-shower' ); ?></p>
+            <h2 class="dps-signature-section__title"><?php esc_html_e( 'Dados do tutor', 'desi-pet-shower' ); ?></h2>
+            <p class="dps-signature-section__description"><?php esc_html_e( 'Use o mesmo padrão visual DPS Signature para manter os dados do tutor completos, legíveis e consistentes no admin.', 'desi-pet-shower' ); ?></p>
+        </div>
 
-		<!-- Nome -->
-		<p>
-			<label>
-				<?php echo esc_html__( 'Nome', 'desi-pet-shower' ); ?> <span class="dps-required">*</span><br>
-				<input type="text" name="client_name" value="<?php echo esc_attr( $name_value ); ?>" required>
-			</label>
-		</p>
+        <div class="dps-signature-grid dps-signature-grid--2">
+            <div class="dps-signature-field dps-signature-field--full">
+                <label class="dps-signature-field__label" for="dps-client-name">
+                    <?php esc_html_e( 'Nome completo', 'desi-pet-shower' ); ?>
+                    <span class="dps-signature-field__required" aria-hidden="true">*</span>
+                </label>
+                <input id="dps-client-name" type="text" name="client_name" value="<?php echo esc_attr( $name_value ); ?>" autocomplete="name" required />
+            </div>
 
-		<!-- CPF e Data de Nascimento em grid -->
-		<div class="dps-form-row dps-form-row--2col">
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'CPF', 'desi-pet-shower' ); ?><br>
-					<input type="text" name="client_cpf" value="<?php echo esc_attr( $cpf_val ); ?>" placeholder="000.000.000-00">
-				</label>
-			</p>
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'Data de nascimento', 'desi-pet-shower' ); ?><br>
-					<input type="date" name="client_birth" value="<?php echo esc_attr( $birth_val ); ?>">
-				</label>
-			</p>
-		</div>
-	</fieldset>
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-client-cpf"><?php esc_html_e( 'CPF', 'desi-pet-shower' ); ?></label>
+                <input id="dps-client-cpf" type="text" name="client_cpf" value="<?php echo esc_attr( $meta['cpf'] ?? '' ); ?>" placeholder="<?php echo esc_attr__( '000.000.000-00', 'desi-pet-shower' ); ?>" inputmode="numeric" data-dps-mask="cpf" />
+            </div>
 
-	<!-- Grupo: Contato -->
-	<fieldset class="dps-fieldset">
-		<legend class="dps-fieldset__legend"><?php echo esc_html__( 'Contato', 'desi-pet-shower' ); ?></legend>
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-client-birth"><?php esc_html_e( 'Data de nascimento', 'desi-pet-shower' ); ?></label>
+                <input id="dps-client-birth" type="date" name="client_birth" value="<?php echo esc_attr( $meta['birth'] ?? '' ); ?>" autocomplete="bday" />
+            </div>
+        </div>
+    </section>
 
-		<!-- Telefone / WhatsApp -->
-		<p>
-			<label>
-				<?php echo esc_html__( 'Telefone / WhatsApp', 'desi-pet-shower' ); ?> <span class="dps-required">*</span><br>
-				<input type="tel" name="client_phone" value="<?php echo esc_attr( $phone_val ); ?>" placeholder="(00) 00000-0000" required>
-			</label>
-		</p>
+    <section class="dps-signature-section">
+        <div class="dps-signature-section__header">
+            <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Contato', 'desi-pet-shower' ); ?></p>
+            <h2 class="dps-signature-section__title"><?php esc_html_e( 'Canais de comunicação', 'desi-pet-shower' ); ?></h2>
+            <p class="dps-signature-section__description"><?php esc_html_e( 'Telefone e e-mail são os campos usados para retorno, lembretes e demais fluxos automáticos do sistema.', 'desi-pet-shower' ); ?></p>
+        </div>
 
-		<!-- Email -->
-		<p>
-			<label>
-				Email<br>
-				<input type="email" name="client_email" value="<?php echo esc_attr( $email_val ); ?>" placeholder="seuemail@exemplo.com">
-			</label>
-		</p>
-	</fieldset>
+        <div class="dps-signature-grid dps-signature-grid--2">
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-client-phone">
+                    <?php esc_html_e( 'Telefone / WhatsApp', 'desi-pet-shower' ); ?>
+                    <span class="dps-signature-field__required" aria-hidden="true">*</span>
+                </label>
+                <input id="dps-client-phone" type="tel" name="client_phone" value="<?php echo esc_attr( $meta['phone'] ?? '' ); ?>" placeholder="<?php echo esc_attr__( '(00) 00000-0000', 'desi-pet-shower' ); ?>" autocomplete="tel" inputmode="tel" data-dps-mask="phone" required />
+            </div>
 
-	<!-- Grupo: Redes Sociais -->
-	<fieldset class="dps-fieldset">
-		<legend class="dps-fieldset__legend"><?php echo esc_html__( 'Redes Sociais', 'desi-pet-shower' ); ?></legend>
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-client-email"><?php esc_html_e( 'E-mail', 'desi-pet-shower' ); ?></label>
+                <input id="dps-client-email" type="email" name="client_email" value="<?php echo esc_attr( $meta['email'] ?? '' ); ?>" placeholder="<?php echo esc_attr__( 'seuemail@exemplo.com', 'desi-pet-shower' ); ?>" autocomplete="email" inputmode="email" />
+            </div>
 
-		<div class="dps-form-row dps-form-row--2col">
-			<!-- Instagram -->
-			<p class="dps-form-col">
-				<label>
-					Instagram<br>
-					<input type="text" name="client_instagram" value="<?php echo esc_attr( $insta_val ); ?>" placeholder="@usuario">
-				</label>
-			</p>
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-client-instagram"><?php esc_html_e( 'Instagram', 'desi-pet-shower' ); ?></label>
+                <input id="dps-client-instagram" type="text" name="client_instagram" value="<?php echo esc_attr( $meta['instagram'] ?? '' ); ?>" placeholder="<?php echo esc_attr__( '@usuario', 'desi-pet-shower' ); ?>" autocomplete="off" />
+            </div>
 
-			<!-- Facebook -->
-			<p class="dps-form-col">
-				<label>
-					Facebook<br>
-					<input type="text" name="client_facebook" value="<?php echo esc_attr( $fb_val ); ?>" placeholder="Nome do perfil">
-				</label>
-			</p>
-		</div>
-	</fieldset>
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-client-facebook"><?php esc_html_e( 'Facebook', 'desi-pet-shower' ); ?></label>
+                <input id="dps-client-facebook" type="text" name="client_facebook" value="<?php echo esc_attr( $meta['facebook'] ?? '' ); ?>" placeholder="<?php echo esc_attr__( 'Nome do perfil', 'desi-pet-shower' ); ?>" autocomplete="off" />
+            </div>
+        </div>
+    </section>
 
-	<!-- Grupo: Endereço e Preferências -->
-	<fieldset class="dps-fieldset">
-		<legend class="dps-fieldset__legend"><?php echo esc_html__( 'Endereço e Preferências', 'desi-pet-shower' ); ?></legend>
+    <section class="dps-signature-section">
+        <div class="dps-signature-section__header">
+            <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Localização & preferências', 'desi-pet-shower' ); ?></p>
+            <h2 class="dps-signature-section__title"><?php esc_html_e( 'Endereço e observações do cadastro', 'desi-pet-shower' ); ?></h2>
+            <p class="dps-signature-section__description"><?php esc_html_e( 'O autocomplete é carregado apenas quando houver chave configurada. Sem a chave, o campo continua funcionando como texto livre.', 'desi-pet-shower' ); ?></p>
+        </div>
 
-		<!-- Endereço completo -->
-		<p>
-			<label>
-				<?php echo esc_html__( 'Endereço completo', 'desi-pet-shower' ); ?><br>
-				<textarea name="client_address" id="dps-client-address-admin" rows="2" placeholder="Rua, Número, Bairro, Cidade - UF"><?php echo esc_textarea( $addr_val ); ?></textarea>
-			</label>
-		</p>
+        <div class="dps-signature-grid dps-signature-grid--2">
+            <div class="dps-signature-field dps-signature-field--full">
+                <label class="dps-signature-field__label" for="dps-client-address-admin"><?php esc_html_e( 'Endereço completo', 'desi-pet-shower' ); ?></label>
+                <textarea
+                    id="dps-client-address-admin"
+                    name="client_address"
+                    rows="3"
+                    data-dps-address-autocomplete
+                    data-dps-google-api-key="<?php echo esc_attr( $api_key ); ?>"
+                    data-dps-lat-target="dps-client-lat-admin"
+                    data-dps-lng-target="dps-client-lng-admin"
+                    placeholder="<?php echo esc_attr__( 'Rua, número, bairro, cidade - UF', 'desi-pet-shower' ); ?>"
+                ><?php echo esc_textarea( $meta['address'] ?? '' ); ?></textarea>
+            </div>
 
-		<!-- Como nos conheceu? -->
-		<p>
-			<label>
-				<?php echo esc_html__( 'Como nos conheceu?', 'desi-pet-shower' ); ?><br>
-				<input type="text" name="client_referral" value="<?php echo esc_attr( $ref_val ); ?>" placeholder="Google, indicação, Instagram...">
-			</label>
-		</p>
+            <div class="dps-signature-field dps-signature-field--full">
+                <label class="dps-signature-field__label" for="dps-client-referral"><?php esc_html_e( 'Como nos conheceu?', 'desi-pet-shower' ); ?></label>
+                <input id="dps-client-referral" type="text" name="client_referral" value="<?php echo esc_attr( $meta['referral'] ?? '' ); ?>" placeholder="<?php echo esc_attr__( 'Google, indicação, Instagram…', 'desi-pet-shower' ); ?>" autocomplete="off" />
+            </div>
 
-		<!-- Autorização de foto -->
-		<p>
-			<label class="dps-checkbox-label">
-				<input type="checkbox" name="client_photo_auth" value="1" <?php echo $checked; ?>>
-				<span class="dps-checkbox-text"><?php echo esc_html__( 'Autorizo publicação da foto do pet nas redes sociais', 'desi-pet-shower' ); ?></span>
-			</label>
-		</p>
-	</fieldset>
+            <div class="dps-signature-field dps-signature-field--full">
+                <label class="dps-signature-check" for="dps-client-photo-auth">
+                    <input type="hidden" name="client_photo_auth" value="" />
+                    <input id="dps-client-photo-auth" type="checkbox" name="client_photo_auth" value="1" <?php checked( ! empty( $meta['photo_auth'] ) ); ?> />
+                    <span><?php esc_html_e( 'Autoriza a publicação da foto do pet nas redes sociais.', 'desi-pet-shower' ); ?></span>
+                </label>
+            </div>
+        </div>
+    </section>
 
-	<!-- Campos ocultos para latitude e longitude (admin) -->
-	<input type="hidden" name="client_lat" id="dps-client-lat-admin" value="<?php echo esc_attr( $lat_admin ); ?>">
-	<input type="hidden" name="client_lng" id="dps-client-lng-admin" value="<?php echo esc_attr( $lng_admin ); ?>">
+    <input type="hidden" name="client_lat" id="dps-client-lat-admin" value="<?php echo esc_attr( $meta['lat'] ?? '' ); ?>" />
+    <input type="hidden" name="client_lng" id="dps-client-lng-admin" value="<?php echo esc_attr( $meta['lng'] ?? '' ); ?>" />
 
-	<!-- Submit button -->
-	<p>
-		<button type="submit" class="dps-submit-btn"><?php echo $btn_text; ?></button>
-	</p>
+    <div class="dps-signature-actions dps-signature-actions--end">
+        <p class="dps-signature-actions__hint"><?php esc_html_e( 'Os dados são salvos com os mesmos contratos já usados pelo restante do sistema.', 'desi-pet-shower' ); ?></p>
+        <button type="submit" class="dps-submit-btn dps-signature-button">
+            <span class="dps-signature-button__text"><?php echo esc_html( $btn_text ); ?></span>
+        </button>
+    </div>
 </form>
-
-<?php
-/**
- * LEGACY: Google Maps autocomplete script
- * 
- * This inline script is preserved from the original implementation for backward compatibility.
- * 
- * TODO (Phase 4+): Move to wp_enqueue_script() with proper dependency management and SRI.
- * - Create separate JS file: assets/js/dps-google-maps-autocomplete.js
- * - Enqueue with wp_enqueue_script() in appropriate hook
- * - Add SRI (Subresource Integrity) for Google Maps API
- * - Use wp_localize_script() to pass API key securely
- * 
- * Note: The API key is loaded from WordPress options and only included if configured.
- */
-if ( $api_key ) :
-	?>
-	<script src="https://maps.googleapis.com/maps/api/js?key=<?php echo esc_attr( $api_key ); ?>&libraries=places"></script>
-	<script>
-	(function(){
-		var input = document.getElementById("dps-client-address-admin");
-		if ( input ) {
-			var autocomplete = new google.maps.places.Autocomplete(input, { types: ["geocode"] });
-			autocomplete.addListener("place_changed", function() {
-				var place = autocomplete.getPlace();
-				if ( place && place.geometry ) {
-					var lat = place.geometry.location.lat();
-					var lng = place.geometry.location.lng();
-					var latField = document.getElementById("dps-client-lat-admin");
-					var lngField = document.getElementById("dps-client-lng-admin");
-					if ( latField && lngField ) {
-						latField.value = lat;
-						lngField.value = lng;
-					}
-				}
-			});
-		}
-	})();
-	</script>
-	<?php
-endif;
-?>

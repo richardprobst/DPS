@@ -58,6 +58,37 @@ final class DPS_Portal_Profile_Update {
     }
 
     /**
+     * Enqueues the Signature assets for profile update flows.
+     *
+     * @return void
+     */
+    private function enqueue_assets() {
+        wp_enqueue_style( 'dps-client-portal-profile-update' );
+        wp_enqueue_script( 'dps-client-portal-profile-update' );
+    }
+
+    /**
+     * Builds the public profile update URL.
+     *
+     * @param string $token_plain Plain token generated for the client.
+     * @return string
+     */
+    private function get_update_url( $token_plain ) {
+        $portal_url = dps_get_portal_page_url();
+        if ( ! $portal_url || ! is_string( $portal_url ) ) {
+            $portal_url = home_url( '/portal-cliente/' );
+        }
+
+        return add_query_arg(
+            [
+                'dps_action' => 'profile_update',
+                'token'      => $token_plain,
+            ],
+            $portal_url
+        );
+    }
+
+    /**
      * Renderiza o botão de gerar link de atualização no header da página do cliente
      *
      * @param int     $client_id ID do cliente.
@@ -70,137 +101,31 @@ final class DPS_Portal_Profile_Update {
             return;
         }
 
+        $this->enqueue_assets();
+
         $nonce = wp_create_nonce( 'dps_generate_profile_update_' . $client_id );
-        
-        // Verifica se já existe um token gerado recentemente
-        $existing_token = get_transient( 'dps_profile_update_token_' . $client_id );
-        
-        // Grupo de ações de atualização de perfil
-        echo '<div class="dps-quick-action-group">';
-        echo '<div class="dps-quick-action-group__header">';
-        echo '<span class="dps-quick-action-group__icon" aria-hidden="true">📝</span>';
-        echo '<h5 class="dps-quick-action-group__title">' . esc_html__( 'Atualização de Perfil', 'dps-client-portal' ) . '</h5>';
-        echo '</div>';
-        echo '<div class="dps-quick-action-group__content">';
-
-        // Link copiável existente
-        if ( $existing_token ) {
-            echo '<div class="dps-profile-update-link-container">';
-            echo '<button type="button" class="dps-btn-action dps-btn-action--secondary dps-copy-link" data-link="' . esc_attr( $existing_token['url'] ) . '" title="' . esc_attr__( 'Clique para copiar', 'dps-client-portal' ) . '">';
-            echo '📋 ' . esc_html__( 'Copiar', 'dps-client-portal' );
-            echo '</button>';
-            echo '<span class="dps-link-expires">' . esc_html__( '7 dias', 'dps-client-portal' ) . '</span>';
-            echo '</div>';
-        }
-        
-        // Botão para gerar novo link
-        echo '<button type="button" class="dps-btn-action dps-btn-action--secondary dps-generate-update-link" ';
-        echo 'data-client-id="' . esc_attr( $client_id ) . '" ';
-        echo 'data-nonce="' . esc_attr( $nonce ) . '" ';
-        echo 'title="' . esc_attr__( 'Gerar link para o cliente atualizar seus dados', 'dps-client-portal' ) . '">';
-        echo '🔗 ' . esc_html__( 'Gerar Link', 'dps-client-portal' );
-        echo '</button>';
-
-        echo '</div>'; // .dps-quick-action-group__content
-        echo '</div>'; // .dps-quick-action-group
-        
-        // Adiciona JavaScript inline para o botão
-        $this->render_button_script();
-    }
-
-    /**
-     * Renderiza o script JavaScript para o botão de gerar link
-     */
-    private function render_button_script() {
-        static $script_rendered = false;
-        
-        if ( $script_rendered ) {
-            return;
-        }
-        
-        $script_rendered = true;
         ?>
-        <script>
-        (function() {
-            // Handler para gerar link
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.dps-generate-update-link')) return;
-                
-                var btn = e.target.closest('.dps-generate-update-link');
-                var clientId = btn.dataset.clientId;
-                var nonce = btn.dataset.nonce;
-                
-                btn.disabled = true;
-                btn.innerHTML = '⏳ <?php echo esc_js( __( 'Gerando...', 'dps-client-portal' ) ); ?>';
-                
-                fetch('<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'action=dps_generate_profile_update_link&client_id=' + clientId + '&_wpnonce=' + nonce
-                })
-                .then(function(response) { return response.json(); })
-                .then(function(data) {
-                    btn.disabled = false;
-                    
-                    if (data && data.success && data.data && data.data.url) {
-                        // Copia para área de transferência
-                        navigator.clipboard.writeText(data.data.url).then(function() {
-                            btn.innerHTML = '✅ <?php echo esc_js( __( 'Link Copiado!', 'dps-client-portal' ) ); ?>';
-                            
-                            // Mostra mensagem de sucesso
-                            var msg = document.createElement('div');
-                            msg.className = 'dps-alert dps-alert--success';
-                            msg.innerHTML = '<?php echo esc_js( __( 'Link de atualização gerado e copiado! Envie para o cliente via WhatsApp ou Email.', 'dps-client-portal' ) ); ?>' +
-                                '<br><strong><?php echo esc_js( __( 'Válido por 7 dias.', 'dps-client-portal' ) ); ?></strong>' +
-                                '<br><code style="word-break: break-all;">' + data.data.url + '</code>';
-                            
-                            var header = document.querySelector('.dps-client-header');
-                            if (header) {
-                                header.parentNode.insertBefore(msg, header.nextSibling);
-                            }
-                            
-                            setTimeout(function() {
-                                btn.innerHTML = '🔗 <?php echo esc_js( __( 'Link de Atualização', 'dps-client-portal' ) ); ?>';
-                            }, 3000);
-                        }).catch(function() {
-                            // Fallback: mostra em prompt
-                            prompt('<?php echo esc_js( __( 'Copie o link abaixo:', 'dps-client-portal' ) ); ?>', data.data.url);
-                            btn.innerHTML = '🔗 <?php echo esc_js( __( 'Link de Atualização', 'dps-client-portal' ) ); ?>';
-                        });
-                    } else {
-                        var errorMsg = (data && data.data && data.data.message) ? data.data.message : '<?php echo esc_js( __( 'Erro ao gerar link. Tente novamente.', 'dps-client-portal' ) ); ?>';
-                        alert(errorMsg);
-                        btn.innerHTML = '🔗 <?php echo esc_js( __( 'Link de Atualização', 'dps-client-portal' ) ); ?>';
-                    }
-                })
-                .catch(function(error) {
-                    btn.disabled = false;
-                    btn.innerHTML = '🔗 <?php echo esc_js( __( 'Link de Atualização', 'dps-client-portal' ) ); ?>';
-                    alert('<?php echo esc_js( __( 'Erro de conexão. Verifique sua internet e tente novamente.', 'dps-client-portal' ) ); ?>');
-                });
-            });
-            
-            // Handler para copiar link existente
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.dps-copy-link')) return;
-                
-                var btn = e.target.closest('.dps-copy-link');
-                var link = btn.dataset.link;
-                
-                navigator.clipboard.writeText(link).then(function() {
-                    var originalText = btn.innerHTML;
-                    btn.innerHTML = '✅ <?php echo esc_js( __( 'Copiado!', 'dps-client-portal' ) ); ?>';
-                    setTimeout(function() {
-                        btn.innerHTML = originalText;
-                    }, 2000);
-                }).catch(function() {
-                    prompt('<?php echo esc_js( __( 'Copie o link abaixo:', 'dps-client-portal' ) ); ?>', link);
-                });
-            });
-        })();
-        </script>
+        <div class="dps-quick-action-group dps-profile-update-link-generator">
+            <div class="dps-quick-action-group__header">
+                <span class="dps-quick-action-group__icon" aria-hidden="true">📝</span>
+                <h5 class="dps-quick-action-group__title"><?php esc_html_e( 'Atualização de Perfil', 'dps-client-portal' ); ?></h5>
+            </div>
+            <div class="dps-quick-action-group__content">
+                <button
+                    type="button"
+                    class="dps-btn-action dps-btn-action--secondary dps-generate-update-link"
+                    data-client-id="<?php echo esc_attr( (string) $client_id ); ?>"
+                    data-nonce="<?php echo esc_attr( $nonce ); ?>"
+                    data-loading-label="<?php echo esc_attr__( 'Gerando...', 'dps-client-portal' ); ?>"
+                    data-default-label="<?php echo esc_attr__( 'Gerar link', 'dps-client-portal' ); ?>"
+                    title="<?php echo esc_attr__( 'Gerar link para o cliente atualizar seus dados', 'dps-client-portal' ); ?>"
+                >
+                    <?php esc_html_e( 'Gerar link', 'dps-client-portal' ); ?>
+                </button>
+                <p class="dps-profile-update-link-generator__hint"><?php esc_html_e( 'O link é gerado em tempo real e permanece válido por 7 dias.', 'dps-client-portal' ); ?></p>
+                <div class="dps-profile-update-link-generator__result" data-dps-update-link-result hidden></div>
+            </div>
+        </div>
         <?php
     }
 
@@ -234,18 +159,7 @@ final class DPS_Portal_Profile_Update {
             wp_send_json_error( [ 'message' => __( 'Não foi possível gerar o link.', 'dps-client-portal' ) ] );
         }
         
-        // Gera URL - usa a página do portal com parâmetro especial
-        $portal_url = dps_get_portal_page_url();
-        $update_url = add_query_arg( [
-            'dps_action' => 'profile_update',
-            'token'      => $token_plain,
-        ], $portal_url );
-        
-        // Armazena temporariamente para exibição
-        set_transient( 'dps_profile_update_token_' . $client_id, [
-            'token' => $token_plain,
-            'url'   => $update_url,
-        ], 7 * DAY_IN_SECONDS );
+        $update_url = $this->get_update_url( $token_plain );
         
         // Log da ação
         do_action( 'dps_portal_profile_update_link_generated', $client_id, $update_url );
@@ -491,6 +405,8 @@ final class DPS_Portal_Profile_Update {
         if ( 'profile_update' !== $action || ! isset( $_GET['token'] ) ) {
             return '';
         }
+
+        $this->enqueue_assets();
         
         $token = sanitize_text_field( wp_unslash( $_GET['token'] ) );
         

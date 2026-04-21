@@ -191,13 +191,14 @@ add_action( 'init', static function (): void {
     $registrationV2->setHandler( $registrationHandler );
     $registrationV2->setBreedProvider( $breedProvider );
     $registrationV2->setRecaptchaService( $recaptchaService );
+    $registrationV2->setEmailConfirmationService( $emailService );
 
     $bookingV2 = new DPS_Frontend_Booking_V2_Module( $logger, $templateEngine, $bookingBridge );
     $bookingV2->setHandler( $bookingHandler );
     $bookingV2->setConfirmationService( $confirmationService );
 
     $registry = new DPS_Frontend_Module_Registry( $flags, $logger );
-    $registry->add( 'registration',    new DPS_Frontend_Registration_Module( $logger ) );
+    $registry->add( 'registration',    new DPS_Frontend_Registration_Module( $logger, $registrationV2 ) );
     $registry->add( 'booking',         new DPS_Frontend_Booking_Module( $logger ) );
     $registry->add( 'settings',        new DPS_Frontend_Settings_Module( $logger, $flags ) );
     $registry->add( 'registration_v2', $registrationV2 );

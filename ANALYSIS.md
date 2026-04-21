@@ -2,6 +2,9 @@
 
 ## Plugin base (`plugins/desi-pet-shower-base`)
 - O arquivo principal declara constantes globais, registra os *custom post types* de clientes, pets e agendamentos, carrega os ativos do frontend e expÃµe os *shortcodes* `[dps_base]` e `[dps_configuracoes]`, que servem como ponto de entrada para o painel e para a tela de configuraÃ§Ãµes consumida pelos add-ons.
+
+- O base passou a registrar tambem a fundacao compartilhada `dps-signature-forms.css` e `dps-signature-forms.js`, usada como camada unica de UX/UI para os formularios DPS Signature do cadastro publico, do portal do cliente e dos formularios internos de cliente/pet.
+- Os templates internos `templates/forms/client-form.php` e `templates/forms/pet-form.php` foram reescritos sobre a mesma base Signature, mantendo `dps_action`, nonces e nomes de campos ja consumidos pelo salvamento do nucleo, mas removendo scripts inline e reutilizando mascara, autocomplete e listas de racas pela camada compartilhada.
 - `includes/class-dps-cpt-helper.php` centraliza o registro de CPTs com rÃ³tulos e argumentos padrÃ£o; novos tipos devem instanciar `DPS_CPT_Helper` para herdar as opÃ§Ãµes comuns e apenas sobrescrever particularidades (ex.: capabilities customizadas ou suporte a editor).
 - **NOTA**: Os CPTs principais (`dps_cliente`, `dps_pet`, `dps_agendamento`) estÃ£o registrados com `show_ui => true` e `show_in_menu => false`, sendo exibidos pelo painel central e reutilizÃ¡veis pelos add-ons via abas. Para anÃ¡lise completa sobre a interface nativa do WordPress para estes CPTs, consulte `docs/analysis/BASE_PLUGIN_DEEP_ANALYSIS.md` e `docs/analysis/ADMIN_MENUS_MAPPING.md`.
 - A classe `DPS_Base_Frontend` concentra a lÃ³gica de interface: normaliza telefones para WhatsApp, agrega dados de agendamentos multi-pet para cobranÃ§as conjuntas, monta botÃµes de cobranÃ§a, controla salvamento/exclusÃ£o de clientes, pets e atendimentos e renderiza as abas consumidas pelos add-ons via *hooks* (`dps_base_nav_tabs_after_pets`, `dps_base_nav_tabs_after_history`, etc.).
@@ -1220,6 +1223,11 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 ### Portal do Cliente (`desi-pet-shower-client-portal_addon`)
 
+**Status atual dos formularios do portal**:
+- O acesso publico, o reset de senha e o formulario de atualizacao de perfil compartilham o mesmo shell DPS Signature, com foco visivel, mensagens inline e responsividade coerente nos breakpoints oficiais.
+- A geracao do link de atualizacao de perfil deixou de depender de transients. O link agora e gerado sob demanda via AJAX, preserva o contrato externo `dps_generate_profile_update_link` e responde sempre em tempo real.
+- O carregamento de assets do portal passou a ser contextual: `client-portal-auth.css` cobre os estados publicos de acesso/reset e `client-portal-profile-update.css` + `client-portal-profile-update.js` cobrem o link de atualizacao e o formulario tokenizado, todos apoiados pela base `dps-signature-forms`.
+
 **Diret�rio**: `plugins/desi-pet-shower-client-portal`
 
 **Prop�sito e funcionalidades principais**:
@@ -1667,6 +1675,12 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 ---
 
 ### Frontend (`desi-pet-shower-frontend`)
+
+**Status atual do cadastro publico**:
+- `[dps_registration_v2]` e `[dps_registration_form]` convergem para o mesmo renderer nativo DPS Signature; o shortcode legado passou a atuar apenas como alias de compatibilidade.
+- O fluxo de cadastro publico preserva hooks, nomes de campos, nonces e integracoes ja consumidas pelo ecossistema, mas deixou de depender do add-on legado de cadastro.
+- Anti-spam, duplicate warning, mensagens e confirmacao de e-mail operam sem transients, usando nonce, honeypot, timestamp e tokens persistidos.
+- O renderer nativo passou a cobrir o conjunto completo de dados do tutor e dos pets, incluindo mascaras, autocomplete, multiplos pets, reCAPTCHA e estados de confirmacao por e-mail.
 
 **DiretÃ³rio**: `plugins/desi-pet-shower-frontend`
 

@@ -1,342 +1,294 @@
 <?php
 /**
- * Template de formulário de cadastro/edição de pet.
+ * Pet create/edit form aligned to DPS Signature.
  *
- * Sobrescreva em wp-content/themes/SEU_TEMA/dps-templates/forms/pet-form.php
- * para personalizar o HTML mantendo a lógica do plugin.
+ * Override path:
+ * wp-content/themes/SEU_TEMA/dps-templates/forms/pet-form.php
  *
  * @package DesiPetShower
  * @since 1.0.4
- *
- * Variáveis disponíveis:
- * @var int         $edit_id        ID do pet sendo editado (0 se novo)
- * @var WP_Post|null $editing       Post do pet sendo editado (null se novo)
- * @var array       $meta           Array com metadados do pet
- * @var array       $clients        Lista de clientes disponíveis
- * @var array       $breed_options  Lista de raças disponíveis para a espécie selecionada
- * @var array       $breed_data     Dataset completo de raças por espécie
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+    exit;
 }
 
-// Extrai variáveis passadas para o template
-$edit_id       = isset( $edit_id ) ? (int) $edit_id : 0;
-$editing       = isset( $editing ) ? $editing : null;
-$meta          = isset( $meta ) && is_array( $meta ) ? $meta : [];
-$clients       = isset( $clients ) && is_array( $clients ) ? $clients : [];
-$breed_options = isset( $breed_options ) && is_array( $breed_options ) ? $breed_options : [];
-$breed_data    = isset( $breed_data ) && is_array( $breed_data ) ? $breed_data : [];
-
-// Valores do formulário
-$pet_name       = $editing ? $editing->post_title : '';
-$owner_selected = $meta['owner_id'] ?? '';
-$species_val    = $meta['species'] ?? '';
-$breed_val      = $meta['breed'] ?? '';
-$sex_val        = $meta['sex'] ?? '';
-$size_val       = $meta['size'] ?? '';
-$weight_val     = $meta['weight'] ?? '';
-$birth_val      = $meta['birth'] ?? '';
-$coat_val       = $meta['coat'] ?? '';
-$color_val      = $meta['color'] ?? '';
-$vaccinations   = $meta['vaccinations'] ?? '';
-$allergies      = $meta['allergies'] ?? '';
-$care_val       = $meta['care'] ?? '';
-$behavior_val   = $meta['behavior'] ?? '';
-$aggressive     = $meta['aggressive'] ?? '';
-$photo_id       = $meta['photo_id'] ?? '';
-
-$checked_ag = $aggressive ? 'checked' : '';
-$photo_url  = '';
-if ( $photo_id ) {
-	$photo_url = wp_get_attachment_image_url( $photo_id, 'thumbnail' );
-}
-
-// Preferências de produtos
-$shampoo_pref        = $meta['shampoo_pref'] ?? '';
-$perfume_pref        = $meta['perfume_pref'] ?? '';
-$accessories_pref    = $meta['accessories_pref'] ?? '';
-$product_restrictions = $meta['product_restrictions'] ?? '';
-
-$btn_text = $edit_id ? esc_html__( 'Atualizar Pet', 'desi-pet-shower' ) : esc_html__( 'Salvar Pet', 'desi-pet-shower' );
+$edit_id              = isset( $edit_id ) ? (int) $edit_id : 0;
+$editing              = isset( $editing ) ? $editing : null;
+$meta                 = isset( $meta ) && is_array( $meta ) ? $meta : [];
+$clients              = isset( $clients ) && is_array( $clients ) ? $clients : [];
+$breed_options        = isset( $breed_options ) && is_array( $breed_options ) ? $breed_options : [];
+$breed_data           = isset( $breed_data ) && is_array( $breed_data ) ? $breed_data : [];
+$pet_name             = $editing ? $editing->post_title : '';
+$owner_selected       = $meta['owner_id'] ?? '';
+$photo_id             = $meta['photo_id'] ?? '';
+$photo_url            = $photo_id ? wp_get_attachment_image_url( $photo_id, 'thumbnail' ) : '';
+$btn_text             = $edit_id ? esc_html__( 'Atualizar Pet', 'desi-pet-shower' ) : esc_html__( 'Salvar Pet', 'desi-pet-shower' );
+$species_options      = [
+    ''      => __( 'Selecione…', 'desi-pet-shower' ),
+    'cao'   => __( 'Cachorro', 'desi-pet-shower' ),
+    'gato'  => __( 'Gato', 'desi-pet-shower' ),
+    'outro' => __( 'Outro', 'desi-pet-shower' ),
+];
+$sex_options          = [
+    ''       => __( 'Selecione…', 'desi-pet-shower' ),
+    'macho'  => __( 'Macho', 'desi-pet-shower' ),
+    'femea'  => __( 'Fêmea', 'desi-pet-shower' ),
+];
+$size_options         = [
+    ''        => __( 'Selecione…', 'desi-pet-shower' ),
+    'pequeno' => __( 'Pequeno', 'desi-pet-shower' ),
+    'medio'   => __( 'Médio', 'desi-pet-shower' ),
+    'grande'  => __( 'Grande', 'desi-pet-shower' ),
+];
+$shampoo_options      = [
+    ''               => __( 'Sem preferência', 'desi-pet-shower' ),
+    'hipoalergenico' => __( 'Hipoalergênico', 'desi-pet-shower' ),
+    'antisseptico'   => __( 'Antisséptico', 'desi-pet-shower' ),
+    'pelagem_branca' => __( 'Para pelagem branca', 'desi-pet-shower' ),
+    'pelagem_escura' => __( 'Para pelagem escura', 'desi-pet-shower' ),
+    'antipulgas'     => __( 'Antipulgas', 'desi-pet-shower' ),
+    'hidratante'     => __( 'Hidratante', 'desi-pet-shower' ),
+    'outro'          => __( 'Outro', 'desi-pet-shower' ),
+];
+$perfume_options      = [
+    ''               => __( 'Sem preferência', 'desi-pet-shower' ),
+    'suave'          => __( 'Perfume suave', 'desi-pet-shower' ),
+    'intenso'        => __( 'Perfume intenso', 'desi-pet-shower' ),
+    'sem_perfume'    => __( 'Sem perfume (proibido)', 'desi-pet-shower' ),
+    'hipoalergenico' => __( 'Hipoalergênico apenas', 'desi-pet-shower' ),
+];
+$accessory_options    = [
+    ''               => __( 'Sem preferência', 'desi-pet-shower' ),
+    'lacinho'        => __( 'Lacinho', 'desi-pet-shower' ),
+    'gravata'        => __( 'Gravata', 'desi-pet-shower' ),
+    'lenco'          => __( 'Lenço', 'desi-pet-shower' ),
+    'bandana'        => __( 'Bandana', 'desi-pet-shower' ),
+    'sem_aderecos'   => __( 'Não usar adereços', 'desi-pet-shower' ),
+];
 ?>
 
-<form method="post" enctype="multipart/form-data" class="dps-form dps-form--pet">
-	<!-- Hidden fields -->
-	<input type="hidden" name="dps_action" value="save_pet">
-	<?php wp_nonce_field( 'dps_action', 'dps_nonce_pets' ); ?>
-	<?php if ( $edit_id ) : ?>
-		<input type="hidden" name="pet_id" value="<?php echo esc_attr( $edit_id ); ?>">
-	<?php endif; ?>
+<form method="post" enctype="multipart/form-data" class="dps-form dps-form--pet dps-signature-form">
+    <input type="hidden" name="dps_action" value="save_pet" />
+    <?php wp_nonce_field( 'dps_action', 'dps_nonce_pets' ); ?>
+    <?php if ( $edit_id ) : ?>
+        <input type="hidden" name="pet_id" value="<?php echo esc_attr( (string) $edit_id ); ?>" />
+    <?php endif; ?>
 
-	<!-- Fieldset 1: Dados Básicos -->
-	<fieldset class="dps-fieldset">
-		<legend class="dps-fieldset__legend"><?php echo esc_html__( 'Dados Básicos', 'desi-pet-shower' ); ?></legend>
+    <section class="dps-signature-section">
+        <div class="dps-signature-section__header">
+            <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Cadastro interno', 'desi-pet-shower' ); ?></p>
+            <h2 class="dps-signature-section__title"><?php esc_html_e( 'Dados principais do pet', 'desi-pet-shower' ); ?></h2>
+            <p class="dps-signature-section__description"><?php esc_html_e( 'Este formulário foi reescrito no padrão DPS Signature/M3 para manter consistência com o cadastro público e com o portal do cliente.', 'desi-pet-shower' ); ?></p>
+        </div>
 
-		<!-- Nome do pet e Cliente em grid -->
-		<div class="dps-form-row dps-form-row--2col">
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'Nome do Pet', 'desi-pet-shower' ); ?> <span class="dps-required">*</span><br>
-					<input type="text" name="pet_name" value="<?php echo esc_attr( $pet_name ); ?>" required>
-				</label>
-			</p>
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'Cliente (Tutor)', 'desi-pet-shower' ); ?> <span class="dps-required">*</span><br>
-					<select name="owner_id" id="dps-pet-owner" required>
-						<option value=""><?php echo esc_html__( 'Selecione...', 'desi-pet-shower' ); ?></option>
-						<?php foreach ( $clients as $client ) : ?>
-							<option value="<?php echo esc_attr( $client->ID ); ?>" <?php selected( (string) $client->ID, (string) $owner_selected ); ?>>
-								<?php echo esc_html( $client->post_title ); ?>
-							</option>
-						<?php endforeach; ?>
-					</select>
-				</label>
-			</p>
-		</div>
+        <div class="dps-signature-grid dps-signature-grid--2">
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-pet-name">
+                    <?php esc_html_e( 'Nome do pet', 'desi-pet-shower' ); ?>
+                    <span class="dps-signature-field__required" aria-hidden="true">*</span>
+                </label>
+                <input id="dps-pet-name" type="text" name="pet_name" value="<?php echo esc_attr( $pet_name ); ?>" required />
+            </div>
 
-		<!-- Espécie, Raça e Sexo em grid de 3 colunas -->
-		<div class="dps-form-row dps-form-row--3col">
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'Espécie', 'desi-pet-shower' ); ?> <span class="dps-required">*</span><br>
-					<select name="pet_species" id="dps-pet-species" required>
-						<option value=""><?php echo esc_html__( 'Selecione...', 'desi-pet-shower' ); ?></option>
-						<option value="cao" <?php selected( $species_val, 'cao' ); ?>><?php echo esc_html__( 'Cachorro', 'desi-pet-shower' ); ?></option>
-						<option value="gato" <?php selected( $species_val, 'gato' ); ?>><?php echo esc_html__( 'Gato', 'desi-pet-shower' ); ?></option>
-						<option value="outro" <?php selected( $species_val, 'outro' ); ?>><?php echo esc_html__( 'Outro', 'desi-pet-shower' ); ?></option>
-					</select>
-				</label>
-			</p>
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'Raça', 'desi-pet-shower' ); ?><br>
-					<input type="text" name="pet_breed" list="dps-breed-list" value="<?php echo esc_attr( $breed_val ); ?>" placeholder="<?php echo esc_attr__( 'Digite ou selecione', 'desi-pet-shower' ); ?>">
-				</label>
-			</p>
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'Sexo', 'desi-pet-shower' ); ?> <span class="dps-required">*</span><br>
-					<select name="pet_sex" required>
-						<option value=""><?php echo esc_html__( 'Selecione...', 'desi-pet-shower' ); ?></option>
-						<option value="macho" <?php selected( $sex_val, 'macho' ); ?>><?php echo esc_html__( 'Macho', 'desi-pet-shower' ); ?></option>
-						<option value="femea" <?php selected( $sex_val, 'femea' ); ?>><?php echo esc_html__( 'Fêmea', 'desi-pet-shower' ); ?></option>
-					</select>
-				</label>
-			</p>
-		</div>
-	</fieldset>
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-pet-owner">
+                    <?php esc_html_e( 'Cliente (tutor)', 'desi-pet-shower' ); ?>
+                    <span class="dps-signature-field__required" aria-hidden="true">*</span>
+                </label>
+                <select id="dps-pet-owner" name="owner_id" required>
+                    <option value=""><?php esc_html_e( 'Selecione…', 'desi-pet-shower' ); ?></option>
+                    <?php foreach ( $clients as $client ) : ?>
+                        <option value="<?php echo esc_attr( (string) $client->ID ); ?>" <?php selected( (string) $client->ID, (string) $owner_selected ); ?>>
+                            <?php echo esc_html( $client->post_title ); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-	<!-- Datalist para raças -->
-	<datalist id="dps-breed-list">
-		<?php foreach ( $breed_options as $breed ) : ?>
-			<option value="<?php echo esc_attr( $breed ); ?>">
-		<?php endforeach; ?>
-	</datalist>
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-pet-species">
+                    <?php esc_html_e( 'Espécie', 'desi-pet-shower' ); ?>
+                    <span class="dps-signature-field__required" aria-hidden="true">*</span>
+                </label>
+                <select id="dps-pet-species" name="pet_species" data-dps-breed-target="dps-pet-breed-list" required>
+                    <?php foreach ( $species_options as $value => $label ) : ?>
+                        <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $meta['species'] ?? '', $value ); ?>><?php echo esc_html( $label ); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-	<!-- Fieldset 2: Características Físicas -->
-	<fieldset class="dps-fieldset">
-		<legend class="dps-fieldset__legend"><?php echo esc_html__( 'Características Físicas', 'desi-pet-shower' ); ?></legend>
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-pet-breed"><?php esc_html_e( 'Raça', 'desi-pet-shower' ); ?></label>
+                <input id="dps-pet-breed" type="text" name="pet_breed" value="<?php echo esc_attr( $meta['breed'] ?? '' ); ?>" list="dps-pet-breed-list" autocomplete="off" placeholder="<?php echo esc_attr__( 'Digite ou selecione', 'desi-pet-shower' ); ?>" />
+                <datalist id="dps-pet-breed-list" data-dps-breed-map="<?php echo esc_attr( wp_json_encode( $breed_data ) ); ?>">
+                    <?php foreach ( $breed_options as $breed ) : ?>
+                        <option value="<?php echo esc_attr( $breed ); ?>"></option>
+                    <?php endforeach; ?>
+                </datalist>
+            </div>
 
-		<!-- Tamanho, Peso e Data de Nascimento em grid -->
-		<div class="dps-form-row dps-form-row--3col">
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'Tamanho', 'desi-pet-shower' ); ?> <span class="dps-required">*</span><br>
-					<select name="pet_size" required>
-						<option value=""><?php echo esc_html__( 'Selecione...', 'desi-pet-shower' ); ?></option>
-						<option value="pequeno" <?php selected( $size_val, 'pequeno' ); ?>><?php echo esc_html__( 'Pequeno', 'desi-pet-shower' ); ?></option>
-						<option value="medio" <?php selected( $size_val, 'medio' ); ?>><?php echo esc_html__( 'Médio', 'desi-pet-shower' ); ?></option>
-						<option value="grande" <?php selected( $size_val, 'grande' ); ?>><?php echo esc_html__( 'Grande', 'desi-pet-shower' ); ?></option>
-					</select>
-				</label>
-			</p>
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'Peso (kg)', 'desi-pet-shower' ); ?><br>
-					<input type="number" step="0.1" min="0.1" max="100" name="pet_weight" value="<?php echo esc_attr( $weight_val ); ?>" placeholder="5.5">
-				</label>
-			</p>
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'Data de nascimento', 'desi-pet-shower' ); ?><br>
-					<input type="date" name="pet_birth" value="<?php echo esc_attr( $birth_val ); ?>">
-				</label>
-			</p>
-		</div>
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-pet-sex">
+                    <?php esc_html_e( 'Sexo', 'desi-pet-shower' ); ?>
+                    <span class="dps-signature-field__required" aria-hidden="true">*</span>
+                </label>
+                <select id="dps-pet-sex" name="pet_sex" required>
+                    <?php foreach ( $sex_options as $value => $label ) : ?>
+                        <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $meta['sex'] ?? '', $value ); ?>><?php echo esc_html( $label ); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-		<!-- Tipo de pelo e Cor em grid -->
-		<div class="dps-form-row dps-form-row--2col">
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'Tipo de pelo', 'desi-pet-shower' ); ?><br>
-					<input type="text" name="pet_coat" value="<?php echo esc_attr( $coat_val ); ?>" placeholder="<?php echo esc_attr__( 'Curto, longo, encaracolado...', 'desi-pet-shower' ); ?>">
-				</label>
-			</p>
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'Cor predominante', 'desi-pet-shower' ); ?><br>
-					<input type="text" name="pet_color" value="<?php echo esc_attr( $color_val ); ?>" placeholder="<?php echo esc_attr__( 'Branco, preto, caramelo...', 'desi-pet-shower' ); ?>">
-				</label>
-			</p>
-		</div>
-	</fieldset>
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-pet-size">
+                    <?php esc_html_e( 'Porte', 'desi-pet-shower' ); ?>
+                    <span class="dps-signature-field__required" aria-hidden="true">*</span>
+                </label>
+                <select id="dps-pet-size" name="pet_size" required>
+                    <?php foreach ( $size_options as $value => $label ) : ?>
+                        <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $meta['size'] ?? '', $value ); ?>><?php echo esc_html( $label ); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+    </section>
 
-	<!-- Fieldset 3: Saúde e Comportamento -->
-	<fieldset class="dps-fieldset">
-		<legend class="dps-fieldset__legend"><?php echo esc_html__( 'Saúde e Comportamento', 'desi-pet-shower' ); ?></legend>
+    <section class="dps-signature-section">
+        <div class="dps-signature-section__header">
+            <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Ficha física', 'desi-pet-shower' ); ?></p>
+            <h2 class="dps-signature-section__title"><?php esc_html_e( 'Características do pet', 'desi-pet-shower' ); ?></h2>
+            <p class="dps-signature-section__description"><?php esc_html_e( 'Mantenha porte, peso, data de nascimento e pelagem atualizados para facilitar atendimentos futuros.', 'desi-pet-shower' ); ?></p>
+        </div>
 
-		<p>
-			<label>
-				<?php echo esc_html__( 'Vacinas / Saúde', 'desi-pet-shower' ); ?><br>
-				<textarea name="pet_vaccinations" rows="2" placeholder="<?php echo esc_attr__( 'Liste vacinas, condições médicas...', 'desi-pet-shower' ); ?>"><?php echo esc_textarea( $vaccinations ); ?></textarea>
-			</label>
-		</p>
+        <div class="dps-signature-grid dps-signature-grid--3">
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-pet-weight"><?php esc_html_e( 'Peso (kg)', 'desi-pet-shower' ); ?></label>
+                <input id="dps-pet-weight" type="number" step="0.1" min="0.1" max="100" name="pet_weight" value="<?php echo esc_attr( $meta['weight'] ?? '' ); ?>" inputmode="decimal" />
+            </div>
 
-		<p>
-			<label>
-				<?php echo esc_html__( 'Alergias / Restrições', 'desi-pet-shower' ); ?><br>
-				<textarea name="pet_allergies" rows="2" placeholder="<?php echo esc_attr__( 'Alergias a alimentos, medicamentos...', 'desi-pet-shower' ); ?>"><?php echo esc_textarea( $allergies ); ?></textarea>
-			</label>
-		</p>
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-pet-birth"><?php esc_html_e( 'Data de nascimento', 'desi-pet-shower' ); ?></label>
+                <input id="dps-pet-birth" type="date" name="pet_birth" value="<?php echo esc_attr( $meta['birth'] ?? '' ); ?>" />
+            </div>
 
-		<p>
-			<label>
-				<?php echo esc_html__( 'Cuidados especiais', 'desi-pet-shower' ); ?><br>
-				<textarea name="pet_care" rows="2" placeholder="<?php echo esc_attr__( 'Necessita cuidados especiais durante o banho?', 'desi-pet-shower' ); ?>"><?php echo esc_textarea( $care_val ); ?></textarea>
-			</label>
-		</p>
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-pet-coat"><?php esc_html_e( 'Tipo de pelo', 'desi-pet-shower' ); ?></label>
+                <input id="dps-pet-coat" type="text" name="pet_coat" value="<?php echo esc_attr( $meta['coat'] ?? '' ); ?>" placeholder="<?php echo esc_attr__( 'Curto, longo, encaracolado…', 'desi-pet-shower' ); ?>" />
+            </div>
 
-		<p>
-			<label>
-				<?php echo esc_html__( 'Notas de comportamento', 'desi-pet-shower' ); ?><br>
-				<textarea name="pet_behavior" rows="2" placeholder="<?php echo esc_attr__( 'Como o pet costuma se comportar?', 'desi-pet-shower' ); ?>"><?php echo esc_textarea( $behavior_val ); ?></textarea>
-			</label>
-		</p>
+            <div class="dps-signature-field dps-signature-field--full">
+                <label class="dps-signature-field__label" for="dps-pet-color"><?php esc_html_e( 'Cor predominante', 'desi-pet-shower' ); ?></label>
+                <input id="dps-pet-color" type="text" name="pet_color" value="<?php echo esc_attr( $meta['color'] ?? '' ); ?>" placeholder="<?php echo esc_attr__( 'Branco, preto, caramelo…', 'desi-pet-shower' ); ?>" />
+            </div>
+        </div>
+    </section>
 
-		<p>
-			<label class="dps-checkbox-label">
-				<input type="checkbox" name="pet_aggressive" value="1" <?php echo $checked_ag; ?>>
-				<span class="dps-checkbox-text">⚠️ <?php echo esc_html__( 'Cão agressivo (requer cuidado especial)', 'desi-pet-shower' ); ?></span>
-			</label>
-		</p>
-	</fieldset>
+    <section class="dps-signature-section">
+        <div class="dps-signature-section__header">
+            <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Saúde & comportamento', 'desi-pet-shower' ); ?></p>
+            <h2 class="dps-signature-section__title"><?php esc_html_e( 'Observações do atendimento', 'desi-pet-shower' ); ?></h2>
+            <p class="dps-signature-section__description"><?php esc_html_e( 'Essas informações ajudam a equipe a preparar o banho e tosa com mais segurança e previsibilidade.', 'desi-pet-shower' ); ?></p>
+        </div>
 
-	<!-- Fieldset 4: Preferências de Produtos -->
-	<fieldset class="dps-fieldset">
-		<legend class="dps-fieldset__legend"><?php echo esc_html__( 'Preferências de Produtos', 'desi-pet-shower' ); ?></legend>
-		<p class="dps-fieldset__description"><?php echo esc_html__( 'Restrições e preferências de produtos para o atendimento.', 'desi-pet-shower' ); ?></p>
+        <div class="dps-signature-grid dps-signature-grid--2">
+            <div class="dps-signature-field dps-signature-field--full">
+                <label class="dps-signature-field__label" for="dps-pet-vaccinations"><?php esc_html_e( 'Vacinas / saúde', 'desi-pet-shower' ); ?></label>
+                <textarea id="dps-pet-vaccinations" name="pet_vaccinations" rows="3" placeholder="<?php echo esc_attr__( 'Liste vacinas, condições médicas…', 'desi-pet-shower' ); ?>"><?php echo esc_textarea( $meta['vaccinations'] ?? '' ); ?></textarea>
+            </div>
 
-		<div class="dps-form-row dps-form-row--3col">
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'Shampoo', 'desi-pet-shower' ); ?><br>
-					<select name="pet_shampoo_pref">
-						<option value=""><?php echo esc_html__( 'Sem preferência', 'desi-pet-shower' ); ?></option>
-						<option value="hipoalergenico" <?php selected( $shampoo_pref, 'hipoalergenico' ); ?>><?php echo esc_html__( 'Hipoalergênico', 'desi-pet-shower' ); ?></option>
-						<option value="antisseptico" <?php selected( $shampoo_pref, 'antisseptico' ); ?>><?php echo esc_html__( 'Antisséptico', 'desi-pet-shower' ); ?></option>
-						<option value="pelagem_branca" <?php selected( $shampoo_pref, 'pelagem_branca' ); ?>><?php echo esc_html__( 'Para pelagem branca', 'desi-pet-shower' ); ?></option>
-						<option value="pelagem_escura" <?php selected( $shampoo_pref, 'pelagem_escura' ); ?>><?php echo esc_html__( 'Para pelagem escura', 'desi-pet-shower' ); ?></option>
-						<option value="antipulgas" <?php selected( $shampoo_pref, 'antipulgas' ); ?>><?php echo esc_html__( 'Antipulgas', 'desi-pet-shower' ); ?></option>
-						<option value="hidratante" <?php selected( $shampoo_pref, 'hidratante' ); ?>><?php echo esc_html__( 'Hidratante', 'desi-pet-shower' ); ?></option>
-						<option value="outro" <?php selected( $shampoo_pref, 'outro' ); ?>><?php echo esc_html__( 'Outro', 'desi-pet-shower' ); ?></option>
-					</select>
-				</label>
-			</p>
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'Perfume', 'desi-pet-shower' ); ?><br>
-					<select name="pet_perfume_pref">
-						<option value=""><?php echo esc_html__( 'Sem preferência', 'desi-pet-shower' ); ?></option>
-						<option value="suave" <?php selected( $perfume_pref, 'suave' ); ?>><?php echo esc_html__( 'Perfume suave', 'desi-pet-shower' ); ?></option>
-						<option value="intenso" <?php selected( $perfume_pref, 'intenso' ); ?>><?php echo esc_html__( 'Perfume intenso', 'desi-pet-shower' ); ?></option>
-						<option value="sem_perfume" <?php selected( $perfume_pref, 'sem_perfume' ); ?>><?php echo esc_html__( 'Sem perfume (proibido)', 'desi-pet-shower' ); ?></option>
-						<option value="hipoalergenico" <?php selected( $perfume_pref, 'hipoalergenico' ); ?>><?php echo esc_html__( 'Hipoalergênico apenas', 'desi-pet-shower' ); ?></option>
-					</select>
-				</label>
-			</p>
-			<p class="dps-form-col">
-				<label>
-					<?php echo esc_html__( 'Adereços', 'desi-pet-shower' ); ?><br>
-					<select name="pet_accessories_pref">
-						<option value=""><?php echo esc_html__( 'Sem preferência', 'desi-pet-shower' ); ?></option>
-						<option value="lacinho" <?php selected( $accessories_pref, 'lacinho' ); ?>><?php echo esc_html__( 'Lacinho', 'desi-pet-shower' ); ?></option>
-						<option value="gravata" <?php selected( $accessories_pref, 'gravata' ); ?>><?php echo esc_html__( 'Gravata', 'desi-pet-shower' ); ?></option>
-						<option value="lenco" <?php selected( $accessories_pref, 'lenco' ); ?>><?php echo esc_html__( 'Lenço', 'desi-pet-shower' ); ?></option>
-						<option value="bandana" <?php selected( $accessories_pref, 'bandana' ); ?>><?php echo esc_html__( 'Bandana', 'desi-pet-shower' ); ?></option>
-						<option value="sem_aderecos" <?php selected( $accessories_pref, 'sem_aderecos' ); ?>><?php echo esc_html__( 'Não usar adereços', 'desi-pet-shower' ); ?></option>
-					</select>
-				</label>
-			</p>
-		</div>
+            <div class="dps-signature-field dps-signature-field--full">
+                <label class="dps-signature-field__label" for="dps-pet-allergies"><?php esc_html_e( 'Alergias / restrições', 'desi-pet-shower' ); ?></label>
+                <textarea id="dps-pet-allergies" name="pet_allergies" rows="3" placeholder="<?php echo esc_attr__( 'Alergias alimentares, medicamentosas…', 'desi-pet-shower' ); ?>"><?php echo esc_textarea( $meta['allergies'] ?? '' ); ?></textarea>
+            </div>
 
-		<p>
-			<label>
-				<?php echo esc_html__( 'Outras restrições de produtos', 'desi-pet-shower' ); ?><br>
-				<textarea name="pet_product_restrictions" rows="2" placeholder="<?php echo esc_attr__( 'Ex.: Alérgico a produto X, usar apenas produtos naturais...', 'desi-pet-shower' ); ?>"><?php echo esc_textarea( $product_restrictions ); ?></textarea>
-			</label>
-		</p>
-	</fieldset>
+            <div class="dps-signature-field dps-signature-field--full">
+                <label class="dps-signature-field__label" for="dps-pet-care"><?php esc_html_e( 'Cuidados especiais', 'desi-pet-shower' ); ?></label>
+                <textarea id="dps-pet-care" name="pet_care" rows="3" placeholder="<?php echo esc_attr__( 'Necessita cuidados especiais durante o banho?', 'desi-pet-shower' ); ?>"><?php echo esc_textarea( $meta['care'] ?? '' ); ?></textarea>
+            </div>
 
-	<!-- Fieldset 5: Foto do Pet -->
-	<fieldset class="dps-fieldset">
-		<legend class="dps-fieldset__legend"><?php echo esc_html__( 'Foto do Pet', 'desi-pet-shower' ); ?></legend>
+            <div class="dps-signature-field dps-signature-field--full">
+                <label class="dps-signature-field__label" for="dps-pet-behavior"><?php esc_html_e( 'Notas de comportamento', 'desi-pet-shower' ); ?></label>
+                <textarea id="dps-pet-behavior" name="pet_behavior" rows="3" placeholder="<?php echo esc_attr__( 'Como o pet costuma se comportar?', 'desi-pet-shower' ); ?>"><?php echo esc_textarea( $meta['behavior'] ?? '' ); ?></textarea>
+            </div>
 
-		<div class="dps-file-upload">
-			<label class="dps-file-upload__label">
-				<input type="file" name="pet_photo" accept="image/*" class="dps-file-upload__input">
-				<span class="dps-file-upload__text">📷 <?php echo esc_html__( 'Escolher foto', 'desi-pet-shower' ); ?></span>
-			</label>
-			<?php if ( $photo_url ) : ?>
-				<div class="dps-file-upload__preview">
-					<img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $pet_name ); ?>" loading="lazy">
-				</div>
-			<?php endif; ?>
-		</div>
-	</fieldset>
+            <div class="dps-signature-field dps-signature-field--full">
+                <label class="dps-signature-check" for="dps-pet-aggressive">
+                    <input type="hidden" name="pet_aggressive" value="" />
+                    <input id="dps-pet-aggressive" type="checkbox" name="pet_aggressive" value="1" <?php checked( ! empty( $meta['aggressive'] ) ); ?> />
+                    <span><?php esc_html_e( 'Pet requer cuidado especial (agressivo, nervoso ou muito reativo).', 'desi-pet-shower' ); ?></span>
+                </label>
+            </div>
+        </div>
+    </section>
 
-	<!-- Submit button -->
-	<p>
-		<button type="submit" class="dps-submit-btn"><?php echo $btn_text; ?></button>
-	</p>
+    <section class="dps-signature-section">
+        <div class="dps-signature-section__header">
+            <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Produtos', 'desi-pet-shower' ); ?></p>
+            <h2 class="dps-signature-section__title"><?php esc_html_e( 'Preferências de produtos e adereços', 'desi-pet-shower' ); ?></h2>
+            <p class="dps-signature-section__description"><?php esc_html_e( 'Registre restrições e preferências do atendimento para reduzir retrabalho e manter padrão de execução.', 'desi-pet-shower' ); ?></p>
+        </div>
+
+        <div class="dps-signature-grid dps-signature-grid--3">
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-pet-shampoo-pref"><?php esc_html_e( 'Shampoo', 'desi-pet-shower' ); ?></label>
+                <select id="dps-pet-shampoo-pref" name="pet_shampoo_pref">
+                    <?php foreach ( $shampoo_options as $value => $label ) : ?>
+                        <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $meta['shampoo_pref'] ?? '', $value ); ?>><?php echo esc_html( $label ); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-pet-perfume-pref"><?php esc_html_e( 'Perfume', 'desi-pet-shower' ); ?></label>
+                <select id="dps-pet-perfume-pref" name="pet_perfume_pref">
+                    <?php foreach ( $perfume_options as $value => $label ) : ?>
+                        <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $meta['perfume_pref'] ?? '', $value ); ?>><?php echo esc_html( $label ); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="dps-signature-field">
+                <label class="dps-signature-field__label" for="dps-pet-accessories-pref"><?php esc_html_e( 'Adereços', 'desi-pet-shower' ); ?></label>
+                <select id="dps-pet-accessories-pref" name="pet_accessories_pref">
+                    <?php foreach ( $accessory_options as $value => $label ) : ?>
+                        <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $meta['accessories_pref'] ?? '', $value ); ?>><?php echo esc_html( $label ); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="dps-signature-field dps-signature-field--full">
+                <label class="dps-signature-field__label" for="dps-pet-product-restrictions"><?php esc_html_e( 'Outras restrições de produtos', 'desi-pet-shower' ); ?></label>
+                <textarea id="dps-pet-product-restrictions" name="pet_product_restrictions" rows="3" placeholder="<?php echo esc_attr__( 'Ex.: alérgico a produto X, usar apenas produtos naturais…', 'desi-pet-shower' ); ?>"><?php echo esc_textarea( $meta['product_restrictions'] ?? '' ); ?></textarea>
+            </div>
+        </div>
+    </section>
+
+    <section class="dps-signature-section">
+        <div class="dps-signature-section__header">
+            <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Arquivo visual', 'desi-pet-shower' ); ?></p>
+            <h2 class="dps-signature-section__title"><?php esc_html_e( 'Foto do pet', 'desi-pet-shower' ); ?></h2>
+            <p class="dps-signature-section__description"><?php esc_html_e( 'A foto ajuda na identificação rápida no atendimento e no histórico interno.', 'desi-pet-shower' ); ?></p>
+        </div>
+
+        <div class="dps-signature-file">
+            <label class="dps-signature-file-trigger" for="dps-pet-photo">
+                <span><?php esc_html_e( 'Escolher foto', 'desi-pet-shower' ); ?></span>
+            </label>
+            <input id="dps-pet-photo" class="dps-signature-file__input" type="file" name="pet_photo" accept="image/*" />
+
+            <?php if ( $photo_url ) : ?>
+                <div class="dps-signature-file__preview">
+                    <img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $pet_name ); ?>" loading="lazy" />
+                </div>
+            <?php endif; ?>
+        </div>
+    </section>
+
+    <div class="dps-signature-actions dps-signature-actions--end">
+        <p class="dps-signature-actions__hint"><?php esc_html_e( 'O salvamento continua usando os mesmos contratos do formulário interno original.', 'desi-pet-shower' ); ?></p>
+        <button type="submit" class="dps-submit-btn dps-signature-button">
+            <span class="dps-signature-button__text"><?php echo esc_html( $btn_text ); ?></span>
+        </button>
+    </div>
 </form>
-
-<script>
-(function(){
-	const breedData = <?php echo wp_json_encode( $breed_data ); ?>;
-	const speciesSelect = document.getElementById('dps-pet-species');
-	const breedInput = document.querySelector('input[name="pet_breed"]');
-	const datalist = document.getElementById('dps-breed-list');
-	
-	if (!datalist || !speciesSelect) { return; }
-	
-	const unique = function(list) {
-		const seen = new Set();
-		return list.filter(function(item) {
-			if (seen.has(item)) { return false; }
-			seen.add(item);
-			return true;
-		});
-	};
-	
-	const render = function(species) {
-		const data = breedData[species] || breedData.all || { popular: [], all: [] };
-		const items = unique([].concat(data.popular || [], data.all || []));
-		datalist.innerHTML = '';
-		items.forEach(function(breed) {
-			const option = document.createElement('option');
-			option.value = breed;
-			datalist.appendChild(option);
-		});
-	};
-	
-	render(speciesSelect.value);
-	
-	speciesSelect.addEventListener('change', function() {
-		render(this.value);
-		if (breedInput) { breedInput.value = ''; }
-	});
-})();
-</script>

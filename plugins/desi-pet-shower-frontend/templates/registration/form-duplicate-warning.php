@@ -1,13 +1,12 @@
 <?php
 /**
- * Template: Registration V2 — Duplicate Warning
- *
- * Exibido quando telefone duplicado detectado e admin pode fazer override.
+ * Template: Signature duplicate warning.
  *
  * @package DPS_Frontend_Addon
  * @since   2.0.0
  *
- * @var int $duplicate_client_id ID do cliente duplicado.
+ * @var int  $duplicate_client_id
+ * @var bool $confirmed
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,34 +14,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $duplicate_client_id = $duplicate_client_id ?? 0;
+$confirmed           = $confirmed ?? false;
 ?>
 
-<div class="dps-v2-alert dps-v2-alert--warning" role="alert">
-    <div class="dps-v2-alert__content">
-        <p>
-            <strong><?php esc_html_e( 'Atenção:', 'dps-frontend-addon' ); ?></strong>
+<div class="dps-registration-signature__duplicate-stack">
+    <article class="dps-signature-notice dps-signature-notice--warning" role="alert">
+        <h3 class="dps-signature-notice__title"><?php esc_html_e( 'Telefone já encontrado na base', 'dps-frontend-addon' ); ?></h3>
+        <p class="dps-signature-notice__text">
             <?php
             printf(
                 /* translators: %d: existing client ID */
-                esc_html__( 'Já existe um cliente com este telefone (ID #%d). Marque a opção abaixo para confirmar o cadastro de um novo registro.', 'dps-frontend-addon' ),
+                esc_html__( 'Existe um cliente com este telefone (ID #%d). Confirme abaixo apenas se você realmente precisa criar um novo cadastro separado.', 'dps-frontend-addon' ),
                 $duplicate_client_id
             );
             ?>
         </p>
-    </div>
-</div>
+    </article>
 
-<div class="dps-v2-field dps-v2-field--checkbox">
-    <label for="dps-v2-confirm_duplicate" class="dps-v2-field__checkbox-label">
+    <label class="dps-signature-check" for="dps-registration-confirm-duplicate">
+        <input type="hidden" name="dps_confirm_duplicate" value="" />
         <input
+            id="dps-registration-confirm-duplicate"
             type="checkbox"
-            id="dps-v2-confirm_duplicate"
             name="dps_confirm_duplicate"
             value="1"
-            class="dps-v2-field__checkbox"
+            <?php checked( $confirmed ); ?>
         />
-        <span class="dps-v2-field__checkbox-text">
-            <?php esc_html_e( 'Confirmo que desejo criar um novo cadastro mesmo com telefone duplicado.', 'dps-frontend-addon' ); ?>
-        </span>
+        <span><?php esc_html_e( 'Confirmo que desejo seguir mesmo com telefone duplicado.', 'dps-frontend-addon' ); ?></span>
     </label>
 </div>

@@ -827,16 +827,40 @@ final class DPS_Client_Portal {
             return;
         }
 
-        // Design tokens M3 Expressive (devem ser carregados antes de qualquer CSS do portal)
         $style_deps = [];
         if ( defined( 'DPS_BASE_URL' ) ) {
-            wp_register_style(
-                'dps-design-tokens',
-                DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
-                [],
-                defined( 'DPS_BASE_VERSION' ) ? DPS_BASE_VERSION : '2.0.0'
-            );
+            if ( ! wp_style_is( 'dps-design-tokens', 'registered' ) ) {
+                wp_register_style(
+                    'dps-design-tokens',
+                    DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
+                    [],
+                    defined( 'DPS_BASE_VERSION' ) ? DPS_BASE_VERSION : '2.0.0'
+                );
+            }
             $style_deps[] = 'dps-design-tokens';
+
+            if ( ! wp_style_is( 'dps-signature-forms', 'registered' ) ) {
+                $signature_style_path = trailingslashit( DPS_BASE_DIR ) . 'assets/css/dps-signature-forms.css';
+                wp_register_style(
+                    'dps-signature-forms',
+                    DPS_BASE_URL . 'assets/css/dps-signature-forms.css',
+                    [ 'dps-design-tokens' ],
+                    file_exists( $signature_style_path ) ? filemtime( $signature_style_path ) : ( defined( 'DPS_BASE_VERSION' ) ? DPS_BASE_VERSION : '2.0.0' )
+                );
+            }
+
+            if ( ! wp_script_is( 'dps-signature-forms', 'registered' ) ) {
+                $signature_script_path = trailingslashit( DPS_BASE_DIR ) . 'assets/js/dps-signature-forms.js';
+                wp_register_script(
+                    'dps-signature-forms',
+                    DPS_BASE_URL . 'assets/js/dps-signature-forms.js',
+                    [],
+                    file_exists( $signature_script_path ) ? filemtime( $signature_script_path ) : ( defined( 'DPS_BASE_VERSION' ) ? DPS_BASE_VERSION : '2.0.0' ),
+                    true
+                );
+            }
+
+            $style_deps[] = 'dps-signature-forms';
         }
 
         $style_path = trailingslashit( DPS_CLIENT_PORTAL_ADDON_DIR ) . 'assets/css/client-portal.css';
@@ -844,12 +868,215 @@ final class DPS_Client_Portal {
         $style_version = file_exists( $style_path ) ? filemtime( $style_path ) : '1.0.0';
 
         wp_register_style( 'dps-client-portal', $style_url, $style_deps, $style_version );
+
+        $auth_style_path = trailingslashit( DPS_CLIENT_PORTAL_ADDON_DIR ) . 'assets/css/client-portal-auth.css';
+        $auth_style_url  = trailingslashit( DPS_CLIENT_PORTAL_ADDON_URL ) . 'assets/css/client-portal-auth.css';
+        wp_register_style(
+            'dps-client-portal-auth',
+            $auth_style_url,
+            $style_deps,
+            file_exists( $auth_style_path ) ? filemtime( $auth_style_path ) : $style_version
+        );
+
+        $profile_style_path = trailingslashit( DPS_CLIENT_PORTAL_ADDON_DIR ) . 'assets/css/client-portal-profile-update.css';
+        $profile_style_url  = trailingslashit( DPS_CLIENT_PORTAL_ADDON_URL ) . 'assets/css/client-portal-profile-update.css';
+        wp_register_style(
+            'dps-client-portal-profile-update',
+            $profile_style_url,
+            $style_deps,
+            file_exists( $profile_style_path ) ? filemtime( $profile_style_path ) : $style_version
+        );
         
         $script_path = trailingslashit( DPS_CLIENT_PORTAL_ADDON_DIR ) . 'assets/js/client-portal.js';
         $script_url  = trailingslashit( DPS_CLIENT_PORTAL_ADDON_URL ) . 'assets/js/client-portal.js';
         $script_version = file_exists( $script_path ) ? filemtime( $script_path ) : '1.0.0';
         
-        wp_register_script( 'dps-client-portal', $script_url, [], $script_version, true );
+        wp_register_script( 'dps-client-portal', $script_url, [], $script_version, false );
+
+        $profile_script_path = trailingslashit( DPS_CLIENT_PORTAL_ADDON_DIR ) . 'assets/js/client-portal-profile-update.js';
+        $profile_script_url  = trailingslashit( DPS_CLIENT_PORTAL_ADDON_URL ) . 'assets/js/client-portal-profile-update.js';
+        wp_register_script(
+            'dps-client-portal-profile-update',
+            $profile_script_url,
+            [ 'dps-signature-forms' ],
+            file_exists( $profile_script_path ) ? filemtime( $profile_script_path ) : $script_version,
+            false
+        );
+
+        wp_localize_script(
+            'dps-client-portal-profile-update',
+            'dpsPortalProfileUpdate',
+            [
+                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+                'i18n'    => [
+                    'generating'      => __( 'Gerando...', 'dps-client-portal' ),
+                    'generate'        => __( 'Gerar link', 'dps-client-portal' ),
+                    'copy'            => __( 'Copiar link', 'dps-client-portal' ),
+                    'copied'          => __( 'Link copiado!', 'dps-client-portal' ),
+                    'copyPrompt'      => __( 'Copie o link abaixo:', 'dps-client-portal' ),
+                    'generated'       => __( 'Link gerado e copiado. Envie para o cliente por WhatsApp ou e-mail.', 'dps-client-portal' ),
+                    'genericError'    => __( 'Não foi possível gerar o link agora. Tente novamente.', 'dps-client-portal' ),
+                    'newPetTitle'     => __( 'Novo pet', 'dps-client-portal' ),
+                    'petSummary'      => __( 'Preencha os dados principais deste pet.', 'dps-client-portal' ),
+                    'removePet'       => __( 'Remover', 'dps-client-portal' ),
+                    'details'         => __( 'Detalhes', 'dps-client-portal' ),
+                ],
+            ]
+        );
+
+        $post                = get_post();
+        $content             = $post instanceof \WP_Post ? $post->post_content : '';
+        $action              = isset( $_GET['dps_action'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_action'] ) ) : '';
+        $has_portal_shortcode = has_shortcode( $content, 'dps_client_portal' );
+        $has_login_shortcode  = has_shortcode( $content, 'dps_client_login' );
+        $has_profile_shortcode = has_shortcode( $content, 'dps_profile_update' );
+
+        if ( $has_profile_shortcode || ( 'profile_update' === $action && $has_portal_shortcode ) ) {
+            wp_enqueue_style( 'dps-client-portal-profile-update' );
+            wp_enqueue_script( 'dps-client-portal-profile-update' );
+            return;
+        }
+
+        if ( ! $has_portal_shortcode && ! $has_login_shortcode ) {
+            return;
+        }
+
+        if ( $has_login_shortcode ) {
+            $this->enqueue_portal_access_assets( true );
+            $this->localize_portal_script();
+            return;
+        }
+
+        if ( 'portal_password_reset' === $action ) {
+            $this->enqueue_portal_access_assets();
+            return;
+        }
+
+        $client_id = $this->get_authenticated_client_id();
+
+        if ( ! $client_id ) {
+            $this->enqueue_portal_access_assets( true );
+            $this->localize_portal_script();
+            return;
+        }
+
+        $this->enqueue_authenticated_portal_assets();
+        $portal_script_context = $this->get_portal_script_context( $client_id );
+        $this->localize_portal_script(
+            $client_id,
+            $portal_script_context['client_pets_data'],
+            $portal_script_context['scheduling_suggestions']
+        );
+        wp_enqueue_style( 'dps-client-portal-profile-update' );
+        wp_enqueue_script( 'dps-client-portal-profile-update' );
+    }
+
+    /**
+     * Enqueues the Signature auth shell used by access and password reset.
+     *
+     * @param bool $with_script Whether to also enqueue the public portal script.
+     * @return void
+     */
+    private function enqueue_portal_access_assets( $with_script = false ) {
+        wp_enqueue_style( 'dps-client-portal-auth' );
+
+        if ( $with_script ) {
+            wp_enqueue_script( 'dps-client-portal' );
+        }
+    }
+
+    /**
+     * Enqueues the legacy authenticated portal experience.
+     *
+     * @return void
+     */
+    private function enqueue_authenticated_portal_assets() {
+        wp_enqueue_style( 'dps-client-portal' );
+        wp_enqueue_script( 'dps-client-portal' );
+    }
+
+    /**
+     * Appends footer scripts when the active theme template does not print wp_footer().
+     *
+     * Some portal landing pages use blank templates that omit footer hooks, which
+     * prevents shortcode-localized scripts from ever being printed.
+     *
+     * @param string $output Current shortcode markup.
+     * @return string
+     */
+    private function append_missing_footer_scripts( $output ) {
+        $handles = [
+            'dps-client-portal',
+            'dps-client-portal-profile-update',
+            'dps-signature-forms',
+        ];
+
+        $handles_to_print = [];
+        foreach ( $handles as $handle ) {
+            if ( wp_script_is( $handle, 'enqueued' ) ) {
+                $handles_to_print[] = $handle;
+            }
+        }
+
+        if ( empty( $handles_to_print ) ) {
+            return $output;
+        }
+
+        ob_start();
+        wp_print_scripts( $handles_to_print );
+        $scripts_markup = ob_get_clean();
+
+        if ( ! is_string( $scripts_markup ) || '' === trim( $scripts_markup ) ) {
+            return $output;
+        }
+
+        return $output . $scripts_markup;
+    }
+
+    /**
+     * Builds the client context required by the portal frontend script.
+     *
+     * @param int $client_id Authenticated client ID.
+     * @return array<string, array>
+     */
+    private function get_portal_script_context( $client_id ) {
+        $client_id = absint( $client_id );
+        if ( ! $client_id ) {
+            return [
+                'client_pets_data'        => [],
+                'scheduling_suggestions'  => [],
+            ];
+        }
+
+        $client_pets_data        = [];
+        $scheduling_suggestions  = [];
+        $pet_repo                = DPS_Pet_Repository::get_instance();
+        $client_pets             = $pet_repo->get_pets_by_client( $client_id );
+        $species_icons           = [
+            'Cachorro' => 'dog',
+            'Gato'     => 'cat',
+        ];
+
+        foreach ( $client_pets as $pet ) {
+            $species = get_post_meta( $pet->ID, 'pet_species', true );
+
+            $client_pets_data[] = [
+                'id'      => $pet->ID,
+                'name'    => $pet->post_title,
+                'species' => $species,
+                'icon'    => isset( $species_icons[ $species ] ) ? $species_icons[ $species ] : 'pet',
+            ];
+        }
+
+        if ( ! empty( $client_pets ) ) {
+            $suggestions_service    = DPS_Scheduling_Suggestions::get_instance();
+            $scheduling_suggestions = $suggestions_service->get_suggestions_for_client( $client_id, $client_pets );
+        }
+
+        return [
+            'client_pets_data'       => $client_pets_data,
+            'scheduling_suggestions' => $scheduling_suggestions,
+        ];
     }
 
     /**
@@ -1032,7 +1259,7 @@ final class DPS_Client_Portal {
             include $template_path;
             $output = ob_get_clean();
 
-            return apply_filters( 'dps_portal_login_screen', $output, $portal_access_context );
+            return $this->append_missing_footer_scripts( apply_filters( 'dps_portal_login_screen', $output, $portal_access_context ) );
         }
 
         ob_start();
@@ -1040,7 +1267,7 @@ final class DPS_Client_Portal {
         echo '<h3>' . esc_html__( 'Acesso ao Portal do Cliente', 'dps-client-portal' ) . '</h3>';
         echo '<p>' . esc_html__( 'Solicite um link direto ou entre com o e-mail cadastrado e sua senha.', 'dps-client-portal' ) . '</p>';
         echo '</div>';
-        return ob_get_clean();
+        return $this->append_missing_footer_scripts( ob_get_clean() );
     }
 
     /**
@@ -1067,7 +1294,7 @@ final class DPS_Client_Portal {
         if ( file_exists( $template_path ) ) {
             ob_start();
             include $template_path;
-            return ob_get_clean();
+            return $this->append_missing_footer_scripts( ob_get_clean() );
         }
 
         return $this->render_access_screen();
@@ -1086,20 +1313,17 @@ final class DPS_Client_Portal {
 
         // Hook: Antes de renderizar o portal (Fase 2.3)
         do_action( 'dps_portal_before_render' );
-        
-        wp_enqueue_style( 'dps-client-portal' );
-        wp_enqueue_script( 'dps-client-portal' );
-        
+
         // Verifica se ? uma a??o de atualiza??o de perfil via token (Fase 5)
         $action = isset( $_GET['dps_action'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_action'] ) ) : '';
         if ( 'profile_update' === $action && isset( $_GET['token'] ) ) {
             if ( class_exists( 'DPS_Portal_Profile_Update' ) ) {
-                return DPS_Portal_Profile_Update::get_instance()->render_profile_update_shortcode( [] );
+                return $this->append_missing_footer_scripts( DPS_Portal_Profile_Update::get_instance()->render_profile_update_shortcode( [] ) );
             }
         }
 
         if ( 'portal_password_reset' === $action ) {
-            $this->localize_portal_script();
+            $this->enqueue_portal_access_assets();
             return $this->render_password_reset_screen();
         }
 
@@ -1108,6 +1332,7 @@ final class DPS_Client_Portal {
 
         // F6.4: Se h? 2FA pendente, renderiza formul?rio de verifica??o
         if ( ! $client_id && ! empty( $this->pending_2fa_session_key ) ) {
+            $this->enqueue_portal_access_assets();
             $email = get_post_meta( $this->pending_2fa_client_id, 'client_email', true );
             $twofa = DPS_Portal_2FA::get_instance();
             return $twofa->render_verification_form( $this->pending_2fa_session_key, $email );
@@ -1118,12 +1343,15 @@ final class DPS_Client_Portal {
 
         // Se n?o autenticado, exibe tela de acesso
         if ( ! $client_id ) {
+            $this->enqueue_portal_access_assets( true );
             $this->localize_portal_script();
             return $this->render_access_screen();
         }
 
         // Hook: Cliente autenticado (Fase 2.3)
         do_action( 'dps_portal_client_authenticated', $client_id );
+
+        $this->enqueue_authenticated_portal_assets();
         
         // Localiza script com dados do chat e appointment requests (Fase 4)
         // Phase 5.3: Incluir lista de pets do cliente para seletor rÃ¡pido no modal
@@ -1510,7 +1738,7 @@ final class DPS_Client_Portal {
         // Widget de Chat flutuante
         DPS_Portal_Renderer::get_instance()->render_chat_widget( $client_id );
         
-        return ob_get_clean();
+        return $this->append_missing_footer_scripts( ob_get_clean() );
     }
 
     /**
@@ -2735,8 +2963,7 @@ final class DPS_Client_Portal {
             DPS_Cache_Control::force_no_cache();
         }
 
-        wp_enqueue_style( 'dps-client-portal' );
-        wp_enqueue_script( 'dps-client-portal' );
+        $this->enqueue_portal_access_assets( true );
         $this->localize_portal_script();
 
         return $this->render_access_screen();

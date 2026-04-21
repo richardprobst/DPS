@@ -100,8 +100,8 @@ final class DPS_Frontend_Settings_Module {
 
         $modules = [
             'registration' => [
-                'label'       => __( 'Cadastro (v1)', 'dps-frontend-addon' ),
-                'description' => __( 'Assume shortcode [dps_registration_form] com wrapper M3 sobre o add-on legado.', 'dps-frontend-addon' ),
+                'label'       => __( 'Cadastro (alias compatível)', 'dps-frontend-addon' ),
+                'description' => __( 'Mantém o shortcode [dps_registration_form] usando o mesmo motor canônico DPS Signature do cadastro nativo.', 'dps-frontend-addon' ),
                 'phase'       => __( 'Fase 2', 'dps-frontend-addon' ),
             ],
             'booking' => [
@@ -116,7 +116,7 @@ final class DPS_Frontend_Settings_Module {
             ],
             'registration_v2' => [
                 'label'       => __( 'Cadastro (v2 Nativo)', 'dps-frontend-addon' ),
-                'description' => __( 'Shortcode [dps_registration_v2] — formulário nativo M3 Expressive, independente do legado.', 'dps-frontend-addon' ),
+                'description' => __( 'Shortcode [dps_registration_v2] — implementação canônica DPS Signature do cadastro público.', 'dps-frontend-addon' ),
                 'phase'       => __( 'Fase 7', 'dps-frontend-addon' ),
             ],
             'booking_v2' => [
