@@ -1,0 +1,11 @@
+{
+  "originalStatus": "pendente",
+  "pending": {
+    "checklistCount": 0,
+    "checklistVisible": false
+  },
+  "finished": {
+    "checklistCount": 1,
+    "checklistVisible": true
+  }
+}

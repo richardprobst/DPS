@@ -360,6 +360,8 @@
     color: var(--dps-agenda-muted);
     font-size: 1rem;
     max-width: 64ch;
+    white-space: normal;
+    overflow-wrap: break-word;
 }
 
 .dps-agenda-tabs-nav {
@@ -566,26 +568,33 @@
     width: 10%;
 }
 
-.dps-table--tab2 col.dps-col-status,
+.dps-table--tab2 col.dps-col-status {
+    width: 15%;
+}
+
 .dps-table--tab2 col.dps-col-payment,
 .dps-table--tab2 col.dps-col-actions {
     width: 13%;
 }
 
 .dps-table--tab2 col.dps-col-operational {
-    width: 32%;
+    width: 29%;
 }
 
 .dps-table--tab3 col.dps-col-taxidog {
-    width: 18%;
+    width: 19%;
 }
 
 .dps-table--tab3 col.dps-col-notes {
-    width: 20%;
+    width: 19%;
 }
 
 .dps-table--tab3 col.dps-col-operational {
-    width: 28%;
+    width: 26%;
+}
+
+.dps-table--tab3 col.dps-col-actions {
+    width: 12%;
 }
 
 .dps-table col.dps-col-pet {
@@ -715,9 +724,32 @@
 .dps-info-card__note,
 .dps-info-card__detail,
 .dps-info-card__empty,
-.dps-notes-preview {
+.dps-notes-preview,
+.dps-operation-panel-subtitle,
+.dps-operational-card__eyebrow,
+.dps-info-card__eyebrow,
+.dps-history-ops-label {
+    white-space: normal;
     overflow-wrap: break-word;
     word-break: normal;
+}
+
+.dps-operational-card__copy,
+.dps-info-card__copy,
+.dps-operation-panel-heading,
+.dps-checklist-panel,
+.dps-checkin-panel,
+.dps-detail-panels {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.dps-agenda-action-link__label {
+    display: block;
+    min-width: 0;
+    white-space: normal;
+    line-height: 1.35;
+    text-align: center;
 }
 
 .dps-table--tab1 .dps-services-popup-btn,
@@ -931,6 +963,22 @@
     gap: 10px;
 }
 
+.dps-table--tab2 .dps-status-dropdown {
+    font-size: 0.92rem;
+}
+
+.dps-table--tab2 .dps-payment-popup-btn,
+.dps-table--tab2 .dps-agenda-action-link,
+.dps-table--tab3 .dps-agenda-action-link {
+    min-height: 40px;
+    padding-inline: 12px;
+}
+
+.dps-table--tab2 .dps-agenda-row-actions,
+.dps-table--tab3 .dps-agenda-row-actions {
+    align-content: start;
+}
+
 .dps-table--tab2 .dps-operational-meta {
     padding: 8px 10px;
     gap: 3px;
@@ -964,6 +1012,15 @@
 .dps-table--tab3 .dps-info-card__detail,
 .dps-table--tab3 .dps-notes-preview {
     line-height: 1.45;
+}
+
+.dps-table--tab3 .dps-info-card__eyebrow {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+}
+
+.dps-table--tab3 .dps-info-card__title {
+    font-size: 0.94rem;
 }
 
 .dps-table--tab3 .dps-taxidog-map-btn,
@@ -1461,7 +1518,7 @@
 
 .dps-table--tab2 tbody > tr:not(.dps-detail-row) > td,
 .dps-table--tab3 tbody > tr:not(.dps-detail-row) > td {
-    vertical-align: middle;
+    vertical-align: top;
 }
 
 .dps-table--tab3 .dps-agenda-operational-summary,

@@ -1,0 +1,440 @@
+[
+  {
+    "viewport": "1280",
+    "tab": "visao-rapida",
+    "expanded": false,
+    "report": {
+      "appointmentId": "1667",
+      "overflowCount": 0,
+      "overflowNodes": [],
+      "cells": [
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--time",
+          "topGap": 17,
+          "height": 92,
+          "width": 333,
+          "text": "23:30\nAtrasado"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--pet",
+          "topGap": 17,
+          "height": 92,
+          "width": 250,
+          "text": "QA SMOKE PET\n>"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--service dps-col-service",
+          "topGap": 17,
+          "height": 92,
+          "width": 166,
+          "text": "VER SERVIÇOS"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--confirmation",
+          "topGap": 23,
+          "height": 92,
+          "width": 146,
+          "text": "Confirmado\nNão confirmado\nCancelado"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--actions",
+          "topGap": 17,
+          "height": 92,
+          "width": 146,
+          "text": "REAGENDAR"
+        }
+      ],
+      "detailPanels": []
+    }
+  },
+  {
+    "viewport": "1280",
+    "tab": "operacao",
+    "expanded": false,
+    "report": {
+      "appointmentId": "1667",
+      "overflowCount": 0,
+      "overflowNodes": [],
+      "cells": [
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--time",
+          "topGap": 17,
+          "height": 339,
+          "width": 112,
+          "text": "23:30\nAtrasado"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--pet",
+          "topGap": 17,
+          "height": 339,
+          "width": 223,
+          "text": "QA SMOKE PET\n>"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--status",
+          "topGap": 24,
+          "height": 339,
+          "width": 148,
+          "text": "Pendente\nFinalizado\nPago\nCancelado"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--payment",
+          "topGap": 17,
+          "height": 339,
+          "width": 148,
+          "text": "EM ABERTO"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--operational",
+          "topGap": 17,
+          "height": 339,
+          "width": 278,
+          "text": "ROTINA DO ATENDIMENTO\nOperação concluída\nFECHAMENTO PENDENTE\nCHECK-IN\n15:54\nCHECK-OUT\n15:57\nDURAÇÃO\n2 min\n\nSem alertas operacionais registrados.\n\nVER OPERAÇÃO\n▾"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--actions",
+          "topGap": 17,
+          "height": 339,
+          "width": 130,
+          "text": "REAGENDAR"
+        }
+      ],
+      "detailPanels": []
+    }
+  },
+  {
+    "viewport": "1280",
+    "tab": "operacao",
+    "expanded": true,
+    "report": {
+      "appointmentId": "1667",
+      "overflowCount": 0,
+      "overflowNodes": [],
+      "cells": [
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--time",
+          "topGap": 17,
+          "height": 339,
+          "width": 112,
+          "text": "23:30\nAtrasado"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--pet",
+          "topGap": 17,
+          "height": 339,
+          "width": 223,
+          "text": "QA SMOKE PET\n>"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--status",
+          "topGap": 24,
+          "height": 339,
+          "width": 148,
+          "text": "Pendente\nFinalizado\nPago\nCancelado"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--payment",
+          "topGap": 17,
+          "height": 339,
+          "width": 148,
+          "text": "EM ABERTO"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--operational",
+          "topGap": 17,
+          "height": 339,
+          "width": 278,
+          "text": "ROTINA DO ATENDIMENTO\nOperação concluída\nFECHAMENTO PENDENTE\nCHECK-IN\n15:54\nCHECK-OUT\n15:57\nDURAÇÃO\n2 min\n\nSem alertas operacionais registrados.\n\nVER OPERAÇÃO\n▾"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--actions",
+          "topGap": 17,
+          "height": 339,
+          "width": 130,
+          "text": "REAGENDAR"
+        }
+      ],
+      "detailPanels": [
+        {
+          "className": "dps-checkin-panel",
+          "width": 1003,
+          "height": 213
+        }
+      ]
+    }
+  },
+  {
+    "viewport": "1280",
+    "tab": "detalhes",
+    "expanded": false,
+    "report": {
+      "appointmentId": "1667",
+      "overflowCount": 0,
+      "overflowNodes": [],
+      "cells": [
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--time",
+          "topGap": 17,
+          "height": 252,
+          "width": 112,
+          "text": "23:30\nAtrasado"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--pet",
+          "topGap": 17,
+          "height": 252,
+          "width": 223,
+          "text": "QA SMOKE PET\n>"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--taxidog",
+          "topGap": 17,
+          "height": 252,
+          "width": 148,
+          "text": "DESLOCAMENTO\nTaxiDog\nSOLICITADO\n\nRota solicitada para este atendimento."
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--notes",
+          "topGap": 17,
+          "height": 252,
+          "width": 148,
+          "text": "REGISTRO INTERNO\nObservações\n\nAgendamento temporário para smoke suite de QA."
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--operational",
+          "topGap": 17,
+          "height": 252,
+          "width": 278,
+          "text": "LEITURA RÁPIDA\nResumo operacional\nCHECK-IN\n15:54\nCHECK-OUT\n15:57\nDURAÇÃO\n2 min"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--actions",
+          "topGap": 17,
+          "height": 252,
+          "width": 130,
+          "text": "REAGENDAR"
+        }
+      ],
+      "detailPanels": []
+    }
+  },
+  {
+    "viewport": "375",
+    "tab": "visao-rapida",
+    "expanded": false,
+    "report": {
+      "appointmentId": "1667",
+      "overflowCount": 0,
+      "overflowNodes": [],
+      "cells": [
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--time",
+          "topGap": 39,
+          "height": 110,
+          "width": 297,
+          "text": "23:30\nAtrasado"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--pet",
+          "topGap": 40,
+          "height": 111,
+          "width": 297,
+          "text": "QA SMOKE PET\n>"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--service dps-col-service",
+          "topGap": 40,
+          "height": 111,
+          "width": 297,
+          "text": "VER SERVIÇOS"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--confirmation",
+          "topGap": 40,
+          "height": 110,
+          "width": 297,
+          "text": "Confirmado\nNão confirmado\nCancelado"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--actions",
+          "topGap": 40,
+          "height": 111,
+          "width": 297,
+          "text": "REAGENDAR"
+        }
+      ],
+      "detailPanels": []
+    }
+  },
+  {
+    "viewport": "375",
+    "tab": "operacao",
+    "expanded": false,
+    "report": {
+      "appointmentId": "1667",
+      "overflowCount": 0,
+      "overflowNodes": [],
+      "cells": [
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--time",
+          "topGap": 39,
+          "height": 110,
+          "width": 297,
+          "text": "23:30\nAtrasado"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--pet",
+          "topGap": 40,
+          "height": 111,
+          "width": 297,
+          "text": "QA SMOKE PET\n>"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--status",
+          "topGap": 40,
+          "height": 112,
+          "width": 297,
+          "text": "Pendente\nFinalizado\nPago\nCancelado"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--payment",
+          "topGap": 40,
+          "height": 85,
+          "width": 297,
+          "text": "EM ABERTO"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--operational",
+          "topGap": 40,
+          "height": 337,
+          "width": 297,
+          "text": "ROTINA DO ATENDIMENTO\nOperação concluída\nFECHAMENTO PENDENTE\nCHECK-IN\n15:54\nCHECK-OUT\n15:57\nDURAÇÃO\n2 min\n\nSem alertas operacionais registrados.\n\nVER OPERAÇÃO\n▾"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--actions",
+          "topGap": 40,
+          "height": 109,
+          "width": 297,
+          "text": "REAGENDAR"
+        }
+      ],
+      "detailPanels": []
+    }
+  },
+  {
+    "viewport": "375",
+    "tab": "operacao",
+    "expanded": true,
+    "report": {
+      "appointmentId": "1667",
+      "overflowCount": 0,
+      "overflowNodes": [],
+      "cells": [
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--time",
+          "topGap": 39,
+          "height": 110,
+          "width": 297,
+          "text": "23:30\nAtrasado"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--pet",
+          "topGap": 40,
+          "height": 111,
+          "width": 297,
+          "text": "QA SMOKE PET\n>"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--status",
+          "topGap": 40,
+          "height": 112,
+          "width": 297,
+          "text": "Pendente\nFinalizado\nPago\nCancelado"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--payment",
+          "topGap": 40,
+          "height": 85,
+          "width": 297,
+          "text": "EM ABERTO"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--operational",
+          "topGap": 40,
+          "height": 337,
+          "width": 297,
+          "text": "ROTINA DO ATENDIMENTO\nOperação concluída\nFECHAMENTO PENDENTE\nCHECK-IN\n15:54\nCHECK-OUT\n15:57\nDURAÇÃO\n2 min\n\nSem alertas operacionais registrados.\n\nVER OPERAÇÃO\n▾"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--actions",
+          "topGap": 40,
+          "height": 109,
+          "width": 297,
+          "text": "REAGENDAR"
+        }
+      ],
+      "detailPanels": [
+        {
+          "className": "dps-checkin-panel",
+          "width": 259,
+          "height": 328
+        }
+      ]
+    }
+  },
+  {
+    "viewport": "375",
+    "tab": "detalhes",
+    "expanded": false,
+    "report": {
+      "appointmentId": "1667",
+      "overflowCount": 0,
+      "overflowNodes": [],
+      "cells": [
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--time",
+          "topGap": 39,
+          "height": 110,
+          "width": 297,
+          "text": "23:30\nAtrasado"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--pet",
+          "topGap": 40,
+          "height": 111,
+          "width": 297,
+          "text": "QA SMOKE PET\n>"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--taxidog",
+          "topGap": 40,
+          "height": 180,
+          "width": 297,
+          "text": "DESLOCAMENTO\nTaxiDog\nSOLICITADO\n\nRota solicitada para este atendimento."
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--notes",
+          "topGap": 40,
+          "height": 170,
+          "width": 297,
+          "text": "REGISTRO INTERNO\nObservações\n\nAgendamento temporário para smoke suite de QA."
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--operational",
+          "topGap": 40,
+          "height": 328,
+          "width": 297,
+          "text": "LEITURA RÁPIDA\nResumo operacional\nCHECK-IN\n15:54\nCHECK-OUT\n15:57\nDURAÇÃO\n2 min"
+        },
+        {
+          "className": "dps-agenda-cell dps-agenda-cell--actions",
+          "topGap": 40,
+          "height": 109,
+          "width": 297,
+          "text": "REAGENDAR"
+        }
+      ],
+      "detailPanels": []
+    }
+  }
+]

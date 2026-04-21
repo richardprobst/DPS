@@ -1,0 +1,485 @@
+[
+  {
+    "tab": "visao-rapida",
+    "expanded": false,
+    "overflowCount": 0,
+    "overflowNodes": [],
+    "cells": [
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--time",
+        "topGap": 17,
+        "height": 91,
+        "width": 332,
+        "text": "23:30"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--pet",
+        "topGap": 17,
+        "height": 91,
+        "width": 249,
+        "text": "QA Smoke Pet>"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--service dps-col-service",
+        "topGap": 17,
+        "height": 91,
+        "width": 166,
+        "text": "Ver serviços"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--confirmation",
+        "topGap": 23,
+        "height": 91,
+        "width": 145,
+        "text": "ConfirmadoNão confirmadoCancelado"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--actions",
+        "topGap": 17,
+        "height": 91,
+        "width": 145,
+        "text": "Reagendar"
+      }
+    ],
+    "detailPanels": []
+  },
+  {
+    "tab": "operacao",
+    "expanded": false,
+    "overflowCount": 1,
+    "overflowNodes": [
+      {
+        "tag": "span",
+        "className": "dps-agenda-action-link__label",
+        "text": "Reagendar",
+        "scrollWidth": 86,
+        "clientWidth": 81
+      }
+    ],
+    "cells": [
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--time",
+        "topGap": 153,
+        "height": 339,
+        "width": 112,
+        "text": "23:30"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--pet",
+        "topGap": 140,
+        "height": 339,
+        "width": 222,
+        "text": "QA Smoke Pet>"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--status",
+        "topGap": 147,
+        "height": 339,
+        "width": 148,
+        "text": "PendenteFinalizadoPagoCancelado"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--payment",
+        "topGap": 140,
+        "height": 339,
+        "width": 148,
+        "text": "Cobrar cliente"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--operational",
+        "topGap": 17,
+        "height": 339,
+        "width": 278,
+        "text": "Rotina do atendimento\n                    Operação concluída\n                \n\n                \n    "
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--actions",
+        "topGap": 140,
+        "height": 339,
+        "width": 130,
+        "text": "Reagendar"
+      }
+    ],
+    "detailPanels": [
+      {
+        "className": "dps-checklist-panel",
+        "height": 0,
+        "width": 0
+      },
+      {
+        "className": "dps-checkin-panel",
+        "height": 0,
+        "width": 0
+      }
+    ]
+  },
+  {
+    "tab": "operacao",
+    "expanded": true,
+    "overflowCount": 1,
+    "overflowNodes": [
+      {
+        "tag": "span",
+        "className": "dps-agenda-action-link__label",
+        "text": "Reagendar",
+        "scrollWidth": 86,
+        "clientWidth": 81
+      }
+    ],
+    "cells": [
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--time",
+        "topGap": 153,
+        "height": 339,
+        "width": 112,
+        "text": "23:30"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--pet",
+        "topGap": 140,
+        "height": 339,
+        "width": 222,
+        "text": "QA Smoke Pet>"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--status",
+        "topGap": 147,
+        "height": 339,
+        "width": 148,
+        "text": "PendenteFinalizadoPagoCancelado"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--payment",
+        "topGap": 140,
+        "height": 339,
+        "width": 148,
+        "text": "Cobrar cliente"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--operational",
+        "topGap": 17,
+        "height": 339,
+        "width": 278,
+        "text": "Rotina do atendimento\n                    Operação concluída\n                \n\n                \n    "
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--actions",
+        "topGap": 140,
+        "height": 339,
+        "width": 130,
+        "text": "Reagendar"
+      }
+    ],
+    "detailPanels": [
+      {
+        "className": "dps-checklist-panel",
+        "height": 781,
+        "width": 552
+      },
+      {
+        "className": "dps-checkin-panel",
+        "height": 261,
+        "width": 434
+      }
+    ]
+  },
+  {
+    "tab": "detalhes",
+    "expanded": false,
+    "overflowCount": 7,
+    "overflowNodes": [
+      {
+        "tag": "div",
+        "className": "dps-info-card__header",
+        "text": "Deslocamento\n                    TaxiDog\n                \n\n                \n    ",
+        "scrollWidth": 106,
+        "clientWidth": 93
+      },
+      {
+        "tag": "div",
+        "className": "dps-info-card__copy",
+        "text": "Deslocamento\n                    TaxiDog",
+        "scrollWidth": 106,
+        "clientWidth": 93
+      },
+      {
+        "tag": "span",
+        "className": "dps-info-card__eyebrow",
+        "text": "Deslocamento",
+        "scrollWidth": 106,
+        "clientWidth": 93
+      },
+      {
+        "tag": "div",
+        "className": "dps-info-card__header",
+        "text": "Registro internoObservações",
+        "scrollWidth": 98,
+        "clientWidth": 93
+      },
+      {
+        "tag": "div",
+        "className": "dps-info-card__copy",
+        "text": "Registro internoObservações",
+        "scrollWidth": 98,
+        "clientWidth": 93
+      },
+      {
+        "tag": "strong",
+        "className": "dps-info-card__title",
+        "text": "Observações",
+        "scrollWidth": 98,
+        "clientWidth": 93
+      },
+      {
+        "tag": "span",
+        "className": "dps-agenda-action-link__label",
+        "text": "Reagendar",
+        "scrollWidth": 86,
+        "clientWidth": 81
+      }
+    ],
+    "cells": [
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--time",
+        "topGap": 104,
+        "height": 240,
+        "width": 112,
+        "text": "23:30"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--pet",
+        "topGap": 91,
+        "height": 240,
+        "width": 222,
+        "text": "QA Smoke Pet>"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--taxidog",
+        "topGap": 18,
+        "height": 240,
+        "width": 148,
+        "text": "Deslocamento\n                    TaxiDog\n                \n\n                \n                    Soli"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--notes",
+        "topGap": 28,
+        "height": 240,
+        "width": 148,
+        "text": "Registro internoObservaçõesAgendamento temporário para smoke suite de QA."
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--operational",
+        "topGap": 17,
+        "height": 240,
+        "width": 278,
+        "text": "Leitura rápidaResumo operacional\n        \n\n            \n                \n\n                    Checkl"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--actions",
+        "topGap": 91,
+        "height": 240,
+        "width": 130,
+        "text": "Reagendar"
+      }
+    ],
+    "detailPanels": []
+  },
+  {
+    "tab": "operacao-mobile",
+    "expanded": true,
+    "overflowCount": 12,
+    "overflowNodes": [
+      {
+        "tag": "div",
+        "className": "dps-agenda-table-container",
+        "text": "HorárioPet e tutorStatus do serviçoPagamentoPainel operacionalAções23:30QA Smoke",
+        "scrollWidth": 346,
+        "clientWidth": 299
+      },
+      {
+        "tag": "table",
+        "className": "dps-table dps-table--tab2",
+        "text": "HorárioPet e tutorStatus do serviçoPagamentoPainel operacionalAções23:30QA Smoke",
+        "scrollWidth": 346,
+        "clientWidth": 299
+      },
+      {
+        "tag": "tbody",
+        "className": "",
+        "text": "23:30QA Smoke Pet>PendenteFinalizadoPagoCanceladoCobrar cliente        \n        ",
+        "scrollWidth": 346,
+        "clientWidth": 299
+      },
+      {
+        "tag": "tr",
+        "className": "dps-detail-row",
+        "text": "Checklist operacional\n\n                Conferência final das etapas do atendimen",
+        "scrollWidth": 345,
+        "clientWidth": 297
+      },
+      {
+        "tag": "td",
+        "className": "",
+        "text": "Checklist operacional\n\n                Conferência final das etapas do atendimen",
+        "scrollWidth": 344,
+        "clientWidth": 295
+      },
+      {
+        "tag": "div",
+        "className": "dps-detail-panels",
+        "text": "Checklist operacional\n\n                Conferência final das etapas do atendimen",
+        "scrollWidth": 344,
+        "clientWidth": 295
+      },
+      {
+        "tag": "div",
+        "className": "dps-checklist-panel",
+        "text": "Checklist operacional\n\n                Conferência final das etapas do atendimen",
+        "scrollWidth": 296,
+        "clientWidth": 257
+      },
+      {
+        "tag": "div",
+        "className": "dps-operation-panel-heading",
+        "text": "Checklist operacional\n\n                Conferência final das etapas do atendimen",
+        "scrollWidth": 280,
+        "clientWidth": 225
+      },
+      {
+        "tag": "p",
+        "className": "dps-operation-panel-subtitle",
+        "text": "Conferência final das etapas do atendimento.",
+        "scrollWidth": 280,
+        "clientWidth": 225
+      },
+      {
+        "tag": "div",
+        "className": "dps-checkin-panel",
+        "text": "Check-in e check-out\n\n                Entrada, saída e observações operacionais ",
+        "scrollWidth": 325,
+        "clientWidth": 257
+      },
+      {
+        "tag": "div",
+        "className": "dps-operation-panel-heading",
+        "text": "Check-in e check-out\n\n                Entrada, saída e observações operacionais ",
+        "scrollWidth": 309,
+        "clientWidth": 225
+      },
+      {
+        "tag": "p",
+        "className": "dps-operation-panel-subtitle",
+        "text": "Entrada, saída e observações operacionais do pet.",
+        "scrollWidth": 309,
+        "clientWidth": 225
+      }
+    ],
+    "cells": [
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--time",
+        "topGap": 39,
+        "height": 87,
+        "width": 297,
+        "text": "23:30"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--pet",
+        "topGap": 40,
+        "height": 111,
+        "width": 297,
+        "text": "QA Smoke Pet>"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--status",
+        "topGap": 40,
+        "height": 112,
+        "width": 297,
+        "text": "PendenteFinalizadoPagoCancelado"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--payment",
+        "topGap": 40,
+        "height": 111,
+        "width": 297,
+        "text": "Cobrar cliente"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--operational",
+        "topGap": 40,
+        "height": 337,
+        "width": 297,
+        "text": "Rotina do atendimento\n                    Operação concluída\n                \n\n                \n    "
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--actions",
+        "topGap": 40,
+        "height": 111,
+        "width": 297,
+        "text": "Reagendar"
+      }
+    ],
+    "detailPanels": [
+      {
+        "className": "dps-checklist-panel",
+        "height": 1458,
+        "width": 259
+      },
+      {
+        "className": "dps-checkin-panel",
+        "height": 307,
+        "width": 259
+      }
+    ]
+  },
+  {
+    "tab": "detalhes-mobile",
+    "expanded": false,
+    "overflowCount": 0,
+    "overflowNodes": [],
+    "cells": [
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--time",
+        "topGap": 39,
+        "height": 87,
+        "width": 297,
+        "text": "23:30"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--pet",
+        "topGap": 40,
+        "height": 111,
+        "width": 297,
+        "text": "QA Smoke Pet>"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--taxidog",
+        "topGap": 40,
+        "height": 182,
+        "width": 297,
+        "text": "Deslocamento\n                    TaxiDog\n                \n\n                \n                    Soli"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--notes",
+        "topGap": 40,
+        "height": 171,
+        "width": 297,
+        "text": "Registro internoObservaçõesAgendamento temporário para smoke suite de QA."
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--operational",
+        "topGap": 40,
+        "height": 398,
+        "width": 297,
+        "text": "Leitura rápidaResumo operacional\n        \n\n            \n                \n\n                    Checkl"
+      },
+      {
+        "className": "dps-agenda-cell dps-agenda-cell--actions",
+        "topGap": 40,
+        "height": 111,
+        "width": 297,
+        "text": "Reagendar"
+      }
+    ],
+    "detailPanels": []
+  }
+]
