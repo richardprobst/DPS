@@ -15,6 +15,7 @@
 .dps-checklist-progress,
 .dps-checkin-status,
 .dps-checkin-actions,
+.dps-safety-summary,
 .dps-safety-items,
 .dps-checklist-steps {
     display: grid;
@@ -54,7 +55,7 @@
 
 .dps-checklist-step {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: start;
     gap: 12px;
     padding: 12px 14px;
@@ -80,6 +81,10 @@
     font-size: 0.94rem;
     font-weight: 700;
     line-height: 1.5;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: normal;
 }
 
 .dps-checklist-step[data-status="done"] .dps-checklist-step-label,
@@ -90,9 +95,11 @@
 
 .dps-checklist-step-actions {
     display: flex;
+    grid-column: 1 / -1;
     gap: 8px;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: flex-start;
+    padding-top: 4px;
 }
 
 .dps-checklist-btn,
@@ -109,6 +116,8 @@
 
 .dps-checklist-rework-badge {
     display: inline-flex;
+    grid-column: 2;
+    justify-self: start;
     align-items: center;
     gap: 6px;
     min-height: 28px;
@@ -125,6 +134,10 @@
 
 .dps-checkin-status {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.dps-safety-summary {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .dps-checkin-status-badge {
@@ -222,13 +235,25 @@
     color: var(--dps-agenda-danger, #a44439);
 }
 
-@media (max-width: 840px) {
+@media (min-width: 601px) {
     .dps-checklist-step {
-        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
     }
 
     .dps-checklist-step-actions {
-        grid-column: 1 / -1;
+        grid-column: 3;
+        justify-content: flex-end;
+        padding-top: 0;
+    }
+
+    .dps-checklist-rework-badge {
+        grid-column: 2 / 4;
+    }
+}
+
+@media (max-width: 840px) {
+    .dps-checklist-step-actions {
         justify-content: flex-start;
     }
 }

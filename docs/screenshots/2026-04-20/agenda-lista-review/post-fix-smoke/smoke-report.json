@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-04-20T21:28:13.547Z",
+  "siteUrl": "https://desi.pet",
+  "agendaUrl": "https://desi.pet/agenda-de-atendimentos/",
+  "adminHubUrl": "https://desi.pet/wp-admin/admin.php?page=dps-agenda-hub",
+  "results": [
+    {
+      "name": "guest",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "operator-access",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "admin",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "operator-flow",
+      "status": "passed",
+      "detail": ""
+    }
+  ]
+}

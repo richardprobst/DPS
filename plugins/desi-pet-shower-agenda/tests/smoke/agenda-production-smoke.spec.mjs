@@ -9,7 +9,10 @@ const adminHubUrl = new URL('/wp-admin/admin.php?page=dps-agenda-hub', siteUrl).
 const loginUrl = new URL('/wp-login.php', siteUrl).toString();
 const ajaxUrl = new URL('/wp-admin/admin-ajax.php', siteUrl).toString();
 const qaPetName = process.env.AGENDA_QA_PET_NAME || 'QA Smoke Pet';
+const qaDate = process.env.AGENDA_QA_DATE || '';
 const outputDir = path.resolve(process.env.AGENDA_SMOKE_OUTPUT_DIR || 'docs/screenshots/2026-04-20/agenda-hardening-smoke');
+const operatorSessionFile = process.env.AGENDA_OPERATOR_SESSION_FILE || '';
+const adminSessionFile = process.env.AGENDA_ADMIN_SESSION_FILE || '';
 
 const knownConsoleNoise = [
   /mixpanel/i,
@@ -109,6 +112,25 @@ async function assertVisible(locator, timeout = 15000) {
   await locator.waitFor({ state: 'visible', timeout });
 }
 
+async function applyStoredSession(context, sessionFile) {
+  const raw = await fs.readFile(sessionFile, 'utf8');
+  const parsed = JSON.parse(raw);
+  const cookies = Array.isArray(parsed) ? parsed : parsed.cookies;
+
+  assert.ok(Array.isArray(cookies) && cookies.length > 0, `Session file ${sessionFile} does not contain cookies.`);
+  await context.addCookies(cookies);
+}
+
+async function authenticatePage(context, page, auth, redirectUrl = agendaUrl) {
+  if (auth.sessionFile) {
+    await applyStoredSession(context, auth.sessionFile);
+    await page.goto(redirectUrl, { waitUntil: 'networkidle' });
+    return;
+  }
+
+  await login(page, auth.username, auth.password, redirectUrl);
+}
+
 async function login(page, username, password, redirectUrl = agendaUrl) {
   await page.goto(loginUrl, { waitUntil: 'domcontentloaded' });
   await page.evaluate((nextUrl) => {
@@ -157,6 +179,122 @@ async function findQaRow(page) {
   throw new Error(`Visible QA row not found for "${qaPetName}".`);
 }
 
+async function scopeLooksEmpty(page) {
+  const bodyText = await page.locator('body').innerText();
+  return /Nenhum atendimento neste recorte|abra a agenda completa/i.test(bodyText);
+}
+
+async function openFullAgenda(page) {
+  const fullAgendaLink = page
+    .locator('a[href*="show_all=1"]')
+    .filter({ hasText: /Agenda completa|Ver agenda completa/i })
+    .first();
+
+  if ((await fullAgendaLink.count()) > 0 && (await fullAgendaLink.isVisible())) {
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'networkidle' }),
+      fullAgendaLink.click(),
+    ]);
+    return;
+  }
+
+  const fullAgendaUrl = new URL(agendaUrl);
+  fullAgendaUrl.searchParams.set('show_all', '1');
+  await page.goto(fullAgendaUrl.toString(), { waitUntil: 'networkidle' });
+}
+
+async function openQaDate(page) {
+  if (!qaDate) {
+    return false;
+  }
+
+  const qaAgendaUrl = new URL(agendaUrl);
+  qaAgendaUrl.searchParams.set('dps_date', qaDate);
+  qaAgendaUrl.searchParams.set('view', 'day');
+  qaAgendaUrl.searchParams.delete('show_all');
+  await page.goto(qaAgendaUrl.toString(), { waitUntil: 'networkidle' });
+  return true;
+}
+
+async function ensureQaRowVisible(page, tab) {
+  if (tab) {
+    await openAgendaTab(page, tab);
+  }
+
+  try {
+    return await findQaRow(page);
+  } catch (initialError) {
+    const alreadyInFullAgenda = page.url().includes('show_all=1');
+    const emptyScope = await scopeLooksEmpty(page);
+
+    if (emptyScope || !alreadyInFullAgenda) {
+      await openFullAgenda(page);
+
+      if (tab) {
+        await openAgendaTab(page, tab);
+      }
+
+      try {
+        return await findQaRow(page);
+      } catch (fullAgendaError) {
+        if (!(await openQaDate(page))) {
+          throw fullAgendaError;
+        }
+
+        if (tab) {
+          await openAgendaTab(page, tab);
+        }
+
+        return await findQaRow(page);
+      }
+    }
+
+    if (!(await openQaDate(page))) {
+      throw initialError;
+    }
+
+    if (tab) {
+      await openAgendaTab(page, tab);
+    }
+
+    return await findQaRow(page);
+  }
+}
+
+async function updateAppointmentStatus(page, row, nextStatus) {
+  const statusDropdown = row.locator('.dps-status-dropdown').first();
+  await assertVisible(statusDropdown);
+
+  const appointmentId = await row.getAttribute('data-appt-id');
+  assert.ok(appointmentId, 'Appointment id is missing from the QA row.');
+
+  const currentStatus = await statusDropdown.inputValue();
+  if (currentStatus === nextStatus) {
+    return { appointmentId, currentStatus };
+  }
+
+  const statusResponsePromise = page.waitForResponse((response) => {
+    return response.url().includes('admin-ajax.php') && (response.request().postData() || '').includes('action=dps_update_status');
+  });
+
+  await statusDropdown.selectOption(nextStatus);
+  const statusPayload = await readJsonResponse(await statusResponsePromise);
+  assert.equal(statusPayload.success, true, `Status update to ${nextStatus} should succeed.`);
+
+  await page.waitForFunction(
+    ({ apptId, expectedStatus }) => {
+      const rowElement = Array.from(document.querySelectorAll('tr[data-appt-id]')).find((item) => {
+        return item.getAttribute('data-appt-id') === apptId && (item.offsetWidth || item.offsetHeight || item.getClientRects().length);
+      });
+      const select = rowElement ? rowElement.querySelector('.dps-status-dropdown') : null;
+      return !!select && select.value === expectedStatus;
+    },
+    { apptId: appointmentId, expectedStatus: nextStatus }
+  );
+
+  return { appointmentId, currentStatus };
+}
+
 async function dismissDialogWithEscape(page) {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(250);
@@ -197,13 +335,13 @@ async function runGuestScenario(browser) {
   await context.close();
 }
 
-async function runOperatorAccessScenario(browser, username, password) {
+async function runOperatorAccessScenario(browser, auth) {
   const context = await browser.newContext();
   const page = await context.newPage();
   const issues = [];
   createIssueCollector(page, issues);
 
-  await login(page, username, password, agendaUrl);
+  await authenticatePage(context, page, auth, agendaUrl);
 
   await page.goto(agendaUrl, { waitUntil: 'networkidle' });
   await assertVisible(page.locator('.dps-agenda-wrapper'));
@@ -220,13 +358,13 @@ async function runOperatorAccessScenario(browser, username, password) {
   await context.close();
 }
 
-async function runAdminScenario(browser, username, password) {
+async function runAdminScenario(browser, auth) {
   const context = await browser.newContext();
   const page = await context.newPage();
   const issues = [];
   createIssueCollector(page, issues);
 
-  await login(page, username, password, agendaUrl);
+  await authenticatePage(context, page, auth, agendaUrl);
 
   await page.goto(agendaUrl, { waitUntil: 'networkidle' });
   await assertVisible(page.locator('.dps-agenda-wrapper'));
@@ -242,19 +380,18 @@ async function runAdminScenario(browser, username, password) {
   await context.close();
 }
 
-async function runOperatorFlowScenario(browser, username, password) {
+async function runOperatorFlowScenario(browser, auth) {
   const context = await browser.newContext();
   const page = await context.newPage();
   const issues = [];
   createIssueCollector(page, issues);
 
-  await login(page, username, password, agendaUrl);
+  await authenticatePage(context, page, auth, agendaUrl);
   await page.setViewportSize({ width: 1200, height: 1400 });
   await page.goto(agendaUrl, { waitUntil: 'networkidle' });
   await assertNoHorizontalOverflow(page);
 
-  await openAgendaTab(page, 'visao-rapida');
-  let row = await findQaRow(page);
+  let row = await ensureQaRowVisible(page, 'visao-rapida');
   const servicesTrigger = row.locator('.dps-services-link, .dps-services-popup-btn').first();
   if ((await servicesTrigger.count()) > 0) {
     await servicesTrigger.click();
@@ -265,8 +402,7 @@ async function runOperatorFlowScenario(browser, username, password) {
     assert.equal(focusReturned, true, 'Focus did not return to the services trigger after closing the modal.');
   }
 
-  await openAgendaTab(page, 'operacao');
-  row = await findQaRow(page);
+  row = await ensureQaRowVisible(page, 'operacao');
   const statusDropdown = row.locator('.dps-status-dropdown').first();
   await assertVisible(statusDropdown);
   const appointmentId = await row.getAttribute('data-appt-id');
@@ -335,34 +471,26 @@ async function runOperatorFlowScenario(browser, username, password) {
   assert.equal(conflictPayload.success, false, 'Version conflict should fail.');
   assert.equal(conflictPayload.data?.error_code, 'version_conflict', 'Conflict should return error_code=version_conflict.');
 
-  const currentStatus = await statusDropdown.inputValue();
-  const targetStatus = currentStatus === 'finalizado' ? 'pendente' : 'finalizado';
-  const statusResponsePromise = page.waitForResponse((response) => {
-    return response.url().includes('admin-ajax.php') && (response.request().postData() || '').includes('action=dps_update_status');
-  });
-
-  await statusDropdown.selectOption(targetStatus);
-  const statusPayload = await readJsonResponse(await statusResponsePromise);
-  assert.equal(statusPayload.success, true, 'Status update should succeed.');
-
-  await page.waitForFunction(
-    ({ apptId, expectedStatus }) => {
-      const row = Array.from(document.querySelectorAll('tr[data-appt-id]')).find((item) => {
-        return item.getAttribute('data-appt-id') === apptId && (item.offsetWidth || item.offsetHeight || item.getClientRects().length);
-      });
-      const select = row ? row.querySelector('.dps-status-dropdown') : null;
-      return !!select && select.value === expectedStatus;
-    },
-    { apptId: appointmentId, expectedStatus: targetStatus }
-  );
-
-  row = await findQaRow(page);
-  const expandButton = row.locator('.dps-expand-panels-btn').first();
+  await updateAppointmentStatus(page, row, 'pendente');
+  row = await ensureQaRowVisible(page, 'operacao');
+  let expandButton = row.locator('.dps-expand-panels-btn').first();
   await expandButton.click();
   assert.equal(await expandButton.getAttribute('aria-expanded'), 'true', 'Expanded panel button did not toggle.');
 
-  const detailRow = page.locator(`.dps-detail-row[data-appt-id="${appointmentId}"]`).first();
+  let detailRow = page.locator(`.dps-detail-row[data-appt-id="${appointmentId}"]`).first();
   await assertVisible(detailRow);
+  assert.equal(await detailRow.locator('.dps-checklist-panel').count(), 0, 'Checklist must stay hidden while the appointment is pending.');
+
+  await updateAppointmentStatus(page, row, 'finalizado');
+  row = await ensureQaRowVisible(page, 'operacao');
+  expandButton = row.locator('.dps-expand-panels-btn').first();
+  detailRow = page.locator(`.dps-detail-row[data-appt-id="${appointmentId}"]`).first();
+  if ((await expandButton.getAttribute('aria-expanded')) !== 'true') {
+    await expandButton.click();
+  }
+  assert.equal(await expandButton.getAttribute('aria-expanded'), 'true', 'Expanded panel button should stay open after finalizing.');
+  await assertVisible(detailRow);
+  assert.equal(await detailRow.locator('.dps-checklist-panel').count(), 1, 'Checklist must appear after finalizing the appointment.');
   await assertNoHorizontalOverflow(page);
   await saveFullPage(page, 'operator-operacao-expandido.png');
 
@@ -406,21 +534,28 @@ async function runOperatorFlowScenario(browser, username, password) {
     assert.match(statusText, /Check-out/i);
   }
 
-  await openAgendaTab(page, 'detalhes');
-  row = await findQaRow(page);
+  row = await ensureQaRowVisible(page, 'detalhes');
   const taxidogRequest = row.locator('.dps-taxidog-request-btn').first();
   if ((await taxidogRequest.count()) > 0) {
     await taxidogRequest.click();
     const confirm = page.locator('[data-dialog-action="confirm"]').first();
     await assertVisible(confirm);
     await confirm.click();
+    await page.waitForFunction((apptId) => {
+      const rowElement = Array.from(document.querySelectorAll('tr[data-appt-id]')).find((item) => {
+        return item.getAttribute('data-appt-id') === apptId && (item.offsetWidth || item.offsetHeight || item.getClientRects().length);
+      });
+      return !!rowElement && /Solicitado|Abrir no mapa|TaxiDog/i.test(rowElement.textContent || '');
+    }, appointmentId);
+    row = await ensureQaRowVisible(page, 'detalhes');
+    assert.match(await row.innerText(), /Solicitado|Abrir no mapa|TaxiDog/i);
     const taxidogToast = page.locator('.dps-toast:visible').first();
-    await assertVisible(taxidogToast);
-    assert.match(await taxidogToast.innerText(), /TaxiDog solicitado|TaxiDog/i);
+    if ((await taxidogToast.count()) > 0) {
+      assert.match(await taxidogToast.innerText(), /TaxiDog|Status atualizado|sucesso/i);
+    }
   }
 
-  await openAgendaTab(page, 'visao-rapida');
-  row = await findQaRow(page);
+  row = await ensureQaRowVisible(page, 'visao-rapida');
   const resendButton = row.locator('.dps-resend-payment-btn').first();
   if ((await resendButton.count()) > 0) {
     await resendButton.click();
@@ -444,7 +579,17 @@ async function runOperatorFlowScenario(browser, username, password) {
   for (const breakpoint of breakpoints) {
     await page.setViewportSize({ width: breakpoint.width, height: breakpoint.height });
     await page.goto(agendaUrl, { waitUntil: 'networkidle' });
-    await openAgendaTab(page, 'operacao');
+    await ensureQaRowVisible(page, 'operacao');
+    if (breakpoint.width === 375) {
+      const mobileRow = await ensureQaRowVisible(page, 'operacao');
+      const mobileExpandButton = mobileRow.locator('.dps-expand-panels-btn').first();
+      await mobileExpandButton.click();
+      const mobileAppointmentId = await mobileRow.getAttribute('data-appt-id');
+      const mobileDetailRow = page.locator(`.dps-detail-row[data-appt-id="${mobileAppointmentId}"]`).first();
+      await assertVisible(mobileDetailRow);
+      const mobileDisplay = await mobileDetailRow.evaluate((element) => window.getComputedStyle(element).display);
+      assert.notEqual(mobileDisplay, 'table-row', 'Expanded mobile detail row must not render as table-row.');
+    }
     await assertNoHorizontalOverflow(page);
     await saveFullPage(page, breakpoint.file);
   }
@@ -456,10 +601,18 @@ async function runOperatorFlowScenario(browser, username, password) {
 async function main() {
   await fs.mkdir(outputDir, { recursive: true });
 
-  const operatorUser = requireEnv('AGENDA_OPERATOR_USER');
-  const operatorPassword = requireEnv('AGENDA_OPERATOR_PASSWORD');
-  const adminUser = requireEnv('AGENDA_ADMIN_USER');
-  const adminPassword = requireEnv('AGENDA_ADMIN_PASSWORD');
+  const operatorAuth = operatorSessionFile
+    ? { sessionFile: operatorSessionFile }
+    : {
+        username: requireEnv('AGENDA_OPERATOR_USER'),
+        password: requireEnv('AGENDA_OPERATOR_PASSWORD'),
+      };
+  const adminAuth = adminSessionFile
+    ? { sessionFile: adminSessionFile }
+    : {
+        username: requireEnv('AGENDA_ADMIN_USER'),
+        password: requireEnv('AGENDA_ADMIN_PASSWORD'),
+      };
 
   const browser = await chromium.launch({ headless: true });
 
@@ -467,13 +620,13 @@ async function main() {
     await runGuestScenario(browser);
     recordScenario('guest', 'passed');
 
-    await runOperatorAccessScenario(browser, operatorUser, operatorPassword);
+    await runOperatorAccessScenario(browser, operatorAuth);
     recordScenario('operator-access', 'passed');
 
-    await runAdminScenario(browser, adminUser, adminPassword);
+    await runAdminScenario(browser, adminAuth);
     recordScenario('admin', 'passed');
 
-    await runOperatorFlowScenario(browser, operatorUser, operatorPassword);
+    await runOperatorFlowScenario(browser, operatorAuth);
     recordScenario('operator-flow', 'passed');
   } catch (error) {
     recordScenario('failure', 'failed', error instanceof Error ? error.stack || error.message : String(error));

@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-04-21T03:18:50.741Z",
+  "siteUrl": "https://desi.pet",
+  "agendaUrl": "https://desi.pet/agenda-de-atendimentos/",
+  "adminHubUrl": "https://desi.pet/wp-admin/admin.php?page=dps-agenda-hub",
+  "results": [
+    {
+      "name": "guest",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "operator-access",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "admin",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "failure",
+      "status": "failed",
+      "detail": "Error: Visible QA row not found for \"QA Smoke Pet\".\n    at findQaRow (file:///C:/Users/casaprobst/AppData/Local/Temp/dps-agenda-smoke-runner/agenda-production-smoke.spec.mjs:157:9)\n    at async runOperatorFlowScenario (file:///C:/Users/casaprobst/AppData/Local/Temp/dps-agenda-smoke-runner/agenda-production-smoke.spec.mjs:291:13)\n    at async main (file:///C:/Users/casaprobst/AppData/Local/Temp/dps-agenda-smoke-runner/agenda-production-smoke.spec.mjs:521:5)"
+    }
+  ]
+}

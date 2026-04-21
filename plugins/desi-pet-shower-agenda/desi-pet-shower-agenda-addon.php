@@ -492,6 +492,76 @@ class DPS_Agenda_Addon {
 
     }
 
+    /**
+     * Normaliza o status do agendamento para um valor conhecido.
+     *
+     * @since 3.1.0
+     * @param string $status Status bruto.
+     * @return string
+     */
+    public static function normalize_appointment_status( $status ) {
+        $status = sanitize_text_field( (string) $status );
+
+        if ( '' === $status ) {
+            return self::STATUS_PENDING;
+        }
+
+        return $status;
+    }
+
+    /**
+     * Verifica se um status permite checklist operacional.
+     *
+     * @since 3.1.0
+     * @param string $status Status do agendamento.
+     * @return bool
+     */
+    public static function status_allows_checklist( $status ) {
+        $status = self::normalize_appointment_status( $status );
+
+        return in_array( $status, [ self::STATUS_FINISHED, self::STATUS_PAID ], true );
+    }
+
+    /**
+     * Verifica se um agendamento permite checklist operacional.
+     *
+     * @since 3.1.0
+     * @param int $appointment_id ID do agendamento.
+     * @return bool
+     */
+    public static function appointment_allows_checklist( $appointment_id ) {
+        $appointment_id = absint( $appointment_id );
+
+        if ( ! $appointment_id ) {
+            return false;
+        }
+
+        $status = get_post_meta( $appointment_id, 'appointment_status', true );
+
+        return self::status_allows_checklist( $status );
+    }
+
+    /**
+     * Retorna a mensagem de disponibilidade do checklist para um status.
+     *
+     * @since 3.1.0
+     * @param string $status Status do agendamento.
+     * @return string
+     */
+    public static function get_checklist_availability_message( $status ) {
+        $status = self::normalize_appointment_status( $status );
+
+        if ( self::STATUS_CANCELED === $status ) {
+            return __( 'Checklist indisponível para atendimentos cancelados.', 'dps-agenda-addon' );
+        }
+
+        if ( self::status_allows_checklist( $status ) ) {
+            return __( 'Checklist disponível para conferência final do atendimento.', 'dps-agenda-addon' );
+        }
+
+        return __( 'Checklist disponível após marcar o atendimento como finalizado.', 'dps-agenda-addon' );
+    }
+
     
 
     /**
@@ -1407,7 +1477,7 @@ class DPS_Agenda_Addon {
 
                         <p class="dps-dashboard-date-selector__description">
 
-                            <?php esc_html_e( 'Acompanhe volume, próximos atendimentos e capacidade semanal em uma leitura única e consistente com o padrão M3.', 'dps-agenda-addon' ); ?>
+                            <?php esc_html_e( 'Acompanhe volume, próximos atendimentos e capacidade semanal em uma leitura única e consistente com o DPS Signature.', 'dps-agenda-addon' ); ?>
 
                         </p>
 
@@ -2834,11 +2904,20 @@ class DPS_Agenda_Addon {
 
         $tabs = [
 
-            'visao-rapida' => __( 'Confirmações e próximos passos', 'dps-agenda-addon' ),
+            'visao-rapida' => [
+                'label'       => __( 'Visão rápida', 'dps-agenda-addon' ),
+                'description' => __( 'Confirmações, serviços e próximos passos.', 'dps-agenda-addon' ),
+            ],
 
-            'operacao'     => __( 'Checklist, check-in e cobrança', 'dps-agenda-addon' ),
+            'operacao'     => [
+                'label'       => __( 'Operação', 'dps-agenda-addon' ),
+                'description' => __( 'Status, check-in, checklist e cobrança.', 'dps-agenda-addon' ),
+            ],
 
-            'detalhes'     => __( 'Logística, notas e TaxiDog', 'dps-agenda-addon' ),
+            'detalhes'     => [
+                'label'       => __( 'Detalhes', 'dps-agenda-addon' ),
+                'description' => __( 'TaxiDog, observações e contexto do atendimento.', 'dps-agenda-addon' ),
+            ],
 
         ];
 
@@ -3072,11 +3151,35 @@ class DPS_Agenda_Addon {
 
             
 
-            echo '<h5>' . esc_html( $heading ) . '</h5>';
+            echo '<section class="dps-agenda-table-block">';
+
+            echo '<div class="dps-agenda-table-block__header">';
+
+            echo '<div>';
+
+            echo '<h5 class="dps-agenda-table-block__title">' . esc_html( $heading ) . '</h5>';
+
+            echo '<p class="dps-agenda-table-block__meta">' . sprintf( _n( '%d atendimento', '%d atendimentos', count( $apts ), 'dps-agenda-addon' ), count( $apts ) ) . '</p>';
+
+            echo '</div>';
+
+            echo '</div>';
 
             echo '<div class="dps-agenda-table-container">';
 
-            echo '<table class="dps-table dps-table--tab1"><thead><tr>';
+            echo '<table class="dps-table dps-table--tab1"><colgroup>';
+
+            echo '<col class="dps-col-time">';
+
+            echo '<col class="dps-col-pet">';
+
+            echo '<col class="dps-col-service">';
+
+            echo '<col class="dps-col-confirmation">';
+
+            echo '<col class="dps-col-actions">';
+
+            echo '</colgroup><thead><tr>';
 
             echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
 
@@ -3099,6 +3202,8 @@ class DPS_Agenda_Addon {
             echo '</tbody></table>';
 
             echo '</div>';
+
+            echo '</section>';
 
         };
 
@@ -3188,17 +3293,43 @@ class DPS_Agenda_Addon {
 
             
 
-            echo '<h5>' . esc_html( $heading ) . '</h5>';
+            echo '<section class="dps-agenda-table-block">';
+
+            echo '<div class="dps-agenda-table-block__header">';
+
+            echo '<div>';
+
+            echo '<h5 class="dps-agenda-table-block__title">' . esc_html( $heading ) . '</h5>';
+
+            echo '<p class="dps-agenda-table-block__meta">' . sprintf( _n( '%d atendimento', '%d atendimentos', count( $apts ), 'dps-agenda-addon' ), count( $apts ) ) . '</p>';
+
+            echo '</div>';
+
+            echo '</div>';
 
             echo '<div class="dps-agenda-table-container">';
 
-            echo '<table class="dps-table dps-table--tab2"><thead><tr>';
+            echo '<table class="dps-table dps-table--tab2"><colgroup>';
+
+            echo '<col class="dps-col-time">';
+
+            echo '<col class="dps-col-pet">';
+
+            echo '<col class="dps-col-status">';
+
+            echo '<col class="dps-col-payment">';
+
+            echo '<col class="dps-col-operational">';
+
+            echo '<col class="dps-col-actions">';
+
+            echo '</colgroup><thead><tr>';
 
             echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
 
             echo '<th>' . esc_html__( 'Pet e tutor', 'dps-agenda-addon' ) . '</th>';
 
-            echo '<th>' . esc_html__( 'Status do Serviço', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Status do serviço', 'dps-agenda-addon' ) . '</th>';
 
             echo '<th>' . esc_html( ! empty( $column_labels['payment'] ) ? __( 'Pagamento', 'dps-agenda-addon' ) : '' ) . '</th>';
 
@@ -3219,6 +3350,8 @@ class DPS_Agenda_Addon {
             echo '</tbody></table>';
 
             echo '</div>';
+
+            echo '</section>';
 
         };
 
@@ -3308,17 +3441,43 @@ class DPS_Agenda_Addon {
 
             
 
-            echo '<h5>' . esc_html( $heading ) . '</h5>';
+            echo '<section class="dps-agenda-table-block">';
+
+            echo '<div class="dps-agenda-table-block__header">';
+
+            echo '<div>';
+
+            echo '<h5 class="dps-agenda-table-block__title">' . esc_html( $heading ) . '</h5>';
+
+            echo '<p class="dps-agenda-table-block__meta">' . sprintf( _n( '%d atendimento', '%d atendimentos', count( $apts ), 'dps-agenda-addon' ), count( $apts ) ) . '</p>';
+
+            echo '</div>';
+
+            echo '</div>';
 
             echo '<div class="dps-agenda-table-container">';
 
-            echo '<table class="dps-table dps-table--tab3"><thead><tr>';
+            echo '<table class="dps-table dps-table--tab3"><colgroup>';
+
+            echo '<col class="dps-col-time">';
+
+            echo '<col class="dps-col-pet">';
+
+            echo '<col class="dps-col-taxidog">';
+
+            echo '<col class="dps-col-notes">';
+
+            echo '<col class="dps-col-operational">';
+
+            echo '<col class="dps-col-actions">';
+
+            echo '</colgroup><thead><tr>';
 
             echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
 
             echo '<th>' . esc_html__( 'Pet e tutor', 'dps-agenda-addon' ) . '</th>';
 
-            echo '<th>TaxiDog</th>';
+            echo '<th>' . esc_html__( 'TaxiDog', 'dps-agenda-addon' ) . '</th>';
 
             echo '<th>' . esc_html__( 'Observações', 'dps-agenda-addon' ) . '</th>';
 
@@ -3337,6 +3496,8 @@ class DPS_Agenda_Addon {
             echo '</tbody></table>';
 
             echo '</div>';
+
+            echo '</section>';
 
         };
 
@@ -3488,11 +3649,17 @@ class DPS_Agenda_Addon {
 
             $tab_class = 'dps-agenda-tab-button' . ( $is_active ? ' dps-agenda-tab-button--active' : '' );
 
+            $tab_label = isset( $tab_data['label'] ) ? $tab_data['label'] : '';
+
+            $tab_desc = isset( $tab_data['description'] ) ? $tab_data['description'] : '';
 
 
-            echo '<button type="button" id="dps-agenda-tab-' . esc_attr( $tab_id ) . '" class="' . esc_attr( $tab_class ) . '" data-tab="' . esc_attr( $tab_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="dps-tab-content-' . esc_attr( $tab_id ) . '" title="' . esc_attr( $tab_data ) . '" tabindex="' . ( $is_active ? '0' : '-1' ) . '">';
 
-            echo '<span class="dps-tab-desc">' . esc_html( $tab_data ) . '</span>';
+            echo '<button type="button" id="dps-agenda-tab-' . esc_attr( $tab_id ) . '" class="' . esc_attr( $tab_class ) . '" data-tab="' . esc_attr( $tab_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="dps-tab-content-' . esc_attr( $tab_id ) . '" title="' . esc_attr( $tab_label ) . '" tabindex="' . ( $is_active ? '0' : '-1' ) . '">';
+
+            echo '<span class="dps-tab-label">' . esc_html( $tab_label ) . '</span>';
+
+            echo '<span class="dps-tab-desc">' . esc_html( $tab_desc ) . '</span>';
 
             echo '</button>';
 
@@ -8178,6 +8345,19 @@ class DPS_Agenda_Addon {
 
         }
 
+        $appointment_status = get_post_meta( $appointment_id, 'appointment_status', true );
+
+        if ( ! self::status_allows_checklist( $appointment_status ) ) {
+
+            wp_send_json_error(
+                [
+                    'message'    => self::get_checklist_availability_message( $appointment_status ),
+                    'error_code' => 'checklist_unavailable',
+                ]
+            );
+
+        }
+
 
 
         $updated = DPS_Agenda_Checklist_Service::update_step( $appointment_id, $step_key, $status );
@@ -8237,6 +8417,19 @@ class DPS_Agenda_Addon {
         if ( ! $appointment_id || ! $step_key ) {
 
             wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+
+        }
+
+        $appointment_status = get_post_meta( $appointment_id, 'appointment_status', true );
+
+        if ( ! self::status_allows_checklist( $appointment_status ) ) {
+
+            wp_send_json_error(
+                [
+                    'message'    => self::get_checklist_availability_message( $appointment_status ),
+                    'error_code' => 'checklist_unavailable',
+                ]
+            );
 
         }
 
@@ -8329,6 +8522,19 @@ class DPS_Agenda_Addon {
         if ( ! $appointment_id ) {
 
             wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+
+        }
+
+        $appointment_status = get_post_meta( $appointment_id, 'appointment_status', true );
+
+        if ( ! self::status_allows_checklist( $appointment_status ) ) {
+
+            wp_send_json_error(
+                [
+                    'message'    => self::get_checklist_availability_message( $appointment_status ),
+                    'error_code' => 'checklist_unavailable',
+                ]
+            );
 
         }
 
@@ -8750,6 +8956,14 @@ class DPS_Agenda_Addon {
 
         }
 
+        $appointment_status = get_post_meta( $appointment_id, 'appointment_status', true );
+
+        if ( ! self::status_allows_checklist( $appointment_status ) ) {
+
+            return '';
+
+        }
+
 
 
         $checklist = DPS_Agenda_Checklist_Service::get( $appointment_id );
@@ -8766,7 +8980,13 @@ class DPS_Agenda_Addon {
 
         <div class="dps-checklist-panel" data-appointment="<?php echo esc_attr( $appointment_id ); ?>">
 
-            <h4>📋 <?php esc_html_e( 'Checklist Operacional', 'dps-agenda-addon' ); ?></h4>
+            <div class="dps-operation-panel-heading">
+
+                <h4><?php esc_html_e( 'Checklist operacional', 'dps-agenda-addon' ); ?></h4>
+
+                <p class="dps-operation-panel-subtitle"><?php esc_html_e( 'Conferência final das etapas do atendimento.', 'dps-agenda-addon' ); ?></p>
+
+            </div>
 
 
 
@@ -8806,7 +9026,7 @@ class DPS_Agenda_Addon {
 
                     <?php if ( $rework_count > 0 ) : ?>
 
-                        <span class="dps-checklist-rework-badge">🔄 <?php echo esc_html( $rework_count ); ?></span>
+                        <span class="dps-checklist-rework-badge"><?php echo esc_html( $rework_count ); ?> <?php esc_html_e( 'retrabalho', 'dps-agenda-addon' ); ?></span>
 
                     <?php endif; ?>
 
@@ -8816,19 +9036,19 @@ class DPS_Agenda_Addon {
 
                         <?php if ( 'pending' === $status ) : ?>
 
-                            <button class="dps-checklist-btn dps-checklist-btn--done" type="button">✓ <?php esc_html_e( 'Concluir', 'dps-agenda-addon' ); ?></button>
+                            <button class="dps-checklist-btn dps-checklist-btn--done" type="button"><?php esc_html_e( 'Concluir', 'dps-agenda-addon' ); ?></button>
 
                             <button class="dps-checklist-btn dps-checklist-btn--skip" type="button"><?php esc_html_e( 'Pular', 'dps-agenda-addon' ); ?></button>
 
                         <?php elseif ( 'done' === $status ) : ?>
 
-                            <button class="dps-checklist-btn dps-checklist-btn--undo" type="button">↩ <?php esc_html_e( 'Desfazer', 'dps-agenda-addon' ); ?></button>
+                            <button class="dps-checklist-btn dps-checklist-btn--undo" type="button"><?php esc_html_e( 'Desfazer', 'dps-agenda-addon' ); ?></button>
 
-                            <button class="dps-checklist-btn dps-checklist-btn--rework" type="button">🔄 <?php esc_html_e( 'Refazer', 'dps-agenda-addon' ); ?></button>
+                            <button class="dps-checklist-btn dps-checklist-btn--rework" type="button"><?php esc_html_e( 'Refazer', 'dps-agenda-addon' ); ?></button>
 
                         <?php elseif ( 'skipped' === $status ) : ?>
 
-                            <button class="dps-checklist-btn dps-checklist-btn--undo" type="button">↩ <?php esc_html_e( 'Desfazer', 'dps-agenda-addon' ); ?></button>
+                            <button class="dps-checklist-btn dps-checklist-btn--undo" type="button"><?php esc_html_e( 'Desfazer', 'dps-agenda-addon' ); ?></button>
 
                         <?php endif; ?>
 
@@ -8898,7 +9118,13 @@ class DPS_Agenda_Addon {
 
         <div class="dps-checkin-panel" data-appointment="<?php echo esc_attr( $appointment_id ); ?>">
 
-            <h4>🏥 <?php esc_html_e( 'Check-in / Check-out', 'dps-agenda-addon' ); ?></h4>
+            <div class="dps-operation-panel-heading">
+
+                <h4><?php esc_html_e( 'Check-in e check-out', 'dps-agenda-addon' ); ?></h4>
+
+                <p class="dps-operation-panel-subtitle"><?php esc_html_e( 'Entrada, saída e observações operacionais do pet.', 'dps-agenda-addon' ); ?></p>
+
+            </div>
 
 
 
@@ -8908,7 +9134,7 @@ class DPS_Agenda_Addon {
 
                     <span class="dps-checkin-status-badge dps-checkin-status-badge--in">
 
-                        📥 Check-in: <?php echo esc_html( mysql2date( 'H:i', $checkin['time'] ) ); ?>
+                        <?php esc_html_e( 'Check-in', 'dps-agenda-addon' ); ?> · <?php echo esc_html( mysql2date( 'H:i', $checkin['time'] ) ); ?>
 
                     </span>
 
@@ -8920,7 +9146,7 @@ class DPS_Agenda_Addon {
 
                     <span class="dps-checkin-status-badge dps-checkin-status-badge--out">
 
-                        📤 Check-out: <?php echo esc_html( mysql2date( 'H:i', $checkout['time'] ) ); ?>
+                        <?php esc_html_e( 'Check-out', 'dps-agenda-addon' ); ?> · <?php echo esc_html( mysql2date( 'H:i', $checkout['time'] ) ); ?>
 
                     </span>
 
@@ -8932,7 +9158,7 @@ class DPS_Agenda_Addon {
 
                     <span class="dps-checkin-status-badge dps-checkin-status-badge--duration">
 
-                        ⏱️ <?php printf( esc_html__( '%d min', 'dps-agenda-addon' ), $duration ); ?>
+                        <?php printf( esc_html__( '%d min', 'dps-agenda-addon' ), $duration ); ?>
 
                     </span>
 
@@ -9022,11 +9248,11 @@ class DPS_Agenda_Addon {
 
                 <?php if ( ! $checkin ) : ?>
 
-                    <button type="button" class="dps-checkin-btn dps-checkin-btn--checkin">📥 <?php esc_html_e( 'Check-in', 'dps-agenda-addon' ); ?></button>
+                    <button type="button" class="dps-checkin-btn dps-checkin-btn--checkin"><?php esc_html_e( 'Registrar check-in', 'dps-agenda-addon' ); ?></button>
 
                 <?php elseif ( ! $checkout ) : ?>
 
-                    <button type="button" class="dps-checkin-btn dps-checkin-btn--checkout">📤 <?php esc_html_e( 'Check-out', 'dps-agenda-addon' ); ?></button>
+                    <button type="button" class="dps-checkin-btn dps-checkin-btn--checkout"><?php esc_html_e( 'Registrar check-out', 'dps-agenda-addon' ); ?></button>
 
                 <?php endif; ?>
 
@@ -9058,7 +9284,7 @@ class DPS_Agenda_Addon {
 
                        class="dps-checkin-btn dps-checkin-btn--whatsapp">
 
-                        📱 <?php esc_html_e( 'Enviar relatório via WhatsApp', 'dps-agenda-addon' ); ?>
+                        <?php esc_html_e( 'Enviar relatório no WhatsApp', 'dps-agenda-addon' ); ?>
 
                     </a>
 
@@ -9124,6 +9350,8 @@ class DPS_Agenda_Addon {
 
 
 
+        $allows_checklist = self::appointment_allows_checklist( $appointment_id );
+
         $progress     = DPS_Agenda_Checklist_Service::get_progress( $appointment_id );
 
         $rework_count = DPS_Agenda_Checklist_Service::count_reworks( $appointment_id );
@@ -9140,11 +9368,11 @@ class DPS_Agenda_Addon {
 
         // Se não há dados relevantes, retorna vazio.
 
-        $has_checklist = $progress > 0;
+        $has_checklist = $allows_checklist && $progress > 0;
 
         $has_checkin   = (bool) $checkin;
 
-        if ( ! $has_checklist && ! $has_checkin ) {
+        if ( ! $has_checklist && ! $has_checkin && empty( $summary ) ) {
 
             return '';
 
@@ -9162,7 +9390,7 @@ class DPS_Agenda_Addon {
 
                 <div class="dps-history-ops-row">
 
-                    <span class="dps-history-ops-label">📋 <?php esc_html_e( 'Checklist', 'dps-agenda-addon' ); ?></span>
+                    <span class="dps-history-ops-label"><?php esc_html_e( 'Checklist', 'dps-agenda-addon' ); ?></span>
 
                     <span class="dps-history-ops-value <?php echo 100 === $progress ? 'dps-history-ops-value--complete' : ''; ?>">
 
@@ -9172,7 +9400,7 @@ class DPS_Agenda_Addon {
 
                     <?php if ( $rework_count > 0 ) : ?>
 
-                        <span class="dps-history-ops-badge dps-history-ops-badge--rework">🔄 <?php echo esc_html( $rework_count ); ?></span>
+                        <span class="dps-history-ops-badge dps-history-ops-badge--rework"><?php echo esc_html( $rework_count ); ?> <?php esc_html_e( 'retrabalho', 'dps-agenda-addon' ); ?></span>
 
                     <?php endif; ?>
 
@@ -9186,7 +9414,7 @@ class DPS_Agenda_Addon {
 
                 <div class="dps-history-ops-row">
 
-                    <span class="dps-history-ops-label">📥 <?php esc_html_e( 'Check-in', 'dps-agenda-addon' ); ?></span>
+                    <span class="dps-history-ops-label"><?php esc_html_e( 'Check-in', 'dps-agenda-addon' ); ?></span>
 
                     <span class="dps-history-ops-value"><?php echo esc_html( mysql2date( 'H:i', $checkin['time'] ) ); ?></span>
 
@@ -9200,7 +9428,7 @@ class DPS_Agenda_Addon {
 
                 <div class="dps-history-ops-row">
 
-                    <span class="dps-history-ops-label">📤 <?php esc_html_e( 'Check-out', 'dps-agenda-addon' ); ?></span>
+                    <span class="dps-history-ops-label"><?php esc_html_e( 'Check-out', 'dps-agenda-addon' ); ?></span>
 
                     <span class="dps-history-ops-value"><?php echo esc_html( mysql2date( 'H:i', $checkout['time'] ) ); ?></span>
 
@@ -9214,7 +9442,7 @@ class DPS_Agenda_Addon {
 
                 <div class="dps-history-ops-row">
 
-                    <span class="dps-history-ops-label">⏱️ <?php esc_html_e( 'Duração', 'dps-agenda-addon' ); ?></span>
+                    <span class="dps-history-ops-label"><?php esc_html_e( 'Duração', 'dps-agenda-addon' ); ?></span>
 
                     <span class="dps-history-ops-value"><?php printf( esc_html__( '%d min', 'dps-agenda-addon' ), $duration ); ?></span>
 
@@ -9248,7 +9476,7 @@ class DPS_Agenda_Addon {
 
                 <div class="dps-history-ops-obs">
 
-                    <span class="dps-history-ops-label">📝</span>
+                    <span class="dps-history-ops-label"><?php esc_html_e( 'Observações', 'dps-agenda-addon' ); ?></span>
 
                     <span class="dps-history-ops-obs-text"><?php echo esc_html( $checkin['observations'] ); ?></span>
 
@@ -9262,7 +9490,7 @@ class DPS_Agenda_Addon {
 
                 <div class="dps-history-ops-obs">
 
-                    <span class="dps-history-ops-label">📝</span>
+                    <span class="dps-history-ops-label"><?php esc_html_e( 'Observações', 'dps-agenda-addon' ); ?></span>
 
                     <span class="dps-history-ops-obs-text"><?php echo esc_html( $checkout['observations'] ); ?></span>
 
@@ -9322,17 +9550,21 @@ class DPS_Agenda_Addon {
 
         ?>
 
-        <span class="dps-checklist-compact" title="<?php esc_attr_e( 'Checklist Operacional', 'dps-agenda-addon' ); ?>">
+        <?php if ( $allows_checklist ) : ?>
 
-            📋 <?php echo esc_html( $progress ); ?>%
+            <span class="dps-checklist-compact" title="<?php esc_attr_e( 'Checklist operacional', 'dps-agenda-addon' ); ?>">
 
-            <?php if ( $rework_count > 0 ) : ?>
+                <?php esc_html_e( 'Checklist', 'dps-agenda-addon' ); ?> <?php echo esc_html( $progress ); ?>%
 
-                <span class="dps-checklist-rework-badge">🔄 <?php echo esc_html( $rework_count ); ?></span>
+                <?php if ( $rework_count > 0 ) : ?>
 
-            <?php endif; ?>
+                    <span class="dps-checklist-rework-badge"><?php echo esc_html( $rework_count ); ?> <?php esc_html_e( 'retrabalho', 'dps-agenda-addon' ); ?></span>
 
-        </span>
+                <?php endif; ?>
+
+            </span>
+
+        <?php endif; ?>
 
 
 
@@ -9340,15 +9572,15 @@ class DPS_Agenda_Addon {
 
             <?php if ( $has_checkout ) : ?>
 
-                ✅
+                <?php esc_html_e( 'Check-out', 'dps-agenda-addon' ); ?>
 
             <?php elseif ( $has_checkin ) : ?>
 
-                📥
+                <?php esc_html_e( 'Check-in', 'dps-agenda-addon' ); ?>
 
             <?php else : ?>
 
-                ⬜
+                <?php esc_html_e( 'Pendente', 'dps-agenda-addon' ); ?>
 
             <?php endif; ?>
 

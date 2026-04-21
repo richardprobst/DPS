@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-04-20T20:32:38.800Z",
+  "siteUrl": "https://desi.pet",
+  "agendaUrl": "https://desi.pet/agenda-de-atendimentos/",
+  "adminHubUrl": "https://desi.pet/wp-admin/admin.php?page=dps-agenda-hub",
+  "results": [
+    {
+      "name": "guest",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "operator-access",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "admin",
+      "status": "passed",
+      "detail": ""
+    },
+    {
+      "name": "failure",
+      "status": "failed",
+      "detail": "AssertionError [ERR_ASSERTION]: Checklist must stay hidden while the appointment is pending.\n\n1 !== 0\n\n    at runOperatorFlowScenario (file:///C:/Users/casaprobst/AppData/Local/Temp/dps-agenda-smoke-runner/agenda-production-smoke.spec.mjs:380:10)\n    at async main (file:///C:/Users/casaprobst/AppData/Local/Temp/dps-agenda-smoke-runner/agenda-production-smoke.spec.mjs:511:5)"
+    }
+  ]
+}

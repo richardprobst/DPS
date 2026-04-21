@@ -36,7 +36,7 @@
 
     var icon = icons[type] || icons.info;
 
-    var toast = $('<div class="dps-toast dps-toast--' + type + '">' +
+    var toast = $('<div class="dps-toast dps-toast--' + type + '" role="status" aria-live="polite">' +
       '<span class="dps-toast-icon">' + icon + '</span>' +
       '<span class="dps-toast-message">' + escapeHtml(message) + '</span>' +
       '<button type="button" class="dps-toast-close" aria-label="Fechar">&times;</button>' +
@@ -240,6 +240,16 @@
     return dialog;
   }
 
+  function getDetailRowDisplay(detailRow) {
+    var tbodyDisplay = detailRow.closest('tbody').css('display');
+
+    if (tbodyDisplay === 'grid' || tbodyDisplay === 'flex' || window.matchMedia('(max-width: 600px)').matches) {
+      return 'block';
+    }
+
+    return 'table-row';
+  }
+
   function openOperationPanel(apptId, options) {
     var settings = $.extend({
       focusPanel: false,
@@ -254,8 +264,7 @@
     }
 
     if (trigger.attr('aria-expanded') !== 'true') {
-      var isCardLayout = detailRow.closest('tbody').css('display') === 'flex';
-      var expandedDisplay = isCardLayout ? 'flex' : 'table-row';
+      var expandedDisplay = getDetailRowDisplay(detailRow);
       detailRow.stop(true, true).slideDown(200, function() {
         $(this).css('display', expandedDisplay);
       });
@@ -284,6 +293,29 @@
     content: showAgendaContentDialog,
     confirm: showAgendaConfirmDialog
   };
+
+  $(document).on('click', '.dps-expand-panels-btn', function(event) {
+    event.preventDefault();
+
+    var trigger = $(this);
+    var apptId = trigger.data('appt-id');
+    var row = $('tr[data-appt-id="' + apptId + '"]').not('.dps-detail-row').first();
+    var detailRow = row.next('.dps-detail-row[data-appt-id="' + apptId + '"]');
+
+    if (!apptId || !row.length || !detailRow.length) {
+      return;
+    }
+
+    if (trigger.attr('aria-expanded') === 'true') {
+      detailRow.stop(true, true).slideUp(180, function() {
+        $(this).css('display', 'none');
+      });
+      trigger.attr('aria-expanded', 'false');
+      return;
+    }
+
+    openOperationPanel(apptId);
+  });
 
   $(document).on('click', '.dps-agenda-dialog__close, [data-dialog-close="true"]', function(event) {
     event.preventDefault();
@@ -692,7 +724,9 @@
     }
 
     if ( keepExpanded ) {
-      parsedRows.filter('.dps-detail-row').show();
+      parsedRows.filter('.dps-detail-row').each(function(){
+        $(this).css('display', getDetailRowDisplay($(this)));
+      });
       parsedRows.first().find('.dps-expand-panels-btn').attr('aria-expanded', 'true');
     }
 
@@ -1249,18 +1283,18 @@
 
   function getServiceCardVisual(service) {
     if (service && service.is_taxidog) {
-      return { icon: '\uD83D\uDE90', typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' };
+      return { typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' };
     }
 
     if (service && service.type === 'extra') {
-      return { icon: '\u2728', typeClass: 'dps-service-type-extra', typeLabel: 'Extra' };
+      return { typeClass: 'dps-service-type-extra', typeLabel: 'Cuidado adicional' };
     }
 
     if (service && service.type === 'package') {
-      return { icon: '\uD83D\uDCE6', typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' };
+      return { typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' };
     }
 
-    return { icon: '\u2702\uFE0F', typeClass: 'dps-service-type-padrao', typeLabel: 'Servi\u00E7o' };
+    return { typeClass: 'dps-service-type-padrao', typeLabel: 'Serviço' };
   }
 
   function getPetSizeLabel(size) {
@@ -1343,13 +1377,18 @@
     var descId = 'dps-services-modal-desc-' + servicesModalCounter;
     var total = 0;
     var durationText = formatServiceDuration(totalDuration);
+    var summaryItems = [];
     var modalHtml = '<div class="dps-services-modal" role="dialog" aria-modal="true" aria-labelledby="' + titleId + '" aria-describedby="' + descId + '">' +
       '<div class="dps-services-modal-content" role="document" tabindex="-1">' +
         '<div class="dps-services-modal-header">' +
-          '<h3 id="' + titleId + '" class="dps-services-modal-title">\uD83D\uDCCB Servi\u00E7os do atendimento</h3>' +
+          '<div class="dps-services-modal-heading">' +
+            '<span class="dps-services-modal-eyebrow">Atendimento</span>' +
+            '<h3 id="' + titleId + '" class="dps-services-modal-title">Serviços do atendimento</h3>' +
+          '</div>' +
           '<button type="button" class="dps-services-modal-close" aria-label="Fechar modal">&times;</button>' +
         '</div>' +
-        '<div class="dps-services-modal-body" id="' + descId + '">';
+        '<div class="dps-services-modal-body" id="' + descId + '">' +
+          '<p class="dps-services-modal-intro">Leitura consolidada dos serviços, duração prevista e observações registradas para este atendimento.</p>';
 
     if (pet && pet.name) {
       var petMeta = [];
@@ -1366,8 +1405,8 @@
       }
 
       modalHtml += '<div class="dps-services-pet-info">' +
-        '<span class="dps-services-pet-icon" aria-hidden="true">\uD83D\uDC15</span>' +
-        '<div class="dps-services-pet-details">' +
+        '<div class="dps-services-pet-copy">' +
+          '<span class="dps-services-pet-label">Pet atendido</span>' +
           '<span class="dps-services-pet-name">' + escapeHtml(pet.name) + '</span>';
 
       if (petMeta.length > 0) {
@@ -1377,39 +1416,42 @@
       modalHtml += '</div></div>';
     }
 
-    if (services.length > 0 || durationText) {
-      modalHtml += '<div class="dps-services-summary">';
-      modalHtml += '<div class="dps-services-summary-item">' +
-        '<span class="dps-services-summary-icon" aria-hidden="true">\uD83D\uDCCB</span>' +
+    summaryItems.push(
+      '<div class="dps-services-summary-item">' +
         '<span class="dps-services-summary-value">' + services.length + '</span>' +
-        '<span class="dps-services-summary-label">servi\u00E7o' + (services.length !== 1 ? 's' : '') + '</span>' +
-      '</div>';
+        '<span class="dps-services-summary-label">serviço' + (services.length !== 1 ? 's' : '') + '</span>' +
+      '</div>'
+    );
 
-      if (durationText) {
-        modalHtml += '<div class="dps-services-summary-item">' +
-          '<span class="dps-services-summary-icon" aria-hidden="true">\u23F1\uFE0F</span>' +
+    if (durationText) {
+      summaryItems.push(
+        '<div class="dps-services-summary-item">' +
           '<span class="dps-services-summary-value">' + escapeHtml(durationText) + '</span>' +
           '<span class="dps-services-summary-label">tempo estimado</span>' +
-        '</div>';
-      }
+        '</div>'
+      );
+    }
 
+    if (services.length > 0 || durationText) {
+      modalHtml += '<div class="dps-services-summary">';
+      modalHtml += summaryItems.join('');
       modalHtml += '</div>';
     }
 
     if (services.length > 0) {
       modalHtml += '<div class="dps-services-checklist">';
-      modalHtml += '<h4 class="dps-services-section-title">Servi\u00E7os a realizar</h4>';
+      modalHtml += '<h4 class="dps-services-section-title">Serviços previstos</h4>';
 
       for (var i = 0; i < services.length; i++) {
         var srv = services[i] || {};
         var price = parseFloat(srv.price) || 0;
         var visualInfo = getServiceCardVisual(srv);
-        var serviceName = String(srv.name || 'Servi\u00E7o');
+        var serviceName = String(srv.name || 'Serviço');
         var cardMeta = [];
 
         total += price;
 
-        if (visualInfo.typeLabel && srv.type !== 'padrao') {
+        if (visualInfo.typeLabel) {
           cardMeta.push(visualInfo.typeLabel);
         }
         if (srv.duration && parseInt(srv.duration, 10) > 0) {
@@ -1418,8 +1460,8 @@
 
         modalHtml += '<div class="dps-service-card ' + visualInfo.typeClass + '">' +
           '<div class="dps-service-card-header">' +
-            '<span class="dps-service-card-icon" aria-hidden="true">' + visualInfo.icon + '</span>' +
             '<div class="dps-service-card-info">' +
+              '<span class="dps-service-card-kicker">' + escapeHtml(visualInfo.typeLabel) + '</span>' +
               '<span class="dps-service-card-name">' + escapeHtml(serviceName) + '</span>' +
               '<span class="dps-service-card-meta">' + (cardMeta.length ? escapeHtml(cardMeta.join(' \u2022 ')) : '') + '</span>' +
             '</div>' +
@@ -1427,10 +1469,7 @@
           '</div>';
 
         if (srv.description && String(srv.description).trim()) {
-          modalHtml += '<div class="dps-service-card-description">' +
-            '<span class="dps-service-card-desc-icon" aria-hidden="true">\uD83D\uDCA1</span>' +
-            '<span>' + escapeHtml(String(srv.description)).replace(/\n/g, '<br>') + '</span>' +
-          '</div>';
+          modalHtml += '<div class="dps-service-card-description">' + escapeHtml(String(srv.description)).replace(/\n/g, '<br>') + '</div>';
         }
 
         modalHtml += '</div>';
@@ -1444,17 +1483,16 @@
       modalHtml += '</div>';
     } else {
       modalHtml += '<div class="dps-services-empty">' +
-        '<span class="dps-services-empty-icon" aria-hidden="true">\uD83D\uDCCB</span>' +
-        '<span>Nenhum servi\u00E7o registrado para este atendimento.</span>' +
+        '<div class="dps-services-empty-copy">' +
+          '<strong>Nenhum serviço registrado</strong>' +
+          '<span>Este atendimento não possui serviços vinculados no momento.</span>' +
+        '</div>' +
       '</div>';
     }
 
     if (notes && String(notes).trim()) {
       modalHtml += '<div class="dps-services-notes dps-services-notes-highlight">' +
-        '<div class="dps-services-notes-title">' +
-          '<span class="dps-services-notes-icon" aria-hidden="true">\u26A0\uFE0F</span>' +
-          '<span>Observa\u00E7\u00F5es do cliente</span>' +
-        '</div>' +
+        '<div class="dps-services-notes-title">Observações do cliente</div>' +
         '<div class="dps-services-notes-content">' + escapeHtml(String(notes)).replace(/\n/g, '<br>') + '</div>' +
       '</div>';
     }
@@ -1497,6 +1535,12 @@
       }
     }, 0);
   }
+
+  window.DPSAgendaServicesModal = {
+    open: openServicesModal,
+    close: closeServicesModal,
+    buildHtml: buildServicesModalHtml
+  };
 
   $(document).on('click', '.dps-services-popup-btn', function(e) {
     e.preventDefault();
