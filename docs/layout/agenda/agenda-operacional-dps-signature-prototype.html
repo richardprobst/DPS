@@ -1,0 +1,1316 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Protótipo Agenda Operacional DPS Signature</title>
+    <style>
+        @font-face {
+            font-family: "Sora";
+            src: url("../../../plugins/desi-pet-shower-base/assets/fonts/signature/sora-latin.woff2") format("woff2");
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "Manrope";
+            src: url("../../../plugins/desi-pet-shower-base/assets/fonts/signature/manrope-latin.woff2") format("woff2");
+            font-display: swap;
+        }
+
+        :root {
+            --ink: #11161c;
+            --petrol: #173042;
+            --paper: #f7f2ea;
+            --bone: #ece2d3;
+            --line: #d9ccba;
+            --sky: #bdd8e7;
+            --action: #1f8c57;
+            --warning: #8a6622;
+            --danger: #a44439;
+            --muted: #65717d;
+            --white: #fffaf2;
+            --shadow: 0 18px 50px rgba(17, 22, 28, 0.18);
+            --font-display: "Sora", "Segoe UI", sans-serif;
+            --font-body: "Manrope", "Segoe UI", sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background:
+                linear-gradient(90deg, rgba(217, 204, 186, 0.32) 1px, transparent 1px) 0 0 / 48px 48px,
+                linear-gradient(180deg, rgba(217, 204, 186, 0.22) 1px, transparent 1px) 0 0 / 48px 48px,
+                var(--paper);
+            font-family: var(--font-body);
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .agenda-shell {
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .agenda-frame {
+            width: min(1600px, 100%);
+            margin: 0 auto;
+            border: 1px solid var(--line);
+            background: rgba(255, 250, 242, 0.92);
+            box-shadow: 0 18px 70px rgba(17, 22, 28, 0.08);
+        }
+
+        .topbar {
+            display: grid;
+            grid-template-columns: minmax(280px, 1fr) auto;
+            gap: 24px;
+            align-items: end;
+            padding: 24px;
+            border-bottom: 1px solid var(--line);
+            background: linear-gradient(180deg, #fffaf2 0%, #f2eadf 100%);
+        }
+
+        .eyebrow {
+            margin: 0 0 8px;
+            color: var(--petrol);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: var(--font-display);
+            font-size: clamp(28px, 4vw, 42px);
+            line-height: 1.04;
+            letter-spacing: -0.04em;
+        }
+
+        .topbar__meta {
+            margin: 10px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .toolbar {
+            display: grid;
+            gap: 12px;
+            justify-items: end;
+        }
+
+        .view-switch,
+        .date-nav,
+        .quick-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            min-height: 42px;
+            border: 1px solid var(--petrol);
+            border-radius: 0;
+            padding: 10px 14px;
+            background: transparent;
+            color: var(--petrol);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms ease;
+        }
+
+        .btn:hover,
+        .btn:focus-visible {
+            background: var(--petrol);
+            color: var(--white);
+            outline: 2px solid rgba(23, 48, 66, 0.22);
+            outline-offset: 2px;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn--active,
+        .btn--primary {
+            background: var(--petrol);
+            color: var(--white);
+        }
+
+        .btn--success {
+            border-color: var(--action);
+            background: var(--action);
+            color: #fff;
+        }
+
+        .btn--warning {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .btn--danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .btn--icon {
+            width: 44px;
+            min-width: 44px;
+            padding: 0;
+            font-size: 16px;
+        }
+
+        .btn--ghost {
+            border-color: var(--line);
+            color: var(--ink);
+            background: rgba(255, 250, 242, 0.72);
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            border-bottom: 1px solid var(--line);
+            background: var(--bone);
+        }
+
+        .metric {
+            min-height: 76px;
+            padding: 16px;
+            border-right: 1px solid var(--line);
+        }
+
+        .metric:last-child {
+            border-right: 0;
+        }
+
+        .metric strong {
+            display: block;
+            font-family: var(--font-display);
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .metric span {
+            display: block;
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 420px;
+            min-height: 680px;
+        }
+
+        .main-column {
+            min-width: 0;
+            border-right: 1px solid var(--line);
+        }
+
+        .list-head {
+            display: grid;
+            grid-template-columns: minmax(240px, 1fr) auto;
+            gap: 16px;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .list-head h2 {
+            margin: 0;
+            font-family: var(--font-display);
+            font-size: 20px;
+            letter-spacing: -0.02em;
+        }
+
+        .list-head p {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .searchbar {
+            width: min(300px, 100%);
+            min-height: 42px;
+            border: 1px solid var(--line);
+            border-radius: 0;
+            background: var(--white);
+            padding: 0 12px;
+            color: var(--ink);
+        }
+
+        .appointments {
+            overflow-x: auto;
+        }
+
+        .appointment-table {
+            width: 100%;
+            min-width: 980px;
+            border-collapse: collapse;
+        }
+
+        .appointment-table th,
+        .appointment-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .appointment-table th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #fbf6ee;
+            color: #4f5962;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .appointment-row {
+            background: rgba(255, 250, 242, 0.64);
+            transition: background 160ms ease, box-shadow 160ms ease;
+        }
+
+        .appointment-row:hover,
+        .appointment-row.is-active {
+            background: #fffaf2;
+            box-shadow: inset 4px 0 0 var(--petrol);
+        }
+
+        .time {
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+        }
+
+        .late {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 4px 6px;
+            background: rgba(138, 102, 34, 0.14);
+            color: var(--warning);
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .pet-name {
+            display: block;
+            margin-bottom: 5px;
+            border: 1px solid var(--line);
+            background: var(--white);
+            padding: 10px 12px;
+            color: var(--ink);
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .subtext {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            min-height: 30px;
+            border: 1px solid currentColor;
+            padding: 5px 8px;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .status--confirm { color: var(--warning); background: rgba(138, 102, 34, 0.1); }
+        .status--ready { color: var(--petrol); background: rgba(189, 216, 231, 0.28); }
+        .status--service { color: var(--action); background: rgba(31, 140, 87, 0.1); }
+        .status--danger { color: var(--danger); background: rgba(164, 68, 57, 0.1); }
+
+        .money {
+            font-weight: 900;
+        }
+
+        .progress {
+            display: grid;
+            gap: 7px;
+        }
+
+        .progress__bar {
+            height: 8px;
+            border: 1px solid var(--line);
+            background: #fff;
+        }
+
+        .progress__fill {
+            height: 100%;
+            background: var(--action);
+        }
+
+        .action-stack {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .more {
+            width: 42px;
+            min-width: 42px;
+            min-height: 42px;
+            border: 1px solid var(--line);
+            background: var(--white);
+            color: var(--ink);
+            font-weight: 900;
+        }
+
+        .mobile-cards {
+            display: none;
+            padding: 16px;
+        }
+
+        .mobile-card {
+            border: 1px solid var(--line);
+            background: var(--white);
+            margin-bottom: 12px;
+        }
+
+        .mobile-card__top,
+        .mobile-card__body,
+        .mobile-card__actions {
+            padding: 14px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .mobile-card__top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: #fbf6ee;
+        }
+
+        .mobile-card__actions {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            border-bottom: 0;
+        }
+
+        .inspector {
+            min-width: 0;
+            background: #f1e7d9;
+        }
+
+        .inspector__head {
+            padding: 22px 22px 18px;
+            border-bottom: 1px solid var(--line);
+            background: var(--petrol);
+            color: var(--white);
+        }
+
+        .inspector__head small {
+            display: block;
+            margin-bottom: 7px;
+            color: rgba(255, 250, 242, 0.68);
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .inspector__head h2 {
+            margin: 0;
+            font-family: var(--font-display);
+            font-size: 24px;
+            letter-spacing: -0.03em;
+        }
+
+        .inspector__body {
+            padding: 18px;
+        }
+
+        .panel-section {
+            border: 1px solid var(--line);
+            background: var(--white);
+            margin-bottom: 14px;
+        }
+
+        .panel-section__title {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 13px 14px;
+            border-bottom: 1px solid var(--line);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .panel-section__content {
+            padding: 14px;
+        }
+
+        .checklist {
+            display: grid;
+            gap: 8px;
+        }
+
+        .check-item {
+            display: grid;
+            grid-template-columns: 20px 1fr;
+            gap: 9px;
+            align-items: start;
+            font-size: 13px;
+        }
+
+        .check-item input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--action);
+        }
+
+        .log {
+            display: grid;
+            gap: 9px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .log li {
+            padding-left: 10px;
+            border-left: 2px solid var(--line);
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .drawer-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(17, 22, 28, 0.48);
+        }
+
+        .modal-backdrop.is-open {
+            display: flex;
+        }
+
+        .modal {
+            width: min(760px, 100%);
+            max-height: min(760px, 92vh);
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr) auto;
+            border: 1px solid var(--petrol);
+            background: var(--white);
+            box-shadow: var(--shadow);
+            animation: modalIn 160ms ease-out;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal__head {
+            display: flex;
+            align-items: start;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--line);
+            background: #fbf6ee;
+        }
+
+        .modal__head h2 {
+            margin: 0;
+            font-family: var(--font-display);
+            font-size: 22px;
+        }
+
+        .modal__head p {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .modal__close {
+            width: 44px;
+            min-width: 44px;
+            height: 44px;
+            border: 1px solid var(--line);
+            background: var(--white);
+            color: var(--ink);
+            font-size: 22px;
+            line-height: 1;
+        }
+
+        .modal__body {
+            overflow: auto;
+            padding: 18px 20px;
+        }
+
+        .modal__foot {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 16px 20px;
+            border-top: 1px solid var(--line);
+            background: #fbf6ee;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .field {
+            display: grid;
+            gap: 6px;
+        }
+
+        .field--wide {
+            grid-column: 1 / -1;
+        }
+
+        .field label {
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .field input,
+        .field textarea,
+        .field select {
+            width: 100%;
+            min-height: 42px;
+            border: 1px solid var(--line);
+            border-radius: 0;
+            background: var(--white);
+            padding: 10px;
+            color: var(--ink);
+        }
+
+        .field textarea {
+            min-height: 92px;
+            resize: vertical;
+        }
+
+        .toast {
+            position: fixed;
+            right: 22px;
+            bottom: 22px;
+            z-index: 40;
+            display: none;
+            max-width: 360px;
+            border: 1px solid var(--petrol);
+            background: var(--petrol);
+            color: var(--white);
+            padding: 14px 16px;
+            box-shadow: var(--shadow);
+            font-size: 13px;
+        }
+
+        .toast.is-visible {
+            display: block;
+            animation: modalIn 160ms ease-out;
+        }
+
+        @media (max-width: 1180px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .main-column {
+                border-right: 0;
+            }
+
+            .inspector {
+                border-top: 1px solid var(--line);
+            }
+        }
+
+        @media (max-width: 840px) {
+            .agenda-shell {
+                padding: 0;
+            }
+
+            .agenda-frame {
+                border-left: 0;
+                border-right: 0;
+            }
+
+            .topbar {
+                grid-template-columns: 1fr;
+                gap: 18px;
+                padding: 18px 16px;
+            }
+
+            .toolbar,
+            .view-switch,
+            .date-nav,
+            .quick-filters {
+                justify-items: stretch;
+                justify-content: stretch;
+            }
+
+            .view-switch,
+            .quick-filters {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .date-nav {
+                display: grid;
+                grid-template-columns: 44px 1fr 44px;
+            }
+
+            .metrics {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .metric {
+                min-height: 66px;
+                padding: 12px;
+            }
+
+            .metric strong {
+                font-size: 22px;
+            }
+
+            .list-head {
+                grid-template-columns: 1fr;
+                padding: 16px;
+            }
+
+            .searchbar {
+                width: 100%;
+            }
+
+            .appointments {
+                display: none;
+            }
+
+            .mobile-cards {
+                display: block;
+            }
+
+            .inspector__body {
+                padding: 14px;
+            }
+
+            .drawer-actions,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-backdrop {
+                align-items: stretch;
+                padding: 0;
+            }
+
+            .modal {
+                width: 100%;
+                max-height: 100vh;
+                min-height: 100vh;
+                border-left: 0;
+                border-right: 0;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .metrics {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            h1 {
+                font-size: 30px;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="agenda-shell">
+        <section class="agenda-frame" aria-label="Protótipo funcional da Agenda DPS">
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">DPS Signature / Protótipo operacional</p>
+                    <h1>Agenda de Atendimentos</h1>
+                    <p class="topbar__meta">Segunda, 20/04 · Lista canônica única com painéis contextuais por etapa.</p>
+                </div>
+                <div class="toolbar" aria-label="Controles da agenda">
+                    <div class="view-switch">
+                        <button class="btn btn--active" type="button" data-view="day">Dia</button>
+                        <button class="btn" type="button" data-view="week">Semana</button>
+                        <button class="btn" type="button" data-view="month">Mês</button>
+                        <button class="btn" type="button" data-view="all">Completa</button>
+                    </div>
+                    <div class="date-nav">
+                        <button class="btn btn--icon" type="button" data-shift="-1" aria-label="Dia anterior">←</button>
+                        <button class="btn btn--ghost" type="button" data-today>Hoje</button>
+                        <button class="btn btn--icon" type="button" data-shift="1" aria-label="Próximo dia">→</button>
+                    </div>
+                    <div class="quick-filters">
+                        <button class="btn btn--ghost" type="button" data-filter="all">Todos</button>
+                        <button class="btn btn--warning" type="button" data-filter="late">Atrasados</button>
+                        <button class="btn btn--ghost" type="button" data-filter="taxidog">TaxiDog</button>
+                    </div>
+                </div>
+            </header>
+
+            <section class="metrics" aria-label="Resumo do dia">
+                <div class="metric"><strong id="metricTotal">3</strong><span>Total</span></div>
+                <div class="metric"><strong id="metricPending">1</strong><span>Pendentes</span></div>
+                <div class="metric"><strong>1</strong><span>Em atendimento</span></div>
+                <div class="metric"><strong>1</strong><span>Finalizados</span></div>
+                <div class="metric"><strong>2</strong><span>Cobrança</span></div>
+                <div class="metric"><strong>1</strong><span>TaxiDog</span></div>
+            </section>
+
+            <section class="workspace">
+                <div class="main-column">
+                    <div class="list-head">
+                        <div>
+                            <h2>Fila operacional</h2>
+                            <p>Uma linha por atendimento. A ação principal muda conforme a etapa.</p>
+                        </div>
+                        <input class="searchbar" id="searchInput" type="search" placeholder="Buscar pet, tutor ou serviço" aria-label="Buscar atendimento">
+                    </div>
+
+                    <div class="appointments" aria-label="Lista canônica de atendimentos">
+                        <table class="appointment-table">
+                            <thead>
+                                <tr>
+                                    <th>Horário</th>
+                                    <th>Pet e tutor</th>
+                                    <th>Serviços</th>
+                                    <th>Etapa</th>
+                                    <th>Financeiro</th>
+                                    <th>Operação</th>
+                                    <th>Logística</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointmentRows"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="mobile-cards" id="mobileCards" aria-label="Cards operacionais mobile"></div>
+                </div>
+
+                <aside class="inspector" aria-live="polite">
+                    <div class="inspector__head">
+                        <small>Atendimento selecionado</small>
+                        <h2 id="inspectorTitle">QA Smoke Pet</h2>
+                    </div>
+                    <div class="inspector__body" id="inspectorBody"></div>
+                </aside>
+            </section>
+        </section>
+    </main>
+
+    <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <article class="modal">
+            <header class="modal__head">
+                <div>
+                    <h2 id="modalTitle">Modal</h2>
+                    <p id="modalSubtitle">Detalhes do atendimento.</p>
+                </div>
+                <button class="modal__close" type="button" data-close-modal aria-label="Fechar modal">×</button>
+            </header>
+            <div class="modal__body" id="modalBody"></div>
+            <footer class="modal__foot" id="modalFoot"></footer>
+        </article>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+        const appointments = [
+            {
+                id: 1,
+                time: "09:00",
+                pet: "Amora",
+                tutor: "Marina Lopes",
+                service: "Banho premium + hidratação",
+                duration: "1h 20min",
+                stage: "A confirmar",
+                statusClass: "status--confirm",
+                payment: "Pendente · R$ 129,90",
+                progress: 0,
+                logistics: "TaxiDog solicitado",
+                late: false,
+                taxidog: true,
+                primary: "Confirmar",
+                notes: "Tutor pediu atenção na pele sensível.",
+                log: ["08:12 · Lembrete enviado por WhatsApp", "08:40 · TaxiDog incluído no atendimento"]
+            },
+            {
+                id: 2,
+                time: "10:30",
+                pet: "Thor",
+                tutor: "Caio Martins",
+                service: "Tosa completa",
+                duration: "1h 40min",
+                stage: "Check-in",
+                statusClass: "status--ready",
+                payment: "Aberto · R$ 155,00",
+                progress: 25,
+                logistics: "Cliente traz e busca",
+                late: false,
+                taxidog: false,
+                primary: "Iniciar check-in",
+                notes: "Verificar nós nas patas antes do banho.",
+                log: ["09:58 · Atendimento confirmado", "10:20 · Pet aguardando recepção"]
+            },
+            {
+                id: 3,
+                time: "11:15",
+                pet: "Nina",
+                tutor: "QA Smoke Cliente",
+                service: "Banho completo + TaxiDog",
+                duration: "1h 30min",
+                stage: "Em atendimento",
+                statusClass: "status--service",
+                payment: "Cobrar · R$ 107,90",
+                progress: 67,
+                logistics: "Entregar às 13:00",
+                late: true,
+                taxidog: true,
+                primary: "Finalizar",
+                notes: "Agendamento temporário para smoke suite de QA.",
+                log: ["10:55 · Check-in registrado", "11:05 · Banho iniciado", "11:28 · Secagem em andamento"]
+            }
+        ];
+
+        let selectedId = 3;
+        let currentFilter = "all";
+        let query = "";
+
+        const checklistItems = [
+            "Pré-banho e desembaraço",
+            "Banho",
+            "Secagem",
+            "Tosa / Corte",
+            "Orelhas e unhas",
+            "Acabamento e perfume"
+        ];
+
+        const rows = document.getElementById("appointmentRows");
+        const mobileCards = document.getElementById("mobileCards");
+        const inspectorTitle = document.getElementById("inspectorTitle");
+        const inspectorBody = document.getElementById("inspectorBody");
+        const modal = document.getElementById("modalBackdrop");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalSubtitle = document.getElementById("modalSubtitle");
+        const modalBody = document.getElementById("modalBody");
+        const modalFoot = document.getElementById("modalFoot");
+        const toast = document.getElementById("toast");
+
+        function getFilteredAppointments() {
+            return appointments.filter((appointment) => {
+                const matchesFilter =
+                    currentFilter === "all" ||
+                    (currentFilter === "late" && appointment.late) ||
+                    (currentFilter === "taxidog" && appointment.taxidog);
+                const haystack = `${appointment.pet} ${appointment.tutor} ${appointment.service}`.toLowerCase();
+                return matchesFilter && haystack.includes(query.toLowerCase());
+            });
+        }
+
+        function render() {
+            const filtered = getFilteredAppointments();
+            rows.innerHTML = filtered.map(renderRow).join("");
+            mobileCards.innerHTML = filtered.map(renderMobileCard).join("");
+            renderInspector();
+            bindDynamicEvents();
+        }
+
+        function renderRow(appointment) {
+            return `
+                <tr class="appointment-row ${appointment.id === selectedId ? "is-active" : ""}" data-id="${appointment.id}">
+                    <td><div class="time">${appointment.time}</div>${appointment.late ? '<span class="late">Atrasado</span>' : ""}</td>
+                    <td><button class="pet-name" type="button" data-action="pet" data-id="${appointment.id}">${appointment.pet} ›</button><div class="subtext">${appointment.tutor}</div></td>
+                    <td><strong>${appointment.service}</strong><div class="subtext">${appointment.duration}</div></td>
+                    <td><span class="status ${appointment.statusClass}">${appointment.stage}</span></td>
+                    <td><span class="money">${appointment.payment}</span></td>
+                    <td>
+                        <div class="progress">
+                            <span class="subtext">Checklist ${appointment.progress}%</span>
+                            <div class="progress__bar"><div class="progress__fill" style="width:${appointment.progress}%"></div></div>
+                        </div>
+                    </td>
+                    <td><span class="subtext">${appointment.logistics}</span></td>
+                    <td>
+                        <div class="action-stack">
+                            <button class="btn btn--primary" type="button" data-action="primary" data-id="${appointment.id}">${appointment.primary}</button>
+                            <button class="more" type="button" data-action="more" data-id="${appointment.id}" aria-label="Mais ações">•••</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function renderMobileCard(appointment) {
+            return `
+                <article class="mobile-card ${appointment.id === selectedId ? "is-active" : ""}" data-id="${appointment.id}">
+                    <div class="mobile-card__top">
+                        <div><div class="time">${appointment.time}</div>${appointment.late ? '<span class="late">Atrasado</span>' : ""}</div>
+                        <span class="status ${appointment.statusClass}">${appointment.stage}</span>
+                    </div>
+                    <div class="mobile-card__body">
+                        <button class="pet-name" type="button" data-action="pet" data-id="${appointment.id}">${appointment.pet} ›</button>
+                        <div class="subtext">${appointment.tutor}</div>
+                        <p><strong>${appointment.service}</strong><br><span class="subtext">${appointment.payment} · ${appointment.logistics}</span></p>
+                        <div class="progress">
+                            <span class="subtext">Checklist ${appointment.progress}%</span>
+                            <div class="progress__bar"><div class="progress__fill" style="width:${appointment.progress}%"></div></div>
+                        </div>
+                    </div>
+                    <div class="mobile-card__actions">
+                        <button class="btn btn--primary" type="button" data-action="primary" data-id="${appointment.id}">${appointment.primary}</button>
+                        <button class="more" type="button" data-action="more" data-id="${appointment.id}" aria-label="Mais ações">•••</button>
+                    </div>
+                </article>
+            `;
+        }
+
+        function renderInspector() {
+            const appointment = getAppointment(selectedId);
+            inspectorTitle.textContent = appointment.pet;
+            inspectorBody.innerHTML = `
+                <section class="panel-section">
+                    <div class="panel-section__title"><span>Resumo</span><span>${appointment.time}</span></div>
+                    <div class="panel-section__content">
+                        <p><strong>${appointment.pet}</strong> · ${appointment.tutor}</p>
+                        <p class="subtext">${appointment.service}<br>${appointment.notes}</p>
+                    </div>
+                </section>
+                <section class="panel-section">
+                    <div class="panel-section__title"><span>Fluxo operacional</span><span>${appointment.progress}%</span></div>
+                    <div class="panel-section__content">
+                        <div class="progress">
+                            <div class="progress__bar"><div class="progress__fill" style="width:${appointment.progress}%"></div></div>
+                        </div>
+                        <div class="drawer-actions" style="margin-top:12px">
+                            <button class="btn btn--primary" type="button" data-action="primary" data-id="${appointment.id}">${appointment.primary}</button>
+                            <button class="btn btn--ghost" type="button" data-action="operation" data-id="${appointment.id}">Editar operação</button>
+                        </div>
+                    </div>
+                </section>
+                <section class="panel-section">
+                    <div class="panel-section__title"><span>Checklist</span><span>${appointment.stage}</span></div>
+                    <div class="panel-section__content">
+                        <div class="checklist">
+                            ${checklistItems.slice(0, 4).map((item, index) => `
+                                <label class="check-item">
+                                    <input type="checkbox" ${index * 20 < appointment.progress ? "checked" : ""}>
+                                    <span>${item}</span>
+                                </label>
+                            `).join("")}
+                        </div>
+                    </div>
+                </section>
+                <section class="panel-section">
+                    <div class="panel-section__title"><span>Histórico</span><span>Editável</span></div>
+                    <div class="panel-section__content">
+                        <ul class="log">${appointment.log.map((item) => `<li>${item}</li>`).join("")}</ul>
+                    </div>
+                </section>
+            `;
+        }
+
+        function bindDynamicEvents() {
+            document.querySelectorAll("[data-id]").forEach((element) => {
+                element.addEventListener("click", (event) => {
+                    const id = Number(element.dataset.id);
+                    selectedId = id;
+                    const action = element.dataset.action;
+                    if (action === "primary") {
+                        handlePrimary(getAppointment(id));
+                    } else if (action === "pet") {
+                        openPetModal(getAppointment(id));
+                    } else if (action === "operation") {
+                        openOperationModal(getAppointment(id));
+                    } else if (action === "more") {
+                        openMoreModal(getAppointment(id));
+                    } else {
+                        render();
+                    }
+                });
+            });
+        }
+
+        function handlePrimary(appointment) {
+            if (appointment.primary === "Confirmar") {
+                appointment.stage = "Confirmado";
+                appointment.statusClass = "status--ready";
+                appointment.primary = "Iniciar check-in";
+                appointment.log.unshift("Agora · Atendimento confirmado no protótipo");
+                showToast("Atendimento confirmado. A próxima ação virou check-in.");
+                render();
+                return;
+            }
+
+            if (appointment.primary === "Iniciar check-in") {
+                appointment.stage = "Check-in registrado";
+                appointment.statusClass = "status--service";
+                appointment.primary = "Finalizar";
+                appointment.progress = Math.max(appointment.progress, 35);
+                appointment.log.unshift("Agora · Check-in editado e registrado");
+                showToast("Check-in registrado e salvo no histórico do atendimento.");
+                render();
+                return;
+            }
+
+            openFinalizeModal(appointment);
+        }
+
+        function openFinalizeModal(appointment) {
+            modalTitle.textContent = "Finalizar atendimento";
+            modalSubtitle.textContent = "Checklist obrigatório antes de concluir, com registro de log.";
+            modalBody.innerHTML = `
+                <div class="form-grid">
+                    <div class="field field--wide">
+                        <label>Checklist operacional</label>
+                        <div class="checklist">
+                            ${checklistItems.map((item, index) => `
+                                <label class="check-item">
+                                    <input type="checkbox" class="final-check" ${index * 17 < appointment.progress ? "checked" : ""}>
+                                    <span>${item}</span>
+                                </label>
+                            `).join("")}
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Check-out</label>
+                        <input type="time" value="12:48">
+                    </div>
+                    <div class="field">
+                        <label>Status financeiro</label>
+                        <select>
+                            <option>Cobrar cliente</option>
+                            <option>Pago</option>
+                            <option>Cortesia autorizada</option>
+                        </select>
+                    </div>
+                    <div class="field field--wide">
+                        <label>Observações de saída</label>
+                        <textarea>Pet finalizado sem intercorrências. Relatório pronto para envio.</textarea>
+                    </div>
+                </div>
+            `;
+            modalFoot.innerHTML = `
+                <button class="btn btn--ghost" type="button" data-close-modal>Cancelar</button>
+                <button class="btn btn--success" type="button" id="confirmFinalize">Salvar e finalizar</button>
+            `;
+            openModal();
+            document.getElementById("confirmFinalize").addEventListener("click", () => {
+                appointment.stage = "Finalizado";
+                appointment.statusClass = "status--service";
+                appointment.primary = "Enviar relatório";
+                appointment.progress = 100;
+                appointment.log.unshift("Agora · Checklist finalizado e check-out atualizado");
+                closeModal();
+                showToast("Atendimento finalizado. Checklist, check-out e log foram atualizados no protótipo.");
+                render();
+            });
+        }
+
+        function openOperationModal(appointment) {
+            modalTitle.textContent = "Fluxo operacional";
+            modalSubtitle.textContent = "Check-in, check-out, checklist e log no mesmo modal.";
+            modalBody.innerHTML = `
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Check-in</label>
+                        <input type="time" value="10:55">
+                    </div>
+                    <div class="field">
+                        <label>Check-out</label>
+                        <input type="time" value="">
+                    </div>
+                    <div class="field field--wide">
+                        <label>Observações de operação</label>
+                        <textarea>${appointment.notes}</textarea>
+                    </div>
+                    <div class="field field--wide">
+                        <label>Checklist</label>
+                        <div class="checklist">
+                            ${checklistItems.map((item, index) => `
+                                <label class="check-item">
+                                    <input type="checkbox" ${index * 17 < appointment.progress ? "checked" : ""}>
+                                    <span>${item}</span>
+                                </label>
+                            `).join("")}
+                        </div>
+                    </div>
+                </div>
+            `;
+            modalFoot.innerHTML = `
+                <button class="btn btn--ghost" type="button" data-close-modal>Fechar</button>
+                <button class="btn btn--primary" type="button" id="saveOperation">Salvar edição</button>
+            `;
+            openModal();
+            document.getElementById("saveOperation").addEventListener("click", () => {
+                appointment.log.unshift("Agora · Operação editada manualmente");
+                closeModal();
+                showToast("Edição operacional registrada no histórico do atendimento.");
+                render();
+            });
+        }
+
+        function openPetModal(appointment) {
+            modalTitle.textContent = "Perfil rápido do pet";
+            modalSubtitle.textContent = `${appointment.pet} · ${appointment.tutor}`;
+            modalBody.innerHTML = `
+                <div class="form-grid">
+                    <div class="field"><label>Pet</label><input value="${appointment.pet}"></div>
+                    <div class="field"><label>Tutor</label><input value="${appointment.tutor}"></div>
+                    <div class="field"><label>Espécie</label><input value="Cão"></div>
+                    <div class="field"><label>Porte</label><input value="Pequeno"></div>
+                    <div class="field field--wide"><label>Observações do perfil</label><textarea>${appointment.notes}</textarea></div>
+                </div>
+            `;
+            modalFoot.innerHTML = `
+                <button class="btn btn--ghost" type="button" data-close-modal>Fechar</button>
+                <button class="btn btn--primary" type="button" data-close-modal>Salvar perfil</button>
+            `;
+            openModal();
+        }
+
+        function openMoreModal(appointment) {
+            modalTitle.textContent = "Ações do atendimento";
+            modalSubtitle.textContent = "Ações secundárias agrupadas para não poluir a lista.";
+            modalBody.innerHTML = `
+                <div class="drawer-actions">
+                    <button class="btn btn--ghost" type="button" data-more-action="services">Ver serviços</button>
+                    <button class="btn btn--ghost" type="button" data-more-action="reschedule">Reagendar</button>
+                    <button class="btn btn--ghost" type="button" data-more-action="taxidog">Editar TaxiDog</button>
+                    <button class="btn btn--danger" type="button" data-more-action="cancel">Cancelar</button>
+                </div>
+            `;
+            modalFoot.innerHTML = `<button class="btn btn--ghost" type="button" data-close-modal>Fechar</button>`;
+            openModal();
+            document.querySelectorAll("[data-more-action]").forEach((button) => {
+                button.addEventListener("click", () => {
+                    appointment.log.unshift(`Agora · Ação secundária: ${button.textContent}`);
+                    closeModal();
+                    showToast(`${button.textContent} registrado no log do atendimento.`);
+                    render();
+                });
+            });
+        }
+
+        function openModal() {
+            modal.classList.add("is-open");
+            bindCloseButtons();
+        }
+
+        function closeModal() {
+            modal.classList.remove("is-open");
+        }
+
+        function bindCloseButtons() {
+            document.querySelectorAll("[data-close-modal]").forEach((button) => {
+                button.addEventListener("click", closeModal, { once: true });
+            });
+        }
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add("is-visible");
+            window.clearTimeout(showToast.timer);
+            showToast.timer = window.setTimeout(() => toast.classList.remove("is-visible"), 3200);
+        }
+
+        function getAppointment(id) {
+            return appointments.find((appointment) => appointment.id === id) || appointments[0];
+        }
+
+        document.getElementById("searchInput").addEventListener("input", (event) => {
+            query = event.target.value;
+            render();
+        });
+
+        document.querySelectorAll("[data-filter]").forEach((button) => {
+            button.addEventListener("click", () => {
+                currentFilter = button.dataset.filter;
+                document.querySelectorAll("[data-filter]").forEach((item) => item.classList.remove("btn--active"));
+                button.classList.add("btn--active");
+                render();
+            });
+        });
+
+        document.querySelectorAll("[data-view]").forEach((button) => {
+            button.addEventListener("click", () => {
+                document.querySelectorAll("[data-view]").forEach((item) => item.classList.remove("btn--active"));
+                button.classList.add("btn--active");
+                showToast(`Visão ${button.textContent} selecionada no protótipo.`);
+            });
+        });
+
+        document.querySelectorAll("[data-shift], [data-today]").forEach((button) => {
+            button.addEventListener("click", () => showToast("Navegação de data simulada no protótipo."));
+        });
+
+        modal.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+
+        render();
+    </script>
+</body>
+</html>

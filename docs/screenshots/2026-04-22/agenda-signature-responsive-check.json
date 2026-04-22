@@ -1,0 +1,62 @@
+[
+  {
+    "activeTab": "Confirmações e próximos passos",
+    "bodyScrollWidth": 488,
+    "hasHorizontalOverflow": false,
+    "headerRadius": "0px",
+    "innerWidth": 488,
+    "requestedWidth": 375,
+    "scrollWidth": 488,
+    "tabFont": "Manrope, \"Segoe UI\", sans-serif",
+    "titleFont": "Sora, \"Segoe UI\", sans-serif",
+    "width": 488
+  },
+  {
+    "activeTab": "Confirmações e próximos passos",
+    "bodyScrollWidth": 588,
+    "hasHorizontalOverflow": false,
+    "headerRadius": "0px",
+    "innerWidth": 588,
+    "requestedWidth": 600,
+    "scrollWidth": 588,
+    "tabFont": "Manrope, \"Segoe UI\", sans-serif",
+    "titleFont": "Sora, \"Segoe UI\", sans-serif",
+    "width": 588
+  },
+  {
+    "activeTab": "Confirmações e próximos passos",
+    "bodyScrollWidth": 828,
+    "hasHorizontalOverflow": false,
+    "headerRadius": "0px",
+    "innerWidth": 828,
+    "requestedWidth": 840,
+    "scrollWidth": 828,
+    "tabFont": "Manrope, \"Segoe UI\", sans-serif",
+    "titleFont": "Sora, \"Segoe UI\", sans-serif",
+    "width": 828
+  },
+  {
+    "activeTab": "Confirmações e próximos passos",
+    "bodyScrollWidth": 1188,
+    "hasHorizontalOverflow": false,
+    "headerRadius": "0px",
+    "innerWidth": 1188,
+    "requestedWidth": 1200,
+    "scrollWidth": 1188,
+    "tabFont": "Manrope, \"Segoe UI\", sans-serif",
+    "titleFont": "Sora, \"Segoe UI\", sans-serif",
+    "width": 1188
+  },
+  {
+    "activeTab": "Confirmações e próximos passos",
+    "bodyScrollWidth": 1908,
+    "hasHorizontalOverflow": false,
+    "headerRadius": "0px",
+    "innerWidth": 1908,
+    "requestedWidth": 1920,
+    "scrollWidth": 1908,
+    "tabFont": "Manrope, \"Segoe UI\", sans-serif",
+    "titleFont": "Sora, \"Segoe UI\", sans-serif",
+    "width": 1908
+  }
+]

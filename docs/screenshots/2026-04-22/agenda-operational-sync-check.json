@@ -1,0 +1,30 @@
+{
+  "ajaxProbe": {
+    "cardHtmlLength": 2518,
+    "hasCardHtml": true,
+    "hasRowHtml": true,
+    "message": "Status atualizado.",
+    "ok": true,
+    "rowHtmlLength": 5450
+  },
+  "desktop": {
+    "apptId": "1667",
+    "cardCount": 1,
+    "cardPrimaryText": "Cobrar cliente",
+    "cardStage": "Finalizado",
+    "inspectorStage": "Finalizado",
+    "rowCount": 1,
+    "rowPrimaryText": "Cobrar cliente",
+    "rowStage": "Finalizado",
+    "selectedCards": 1,
+    "selectedRows": 1
+  },
+  "mobile": {
+    "firstCardPrimaryText": "Cobrar cliente",
+    "firstCardStage": "Finalizado",
+    "selectedCards": 1,
+    "tableContainerDisplay": "none",
+    "viewportWidth": 482,
+    "visibleCards": 1
+  }
+}

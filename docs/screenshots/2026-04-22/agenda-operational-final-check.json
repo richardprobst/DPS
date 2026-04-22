@@ -1,0 +1,34 @@
+{
+  "desktop": {
+    "cardCount": 1,
+    "cardPrimaryText": "Cobrar cliente",
+    "inspectorStage": "Finalizado",
+    "inspectorVisible": true,
+    "legacyPanels": {
+      "detalhes": 0,
+      "operacao": 0,
+      "visaoRapida": 0
+    },
+    "rowCount": 1,
+    "rowPrimaryText": "Cobrar cliente",
+    "selectedCards": 1,
+    "selectedRows": 1,
+    "shellCount": 1,
+    "tabButtonCount": 0,
+    "tabsNavCount": 0
+  },
+  "modal": {
+    "bodyLength": 8778,
+    "opened": true,
+    "title": "Fluxo operacional do atendimento"
+  },
+  "mobile": {
+    "firstCardPrimaryText": "Cobrar cliente",
+    "firstCardStage": "",
+    "tableContainerDisplay": "",
+    "viewportWidth": 482,
+    "visibleCards": 1
+  },
+  "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day",
+  "checked_at": "2026-04-22T11:20:40"
+}

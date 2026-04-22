@@ -1,0 +1,26 @@
+{
+  "desktop": {
+    "canonicalRows": 1,
+    "firstAction": "Cobrar cliente",
+    "hasInspector": true,
+    "hasWorkspace": true,
+    "mobileCards": 1,
+    "overflow": false,
+    "scrollWidth": 1407,
+    "subtitle": "Uma linha por atendimento, com etapa, financeiro, operação, logística e ações no mesmo eixo.",
+    "tabsNavDisplay": "none",
+    "title": "Fila operacional",
+    "width": 1422
+  },
+  "mobile": {
+    "overflow": false,
+    "scrollWidth": 467,
+    "tableDisplay": "none",
+    "visibleCards": 1,
+    "width": 482
+  },
+  "screenshots": [
+    "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-22\\agenda-operational-implementation-1440.png",
+    "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-22\\agenda-operational-implementation-375.png"
+  ]
+}

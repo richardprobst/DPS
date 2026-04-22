@@ -83,6 +83,12 @@ Antes de criar uma nova versÃ£o oficial:
 
 #### Added (Adicionado)
 
+**Agenda Add-on - fila operacional DPS Signature**
+
+- Implementada a primeira versão da fila operacional canônica da Agenda, substituindo a leitura em três tabelas por um eixo único com horário, pet/tutor, serviços, etapa, financeiro, operação, logística e ações.
+- Adicionados cards operacionais mobile, painel contextual do atendimento selecionado, busca local, filtros rápidos, ação primária por etapa e agrupamento de ações secundárias.
+- Mantidos os modais funcionais existentes para serviços, operação/checklist/check-in/check-out, histórico, pagamento e reagendamento, agora acionados a partir da nova estrutura.
+
 **Client Portal ? Login h?brido e acesso recorrente**
 
 - **Login por e-mail e senha no Portal do Cliente**: mantido o acesso por magic link e adicionado fluxo recorrente com usu?rio WordPress vinculado ao e-mail cadastrado no cliente.
@@ -133,7 +139,7 @@ Antes de criar uma nova versÃ£o oficial:
 - **SeguranÃ§a**: cÃ³digo hashed com `wp_hash_password()`, expiraÃ§Ã£o de 10 minutos, mÃ¡ximo 5 tentativas (anti-brute-force). Anti-enumeration: tentativas incrementadas antes da verificaÃ§Ã£o.
 - **UI de verificaÃ§Ã£o**: 6 inputs individuais com auto-advance entre dÃ­gitos, suporte a paste (colar cÃ³digo inteiro), auto-submit quando completo. E-mail ofuscado no formulÃ¡rio (j***@gmail.com).
 - **E-mail responsivo**: template HTML com dÃ­gitos em caixas estilizadas, branding do portal.
-- **Remember-me preservado**: flag de "Manter acesso" Ã© mantida atravÃ©s do fluxo 2FA via transient.
+- **Remember-me preservado**: flag de "Manter acesso" Ã© mantida atravÃ©s do fluxo 2FA por estado persistente expirÃ¡vel.
 - **Auditoria**: eventos `2fa_code_sent` e `2fa_verified` registrados via `DPS_Audit_Logger`.
 
 **Base Plugin â€” Fase 7.1+7.2: Infraestrutura de Testes**
@@ -201,6 +207,7 @@ Antes de criar uma nova versÃ£o oficial:
 - **Reset de senha dentro do portal**: nova tela dedicada para cria??o/redefini??o de senha, mantendo o mesmo contexto visual do acesso p?blico.
 - **Admin de logins revisado**: a ?rea administrativa passou a exibir estado de magic link, estado do acesso por senha, ?ltimo login, atividade recente e a??es de sincroniza??o/envio de acesso por senha.
 - **Sess?o h?brida unificada**: logins por magic link e por senha agora compartilham restaura??o de sessÃ£o, remember-me e registro de ?ltimo acesso.
+- **Client Portal sem transients/cache interno**: sessao do portal, 2FA, remember-me pendente, rate limiting e auditoria de tokens foram migrados para options persistentes com expiracao/retencao propria; secoes do portal passam a renderizar sempre em tempo real mantendo hooks legados de compatibilidade.
 
 **AI Add-on â€” Assistente Virtual no Portal do Cliente**
 
@@ -249,6 +256,8 @@ Antes de criar uma nova versÃ£o oficial:
 - **Modal de reagendamento**: corrigido o posicionamento do botao de fechar e o shell visual do reagendamento, eliminando o aspecto solto que deformava o dialogo.
 - **Alinhamentos e overflow**: padronizados margens, alinhamentos e contencao de overflow na aba Operacao e nos dialogos, com revalidacao nos breakpoints `375`, `600`, `840`, `1200` e `1920`.
 - **Check-in e check-out editaveis**: os registros operacionais agora podem ser editados sem estourar a tabela, continuam gravados no atendimento e deixam rastros em historico para auditoria.
+- **Fila operacional canonica**: o refresh AJAX da Agenda agora atualiza em conjunto a linha desktop e o card mobile do mesmo atendimento, mantendo selecao, inspetor contextual e resposta coerente no runtime publicado.
+- **Shell operacional unico**: o runtime publicado deixou de depender das abas legadas e agora responde sempre pela fila operacional DPS Signature, inclusive nas atualizacoes do modal operacional.
 
 - **Agenda vazia**: corrigida a condicao de empty state para refletir o conjunto exibido de fato e oferecer recuperacao objetiva ao usuario.
 - **Paginacao e acessibilidade das tabs**: preservado apenas o contexto necessario da aba ativa ao paginar a agenda completa; os paineis agora expoem `aria-labelledby`, `hidden` e navegacao por teclado consistente.

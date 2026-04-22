@@ -167,7 +167,7 @@ final class DPS_Client_Portal {
 
             // Armazena remember flag para aplicar apÃ³s 2FA
             if ( isset( $_GET['dps_remember'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['dps_remember'] ) ) ) {
-                set_transient( 'dps_2fa_remember_' . $session_key, '1', 600 );
+                $twofa->set_remember_flag( $session_key );
             }
 
             // Sinaliza 2FA pendente para o shortcode renderizar o formulÃ¡rio
@@ -2257,9 +2257,8 @@ final class DPS_Client_Portal {
             return;
         }
         
-        // Pre-load meta cache
+        // Lista de pets usada nas consultas em tempo real abaixo.
         $pet_ids = wp_list_pluck( $pets, 'ID' );
-        update_meta_cache( 'post', $pet_ids );
         
         // Pre-fetch prÃ³ximos agendamentos de todos os pets em uma Ãºnica query
         $today = current_time( 'Y-m-d' );

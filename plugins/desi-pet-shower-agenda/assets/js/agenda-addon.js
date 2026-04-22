@@ -1,4 +1,4 @@
-﻿(function($){
+(function($){
   /**
    * Escapa caracteres especiais HTML para prevenir XSS.
    * @param {string} str String a ser escapada.
@@ -14,11 +14,11 @@
   }
 
   /**
-   * Exibe notificaÃ§Ã£o toast estilizada para feedback do usuÃ¡rio.
-   * Substitui alert() nativo por uma notificaÃ§Ã£o moderna.
+   * Exibe notificação toast estilizada para feedback do usuário.
+   * Substitui alert() nativo por uma notificação moderna.
    * @param {string} message Mensagem a ser exibida.
-   * @param {string} type Tipo da notificaÃ§Ã£o: 'error', 'success', 'warning', 'info'.
-   * @param {number} duration DuraÃ§Ã£o em ms (padrÃ£o: 4000).
+   * @param {string} type Tipo da notificação: 'error', 'success', 'warning', 'info'.
+   * @param {number} duration Duração em ms (padrão: 4000).
    */
   function showToast(message, type, duration) {
     type = type || 'error';
@@ -28,10 +28,10 @@
     $('.dps-toast').remove();
 
     var icons = {
-      error: 'âŒ',
-      success: 'âœ…',
-      warning: 'âš ï¸',
-      info: 'â„¹ï¸'
+      error: '',
+      success: '✅',
+      warning: '⚠',
+      info: 'ℹ'
     };
 
     var icon = icons[type] || icons.info;
@@ -55,7 +55,7 @@
       setTimeout(function() { toast.remove(); }, 300);
     });
 
-    // Auto-remove apÃ³s duraÃ§Ã£o
+    // Auto-remove após duração
     if (duration > 0) {
       setTimeout(function() {
         toast.removeClass('dps-toast--visible');
@@ -64,7 +64,7 @@
     }
   }
 
-  // ExpÃµe globalmente para uso em outros mÃ³dulos
+  // Expõe globalmente para uso em outros módulos
   window.DPSToast = { show: showToast };
 
   var AGENDA_DIALOG_SELECTOR = '.dps-agenda-dialog-overlay';
@@ -263,13 +263,25 @@
     }, 120);
   }
 
+  function normalizeAjaxJsonResponse(resp) {
+    if (typeof resp !== 'string') {
+      return resp;
+    }
+
+    try {
+      return JSON.parse(resp.replace(/^\uFEFF/, ''));
+    } catch (e) {
+      return null;
+    }
+  }
+
   function openOperationPanel(apptId, options) {
     var settings = $.extend({
       focusPanel: false,
       focusTarget: 'checklist',
       toast: ''
     }, options || {});
-    var row = $('tr[data-appt-id="' + apptId + '"]').first();
+    var row = $('tr[data-appt-id="' + apptId + '"], .dps-operational-card[data-appt-id="' + apptId + '"]').first();
     var trigger = row.find('[data-operation-focus="' + settings.focusTarget + '"]').first();
 
     if (!row.length) {
@@ -277,8 +289,8 @@
     }
 
     var dialog = showAgendaContentDialog({
-      title: getMessage('operationDialogTitle', 'OperaÃ§Ã£o do atendimento'),
-      subtitle: getMessage('operationDialogSubtitle', 'Checklist, check-in e check-out em um fluxo Ãºnico.'),
+      title: getMessage('operationDialogTitle', 'Operação do atendimento'),
+      subtitle: getMessage('operationDialogSubtitle', 'Checklist, check-in e check-out em um fluxo único.'),
       size: 'large',
       trigger: trigger.length ? trigger : null,
       bodyHtml: '<p class="dps-checklist-modal-loading">' + escapeHtml(getMessage('checklistLoading', 'Carregando checklist...')) + '</p>'
@@ -286,20 +298,32 @@
 
     dialog.attr('data-operation-appt-id', apptId);
 
-    $.post(DPS_AG_Addon.ajax, {
-      action: 'dps_get_operation_panel',
-      appointment_id: apptId,
-      agenda_tab: getCurrentAgendaTab(),
-      nonce: DPS_AG_Addon.nonce_checklist
-    }, function(resp) {
+    $.ajax({
+      url: DPS_AG_Addon.ajax,
+      method: 'POST',
+      dataType: 'json',
+      data: {
+        action: 'dps_get_operation_panel',
+        appointment_id: apptId,
+        agenda_tab: getCurrentAgendaTab(),
+        nonce: DPS_AG_Addon.nonce_checklist
+      }
+    }).done(function(resp) {
+      resp = normalizeAjaxJsonResponse(resp);
       if (resp && resp.success && resp.data && resp.data.html) {
         dialog.find('.dps-agenda-dialog__body').html(resp.data.html);
         focusOperationModal(dialog, settings.focusTarget);
       } else {
-        dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Nao foi possivel carregar o checklist.')) + '</p>');
+        dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Não foi possível carregar o checklist.')) + '</p>');
       }
-    }).fail(function() {
-      dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Nao foi possivel carregar o checklist.')) + '</p>');
+    }).fail(function(xhr) {
+      var fallback = normalizeAjaxJsonResponse(xhr && xhr.responseText ? xhr.responseText : null);
+      if (fallback && fallback.success && fallback.data && fallback.data.html) {
+        dialog.find('.dps-agenda-dialog__body').html(fallback.data.html);
+        focusOperationModal(dialog, settings.focusTarget);
+        return;
+      }
+      dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Não foi possível carregar o checklist.')) + '</p>');
     });
 
     if (settings.toast) {
@@ -324,6 +348,9 @@
   window.DPSAgendaShared = {
     getCurrentTab: getCurrentAgendaTab,
     replaceRow: replaceAgendaRow,
+    replaceCard: replaceAgendaCard,
+    refreshMarkup: refreshAgendaMarkup,
+    syncInspector: syncOperationalInspector,
     showToast: showToast
   };
 
@@ -345,46 +372,46 @@
   });
 
   /**
-   * ObtÃ©m o label e Ã­cone do porte do pet.
+   * Obtém o label e ícone do porte do pet.
    * @param {string} size Porte do pet (pequeno, medio, grande, small, medium, large).
    * @return {object} Objeto com label e icon.
    */
   function getPetSizeInfo(size) {
-    if (!size) return { label: '', icon: 'ðŸ•' };
+    if (!size) return { label: '', icon: '' };
 
     var sizeLower = size.toLowerCase();
     var sizeMap = {
-      'pequeno': { label: 'Pequeno', icon: 'ðŸ•' },
-      'small': { label: 'Pequeno', icon: 'ðŸ•' },
-      'medio': { label: 'MÃ©dio', icon: 'ðŸ¦®' },
-      'mÃ©dio': { label: 'MÃ©dio', icon: 'ðŸ¦®' },
-      'medium': { label: 'MÃ©dio', icon: 'ðŸ¦®' },
-      'grande': { label: 'Grande', icon: 'ðŸ•â€ðŸ¦º' },
-      'large': { label: 'Grande', icon: 'ðŸ•â€ðŸ¦º' }
+      'pequeno': { label: 'Pequeno', icon: '' },
+      'small': { label: 'Pequeno', icon: '' },
+      'medio': { label: 'Médio', icon: '🦮' },
+      'médio': { label: 'Médio', icon: '🦮' },
+      'medium': { label: 'Médio', icon: '🦮' },
+      'grande': { label: 'Grande', icon: '🦺' },
+      'large': { label: 'Grande', icon: '🦺' }
     };
 
-    return sizeMap[sizeLower] || { label: '', icon: 'ðŸ•' };
+    return sizeMap[sizeLower] || { label: '', icon: '' };
   }
 
   /**
-   * ObtÃ©m informaÃ§Ãµes visuais do serviÃ§o (Ã­cone, classe, label).
-   * @param {object} service Objeto do serviÃ§o com name, type, category, is_taxidog.
+   * Obtém informações visuais do serviço (ícone, classe, label).
+   * @param {object} service Objeto do serviço com name, type, category, is_taxidog.
    * @return {object} Objeto com icon, typeClass, typeLabel.
    */
   function getServiceVisualInfo(service) {
-    // Mapas de Ã­cones por tipo e categoria
+    // Mapas de ícones por tipo e categoria
     var typeIcons = {
-      'taxidog': { icon: 'ðŸš', typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' },
-      'extra': { icon: 'âœ¨', typeClass: 'dps-service-type-extra', typeLabel: 'Extra' },
-      'package': { icon: 'ðŸ“¦', typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' }
+      'taxidog': { icon: '', typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' },
+      'extra': { icon: '✨', typeClass: 'dps-service-type-extra', typeLabel: 'Extra' },
+      'package': { icon: '📦', typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' }
     };
 
     var categoryIcons = {
-      'banho': 'ðŸ›',
-      'tosa': 'âœ‚ï¸',
-      'unha': 'ðŸ’…',
-      'ouvido': 'ðŸ‘‚',
-      'dente': 'ðŸ¦·'
+      'banho': '',
+      'tosa': '✂',
+      'unha': '💅',
+      'ouvido': '👂',
+      'dente': '🦷'
     };
 
     // Verifica TaxiDog primeiro
@@ -395,24 +422,24 @@
     // Verifica tipo
     if (service.type && typeIcons[service.type]) {
       var info = Object.assign({}, typeIcons[service.type]);
-      // Determina Ã­cone pela categoria ou nome
+      // Determina ícone pela categoria ou nome
       info.icon = getCategoryIcon(service, categoryIcons);
       return info;
     }
 
-    // ServiÃ§o padrÃ£o
+    // Serviço padrão
     return {
       icon: getCategoryIcon(service, categoryIcons),
       typeClass: 'dps-service-type-padrao',
-      typeLabel: 'ServiÃ§o'
+      typeLabel: 'Serviço'
     };
   }
 
   /**
-   * ObtÃ©m o Ã­cone baseado na categoria ou nome do serviÃ§o.
-   * @param {object} service Objeto do serviÃ§o.
-   * @param {object} categoryIcons Mapa de Ã­cones por categoria.
-   * @return {string} Ãcone emoji.
+   * Obtém o ícone baseado na categoria ou nome do serviço.
+   * @param {object} service Objeto do serviço.
+   * @param {object} categoryIcons Mapa de ícones por categoria.
+   * @return {string} cone emoji.
    */
   function getCategoryIcon(service, categoryIcons) {
     // Verifica categoria diretamente
@@ -420,7 +447,7 @@
       return categoryIcons[service.category];
     }
 
-    // Verifica pelo nome do serviÃ§o
+    // Verifica pelo nome do serviço
     if (service.name) {
       var nameLower = service.name.toLowerCase();
       for (var cat in categoryIcons) {
@@ -430,8 +457,8 @@
       }
     }
 
-    // Ãcone padrÃ£o
-    return 'âœ‚ï¸';
+    // cone padrão
+    return '✂';
   }
 
   $(document).ready(function(){
@@ -445,23 +472,7 @@
       }
     });
 
-    // Restaura a ultima aba apenas quando a URL nao define uma aba explicitamente.
-    try {
-      var agendaUrl = new URL(window.location.href);
-      var requestedTab = agendaUrl.searchParams.get('agenda_tab');
-      if (!requestedTab) {
-        var lastTab = sessionStorage.getItem('dps_agenda_current_tab');
-        if (lastTab) {
-          var button = $('.dps-agenda-tab-button[data-tab="' + lastTab + '"]');
-          if (button.length) {
-            button.trigger('click');
-          }
-        }
-      }
-    } catch(e) {
-      // Ignora erros de URL/sessionStorage (modo privado, etc)
-    }
-    // Evento de alteraÃ§Ã£o de status
+    // Evento de alteração de status
 
     $(document).on('change', '.dps-status-select', function(){
       var select = $(this);
@@ -495,7 +506,7 @@
           }
 
           if ( resp.data && resp.data.row_html ) {
-            replaceAgendaRow(row, resp.data.row_html);
+            refreshAgendaMarkup(row, resp.data);
             showToast(getMessage('updated', 'Status atualizado!'), 'success', 1800);
           } else {
             updateRowStatus(apptId, status);
@@ -516,7 +527,7 @@
       function handleError(response){
         var fallback = 'Erro ao atualizar status.';
         if ( response && response.data && response.data.error_code === 'version_conflict' ) {
-          feedback.addClass('dps-status-feedback--error').text(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuÃ¡rio. Atualize a pÃ¡gina para ver as alteraÃ§Ãµes.'));
+          feedback.addClass('dps-status-feedback--error').text(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.'));
           select.val(previous);
           return;
         }
@@ -527,7 +538,7 @@
         }
       }
     });
-    // Evento para visualizar serviÃ§os de um agendamento
+    // Evento para visualizar serviços de um agendamento
     // Usa modal customizado em vez de alert() para melhor UX
     $(document).on('click', '.dps-services-link', function(e){
       e.preventDefault();
@@ -535,7 +546,7 @@
       var apptId = parseInt(link.data('appt-id'), 10) || 0;
 
       if (!apptId) {
-        showToast('Agendamento invÃ¡lido.', 'error');
+        showToast('Agendamento inválido.', 'error');
         return;
       }
 
@@ -568,15 +579,15 @@
               });
             }
           } else {
-            // Lista vazia - exibe modal com mensagem apropriada se disponÃ­vel
+            // Lista vazia - exibe modal com mensagem apropriada se disponível
             if ( typeof window.DPSServicesModal !== 'undefined' ) {
               window.DPSServicesModal.show([]);
             } else {
-              showToast('Nenhum serviÃ§o encontrado para este agendamento.', 'info');
+              showToast('Nenhum serviço encontrado para este agendamento.', 'info');
             }
           }
         } else {
-          showToast(resp && resp.data ? resp.data.message : 'Erro ao buscar serviÃ§os.', 'error');
+          showToast(resp && resp.data ? resp.data.message : 'Erro ao buscar serviços.', 'error');
         }
       }).fail(function(xhr){
         showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
@@ -604,7 +615,7 @@
       }).done(function(resp){
         if ( resp && resp.success ) {
           if ( resp.data && resp.data.row_html ) {
-            replaceAgendaRow(row, resp.data.row_html);
+            refreshAgendaMarkup(row, resp.data);
           } else if ( resp.data && resp.data.new_status ) {
             updateRowStatus(apptId, resp.data.new_status);
             row.find('.dps-quick-action-btn').prop('disabled', false).removeClass('is-loading');
@@ -625,7 +636,7 @@
       }
     });
 
-    // CONF-2: Evento para botÃµes de confirmaÃ§Ã£o
+    // CONF-2: Evento para botões de confirmação
 
     $(document).on('click', '.dps-confirmation-btn', function(e){
       e.preventDefault();
@@ -649,7 +660,7 @@
       }).done(function(resp){
         if ( resp && resp.success ) {
           if ( resp.data && resp.data.row_html ) {
-            replaceAgendaRow(row, resp.data.row_html);
+            refreshAgendaMarkup(row, resp.data);
           } else {
             row.find('.dps-confirmation-btn').prop('disabled', false).removeClass('is-loading');
           }
@@ -661,7 +672,7 @@
       });
 
       function handleConfirmationError(response){
-        showToast(getAjaxErrorMessage(response, 'Erro ao atualizar confirmacao. Tente novamente.'), 'error');
+        showToast(getAjaxErrorMessage(response, 'Erro ao atualizar confirmação. Tente novamente.'), 'error');
         row.find('.dps-confirmation-btn').prop('disabled', false).removeClass('is-loading');
       }
     });
@@ -669,7 +680,7 @@
 
   /**
    * Atualiza a classe de uma linha da tabela da agenda com o novo status.
-   * Cada linha utiliza data-appt-id para identificÃ¡-la e classes CSS no formato
+   * Cada linha utiliza data-appt-id para identificá-la e classes CSS no formato
    * status-pendente, status-finalizado, status-finalizado_pago ou status-cancelado.
    * @param {string|number} apptId ID do agendamento
    * @param {string} status Novo status definido
@@ -691,22 +702,21 @@
 
 
   function getCurrentAgendaTab(){
-    var activeButton = $('.dps-agenda-tab-button--active').first();
-    if ( activeButton.length && activeButton.data('tab') ) {
-      return String(activeButton.data('tab'));
+    if ( $('.dps-agenda-operational-workspace[data-dps-agenda-mode="operacional"]').length ) {
+      return 'operacional';
     }
 
     try {
       var agendaUrl = new URL(window.location.href);
       var requestedTab = agendaUrl.searchParams.get('agenda_tab');
-      if ( requestedTab ) {
+      if ( requestedTab === 'operacional' ) {
         return requestedTab;
       }
     } catch(e) {
       // Ignora erros da URL API
     }
 
-    return 'visao-rapida';
+    return 'operacional';
   }
 
   function replaceAgendaRow(row, rowHtml){
@@ -726,6 +736,7 @@
     var apptId = currentRow.data('appt-id');
     var detailRow = currentRow.next('.dps-detail-row[data-appt-id="' + apptId + '"]');
     var keepExpanded = detailRow.length && detailRow.is(':visible');
+    var keepSelected = currentRow.hasClass('is-selected');
 
     currentRow.replaceWith(parsedRows);
     if ( detailRow.length ) {
@@ -737,6 +748,10 @@
       parsedRows.first().find('.dps-expand-panels-btn').attr('aria-expanded', 'true');
     }
 
+    if ( keepSelected ) {
+      parsedRows.first().addClass('is-selected');
+    }
+
     parsedRows.addClass('dps-row-updated');
     setTimeout(function(){
       parsedRows.removeClass('dps-row-updated');
@@ -744,6 +759,280 @@
 
     return parsedRows.first();
   }
+
+  function getCanonicalCard(apptId) {
+    return $('.dps-operational-card[data-appt-id="' + apptId + '"]').first();
+  }
+
+  function replaceAgendaCard(apptId, cardHtml) {
+    var currentCard = getCanonicalCard(apptId);
+    if ( ! currentCard.length || ! cardHtml ) {
+      return currentCard;
+    }
+
+    var parsedCard = $($.parseHTML($.trim(cardHtml), document, true)).filter('.dps-operational-card');
+    if ( ! parsedCard.length ) {
+      parsedCard = $(cardHtml).filter('.dps-operational-card');
+    }
+    if ( ! parsedCard.length ) {
+      return currentCard;
+    }
+
+    var keepSelected = currentCard.hasClass('is-selected');
+    currentCard.replaceWith(parsedCard);
+
+    if ( keepSelected ) {
+      parsedCard.addClass('is-selected');
+    }
+
+    parsedCard.addClass('dps-row-updated');
+    setTimeout(function(){
+      parsedCard.removeClass('dps-row-updated');
+    }, 1500);
+
+    return parsedCard.first();
+  }
+
+  function getOperationalTarget(element) {
+    return $(element).closest('tr[data-appt-id], .dps-operational-card[data-appt-id]');
+  }
+
+  function getCanonicalRow(apptId) {
+    return $('tr[data-appt-id="' + apptId + '"]').first();
+  }
+
+  function refreshAgendaMarkup(target, payload) {
+    var currentTarget = target && target.jquery ? target : $(target);
+    var apptId = (currentTarget.length ? currentTarget.data('appt-id') : '') || (payload && payload.appointment_id) || '';
+    var updatedRow = currentTarget;
+    var wasSelected = currentTarget.hasClass('is-selected');
+
+    if ( apptId && ( ! updatedRow.length || !updatedRow.is('tr') ) ) {
+      updatedRow = getCanonicalRow(apptId);
+    }
+
+    if ( apptId && !wasSelected ) {
+      wasSelected = getCanonicalCard(apptId).hasClass('is-selected');
+    }
+
+    if ( payload && payload.row_html && updatedRow.length ) {
+      updatedRow = replaceAgendaRow(updatedRow, payload.row_html);
+    }
+
+    if ( payload && payload.card_html && apptId ) {
+      replaceAgendaCard(apptId, payload.card_html);
+    }
+
+    if ( $('.dps-agenda-operational-workspace[data-dps-agenda-mode="operacional"]').length ) {
+      filterOperationalList();
+    }
+
+    if ( wasSelected && updatedRow.length ) {
+      syncOperationalInspector(updatedRow);
+    }
+
+    return updatedRow;
+  }
+
+  function syncOperationalInspector(source) {
+    var target = source && source.jquery ? source : $(source);
+    if (!target.length || !$('.dps-operational-inspector').length) {
+      return;
+    }
+
+    var fields = {
+      pet: target.data('dps-pet') || '',
+      tutor: target.data('dps-tutor') || '',
+      stage: target.data('dps-stage') || '',
+      service: target.data('dps-service') || '',
+      payment: target.data('dps-payment') || '',
+      logistics: target.data('dps-logistics') || '',
+      notes: target.data('dps-notes') || '',
+      progress: String(target.data('dps-progress') || '0') + '%'
+    };
+
+    $('[data-inspector-field="pet"]').text(fields.pet);
+    $('[data-inspector-field="tutor"]').text(fields.tutor);
+    $('[data-inspector-field="stage"]').text(fields.stage);
+    $('[data-inspector-field="service"]').text(fields.service);
+    $('[data-inspector-field="payment"]').text(fields.payment);
+    $('[data-inspector-field="logistics"]').text(fields.logistics);
+    $('[data-inspector-field="notes"]').text(fields.notes);
+    $('[data-inspector-field="progress"]').text(fields.progress);
+    $('[data-inspector-progress-bar]').css('width', fields.progress);
+
+    $('tr[data-appt-id], .dps-operational-card[data-appt-id]').removeClass('is-selected');
+    $('tr[data-appt-id="' + target.data('appt-id') + '"], .dps-operational-card[data-appt-id="' + target.data('appt-id') + '"]').addClass('is-selected');
+  }
+
+  function filterOperationalList() {
+    var query = String($('.dps-agenda-operational-search__input').val() || '').toLowerCase();
+    var filter = $('.dps-agenda-filter-btn--active').data('agenda-filter') || 'all';
+
+    $('tr.dps-operational-row, .dps-operational-card').each(function(){
+      var item = $(this);
+      var haystack = [
+        item.data('dps-pet'),
+        item.data('dps-tutor'),
+        item.data('dps-stage'),
+        item.data('dps-service'),
+        item.data('dps-payment'),
+        item.data('dps-logistics'),
+        item.data('dps-notes')
+      ].join(' ').toLowerCase();
+      var matchesQuery = !query || haystack.indexOf(query) !== -1;
+      var matchesFilter = filter === 'all' ||
+        (filter === 'late' && item.hasClass('is-late')) ||
+        (filter === 'taxidog' && haystack.indexOf('taxidog') !== -1);
+
+      item.toggle(matchesQuery && matchesFilter);
+    });
+
+    $('.dps-agenda-day-panel--operational').each(function(){
+      var panel = $(this);
+      var visibleRows = panel.find('tr.dps-operational-row:visible, .dps-operational-card:visible').length;
+      panel.toggle(visibleRows > 0);
+    });
+
+    if ( $('.dps-operational-inspector').length ) {
+      var selectedVisible = $('tr.dps-operational-row.is-selected:visible, .dps-operational-card.is-selected:visible').first();
+      if ( selectedVisible.length ) {
+        return;
+      }
+
+      var nextVisible = $('tr.dps-operational-row:visible, .dps-operational-card:visible').first();
+      if ( nextVisible.length ) {
+        syncOperationalInspector(nextVisible);
+      }
+    }
+  }
+
+  if ( $('.dps-agenda-operational-workspace[data-dps-agenda-mode="operacional"]').length ) {
+    filterOperationalList();
+  }
+
+  $(document).on('click', 'tr.dps-operational-row, .dps-operational-card', function(e){
+    if ($(e.target).closest('a, button, input, select, textarea, label').length) {
+      return;
+    }
+    syncOperationalInspector($(this));
+  });
+
+  $(document).on('input', '.dps-agenda-operational-search__input', filterOperationalList);
+
+  $(document).on('click', '.dps-agenda-filter-btn', function(){
+    $('.dps-agenda-filter-btn').removeClass('dps-agenda-filter-btn--active');
+    $(this).addClass('dps-agenda-filter-btn--active');
+    filterOperationalList();
+  });
+
+  $(document).on('click', '.dps-agenda-primary-confirm', function(e){
+    e.preventDefault();
+    var btn = $(this);
+    var apptId = btn.data('appt-id');
+    var row = getCanonicalRow(apptId);
+
+    btn.prop('disabled', true).addClass('is-loading');
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_agenda_update_confirmation',
+      appt_id: apptId,
+      confirmation_status: 'confirmed',
+      nonce: DPS_AG_Addon.nonce_confirmation,
+      agenda_tab: getCurrentAgendaTab()
+    }, function(resp){
+      if (resp && resp.success) {
+        if (resp.data && resp.data.row_html && row.length) {
+          row = refreshAgendaMarkup(row, resp.data);
+          syncOperationalInspector(row);
+        }
+        showToast(resp.data && resp.data.message ? resp.data.message : 'Atendimento confirmado.', 'success', 1600);
+      } else {
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao confirmar atendimento.', 'error');
+      }
+    }).fail(function(xhr){
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
+    }).always(function(){
+      btn.prop('disabled', false).removeClass('is-loading');
+    });
+  });
+
+  $(document).on('click', '.dps-agenda-finalize-btn', function(e){
+    e.preventDefault();
+    var btn = $(this);
+    var apptId = btn.data('appt-id');
+    var version = parseInt(btn.data('appt-version'), 10) || 1;
+    var row = getCanonicalRow(apptId);
+
+    btn.prop('disabled', true).addClass('is-loading');
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_update_status',
+      id: apptId,
+      status: 'finalizado',
+      version: version,
+      nonce: DPS_AG_Addon.nonce_status,
+      agenda_tab: getCurrentAgendaTab()
+    }, function(resp){
+      if (resp && resp.success) {
+        if (resp.data && resp.data.row_html && row.length) {
+          row = refreshAgendaMarkup(row, resp.data);
+          syncOperationalInspector(row);
+        }
+        setTimeout(function(){
+          openOperationPanel(apptId, {
+            focusPanel: true,
+            focusTarget: 'checklist',
+            toast: getMessage('operationPanelContinue', 'Continue o fluxo operacional no modal do atendimento.')
+          });
+        }, 120);
+      } else if (resp && resp.data && resp.data.error_code === 'version_conflict') {
+        showToast(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.'), 'warning');
+      } else {
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao finalizar atendimento.', 'error');
+      }
+    }).fail(function(xhr){
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
+    }).always(function(){
+      btn.prop('disabled', false).removeClass('is-loading');
+    });
+  });
+
+  $(document).on('click', '.dps-agenda-secondary-actions', function(e){
+    e.preventDefault();
+    var btn = $(this);
+    var apptId = btn.data('appt-id');
+    var row = getCanonicalRow(apptId);
+    var date = row.data('dps-date') || '';
+    var time = row.data('dps-time') || '';
+    var bodyHtml = '<div class="dps-secondary-action-grid">' +
+      '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-secondary-action="services">Serviços</button>' +
+      '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-secondary-action="operation">Operação</button>' +
+      '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-secondary-action="reschedule">Reagendar</button>' +
+      '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-secondary-action="history">Histórico</button>' +
+      '</div>';
+
+    openAgendaDialog({
+      title: 'Ações do atendimento',
+      subtitle: 'Ações secundárias agrupadas para manter a fila limpa.',
+      size: 'small',
+      trigger: btn,
+      bodyHtml: bodyHtml,
+      footerHtml: '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + escapeHtml(getMessage('close', 'Fechar')) + '</button>'
+    });
+
+    $(document).one('click.dpsSecondaryActions', '[data-secondary-action]', function(){
+      var action = $(this).data('secondary-action');
+      closeAgendaDialog($(AGENDA_DIALOG_SELECTOR).last(), 'secondary-action');
+      if (action === 'services') {
+        row.find('.dps-services-popup-btn').trigger('click');
+      } else if (action === 'operation') {
+        openOperationPanel(apptId, { focusPanel: true, focusTarget: 'checklist' });
+      } else if (action === 'history') {
+        $('<button type="button" class="dps-history-indicator" data-appt-id="' + apptId + '"></button>').appendTo('body').trigger('click').remove();
+      } else if (action === 'reschedule') {
+        $('<button type="button" class="dps-quick-reschedule" data-appt-id="' + apptId + '" data-date="' + escapeHtml(date) + '" data-time="' + escapeHtml(time) + '"></button>').appendTo('body').trigger('click').remove();
+      }
+    });
+  });
 
   function parseAjaxPayload(text){
     if ( ! text || typeof text !== 'string' ) {
@@ -800,30 +1089,30 @@
     return fallback;
   }
 
-  // FASE 2: ExportaÃ§Ã£o PDF (abre pÃ¡gina de impressÃ£o em nova janela)
+  // FASE 2: Exportação PDF (abre página de impressão em nova janela)
   $(document).on('click', '.dps-export-pdf-btn', function(e){
     e.preventDefault();
     var btn = $(this);
     var date = btn.data('date') || '';
     var view = btn.data('view') || 'day';
 
-    // ConstrÃ³i URL para a pÃ¡gina de impressÃ£o PDF
+    // Constrói URL para a página de impressão PDF
     var pdfUrl = DPS_AG_Addon.ajax +
       '?action=dps_agenda_export_pdf' +
       '&date=' + encodeURIComponent(date) +
       '&view=' + encodeURIComponent(view) +
       '&nonce=' + encodeURIComponent(DPS_AG_Addon.nonce_export_pdf);
 
-    // Calcula dimensÃµes responsivas para a janela
+    // Calcula dimensões responsivas para a janela
     var width = Math.min(950, window.screen.availWidth - 100);
     var height = Math.min(700, window.screen.availHeight - 100);
 
-    // Abre em nova janela com dimensÃµes responsivas
+    // Abre em nova janela com dimensões responsivas
     window.open(pdfUrl, '_blank', 'width=' + width + ',height=' + height + ',scrollbars=yes');
   });
 
   // =========================================================================
-  // FASE 5: Reagendamento RÃ¡pido
+  // FASE 5: Reagendamento Rápido
   // =========================================================================
 
   // Abrir dialog de reagendamento
@@ -882,7 +1171,7 @@
       if ( resp && resp.success ) {
         closeAgendaDialog(dialog, 'saved');
         showToast(resp.data.message, 'success');
-        // Aguarda 2 segundos para o usuÃ¡rio ver a mensagem de sucesso antes de recarregar
+        // Aguarda 2 segundos para o usuário ver a mensagem de sucesso antes de recarregar
         setTimeout(function(){ location.reload(); }, 2000);
       } else {
         showToast(resp.data ? resp.data.message : getMessage('error', 'Erro ao reagendar.'), 'error');
@@ -895,7 +1184,7 @@
   });
 
   // =========================================================================
-  // FASE 5: HistÃ³rico de AlteraÃ§Ãµes
+  // FASE 5: Histórico de Alterações
   // =========================================================================
 
   function buildHistoryDialogBody(history) {
@@ -943,7 +1232,7 @@
       if ( resp && resp.success ) {
         var history = resp.data.history || [];
         if ( history.length === 0 ) {
-          showToast(getMessage('no_history', 'Sem historico de alteracoes.'), 'info');
+          showToast(getMessage('no_history', 'Sem histórico de alterações.'), 'info');
           return;
         }
 
@@ -955,10 +1244,10 @@
           footerHtml: '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + escapeHtml(getMessage('historyClose', getMessage('close', 'Fechar'))) + '</button>'
         });
       } else {
-        showToast(resp.data ? resp.data.message : getMessage('error', 'Erro ao buscar historico.'), 'error');
+        showToast(resp.data ? resp.data.message : getMessage('error', 'Erro ao buscar histórico.'), 'error');
       }
     }).fail(function(xhr){
-      showToast(getAjaxErrorMessage(xhr, getMessage('error', 'Erro ao buscar historico.')), 'error');
+      showToast(getAjaxErrorMessage(xhr, getMessage('error', 'Erro ao buscar histórico.')), 'error');
     });
   });
 
@@ -977,7 +1266,7 @@
     return labels[action] || action;
   }
 
-  // FASE 3: AÃ§Ãµes rÃ¡pidas de TaxiDog
+  // FASE 3: Ações rápidas de TaxiDog
 
   $(document).on('click', '.dps-taxidog-action-btn', function(e){
     e.preventDefault();
@@ -997,7 +1286,7 @@
     }, function(resp){
       if ( resp && resp.success ) {
         if ( resp.data && resp.data.row_html ) {
-          replaceAgendaRow(row, resp.data.row_html);
+          refreshAgendaMarkup(row, resp.data);
         } else {
           location.reload();
         }
@@ -1061,7 +1350,7 @@
         }, function(resp){
           if (resp && resp.success) {
             if (resp.data && resp.data.row_html) {
-              replaceAgendaRow(row, resp.data.row_html);
+              refreshAgendaMarkup(row, resp.data);
             } else {
               location.reload();
             }
@@ -1077,72 +1366,11 @@
     });
   });
 
-  // FASE 6: Sistema de navegacao entre abas
-  function activateAgendaTab(clickedButton) {
-    var targetTab = clickedButton.data('tab');
-    var buttons = $('.dps-agenda-tab-button');
-
-    buttons.removeClass('dps-agenda-tab-button--active')
-      .attr('aria-selected', 'false')
-      .attr('tabindex', '-1');
-    clickedButton.addClass('dps-agenda-tab-button--active')
-      .attr('aria-selected', 'true')
-      .attr('tabindex', '0');
-
-    $('.dps-tab-content').removeClass('dps-tab-content--active').attr('hidden', true);
-    $('#dps-tab-content-' + targetTab).addClass('dps-tab-content--active').removeAttr('hidden');
-
-    try {
-      sessionStorage.setItem('dps_agenda_current_tab', targetTab);
-    } catch(e) {
-      // Ignora erros de sessionStorage (modo privado, etc)
-    }
-
-    try {
-      var nextUrl = new URL(window.location.href);
-      nextUrl.searchParams.set('agenda_tab', targetTab);
-      window.history.replaceState({}, '', nextUrl.toString());
-    } catch(e) {
-      // Ignora erros da URL API
-    }
-  }
-
-  $(document).on('click', '.dps-agenda-tab-button', function(e){
-    e.preventDefault();
-    activateAgendaTab($(this));
-  });
-
-  $(document).on('keydown', '.dps-agenda-tab-button', function(e){
-    var buttons = $('.dps-agenda-tab-button');
-    var currentIndex = buttons.index(this);
-    var nextIndex = currentIndex;
-
-    if (e.key === 'ArrowRight') {
-      nextIndex = (currentIndex + 1) % buttons.length;
-    } else if (e.key === 'ArrowLeft') {
-      nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
-    } else if (e.key === 'Home') {
-      nextIndex = 0;
-    } else if (e.key === 'End') {
-      nextIndex = buttons.length - 1;
-    } else if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      activateAgendaTab($(this));
-      return;
-    } else {
-      return;
-    }
-
-    e.preventDefault();
-    var nextButton = buttons.eq(nextIndex);
-    nextButton.focus();
-    activateAgendaTab(nextButton);
-  });
   // =========================================================================
   // FASE 7: Novos Handlers para Dropdowns e Popups
   // =========================================================================
 
-  // Handler para dropdown de confirmaÃ§Ã£o (Tab1)
+  // Handler para dropdown de confirmação (Tab1)
 
   $(document).on('change', '.dps-confirmation-dropdown', function(){
     var select = $(this);
@@ -1161,8 +1389,8 @@
     }, function(resp){
       if (resp && resp.success) {
         if (resp.data && resp.data.row_html) {
-          replaceAgendaRow(row, resp.data.row_html);
-          showToast(resp.data.message || 'Confirmacao atualizada.', 'success', 1600);
+          row = refreshAgendaMarkup(row, resp.data);
+          showToast(resp.data.message || 'Confirmação atualizada.', 'success', 1600);
         } else {
           select.removeClass('dps-dropdown--confirmed dps-dropdown--not-confirmed dps-dropdown--cancelled');
           if (confirmationStatus === 'confirmed') {
@@ -1178,7 +1406,7 @@
           }, 1000);
         }
       } else {
-        showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar confirmacao.', 'error');
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar confirmação.', 'error');
       }
     }).fail(function(xhr){
       showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
@@ -1214,7 +1442,7 @@
         }
 
         if (resp.data && resp.data.row_html) {
-          replaceAgendaRow(row, resp.data.row_html);
+          row = refreshAgendaMarkup(row, resp.data);
           if (status === 'finalizado' || status === 'finalizado_pago') {
             setTimeout(function(){
               openOperationPanel(apptId, {
@@ -1253,7 +1481,7 @@
         }
       } else {
         if (resp && resp.data && resp.data.error_code === 'version_conflict') {
-          showToast(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuÃ¡rio. Atualize a pÃ¡gina para ver as alteraÃ§Ãµes.'), 'warning');
+          showToast(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.'), 'warning');
         } else {
           showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar status.', 'error');
         }
@@ -1267,7 +1495,7 @@
     });
   });
 
-  // Handler para botÃ£o de popup de serviÃ§os (Tab1)
+  // Handler para botão de popup de serviços (Tab1)
   var SERVICES_MODAL_SELECTOR = '.dps-services-modal';
   var SERVICES_MODAL_CONTENT_SELECTOR = '.dps-services-modal-content';
   var SERVICES_MODAL_CLOSE_SELECTOR = '.dps-services-modal-close';
@@ -1318,7 +1546,7 @@
       return 'Pequeno';
     }
 
-    if (normalized === 'medio' || normalized === 'mÃ©dio' || normalized === 'medium') {
+    if (normalized === 'medio' || normalized === 'médio' || normalized === 'medium') {
       return 'M\u00E9dio';
     }
 
@@ -1676,7 +1904,7 @@
     }, function(resp){
       if (resp && resp.success) {
         if (resp.data && resp.data.row_html) {
-          replaceAgendaRow(row, resp.data.row_html);
+          row = refreshAgendaMarkup(row, resp.data);
           showToast(resp.data.message || 'TaxiDog atualizado.', 'success', 1600);
         } else {
           row.css('background-color', '#d1fae5');
@@ -1694,7 +1922,7 @@
     });
   });
 
-  // Handler para botÃ£o de solicitar TaxiDog (Tab3)
+  // Handler para botão de solicitar TaxiDog (Tab3)
 
   $(document).on('click', '.dps-taxidog-request-btn', function(e){
     e.preventDefault();
@@ -1718,7 +1946,7 @@
         }, function(resp){
           if (resp && resp.success) {
             if (resp.data && resp.data.row_html) {
-              replaceAgendaRow(row, resp.data.row_html);
+              row = refreshAgendaMarkup(row, resp.data);
               showToast(resp.data.message || 'TaxiDog solicitado com sucesso!', 'success', 1600);
             } else {
               location.reload();
@@ -1736,7 +1964,7 @@
   });
 
   /* ===========================
-     CHECKLIST OPERACIONAL â€” POPUP
+     CHECKLIST OPERACIONAL — POPUP
      =========================== */
 
   /**
@@ -1759,18 +1987,29 @@
       bodyHtml: '<p class="dps-checklist-modal-loading">' + loadingMsg + '</p>'
     });
 
-    $.post(DPS_AG_Addon.ajax, {
-      action: 'dps_get_checklist_panel',
-      appointment_id: apptId,
-      nonce: DPS_AG_Addon.nonce_checklist
-    }, function(resp) {
+    $.ajax({
+      url: DPS_AG_Addon.ajax,
+      method: 'POST',
+      dataType: 'json',
+      data: {
+        action: 'dps_get_checklist_panel',
+        appointment_id: apptId,
+        nonce: DPS_AG_Addon.nonce_checklist
+      }
+    }).done(function(resp) {
+      resp = normalizeAjaxJsonResponse(resp);
       if (resp && resp.success && resp.data && resp.data.html) {
         dialog.find('.dps-agenda-dialog__body').html(resp.data.html);
       } else {
-        dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Nao foi possivel carregar o checklist.')) + '</p>');
+        dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Não foi possível carregar o checklist.')) + '</p>');
       }
-    }).fail(function() {
-      dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Nao foi possivel carregar o checklist.')) + '</p>');
+    }).fail(function(xhr) {
+      var fallback = normalizeAjaxJsonResponse(xhr && xhr.responseText ? xhr.responseText : null);
+      if (fallback && fallback.success && fallback.data && fallback.data.html) {
+        dialog.find('.dps-agenda-dialog__body').html(fallback.data.html);
+        return;
+      }
+      dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Não foi possível carregar o checklist.')) + '</p>');
     });
   }
 

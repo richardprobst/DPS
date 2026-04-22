@@ -1,9 +1,9 @@
 <?php
 /**
- * Helper de Cache do Portal do Cliente
+ * Helper de compatibilidade do Portal do Cliente.
  *
- * Gerencia cache de seções do portal para melhorar performance.
- * Usa transients do WordPress com invalidação inteligente.
+ * Mantem o contrato publico da antiga API de cache, mas sempre executa
+ * as secoes em tempo real para cumprir a politica global sem cache.
  *
  * @package DPS_Client_Portal
  * @since 2.5.0
@@ -16,71 +16,53 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'DPS_Portal_Cache_Helper' ) ) :
 
 /**
- * Classe helper para gerenciamento de cache do portal
+ * Classe de compatibilidade para contratos historicos do portal.
  */
 final class DPS_Portal_Cache_Helper {
 
     /**
-     * Prefixo para chaves de cache
+     * Prefixo legado mantido para compatibilidade com integracoes externas.
      *
      * @var string
      */
     const CACHE_PREFIX = 'dps_portal_';
 
     /**
-     * Tempo de vida padrão do cache (1 hora)
+     * Valor legado mantido para filtros existentes. Nao controla armazenamento.
      *
      * @var int
      */
     const CACHE_LIFETIME = HOUR_IN_SECONDS;
 
     /**
-     * Obtém conteúdo cacheado de uma seção
+     * Renderiza uma secao sempre em tempo real.
      *
-     * @param string   $section    Nome da seção (ex: 'next_appt', 'history', 'gallery')
-     * @param int      $client_id  ID do cliente
-     * @param callable $callback   Função que gera o conteúdo se não estiver em cache
-     * @param int      $expiration Tempo de expiração em segundos (padrão: 1 hora)
-     * @return string Conteúdo da seção
+     * @param string   $section    Nome da secao.
+     * @param int      $client_id  ID do cliente.
+     * @param callable $callback   Funcao que gera o conteudo.
+     * @param int|null $expiration Valor legado recebido por compatibilidade.
+     * @return string Conteudo da secao.
      */
     public static function get_cached_section( $section, $client_id, $callback, $expiration = null ) {
-        // Permite desabilitar cache via filtro
-        if ( apply_filters( 'dps_portal_disable_cache', false, $section, $client_id ) ) {
-            ob_start();
-            call_user_func( $callback, $client_id );
-            return ob_get_clean();
-        }
+        $expiration = $expiration ?? self::CACHE_LIFETIME;
 
-        $cache_key = self::get_cache_key( $section, $client_id );
-        $cached    = get_transient( $cache_key );
+        apply_filters( 'dps_portal_disable_cache', false, $section, $client_id );
+        apply_filters( 'dps_portal_cache_expiration', $expiration, $section, $client_id );
 
-        if ( false !== $cached ) {
-            return $cached;
-        }
-
-        // Gera conteúdo
         ob_start();
         call_user_func( $callback, $client_id );
-        $output = ob_get_clean();
-
-        // Armazena em cache
-        $expiration = $expiration ?? self::CACHE_LIFETIME;
-        $expiration = apply_filters( 'dps_portal_cache_expiration', $expiration, $section, $client_id );
-        
-        set_transient( $cache_key, $output, $expiration );
-
-        return $output;
+        return ob_get_clean();
     }
 
     /**
-     * Invalida cache de um cliente específico
+     * Notifica integracoes sobre atualizacao de dados de um cliente.
      *
-     * @param int          $client_id ID do cliente
-     * @param string|array $sections  Seções a invalidar (null = todas)
+     * @param int          $client_id ID do cliente.
+     * @param string|array $sections  Secoes afetadas (null = todas).
+     * @return void
      */
     public static function invalidate_client_cache( $client_id, $sections = null ) {
         if ( null === $sections ) {
-            // Invalida todas as seções padrão
             $sections = [
                 'next_appt',
                 'history',
@@ -96,67 +78,30 @@ final class DPS_Portal_Cache_Helper {
             $sections = [ $sections ];
         }
 
-        foreach ( $sections as $section ) {
-            $cache_key = self::get_cache_key( $section, $client_id );
-            delete_transient( $cache_key );
-        }
-
         do_action( 'dps_portal_cache_invalidated', $client_id, $sections );
     }
 
     /**
-     * Invalida cache de todos os clientes
+     * Notifica integracoes sobre atualizacao global do portal.
      *
-     * Útil quando há mudanças globais (ex: atualização de serviços)
+     * @return void
      */
     public static function invalidate_all_cache() {
-        global $wpdb;
-
-        // Remove todos os transients do portal
-        $wpdb->query(
-            $wpdb->prepare(
-                "DELETE FROM {$wpdb->options} 
-                WHERE option_name LIKE %s 
-                OR option_name LIKE %s",
-                $wpdb->esc_like( '_transient_' . self::CACHE_PREFIX ) . '%',
-                $wpdb->esc_like( '_transient_timeout_' . self::CACHE_PREFIX ) . '%'
-            )
-        );
-
         do_action( 'dps_portal_all_cache_invalidated' );
     }
 
     /**
-     * Gera chave de cache única
+     * Retorna estatisticas de compatibilidade.
      *
-     * @param string $section   Nome da seção
-     * @param int    $client_id ID do cliente
-     * @return string Chave de cache
-     */
-    private static function get_cache_key( $section, $client_id ) {
-        return self::CACHE_PREFIX . $section . '_' . $client_id;
-    }
-
-    /**
-     * Retorna estatísticas de cache (para debug)
-     *
-     * @return array Estatísticas de cache
+     * @return array<string, mixed>
      */
     public static function get_cache_stats() {
-        global $wpdb;
-
-        $total = $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$wpdb->options} 
-                WHERE option_name LIKE %s",
-                $wpdb->esc_like( '_transient_' . self::CACHE_PREFIX ) . '%'
-            )
-        );
-
         return [
-            'total_cached_sections' => intval( $total ),
+            'total_cached_sections' => 0,
             'cache_prefix'          => self::CACHE_PREFIX,
             'default_lifetime'      => self::CACHE_LIFETIME,
+            'cache_enabled'         => false,
+            'storage_mode'          => 'realtime',
         ];
     }
 }

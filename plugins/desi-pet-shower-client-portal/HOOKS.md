@@ -199,10 +199,12 @@ add_action( 'dps_portal_after_update_client', function( $client_id, $post_data )
 
 ---
 
-### Hooks de Cache
+### Hooks legados de atualizacao do portal
 
 #### `dps_portal_cache_invalidated`
-Executado após invalidar cache de um cliente.
+Executado quando dados de um cliente mudam em pontos que historicamente invalidavam cache.
+O Client Portal nao armazena mais secoes renderizadas; este hook permanece apenas
+como contrato de compatibilidade para add-ons que precisam reagir a alteracoes.
 
 **Parâmetros:**
 - `int $client_id` - ID do cliente
@@ -211,15 +213,16 @@ Executado após invalidar cache de um cliente.
 **Uso:**
 ```php
 add_action( 'dps_portal_cache_invalidated', function( $client_id, $sections ) {
-    // Limpar cache customizado
-    delete_transient( 'my_custom_cache_' . $client_id );
+    // Sincronizar um indice externo ou registrar uma auditoria.
+    my_portal_sync_after_client_change( $client_id, $sections );
 }, 10, 2 );
 ```
 
 ---
 
 #### `dps_portal_all_cache_invalidated`
-Executado após invalidar todo o cache do portal.
+Executado quando uma mudanca global do portal deve ser propagada para integracoes.
+Nao ha armazenamento interno a limpar.
 
 **Parâmetros:** Nenhum
 
@@ -285,7 +288,8 @@ add_filter( 'dps_portal_login_screen', function( $output ) {
 ---
 
 ### `dps_portal_disable_cache`
-Permite desabilitar cache para seções específicas.
+Filtro legado mantido para compatibilidade com integracoes antigas.
+Como o Client Portal renderiza secoes em tempo real, o valor retornado nao altera o comportamento interno.
 
 **Parâmetros:**
 - `bool $disable` - Se deve desabilitar (padrão: false)
@@ -297,10 +301,7 @@ Permite desabilitar cache para seções específicas.
 **Uso:**
 ```php
 add_filter( 'dps_portal_disable_cache', function( $disable, $section, $client_id ) {
-    // Desabilitar cache para seção 'history'
-    if ( $section === 'history' ) {
-        return true;
-    }
+    // Compatibilidade: nao ha armazenamento interno a desabilitar.
     return $disable;
 }, 10, 3 );
 ```
@@ -308,22 +309,20 @@ add_filter( 'dps_portal_disable_cache', function( $disable, $section, $client_id
 ---
 
 ### `dps_portal_cache_expiration`
-Permite customizar tempo de expiração do cache.
+Filtro legado mantido para compatibilidade com integracoes antigas.
+Como o Client Portal nao persiste secoes renderizadas, o valor retornado nao controla armazenamento interno.
 
 **Parâmetros:**
 - `int $expiration` - Tempo em segundos (padrão: 1 hora)
 - `string $section` - Nome da seção
 - `int $client_id` - ID do cliente
 
-**Retorno:** `int` - Tempo de expiração em segundos
+**Retorno:** `int` - Valor legado em segundos
 
 **Uso:**
 ```php
 add_filter( 'dps_portal_cache_expiration', function( $expiration, $section, $client_id ) {
-    // Cache de 2 horas para histórico
-    if ( $section === 'history' ) {
-        return 2 * HOUR_IN_SECONDS;
-    }
+    // Compatibilidade: manter o valor recebido.
     return $expiration;
 }, 10, 3 );
 ```
@@ -368,4 +367,4 @@ add_action( 'dps_portal_custom_tab_panels', function( $client_id, $tabs ) {
 
 Para mais informações sobre hooks e extensibilidade, consulte:
 - `ANALYSIS.md` - Arquitetura geral do sistema
-- `CLIENT_PORTAL_ADDON_DEEP_ANALYSIS.md` - Análise detalhada do add-on
+- `docs/analysis/CLIENT_PORTAL_ADDON_DEEP_ANALYSIS.md` - Análise detalhada do add-on

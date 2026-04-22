@@ -480,12 +480,6 @@ final class DPS_Portal_Profile_Update {
             'meta_value'     => $client_id,
         ] );
         
-        // Pré-carrega metadados dos pets
-        if ( $pets ) {
-            $pet_ids = wp_list_pluck( $pets, 'ID' );
-            update_meta_cache( 'post', $pet_ids );
-        }
-        
         // Carrega dados das raças
         $breed_data = [];
         if ( function_exists( 'dps_get_breed_data' ) ) {

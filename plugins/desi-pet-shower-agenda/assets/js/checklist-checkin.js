@@ -43,22 +43,7 @@
       return window.DPSAgendaShared.getCurrentTab();
     }
 
-    var activeButton = $('.dps-agenda-tab-button--active').first();
-    if (activeButton.length && activeButton.data('tab')) {
-      return String(activeButton.data('tab'));
-    }
-
-    try {
-      var agendaUrl = new URL(window.location.href);
-      var requestedTab = agendaUrl.searchParams.get('agenda_tab');
-      if (requestedTab) {
-        return requestedTab;
-      }
-    } catch (e) {
-      // Ignora falhas da URL API.
-    }
-
-    return 'visao-rapida';
+    return 'operacional';
   }
 
   function closeReworkModal(target) {
@@ -134,8 +119,18 @@
     }, options || {});
     var dialog = getOperationDialog(appointmentId);
 
-    if (data && data.row_html) {
-      replaceAgendaRow(appointmentId, data.row_html);
+    if (data && (data.row_html || data.card_html)) {
+      if (window.DPSAgendaShared && typeof window.DPSAgendaShared.refreshMarkup === 'function') {
+        window.DPSAgendaShared.refreshMarkup(getAgendaRow(appointmentId), data);
+      } else {
+        if (data.row_html) {
+          replaceAgendaRow(appointmentId, data.row_html);
+        }
+
+        if (data.card_html && window.DPSAgendaShared && typeof window.DPSAgendaShared.replaceCard === 'function') {
+          window.DPSAgendaShared.replaceCard(appointmentId, data.card_html);
+        }
+      }
     }
 
     if (dialog.length && data && data.operation_html) {

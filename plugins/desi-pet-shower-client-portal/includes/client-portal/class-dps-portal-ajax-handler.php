@@ -359,22 +359,17 @@ class DPS_Portal_AJAX_Handler {
     public function ajax_request_portal_access() {
         // Valida IP para rate limiting
         $ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
-        $rate_key = 'dps_access_request_' . md5( $ip );
+        $rate_limiter = DPS_Portal_Rate_Limiter::get_instance();
         
         // Verifica se já solicitou recentemente (rate limiting: 5 solicitações por hora)
-        $request_count = get_transient( $rate_key );
-        if ( false === $request_count ) {
-            $request_count = 0;
-        }
-        
-        if ( $request_count >= 5 ) {
+        if ( $rate_limiter->is_limited( 'portal_access_request_ip', $ip, 5 ) ) {
             wp_send_json_error( [ 
                 'message' => __( 'Você já solicitou acesso várias vezes. Aguarde um momento antes de solicitar novamente.', 'dps-client-portal' ) 
             ] );
         }
         
         // Incrementa contador
-        set_transient( $rate_key, $request_count + 1, HOUR_IN_SECONDS );
+        $rate_limiter->hit( 'portal_access_request_ip', $ip, HOUR_IN_SECONDS );
         
         // Captura dados do cliente (opcional, pode vir do formulário)
         $client_name = isset( $_POST['client_name'] ) ? sanitize_text_field( wp_unslash( $_POST['client_name'] ) ) : '';

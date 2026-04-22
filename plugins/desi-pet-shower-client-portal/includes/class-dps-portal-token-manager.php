@@ -67,6 +67,27 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
     const MAX_USER_AGENT_LENGTH = 255;
 
     /**
+     * Option que armazena tentativas invalidas de token para auditoria.
+     *
+     * @var string
+     */
+    private const INVALID_ATTEMPTS_OPTION = 'dps_portal_invalid_token_attempts';
+
+    /**
+     * Retencao dos registros de tentativa invalida.
+     *
+     * @var int
+     */
+    private const INVALID_ATTEMPTS_RETENTION = 2592000;
+
+    /**
+     * Limite maximo de registros persistidos na option de auditoria.
+     *
+     * @var int
+     */
+    private const MAX_INVALID_ATTEMPTS = 200;
+
+    /**
      * Única instância da classe
      *
      * @var DPS_Portal_Token_Manager|null
@@ -248,7 +269,6 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
      *
      * Implementa rate limiting para prevenir brute force:
      * - 5 tentativas por hora por IP
-     * - Cache negativo de tokens inválidos (5 min)
      * - Logging de tentativas inválidas
      *
      * @param string $token_plain Token em texto plano
@@ -263,28 +283,16 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
 
         // SECURITY: Rate limiting (5 tentativas/hora por IP)
         $ip = $this->get_client_ip_with_proxy_support();
-        $rate_limit_key = 'dps_token_attempts_' . md5( $ip );
-        $attempts = get_transient( $rate_limit_key );
+        $is_rate_limited = $this->is_rate_limited( $ip );
         
-        if ( false === $attempts ) {
-            $attempts = 0;
-        }
         
         // Bloqueia se excedeu o limite
-        if ( $attempts >= 5 ) {
+        if ( $is_rate_limited ) {
             // Log da tentativa bloqueada
             do_action( 'dps_portal_rate_limit_exceeded', $ip, $token_plain );
             return false;
         }
         
-        // SECURITY: Cache negativo para tokens claramente inválidos
-        $token_cache_key = 'dps_invalid_token_' . md5( $token_plain );
-        if ( get_transient( $token_cache_key ) ) {
-            // Token já foi validado e é inválido, não tentar novamente
-            $this->increment_rate_limit( $rate_limit_key, $attempts );
-            return false;
-        }
-
         $table_name = $this->get_table_name();
         $now        = current_time( 'mysql' );
 
@@ -303,8 +311,7 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
         if ( empty( $tokens ) ) {
             // Nenhum token ativo encontrado
             $this->log_invalid_attempt( $token_plain, $ip, 'no_active_tokens' );
-            $this->increment_rate_limit( $rate_limit_key, $attempts );
-            set_transient( $token_cache_key, 1, 5 * MINUTE_IN_SECONDS );
+            $this->increment_rate_limit( $ip );
             return false;
         }
 
@@ -312,27 +319,53 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
         foreach ( $tokens as $token_data ) {
             if ( password_verify( $token_plain, $token_data['token_hash'] ) ) {
                 // Token válido encontrado - reseta contador de rate limit
-                delete_transient( $rate_limit_key );
-                delete_transient( $token_cache_key );
+                $this->clear_rate_limit( $ip );
                 return $token_data;
             }
         }
 
         // Token não encontrado
         $this->log_invalid_attempt( $token_plain, $ip, 'token_not_found' );
-        $this->increment_rate_limit( $rate_limit_key, $attempts );
-        set_transient( $token_cache_key, 1, 5 * MINUTE_IN_SECONDS );
+        $this->increment_rate_limit( $ip );
         return false;
     }
     
     /**
-     * Incrementa o contador de rate limiting
+     * Verifica se o IP excedeu o limite de validacao de token.
      *
-     * @param string $key Chave do transient
-     * @param int    $current_attempts Tentativas atuais
+     * @param string $ip IP do cliente.
+     * @return bool
      */
-    private function increment_rate_limit( $key, $current_attempts ) {
-        set_transient( $key, $current_attempts + 1, HOUR_IN_SECONDS );
+    private function is_rate_limited( $ip ) {
+        if ( ! class_exists( 'DPS_Portal_Rate_Limiter' ) ) {
+            return false;
+        }
+
+        return DPS_Portal_Rate_Limiter::get_instance()->is_limited( 'portal_token_validation_ip', $ip, 5 );
+    }
+
+    /**
+     * Incrementa o contador de rate limiting.
+     *
+     * @param string $ip IP do cliente.
+     * @return void
+     */
+    private function increment_rate_limit( $ip ) {
+        if ( class_exists( 'DPS_Portal_Rate_Limiter' ) ) {
+            DPS_Portal_Rate_Limiter::get_instance()->hit( 'portal_token_validation_ip', $ip, HOUR_IN_SECONDS );
+        }
+    }
+
+    /**
+     * Limpa o contador de rate limiting.
+     *
+     * @param string $ip IP do cliente.
+     * @return void
+     */
+    private function clear_rate_limit( $ip ) {
+        if ( class_exists( 'DPS_Portal_Rate_Limiter' ) ) {
+            DPS_Portal_Rate_Limiter::get_instance()->clear( 'portal_token_validation_ip', $ip );
+        }
     }
     
     /**
@@ -356,9 +389,41 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
         // Hook para extensibilidade (pode salvar em CPT, enviar alertas, etc)
         do_action( 'dps_portal_invalid_token_attempt', $log_data );
         
-        // Salva log em transient (retenção de 30 dias)
-        $log_key = 'dps_token_invalid_log_' . md5( $ip . $token_plain );
-        set_transient( $log_key, $log_data, 30 * DAY_IN_SECONDS );
+        // Persiste log com retencao limitada.
+        $this->persist_invalid_attempt_log( $log_data );
+    }
+
+    /**
+     * Persiste log de tentativa invalida com retencao limitada.
+     *
+     * @param array<string, mixed> $log_data Dados da tentativa.
+     * @return void
+     */
+    private function persist_invalid_attempt_log( array $log_data ) {
+        $logs = get_option( self::INVALID_ATTEMPTS_OPTION, [] );
+        if ( ! is_array( $logs ) ) {
+            $logs = [];
+        }
+
+        $now    = time();
+        $cutoff = $now - self::INVALID_ATTEMPTS_RETENTION;
+        $logs   = array_values(
+            array_filter(
+                $logs,
+                static function( $entry ) use ( $cutoff ) {
+                    return is_array( $entry ) && isset( $entry['created_at'] ) && (int) $entry['created_at'] >= $cutoff;
+                }
+            )
+        );
+
+        $log_data['created_at'] = $now;
+        $logs[]                 = $log_data;
+
+        if ( count( $logs ) > self::MAX_INVALID_ATTEMPTS ) {
+            $logs = array_slice( $logs, -self::MAX_INVALID_ATTEMPTS );
+        }
+
+        update_option( self::INVALID_ATTEMPTS_OPTION, $logs, false );
     }
     
     /**

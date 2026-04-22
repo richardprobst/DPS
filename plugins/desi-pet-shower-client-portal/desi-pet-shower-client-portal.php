@@ -84,7 +84,7 @@ require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-user-manag
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-token-manager.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-session-manager.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-admin-actions.php';
-require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-cache-helper.php'; // Fase 2.2
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-cache-helper.php'; // Compatibilidade de contratos legados
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-calendar-helper.php'; // Fase 2.8
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-profile-update.php'; // Fase 5 - AtualizaÃ§Ã£o de perfil via link
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-2fa.php'; // Fase 6.4 - 2FA via e-mail

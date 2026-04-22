@@ -1,9 +1,9 @@
 <?php
 /**
- * Gerenciador de sessões do Portal do Cliente
+ * Gerenciador de sessoes do Portal do Cliente.
  *
- * Esta classe gerencia a autenticação e sessão dos clientes no portal,
- * independente do sistema de usuários do WordPress.
+ * Esta classe gerencia autenticacao e sessao dos clientes no portal,
+ * independente do sistema de usuarios do WordPress.
  *
  * @package DPS_Client_Portal
  * @since 2.0.0
@@ -16,45 +16,42 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'DPS_Portal_Session_Manager' ) ) :
 
 /**
- * Classe responsável pelo gerenciamento de sessões do portal
- * 
- * Versão 2.4.0: Migrado de $_SESSION para transients + cookies
- * para compatibilidade com ambientes multi-servidor e cloud.
- * 
+ * Classe responsavel pelo gerenciamento de sessoes do portal.
+ *
  * @since 3.0.0 Implementa DPS_Portal_Session_Manager_Interface
  */
 final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Interface {
 
     /**
-     * Nome do cookie de sessão
+     * Nome do cookie de sessao.
      *
      * @var string
      */
     const COOKIE_NAME = 'dps_portal_session';
 
     /**
-     * Prefixo para transients de sessão
+     * Option que armazena sessoes ativas do portal.
      *
      * @var string
      */
-    const TRANSIENT_PREFIX = 'dps_session_';
+    const SESSION_STORAGE_OPTION = 'dps_portal_sessions';
 
     /**
-     * Tempo de vida da sessão em segundos (24 horas)
+     * Tempo de vida da sessao em segundos (24 horas).
      *
      * @var int
      */
     const SESSION_LIFETIME = 86400;
 
     /**
-     * Única instância da classe
+     * Unica instancia da classe.
      *
      * @var DPS_Portal_Session_Manager|null
      */
     private static $instance = null;
 
     /**
-     * Recupera a instância única (singleton)
+     * Recupera a instancia unica (singleton).
      *
      * @return DPS_Portal_Session_Manager
      */
@@ -66,15 +63,10 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
     }
 
     /**
-     * Construtor privado para singleton
+     * Construtor privado para singleton.
      */
     private function __construct() {
-        // Valida sessão em cada requisição
-        // IMPORTANTE: Prioridade 10 para executar APÓS handle_token_authentication (prioridade 5)
-        // Isso garante que o cookie esteja definido antes da validação
-        // 
-        // NOTA: Se o hook 'init' já executou, chamamos validate_session() diretamente
-        // para garantir validação de sessão mesmo em inicialização tardia.
+        // Prioridade 10 para executar apos handle_token_authentication (prioridade 5).
         if ( did_action( 'init' ) ) {
             $this->validate_session();
         } else {
@@ -83,48 +75,36 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
     }
 
     /**
-     * Autentica um cliente no portal usando transients + cookies
+     * Autentica um cliente no portal usando cookie + armazenamento persistente.
      *
-     * @param int $client_id ID do cliente
-     * @return bool True se autenticado com sucesso, false se erro
+     * @param int $client_id ID do cliente.
+     * @return bool True se autenticado com sucesso, false se erro.
      */
     public function authenticate_client( $client_id ) {
         $client_id = absint( $client_id );
-        
-        // Valida se é um cliente válido
+
         if ( ! $client_id || 'dps_cliente' !== get_post_type( $client_id ) ) {
             return false;
         }
 
-        // Gera token de sessão único e seguro
         $session_token = bin2hex( random_bytes( 16 ) );
-        
-        // Armazena dados da sessão em transient (compatível com object cache e multi-servidor)
-        $session_data = [
+        $session_data  = [
             'client_id'  => $client_id,
             'login_time' => time(),
             'ip'         => $this->get_client_ip(),
             'user_agent' => $this->get_user_agent(),
         ];
-        
-        set_transient( 
-            self::TRANSIENT_PREFIX . $session_token, 
-            $session_data, 
-            self::SESSION_LIFETIME 
-        );
-        
-        // Define cookie seguro no navegador do cliente
+
+        $this->store_session_data( $session_token, $session_data );
+
         $expires  = time() + self::SESSION_LIFETIME;
         $path     = COOKIEPATH;
         $domain   = COOKIE_DOMAIN;
         $secure   = is_ssl();
         $httponly = true;
-        
-        // Usa sintaxe de parâmetros individuais para compatibilidade com PHP <7.3
-        // Nota: setcookie() com array associativo só funciona a partir do PHP 7.3.0
-        // Para máxima compatibilidade com versões anteriores, usamos parâmetros individuais
-        setcookie( 
-            self::COOKIE_NAME, 
+
+        setcookie(
+            self::COOKIE_NAME,
             $session_token,
             $expires,
             $path,
@@ -132,10 +112,9 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
             $secure,
             $httponly
         );
-        
-        // SameSite=Strict via header (PHP <7.3 compatibility)
+
         if ( ! headers_sent() ) {
-            header( 
+            header(
                 sprintf(
                     'Set-Cookie: %s=%s; Expires=%s; Path=%s; Domain=%s%s%s; SameSite=Strict',
                     self::COOKIE_NAME,
@@ -154,29 +133,24 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
     }
 
     /**
-     * Retorna o ID do cliente autenticado
+     * Retorna o ID do cliente autenticado.
      *
-     * @return int ID do cliente ou 0 se não autenticado
+     * @return int ID do cliente ou 0 se nao autenticado.
      */
     public function get_authenticated_client_id() {
-        // Verifica se cookie existe
         if ( ! isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
             return 0;
         }
-        
+
         $session_token = sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) );
-        
-        // Busca dados da sessão no transient
-        $session_data = get_transient( self::TRANSIENT_PREFIX . $session_token );
-        
+        $session_data  = $this->get_session_data( $session_token );
+
         if ( false === $session_data || ! is_array( $session_data ) ) {
             return 0;
         }
-        
-        // Extrai client_id
+
         $client_id = isset( $session_data['client_id'] ) ? absint( $session_data['client_id'] ) : 0;
 
-        // Valida se ainda é um cliente válido
         if ( ! $client_id || 'dps_cliente' !== get_post_type( $client_id ) ) {
             $this->logout();
             return 0;
@@ -186,33 +160,32 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
     }
 
     /**
-     * Verifica se há um cliente autenticado
+     * Verifica se ha um cliente autenticado.
      *
-     * @return bool True se autenticado, false caso contrário
+     * @return bool True se autenticado, false caso contrario.
      */
     public function is_authenticated() {
         return $this->get_authenticated_client_id() > 0;
     }
 
     /**
-     * Valida a sessão atual
-     * Remove sessões expiradas ou inválidas
+     * Valida a sessao atual.
+     *
+     * @return void
      */
     public function validate_session() {
         if ( ! isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
             return;
         }
-        
+
         $session_token = sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) );
-        $session_data  = get_transient( self::TRANSIENT_PREFIX . $session_token );
-        
+        $session_data  = $this->get_session_data( $session_token );
+
         if ( false === $session_data ) {
-            // Sessão expirou, limpa cookie
             $this->logout();
             return;
         }
-        
-        // Valida se o cliente ainda existe
+
         $client_id = isset( $session_data['client_id'] ) ? absint( $session_data['client_id'] ) : 0;
         if ( ! $client_id || 'dps_cliente' !== get_post_type( $client_id ) ) {
             $this->logout();
@@ -220,7 +193,9 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
     }
 
     /**
-     * Faz logout do cliente
+     * Faz logout do cliente.
+     *
+     * @return void
      */
     public function logout() {
         $should_logout_wp_user = false;
@@ -233,7 +208,7 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
 
         if ( isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
             $session_token = sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) );
-            delete_transient( self::TRANSIENT_PREFIX . $session_token );
+            $this->delete_session_data( $session_token );
         }
 
         $expires  = time() - 3600;
@@ -290,14 +265,15 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
     }
 
     /**
-     * Processa ação de logout via query parameter
+     * Processa acao de logout via query parameter.
+     *
+     * @return void
      */
     public function handle_logout_request() {
         if ( ! isset( $_GET['dps_portal_logout'] ) ) {
             return;
         }
 
-        // Verifica nonce
         $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
         if ( ! wp_verify_nonce( $nonce, 'dps_portal_logout' ) ) {
             return;
@@ -305,48 +281,166 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
 
         $this->logout();
 
-        // Redireciona para a tela de acesso
         $redirect_url = dps_get_portal_page_url();
         wp_safe_redirect( $redirect_url );
         exit;
     }
 
     /**
-     * Gera URL de logout
+     * Gera URL de logout.
      *
-     * @return string URL de logout com nonce
+     * @return string URL de logout com nonce.
      */
     public function get_logout_url() {
         $base_url = dps_get_portal_page_url();
 
-        return wp_nonce_url( 
-            add_query_arg( 'dps_portal_logout', '1', $base_url ), 
-            'dps_portal_logout' 
+        return wp_nonce_url(
+            add_query_arg( 'dps_portal_logout', '1', $base_url ),
+            'dps_portal_logout'
         );
     }
 
     /**
-     * Método de compatibilidade - não mais necessário
-     * Mantido para retrocompatibilidade mas não faz nada
-     * 
-     * @deprecated 2.4.0 Não mais necessário com sistema de transients
+     * Metodo de compatibilidade mantido para retrocompatibilidade.
+     *
+     * @deprecated 2.4.0 Nao e mais necessario com o armazenamento atual.
+     * @return void
      */
     public function maybe_start_session() {
-        // Não faz nada - mantido apenas para compatibilidade
+        // Mantido apenas para compatibilidade com chamadas antigas.
     }
 
     /**
-     * Obtém o IP do cliente de forma segura
+     * Armazena dados de sessao.
+     *
+     * @param string $session_token Token enviado ao navegador.
+     * @param array  $session_data  Dados da sessao.
+     * @return void
+     */
+    private function store_session_data( $session_token, array $session_data ) {
+        $sessions = $this->get_sessions();
+        $now      = time();
+
+        $this->purge_expired_sessions( $sessions, $now );
+
+        $session_data['expires_at'] = $now + self::SESSION_LIFETIME;
+        $sessions[ $this->get_session_storage_key( $session_token ) ] = $session_data;
+
+        $this->save_sessions( $sessions );
+    }
+
+    /**
+     * Recupera dados de sessao.
+     *
+     * @param string $session_token Token enviado ao navegador.
+     * @return array|false
+     */
+    private function get_session_data( $session_token ) {
+        $sessions = $this->get_sessions();
+        $key      = $this->get_session_storage_key( $session_token );
+        $now      = time();
+
+        $this->purge_expired_sessions( $sessions, $now );
+
+        if ( ! isset( $sessions[ $key ] ) || ! is_array( $sessions[ $key ] ) ) {
+            $this->save_sessions( $sessions );
+            return false;
+        }
+
+        if ( $this->is_session_expired( $sessions[ $key ], $now ) ) {
+            unset( $sessions[ $key ] );
+            $this->save_sessions( $sessions );
+            return false;
+        }
+
+        $this->save_sessions( $sessions );
+        return $sessions[ $key ];
+    }
+
+    /**
+     * Remove uma sessao.
+     *
+     * @param string $session_token Token enviado ao navegador.
+     * @return void
+     */
+    private function delete_session_data( $session_token ) {
+        $sessions = $this->get_sessions();
+        $key      = $this->get_session_storage_key( $session_token );
+
+        if ( isset( $sessions[ $key ] ) ) {
+            unset( $sessions[ $key ] );
+            $this->save_sessions( $sessions );
+        }
+    }
+
+    /**
+     * Recupera sessoes persistidas.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private function get_sessions() {
+        $sessions = get_option( self::SESSION_STORAGE_OPTION, [] );
+
+        return is_array( $sessions ) ? $sessions : [];
+    }
+
+    /**
+     * Persiste sessoes.
+     *
+     * @param array<string, array<string, mixed>> $sessions Sessoes ativas.
+     * @return void
+     */
+    private function save_sessions( array $sessions ) {
+        update_option( self::SESSION_STORAGE_OPTION, $sessions, false );
+    }
+
+    /**
+     * Remove sessoes expiradas.
+     *
+     * @param array<string, array<string, mixed>> $sessions Sessoes por referencia.
+     * @param int                                 $now      Timestamp atual.
+     * @return void
+     */
+    private function purge_expired_sessions( array &$sessions, $now ) {
+        foreach ( $sessions as $key => $session_data ) {
+            if ( ! is_array( $session_data ) || $this->is_session_expired( $session_data, $now ) ) {
+                unset( $sessions[ $key ] );
+            }
+        }
+    }
+
+    /**
+     * Determina se uma sessao expirou.
+     *
+     * @param array<string, mixed> $session_data Dados da sessao.
+     * @param int                  $now          Timestamp atual.
+     * @return bool
+     */
+    private function is_session_expired( array $session_data, $now ) {
+        return empty( $session_data['expires_at'] ) || (int) $session_data['expires_at'] <= (int) $now;
+    }
+
+    /**
+     * Gera chave interna sem persistir o token bruto.
+     *
+     * @param string $session_token Token enviado ao navegador.
+     * @return string
+     */
+    private function get_session_storage_key( $session_token ) {
+        return hash( 'sha256', (string) $session_token );
+    }
+
+    /**
+     * Obtem o IP do cliente de forma segura.
      *
      * @deprecated 2.5.0 Use DPS_IP_Helper::get_ip() diretamente.
      *
-     * @return string IP do cliente
+     * @return string IP do cliente.
      */
     private function get_client_ip() {
         if ( class_exists( 'DPS_IP_Helper' ) ) {
             return DPS_IP_Helper::get_ip();
         }
-        // Fallback para retrocompatibilidade
         if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
             return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
         }
@@ -354,9 +448,9 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
     }
 
     /**
-     * Obtém o User Agent de forma segura
+     * Obtem o User Agent de forma segura.
      *
-     * @return string User Agent
+     * @return string User Agent.
      */
     private function get_user_agent() {
         if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {

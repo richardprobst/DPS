@@ -712,3 +712,131 @@
         flex-direction: column;
     }
 }
+
+/* === DPS Signature convergence: modais operacionais === */
+
+.dps-checklist-panel,
+.dps-checkin-panel,
+.dps-rework-modal,
+.dps-checklist-modal-loading,
+.dps-checklist-modal-error {
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.dps-checklist-panel,
+.dps-checkin-panel,
+.dps-rework-modal,
+.dps-operation-modal-shell,
+.dps-checklist-panel button,
+.dps-checkin-panel button,
+.dps-rework-modal button,
+.dps-checklist-panel input,
+.dps-checkin-panel input,
+.dps-rework-modal input,
+.dps-checklist-panel textarea,
+.dps-checkin-panel textarea,
+.dps-rework-modal textarea {
+    font-family: var(--dps-signature-font-body, var(--dps-font-body, sans-serif));
+}
+
+.dps-checklist-panel h4,
+.dps-checkin-panel h4,
+.dps-rework-modal h4,
+.dps-operational-pill__value {
+    font-family: var(--dps-signature-font-display, var(--dps-font-display, sans-serif));
+}
+
+.dps-operation-modal-summary,
+.dps-operational-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: 0.5rem;
+}
+
+.dps-operational-pill {
+    min-height: 4rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: 0;
+    background: var(--dps-color-surface-container-lowest);
+}
+
+.dps-operational-pill__label {
+    letter-spacing: 0.08em;
+}
+
+.dps-operational-pill__value {
+    font-size: clamp(1rem, 1.1vw, 1.15rem);
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.dps-expand-panels-btn,
+.dps-operation-action-btn,
+.dps-checklist-btn,
+.dps-checkin-btn,
+.dps-checklist-rework-badge,
+.dps-safety-tag,
+.dps-checkin-status-badge,
+.dps-checkin-stage__time {
+    border-radius: 2px;
+    box-shadow: none;
+    transform: none;
+}
+
+.dps-expand-panels-btn:hover,
+.dps-operation-action-btn:hover,
+.dps-checklist-btn:hover,
+.dps-checkin-btn:hover,
+.dps-expand-panels-btn:focus-visible,
+.dps-operation-action-btn:focus-visible,
+.dps-checklist-btn:focus-visible,
+.dps-checkin-btn:focus-visible {
+    box-shadow: none;
+    transform: none;
+}
+
+.dps-checklist-progress-bar {
+    border-radius: 2px;
+}
+
+.dps-checklist-step,
+.dps-checkin-stage {
+    border-radius: 0;
+    background: var(--dps-color-surface-container-lowest);
+}
+
+.dps-checklist-step-icon {
+    border-radius: 2px;
+}
+
+.dps-checklist-step-label {
+    color: var(--dps-color-on-surface);
+}
+
+.dps-checkin-status {
+    gap: 0.5rem;
+}
+
+.dps-checkin-status-badge {
+    min-height: 2.2rem;
+    padding: 0.45rem 0.65rem;
+}
+
+.dps-rework-modal {
+    border: 1px solid var(--dps-color-outline-variant);
+    box-shadow: 0 18px 42px -30px color-mix(in srgb, var(--dps-color-on-surface) 28%, transparent);
+}
+
+.dps-rework-modal textarea {
+    border-radius: 2px;
+    font-family: var(--dps-signature-font-body, var(--dps-font-body, sans-serif));
+}
+
+@media (max-width: 600px) {
+    .dps-operation-modal-summary,
+    .dps-operational-summary {
+        grid-template-columns: 1fr;
+    }
+}

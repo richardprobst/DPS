@@ -1,0 +1,2719 @@
+{
+  "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day",
+  "timestamp": "2026-04-22 08:54:22",
+  "findings": [
+    {
+      "severity": "M?dia",
+      "area": "Toque/Foco",
+      "title": "Alvos pequenos em 375px",
+      "detail": "H? controles vis?veis abaixo de 36px em pelo menos uma dimens?o; em opera??o real isso aumenta erro de toque.",
+      "evidence": [
+        {
+          "aria": "",
+          "cls": "skip-link screen-reader-text",
+          "href": "#main",
+          "rect": {
+            "height": 1,
+            "width": 1,
+            "x": -1,
+            "y": -160001
+          },
+          "tag": "a",
+          "text": "Skip to content",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "Menu",
+          "cls": "is-small",
+          "href": "#",
+          "rect": {
+            "height": 49.171875,
+            "width": 24.578125,
+            "x": 175.203125,
+            "y": 70
+          },
+          "tag": "a",
+          "text": "Menu",
+          "title": "",
+          "type": ""
+        }
+      ]
+    },
+    {
+      "severity": "M?dia",
+      "area": "Toque/Foco",
+      "title": "Alvos pequenos em 600px",
+      "detail": "H? controles vis?veis abaixo de 36px em pelo menos uma dimens?o; em opera??o real isso aumenta erro de toque.",
+      "evidence": [
+        {
+          "aria": "",
+          "cls": "skip-link screen-reader-text",
+          "href": "#main",
+          "rect": {
+            "height": 1,
+            "width": 1,
+            "x": -1,
+            "y": -160001
+          },
+          "tag": "a",
+          "text": "Skip to content",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "Menu",
+          "cls": "is-small",
+          "href": "#",
+          "rect": {
+            "height": 49.171875,
+            "width": 24.578125,
+            "x": 287.703125,
+            "y": 90
+          },
+          "tag": "a",
+          "text": "Menu",
+          "title": "",
+          "type": ""
+        }
+      ]
+    },
+    {
+      "severity": "M?dia",
+      "area": "Toque/Foco",
+      "title": "Alvos pequenos em 840px",
+      "detail": "H? controles vis?veis abaixo de 36px em pelo menos uma dimens?o; em opera??o real isso aumenta erro de toque.",
+      "evidence": [
+        {
+          "aria": "",
+          "cls": "skip-link screen-reader-text",
+          "href": "#main",
+          "rect": {
+            "height": 1,
+            "width": 1,
+            "x": -1,
+            "y": -160001
+          },
+          "tag": "a",
+          "text": "Skip to content",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "Menu",
+          "cls": "is-small",
+          "href": "#",
+          "rect": {
+            "height": 49.171875,
+            "width": 24.578125,
+            "x": 407.703125,
+            "y": 90
+          },
+          "tag": "a",
+          "text": "Menu",
+          "title": "",
+          "type": ""
+        }
+      ]
+    },
+    {
+      "severity": "M?dia",
+      "area": "Toque/Foco",
+      "title": "Alvos pequenos em 1200px",
+      "detail": "H? controles vis?veis abaixo de 36px em pelo menos uma dimens?o; em opera??o real isso aumenta erro de toque.",
+      "evidence": [
+        {
+          "aria": "",
+          "cls": "skip-link screen-reader-text",
+          "href": "#main",
+          "rect": {
+            "height": 1,
+            "width": 1,
+            "x": -1,
+            "y": -160001
+          },
+          "tag": "a",
+          "text": "Skip to content",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "Ver dia anterior",
+          "cls": "dps-nav-btn dps-nav-btn--prev",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-19&view=day",
+          "rect": {
+            "height": 36,
+            "width": 35.1875,
+            "x": 1016.5,
+            "y": 279.046875
+          },
+          "tag": "a",
+          "text": "←",
+          "title": "Ver dia anterior",
+          "type": ""
+        },
+        {
+          "aria": "Ver proximo dia",
+          "cls": "dps-nav-btn dps-nav-btn--next",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-21&view=day",
+          "rect": {
+            "height": 36,
+            "width": 35.1875,
+            "x": 1113.8125,
+            "y": 279.046875
+          },
+          "tag": "a",
+          "text": "→",
+          "title": "Ver proximo dia",
+          "type": ""
+        }
+      ]
+    },
+    {
+      "severity": "M?dia",
+      "area": "Toque/Foco",
+      "title": "Alvos pequenos em 1920px",
+      "detail": "H? controles vis?veis abaixo de 36px em pelo menos uma dimens?o; em opera??o real isso aumenta erro de toque.",
+      "evidence": [
+        {
+          "aria": "",
+          "cls": "skip-link screen-reader-text",
+          "href": "#main",
+          "rect": {
+            "height": 1,
+            "width": 1,
+            "x": -1,
+            "y": -160001
+          },
+          "tag": "a",
+          "text": "Skip to content",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "Ver dia anterior",
+          "cls": "dps-nav-btn dps-nav-btn--prev",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-19&view=day",
+          "rect": {
+            "height": 36,
+            "width": 35.1875,
+            "x": 1376.5,
+            "y": 296.75
+          },
+          "tag": "a",
+          "text": "←",
+          "title": "Ver dia anterior",
+          "type": ""
+        },
+        {
+          "aria": "Ver proximo dia",
+          "cls": "dps-nav-btn dps-nav-btn--next",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-21&view=day",
+          "rect": {
+            "height": 36,
+            "width": 35.1875,
+            "x": 1473.8125,
+            "y": 296.75
+          },
+          "tag": "a",
+          "text": "→",
+          "title": "Ver proximo dia",
+          "type": ""
+        }
+      ]
+    },
+    {
+      "severity": "M?dia",
+      "area": "Acessibilidade",
+      "title": "Bot?es/links ic?nicos sem nome acess?vel",
+      "detail": "Controles sem nome ficam ruins para leitor de tela e automa??o de teclado.",
+      "evidence": [
+        {
+          "cls": "",
+          "tag": "A",
+          "text": ""
+        },
+        {
+          "cls": "",
+          "tag": "A",
+          "text": ""
+        },
+        {
+          "cls": "",
+          "tag": "A",
+          "text": ""
+        },
+        {
+          "cls": "",
+          "tag": "A",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "severity": "Baixa",
+      "area": "Sem?ntica",
+      "title": "A??es implementadas como link `href=\"#\"`",
+      "detail": "A??es como abrir modal deveriam ser `button` para sem?ntica, teclado e previsibilidade.",
+      "evidence": [
+        {
+          "cls": "nav-top-link",
+          "text": "DESI PET SHOWER"
+        }
+      ]
+    },
+    {
+      "severity": "Baixa",
+      "area": "Console",
+      "title": "Erros de console no runtime",
+      "detail": "H? ru?do de console durante a auditoria; separar externos de erros do plugin antes de priorizar.",
+      "evidence": [
+        {
+          "level": "SEVERE",
+          "message": "https://desi.pet/wp-admin/ - Access to fetch at 'https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3A5da204e1-b573-424a-945f-23400a709302%22%2C%22device_id%22%3A%225da204e1-b573-424a-945f-23400a709302%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1' from origin 'https://desi.pet' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "source": "javascript",
+          "timestamp": 1776858818481
+        },
+        {
+          "level": "SEVERE",
+          "message": "https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3A5da204e1-b573-424a-945f-23400a709302%22%2C%22device_id%22%3A%225da204e1-b573-424a-945f-23400a709302%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1 - Failed to load resource: net::ERR_FAILED",
+          "source": "network",
+          "timestamp": 1776858818481
+        },
+        {
+          "level": "SEVERE",
+          "message": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day 4030 Access to fetch at 'https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3A5da204e1-b573-424a-945f-23400a709302%22%2C%22device_id%22%3A%225da204e1-b573-424a-945f-23400a709302%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1' from origin 'https://desi.pet' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "source": "javascript",
+          "timestamp": 1776858823108
+        },
+        {
+          "level": "SEVERE",
+          "message": "https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3A5da204e1-b573-424a-945f-23400a709302%22%2C%22device_id%22%3A%225da204e1-b573-424a-945f-23400a709302%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1 - Failed to load resource: net::ERR_FAILED",
+          "source": "network",
+          "timestamp": 1776858823108
+        },
+        {
+          "level": "SEVERE",
+          "message": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day - Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "source": "javascript",
+          "timestamp": 1776858823326
+        }
+      ]
+    }
+  ],
+  "metrics": {
+    "375": {
+      "activePanelText": "Segunda-feira, 20/041 atendimento no periodo0 pendentes1 finalizadosConcluídos no períodoHorárioPet e tutorServiçosConfirmaçãoAções23:30QA Smoke Pet>TutorQA Smoke ClienteVer serviçosConfirmadoNão confirmadoCanceladoReagendar",
+      "cells": [],
+      "fonts": {
+        "body": "Manrope, \"Segoe UI\", sans-serif",
+        "tab": "Manrope, \"Segoe UI\", sans-serif",
+        "title": "Sora, \"Segoe UI\", sans-serif"
+      },
+      "hasHorizontalOverflow": false,
+      "headers": [
+        {
+          "rect": {
+            "height": 59.1875,
+            "width": 321,
+            "x": 27,
+            "y": 149.171875
+          },
+          "tag": "H3",
+          "text": "Agenda de Atendimentos"
+        },
+        {
+          "rect": {
+            "height": 24.1875,
+            "width": 355,
+            "x": 10,
+            "y": 1287.25
+          },
+          "tag": "H3",
+          "text": "Lista de Atendimentos"
+        },
+        {
+          "rect": {
+            "height": 20.734375,
+            "width": 200.75,
+            "x": 27,
+            "y": 1688.734375
+          },
+          "tag": "H4",
+          "text": "Segunda-feira, 20/04"
+        },
+        {
+          "rect": {
+            "height": 39,
+            "width": 321,
+            "x": 27,
+            "y": 1874.46875
+          },
+          "tag": "H5",
+          "text": "Concluídos no período"
+        }
+      ],
+      "interactive": [
+        {
+          "aria": "",
+          "cls": "skip-link screen-reader-text",
+          "href": "#main",
+          "rect": {
+            "height": 1,
+            "width": 1,
+            "x": -1,
+            "y": -160001
+          },
+          "tag": "a",
+          "text": "Skip to content",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "",
+          "href": "https://desi.pet/",
+          "rect": {
+            "height": 64,
+            "width": 200,
+            "x": 15,
+            "y": 3
+          },
+          "tag": "a",
+          "text": "DESI PET SHOWER",
+          "title": "Desi Pet Shower",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/wp-admin",
+          "rect": {
+            "height": 40.46875,
+            "width": 44.265625,
+            "x": 230,
+            "y": 14.765625
+          },
+          "tag": "a",
+          "text": "ADMIN",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "Menu",
+          "cls": "is-small",
+          "href": "#",
+          "rect": {
+            "height": 49.171875,
+            "width": 24.578125,
+            "x": 175.203125,
+            "y": 70
+          },
+          "tag": "a",
+          "text": "Menu",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn dps-view-btn--active",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=day",
+          "rect": {
+            "height": 45.59375,
+            "width": 311,
+            "x": 32,
+            "y": 316.546875
+          },
+          "tag": "a",
+          "text": "Dia",
+          "title": "Ver lista diaria",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=week",
+          "rect": {
+            "height": 45.59375,
+            "width": 311,
+            "x": 32,
+            "y": 370.140625
+          },
+          "tag": "a",
+          "text": "Semana",
+          "title": "Ver lista semanal",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=calendar",
+          "rect": {
+            "height": 45.59375,
+            "width": 311,
+            "x": 32,
+            "y": 423.734375
+          },
+          "tag": "a",
+          "text": "Mes",
+          "title": "Ver calendario mensal",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&show_all=1",
+          "rect": {
+            "height": 45.59375,
+            "width": 311,
+            "x": 32,
+            "y": 477.328125
+          },
+          "tag": "a",
+          "text": "Agenda completa",
+          "title": "Ver todos os agendamentos futuros",
+          "type": ""
+        },
+        {
+          "aria": "Ver dia anterior",
+          "cls": "dps-nav-btn dps-nav-btn--prev",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-19&view=day",
+          "rect": {
+            "height": 36,
+            "width": 98.109375,
+            "x": 27,
+            "y": 539.921875
+          },
+          "tag": "a",
+          "text": "←",
+          "title": "Ver dia anterior",
+          "type": ""
+        },
+        {
+          "aria": "Ver agendamentos de hoje",
+          "cls": "dps-nav-btn dps-nav-btn--today",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-22&view=day",
+          "rect": {
+            "height": 36,
+            "width": 116.78125,
+            "x": 129.109375,
+            "y": 539.921875
+          },
+          "tag": "a",
+          "text": "Hoje",
+          "title": "Ver agendamentos de hoje",
+          "type": ""
+        },
+        {
+          "aria": "Ver proximo dia",
+          "cls": "dps-nav-btn dps-nav-btn--next",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-21&view=day",
+          "rect": {
+            "height": 36,
+            "width": 98.109375,
+            "x": 249.890625,
+            "y": 539.921875
+          },
+          "tag": "a",
+          "text": "→",
+          "title": "Ver proximo dia",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button dps-agenda-tab-button--active",
+          "href": "",
+          "rect": {
+            "height": 59.1875,
+            "width": 339.484375,
+            "x": 10,
+            "y": 1415.625
+          },
+          "tag": "button",
+          "text": "CONFIRMAÇÕES E PRÓXIMOS PASSOS",
+          "title": "Confirmações e próximos passos",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button",
+          "href": "",
+          "rect": {
+            "height": 59.1875,
+            "width": 339.484375,
+            "x": 10,
+            "y": 1498.328125
+          },
+          "tag": "button",
+          "text": "CHECKLIST, CHECK-IN E COBRANÇA",
+          "title": "Checklist, check-in e cobrança",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button",
+          "href": "",
+          "rect": {
+            "height": 59.1875,
+            "width": 339.484375,
+            "x": 10,
+            "y": 1581.03125
+          },
+          "tag": "button",
+          "text": "LOGÍSTICA, NOTAS E TAXIDOG",
+          "title": "Logística, notas e TaxiDog",
+          "type": "button"
+        },
+        {
+          "aria": "Abrir perfil rápido de QA Smoke Pet e QA Smoke Cliente",
+          "cls": "dps-pet-profile-trigger",
+          "href": "",
+          "rect": {
+            "height": 48,
+            "width": 141.21875,
+            "x": 117.890625,
+            "y": 2079.3125
+          },
+          "tag": "button",
+          "text": "QA SMOKE PET\n>",
+          "title": "Ver perfil rápido do pet e tutor",
+          "type": "button"
+        },
+        {
+          "aria": "Abrir modal de serviços do atendimento: 1 serviço",
+          "cls": "dps-services-popup-btn",
+          "href": "",
+          "rect": {
+            "height": 46.390625,
+            "width": 251,
+            "x": 63,
+            "y": 2237.21875
+          },
+          "tag": "button",
+          "text": "VER SERVIÇOS",
+          "title": "Ver serviços e observações",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-confirmation-dropdown dps-dropdown--not-confirmed",
+          "href": "",
+          "rect": {
+            "height": 45.59375,
+            "width": 251,
+            "x": 63,
+            "y": 2353.328125
+          },
+          "tag": "select",
+          "text": "Confirmado\nNão confirmado\nCancelado",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-action-link dps-agenda-action-link--secondary dps-quick-reschedule",
+          "href": "",
+          "rect": {
+            "height": 44,
+            "width": 251,
+            "x": 63,
+            "y": 2454.640625
+          },
+          "tag": "button",
+          "text": "REAGENDAR",
+          "title": "Reagendar atendimento",
+          "type": "button"
+        }
+      ],
+      "navTexts": [
+        "Dia",
+        "Semana",
+        "Mes",
+        "Agenda completa",
+        "←",
+        "Hoje",
+        "→"
+      ],
+      "tabTexts": [
+        "Confirmações e próximos passos",
+        "Checklist, check-in e cobrança",
+        "Logística, notas e TaxiDog"
+      ],
+      "tables": [
+        {
+          "columns": 0,
+          "headers": [
+            "Horário",
+            "Pet e tutor",
+            "Serviços",
+            "Confirmação",
+            "Ações"
+          ],
+          "rect": {
+            "height": 613.5625,
+            "width": 319,
+            "x": 28,
+            "y": 1930.46875
+          }
+        }
+      ],
+      "viewport": {
+        "bodyScrollWidth": 375,
+        "innerWidth": 375,
+        "scrollWidth": 375
+      }
+    },
+    "600": {
+      "activePanelText": "Segunda-feira, 20/041 atendimento no periodo0 pendentes1 finalizadosConcluídos no períodoHorárioPet e tutorServiçosConfirmaçãoAções23:30QA Smoke Pet>TutorQA Smoke ClienteVer serviçosConfirmadoNão confirmadoCanceladoReagendar",
+      "cells": [],
+      "fonts": {
+        "body": "Manrope, \"Segoe UI\", sans-serif",
+        "tab": "Manrope, \"Segoe UI\", sans-serif",
+        "title": "Sora, \"Segoe UI\", sans-serif"
+      },
+      "hasHorizontalOverflow": false,
+      "headers": [
+        {
+          "rect": {
+            "height": 29.59375,
+            "width": 362.90625,
+            "x": 118.546875,
+            "y": 169.171875
+          },
+          "tag": "H3",
+          "text": "Agenda de Atendimentos"
+        },
+        {
+          "rect": {
+            "height": 24.1875,
+            "width": 443.109375,
+            "x": 10,
+            "y": 994.484375
+          },
+          "tag": "H3",
+          "text": "Lista de Atendimentos"
+        },
+        {
+          "rect": {
+            "height": 20.734375,
+            "width": 200.75,
+            "x": 27,
+            "y": 1379.96875
+          },
+          "tag": "H4",
+          "text": "Segunda-feira, 20/04"
+        },
+        {
+          "rect": {
+            "height": 39,
+            "width": 546,
+            "x": 27,
+            "y": 1513.703125
+          },
+          "tag": "H5",
+          "text": "Concluídos no período"
+        }
+      ],
+      "interactive": [
+        {
+          "aria": "",
+          "cls": "skip-link screen-reader-text",
+          "href": "#main",
+          "rect": {
+            "height": 1,
+            "width": 1,
+            "x": -1,
+            "y": -160001
+          },
+          "tag": "a",
+          "text": "Skip to content",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "",
+          "href": "https://desi.pet/",
+          "rect": {
+            "height": 64,
+            "width": 200,
+            "x": 15,
+            "y": 13
+          },
+          "tag": "a",
+          "text": "DESI PET SHOWER",
+          "title": "Desi Pet Shower",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/wp-admin",
+          "rect": {
+            "height": 40.46875,
+            "width": 44.265625,
+            "x": 230,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "ADMIN",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "Menu",
+          "cls": "is-small",
+          "href": "#",
+          "rect": {
+            "height": 49.171875,
+            "width": 24.578125,
+            "x": 287.703125,
+            "y": 90
+          },
+          "tag": "a",
+          "text": "Menu",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn dps-view-btn--active",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=day",
+          "rect": {
+            "height": 45.59375,
+            "width": 536,
+            "x": 32,
+            "y": 306.953125
+          },
+          "tag": "a",
+          "text": "Dia",
+          "title": "Ver lista diaria",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=week",
+          "rect": {
+            "height": 45.59375,
+            "width": 536,
+            "x": 32,
+            "y": 360.546875
+          },
+          "tag": "a",
+          "text": "Semana",
+          "title": "Ver lista semanal",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=calendar",
+          "rect": {
+            "height": 45.59375,
+            "width": 536,
+            "x": 32,
+            "y": 414.140625
+          },
+          "tag": "a",
+          "text": "Mes",
+          "title": "Ver calendario mensal",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&show_all=1",
+          "rect": {
+            "height": 45.59375,
+            "width": 536,
+            "x": 32,
+            "y": 467.734375
+          },
+          "tag": "a",
+          "text": "Agenda completa",
+          "title": "Ver todos os agendamentos futuros",
+          "type": ""
+        },
+        {
+          "aria": "Ver dia anterior",
+          "cls": "dps-nav-btn dps-nav-btn--prev",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-19&view=day",
+          "rect": {
+            "height": 36,
+            "width": 168.421875,
+            "x": 27,
+            "y": 530.328125
+          },
+          "tag": "a",
+          "text": "←",
+          "title": "Ver dia anterior",
+          "type": ""
+        },
+        {
+          "aria": "Ver agendamentos de hoje",
+          "cls": "dps-nav-btn dps-nav-btn--today",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-22&view=day",
+          "rect": {
+            "height": 36,
+            "width": 201.15625,
+            "x": 199.421875,
+            "y": 530.328125
+          },
+          "tag": "a",
+          "text": "Hoje",
+          "title": "Ver agendamentos de hoje",
+          "type": ""
+        },
+        {
+          "aria": "Ver proximo dia",
+          "cls": "dps-nav-btn dps-nav-btn--next",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-21&view=day",
+          "rect": {
+            "height": 36,
+            "width": 168.421875,
+            "x": 404.578125,
+            "y": 530.328125
+          },
+          "tag": "a",
+          "text": "→",
+          "title": "Ver proximo dia",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button dps-agenda-tab-button--active",
+          "href": "",
+          "rect": {
+            "height": 59.1875,
+            "width": 564.484375,
+            "x": 10,
+            "y": 1106.859375
+          },
+          "tag": "button",
+          "text": "CONFIRMAÇÕES E PRÓXIMOS PASSOS",
+          "title": "Confirmações e próximos passos",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button",
+          "href": "",
+          "rect": {
+            "height": 59.1875,
+            "width": 564.484375,
+            "x": 10,
+            "y": 1189.5625
+          },
+          "tag": "button",
+          "text": "CHECKLIST, CHECK-IN E COBRANÇA",
+          "title": "Checklist, check-in e cobrança",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button",
+          "href": "",
+          "rect": {
+            "height": 59.1875,
+            "width": 564.484375,
+            "x": 10,
+            "y": 1272.265625
+          },
+          "tag": "button",
+          "text": "LOGÍSTICA, NOTAS E TAXIDOG",
+          "title": "Logística, notas e TaxiDog",
+          "type": "button"
+        },
+        {
+          "aria": "Abrir perfil rápido de QA Smoke Pet e QA Smoke Cliente",
+          "cls": "dps-pet-profile-trigger",
+          "href": "",
+          "rect": {
+            "height": 48,
+            "width": 141.21875,
+            "x": 248.390625,
+            "y": 1718.546875
+          },
+          "tag": "button",
+          "text": "QA SMOKE PET\n>",
+          "title": "Ver perfil rápido do pet e tutor",
+          "type": "button"
+        },
+        {
+          "aria": "Abrir modal de serviços do atendimento: 1 serviço",
+          "cls": "dps-services-popup-btn",
+          "href": "",
+          "rect": {
+            "height": 46.390625,
+            "width": 512,
+            "x": 63,
+            "y": 1876.453125
+          },
+          "tag": "button",
+          "text": "VER SERVIÇOS",
+          "title": "Ver serviços e observações",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-confirmation-dropdown dps-dropdown--not-confirmed",
+          "href": "",
+          "rect": {
+            "height": 45.59375,
+            "width": 512,
+            "x": 63,
+            "y": 1992.5625
+          },
+          "tag": "select",
+          "text": "Confirmado\nNão confirmado\nCancelado",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-action-link dps-agenda-action-link--secondary dps-quick-reschedule",
+          "href": "",
+          "rect": {
+            "height": 44,
+            "width": 512,
+            "x": 63,
+            "y": 2093.875
+          },
+          "tag": "button",
+          "text": "REAGENDAR",
+          "title": "Reagendar atendimento",
+          "type": "button"
+        }
+      ],
+      "navTexts": [
+        "Dia",
+        "Semana",
+        "Mes",
+        "Agenda completa",
+        "←",
+        "Hoje",
+        "→"
+      ],
+      "tabTexts": [
+        "Confirmações e próximos passos",
+        "Checklist, check-in e cobrança",
+        "Logística, notas e TaxiDog"
+      ],
+      "tables": [
+        {
+          "columns": 0,
+          "headers": [
+            "Horário",
+            "Pet e tutor",
+            "Serviços",
+            "Confirmação",
+            "Ações"
+          ],
+          "rect": {
+            "height": 613.5625,
+            "width": 580,
+            "x": 28,
+            "y": 1569.703125
+          }
+        }
+      ],
+      "viewport": {
+        "bodyScrollWidth": 600,
+        "innerWidth": 600,
+        "scrollWidth": 600
+      }
+    },
+    "840": {
+      "activePanelText": "Segunda-feira, 20/041 atendimento no periodo0 pendentes1 finalizadosConcluídos no períodoHorárioPet e tutorServiçosConfirmaçãoAções23:30QA Smoke Pet>TutorQA Smoke ClienteVer serviçosConfirmadoNão confirmadoCanceladoReagendar",
+      "cells": [],
+      "fonts": {
+        "body": "Manrope, \"Segoe UI\", sans-serif",
+        "tab": "Manrope, \"Segoe UI\", sans-serif",
+        "title": "Sora, \"Segoe UI\", sans-serif"
+      },
+      "hasHorizontalOverflow": false,
+      "headers": [
+        {
+          "rect": {
+            "height": 29.59375,
+            "width": 362.90625,
+            "x": 238.546875,
+            "y": 169.171875
+          },
+          "tag": "H3",
+          "text": "Agenda de Atendimentos"
+        },
+        {
+          "rect": {
+            "height": 24.1875,
+            "width": 516.953125,
+            "x": 18,
+            "y": 628.46875
+          },
+          "tag": "H3",
+          "text": "Lista de Atendimentos"
+        },
+        {
+          "rect": {
+            "height": 20.734375,
+            "width": 200.75,
+            "x": 35,
+            "y": 859.328125
+          },
+          "tag": "H4",
+          "text": "Segunda-feira, 20/04"
+        },
+        {
+          "rect": {
+            "height": 39,
+            "width": 770,
+            "x": 35,
+            "y": 993.0625
+          },
+          "tag": "H5",
+          "text": "Concluídos no período"
+        }
+      ],
+      "interactive": [
+        {
+          "aria": "",
+          "cls": "skip-link screen-reader-text",
+          "href": "#main",
+          "rect": {
+            "height": 1,
+            "width": 1,
+            "x": -1,
+            "y": -160001
+          },
+          "tag": "a",
+          "text": "Skip to content",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "",
+          "href": "https://desi.pet/",
+          "rect": {
+            "height": 64,
+            "width": 200,
+            "x": 15,
+            "y": 13
+          },
+          "tag": "a",
+          "text": "DESI PET SHOWER",
+          "title": "Desi Pet Shower",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/wp-admin",
+          "rect": {
+            "height": 40.46875,
+            "width": 44.265625,
+            "x": 230,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "ADMIN",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "Menu",
+          "cls": "is-small",
+          "href": "#",
+          "rect": {
+            "height": 49.171875,
+            "width": 24.578125,
+            "x": 407.703125,
+            "y": 90
+          },
+          "tag": "a",
+          "text": "Menu",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn dps-view-btn--active",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=day",
+          "rect": {
+            "height": 45.59375,
+            "width": 54.90625,
+            "x": 251.703125,
+            "y": 281.359375
+          },
+          "tag": "a",
+          "text": "Dia",
+          "title": "Ver lista diaria",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=week",
+          "rect": {
+            "height": 45.59375,
+            "width": 87.203125,
+            "x": 314.609375,
+            "y": 281.359375
+          },
+          "tag": "a",
+          "text": "Semana",
+          "title": "Ver lista semanal",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=calendar",
+          "rect": {
+            "height": 45.59375,
+            "width": 61.53125,
+            "x": 409.8125,
+            "y": 281.359375
+          },
+          "tag": "a",
+          "text": "Mes",
+          "title": "Ver calendario mensal",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&show_all=1",
+          "rect": {
+            "height": 45.59375,
+            "width": 148.9375,
+            "x": 479.34375,
+            "y": 281.359375
+          },
+          "tag": "a",
+          "text": "Agenda completa",
+          "title": "Ver todos os agendamentos futuros",
+          "type": ""
+        },
+        {
+          "aria": "Ver dia anterior",
+          "cls": "dps-nav-btn dps-nav-btn--prev",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-19&view=day",
+          "rect": {
+            "height": 36,
+            "width": 235.921875,
+            "x": 39,
+            "y": 343.953125
+          },
+          "tag": "a",
+          "text": "←",
+          "title": "Ver dia anterior",
+          "type": ""
+        },
+        {
+          "aria": "Ver agendamentos de hoje",
+          "cls": "dps-nav-btn dps-nav-btn--today",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-22&view=day",
+          "rect": {
+            "height": 36,
+            "width": 282.15625,
+            "x": 278.921875,
+            "y": 343.953125
+          },
+          "tag": "a",
+          "text": "Hoje",
+          "title": "Ver agendamentos de hoje",
+          "type": ""
+        },
+        {
+          "aria": "Ver proximo dia",
+          "cls": "dps-nav-btn dps-nav-btn--next",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-21&view=day",
+          "rect": {
+            "height": 36,
+            "width": 235.921875,
+            "x": 565.078125,
+            "y": 343.953125
+          },
+          "tag": "a",
+          "text": "→",
+          "title": "Ver proximo dia",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button dps-agenda-tab-button--active",
+          "href": "",
+          "rect": {
+            "height": 65.96875,
+            "width": 247.140625,
+            "x": 18,
+            "y": 744.84375
+          },
+          "tag": "button",
+          "text": "CONFIRMAÇÕES E PRÓXIMOS PASSOS",
+          "title": "Confirmações e próximos passos",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button",
+          "href": "",
+          "rect": {
+            "height": 65.96875,
+            "width": 247.15625,
+            "x": 288.65625,
+            "y": 744.84375
+          },
+          "tag": "button",
+          "text": "CHECKLIST, CHECK-IN E COBRANÇA",
+          "title": "Checklist, check-in e cobrança",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button",
+          "href": "",
+          "rect": {
+            "height": 65.96875,
+            "width": 247.140625,
+            "x": 559.328125,
+            "y": 744.84375
+          },
+          "tag": "button",
+          "text": "LOGÍSTICA, NOTAS E TAXIDOG",
+          "title": "Logística, notas e TaxiDog",
+          "type": "button"
+        },
+        {
+          "aria": "Abrir perfil rápido de QA Smoke Pet e QA Smoke Cliente",
+          "cls": "dps-pet-profile-trigger",
+          "href": "",
+          "rect": {
+            "height": 40,
+            "width": 147.5,
+            "x": 135.859375,
+            "y": 1098.609375
+          },
+          "tag": "button",
+          "text": "QA SMOKE PET\n>",
+          "title": "Ver perfil rápido do pet e tutor",
+          "type": "button"
+        },
+        {
+          "aria": "Abrir modal de serviços do atendimento: 1 serviço",
+          "cls": "dps-services-popup-btn",
+          "href": "",
+          "rect": {
+            "height": 46.390625,
+            "width": 129.421875,
+            "x": 313.359375,
+            "y": 1098.609375
+          },
+          "tag": "button",
+          "text": "VER SERVIÇOS",
+          "title": "Ver serviços e observações",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-confirmation-dropdown dps-dropdown--not-confirmed",
+          "href": "",
+          "rect": {
+            "height": 45.59375,
+            "width": 163.640625,
+            "x": 472.78125,
+            "y": 1098.609375
+          },
+          "tag": "select",
+          "text": "Confirmado\nNão confirmado\nCancelado",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-action-link dps-agenda-action-link--secondary dps-quick-reschedule",
+          "href": "",
+          "rect": {
+            "height": 44,
+            "width": 120.578125,
+            "x": 666.421875,
+            "y": 1098.609375
+          },
+          "tag": "button",
+          "text": "REAGENDAR",
+          "title": "Reagendar atendimento",
+          "type": "button"
+        }
+      ],
+      "navTexts": [
+        "Dia",
+        "Semana",
+        "Mes",
+        "Agenda completa",
+        "←",
+        "Hoje",
+        "→"
+      ],
+      "tabTexts": [
+        "Confirmações e próximos passos",
+        "Checklist, check-in e cobrança",
+        "Logística, notas e TaxiDog"
+      ],
+      "tables": [
+        {
+          "columns": 0,
+          "headers": [
+            "Horário",
+            "Pet e tutor",
+            "Serviços",
+            "Confirmação",
+            "Ações"
+          ],
+          "rect": {
+            "height": 163.734375,
+            "width": 780,
+            "x": 36,
+            "y": 1049.0625
+          }
+        }
+      ],
+      "viewport": {
+        "bodyScrollWidth": 840,
+        "innerWidth": 840,
+        "scrollWidth": 840
+      }
+    },
+    "1200": {
+      "activePanelText": "Segunda-feira, 20/041 atendimento no periodo0 pendentes1 finalizadosConcluídos no períodoHorárioPet e tutorServiçosConfirmaçãoAções23:30QA Smoke Pet>TutorQA Smoke ClienteVer serviçosConfirmadoNão confirmadoCanceladoReagendar",
+      "cells": [],
+      "fonts": {
+        "body": "Manrope, \"Segoe UI\", sans-serif",
+        "tab": "Manrope, \"Segoe UI\", sans-serif",
+        "title": "Sora, \"Segoe UI\", sans-serif"
+      },
+      "hasHorizontalOverflow": false,
+      "headers": [
+        {
+          "rect": {
+            "height": 29.59375,
+            "width": 1104.40625,
+            "x": 47.796875,
+            "y": 161.265625
+          },
+          "tag": "H3",
+          "text": "Agenda de Atendimentos"
+        },
+        {
+          "rect": {
+            "height": 24.1875,
+            "width": 516.953125,
+            "x": 30,
+            "y": 478.96875
+          },
+          "tag": "H3",
+          "text": "Lista de Atendimentos"
+        },
+        {
+          "rect": {
+            "height": 20.734375,
+            "width": 200.75,
+            "x": 47,
+            "y": 703.046875
+          },
+          "tag": "H4",
+          "text": "Segunda-feira, 20/04"
+        },
+        {
+          "rect": {
+            "height": 39,
+            "width": 1106,
+            "x": 47,
+            "y": 776.046875
+          },
+          "tag": "H5",
+          "text": "Concluídos no período"
+        }
+      ],
+      "interactive": [
+        {
+          "aria": "",
+          "cls": "skip-link screen-reader-text",
+          "href": "#main",
+          "rect": {
+            "height": 1,
+            "width": 1,
+            "x": -1,
+            "y": -160001
+          },
+          "tag": "a",
+          "text": "Skip to content",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "",
+          "href": "https://desi.pet/",
+          "rect": {
+            "height": 64,
+            "width": 200,
+            "x": 55,
+            "y": 13
+          },
+          "tag": "a",
+          "text": "DESI PET SHOWER",
+          "title": "Desi Pet Shower",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/",
+          "rect": {
+            "height": 40.46875,
+            "width": 40.171875,
+            "x": 285,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "HOME",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/agenda-de-atendimentos/",
+          "rect": {
+            "height": 40.46875,
+            "width": 54.890625,
+            "x": 339.171875,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "AGENDA",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/agendamento/",
+          "rect": {
+            "height": 40.46875,
+            "width": 102.4375,
+            "x": 408.0625,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "AGENDAMENTO",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/cadastro-de-clientes-e-pets/",
+          "rect": {
+            "height": 40.46875,
+            "width": 70.84375,
+            "x": 524.5,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "CADASTRO",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/administrativo/",
+          "rect": {
+            "height": 40.46875,
+            "width": 113.484375,
+            "x": 609.34375,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "ADMINISTRATIVO",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "#",
+          "rect": {
+            "height": 40.46875,
+            "width": 129.140625,
+            "x": 736.828125,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "DESI PET SHOWER",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "",
+          "href": "https://desi.pet/quem-somos/",
+          "rect": {
+            "height": 41.796875,
+            "width": 196,
+            "x": -99230.171875,
+            "y": 87.234375
+          },
+          "tag": "a",
+          "text": "",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "",
+          "href": "https://desi.pet/banho-e-tosa/",
+          "rect": {
+            "height": 41.796875,
+            "width": 196,
+            "x": -99230.171875,
+            "y": 129.03125
+          },
+          "tag": "a",
+          "text": "",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "",
+          "href": "https://desi.pet/regras-e-termos-de-atendimento/",
+          "rect": {
+            "height": 62.59375,
+            "width": 196,
+            "x": -99230.171875,
+            "y": 170.828125
+          },
+          "tag": "a",
+          "text": "",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "",
+          "href": "https://desi.pet/politica-de-privacidade/",
+          "rect": {
+            "height": 61.59375,
+            "width": 196,
+            "x": -99230.171875,
+            "y": 233.421875
+          },
+          "tag": "a",
+          "text": "",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/portal-do-cliente/",
+          "rect": {
+            "height": 40.46875,
+            "width": 128.90625,
+            "x": 879.96875,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "PORTAL DO CLIENTE",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/wp-admin",
+          "rect": {
+            "height": 40.46875,
+            "width": 45.546875,
+            "x": 55,
+            "y": 90
+          },
+          "tag": "a",
+          "text": "ADMIN",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn dps-view-btn--active",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=day",
+          "rect": {
+            "height": 45.59375,
+            "width": 54.90625,
+            "x": 96,
+            "y": 274.25
+          },
+          "tag": "a",
+          "text": "Dia",
+          "title": "Ver lista diaria",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=week",
+          "rect": {
+            "height": 45.59375,
+            "width": 87.203125,
+            "x": 158.90625,
+            "y": 274.25
+          },
+          "tag": "a",
+          "text": "Semana",
+          "title": "Ver lista semanal",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=calendar",
+          "rect": {
+            "height": 45.59375,
+            "width": 61.53125,
+            "x": 254.109375,
+            "y": 274.25
+          },
+          "tag": "a",
+          "text": "Mes",
+          "title": "Ver calendario mensal",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&show_all=1",
+          "rect": {
+            "height": 45.59375,
+            "width": 148.9375,
+            "x": 323.640625,
+            "y": 274.25
+          },
+          "tag": "a",
+          "text": "Agenda completa",
+          "title": "Ver todos os agendamentos futuros",
+          "type": ""
+        },
+        {
+          "aria": "Ver dia anterior",
+          "cls": "dps-nav-btn dps-nav-btn--prev",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-19&view=day",
+          "rect": {
+            "height": 36,
+            "width": 35.1875,
+            "x": 1016.5,
+            "y": 279.046875
+          },
+          "tag": "a",
+          "text": "←",
+          "title": "Ver dia anterior",
+          "type": ""
+        },
+        {
+          "aria": "Ver agendamentos de hoje",
+          "cls": "dps-nav-btn dps-nav-btn--today",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-22&view=day",
+          "rect": {
+            "height": 36,
+            "width": 54.125,
+            "x": 1055.6875,
+            "y": 279.046875
+          },
+          "tag": "a",
+          "text": "Hoje",
+          "title": "Ver agendamentos de hoje",
+          "type": ""
+        },
+        {
+          "aria": "Ver proximo dia",
+          "cls": "dps-nav-btn dps-nav-btn--next",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-21&view=day",
+          "rect": {
+            "height": 36,
+            "width": 35.1875,
+            "x": 1113.8125,
+            "y": 279.046875
+          },
+          "tag": "a",
+          "text": "→",
+          "title": "Ver proximo dia",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button dps-agenda-tab-button--active",
+          "href": "",
+          "rect": {
+            "height": 59.1875,
+            "width": 359.140625,
+            "x": 30,
+            "y": 595.34375
+          },
+          "tag": "button",
+          "text": "CONFIRMAÇÕES E PRÓXIMOS PASSOS",
+          "title": "Confirmações e próximos passos",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button",
+          "href": "",
+          "rect": {
+            "height": 59.1875,
+            "width": 359.15625,
+            "x": 412.65625,
+            "y": 595.34375
+          },
+          "tag": "button",
+          "text": "CHECKLIST, CHECK-IN E COBRANÇA",
+          "title": "Checklist, check-in e cobrança",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button",
+          "href": "",
+          "rect": {
+            "height": 59.1875,
+            "width": 359.140625,
+            "x": 795.328125,
+            "y": 595.34375
+          },
+          "tag": "button",
+          "text": "LOGÍSTICA, NOTAS E TAXIDOG",
+          "title": "Logística, notas e TaxiDog",
+          "type": "button"
+        },
+        {
+          "aria": "Abrir perfil rápido de QA Smoke Pet e QA Smoke Cliente",
+          "cls": "dps-pet-profile-trigger",
+          "href": "",
+          "rect": {
+            "height": 40,
+            "width": 214.9375,
+            "x": 193.6875,
+            "y": 889.03125
+          },
+          "tag": "button",
+          "text": "QA SMOKE PET\n>",
+          "title": "Ver perfil rápido do pet e tutor",
+          "type": "button"
+        },
+        {
+          "aria": "Abrir modal de serviços do atendimento: 1 serviço",
+          "cls": "dps-services-popup-btn",
+          "href": "",
+          "rect": {
+            "height": 46.390625,
+            "width": 190.140625,
+            "x": 442.625,
+            "y": 889.03125
+          },
+          "tag": "button",
+          "text": "VER SERVIÇOS",
+          "title": "Ver serviços e observações",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-confirmation-dropdown dps-dropdown--not-confirmed",
+          "href": "",
+          "rect": {
+            "height": 45.59375,
+            "width": 237.0625,
+            "x": 666.765625,
+            "y": 889.03125
+          },
+          "tag": "select",
+          "text": "Confirmado\nNão confirmado\nCancelado",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-action-link dps-agenda-action-link--secondary dps-quick-reschedule",
+          "href": "",
+          "rect": {
+            "height": 44,
+            "width": 183.171875,
+            "x": 937.828125,
+            "y": 889.03125
+          },
+          "tag": "button",
+          "text": "REAGENDAR",
+          "title": "Reagendar atendimento",
+          "type": "button"
+        },
+        {
+          "aria": "Go to top",
+          "cls": "back-to-top button icon invert plain fixed bottom z-1 is-outline circle hide-for-medium",
+          "href": "",
+          "rect": {
+            "height": 38.796875,
+            "width": 38.796875,
+            "x": 1139.34375,
+            "y": 1152.8421630859375
+          },
+          "tag": "button",
+          "text": "Go to top",
+          "title": "",
+          "type": "button"
+        }
+      ],
+      "navTexts": [
+        "Dia",
+        "Semana",
+        "Mes",
+        "Agenda completa",
+        "←",
+        "Hoje",
+        "→"
+      ],
+      "tabTexts": [
+        "Confirmações e próximos passos",
+        "Checklist, check-in e cobrança",
+        "Logística, notas e TaxiDog"
+      ],
+      "tables": [
+        {
+          "columns": 0,
+          "headers": [
+            "Horário",
+            "Pet e tutor",
+            "Serviços",
+            "Confirmação",
+            "Ações"
+          ],
+          "rect": {
+            "height": 173.5625,
+            "width": 1104,
+            "x": 48,
+            "y": 832.046875
+          }
+        }
+      ],
+      "viewport": {
+        "bodyScrollWidth": 1200,
+        "innerWidth": 1200,
+        "scrollWidth": 1200
+      }
+    },
+    "1920": {
+      "activePanelText": "Segunda-feira, 20/041 atendimento no periodo0 pendentes1 finalizadosConcluídos no períodoHorárioPet e tutorServiçosConfirmaçãoAções23:30QA Smoke Pet>TutorQA Smoke ClienteVer serviçosConfirmadoNão confirmadoCanceladoReagendar",
+      "cells": [],
+      "fonts": {
+        "body": "Manrope, \"Segoe UI\", sans-serif",
+        "tab": "Manrope, \"Segoe UI\", sans-serif",
+        "title": "Sora, \"Segoe UI\", sans-serif"
+      },
+      "hasHorizontalOverflow": false,
+      "headers": [
+        {
+          "rect": {
+            "height": 38.40625,
+            "width": 1082,
+            "x": 411,
+            "y": 164.46875
+          },
+          "tag": "H3",
+          "text": "Agenda de Atendimentos"
+        },
+        {
+          "rect": {
+            "height": 30.234375,
+            "width": 516.953125,
+            "x": 390,
+            "y": 503.515625
+          },
+          "tag": "H3",
+          "text": "Lista de Atendimentos"
+        },
+        {
+          "rect": {
+            "height": 25.046875,
+            "width": 242.5625,
+            "x": 407,
+            "y": 733.640625
+          },
+          "tag": "H4",
+          "text": "Segunda-feira, 20/04"
+        },
+        {
+          "rect": {
+            "height": 39,
+            "width": 1106,
+            "x": 407,
+            "y": 807.6875
+          },
+          "tag": "H5",
+          "text": "Concluídos no período"
+        }
+      ],
+      "interactive": [
+        {
+          "aria": "",
+          "cls": "skip-link screen-reader-text",
+          "href": "#main",
+          "rect": {
+            "height": 1,
+            "width": 1,
+            "x": -1,
+            "y": -160001
+          },
+          "tag": "a",
+          "text": "Skip to content",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "",
+          "href": "https://desi.pet/",
+          "rect": {
+            "height": 64,
+            "width": 200,
+            "x": 415,
+            "y": 13
+          },
+          "tag": "a",
+          "text": "DESI PET SHOWER",
+          "title": "Desi Pet Shower",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/",
+          "rect": {
+            "height": 40.46875,
+            "width": 40.171875,
+            "x": 645,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "HOME",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/agenda-de-atendimentos/",
+          "rect": {
+            "height": 40.46875,
+            "width": 54.890625,
+            "x": 699.171875,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "AGENDA",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/agendamento/",
+          "rect": {
+            "height": 40.46875,
+            "width": 102.4375,
+            "x": 768.0625,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "AGENDAMENTO",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/cadastro-de-clientes-e-pets/",
+          "rect": {
+            "height": 40.46875,
+            "width": 70.84375,
+            "x": 884.5,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "CADASTRO",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/administrativo/",
+          "rect": {
+            "height": 40.46875,
+            "width": 113.484375,
+            "x": 969.34375,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "ADMINISTRATIVO",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "#",
+          "rect": {
+            "height": 40.46875,
+            "width": 129.140625,
+            "x": 1096.828125,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "DESI PET SHOWER",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "",
+          "href": "https://desi.pet/quem-somos/",
+          "rect": {
+            "height": 41.796875,
+            "width": 196,
+            "x": -98870.171875,
+            "y": 87.234375
+          },
+          "tag": "a",
+          "text": "",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "",
+          "href": "https://desi.pet/banho-e-tosa/",
+          "rect": {
+            "height": 41.796875,
+            "width": 196,
+            "x": -98870.171875,
+            "y": 129.03125
+          },
+          "tag": "a",
+          "text": "",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "",
+          "href": "https://desi.pet/regras-e-termos-de-atendimento/",
+          "rect": {
+            "height": 62.59375,
+            "width": 196,
+            "x": -98870.171875,
+            "y": 170.828125
+          },
+          "tag": "a",
+          "text": "",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "",
+          "href": "https://desi.pet/politica-de-privacidade/",
+          "rect": {
+            "height": 61.59375,
+            "width": 196,
+            "x": -98870.171875,
+            "y": 233.421875
+          },
+          "tag": "a",
+          "text": "",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/portal-do-cliente/",
+          "rect": {
+            "height": 40.46875,
+            "width": 128.90625,
+            "x": 1239.96875,
+            "y": 24.765625
+          },
+          "tag": "a",
+          "text": "PORTAL DO CLIENTE",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "nav-top-link",
+          "href": "https://desi.pet/wp-admin",
+          "rect": {
+            "height": 40.46875,
+            "width": 45.546875,
+            "x": 415,
+            "y": 90
+          },
+          "tag": "a",
+          "text": "ADMIN",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn dps-view-btn--active",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=day",
+          "rect": {
+            "height": 45.59375,
+            "width": 54.90625,
+            "x": 456,
+            "y": 291.953125
+          },
+          "tag": "a",
+          "text": "Dia",
+          "title": "Ver lista diaria",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=week",
+          "rect": {
+            "height": 45.59375,
+            "width": 87.203125,
+            "x": 518.90625,
+            "y": 291.953125
+          },
+          "tag": "a",
+          "text": "Semana",
+          "title": "Ver lista semanal",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-20&view=calendar",
+          "rect": {
+            "height": 45.59375,
+            "width": 61.53125,
+            "x": 614.109375,
+            "y": 291.953125
+          },
+          "tag": "a",
+          "text": "Mes",
+          "title": "Ver calendario mensal",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-view-btn",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&show_all=1",
+          "rect": {
+            "height": 45.59375,
+            "width": 148.9375,
+            "x": 683.640625,
+            "y": 291.953125
+          },
+          "tag": "a",
+          "text": "Agenda completa",
+          "title": "Ver todos os agendamentos futuros",
+          "type": ""
+        },
+        {
+          "aria": "Ver dia anterior",
+          "cls": "dps-nav-btn dps-nav-btn--prev",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-19&view=day",
+          "rect": {
+            "height": 36,
+            "width": 35.1875,
+            "x": 1376.5,
+            "y": 296.75
+          },
+          "tag": "a",
+          "text": "←",
+          "title": "Ver dia anterior",
+          "type": ""
+        },
+        {
+          "aria": "Ver agendamentos de hoje",
+          "cls": "dps-nav-btn dps-nav-btn--today",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-22&view=day",
+          "rect": {
+            "height": 36,
+            "width": 54.125,
+            "x": 1415.6875,
+            "y": 296.75
+          },
+          "tag": "a",
+          "text": "Hoje",
+          "title": "Ver agendamentos de hoje",
+          "type": ""
+        },
+        {
+          "aria": "Ver proximo dia",
+          "cls": "dps-nav-btn dps-nav-btn--next",
+          "href": "https://desi.pet/agenda-de-atendimentos/?agenda_tab=visao-rapida&dps_date=2026-04-21&view=day",
+          "rect": {
+            "height": 36,
+            "width": 35.1875,
+            "x": 1473.8125,
+            "y": 296.75
+          },
+          "tag": "a",
+          "text": "→",
+          "title": "Ver proximo dia",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button dps-agenda-tab-button--active",
+          "href": "",
+          "rect": {
+            "height": 59.1875,
+            "width": 359.140625,
+            "x": 390,
+            "y": 625.9375
+          },
+          "tag": "button",
+          "text": "CONFIRMAÇÕES E PRÓXIMOS PASSOS",
+          "title": "Confirmações e próximos passos",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button",
+          "href": "",
+          "rect": {
+            "height": 59.1875,
+            "width": 359.15625,
+            "x": 772.65625,
+            "y": 625.9375
+          },
+          "tag": "button",
+          "text": "CHECKLIST, CHECK-IN E COBRANÇA",
+          "title": "Checklist, check-in e cobrança",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-tab-button",
+          "href": "",
+          "rect": {
+            "height": 59.1875,
+            "width": 359.140625,
+            "x": 1155.328125,
+            "y": 625.9375
+          },
+          "tag": "button",
+          "text": "LOGÍSTICA, NOTAS E TAXIDOG",
+          "title": "Logística, notas e TaxiDog",
+          "type": "button"
+        },
+        {
+          "aria": "Abrir perfil rápido de QA Smoke Pet e QA Smoke Cliente",
+          "cls": "dps-pet-profile-trigger",
+          "href": "",
+          "rect": {
+            "height": 40,
+            "width": 214.9375,
+            "x": 553.6875,
+            "y": 920.671875
+          },
+          "tag": "button",
+          "text": "QA SMOKE PET\n>",
+          "title": "Ver perfil rápido do pet e tutor",
+          "type": "button"
+        },
+        {
+          "aria": "Abrir modal de serviços do atendimento: 1 serviço",
+          "cls": "dps-services-popup-btn",
+          "href": "",
+          "rect": {
+            "height": 46.390625,
+            "width": 190.140625,
+            "x": 802.625,
+            "y": 920.671875
+          },
+          "tag": "button",
+          "text": "VER SERVIÇOS",
+          "title": "Ver serviços e observações",
+          "type": "button"
+        },
+        {
+          "aria": "",
+          "cls": "dps-confirmation-dropdown dps-dropdown--not-confirmed",
+          "href": "",
+          "rect": {
+            "height": 45.59375,
+            "width": 237.0625,
+            "x": 1026.765625,
+            "y": 920.671875
+          },
+          "tag": "select",
+          "text": "Confirmado\nNão confirmado\nCancelado",
+          "title": "",
+          "type": ""
+        },
+        {
+          "aria": "",
+          "cls": "dps-agenda-action-link dps-agenda-action-link--secondary dps-quick-reschedule",
+          "href": "",
+          "rect": {
+            "height": 44,
+            "width": 183.171875,
+            "x": 1297.828125,
+            "y": 920.671875
+          },
+          "tag": "button",
+          "text": "REAGENDAR",
+          "title": "Reagendar atendimento",
+          "type": "button"
+        },
+        {
+          "aria": "Go to top",
+          "cls": "back-to-top button icon invert plain fixed bottom z-1 is-outline circle hide-for-medium",
+          "href": "",
+          "rect": {
+            "height": 38.796875,
+            "width": 38.796875,
+            "x": 1859.34375,
+            "y": 1152.8421630859375
+          },
+          "tag": "button",
+          "text": "Go to top",
+          "title": "",
+          "type": "button"
+        }
+      ],
+      "navTexts": [
+        "Dia",
+        "Semana",
+        "Mes",
+        "Agenda completa",
+        "←",
+        "Hoje",
+        "→"
+      ],
+      "tabTexts": [
+        "Confirmações e próximos passos",
+        "Checklist, check-in e cobrança",
+        "Logística, notas e TaxiDog"
+      ],
+      "tables": [
+        {
+          "columns": 0,
+          "headers": [
+            "Horário",
+            "Pet e tutor",
+            "Serviços",
+            "Confirmação",
+            "Ações"
+          ],
+          "rect": {
+            "height": 173.5625,
+            "width": 1104,
+            "x": 408,
+            "y": 863.6875
+          }
+        }
+      ],
+      "viewport": {
+        "bodyScrollWidth": 1920,
+        "innerWidth": 1920,
+        "scrollWidth": 1920
+      }
+    },
+    "interactions": {
+      "tab_visao-rapida": {
+        "activeTab": "Confirmações e próximos passos",
+        "panelId": "dps-tab-content-visao-rapida",
+        "text": "Segunda-feira, 20/041 atendimento no periodo0 pendentes1 finalizadosConcluídos no períodoHorárioPet e tutorServiçosConfirmaçãoAções23:30QA Smoke Pet>TutorQA Smoke ClienteVer serviçosConfirmadoNão confirmadoCanceladoReagendar"
+      },
+      "tab_operacao": {
+        "activeTab": "Checklist, check-in e cobrança",
+        "panelId": "dps-tab-content-operacao",
+        "text": "Segunda-feira, 20/041 atendimento no periodo0 pendentes1 finalizadosConcluídos no períodoHorárioPet e tutorStatus do ServiçoPagamentoPainel operacionalAções23:30QA Smoke Pet>TutorQA Smoke ClientePendenteFinalizadoPagoCanceladoCobrar clienteChecklist100%Check-in15:54Check-out15:57Checklist concluídoChecklist✎Editar check-in / check-outEditarReagendar"
+      },
+      "tab_detalhes": {
+        "activeTab": "Logística, notas e TaxiDog",
+        "panelId": "dps-tab-content-detalhes",
+        "text": "Segunda-feira, 20/041 atendimento no periodo0 pendentes1 finalizadosConcluídos no períodoHorárioPet e tutorTaxiDogObservaçõesLogísticaAções23:30QA Smoke Pet>TutorQA Smoke ClienteSolicitadoAgendamento temporário para smoke suite de QA.Sem endereco para logisticaReagendar"
+      },
+      "operation_modal": "Fluxo operacional do atendimento\nChecklist, check-in e check-out centralizados em um único modal.\n×\nCHECKLIST\n100%\nCHECK-IN\n15:54\nCHECK-OUT\n15:57\nDURAÇÃO\n2 min\nChecklist Operacional\n100%\nPré-banho (desembaraçar / escovação)\nDESFAZER\nREFAZER\nBanho\nDESFAZER\nREFAZER\nSecagem\nDESFAZER\nREFAZER\nTosa / Corte\nDESFAZER\nREFAZER\nOrelhas / Unhas\nDESFAZER\nREFAZER\nAcabamento (perfume / laço)\nDESFAZER\nREFAZER\nCheck-in / Check-out\nCheck-in: 15:54\nCheck-out: 15:57\n2 min\nRecepção do pet\nRegistre as condições observadas na chegada e mantenha esse histórico editável.\n15:54\nPulgas\nCarrapatos\nFeridinhas / Lesões\nAlergia / Irritação\nOtite / Orelha inflamada\nNós / Pelos embolados\nAgressivo / Ansioso\nObservações gerais\nSALVAR EDIÇÃO DO CHECK-IN\nSaída do pet\nConfirme o encerramento do atendimento e ajuste as informações registradas sempre que necessário.\n15:57\nPulgas\nCarrapatos\nFeridinhas / Lesões\nAlergia / Irritação\nOtite / Orelha inflamada\nNós / Pelos embolados\nAgressivo / Ansioso\nObservações gerais\nSALVAR EDIÇÃO DO CHECK-OUT\nEnviar relatório via WhatsApp\nFECHAR",
+      "pet_modal": "AGENDA\nPerfil rápido do pet\nQA Smoke Pet | QA Smoke Cliente\n×\nPet\nNOME\nQA SMOKE PET\nESPÉCIE\n—\nRAÇA\nSEM RAÇA DEFINIDA\nPORTE\nPEQUENO\nPESO\n8 KG\nSEXO\n—\nTutor\nNOME\nQA SMOKE CLIENTE\nTELEFONE\n15999999999\nE-MAIL\n—\nENDEREÇO\n—\nFECHAR",
+      "reschedule_modal": "Reagendar atendimento\nAtualize data e horario sem sair da lista.\n×\nNova data\nNovo horário\nCANCELAR\nSALVAR",
+      "view_week": {
+        "empty": true,
+        "overflow": false,
+        "text": "Agenda de AtendimentosPeriodo ativoSemana de 20/04 a 26/04Ver:DiaSemanaMesAgenda completa←Hoje→1Total0Pendentes1Finalizados0Cancelados0Atrasados1Pagamento pendente1TaxiDogLista de AtendimentosTrês leituras do mesmo fluxo operacional: confirmar, executar e revisar contexto.Confirmações e próximos passosChecklist, check-in e cobrançaLogística, notas e TaxiDogSegunda-feira, 20/041 atendimento no periodo0 pendentes1 finalizadosConcluídos no períodoHorárioPet e tutorServiçosConfirmaçãoAções23:30QA Smoke Pet>TutorQA Smoke ClienteVer serviçosConfirmadoNão confirmadoCanceladoReagendarSegunda-feira, 20/041 atendimento no periodo0 pendentes1 finalizadosConcluídos no períodoHorárioPet e tutorStatus do ServiçoPagamentoPainel operacionalAções23:30QA Smoke Pet>TutorQA Smoke ClientePendenteFinalizadoPagoCanceladoCobrar clienteChecklist100%Check-in15:54Check-out15:57Checklist concluídoChecklist✎Editar check-in / check-outEditarReagendarSegunda-feira, 20/041 atendimento no periodo0 pendentes1 finalizad",
+        "title": "Semana de 20/04 a 26/04",
+        "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=week&agenda_tab=detalhes"
+      },
+      "view_month": {
+        "empty": true,
+        "overflow": false,
+        "text": "Agenda de AtendimentosPeriodo ativoabril 2026Ver:DiaSemanaMesAgenda completa←Hoje→ AnteriorAbril 2026HojePróximo →SegTerQuaQuiSexSábDom1234567891011121314151617181920121222324252627282930 Pendente Finalizado Pago Cancelado",
+        "title": "abril 2026",
+        "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=calendar"
+      },
+      "view_all": {
+        "empty": true,
+        "overflow": false,
+        "text": "Agenda de AtendimentosPeriodo ativoTodos os atendimentos futurosVer:DiaSemanaMesAgenda completa←Hoje→0Total0Pendentes0Finalizados0Cancelados0Atrasados0Pagamento pendente0TaxiDogLista de AtendimentosTrês leituras do mesmo fluxo operacional: confirmar, executar e revisar contexto.Confirmações e próximos passosChecklist, check-in e cobrançaLogística, notas e TaxiDogNenhum atendimento neste recorte.Ajuste o período ou abra a agenda completa para continuar a operação.Página 1",
+        "title": "Todos os atendimentos futuros",
+        "url": "https://desi.pet/agenda-de-atendimentos/?show_all=1&agenda_tab=detalhes"
+      },
+      "services_modal_recheck": {
+        "serviceButtonCount": 1,
+        "opened": true,
+        "text": "Serviços do atendimento×QA Smoke PetPequeno • Sem raça definida • 8 kg2serviços1h 30mintempo estimadoServiços a realizarQA Smoke Banho CompletoServiço • 90 minR$ 89,90Serviço temporário para a smoke suite da Agenda.TaxiDogTransporteR$ 18,00TotalR$ 107,90Observações do clienteAgendamento temporário para smoke suite de QA."
+      }
+    },
+    "accessibility": {
+      "buttonsAsLinks": [
+        {
+          "cls": "nav-top-link",
+          "text": "DESI PET SHOWER"
+        }
+      ],
+      "consoleReady": true,
+      "controlsWithoutName": [
+        {
+          "cls": "",
+          "tag": "A"
+        },
+        {
+          "cls": "",
+          "tag": "A"
+        },
+        {
+          "cls": "",
+          "tag": "A"
+        },
+        {
+          "cls": "",
+          "tag": "A"
+        }
+      ],
+      "focusVisibleCount": 45,
+      "iconOnlyWithoutLabel": [
+        {
+          "cls": "",
+          "tag": "A",
+          "text": ""
+        },
+        {
+          "cls": "",
+          "tag": "A",
+          "text": ""
+        },
+        {
+          "cls": "",
+          "tag": "A",
+          "text": ""
+        },
+        {
+          "cls": "",
+          "tag": "A",
+          "text": ""
+        }
+      ]
+    },
+    "console_logs": [
+      {
+        "level": "SEVERE",
+        "message": "https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3A5da204e1-b573-424a-945f-23400a709302%22%2C%22device_id%22%3A%225da204e1-b573-424a-945f-23400a709302%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1 - Failed to load resource: net::ERR_FAILED",
+        "source": "network",
+        "timestamp": 1776858839610
+      },
+      {
+        "level": "WARNING",
+        "message": "https://desi.pet/wp-includes/js/jquery/jquery-migrate.js?ver=3.4.1 135:11 \"JQMIGRATE: jQuery.fn.removeAttr no longer sets boolean properties: hidden\"",
+        "source": "console-api",
+        "timestamp": 1776858839646
+      },
+      {
+        "level": "WARNING",
+        "message": "https://desi.pet/wp-includes/js/jquery/jquery-migrate.js?ver=3.4.1 135:11 \"JQMIGRATE: jQuery.trim is deprecated; use String.prototype.trim\"",
+        "source": "console-api",
+        "timestamp": 1776858847427
+      },
+      {
+        "level": "INFO",
+        "message": "https://desi.pet/wp-includes/js/jquery/jquery-migrate.js?ver=3.4.1 103:16 \"JQMIGRATE: Migrate is installed with logging active, version 3.4.1\"",
+        "source": "console-api",
+        "timestamp": 1776858852202
+      },
+      {
+        "level": "INFO",
+        "message": "https://desi.pet/wp-includes/js/dist/vendor/react-dom.js?ver=18.3.1.1 29904:18 \"%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\" \"font-weight:bold\"",
+        "source": "console-api",
+        "timestamp": 1776858852255
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=week 3468 Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "source": "javascript",
+        "timestamp": 1776858852290
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236 - Failed to load resource: net::ERR_FAILED",
+        "source": "network",
+        "timestamp": 1776858852290
+      },
+      {
+        "level": "WARNING",
+        "message": "https://desi.pet/wp-includes/js/jquery/jquery-migrate.js?ver=3.4.1 135:11 \"JQMIGRATE: jQuery.fn.removeAttr no longer sets boolean properties: hidden\"",
+        "source": "console-api",
+        "timestamp": 1776858852346
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=week&agenda_tab=detalhes - Access to fetch at 'https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3A5da204e1-b573-424a-945f-23400a709302%22%2C%22device_id%22%3A%225da204e1-b573-424a-945f-23400a709302%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1' from origin 'https://desi.pet' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "source": "javascript",
+        "timestamp": 1776858853615
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3A5da204e1-b573-424a-945f-23400a709302%22%2C%22device_id%22%3A%225da204e1-b573-424a-945f-23400a709302%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1 - Failed to load resource: net::ERR_FAILED",
+        "source": "network",
+        "timestamp": 1776858853615
+      },
+      {
+        "level": "INFO",
+        "message": "https://desi.pet/wp-includes/js/jquery/jquery-migrate.js?ver=3.4.1 103:16 \"JQMIGRATE: Migrate is installed with logging active, version 3.4.1\"",
+        "source": "console-api",
+        "timestamp": 1776858854163
+      },
+      {
+        "level": "INFO",
+        "message": "https://desi.pet/wp-includes/js/dist/vendor/react-dom.js?ver=18.3.1.1 29904:18 \"%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\" \"font-weight:bold\"",
+        "source": "console-api",
+        "timestamp": 1776858854211
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=calendar 3558 Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "source": "javascript",
+        "timestamp": 1776858854243
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236 - Failed to load resource: net::ERR_FAILED",
+        "source": "network",
+        "timestamp": 1776858854243
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=calendar - Access to fetch at 'https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3A5da204e1-b573-424a-945f-23400a709302%22%2C%22device_id%22%3A%225da204e1-b573-424a-945f-23400a709302%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1' from origin 'https://desi.pet' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "source": "javascript",
+        "timestamp": 1776858855516
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3A5da204e1-b573-424a-945f-23400a709302%22%2C%22device_id%22%3A%225da204e1-b573-424a-945f-23400a709302%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1 - Failed to load resource: net::ERR_FAILED",
+        "source": "network",
+        "timestamp": 1776858855516
+      },
+      {
+        "level": "INFO",
+        "message": "https://desi.pet/wp-includes/js/jquery/jquery-migrate.js?ver=3.4.1 103:16 \"JQMIGRATE: Migrate is installed with logging active, version 3.4.1\"",
+        "source": "console-api",
+        "timestamp": 1776858856149
+      },
+      {
+        "level": "INFO",
+        "message": "https://desi.pet/wp-includes/js/dist/vendor/react-dom.js?ver=18.3.1.1 29904:18 \"%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\" \"font-weight:bold\"",
+        "source": "console-api",
+        "timestamp": 1776858856169
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://desi.pet/agenda-de-atendimentos/?show_all=1 3546 Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "source": "javascript",
+        "timestamp": 1776858856232
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236 - Failed to load resource: net::ERR_FAILED",
+        "source": "network",
+        "timestamp": 1776858856232
+      },
+      {
+        "level": "WARNING",
+        "message": "https://desi.pet/wp-includes/js/jquery/jquery-migrate.js?ver=3.4.1 135:11 \"JQMIGRATE: jQuery.fn.removeAttr no longer sets boolean properties: hidden\"",
+        "source": "console-api",
+        "timestamp": 1776858856264
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://desi.pet/agenda-de-atendimentos/?show_all=1&agenda_tab=detalhes - Access to fetch at 'https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3A5da204e1-b573-424a-945f-23400a709302%22%2C%22device_id%22%3A%225da204e1-b573-424a-945f-23400a709302%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1' from origin 'https://desi.pet' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "source": "javascript",
+        "timestamp": 1776858857522
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3A5da204e1-b573-424a-945f-23400a709302%22%2C%22device_id%22%3A%225da204e1-b573-424a-945f-23400a709302%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1 - Failed to load resource: net::ERR_FAILED",
+        "source": "network",
+        "timestamp": 1776858857522
+      },
+      {
+        "level": "INFO",
+        "message": "https://desi.pet/wp-includes/js/jquery/jquery-migrate.js?ver=3.4.1 103:16 \"JQMIGRATE: Migrate is installed with logging active, version 3.4.1\"",
+        "source": "console-api",
+        "timestamp": 1776858858735
+      },
+      {
+        "level": "INFO",
+        "message": "https://desi.pet/wp-includes/js/dist/vendor/react-dom.js?ver=18.3.1.1 29904:18 \"%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\" \"font-weight:bold\"",
+        "source": "console-api",
+        "timestamp": 1776858858756
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day 3565 Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "source": "javascript",
+        "timestamp": 1776858858813
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236 - Failed to load resource: net::ERR_FAILED",
+        "source": "network",
+        "timestamp": 1776858858813
+      },
+      {
+        "level": "WARNING",
+        "message": "https://desi.pet/wp-includes/js/jquery/jquery-migrate.js?ver=3.4.1 135:11 \"JQMIGRATE: jQuery.fn.removeAttr no longer sets boolean properties: hidden\"",
+        "source": "console-api",
+        "timestamp": 1776858858837
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day&agenda_tab=detalhes - Access to fetch at 'https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3A5da204e1-b573-424a-945f-23400a709302%22%2C%22device_id%22%3A%225da204e1-b573-424a-945f-23400a709302%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1' from origin 'https://desi.pet' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "source": "javascript",
+        "timestamp": 1776858860103
+      },
+      {
+        "level": "SEVERE",
+        "message": "https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3A5da204e1-b573-424a-945f-23400a709302%22%2C%22device_id%22%3A%225da204e1-b573-424a-945f-23400a709302%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1 - Failed to load resource: net::ERR_FAILED",
+        "source": "network",
+        "timestamp": 1776858860103
+      }
+    ]
+  }
+}

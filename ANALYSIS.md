@@ -92,7 +92,7 @@ $clientes = DPS_Query_Helper::get_all_posts_by_type( 'dps_client', [
 $agendamentos = DPS_Query_Helper::get_paginated_posts( 'dps_appointment', 20, $paged );
 ```
 
-**Boas prÃƒÂ¡ticas**: Use `fields => 'ids'` quando precisar apenas de IDs, e prÃƒÂ©-carregue metadados com `update_meta_cache()` quando precisar de metas.
+**Boas prÃƒÂ¡ticas**: Use `fields => 'ids'` quando precisar apenas de IDs e leia metadados sob demanda, sem priming de cache.
 
 #### DPS_Request_Validator
 **PropÃƒÂ³sito**: ValidaÃƒÂ§ÃƒÂ£o centralizada de nonces, capabilities, requisiÃƒÂ§ÃƒÂµes AJAX e sanitizaÃƒÂ§ÃƒÂ£o de campos de formulÃƒÂ¡rio.
@@ -255,9 +255,9 @@ $ip = DPS_IP_Helper::get_ip();
 // Obter IP real atravÃƒÂ©s de CDN (Cloudflare)
 $ip = DPS_IP_Helper::get_ip_with_proxy_support();
 
-// Gerar hash para rate limiting
+// Gerar hash para rate limiting persistente
 $hash = DPS_IP_Helper::get_ip_hash( 'dps_login_' );
-set_transient( 'rate_limit_' . $hash, $count, HOUR_IN_SECONDS );
+update_option( 'dps_rate_limit_' . $hash, [ 'count' => $count, 'expires_at' => time() + HOUR_IN_SECONDS ], false );
 
 // Anonimizar IP para logs de longa duraÃƒÂ§ÃƒÂ£o (LGPD)
 $anon_ip = DPS_IP_Helper::anonymize( $ip );
@@ -738,8 +738,8 @@ O sistema suporta trÃƒÂªs tipos de agendamentos, identificados pelo metadado
 
 ### HistÃƒÂ³rico e exportaÃƒÂ§ÃƒÂ£o de agendamentos
 - A coleta de atendimentos finalizados ÃƒÂ© feita em lotes pelo `WP_Query` com `fields => 'ids'`, `no_found_rows => true` e tamanho configurÃƒÂ¡vel via filtro `dps_history_batch_size` (padrÃƒÂ£o: 200). Isso evita uma ÃƒÂºnica consulta gigante em tabelas volumosas e permite tratar listas grandes de forma incremental.
-- As metas dos agendamentos sÃƒÂ£o prÃƒÂ©-carregadas com `update_meta_cache('post')` antes do loop, reduzindo consultas repetidas ÃƒÂ s mesmas linhas durante a renderizaÃƒÂ§ÃƒÂ£o e exportaÃƒÂ§ÃƒÂ£o.
-- Clientes, pets e serviÃƒÂ§os relacionados sÃƒÂ£o resolvidos com caches em memÃƒÂ³ria por ID, evitando `get_post` duplicadas quando o mesmo registro aparece em vÃƒÂ¡rias linhas.
+- As metas dos agendamentos sao lidas conforme necessidade durante renderizacao/exportacao, sem priming de cache.
+- Clientes, pets e serviÃƒÂ§os relacionados sao resolvidos por consulta direta ou estruturas locais de processamento da requisicao, sem camada de cache reutilizavel.
 - O botÃƒÂ£o de exportaÃƒÂ§ÃƒÂ£o gera CSV apenas com as colunas exibidas e respeita os filtros aplicados na tabela, o que limita o volume exportado a um subconjunto relevante e jÃƒÂ¡ paginado/filtrado pelo usuÃƒÂ¡rio.
 
 ## Add-ons complementares (`plugins/`)
@@ -1258,10 +1258,12 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - NÃƒÂ£o cria CPTs prÃƒÂ³prios
 - Tabela customizada `wp_dps_portal_tokens` para gerenciar tokens de acesso
   - Suporta 5 tipos de token: `login` (temporário 30min), `first_access` (temporário 30min), `permanent` (válido até revogação), `profile_update` (7 dias), `tosa_consent` (7 dias)
-- Sessões PHP próprias para autenticação independente do WordPress
+- Sessões do portal persistidas em option `dps_portal_sessions`, com cookie HttpOnly/SameSite e expiracao propria de 24h
 - Option `dps_portal_page_id`: armazena ID da página configurada do portal
 - Option `dps_portal_2fa_enabled`: habilita/desabilita 2FA via e-mail (padrão: desabilitado)
-- Option `dps_portal_rate_limits`: controle simples de tentativas para pedidos de link e cria??o/redefini??o de senha
+- Option `dps_portal_2fa_state`: estado persistente e expiravel de codigos 2FA, sessoes pendentes e remember-me pendente
+- Option `dps_portal_rate_limits`: controle persistente de tentativas para pedidos de link, criacao/redefinicao de senha, pedidos publicos e validacao de tokens
+- Option `dps_portal_invalid_token_attempts`: auditoria persistente e limitada das tentativas invalidas de token (retencao de 30 dias, maximo 200 registros)
 - Tipos de mensagem customizados para notificações
 
 **Abas do portal**:
@@ -1300,18 +1302,20 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 | `DPS_Portal_Renderer` | `includes/client-portal/class-dps-portal-renderer.php` | Renderização das abas e componentes visuais |
 | `DPS_Portal_Actions_Handler` | `includes/client-portal/class-dps-portal-actions-handler.php` | Handlers de ações POST (save, update, upload) |
 | `DPS_Portal_Ajax_Handler` | `includes/client-portal/class-dps-portal-ajax-handler.php` | Handlers de requisições AJAX |
-| `DPS_Portal_Session_Manager` | `includes/class-dps-portal-session-manager.php` | Gerenciamento de sessões PHP |
+| `DPS_Portal_Session_Manager` | `includes/class-dps-portal-session-manager.php` | Gerenciamento de sessoes persistentes do portal |
 | `DPS_Portal_Token_Manager` | `includes/class-dps-portal-token-manager.php` | CRUD de tokens com suporte a permanentes e temporários |
 | `DPS_Portal_User_Manager` | `includes/class-dps-portal-user-manager.php` | Provisiona/sincroniza usu?rio WordPress pelo e-mail do cliente e envia acesso por senha |
-| `DPS_Portal_Rate_Limiter` | `includes/class-dps-portal-rate-limiter.php` | Limita tentativas de solicita??o de link e de cria??o/redefini??o de senha |
+| `DPS_Portal_Rate_Limiter` | `includes/class-dps-portal-rate-limiter.php` | Limita tentativas em armazenamento persistente sem transients/cache |
+| `DPS_Portal_Cache_Helper` | `includes/class-dps-portal-cache-helper.php` | Camada legada de compatibilidade; renderiza secoes em tempo real e apenas dispara hooks historicos |
 | `DPS_Finance_Repository` | `includes/client-portal/repositories/class-dps-finance-repository.php` | Acesso a dados financeiros (transações, parcelas, resumos) |
 | `DPS_Portal_2FA` | `includes/class-dps-portal-2fa.php` | 2FA via e-mail: gera/verifica cÃƒÂ³digos, renderiza form, AJAX handler |
 | `DPS_Scheduling_Suggestions` | `includes/class-dps-scheduling-suggestions.php` | SugestÃƒÂµes de agendamento baseadas no histÃƒÂ³rico do pet |
 | `DPS_Portal_Renderer` | `includes/client-portal/class-dps-portal-renderer.php` | RenderizaÃƒÂ§ÃƒÂ£o das abas e componentes visuais |
 | `DPS_Portal_Actions_Handler` | `includes/client-portal/class-dps-portal-actions-handler.php` | Handlers de aÃƒÂ§ÃƒÂµes POST (save, update, upload) |
 | `DPS_Portal_Ajax_Handler` | `includes/client-portal/class-dps-portal-ajax-handler.php` | Handlers de requisiÃƒÂ§ÃƒÂµes AJAX |
-| `DPS_Portal_Session_Manager` | `includes/class-dps-portal-session-manager.php` | Gerenciamento de sessÃƒÂµes PHP |
+| `DPS_Portal_Session_Manager` | `includes/class-dps-portal-session-manager.php` | Gerenciamento de sessoes persistentes do portal |
 | `DPS_Portal_Token_Manager` | `includes/class-dps-portal-token-manager.php` | CRUD de tokens com suporte a permanentes e temporÃƒÂ¡rios |
+| `DPS_Portal_Cache_Helper` | `includes/class-dps-portal-cache-helper.php` | Camada legada de compatibilidade; renderiza secoes em tempo real e apenas dispara hooks historicos |
 | `DPS_Finance_Repository` | `includes/client-portal/repositories/class-dps-finance-repository.php` | Acesso a dados financeiros (transaÃƒÂ§ÃƒÂµes, parcelas, resumos) |
 | `DPS_Pet_Repository` | `includes/client-portal/repositories/class-dps-pet-repository.php` | Acesso a dados de pets do cliente |
 | `DPS_Appointment_Repository` | `includes/client-portal/repositories/class-dps-appointment-repository.php` | Acesso a dados de agendamentos do cliente |
@@ -1337,6 +1341,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - `dps_portal_after_update_preferences` (action): disparado apÃƒÂ³s salvar preferÃƒÂªncias de notificaÃƒÂ§ÃƒÂ£o; passa $client_id
 - `dps_portal_before_render` / `dps_portal_after_auth_check` / `dps_portal_client_authenticated` (actions): hooks do ciclo de vida do shortcode
 - `dps_portal_access_notification_sent` (action): disparado apÃƒÂ³s enviar notificaÃƒÂ§ÃƒÂ£o de acesso; passa $client_id, $sent, $access_date, $ip_address
+- `dps_portal_cache_invalidated` / `dps_portal_all_cache_invalidated` (actions): contratos legados mantidos como notificacoes de alteracao; nao limpam armazenamento interno porque o portal renderiza dados em tempo real
 - `dps_portal_review_url` (filter): permite filtrar a URL de avaliaÃƒÂ§ÃƒÂ£o do Google
 
 **MÃƒÂ©todos pÃƒÂºblicos da classe `DPS_Client_Portal`**:
@@ -1365,6 +1370,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - JÃƒÂ¡ segue padrÃƒÂ£o modular com estrutura `includes/` e `assets/`
 - Sistema de tokens com suporte a temporÃƒÂ¡rios (30min) e permanentes (atÃƒÂ© revogaÃƒÂ§ÃƒÂ£o)
 - Cleanup automÃƒÂ¡tico de tokens expirados via cron job hourly
+- O portal nao usa transients/cache interno: secoes sao renderizadas em tempo real; sessoes, 2FA, rate limiting e auditoria de tokens usam options persistentes com expiracao/retencao propria.
 - ConfiguraÃƒÂ§ÃƒÂ£o centralizada da pÃƒÂ¡gina do portal via interface administrativa
 - Menu administrativo registrado sob `desi-pet-shower` desde v2.1.0
 - 2FA opcional via e-mail (cÃƒÂ³digos hashed com `wp_hash_password`, 10min expiraÃƒÂ§ÃƒÂ£o, 5 tentativas max)
@@ -2444,7 +2450,7 @@ public function exemplo_metodo( $param1, $param2, $args = [] ) {
 - Registrar assets apenas onde necessÃƒÂ¡rio
 - Usar `wp_register_*` seguido de `wp_enqueue_*` condicionalmente
 - Otimizar queries com `fields => 'ids'` quando apropriado
-- PrÃƒÂ©-carregar metadados com `update_meta_cache()`
+- Ler metadados sob demanda, sem `update_meta_cache()` ou camada de cache
 
 **IntegraÃƒÂ§ÃƒÂ£o com o nÃƒÂºcleo:**
 - Preferir hooks do plugin base (`dps_base_*`, `dps_settings_*`) a menus prÃƒÂ³prios
@@ -3448,3 +3454,32 @@ A integraÃƒÂ§ÃƒÂ£o do sistema DPS com Google Tasks API permite sincroniz
 - AnÃƒÂ¡lise de riscos e mitigaÃƒÂ§ÃƒÂµes
 - MÃƒÂ©tricas de sucesso (KPIs tÃƒÂ©cnicos e de negÃƒÂ³cio)
 - ComparaÃƒÂ§ÃƒÂ£o com alternativas (Microsoft To Do, Todoist, sistema interno)
+
+---
+
+## Agenda Add-on - fila operacional canônica
+
+**Status:** Implementação inicial publicada em 2026-04-22.
+
+**Objetivo:** reorganizar a Agenda como uma superfície operacional única, alinhada ao DPS Signature, evitando três tabelas concorrentes para o mesmo atendimento.
+
+**Estrutura visual/funcional atual:**
+- `render_appointment_row_operational_signature()` renderiza uma linha canônica por atendimento.
+- `render_appointment_card_operational_signature()` renderiza a versão mobile do mesmo atendimento.
+- `render_operational_inspector_signature()` renderiza o painel contextual do atendimento selecionado.
+- `get_agenda_markup_for_active_tab()` passou a ignorar qualquer aba legada e sempre devolver a linha e o card da fila operacional canônica após atualizações de status, confirmação, reagendamento e ações relacionadas.
+- O helper `get_agenda_markup_for_active_tab()` centraliza o refresh do markup operacional e devolve `row_html` e `card_html` para os endpoints AJAX da Agenda.
+- O shortcode publicado deixou de renderizar os painéis antigos de abas e agora entrega apenas o shell operacional DPS Signature com toolbar, lista canônica e inspetor contextual.
+
+**Fluxos preservados:**
+- `dps_update_status` continua sendo o endpoint de status e mantém versionamento `_dps_appointment_version`.
+- Alterar/finalizar status segue abrindo o modal operacional para checklist, check-in e check-out.
+- `dps_get_operation_panel`, `dps_get_services_details`, `dps_quick_reschedule` e `dps_get_appointment_history` seguem como contratos AJAX existentes.
+- A renderização canônica não grava metadados durante o render; normalizações permanecem nos endpoints/serviços apropriados.
+- O frontend da fila canônica usa `refreshAgendaMarkup()` para sincronizar tabela, card mobile e inspetor sem reload completo da página.
+
+**Arquivos principais:**
+- `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
+- `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+- `plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js`
+- `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`

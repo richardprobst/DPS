@@ -23,11 +23,20 @@ class DPS_Portal_2FA {
     private static $instance = null;
 
     /**
-     * Prefixo para transients de 2FA.
+     * Option que armazena o estado temporario do fluxo 2FA.
      *
      * @var string
      */
-    private const TRANSIENT_PREFIX = 'dps_2fa_';
+    private const STORAGE_OPTION = 'dps_portal_2fa_state';
+
+    /**
+     * Prefixos internos para tipos de estado 2FA.
+     *
+     * @var string
+     */
+    private const CODE_PREFIX = 'code:';
+    private const PENDING_PREFIX = 'pending:';
+    private const REMEMBER_PREFIX = 'remember:';
 
     /**
      * Tempo de vida do código em segundos (10 minutos).
@@ -88,7 +97,7 @@ class DPS_Portal_2FA {
             'created'  => time(),
         ];
 
-        set_transient( self::TRANSIENT_PREFIX . $client_id, $data, self::CODE_EXPIRY );
+        $this->set_state_entry( self::CODE_PREFIX . absint( $client_id ), $data, self::CODE_EXPIRY );
 
         return $code;
     }
@@ -101,7 +110,8 @@ class DPS_Portal_2FA {
      * @return bool|string True se válido, string de erro se inválido.
      */
     public function verify_code( $client_id, $code ) {
-        $data = get_transient( self::TRANSIENT_PREFIX . $client_id );
+        $client_id = absint( $client_id );
+        $data      = $this->get_state_entry( self::CODE_PREFIX . $client_id );
 
         if ( false === $data || ! is_array( $data ) ) {
             return __( 'Código expirado. Solicite um novo link de acesso.', 'dps-client-portal' );
@@ -109,13 +119,13 @@ class DPS_Portal_2FA {
 
         // Verifica limite de tentativas
         if ( $data['attempts'] >= self::MAX_ATTEMPTS ) {
-            delete_transient( self::TRANSIENT_PREFIX . $client_id );
+            $this->delete_state_entry( self::CODE_PREFIX . $client_id );
             return __( 'Muitas tentativas. Solicite um novo link de acesso.', 'dps-client-portal' );
         }
 
         // Incrementa tentativas antes da verificação (anti-enumeration)
         $data['attempts']++;
-        set_transient( self::TRANSIENT_PREFIX . $client_id, $data, self::CODE_EXPIRY );
+        $this->save_state_entry( self::CODE_PREFIX . $client_id, $data );
 
         // Verifica o código usando hash seguro
         if ( ! wp_check_password( $code, $data['code'] ) ) {
@@ -132,8 +142,8 @@ class DPS_Portal_2FA {
             );
         }
 
-        // Código válido — remove transient
-        delete_transient( self::TRANSIENT_PREFIX . $client_id );
+        // Codigo valido: remove o estado persistido.
+        $this->delete_state_entry( self::CODE_PREFIX . $client_id );
 
         return true;
     }
@@ -211,13 +221,17 @@ class DPS_Portal_2FA {
     }
 
     /**
-     * Marca uma sessão como "pendente 2FA" via transient.
+     * Marca uma sessao como "pendente 2FA".
      *
      * @param int    $client_id ID do cliente.
      * @param string $session_key Chave da sessão pendente.
      */
     public function set_pending_2fa( $client_id, $session_key ) {
-        set_transient( 'dps_2fa_pending_' . $session_key, $client_id, self::CODE_EXPIRY );
+        $this->set_state_entry(
+            self::PENDING_PREFIX . $this->build_session_state_key( $session_key ),
+            [ 'client_id' => absint( $client_id ) ],
+            self::CODE_EXPIRY
+        );
     }
 
     /**
@@ -227,7 +241,9 @@ class DPS_Portal_2FA {
      * @return int|false Client ID ou false se não encontrado.
      */
     public function get_pending_client( $session_key ) {
-        return get_transient( 'dps_2fa_pending_' . $session_key );
+        $data = $this->get_state_entry( self::PENDING_PREFIX . $this->build_session_state_key( $session_key ) );
+
+        return isset( $data['client_id'] ) ? absint( $data['client_id'] ) : false;
     }
 
     /**
@@ -236,7 +252,36 @@ class DPS_Portal_2FA {
      * @param string $session_key Chave da sessão pendente.
      */
     public function clear_pending_2fa( $session_key ) {
-        delete_transient( 'dps_2fa_pending_' . $session_key );
+        $this->delete_state_entry( self::PENDING_PREFIX . $this->build_session_state_key( $session_key ) );
+    }
+
+    /**
+     * Persiste a flag de remember-me para aplicar apos a verificacao 2FA.
+     *
+     * @param string $session_key Chave da sessao pendente.
+     * @return void
+     */
+    public function set_remember_flag( $session_key ) {
+        $this->set_state_entry(
+            self::REMEMBER_PREFIX . $this->build_session_state_key( $session_key ),
+            [ 'remember' => '1' ],
+            self::CODE_EXPIRY
+        );
+    }
+
+    /**
+     * Consome a flag de remember-me de uma sessao 2FA.
+     *
+     * @param string $session_key Chave da sessao pendente.
+     * @return bool
+     */
+    public function consume_remember_flag( $session_key ) {
+        $key  = self::REMEMBER_PREFIX . $this->build_session_state_key( $session_key );
+        $data = $this->get_state_entry( $key );
+
+        $this->delete_state_entry( $key );
+
+        return isset( $data['remember'] ) && '1' === $data['remember'];
     }
 
     /**
@@ -281,9 +326,7 @@ class DPS_Portal_2FA {
         $this->clear_pending_2fa( $session_key );
 
         // F4.6: Aplica remember-me se estava sinalizado antes da 2FA
-        $remember = get_transient( 'dps_2fa_remember_' . $session_key );
-        if ( '1' === $remember ) {
-            delete_transient( 'dps_2fa_remember_' . $session_key );
+        if ( $this->consume_remember_flag( $session_key ) ) {
             $token_manager   = DPS_Portal_Token_Manager::get_instance();
             $permanent_token = $token_manager->generate_token( $client_id, 'permanent' );
             if ( false !== $permanent_token ) {
@@ -510,5 +553,142 @@ class DPS_Portal_2FA {
         $domain = $parts[1];
         $masked = substr( $local, 0, 1 ) . str_repeat( '*', max( 1, strlen( $local ) - 1 ) ) . '@' . $domain;
         return $masked;
+    }
+
+    /**
+     * Grava uma entrada de estado com expiracao.
+     *
+     * @param string $key Chave interna.
+     * @param array  $data Dados a persistir.
+     * @param int    $ttl_seconds Tempo de vida em segundos.
+     * @return void
+     */
+    private function set_state_entry( $key, array $data, $ttl_seconds ) {
+        $state = $this->get_state();
+        $now   = time();
+
+        $this->purge_expired_entries( $state, $now );
+
+        $data['expires_at'] = $now + max( 1, absint( $ttl_seconds ) );
+        $state[ $key ]      = $data;
+
+        $this->save_state( $state );
+    }
+
+    /**
+     * Atualiza uma entrada de estado preservando a expiracao original.
+     *
+     * @param string $key Chave interna.
+     * @param array  $data Dados atualizados.
+     * @return void
+     */
+    private function save_state_entry( $key, array $data ) {
+        $state = $this->get_state();
+
+        if ( isset( $state[ $key ] ) && is_array( $state[ $key ] ) && isset( $state[ $key ]['expires_at'] ) ) {
+            $data['expires_at'] = $state[ $key ]['expires_at'];
+        }
+
+        $state[ $key ] = $data;
+        $this->save_state( $state );
+    }
+
+    /**
+     * Recupera uma entrada de estado se ainda estiver valida.
+     *
+     * @param string $key Chave interna.
+     * @return array|false
+     */
+    private function get_state_entry( $key ) {
+        $state = $this->get_state();
+        $now   = time();
+
+        $this->purge_expired_entries( $state, $now );
+
+        if ( ! isset( $state[ $key ] ) || ! is_array( $state[ $key ] ) ) {
+            $this->save_state( $state );
+            return false;
+        }
+
+        if ( $this->is_entry_expired( $state[ $key ], $now ) ) {
+            unset( $state[ $key ] );
+            $this->save_state( $state );
+            return false;
+        }
+
+        $this->save_state( $state );
+        return $state[ $key ];
+    }
+
+    /**
+     * Remove uma entrada de estado.
+     *
+     * @param string $key Chave interna.
+     * @return void
+     */
+    private function delete_state_entry( $key ) {
+        $state = $this->get_state();
+
+        if ( isset( $state[ $key ] ) ) {
+            unset( $state[ $key ] );
+            $this->save_state( $state );
+        }
+    }
+
+    /**
+     * Recupera o estado persistido do fluxo 2FA.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private function get_state() {
+        $state = get_option( self::STORAGE_OPTION, [] );
+
+        return is_array( $state ) ? $state : [];
+    }
+
+    /**
+     * Persiste o estado do fluxo 2FA.
+     *
+     * @param array<string, array<string, mixed>> $state Estado atualizado.
+     * @return void
+     */
+    private function save_state( array $state ) {
+        update_option( self::STORAGE_OPTION, $state, false );
+    }
+
+    /**
+     * Remove entradas expiradas.
+     *
+     * @param array<string, array<string, mixed>> $state Estado por referencia.
+     * @param int                                 $now Timestamp atual.
+     * @return void
+     */
+    private function purge_expired_entries( array &$state, $now ) {
+        foreach ( $state as $key => $entry ) {
+            if ( ! is_array( $entry ) || $this->is_entry_expired( $entry, $now ) ) {
+                unset( $state[ $key ] );
+            }
+        }
+    }
+
+    /**
+     * Verifica se uma entrada expirou.
+     *
+     * @param array<string, mixed> $entry Entrada de estado.
+     * @param int                  $now Timestamp atual.
+     * @return bool
+     */
+    private function is_entry_expired( array $entry, $now ) {
+        return empty( $entry['expires_at'] ) || (int) $entry['expires_at'] <= (int) $now;
+    }
+
+    /**
+     * Gera chave interna sem persistir a chave publica da sessao 2FA.
+     *
+     * @param string $session_key Chave publica da sessao 2FA.
+     * @return string
+     */
+    private function build_session_state_key( $session_key ) {
+        return hash( 'sha256', (string) $session_key );
     }
 }
