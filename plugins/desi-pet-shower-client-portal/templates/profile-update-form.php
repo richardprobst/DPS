@@ -22,54 +22,13 @@ $pets_total      = count( $pets );
 ?>
 
 <div class="dps-signature-shell dps-signature-shell--profile dps-profile-update-signature">
-    <div class="dps-signature-shell__layout">
-        <section class="dps-signature-hero dps-profile-update-signature__hero" aria-labelledby="dps-profile-update-title">
-            <div class="dps-signature-hero__grid">
-                <div class="dps-profile-update-signature__hero-copy">
-                    <span class="dps-signature-hero__eyebrow"><?php esc_html_e( 'Atualização de cadastro', 'dps-client-portal' ); ?></span>
-                    <h1 id="dps-profile-update-title" class="dps-signature-hero__title"><?php printf( esc_html__( 'Olá, %s. Revise seus dados e os dados dos seus pets.', 'dps-client-portal' ), esc_html( $client_name ) ); ?></h1>
-                    <p class="dps-signature-hero__lead"><?php esc_html_e( 'Atualize somente o que mudou.', 'dps-client-portal' ); ?></p>
-                </div>
-
-                <aside class="dps-signature-hero__aside">
-                    <article class="dps-signature-metric-card">
-                        <p class="dps-signature-metric-card__value"><?php echo esc_html( sprintf( _n( '%d pet vinculado', '%d pets vinculados', $pets_total, 'dps-client-portal' ), $pets_total ) ); ?></p>
-                        <p class="dps-signature-metric-card__note"><?php esc_html_e( 'Revise os pets vinculados.', 'dps-client-portal' ); ?></p>
-                    </article>
-                </aside>
-            </div>
-        </section>
-
-        <aside class="dps-signature-step-rail" aria-label="<?php esc_attr_e( 'Etapas da atualização', 'dps-client-portal' ); ?>">
-            <p class="dps-signature-step-rail__title"><?php esc_html_e( 'Etapas', 'dps-client-portal' ); ?></p>
-            <ol class="dps-signature-step-list">
-                <li>
-                    <button type="button" data-dps-profile-step="client" data-dps-profile-target="dps-profile-update-client">
-                        <span class="dps-signature-step-list__index">1</span>
-                            <span class="dps-signature-step-list__text">
-                                <span class="dps-signature-step-list__label"><?php esc_html_e( 'Tutor', 'dps-client-portal' ); ?></span>
-                        </span>
-                    </button>
-                </li>
-                <li>
-                    <button type="button" data-dps-profile-step="pets" data-dps-profile-target="dps-profile-update-pets">
-                        <span class="dps-signature-step-list__index">2</span>
-                            <span class="dps-signature-step-list__text">
-                                <span class="dps-signature-step-list__label"><?php esc_html_e( 'Pets', 'dps-client-portal' ); ?></span>
-                        </span>
-                    </button>
-                </li>
-                <li>
-                    <button type="button" data-dps-profile-step="finish" data-dps-profile-target="dps-profile-update-submit">
-                        <span class="dps-signature-step-list__index">3</span>
-                            <span class="dps-signature-step-list__text">
-                                <span class="dps-signature-step-list__label"><?php esc_html_e( 'Salvar', 'dps-client-portal' ); ?></span>
-                        </span>
-                    </button>
-                </li>
-            </ol>
-        </aside>
-    </div>
+    <section class="dps-signature-hero dps-profile-update-signature__hero" aria-labelledby="dps-profile-update-title">
+        <div class="dps-profile-update-signature__hero-copy">
+            <span class="dps-signature-hero__eyebrow"><?php esc_html_e( 'Atualização de cadastro', 'dps-client-portal' ); ?></span>
+            <h1 id="dps-profile-update-title" class="dps-signature-hero__title"><?php printf( esc_html__( 'Olá, %s. Revise seu cadastro.', 'dps-client-portal' ), esc_html( $client_name ) ); ?></h1>
+            <p class="dps-signature-hero__lead"><?php echo esc_html( sprintf( _n( '%d pet vinculado', '%d pets vinculados', $pets_total, 'dps-client-portal' ), $pets_total ) ); ?></p>
+        </div>
+    </section>
 
     <section class="dps-signature-panel">
         <div class="dps-signature-panel__header">
@@ -90,9 +49,9 @@ $pets_total      = count( $pets );
             <?php wp_nonce_field( 'dps_profile_update_' . $client_id, 'dps_profile_update_nonce' ); ?>
 
             <section class="dps-signature-section" id="dps-profile-update-client">
-                    <div class="dps-signature-section__header">
-                        <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Etapa 1', 'dps-client-portal' ); ?></p>
-                        <h2 class="dps-signature-section__title"><?php esc_html_e( 'Dados do tutor', 'dps-client-portal' ); ?></h2>
+                <div class="dps-signature-section__header">
+                    <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Tutor', 'dps-client-portal' ); ?></p>
+                    <h2 class="dps-signature-section__title"><?php esc_html_e( 'Dados do tutor', 'dps-client-portal' ); ?></h2>
                 </div>
 
                 <div class="dps-signature-grid dps-signature-grid--2">
@@ -159,8 +118,8 @@ $pets_total      = count( $pets );
 
             <section class="dps-signature-section" id="dps-profile-update-pets">
                 <div class="dps-signature-section__header">
-                    <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Etapa 2', 'dps-client-portal' ); ?></p>
-                    <h2 class="dps-signature-section__title"><?php esc_html_e( 'Pets do cadastro', 'dps-client-portal' ); ?></h2>
+                    <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Pets', 'dps-client-portal' ); ?></p>
+                    <h2 class="dps-signature-section__title"><?php esc_html_e( 'Pets cadastrados', 'dps-client-portal' ); ?></h2>
                 </div>
 
                 <?php if ( ! empty( $pets ) ) : ?>
@@ -179,7 +138,7 @@ $pets_total      = count( $pets );
                             }
                             $summary_text = ! empty( $pet_summary )
                                 ? implode( ' • ', array_map( 'ucfirst', $pet_summary ) )
-                                : __( 'Revise as informações deste pet.', 'dps-client-portal' );
+                                : '';
                             $body_id      = 'dps-profile-existing-pet-' . $pet_id;
                             ?>
                             <article class="dps-signature-card dps-profile-update-signature__pet-card" data-dps-existing-pet>
@@ -187,7 +146,7 @@ $pets_total      = count( $pets );
                                     <div class="dps-signature-card__identity">
                                         <span class="dps-signature-card__eyebrow"><?php echo esc_html( sprintf( __( 'Pet %d', 'dps-client-portal' ), $index + 1 ) ); ?></span>
                                         <h3 class="dps-signature-card__title" data-dps-pet-title><?php echo esc_html( $pet->post_title ); ?></h3>
-                                        <p class="dps-signature-card__summary" data-dps-pet-summary><?php echo esc_html( $summary_text ); ?></p>
+                                        <p class="dps-signature-card__summary" data-dps-pet-summary <?php echo '' === $summary_text ? 'hidden' : ''; ?>><?php echo esc_html( $summary_text ); ?></p>
                                     </div>
                                     <button type="button" class="dps-signature-card__toggle" data-dps-disclosure-toggle aria-expanded="<?php echo 0 === $index ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr( $body_id ); ?>">
                                         <span><?php esc_html_e( 'Detalhes', 'dps-client-portal' ); ?></span>
@@ -289,7 +248,7 @@ $pets_total      = count( $pets );
 
             <section class="dps-signature-section" id="dps-profile-update-submit">
                 <div class="dps-signature-section__header">
-                    <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Etapa 3', 'dps-client-portal' ); ?></p>
+                    <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Envio', 'dps-client-portal' ); ?></p>
                     <h2 class="dps-signature-section__title"><?php esc_html_e( 'Salvar alterações', 'dps-client-portal' ); ?></h2>
                 </div>
 
@@ -307,9 +266,9 @@ $pets_total      = count( $pets );
     <article class="dps-signature-card dps-profile-update-signature__pet-card dps-profile-update-signature__pet-card--new" data-dps-new-pet-card data-new-pet-index="__INDEX__">
         <div class="dps-signature-card__header">
             <div class="dps-signature-card__identity">
-                <span class="dps-signature-card__eyebrow"><?php esc_html_e( 'Novo pet', 'dps-client-portal' ); ?></span>
+                <span class="dps-signature-card__eyebrow"><?php esc_html_e( 'Pet novo', 'dps-client-portal' ); ?></span>
                 <h3 class="dps-signature-card__title" data-dps-pet-title><?php esc_html_e( 'Novo pet', 'dps-client-portal' ); ?></h3>
-                <p class="dps-signature-card__summary" data-dps-pet-summary><?php esc_html_e( 'Preencha os dados principais deste pet.', 'dps-client-portal' ); ?></p>
+                <p class="dps-signature-card__summary" data-dps-pet-summary hidden></p>
             </div>
             <div class="dps-signature-card__actions">
                 <button type="button" class="dps-signature-button dps-signature-button--secondary" data-dps-remove-new-pet>

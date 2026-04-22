@@ -909,7 +909,7 @@ final class DPS_Client_Portal {
             [
                 'ajaxUrl' => admin_url( 'admin-ajax.php' ),
                 'i18n'    => [
-                    'generating'      => __( 'Gerando...', 'dps-client-portal' ),
+                    'generating'      => __( 'Gerando…', 'dps-client-portal' ),
                     'generate'        => __( 'Gerar link', 'dps-client-portal' ),
                     'copy'            => __( 'Copiar link', 'dps-client-portal' ),
                     'copied'          => __( 'Link copiado!', 'dps-client-portal' ),
@@ -917,7 +917,6 @@ final class DPS_Client_Portal {
                     'generated'       => __( 'Link gerado e copiado. Envie para o cliente por WhatsApp ou e-mail.', 'dps-client-portal' ),
                     'genericError'    => __( 'Não foi possível gerar o link agora. Tente novamente.', 'dps-client-portal' ),
                     'newPetTitle'     => __( 'Novo pet', 'dps-client-portal' ),
-                    'petSummary'      => __( 'Preencha os dados principais deste pet.', 'dps-client-portal' ),
                     'removePet'       => __( 'Remover', 'dps-client-portal' ),
                     'details'         => __( 'Detalhes', 'dps-client-portal' ),
                 ],

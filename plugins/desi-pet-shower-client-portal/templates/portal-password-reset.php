@@ -16,31 +16,13 @@ $reset_user_mail = $portal_reset_valid && $portal_reset_user instanceof WP_User 
 
 <div class="dps-signature-shell dps-signature-shell--auth dps-portal-signature dps-client-portal-access-page">
     <section class="dps-portal-entry dps-portal-entry--reset" aria-labelledby="dps-portal-reset-title">
-        <div class="dps-signature-shell__layout dps-portal-signature__reset-layout">
-            <section class="dps-signature-hero dps-portal-signature__hero dps-portal-signature__hero--compact">
-                <div class="dps-signature-hero__grid">
-                    <div class="dps-portal-signature__hero-copy">
-                        <span class="dps-signature-hero__eyebrow"><?php esc_html_e( 'Senha do portal', 'dps-client-portal' ); ?></span>
-                        <h1 id="dps-portal-reset-title" class="dps-signature-hero__title"><?php esc_html_e( 'Criar ou redefinir senha', 'dps-client-portal' ); ?></h1>
-                        <p class="dps-signature-hero__lead"><?php esc_html_e( 'Salve uma nova senha para entrar com seu e-mail.', 'dps-client-portal' ); ?></p>
-                    </div>
-                </div>
-            </section>
-
-            <aside class="dps-signature-step-rail">
-                <p class="dps-signature-step-rail__title"><?php esc_html_e( 'Próximo passo', 'dps-client-portal' ); ?></p>
-                <ol class="dps-signature-step-list">
-                    <li>
-                        <button type="button">
-                                <span class="dps-signature-step-list__index">1</span>
-                                <span class="dps-signature-step-list__text">
-                                <span class="dps-signature-step-list__label"><?php esc_html_e( 'Nova senha', 'dps-client-portal' ); ?></span>
-                            </span>
-                        </button>
-                    </li>
-                </ol>
-            </aside>
-        </div>
+        <section class="dps-signature-hero dps-portal-signature__hero dps-portal-signature__hero--compact">
+            <div class="dps-portal-signature__hero-copy">
+                <span class="dps-signature-hero__eyebrow"><?php esc_html_e( 'Senha do portal', 'dps-client-portal' ); ?></span>
+                <h1 id="dps-portal-reset-title" class="dps-signature-hero__title"><?php esc_html_e( 'Criar ou redefinir senha', 'dps-client-portal' ); ?></h1>
+                <p class="dps-signature-hero__lead"><?php esc_html_e( 'Salve uma nova senha para entrar com seu e-mail.', 'dps-client-portal' ); ?></p>
+            </div>
+        </section>
 
         <?php if ( ! empty( $messages ) ) : ?>
             <div class="dps-signature-form__notice-stack" aria-live="polite">

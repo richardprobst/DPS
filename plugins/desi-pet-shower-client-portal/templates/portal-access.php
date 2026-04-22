@@ -16,46 +16,13 @@ $whatsapp_url = isset( $portal_access_context['whatsapp_url'] ) && is_string( $p
 
 <div class="dps-signature-shell dps-signature-shell--auth dps-portal-signature dps-client-portal-access-page">
     <section class="dps-portal-entry" aria-labelledby="dps-portal-entry-title">
-        <div class="dps-signature-shell__layout">
-            <section class="dps-signature-hero dps-portal-signature__hero">
-                <div class="dps-signature-hero__grid">
-                    <div class="dps-portal-signature__hero-copy">
-                        <span class="dps-signature-hero__eyebrow"><?php esc_html_e( 'Portal do Cliente', 'dps-client-portal' ); ?></span>
-                        <h1 id="dps-portal-entry-title" class="dps-signature-hero__title"><?php esc_html_e( 'Entre no seu portal.', 'dps-client-portal' ); ?></h1>
-                        <p class="dps-signature-hero__lead"><?php esc_html_e( 'Use link por e-mail ou senha cadastrada.', 'dps-client-portal' ); ?></p>
-                    </div>
-
-                    <aside class="dps-signature-hero__aside" aria-label="<?php esc_attr_e( 'Resumo do acesso', 'dps-client-portal' ); ?>">
-                        <article class="dps-signature-metric-card">
-                            <p class="dps-signature-metric-card__value"><?php esc_html_e( 'Link direto + e-mail e senha', 'dps-client-portal' ); ?></p>
-                            <p class="dps-signature-metric-card__note"><?php esc_html_e( 'Escolha o caminho mais simples para agora.', 'dps-client-portal' ); ?></p>
-                        </article>
-                    </aside>
-                </div>
-            </section>
-
-            <aside class="dps-signature-step-rail dps-portal-signature__steps" aria-label="<?php esc_attr_e( 'Etapas do acesso', 'dps-client-portal' ); ?>">
-                <p class="dps-signature-step-rail__title"><?php esc_html_e( 'Fluxo de acesso', 'dps-client-portal' ); ?></p>
-                <ol class="dps-signature-step-list">
-                    <li>
-                        <button type="button">
-                                <span class="dps-signature-step-list__index">1</span>
-                                <span class="dps-signature-step-list__text">
-                                <span class="dps-signature-step-list__label"><?php esc_html_e( 'Escolha', 'dps-client-portal' ); ?></span>
-                            </span>
-                        </button>
-                    </li>
-                    <li>
-                        <button type="button">
-                                <span class="dps-signature-step-list__index">2</span>
-                                <span class="dps-signature-step-list__text">
-                                <span class="dps-signature-step-list__label"><?php esc_html_e( 'Entre', 'dps-client-portal' ); ?></span>
-                            </span>
-                        </button>
-                    </li>
-                </ol>
-            </aside>
-        </div>
+        <section class="dps-signature-hero dps-portal-signature__hero">
+            <div class="dps-portal-signature__hero-copy">
+                <span class="dps-signature-hero__eyebrow"><?php esc_html_e( 'Portal do Cliente', 'dps-client-portal' ); ?></span>
+                <h1 id="dps-portal-entry-title" class="dps-signature-hero__title"><?php esc_html_e( 'Entre no seu portal', 'dps-client-portal' ); ?></h1>
+                <p class="dps-signature-hero__lead"><?php esc_html_e( 'Use link por e-mail ou senha cadastrada.', 'dps-client-portal' ); ?></p>
+            </div>
+        </section>
 
         <?php if ( ! empty( $messages ) ) : ?>
             <div class="dps-signature-form__notice-stack" aria-live="polite">

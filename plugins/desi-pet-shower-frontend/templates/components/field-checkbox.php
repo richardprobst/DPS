@@ -1,6 +1,6 @@
 <?php
 /**
- * Component: Checkbox Field (M3 Expressive)
+ * Component: Checkbox Field (DPS Signature)
  *
  * @package DPS_Frontend_Addon
  * @since   2.0.0

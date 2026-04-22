@@ -21,8 +21,7 @@ $google_api_key = $google_api_key ?? '';
 
 <section class="dps-signature-section" id="dps-registration-section-client">
     <div class="dps-signature-section__header">
-        <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Etapa 1', 'dps-frontend-addon' ); ?></p>
-        <h2 class="dps-signature-section__title"><?php esc_html_e( 'Dados do tutor', 'dps-frontend-addon' ); ?></h2>
+        <h2 class="dps-signature-section__title"><?php esc_html_e( 'Tutor', 'dps-frontend-addon' ); ?></h2>
     </div>
 
     <div class="dps-signature-grid dps-signature-grid--2">

@@ -1,8 +1,8 @@
 /**
  * Estilos do Registration Add-on - DPS
- * Material Design 3 Expressive
+ * DPS Signature Legacy Fallback
  * 
- * Este arquivo segue o sistema de design M3 Expressive do DPS:
+ * Este arquivo existe apenas como fallback quando o motor DPS Signature do frontend não está ativo:
  * - Todas as cores via var(--dps-color-*) / var(--dps-*) tokens
  * - Formas via var(--dps-shape-*) tokens
  * - Elevação via var(--dps-elevation-*) tokens
@@ -31,15 +31,15 @@
  * @package Desi_Pet_Shower_Registration
  * @since 1.1.0
  * @since 1.4.0 Melhorias visuais seguindo padrão da Agenda
- * @version 2.0.0 Migração completa para Material 3 Expressive design tokens
+ * @version 2.0.0 Migração completa para tokens DPS Signature
  */
 
 /* ==========================================================================
-   CSS Variables - Design System (M3 Expressive Tokens)
+   CSS Variables - Design System Tokens
    ========================================================================== */
 
 .dps-registration-form {
-    /* Tokens semânticos mapeados para M3 (via dps-design-tokens.css) */
+    /* Tokens semânticos DPS Signature (via dps-design-tokens.css) */
     --dps-accent: var(--dps-color-primary);
     --dps-accent-strong: var(--dps-color-primary-pressed);
     --dps-accent-hover: var(--dps-color-primary-hover);
@@ -202,7 +202,7 @@
 }
 
 /* ==========================================================================
-   4. Navigation Buttons - M3 Expressive Style
+   4. Navigation Buttons - DPS Signature Fallback
    ========================================================================== */
 
 .dps-button-next,
@@ -217,7 +217,7 @@
     font-weight: var(--dps-typescale-label-large-weight);
     font-family: var(--dps-font-body);
     cursor: pointer;
-    transition: all var(--dps-motion-hover);
+    transition: background-color var(--dps-motion-hover), border-color var(--dps-motion-hover), color var(--dps-motion-hover), box-shadow var(--dps-motion-hover), transform var(--dps-motion-hover);
     text-decoration: none;
 }
 
@@ -284,7 +284,7 @@
 }
 
 /* ==========================================================================
-   6. Labels e Inputs - M3 Clean Style
+   6. Labels e Inputs - DPS Signature Fallback
    ========================================================================== */
 
 .dps-registration-form label {
@@ -326,7 +326,7 @@
 .dps-registration-form input:not([type="checkbox"]):not([type="radio"]):focus,
 .dps-registration-form select:focus,
 .dps-registration-form textarea:focus {
-    outline: none;
+    outline: 2px solid transparent;
     border-color: var(--dps-accent);
     box-shadow: 0 0 0 4px var(--dps-accent-soft);
     background: var(--dps-surface);
@@ -365,7 +365,7 @@
 }
 
 /* ==========================================================================
-   7. Checkboxes - M3 Elegant Inline Style
+   7. Checkboxes - DPS Signature Fallback
    ========================================================================== */
 
 .dps-registration-form input[type="checkbox"] {
@@ -414,7 +414,7 @@
 }
 
 /* ==========================================================================
-   8. Pet Fieldset - M3 Elevated Card Style
+   8. Pet Fieldset - DPS Signature Fallback
    ========================================================================== */
 
 .dps-pet-fieldset {
@@ -470,7 +470,7 @@
 }
 
 /* ==========================================================================
-   9. Buttons - M3 Expressive Style
+   9. Buttons - DPS Signature Fallback
    ========================================================================== */
 
 .dps-registration-form .button {
@@ -484,7 +484,7 @@
     font-family: var(--dps-font-body);
     border-radius: var(--dps-shape-button);
     cursor: pointer;
-    transition: all var(--dps-motion-hover);
+    transition: background-color var(--dps-motion-hover), border-color var(--dps-motion-hover), color var(--dps-motion-hover), box-shadow var(--dps-motion-hover), transform var(--dps-motion-hover);
     text-decoration: none;
 }
 
@@ -520,7 +520,7 @@
     color: var(--dps-muted);
     font-weight: 500;
     font-size: var(--dps-typescale-label-large-size);
-    transition: all var(--dps-motion-hover);
+    transition: background-color var(--dps-motion-hover), border-color var(--dps-motion-hover), color var(--dps-motion-hover), box-shadow var(--dps-motion-hover), transform var(--dps-motion-hover);
     cursor: pointer;
 }
 
@@ -735,7 +735,7 @@
 }
 
 /* ==========================================================================
-   11.1. Registration Success Box - M3 Tokens
+   11.1. Registration Success Box - DPS Signature Tokens
    ========================================================================== */
 
 .dps-reg-success {
@@ -795,7 +795,7 @@
 }
 
 /* ==========================================================================
-   11.2. Fallback Registration Messages - M3 Tokens
+   11.2. Fallback Registration Messages - DPS Signature Tokens
    ========================================================================== */
 
 .dps-reg-message {
@@ -1436,7 +1436,7 @@
    16. Estados de Botões
    ========================================================================== */
 
-/* Botão desabilitado - M3 opacity: 0.38 content, 0.12 container */
+/* Botão desabilitado - opacidade padronizada do fallback Signature */
 .dps-registration-form .button:disabled,
 .dps-registration-form .button[disabled],
 .dps-button-next:disabled,
@@ -1696,7 +1696,7 @@
 .dps-product-pref-field select:focus,
 .dps-product-pref-field textarea:focus {
     border-color: var(--dps-accent);
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: 0 0 0 4px var(--dps-accent-soft);
 }
 
@@ -1753,7 +1753,7 @@
 }
 
 /* ==========================================================================
-   22. Visual Enhancements - M3 Expressive Animations
+   22. Visual Enhancements - DPS Signature Motion
    ========================================================================== */
 
 /* Feedback visual ao interagir com campos */

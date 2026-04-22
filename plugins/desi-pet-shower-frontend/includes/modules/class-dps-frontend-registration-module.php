@@ -29,11 +29,19 @@ final class DPS_Frontend_Registration_Module {
      * Registers the compatibility shortcode and its asset bridge.
      */
     public function boot(): void {
-        remove_shortcode( 'dps_registration_form' );
-        add_shortcode( 'dps_registration_form', [ $this, 'renderShortcode' ] );
+        $this->registerShortcodeAlias();
+        add_action( 'init', [ $this, 'registerShortcodeAlias' ], 20 );
         add_action( 'wp_enqueue_scripts', [ $this, 'maybeEnqueueCompatibilityAssets' ] );
 
         $this->logger->debug( 'Módulo Registration ativado como alias compatível do DPS Signature.' );
+    }
+
+    /**
+     * Forces the legacy shortcode to use the canonical Signature renderer.
+     */
+    public function registerShortcodeAlias(): void {
+        remove_shortcode( 'dps_registration_form' );
+        add_shortcode( 'dps_registration_form', [ $this, 'renderShortcode' ] );
     }
 
     /**

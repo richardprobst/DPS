@@ -80,7 +80,16 @@
             parts.push( sizeLabel );
         }
 
-        return parts.length ? parts.join( ' • ' ) : 'Pet sem detalhes';
+        return parts.length ? parts.join( ' • ' ) : '';
+    }
+
+    function updatePetSummary( summary, value ) {
+        if ( ! summary ) {
+            return;
+        }
+
+        summary.textContent = value || '';
+        summary.hidden = ! value;
     }
 
     function refreshPetCard( card, index, total ) {
@@ -99,12 +108,10 @@
         }
 
         if ( title ) {
-            title.textContent = nameField && nameField.value.trim() ? nameField.value.trim() : 'Pet ' + ( index + 1 );
+            title.textContent = nameField && nameField.value.trim() ? nameField.value.trim() : 'Novo pet';
         }
 
-        if ( summary ) {
-            summary.textContent = buildPetSummary( card );
-        }
+        updatePetSummary( summary, buildPetSummary( card ) );
 
         if ( removeButton ) {
             removeButton.hidden = total <= 1;
@@ -205,14 +212,14 @@
 
             if ( nameField && title ) {
                 nameField.addEventListener( 'input', function() {
-                    title.textContent = nameField.value.trim() || 'Pet ' + ( Number( card.getAttribute( 'data-pet-index' ) ) + 1 );
+                    title.textContent = nameField.value.trim() || 'Novo pet';
                 } );
             }
 
             [ speciesField, sizeField ].forEach( function( field ) {
                 if ( field && summary ) {
                     field.addEventListener( 'change', function() {
-                        summary.textContent = buildPetSummary( card );
+                        updatePetSummary( summary, buildPetSummary( card ) );
                     } );
                 }
             } );
@@ -460,38 +467,6 @@
         } );
     }
 
-    function initStepNavigation( form ) {
-        var shell = getShell( form );
-        var buttons;
-        if ( ! shell ) {
-            return;
-        }
-
-        buttons = toArray( shell.querySelectorAll( '[data-dps-registration-section]' ) );
-
-        buttons.forEach( function( button, index ) {
-            if ( button.dataset.dpsStepReady === '1' ) {
-                return;
-            }
-
-            button.dataset.dpsStepReady = '1';
-            if ( index === 0 ) {
-                button.classList.add( 'is-current' );
-            }
-            button.addEventListener( 'click', function() {
-                var targetId = button.getAttribute( 'data-dps-registration-section' );
-                var target = targetId ? document.getElementById( targetId ) : null;
-                buttons.forEach( function( stepButton ) {
-                    stepButton.classList.remove( 'is-current' );
-                } );
-                button.classList.add( 'is-current' );
-                if ( target ) {
-                    scrollToElement( target );
-                }
-            } );
-        } );
-    }
-
     function initForm( form ) {
         if ( form.dataset.dpsRegistrationReady === '1' ) {
             return;
@@ -502,7 +477,6 @@
         refreshAllPetCards( form );
         initSubmitState( form );
         initRecaptcha( form );
-        initStepNavigation( form );
 
         form.addEventListener( 'submit', function( event ) {
             if ( ! validateForm( form ) ) {

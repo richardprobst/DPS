@@ -1,6 +1,6 @@
 <?php
 /**
- * Component: Loader (M3 Expressive)
+ * Component: Loader (DPS Signature)
  *
  * @package DPS_Frontend_Addon
  * @since   2.0.0

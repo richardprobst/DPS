@@ -1,6 +1,6 @@
 <?php
 /**
- * Component: Card (M3 Expressive)
+ * Component: Card (DPS Signature)
  *
  * @package DPS_Frontend_Addon
  * @since   2.0.0

@@ -216,5 +216,90 @@
 - `./signature-registration-clean-1920.png`
 
 ## Validacao
-- O HTML publicado retornou o titulo `Cadastro rapido de tutor e pets.`, carregou `registration-v2.css` e nao exibiu as frases explicativas removidas.
+- O HTML publicado retornou o titulo `Cadastro de tutor e pets`, carregou `registration-v2.css` e nao exibiu as frases explicativas removidas.
 - As capturas confirmaram ausencia de overflow horizontal nos cinco breakpoints.
+
+# Ajuste complementar - UI Signature sem resquicios M3
+
+## Contexto
+- Objetivo da mudanca: consolidar cadastro, portal de acesso e atualizacao de perfil em uma unica linguagem DPS Signature, sem step rail, hero duplicado, metric cards, copy de manual ou fallback visual M3.
+- Ambiente: paginas publicadas em `https://desi.pet/cadastro-de-clientes-e-pets/` e `https://desi.pet/portal-do-cliente/`, apos envio dos arquivos por SFTP.
+- O token temporario de atualizacao de perfil foi gerado via WP-CLI para QA real e revogado ao final.
+
+## Antes/Depois
+- Antes: a UI ainda misturava trilhas laterais, cards auxiliares, textos instrutivos repetidos e acento tertiary que deixava o portal com aparencia lilas.
+- Depois: o cadastro usa um workspace unico Signature, o portal usa hero direto com acento primario, os botoes do acesso nao colapsam em circulos e os resumos vazios de pet ficam ocultos ate haver dados reais.
+- Ajuste posterior: o chip textual `DPS Signature` e a frase introdutoria do topo do cadastro foram removidos; as secoes ficaram apenas como `Tutor`, `Pets` e `Enviar`.
+
+## Arquivos de codigo alterados nesta rodada
+- `plugins/desi-pet-shower-base/assets/css/dps-signature-forms.css`
+- `plugins/desi-pet-shower-client-portal/README.md`
+- `plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css`
+- `plugins/desi-pet-shower-client-portal/assets/css/client-portal.css`
+- `plugins/desi-pet-shower-client-portal/assets/js/client-portal-profile-update.js`
+- `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
+- `plugins/desi-pet-shower-client-portal/templates/portal-access.php`
+- `plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php`
+- `plugins/desi-pet-shower-client-portal/templates/profile-update-form.php`
+- `plugins/desi-pet-shower-frontend/assets/css/booking-v2.css`
+- `plugins/desi-pet-shower-frontend/assets/css/frontend-addon.css`
+- `plugins/desi-pet-shower-frontend/assets/css/registration-v2.css`
+- `plugins/desi-pet-shower-frontend/assets/js/registration-v2.js`
+- `plugins/desi-pet-shower-frontend/includes/modules/class-dps-frontend-booking-module.php`
+- `plugins/desi-pet-shower-frontend/includes/modules/class-dps-frontend-booking-v2-module.php`
+- `plugins/desi-pet-shower-frontend/includes/modules/class-dps-frontend-registration-module.php`
+- `plugins/desi-pet-shower-frontend/includes/modules/class-dps-frontend-registration-v2-module.php`
+- `plugins/desi-pet-shower-frontend/includes/modules/class-dps-frontend-settings-module.php`
+- `plugins/desi-pet-shower-frontend/includes/support/class-dps-frontend-deprecation-notice.php`
+- `plugins/desi-pet-shower-frontend/templates/booking/form-main.php`
+- `plugins/desi-pet-shower-frontend/templates/components/alert.php`
+- `plugins/desi-pet-shower-frontend/templates/components/button-primary.php`
+- `plugins/desi-pet-shower-frontend/templates/components/button-secondary.php`
+- `plugins/desi-pet-shower-frontend/templates/components/card.php`
+- `plugins/desi-pet-shower-frontend/templates/components/field-checkbox.php`
+- `plugins/desi-pet-shower-frontend/templates/components/field-email.php`
+- `plugins/desi-pet-shower-frontend/templates/components/field-phone.php`
+- `plugins/desi-pet-shower-frontend/templates/components/field-select.php`
+- `plugins/desi-pet-shower-frontend/templates/components/field-text.php`
+- `plugins/desi-pet-shower-frontend/templates/components/field-textarea.php`
+- `plugins/desi-pet-shower-frontend/templates/components/loader.php`
+- `plugins/desi-pet-shower-frontend/templates/registration/form-client-data.php`
+- `plugins/desi-pet-shower-frontend/templates/registration/form-main.php`
+- `plugins/desi-pet-shower-frontend/templates/registration/form-pet-data.php`
+- `plugins/desi-pet-shower-registration/assets/css/registration-addon.css`
+- `plugins/desi-pet-shower-registration/assets/js/dps-registration.js`
+- `plugins/desi-pet-shower-registration/desi-pet-shower-registration-addon.php`
+
+## Breakpoints validados
+- `375`
+- `600`
+- `840`
+- `1200`
+- `1920`
+
+## Capturas - cadastro publico final
+- `./signature-registration-clean-375.png`
+- `./signature-registration-clean-600.png`
+- `./signature-registration-clean-840.png`
+- `./signature-registration-clean-1200.png`
+- `./signature-registration-clean-1920.png`
+
+## Capturas - portal de acesso final
+- `./signature-portal-access-clean-375.png`
+- `./signature-portal-access-clean-600.png`
+- `./signature-portal-access-clean-840.png`
+- `./signature-portal-access-clean-1200.png`
+- `./signature-portal-access-clean-1920.png`
+
+## Capturas - atualizacao de perfil final
+- `./signature-profile-update-clean-375.png`
+- `./signature-profile-update-clean-600.png`
+- `./signature-profile-update-clean-840.png`
+- `./signature-profile-update-clean-1200.png`
+- `./signature-profile-update-clean-1920.png`
+
+## Validacao
+- Cadastro: `#dps-registration-signature-form` renderizado, `#dps-reg-form` ausente, sem step rail, sem texto M3/Material, sem copy de manual e sem overflow nos cinco breakpoints.
+- Cadastro complementar: sem texto visivel `DPS Signature` no topo, sem frase introdutoria redundante e sem os titulos antigos `Contato principal`, `Dados do pet` ou `Concluir cadastro`.
+- Portal de acesso: sem step rail, sem texto M3/Material, sem overflow, hero com acento primario e botoes com largura utilizavel.
+- Atualizacao de perfil: formulario com token real renderizado, sem step rail, sem texto M3/Material, sem copy de manual e sem overflow nos cinco breakpoints.

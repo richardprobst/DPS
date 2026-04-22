@@ -54,8 +54,7 @@ $size_summary = [
 
 <section class="dps-signature-section" id="dps-registration-section-pets">
     <div class="dps-signature-section__header">
-        <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Etapa 2', 'dps-frontend-addon' ); ?></p>
-        <h2 class="dps-signature-section__title"><?php esc_html_e( 'Pets do cadastro', 'dps-frontend-addon' ); ?></h2>
+        <h2 class="dps-signature-section__title"><?php esc_html_e( 'Pets', 'dps-frontend-addon' ); ?></h2>
     </div>
 
     <div class="dps-registration-signature__pet-stack dps-signature-card-stack" data-dps-registration-pets>
@@ -67,7 +66,7 @@ $size_summary = [
             $pet_name          = $pet['pet_name'] ?? '';
             $pet_species       = $pet['pet_species'] ?? '';
             $pet_size          = $pet['pet_size'] ?? '';
-            $card_title        = '' !== $pet_name ? $pet_name : sprintf( __( 'Pet %d', 'dps-frontend-addon' ), $index + 1 );
+            $card_title        = '' !== $pet_name ? $pet_name : __( 'Novo pet', 'dps-frontend-addon' );
             $summary_parts     = [];
             if ( isset( $species_summary[ $pet_species ] ) ) {
                 $summary_parts[] = $species_summary[ $pet_species ];
@@ -75,9 +74,7 @@ $size_summary = [
             if ( isset( $size_summary[ $pet_size ] ) ) {
                 $summary_parts[] = $size_summary[ $pet_size ];
             }
-            $card_summary = ! empty( $summary_parts )
-                ? implode( ' • ', $summary_parts )
-                : __( 'Pet sem detalhes', 'dps-frontend-addon' );
+            $card_summary = ! empty( $summary_parts ) ? implode( ' • ', $summary_parts ) : '';
             $body_id      = 'dps-registration-pet-body-' . $index;
             $breed_list   = 'dps-registration-pet-breed-list-' . $index;
             ?>
@@ -86,7 +83,7 @@ $size_summary = [
                     <div class="dps-signature-card__identity">
                         <span class="dps-signature-card__eyebrow"><?php echo esc_html( sprintf( __( 'Pet %d', 'dps-frontend-addon' ), $index + 1 ) ); ?></span>
                         <h3 class="dps-signature-card__title" data-dps-pet-title><?php echo esc_html( $card_title ); ?></h3>
-                        <p class="dps-signature-card__summary" data-dps-pet-summary><?php echo esc_html( $card_summary ); ?></p>
+                        <p class="dps-signature-card__summary" data-dps-pet-summary <?php echo '' === $card_summary ? 'hidden' : ''; ?>><?php echo esc_html( $card_summary ); ?></p>
                     </div>
 
                     <div class="dps-signature-card__actions">

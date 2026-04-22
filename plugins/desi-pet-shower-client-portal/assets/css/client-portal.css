@@ -3,13 +3,13 @@
    ======================================== */
 
 /* ========================================
-   CSS VARIABLES — M3 Expressive Tokens
+   CSS VARIABLES — DPS Signature Tokens
    Mapeamento semântico via dps-design-tokens.css
    
    Requer: dps-design-tokens.css carregado antes deste arquivo.
    ======================================== */
 
-/* Tokens semânticos do portal, mapeados para M3 (via dps-design-tokens.css) */
+/* Tokens semânticos do portal, mapeados para DPS Signature (via dps-design-tokens.css) */
 .dps-client-portal,
 .dps-client-portal-access-page,
 .dps-chat-widget {
@@ -60,10 +60,10 @@
 
 /* ========================================
    TELA DE ACESSO (Portal Access Screen)
-   M3 Expressive — Acolhedor, moderno, confiável
+   DPS Signature — Acolhedor, moderno, confiável
    ======================================== */
 
-/* Animação de entrada M3 Expressive para o card principal */
+/* Animação de entrada DPS Signature para o card principal */
 @keyframes dps-access-card-enter {
     from {
         opacity: 0;
@@ -75,7 +75,7 @@
     }
 }
 
-/* Feedback de sucesso — pulse verde M3 */
+/* Feedback de sucesso — pulse verde DPS Signature */
 @keyframes dps-access-success-pulse {
     0%   { box-shadow: 0 0 0 0 rgba(26, 122, 58, 0.3); }
     70%  { box-shadow: 0 0 0 10px rgba(26, 122, 58, 0); }
@@ -243,7 +243,7 @@
     color: var(--dps-danger);
 }
 
-/* Feedback de solicitação de acesso — M3 */
+/* Feedback de solicitação de acesso — DPS Signature */
 .dps-portal-access__feedback {
     font-size: var(--dps-typescale-body-medium-size);
     text-align: center;
@@ -9482,7 +9482,7 @@ html {
 }
 
 /* ========================================
-   PORTAL HOME REFRESH - M3 EXPRESSIVE
+   PORTAL HOME REFRESH - DPS SIGNATURE
    Home contextual com hero, cards acionaveis e atalhos claros
    ======================================== */
 

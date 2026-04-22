@@ -54,11 +54,17 @@
 }
 
 .dps-portal-signature .dps-signature-actions {
+    align-items: stretch;
+    flex-wrap: wrap;
+    justify-content: flex-start;
     margin-top: auto;
 }
 
-.dps-portal-signature__reset-layout {
-    margin-bottom: 1rem;
+.dps-portal-signature .dps-signature-actions .dps-signature-button {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    text-align: center;
 }
 
 @media (min-width: 840px) {

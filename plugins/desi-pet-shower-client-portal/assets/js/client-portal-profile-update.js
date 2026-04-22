@@ -33,7 +33,16 @@
             parts.push( sizeField.selectedOptions[ 0 ].textContent.trim() );
         }
 
-        return parts.length ? parts.join( ' • ' ) : ( getConfig().i18n.petSummary || 'Preencha os dados principais deste pet.' );
+        return parts.length ? parts.join( ' • ' ) : '';
+    }
+
+    function updatePetSummary( summary, value ) {
+        if ( ! summary ) {
+            return;
+        }
+
+        summary.textContent = value || '';
+        summary.hidden = ! value;
     }
 
     function bindPetCard( card ) {
@@ -59,7 +68,7 @@
         [ speciesField, sizeField ].forEach( function( field ) {
             if ( field && summary ) {
                 field.addEventListener( 'change', function() {
-                    summary.textContent = getPetSummary( card );
+                    updatePetSummary( summary, getPetSummary( card ) );
                 } );
             }
         } );
@@ -71,7 +80,7 @@
         }
 
         if ( summary ) {
-            summary.textContent = getPetSummary( card );
+            updatePetSummary( summary, getPetSummary( card ) );
         }
     }
 
@@ -87,21 +96,6 @@
         }
 
         toArray( form.querySelectorAll( '[data-dps-existing-pet], [data-dps-new-pet-card]' ) ).forEach( bindPetCard );
-
-        toArray( document.querySelectorAll( '[data-dps-profile-target]' ) ).forEach( function( button ) {
-            if ( button.dataset.dpsProfileStepReady === '1' ) {
-                return;
-            }
-
-            button.dataset.dpsProfileStepReady = '1';
-            button.addEventListener( 'click', function() {
-                var targetId = button.getAttribute( 'data-dps-profile-target' );
-                var target = targetId ? document.getElementById( targetId ) : null;
-                if ( target ) {
-                    scrollToElement( target );
-                }
-            } );
-        } );
 
         if ( addButton && template && container ) {
             addButton.addEventListener( 'click', function() {

@@ -1,6 +1,6 @@
 <?php
 /**
- * Component: Select Field (M3 Expressive)
+ * Component: Select Field (DPS Signature)
  *
  * @package DPS_Frontend_Addon
  * @since   2.0.0

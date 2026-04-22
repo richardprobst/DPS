@@ -106,7 +106,7 @@ final class DPS_Frontend_Settings_Module {
             ],
             'booking' => [
                 'label'       => __( 'Agendamento (v1)', 'dps-frontend-addon' ),
-                'description' => __( 'Assume shortcode [dps_booking_form] com wrapper M3 sobre o add-on legado.', 'dps-frontend-addon' ),
+                'description' => __( 'Assume shortcode [dps_booking_form] com shell DPS Signature sobre o add-on legado.', 'dps-frontend-addon' ),
                 'phase'       => __( 'Fase 3', 'dps-frontend-addon' ),
             ],
             'settings' => [
@@ -121,7 +121,7 @@ final class DPS_Frontend_Settings_Module {
             ],
             'booking_v2' => [
                 'label'       => __( 'Agendamento (v2 Nativo)', 'dps-frontend-addon' ),
-                'description' => __( 'Shortcode [dps_booking_v2] — wizard nativo M3 Expressive, independente do legado.', 'dps-frontend-addon' ),
+                'description' => __( 'Shortcode [dps_booking_v2] — wizard nativo DPS Signature, independente do legado.', 'dps-frontend-addon' ),
                 'phase'       => __( 'Fase 7', 'dps-frontend-addon' ),
             ],
         ];

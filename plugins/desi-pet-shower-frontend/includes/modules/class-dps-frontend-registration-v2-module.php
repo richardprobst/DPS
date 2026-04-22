@@ -226,10 +226,6 @@ final class DPS_Frontend_Registration_V2_Module extends DPS_Abstract_Module_V2 {
                     'phoneRequired'       => __( 'Informe o telefone ou WhatsApp do tutor.', 'dps-frontend-addon' ),
                     'petNameRequired'     => __( 'Informe o nome do pet.', 'dps-frontend-addon' ),
                     'petSpeciesRequired'  => __( 'Selecione a espécie do pet.', 'dps-frontend-addon' ),
-                    'addPetLabel'         => __( 'Adicionar Outro Pet', 'dps-frontend-addon' ),
-                    'removePetLabel'      => __( 'Remover pet', 'dps-frontend-addon' ),
-                    'stepCopied'          => __( 'Etapa selecionada.', 'dps-frontend-addon' ),
-                    'saving'              => __( 'Enviando cadastro…', 'dps-frontend-addon' ),
                     'recaptchaUnavailable'=> __( 'Não foi possível validar o anti-spam. Tente novamente.', 'dps-frontend-addon' ),
                 ],
             ]

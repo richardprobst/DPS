@@ -171,6 +171,8 @@ Antes de criar uma nova versão oficial:
 
 **Cadastro e Portal - DPS Signature**
 
+- **Topo do cadastro simplificado**: removido o chip textual `DPS Signature` e a frase introdutoria redundante do formulario publico, mantendo apenas o titulo operacional do cadastro.
+
 - **Cadastro sem camada de manual**: removidos textos explicativos longos, listas de instrução e helpers desnecessários do cadastro público, deixando a experiência objetiva, compacta e alinhada exclusivamente ao DPS Signature.
 - **Remoção de referências do padrão visual anterior**: templates e assets carregados pelos formulários Signature deixam de expor nomenclatura técnica antiga no código e na interface.
 - **Cadastro publico consolidado**: `[dps_registration_v2]` passa a ser o motor canonico do cadastro DPS Signature e `[dps_registration_form]` permanece apenas como alias de compatibilidade sobre o mesmo renderer nativo.
@@ -195,7 +197,7 @@ Antes de criar uma nova versão oficial:
 - **Dialogs padronizados na Agenda**: reagendamento, historico, cobranca, confirmacoes sensiveis e retrabalho passaram a usar o mesmo dialog system do add-on, removendo `confirm()`/`alert()` do fluxo principal da lista.
 **Client Portal ? Tela inicial e administra??o de logins**
 
-- **Landing p?blica refeita no padr?o M3**: a p?gina inicial do portal agora apresenta lado a lado as op??es de link direto e e-mail com senha, com suporte contextual para WhatsApp quando o e-mail n?o estiver cadastrado.
+- **Landing p?blica refeita no padr?o DPS Signature**: a p?gina inicial do portal agora apresenta lado a lado as op??es de link direto e e-mail com senha, com suporte contextual para WhatsApp quando o e-mail n?o estiver cadastrado.
 - **Reset de senha dentro do portal**: nova tela dedicada para cria??o/redefini??o de senha, mantendo o mesmo contexto visual do acesso p?blico.
 - **Admin de logins revisado**: a ?rea administrativa passou a exibir estado de magic link, estado do acesso por senha, ?ltimo login, atividade recente e a??es de sincroniza??o/envio de acesso por senha.
 - **Sess?o h?brida unificada**: logins por magic link e por senha agora compartilham restaura??o de sessão, remember-me e registro de ?ltimo acesso.
