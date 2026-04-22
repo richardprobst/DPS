@@ -189,9 +189,9 @@ describe('Agenda Add-on', () => {
   it('should open services modal', () => {
     cy.visit('/agenda-de-atendimentos');
     cy.get('.dps-services-popup-btn').first().click();
-    cy.get('.dps-services-modal').should('be.visible');
+    cy.get('.dps-agenda-dialog--services').should('be.visible');
     cy.get('body').type('{esc}');
-    cy.get('.dps-services-modal').should('not.exist');
+    cy.get('.dps-agenda-dialog--services').should('not.exist');
   });
 
   it('should reschedule appointment', () => {

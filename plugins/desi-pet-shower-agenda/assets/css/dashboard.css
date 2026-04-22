@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Estilos do Dashboard Operacional da Agenda - DPS
  * DPS Signature
  *
@@ -42,7 +42,7 @@
     padding: var(--dps-space-2) var(--dps-space-4);
     background: var(--dps-color-surface-container);
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-chip);
+    border-radius: 0;
     color: var(--dps-color-on-surface-variant);
     font-size: var(--dps-typescale-body-medium-size);
     cursor: pointer;
@@ -294,7 +294,7 @@
 .dps-capacity-config {
     background: var(--dps-color-surface-container-low);
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-chip);
+    border-radius: 0;
     padding: var(--dps-space-5);
     margin-bottom: var(--dps-space-6);
 }
@@ -428,7 +428,7 @@
     flex-wrap: wrap;
     padding: var(--dps-space-4);
     background: var(--dps-color-surface-container-low);
-    border-radius: var(--dps-shape-chip);
+    border-radius: 0;
 }
 
 .dps-heatmap-legend-item {
@@ -582,7 +582,7 @@
 .dps-dashboard-table-wrapper {
     overflow-x: auto;
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-medium);
+    border-radius: 0;
 }
 
 .dps-dashboard-table {

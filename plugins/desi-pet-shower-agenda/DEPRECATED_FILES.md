@@ -22,8 +22,7 @@ desi-pet-shower-agenda_addon/
 │   ├── css/
 │   │   └── agenda-addon.css
 │   └── js/
-│       ├── agenda-addon.js      ← OFICIAL
-│       └── services-modal.js     ← OFICIAL
+│       └── agenda-addon.js      ← OFICIAL
 ├── languages/
 │   └── .gitkeep                  ← Pasta para traduções
 ├── desi-pet-shower-agenda-addon.php

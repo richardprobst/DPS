@@ -196,3 +196,111 @@
 - O runtime continuou coerente na superficie canonica: `1` linha desktop, `1` card mobile, `selectedRows = 1`, `selectedCards = 1` e inspetor contextual visivel em `Finalizado`.
 - O modal operacional abriu no runtime publicado com o titulo `Fluxo operacional do atendimento` e corpo carregado, confirmando que a rodada final nao regrediu o fluxo de checklist/check-in/check-out.
 - O backend passou a ignorar abas antigas no refresh e responder sempre com `row_html` e `card_html` da fila operacional DPS Signature, incluindo os updates disparados a partir do JS operacional e do modal.
+
+## Rodada Agenda - fechamento completo do plano DPS Signature
+- Objetivo desta etapa: concluir a implementacao publicada da Agenda, eliminar os ultimos residuos funcionais do modo antigo e validar a versao enviada ao `desi.pet` com a UI/UX final do DPS Signature.
+- Fonte de verdade visual seguida explicitamente: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Ambiente validado: `https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day`, com deploy via SSH/SFTP, usuario administrativo temporario criado por WP-CLI e bateria de verificacao em Chrome headless autenticado.
+
+## Arquivos de codigo alterados no fechamento da Agenda
+- `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
+- `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+- `plugins/desi-pet-shower-agenda/includes/class-dps-agenda-checkin-service.php`
+- `plugins/desi-pet-shower-agenda/includes/class-dps-agenda-checklist-service.php`
+- `plugins/desi-pet-shower-agenda/includes/integrations/class-dps-google-integrations-settings.php`
+- `plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js`
+- `plugins/desi-pet-shower-agenda/assets/js/checklist-checkin.js`
+- `plugins/desi-pet-shower-agenda/assets/js/pet-profile-modal.js`
+- `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+- `plugins/desi-pet-shower-agenda/assets/css/agenda-admin.css`
+- `plugins/desi-pet-shower-agenda/assets/css/checklist-checkin.css`
+- `plugins/desi-pet-shower-agenda/assets/css/dashboard.css`
+
+## Capturas - fechamento completo da Agenda
+- `./agenda-operational-live-1920.png`
+- `./agenda-operational-live-1200.png`
+- `./agenda-operational-live-840.png`
+- `./agenda-operational-live-600.png`
+- `./agenda-operational-live-375.png`
+- `./agenda-operational-pet-dialog-live-1200.png`
+- `./agenda-operational-services-dialog-live-1200.png`
+- `./agenda-operational-operation-dialog-live-1200.png`
+- `./agenda-operational-history-dialog-live-1200.png`
+- `./agenda-operational-reschedule-dialog-live-1200.png`
+- `./agenda-operational-live-final-check.json`
+
+## Rodada Agenda - convergencia local de codigo
+- Objetivo desta etapa: fechar os itens pendentes do plano da Agenda no codigo, mantendo `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do DPS Signature.
+- Arquivos alterados nesta rodada:
+  - `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
+  - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+  - `plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js`
+  - `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+  - `plugins/desi-pet-shower-agenda/assets/css/checklist-checkin.css`
+- Mudancas principais:
+  - remocao de mutacoes no render operacional
+  - consolidacao do fluxo de servicos no shell unificado da Agenda
+  - remocao do arquivo legado `services-modal.js` e do parametro `agenda_tab` no frontend operacional
+  - reordenacao mobile para levar a fila antes dos KPIs
+  - normalizacao de rotulos e indicadores textuais no fluxo operacional e em views legadas da Agenda
+- Evidencias usadas como referencia nesta etapa:
+  - `./agenda-operational-live-375.png`
+  - `./agenda-operational-live-375-selected.png`
+  - `./agenda-operational-live-1200.png`
+  - `./agenda-operational-services-dialog-live-1200.png`
+  - `./agenda-operational-operation-dialog-live-1200.png`
+  - `./agenda-operational-history-dialog-live-1200.png`
+- Limitacao desta rodada:
+  - nao foi gerada nova captura apos os patches porque esta workspace nao possui WordPress executavel nem runtime autenticado do site publicado; a validacao visual final continua dependente de deploy e nova bateria de screenshots.
+
+## Validacao - fechamento completo da Agenda
+- O runtime publicado confirmou `shellCount = 1`, `tabsNavCount = 0`, `legacyButtonCount = 0`, `rowCount = 1`, `cardCount = 1` e `toolbarCount = 1`.
+- Os breakpoints `375`, `600`, `840`, `1200` e `1920` foram validados com `window.innerWidth` exato e sem overflow horizontal.
+- O layout publicado alternou corretamente entre tabela desktop (`1200+`) e cards operacionais (`840-`), preservando `selectedRows = 1` e `selectedCards = 1`.
+- Os modais publicados abriram com sucesso no ambiente real: `Perfil rápido do pet`, `Serviços do atendimento`, `Fluxo operacional do atendimento`, `Linha do tempo do atendimento` e `Reagendar atendimento`.
+- O modal de historico mostrou badges de origem no runtime (`systemBadges = 3` nesta massa de teste), confirmando o novo payload com `source` e `source_label`.
+- Foi corrigido um bloqueador funcional de publicacao: arquivos com BOM no plugin da Agenda estavam contaminando respostas JSON do AJAX; a rodada final normalizou UTF-8 sem BOM e revalidou os modais em producao.
+
+## Rodada Agenda - publicacao final validada
+- Objetivo desta etapa: publicar a pasta completa do plugin Agenda no servidor, remover residuos do fluxo antigo e validar a interface publicada com Playwright autenticado.
+- Fonte de verdade visual seguida explicitamente: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Ambiente validado: `https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day`, com usuario administrativo temporario criado por WP-CLI, removido ao final e confirmado sem orfaos `dpsqa_*`.
+- Deploy: substituicao completa de `wp-content/plugins/desi-pet-shower-agenda`, com backups remotos `desi-pet-shower-agenda.__backup_20260422-155322` e `desi-pet-shower-agenda.__backup_20260422-160218`.
+
+## Arquivos de codigo alterados na publicacao final
+- `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
+- `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+- `plugins/desi-pet-shower-agenda/includes/class-dps-agenda-checkin-service.php`
+- `plugins/desi-pet-shower-agenda/includes/class-dps-agenda-checklist-service.php`
+- `plugins/desi-pet-shower-agenda/includes/integrations/class-dps-google-integrations-settings.php`
+- `plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js`
+- `plugins/desi-pet-shower-agenda/assets/js/checklist-checkin.js`
+- `plugins/desi-pet-shower-agenda/assets/js/pet-profile-modal.js`
+- `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+- `plugins/desi-pet-shower-agenda/assets/css/agenda-admin.css`
+- `plugins/desi-pet-shower-agenda/assets/css/checklist-checkin.css`
+- `plugins/desi-pet-shower-agenda/assets/css/dashboard.css`
+- `plugins/desi-pet-shower-agenda/DEPRECATED_FILES.md`
+- `plugins/desi-pet-shower-agenda/QA_FUNCTIONAL_REPORT.md`
+
+## Capturas - publicacao final validada
+- `./agenda-operational-live-v2-375.png`
+- `./agenda-operational-live-v2-600.png`
+- `./agenda-operational-live-v2-840.png`
+- `./agenda-operational-live-v2-1200.png`
+- `./agenda-operational-live-v2-1920.png`
+- `./agenda-operational-services-dialog-live-v2-1200.png`
+- `./agenda-operational-operation-dialog-live-v2-1200.png`
+- `./agenda-operational-pet-dialog-live-v2-1200.png`
+- `./agenda-operational-reschedule-dialog-live-v2-1200.png`
+- `./agenda-operational-history-dialog-live-v2-1200.png`
+- `./agenda-operational-live-v2-check.json`
+
+## Validacao - publicacao final validada
+- `horizontalOverflow = false` nos breakpoints `375`, `600`, `840`, `1200` e `1920`.
+- `shellCount = 1`, `workspaceCount = 1`, `legacyTabsCount = 0`, `legacyModalCount = 0`, `operationalPillCount = 0` e `hasLegacyStrings = false`.
+- Os fluxos `Servicos`, `Operacao`, `Perfil do pet`, `Historico` e `Mais > Reagendar` abriram no runtime publicado.
+- A API global `window.DPSServicesModal` ficou ausente e o shell unico `window.DPSAgendaDialog` ficou disponivel.
+- A segunda revalidacao publicada, apos remover `$.trim`, retornou `console_error_count = 0` e `console_warning_count = 0`.
+- O pacote remoto ativo tem `33` arquivos, sem `services-modal.js`, sem arquivos `.bak*` e sem residuos `agenda_tab`, `DPSServicesModal`, `dps-operational-pill`, `shape-*`, `M3` ou `Material` nos arquivos ativos da Agenda.
+- Limitacao de ambiente: o PHP CLI do servidor respondeu `PHP 8.2.30`, abaixo do requisito global `Requires PHP: 8.4`.

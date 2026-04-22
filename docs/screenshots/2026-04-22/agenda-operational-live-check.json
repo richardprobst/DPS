@@ -1,0 +1,60 @@
+{
+  "login": true,
+  "agenda_loaded": true,
+  "base_checks": {
+    "cardCount": 1,
+    "legacyButtonCount": 0,
+    "rowCount": 1,
+    "shellCount": 1,
+    "tabsNavCount": 0,
+    "toolbarCount": 1
+  },
+  "modals": {
+    "pet": {
+      "opened": true,
+      "title": "Perfil rápido do pet"
+    }
+  },
+  "breakpoints": {
+    "1920": {
+      "cardVisible": 0,
+      "overflowX": false,
+      "rowVisible": 1,
+      "selectedCards": 1,
+      "selectedRows": 1,
+      "width": 1902
+    },
+    "1200": {
+      "cardVisible": 0,
+      "overflowX": false,
+      "rowVisible": 1,
+      "selectedCards": 1,
+      "selectedRows": 1,
+      "width": 1182
+    },
+    "840": {
+      "cardVisible": 1,
+      "overflowX": false,
+      "rowVisible": 0,
+      "selectedCards": 1,
+      "selectedRows": 1,
+      "width": 822
+    },
+    "600": {
+      "cardVisible": 1,
+      "overflowX": false,
+      "rowVisible": 0,
+      "selectedCards": 1,
+      "selectedRows": 1,
+      "width": 582
+    },
+    "375": {
+      "cardVisible": 1,
+      "overflowX": false,
+      "rowVisible": 0,
+      "selectedCards": 1,
+      "selectedRows": 1,
+      "width": 482
+    }
+  }
+}

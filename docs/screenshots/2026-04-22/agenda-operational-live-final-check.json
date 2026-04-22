@@ -1,0 +1,78 @@
+{
+  "login": true,
+  "agenda_loaded": true,
+  "base_checks": {
+    "cardCount": 1,
+    "legacyButtonCount": 0,
+    "rowCount": 1,
+    "shellCount": 1,
+    "tabsNavCount": 0,
+    "toolbarCount": 1
+  },
+  "modals": {
+    "pet": {
+      "opened": true,
+      "title": "Perfil rápido do pet"
+    },
+    "services": {
+      "opened": true,
+      "title": "Serviços do atendimento"
+    },
+    "operation": {
+      "opened": true,
+      "title": "Fluxo operacional do atendimento"
+    },
+    "history": {
+      "opened": true,
+      "title": "Linha do tempo do atendimento",
+      "manualBadges": 0,
+      "systemBadges": 3
+    },
+    "reschedule": {
+      "opened": true,
+      "title": "Reagendar atendimento"
+    }
+  },
+  "breakpoints": {
+    "1920": {
+      "cardVisible": 0,
+      "innerWidth": 1920,
+      "overflowX": false,
+      "rowVisible": 1,
+      "selectedCards": 1,
+      "selectedRows": 1
+    },
+    "1200": {
+      "cardVisible": 0,
+      "innerWidth": 1200,
+      "overflowX": false,
+      "rowVisible": 1,
+      "selectedCards": 1,
+      "selectedRows": 1
+    },
+    "840": {
+      "cardVisible": 1,
+      "innerWidth": 840,
+      "overflowX": false,
+      "rowVisible": 0,
+      "selectedCards": 1,
+      "selectedRows": 1
+    },
+    "600": {
+      "cardVisible": 1,
+      "innerWidth": 600,
+      "overflowX": false,
+      "rowVisible": 0,
+      "selectedCards": 1,
+      "selectedRows": 1
+    },
+    "375": {
+      "cardVisible": 1,
+      "innerWidth": 375,
+      "overflowX": false,
+      "rowVisible": 0,
+      "selectedCards": 1,
+      "selectedRows": 1
+    }
+  }
+}

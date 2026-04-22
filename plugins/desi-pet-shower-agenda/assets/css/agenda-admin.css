@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Agenda admin surfaces - DPS
  * DPS Signature Standard for Agenda hub, settings and integrations.
  *
@@ -85,7 +85,7 @@
 .dps-agenda-admin-notice {
     padding: var(--dps-space-4) var(--dps-space-5);
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-medium);
+    border-radius: 0;
     font-size: var(--dps-typescale-body-medium-size);
     line-height: var(--dps-typescale-body-medium-line);
 }
@@ -179,7 +179,7 @@
     padding: var(--dps-space-4);
     background: var(--dps-color-surface-container-low);
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-medium);
+    border-radius: 0;
 }
 
 .dps-agenda-admin-feature-card h3,
@@ -210,7 +210,7 @@
     padding: 0 var(--dps-space-4);
     background: var(--dps-color-surface-container);
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-full);
+    border-radius: 2px;
     color: var(--dps-color-on-surface-variant);
     font-size: var(--dps-typescale-label-medium-size);
     font-weight: var(--dps-typescale-label-medium-weight);
@@ -255,7 +255,7 @@
     min-height: 42px;
     padding: 0 var(--dps-space-5);
     border: 1px solid transparent;
-    border-radius: var(--dps-shape-full);
+    border-radius: 2px;
     cursor: pointer;
     font-size: var(--dps-typescale-label-large-size);
     line-height: var(--dps-typescale-label-large-line);
@@ -333,14 +333,14 @@
     margin-bottom: var(--dps-space-5);
     background: var(--dps-color-surface-container-low);
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-full);
+    border-radius: 2px;
 }
 
 .dps-admin-tabbed-page .nav-tab {
     margin: 0;
     padding: 0.7rem 1rem;
     border: 1px solid transparent;
-    border-radius: var(--dps-shape-full);
+    border-radius: 2px;
     background: transparent;
     color: var(--dps-color-on-surface-variant);
     font-size: var(--dps-typescale-label-large-size);
@@ -391,7 +391,7 @@
     padding: var(--dps-space-4);
     background: var(--dps-color-surface-container-lowest);
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-medium);
+    border-radius: 0;
 }
 
 .dps-google-toggle input[type="checkbox"] {

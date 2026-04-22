@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Estilos do fluxo operacional da Agenda.
  *
  * Fonte de verdade visual: docs/visual/ (padrao DPS Signature / DPS Signature).
@@ -11,7 +11,7 @@
     min-width: 0;
     padding: var(--dps-space-5);
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-large);
+    border-radius: 0;
     background: var(--dps-color-surface-container-lowest);
     box-shadow: var(--dps-elevation-1);
 }
@@ -29,7 +29,7 @@
 .dps-checklist-modal-error {
     margin: 0;
     padding: var(--dps-space-5);
-    border-radius: var(--dps-shape-medium);
+    border-radius: 0;
     background: var(--dps-color-surface-container-low);
     color: var(--dps-color-on-surface-variant);
     text-align: center;
@@ -68,19 +68,19 @@
     min-width: 0;
 }
 
-.dps-operational-pill {
+.dps-operational-metric {
     display: inline-grid;
     gap: 0.15rem;
     align-content: center;
     min-width: 0;
     padding: 0.6rem 0.8rem;
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-medium);
+    border-radius: 0;
     background: var(--dps-color-surface-container-low);
     color: var(--dps-color-on-surface);
 }
 
-.dps-operational-pill__label {
+.dps-operational-metric__label {
     color: var(--dps-color-on-surface-variant);
     font-size: var(--dps-typescale-label-small-size);
     line-height: var(--dps-typescale-label-small-line);
@@ -89,35 +89,35 @@
     text-transform: uppercase;
 }
 
-.dps-operational-pill__value {
+.dps-operational-metric__value {
     min-width: 0;
     font-size: var(--dps-typescale-title-small-size);
     line-height: var(--dps-typescale-title-small-line);
     font-weight: var(--dps-typescale-title-small-weight);
 }
 
-.dps-operational-pill--checklist {
+.dps-operational-metric--checklist {
     border-color: color-mix(in srgb, var(--dps-color-primary) 24%, transparent);
     background: color-mix(in srgb, var(--dps-color-primary-container) 72%, var(--dps-color-surface-container-lowest));
 }
 
-.dps-operational-pill--rework {
+.dps-operational-metric--rework {
     border-color: color-mix(in srgb, var(--dps-color-warning) 28%, transparent);
     background: color-mix(in srgb, var(--dps-color-warning-container) 74%, var(--dps-color-surface-container-lowest));
 }
 
-.dps-operational-pill--checkin {
+.dps-operational-metric--checkin {
     border-color: color-mix(in srgb, var(--dps-color-success) 24%, transparent);
     background: color-mix(in srgb, var(--dps-color-success-container) 76%, var(--dps-color-surface-container-lowest));
 }
 
-.dps-operational-pill--checkout {
+.dps-operational-metric--checkout {
     border-color: color-mix(in srgb, var(--dps-color-tertiary) 24%, transparent);
     background: color-mix(in srgb, var(--dps-color-tertiary-container) 72%, var(--dps-color-surface-container-lowest));
 }
 
-.dps-operational-pill--pending,
-.dps-operational-pill--summary {
+.dps-operational-metric--pending,
+.dps-operational-metric--summary {
     background: var(--dps-color-surface-container);
 }
 
@@ -140,7 +140,7 @@
     min-width: 0;
     padding: 0.75rem 1rem;
     border: 1px solid transparent;
-    border-radius: var(--dps-shape-full);
+    border-radius: 2px;
     text-decoration: none;
     font-size: var(--dps-typescale-label-large-size);
     line-height: var(--dps-typescale-label-large-line);
@@ -279,7 +279,7 @@
     flex: 1 1 auto;
     height: 0.5rem;
     overflow: hidden;
-    border-radius: var(--dps-shape-full);
+    border-radius: 2px;
     background: var(--dps-color-surface-container-high);
 }
 
@@ -314,7 +314,7 @@
     min-width: 0;
     padding: 0.95rem 1rem;
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-medium);
+    border-radius: 0;
     background: var(--dps-color-surface-container-low);
 }
 
@@ -332,7 +332,7 @@
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    border-radius: var(--dps-shape-full);
+    border-radius: 2px;
     background: var(--dps-color-surface-container-high);
 }
 
@@ -365,7 +365,7 @@
     gap: 0.35rem;
     min-width: 0;
     padding: 0.45rem 0.75rem;
-    border-radius: var(--dps-shape-full);
+    border-radius: 2px;
     font-size: var(--dps-typescale-label-medium-size);
     line-height: var(--dps-typescale-label-medium-line);
     font-weight: var(--dps-typescale-label-medium-weight);
@@ -414,7 +414,7 @@
     min-width: 0;
     padding: var(--dps-space-4);
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-medium);
+    border-radius: 0;
     background: var(--dps-color-surface-container-low);
 }
 
@@ -483,7 +483,7 @@
     min-width: 0;
     padding: 0.9rem 1rem;
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-medium);
+    border-radius: 0;
     background: var(--dps-color-surface-container-lowest);
     transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
 }
@@ -509,7 +509,7 @@
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    border-radius: var(--dps-shape-full);
+    border-radius: 2px;
     background: var(--dps-color-surface-container-high);
 }
 
@@ -540,7 +540,7 @@
     min-height: 3rem;
     padding: 0.8rem 0.95rem;
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-medium);
+    border-radius: 0;
     background: var(--dps-color-surface-container-lowest);
     color: var(--dps-color-on-surface);
     font: inherit;
@@ -627,7 +627,7 @@
     min-height: 8rem;
     padding: 0.85rem 1rem;
     border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-medium);
+    border-radius: 0;
     box-sizing: border-box;
     resize: vertical;
 }
@@ -743,7 +743,7 @@
 .dps-checklist-panel h4,
 .dps-checkin-panel h4,
 .dps-rework-modal h4,
-.dps-operational-pill__value {
+.dps-operational-metric__value {
     font-family: var(--dps-signature-font-display, var(--dps-font-display, sans-serif));
 }
 
@@ -754,18 +754,18 @@
     gap: 0.5rem;
 }
 
-.dps-operational-pill {
+.dps-operational-metric {
     min-height: 4rem;
     padding: 0.7rem 0.85rem;
     border-radius: 0;
     background: var(--dps-color-surface-container-lowest);
 }
 
-.dps-operational-pill__label {
+.dps-operational-metric__label {
     letter-spacing: 0.08em;
 }
 
-.dps-operational-pill__value {
+.dps-operational-metric__value {
     font-size: clamp(1rem, 1.1vw, 1.15rem);
     line-height: 1.1;
     font-weight: 600;
@@ -837,6 +837,58 @@
 @media (max-width: 600px) {
     .dps-operation-modal-summary,
     .dps-operational-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* === DPS Signature final convergence: operacao === */
+
+.dps-checklist-step-icon,
+.dps-safety-item-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 2px;
+    font-size: 0.72rem;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dps-color-petrol, #173042);
+}
+
+.dps-checklist-rework-badge,
+.dps-safety-tag,
+.dps-checkin-status-badge,
+.dps-checkin-stage__time {
+    min-height: 2.2rem;
+}
+
+.dps-checklist-rework-badge {
+    text-transform: none;
+}
+
+.dps-checkin-stage__heading h5 {
+    letter-spacing: -0.01em;
+}
+
+.dps-checklist-step,
+.dps-safety-item,
+.dps-checkin-stage,
+.dps-safety-item-notes,
+.dps-checkin-observations textarea {
+    border-radius: 0;
+}
+
+.dps-checkin-actions .dps-checkin-btn,
+.dps-checkin-whatsapp .dps-checkin-btn,
+.dps-checklist-step-actions .dps-checklist-btn {
+    min-height: 44px;
+}
+
+@media (max-width: 600px) {
+    .dps-checkin-status,
+    .dps-safety-summary {
+        display: grid;
         grid-template-columns: 1fr;
     }
 }

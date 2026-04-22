@@ -332,22 +332,22 @@ msgstr ""
 msgid "seu pet"
 msgstr ""
 
-#: assets/js/services-modal.js
+#: assets/js/agenda-addon.js
 msgid "ServiÃ§os do Agendamento"
 msgstr ""
 
-#: assets/js/services-modal.js
+#: assets/js/agenda-addon.js
 msgid "Nenhum serviÃ§o encontrado"
 msgstr ""
 
-#: assets/js/services-modal.js
+#: assets/js/agenda-addon.js
 msgid "Fechar modal"
 msgstr ""
 
-#: assets/js/services-modal.js
+#: assets/js/agenda-addon.js
 msgid "Total"
 msgstr ""
 
-#: assets/js/services-modal.js
+#: assets/js/agenda-addon.js
 msgid "Fechar"
 msgstr ""

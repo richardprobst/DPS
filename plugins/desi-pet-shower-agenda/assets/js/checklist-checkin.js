@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Checklist operacional e fluxo de check-in / check-out.
  *
  * @package DPS_Agenda_Addon
@@ -38,14 +38,6 @@
     window.console.error(message);
   }
 
-  function getCurrentAgendaTab() {
-    if (window.DPSAgendaShared && typeof window.DPSAgendaShared.getCurrentTab === 'function') {
-      return window.DPSAgendaShared.getCurrentTab();
-    }
-
-    return 'operacional';
-  }
-
   function closeReworkModal(target) {
     if (window.DPSAgendaDialog && typeof window.DPSAgendaDialog.close === 'function') {
       window.DPSAgendaDialog.close(target || $('.dps-agenda-dialog-overlay--rework').last(), 'dismiss');
@@ -70,7 +62,7 @@
       return window.DPSAgendaShared.replaceRow(currentRow, rowHtml);
     }
 
-    var parsedRows = $($.parseHTML($.trim(rowHtml), document, true)).filter('tr');
+        var parsedRows = $($.parseHTML(String(rowHtml || '').trim(), document, true)).filter('tr');
     if (!parsedRows.length) {
       parsedRows = $(rowHtml).filter('tr');
     }
@@ -179,7 +171,6 @@
     formData.action = actionName;
     formData.nonce = cfg.nonce_checkin;
     formData.appointment_id = appointmentId;
-    formData.agenda_tab = getCurrentAgendaTab();
 
     $stage.addClass('dps-checkin-stage--saving');
     $btn.prop('disabled', true).attr('aria-disabled', 'true').text(cfg.messages.saving);
@@ -209,8 +200,7 @@
       appointment_id: appointmentId,
       step_key: stepKey,
       status: status,
-      reason: reason,
-      agenda_tab: getCurrentAgendaTab()
+      reason: reason
     };
 
     $step.css('opacity', '0.5').attr('aria-busy', 'true');
@@ -242,8 +232,7 @@
         nonce: cfg.nonce_checklist,
         appointment_id: appointmentId,
         step_key: stepKey,
-        reason: reason,
-        agenda_tab: getCurrentAgendaTab()
+        reason: reason
       }, function (response) {
         if (response && response.success && response.data) {
           refreshOperationUi(appointmentId, response.data, {

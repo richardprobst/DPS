@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * ServiÃ§o de Checklist Operacional para agendamentos.
  *

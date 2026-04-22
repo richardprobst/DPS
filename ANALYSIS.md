@@ -914,7 +914,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - `assets/js/agenda-addon.js`: interaÃƒÂ§ÃƒÂµes AJAX e feedback visual
 - `assets/js/checklist-checkin.js`: interaÃƒÂ§ÃƒÂµes do checklist operacional e check-in/check-out
 - `assets/css/checklist-checkin.css`: estilos DPS Signature para checklist e check-in/check-out
-- `assets/css/agenda-addon.css`: shell DPS Signature da Agenda, linhas por aba, overview, tabs compactas e dialog system unificado
+- `assets/css/agenda-addon.css`: shell DPS Signature da Agenda, fila operacional canonica, cards mobile, inspetor contextual e dialog system unificado
 - **[Deprecated]** `agenda-addon.js` e `agenda.js` na raiz (devem ser removidos)
 
 **Classes de serviÃƒÂ§o**:
@@ -929,6 +929,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - **[2026-03-23] Lista de Atendimentos redesenhada**: shell DPS Signature unificado com overview mais contido, tabs compactas e microcopy operacional orientada a decisao.
 - **[2026-03-23] Operacao inline unificada**: checklist operacional e check-in/check-out passam a compartilhar o mesmo painel expansivel da aba Operacao.
 - **[2026-03-23] Dialog system da Agenda**: historico, cobranca, reagendamento, confirmacoes sensiveis e retrabalho convergem para o mesmo shell modal.
+- **[2026-04-22] Publicacao final da Agenda operacional**: runtime publicado validado sem `services-modal.js`, sem `window.DPSServicesModal`, sem `agenda_tab` no frontend operacional e sem tokens/classes de geometria antiga nos assets ativos da Agenda. Servicos, operacao, perfil do pet, historico e `Mais > Reagendar` usam o shell unificado DPS Signature.
 
 ---
 
@@ -3483,3 +3484,17 @@ A integraÃƒÂ§ÃƒÂ£o do sistema DPS com Google Tasks API permite sincroniz
 - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
 - `plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js`
 - `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+
+**Estado consolidado após a rodada final de 2026-04-22:**
+- A navegação publicada da Agenda deixou de depender de `agenda_tab`; o frontend trata a página como uma única superfície operacional e os links de navegação preservam apenas data, escopo e visão (`Dia`, `Semana`, `Mes`, `Agenda completa`).
+- O modal de serviços foi refeito sobre o mesmo shell de diálogo DPS Signature usado pelo restante da Agenda (`showAgendaContentDialog()`), eliminando o modal customizado antigo e mantendo um padrão único de header, body, footer e foco.
+- O histórico do atendimento passou a expor `source` e `source_label` no payload AJAX, permitindo diferenciar no frontend registros automáticos e ações manuais por badges dedicadas.
+- A normalização de codificação UTF-8 sem BOM tornou-se parte prática da publicação da Agenda: arquivos PHP com BOM invalidavam respostas JSON do `admin-ajax.php` e impediam a abertura dos modais operacionais no runtime publicado.
+- Validação publicada em `https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day`: `shellCount = 1`, `tabsNavCount = 0`, `legacyButtonCount = 0`, modais de pet/serviços/operação/histórico/reagendamento abrindo corretamente e breakpoints `375`, `600`, `840`, `1200` e `1920` sem overflow horizontal.
+
+**Atualizacao local de codigo ainda nao validada em runtime:**
+- O renderer operacional deixou de mutar dados durante o render, limitando-se a leitura e composicao de estado.
+- O fluxo de servicos no JS principal agora converge para o mesmo shell de dialogo da Agenda, sem `window.DPSServicesModal`, sem `services-modal.js` e sem dependencia de `agenda_tab` no frontend operacional.
+- O mobile operacional passou a usar `dps-agenda-operational-stack` para priorizar a fila sobre os KPIs em `600px-`.
+- Rotulos e indicadores do fluxo operacional e de views legadas da Agenda foram normalizados para texto, reduzindo residuos de emoji, copy quebrada, classes `pill` e sinais visuais fora do DPS Signature.
+- Esta rodada foi feita sem WordPress executavel na workspace; portanto o fechamento funcional final ainda depende de deploy e revalidacao publicada.

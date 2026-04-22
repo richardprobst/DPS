@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * ServiÃ§o de Check-in / Check-out para agendamentos.
  *

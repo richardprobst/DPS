@@ -89,6 +89,28 @@ Antes de criar uma nova versÃ£o oficial:
 - Adicionados cards operacionais mobile, painel contextual do atendimento selecionado, busca local, filtros rápidos, ação primária por etapa e agrupamento de ações secundárias.
 - Mantidos os modais funcionais existentes para serviços, operação/checklist/check-in/check-out, histórico, pagamento e reagendamento, agora acionados a partir da nova estrutura.
 
+#### Changed (Alterado)
+
+- Consolidada a Agenda publicada como superfície operacional única do DPS Signature, sem navegação funcional por abas legadas e com navegação preservando apenas visão e período.
+- Padronizado o modal de serviços no mesmo shell visual e comportamental dos demais diálogos da Agenda.
+- Refinado o mobile da fila operacional com stage badge dedicada no card, toolbar compacta e estados sincronizados entre linha desktop, card mobile e inspetor contextual.
+- Reordenada a hierarquia mobile da Agenda em codigo para priorizar a fila operacional sobre os KPIs no shell DPS Signature.
+- Normalizados rotulos textuais da Agenda operacional e de views legadas para remover indicadores antigos e copy quebrada.
+
+#### Fixed (Corrigido)
+
+- Corrigido o bug de BOM em arquivos do plugin da Agenda que invalidava respostas JSON do AJAX publicado e impedia a abertura dos modais de serviços e fluxo operacional.
+- Corrigida a telemetria de histórico para devolver `source` e `source_label`, permitindo badges coerentes para registros automáticos e ações manuais no modal de linha do tempo.
+- Validado no `desi.pet` que os modais de pet, serviços, operação, histórico e reagendamento abriram corretamente após a publicação final.
+- Removidos efeitos colaterais de persistencia no renderer operacional da Agenda, que antes ajustava metadados durante a montagem da UI.
+- Removido uso deprecated de `$.trim` nos scripts ativos da Agenda; a revalidacao publicada ficou sem erros e sem warnings no Playwright.
+
+#### Refactoring (Interno)
+
+- Removidos resíduos de CSS/JS/layout das antigas tabelas concorrentes da Agenda, mantendo o runtime ativo concentrado na fila operacional canônica do DPS Signature.
+- Simplificada a semântica do frontend para tratar a Agenda como modo operacional único, reduzindo dependências de `agenda_tab` no runtime publicado.
+- Consolidado o fluxo de servicos da Agenda no `agenda-addon.js`, removendo o arquivo legado `services-modal.js` e a dependencia de `agenda_tab` no frontend operacional.
+
 **Client Portal ? Login h?brido e acesso recorrente**
 
 - **Login por e-mail e senha no Portal do Cliente**: mantido o acesso por magic link e adicionado fluxo recorrente com usu?rio WordPress vinculado ao e-mail cadastrado no cliente.
