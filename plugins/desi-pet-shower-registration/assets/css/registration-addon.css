@@ -1,21 +1,21 @@
-/**
+﻿/**
  * Estilos do Registration Add-on - DPS
  * DPS Signature Legacy Fallback
- * 
- * Este arquivo existe apenas como fallback quando o motor DPS Signature do frontend não está ativo:
+ *
+ * Este arquivo existe apenas como fallback quando o motor DPS Signature do frontend nÃ£o estÃ¡ ativo:
  * - Todas as cores via var(--dps-color-*) / var(--dps-*) tokens
  * - Formas via var(--dps-shape-*) tokens
- * - Elevação via var(--dps-elevation-*) tokens
+ * - ElevaÃ§Ã£o via var(--dps-elevation-*) tokens
  * - Movimento via var(--dps-motion-*) tokens
- * - Espaçamento via var(--dps-space-*) tokens
+ * - EspaÃ§amento via var(--dps-space-*) tokens
  * - Tipografia via var(--dps-font-*) / var(--dps-typescale-*) tokens
  *
- * Perfil: Expressive (formulário público)
- * - Spring-based motion com bounce
+ * Perfil: formulÃ¡rio pÃºblico do sistema
+ * - Motion com resposta controlada
  * - Stagger animations para cards
  * - Elevated cards
- * - Fontes expressivas (Outfit / Source Sans 3)
- * - Botões pill-shaped
+ * - Tipografia pÃºblica com mais presenÃ§a
+ * - BotÃµes pill-shaped
  *
  * Requer: dps-design-tokens.css carregado antes deste arquivo.
  *
@@ -30,8 +30,8 @@
  *
  * @package Desi_Pet_Shower_Registration
  * @since 1.1.0
- * @since 1.4.0 Melhorias visuais seguindo padrão da Agenda
- * @version 2.0.0 Migração completa para tokens DPS Signature
+ * @since 1.4.0 Melhorias visuais seguindo padrÃ£o da Agenda
+ * @version 2.0.0 MigraÃ§Ã£o completa para tokens DPS Signature
  */
 
 /* ==========================================================================
@@ -39,7 +39,7 @@
    ========================================================================== */
 
 .dps-registration-form {
-    /* Tokens semânticos DPS Signature (via dps-design-tokens.css) */
+    /* Tokens semÃ¢nticos DPS Signature (via dps-design-tokens.css) */
     --dps-accent: var(--dps-color-primary);
     --dps-accent-strong: var(--dps-color-primary-pressed);
     --dps-accent-hover: var(--dps-color-primary-hover);
@@ -525,7 +525,7 @@
 }
 
 #dps-add-pet::before {
-    content: '➕';
+    content: 'âž•';
     font-size: 16px;
 }
 
@@ -692,7 +692,7 @@
 }
 
 .dps-registration-form .dps-message-success::before {
-    content: '✓';
+    content: 'âœ“';
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -838,7 +838,7 @@
     overflow: hidden;
 }
 
-/* Sugestões do Google Places */
+/* SugestÃµes do Google Places */
 .pac-container {
     border-radius: var(--dps-shape-small);
     box-shadow: var(--dps-elevation-3);
@@ -885,17 +885,17 @@
         max-width: 840px;
         padding: 48px 56px;
     }
-    
+
     .dps-registration-form h4 {
         font-size: 22px;
         margin-bottom: 28px;
     }
-    
+
     .dps-client-fields,
     .dps-pet-fieldset {
         gap: 24px;
     }
-    
+
     .dps-registration-form input[type="text"],
     .dps-registration-form input[type="email"],
     .dps-registration-form input[type="tel"],
@@ -905,15 +905,15 @@
     .dps-registration-form textarea {
         padding: 14px 16px;
     }
-    
+
     .dps-progress {
         padding: 24px 28px;
     }
-    
+
     .dps-pet-fieldset {
         padding: 28px;
     }
-    
+
     .dps-summary-content {
         padding: 24px 28px;
     }
@@ -926,27 +926,27 @@
         padding: 56px 64px;
         border-radius: var(--dps-shape-extra-large);
     }
-    
+
     .dps-registration-form h4 {
         font-size: 24px;
         margin-bottom: 32px;
     }
-    
+
     .dps-registration-form h4::before {
         width: 5px;
         height: 28px;
     }
-    
+
     .dps-client-fields,
     .dps-pet-fieldset {
         gap: 28px;
     }
-    
+
     .dps-registration-form label {
         font-size: 15px;
         margin-bottom: 10px;
     }
-    
+
     .dps-registration-form input[type="text"],
     .dps-registration-form input[type="email"],
     .dps-registration-form input[type="tel"],
@@ -958,57 +958,57 @@
         font-size: 16px;
         border-radius: var(--dps-shape-medium);
     }
-    
+
     .dps-progress {
         padding: 28px 32px;
         border-radius: var(--dps-shape-large);
         margin-bottom: 32px;
     }
-    
+
     .dps-progress-bar {
         height: 12px;
     }
-    
+
     #dps-step-counter {
         padding: 6px 14px;
         font-size: 14px;
     }
-    
+
     .dps-pet-fieldset {
         padding: 32px;
         border-radius: var(--dps-shape-extra-large);
         margin-bottom: 24px;
     }
-    
+
     .dps-pet-fieldset legend {
         font-size: 17px;
         padding: 10px 18px;
     }
-    
+
     .dps-button-next,
     .dps-button-secondary,
     .dps-registration-form .button {
         padding: 16px 32px;
         font-size: 16px;
     }
-    
+
     .dps-step-actions {
         margin-top: 36px;
         padding-top: 28px;
     }
-    
+
     .dps-summary-box {
         border-radius: var(--dps-shape-extra-large);
     }
-    
+
     .dps-summary-header {
         padding: 24px 28px;
     }
-    
+
     .dps-summary-content {
         padding: 28px 32px;
     }
-    
+
     .dps-summary-confirm {
         padding: 24px 28px;
     }
@@ -1021,24 +1021,24 @@
         padding: 32px;
         margin: 0 auto;
     }
-    
+
     .dps-progress {
         padding: 18px 22px;
     }
-    
+
     .dps-client-fields,
     .dps-pet-fieldset {
         gap: 18px;
     }
-    
+
     .dps-pet-fieldset {
         padding: 22px;
     }
-    
+
     .dps-step-actions {
         flex-wrap: wrap;
     }
-    
+
     .dps-button-next,
     .dps-button-secondary,
     .dps-registration-form .button {
@@ -1054,12 +1054,12 @@
         margin: 0 16px;
         border-radius: var(--dps-shape-medium);
     }
-    
+
     .dps-progress {
         padding: 16px 20px;
         margin-bottom: 24px;
     }
-    
+
     .dps-progress-top {
         flex-direction: column;
         align-items: center;
@@ -1080,18 +1080,18 @@
     .dps-step-actions {
         flex-direction: column;
     }
-    
+
     .dps-button-next,
     .dps-button-secondary,
     .dps-registration-form .button {
         width: 100%;
         justify-content: center;
     }
-    
+
     .dps-summary-section ul {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-summary-pet {
         padding: 14px 16px;
     }
@@ -1104,25 +1104,25 @@
         margin: 0 12px;
         border-radius: var(--dps-shape-medium);
     }
-    
+
     .dps-progress {
         padding: 14px 16px;
         border-radius: var(--dps-shape-small);
     }
-    
+
     .dps-progress-top {
         font-size: 14px;
     }
-    
+
     #dps-step-counter {
         font-size: 12px;
         padding: 4px 10px;
     }
-    
+
     .dps-progress-bar {
         height: 8px;
     }
-    
+
     .dps-registration-form input[type="text"],
     .dps-registration-form input[type="email"],
     .dps-registration-form input[type="tel"],
@@ -1130,20 +1130,20 @@
     .dps-registration-form input[type="number"],
     .dps-registration-form select,
     .dps-registration-form textarea {
-        font-size: 16px; /* Evita zoom automático no iOS */
+        font-size: 16px; /* Evita zoom automÃ¡tico no iOS */
         padding: 14px 12px;
     }
-    
+
     .dps-pet-fieldset {
         padding: 18px;
         border-radius: var(--dps-shape-medium);
     }
-    
+
     .dps-pet-fieldset legend {
         font-size: 14px;
         padding: 6px 12px;
     }
-    
+
     .dps-registration-form .button,
     .dps-button-next,
     .dps-button-secondary {
@@ -1161,23 +1161,23 @@
         width: 100%;
         justify-content: center;
     }
-    
+
     .dps-map-container {
         height: 180px;
     }
-    
+
     .dps-summary-box {
         border-radius: var(--dps-shape-medium);
     }
-    
+
     .dps-summary-header {
         padding: 16px 18px;
     }
-    
+
     .dps-summary-content {
         padding: 16px 18px;
     }
-    
+
     .dps-summary-confirm {
         padding: 16px 18px;
     }
@@ -1190,65 +1190,65 @@
         margin: 0 8px;
         border-radius: var(--dps-shape-small);
     }
-    
+
     .dps-registration-form h4 {
         font-size: 16px;
         margin: 0 0 20px;
     }
-    
+
     .dps-registration-form h4::before {
         width: 3px;
         height: 20px;
     }
-    
+
     .dps-progress {
         padding: 12px 14px;
     }
-    
+
     .dps-client-fields,
     .dps-pet-fieldset {
         gap: 14px;
     }
-    
+
     .dps-registration-form label {
         font-size: 13px;
     }
-    
+
     .dps-pet-fieldset {
         padding: 14px;
     }
-    
+
     .dps-pet-fieldset legend {
         font-size: 13px;
         padding: 5px 10px;
     }
-    
+
     .dps-map-container {
         height: 150px;
     }
-    
+
     .dps-registration-form .dps-message-success,
     .dps-registration-form .dps-message-error {
         padding: 14px;
         font-size: 14px;
         border-radius: var(--dps-shape-small);
     }
-    
+
     .dps-registration-form .dps-message-success::before,
     .dps-registration-form .dps-message-error::before {
         width: 24px;
         height: 24px;
         font-size: 14px;
     }
-    
+
     .dps-summary-section h5 {
         font-size: 15px;
     }
-    
+
     .dps-summary-pet h6 {
         font-size: 14px;
     }
-    
+
     .dps-summary-section li {
         font-size: 13px;
     }
@@ -1261,47 +1261,47 @@
         margin: 0 4px;
         border-radius: var(--dps-shape-small);
     }
-    
+
     .dps-registration-form h4 {
         font-size: 15px;
         margin: 0 0 16px;
         gap: 8px;
     }
-    
+
     .dps-registration-form h4::before {
         width: 3px;
         height: 18px;
     }
-    
+
     .dps-progress {
         padding: 10px 12px;
         border-radius: var(--dps-shape-small);
     }
-    
+
     .dps-progress-top {
         font-size: 13px;
         gap: 8px;
     }
-    
+
     #dps-step-counter {
         font-size: 11px;
         padding: 3px 8px;
         min-width: 36px;
     }
-    
+
     .dps-progress-bar {
         height: 6px;
     }
-    
+
     .dps-client-fields,
     .dps-pet-fieldset {
         gap: 12px;
     }
-    
+
     .dps-registration-form label {
         font-size: 12px;
     }
-    
+
     .dps-registration-form input[type="text"],
     .dps-registration-form input[type="email"],
     .dps-registration-form input[type="tel"],
@@ -1314,77 +1314,77 @@
         min-height: 44px;
         border-radius: var(--dps-shape-small);
     }
-    
+
     .dps-pet-fieldset {
         padding: 12px;
         border-radius: var(--dps-shape-small);
     }
-    
+
     .dps-pet-fieldset legend {
         font-size: 12px;
         padding: 4px 8px;
     }
-    
+
     .dps-registration-form .button,
     .dps-button-next,
     .dps-button-secondary {
         padding: 12px 16px;
         font-size: 14px;
     }
-    
+
     #dps-add-pet {
         padding: 12px 16px;
         font-size: 14px;
         border-radius: var(--dps-shape-small);
     }
-    
+
     .dps-step-actions {
         gap: 10px;
         margin-top: 20px;
         padding-top: 16px;
     }
-    
+
     .dps-summary-box {
         border-radius: var(--dps-shape-small);
     }
-    
+
     .dps-summary-header {
         padding: 14px;
     }
-    
+
     .dps-summary-header h4 {
         font-size: 15px;
     }
-    
+
     .dps-summary-content {
         padding: 14px;
     }
-    
+
     .dps-summary-confirm {
         padding: 12px 14px;
         font-size: 13px;
     }
-    
+
     .dps-summary-section h5 {
         font-size: 14px;
     }
-    
+
     .dps-summary-pet h6 {
         font-size: 13px;
     }
-    
+
     .dps-summary-section li {
         font-size: 12px;
     }
-    
+
     .dps-required-legend {
         font-size: 12px;
     }
-    
+
     .dps-step-description {
         font-size: 13px;
     }
-    
+
     .dps-field-hint {
         font-size: 11px;
     }
@@ -1404,7 +1404,7 @@
     outline-offset: 2px;
 }
 
-/* Indicador de campo obrigatório */
+/* Indicador de campo obrigatÃ³rio */
 .dps-required {
     color: var(--dps-error);
     margin-left: 3px;
@@ -1429,14 +1429,14 @@
 }
 
 .dps-field-error-message::before {
-    content: '⚠';
+    content: 'âš ';
 }
 
 /* ==========================================================================
-   16. Estados de Botões
+   16. Estados de BotÃµes
    ========================================================================== */
 
-/* Botão desabilitado - opacidade padronizada do fallback Signature */
+/* BotÃ£o desabilitado - opacidade padronizada do fallback Signature */
 .dps-registration-form .button:disabled,
 .dps-registration-form .button[disabled],
 .dps-button-next:disabled,
@@ -1505,7 +1505,7 @@
 }
 
 .dps-js-error::before {
-    content: '⚠️';
+    content: 'âš ï¸';
     flex-shrink: 0;
 }
 
@@ -1535,7 +1535,7 @@
 }
 
 .dps-admin-preview-banner::before {
-    content: '👁️';
+    content: 'ðŸ‘ï¸';
     font-size: var(--dps-typescale-title-medium-size);
 }
 
@@ -1549,7 +1549,7 @@
     text-decoration: underline;
 }
 
-/* Opções administrativas */
+/* OpÃ§Ãµes administrativas */
 .dps-admin-options {
     background: var(--dps-warning-soft);
     border-left: 3px solid var(--dps-warning);
@@ -1576,7 +1576,7 @@
     color: var(--dps-color-on-warning-container);
 }
 
-/* Legenda de campos obrigatórios */
+/* Legenda de campos obrigatÃ³rios */
 .dps-required-legend {
     font-size: var(--dps-typescale-body-small-size);
     color: var(--dps-muted);
@@ -1590,7 +1590,7 @@
 }
 
 /* ==========================================================================
-   19. Step Transitions - Expressive Animation
+19. Step Transitions - Signature Animation
    ========================================================================== */
 
 .dps-step {
@@ -1603,7 +1603,7 @@
         font-size: 13px;
         padding: 12px 16px;
     }
-    
+
     .dps-admin-preview-banner::before {
         font-size: 16px;
     }
@@ -1628,7 +1628,7 @@
 }
 
 .dps-step-description::before {
-    content: '💡';
+    content: 'ðŸ’¡';
     font-size: var(--dps-typescale-title-large-size);
     flex-shrink: 0;
 }
@@ -1715,25 +1715,25 @@
 }
 
 .dps-empty-message::before {
-    content: '📋';
+    content: 'ðŸ“‹';
     display: block;
     font-size: var(--dps-typescale-headline-large-size);
     margin-bottom: var(--dps-space-3);
     opacity: 0.6;
 }
 
-/* Grid para campos de preferências */
+/* Grid para campos de preferÃªncias */
 @media (min-width: 768px) {
     .dps-product-prefs-pet {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 20px;
     }
-    
+
     .dps-product-prefs-pet__title {
         grid-column: 1 / -1;
     }
-    
+
     .dps-product-pref-field--full {
         grid-column: 1 / -1;
     }
@@ -1745,7 +1745,7 @@
         flex-direction: column;
         padding: 20px;
     }
-    
+
     .dps-product-prefs-pet__title {
         font-size: 16px;
         margin-bottom: 16px;
@@ -1762,14 +1762,14 @@
     border-color: var(--dps-border);
 }
 
-/* Transição suave ao focar */
+/* TransiÃ§Ã£o suave ao focar */
 .dps-registration-form input,
 .dps-registration-form select,
 .dps-registration-form textarea {
     transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover), background var(--dps-motion-hover);
 }
 
-/* Step indicator visual - Número do passo */
+/* Step indicator visual - NÃºmero do passo */
 .dps-step-number {
     display: inline-flex;
     align-items: center;
@@ -1785,7 +1785,7 @@
     flex-shrink: 0;
 }
 
-/* Card entry animation - Expressive spring-based */
+/* Card entry animation - Signature spring-based */
 @keyframes dps-enter-from-below {
     0% {
         opacity: 0;
@@ -1804,7 +1804,7 @@
     }
 }
 
-/* Success message pulse - Expressive */
+/* Success message pulse - Signature */
 @keyframes dps-success-pulse {
     0% {
         opacity: 0;
@@ -1830,7 +1830,7 @@
         border: none;
         box-shadow: none;
     }
-    
+
     .dps-progress,
     .dps-step-actions,
     .dps-admin-preview-banner,
@@ -1841,24 +1841,24 @@
     .dps-registration-form .button {
         display: none !important;
     }
-    
+
     .dps-step {
         display: block !important;
         opacity: 1 !important;
         transform: none !important;
     }
-    
+
     .dps-registration-form h4 {
         page-break-after: avoid;
     }
-    
+
     .dps-pet-fieldset,
     .dps-summary-box {
         page-break-inside: avoid;
         border: 1px solid var(--dps-color-outline);
         background: none;
     }
-    
+
     .dps-registration-form input,
     .dps-registration-form select,
     .dps-registration-form textarea {
@@ -1875,13 +1875,13 @@
     .dps-registration-form {
         border-width: 2px;
     }
-    
+
     .dps-registration-form input,
     .dps-registration-form select,
     .dps-registration-form textarea {
         border-width: 2px;
     }
-    
+
     .dps-button-next,
     .dps-button-secondary,
     .dps-registration-form .button {
@@ -1905,15 +1905,15 @@
         transition: none !important;
         animation: none !important;
     }
-    
+
     .dps-js-error {
         animation: none !important;
     }
-    
+
     .dps-pet-fieldset {
         animation: none !important;
     }
-    
+
     .dps-registration-form .dps-message-success {
         animation: none !important;
     }

@@ -1,14 +1,14 @@
-# Screenshots 2026-03-23 - Agenda (Lista de Atendimentos redesign M3)
+﻿# Screenshots 2026-03-23 - Agenda (Lista de Atendimentos redesign DPS Signature)
 
 ## Contexto
 - Objetivo da mudanca: implementar o redesign completo da Lista de Atendimentos da Agenda, incluindo shell, tabs, linhas, painel operacional inline, checkboxes e dialog system, e consolidar o CSS final removendo duplicacoes e regras legadas.
 - Ambiente: previews estaticos servidos localmente a partir do workspace.
-- Referencia de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Referencia de design DPS Signature utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
 
 ## Antes/Depois
 - Antes: a Lista de Atendimentos misturava shells visuais, tabs altas demais, profundidade fragmentada entre grid e modal, e dialogs inconsistentes entre historico, cobranca, reagendamento e retrabalho.
-- Depois: a area opera como um unico workspace M3 com overview redesenhado em superficies tonais compactas, tabs compactas, linhas padronizadas entre as tres leituras, painel inline unificado na aba Operacao e dialogs compartilhando o mesmo shell visual.
-- Consolidacao complementar: o CSS da Agenda foi limpo para depender da camada final M3, com remocao de blocos repetidos nas tabs, overview e detail panels, e neutralizacao de shells legados de modal sem uso no fluxo atual.
+- Depois: a area opera como um unico workspace DPS Signature com overview redesenhado em superficies tonais compactas, tabs compactas, linhas padronizadas entre as tres leituras, painel inline unificado na aba Operacao e dialogs compartilhando o mesmo shell visual.
+- Consolidacao complementar: o CSS da Agenda foi limpo para depender da camada final DPS Signature, com remocao de blocos repetidos nas tabs, overview e detail panels, e neutralizacao de shells legados de modal sem uso no fluxo atual.
 - Refinamento visual complementar: os cards `Total`, `Pendentes`, `Finalizados`, `Cancelados`, `Atrasados`, `Pagamento pendente` e `TaxiDog` foram compactados e perderam a iconografia decorativa para reduzir ruido visual e devolver mais protagonismo ao workspace operacional.
 - Refinamento visual complementar 2: removido o espaco morto no topo dos cards de overview, que ainda permanecia como heranca da antiga faixa de icones.
 - Alinhamento final do preview: removido o resquicio do botao legado de exportacao, para manter o registro visual sincronizado com o runtime atual da Agenda.
@@ -50,6 +50,6 @@
 
 ## Observacoes
 - Os previews usam os CSS reais do add-on para registrar o redesign mesmo sem uma instancia WordPress ativa no momento da captura.
-- O registro cobre a shell principal, as tres abas, o painel operacional inline e o dialog system unificado, em conformidade com o padrao M3 adotado em `docs/visual/`.
+- O registro cobre a shell principal, as tres abas, o painel operacional inline e o dialog system unificado, em conformidade com o padrao DPS Signature adotado em `docs/visual/`.
 - Esta rodada tambem revalidou a responsividade apos a limpeza estrutural do CSS em `agenda-addon.css` e `checklist-checkin.css`.
 - Nesta rodada de correcao textual nao houve nova captura full-page, porque a validacao foi feita por leitura direta dos arquivos de runtime e por validacao de sintaxe local, sem instancia WordPress ativa para reproduzir a tela real.

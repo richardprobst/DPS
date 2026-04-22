@@ -1,4 +1,4 @@
-# Registro de screenshots - 2026-03-08
+﻿# Registro de screenshots - 2026-03-08
 
 ## Contexto geral
 Registros visuais do add-on `desi-pet-shower-game` no dia 2026-03-08.
@@ -31,11 +31,11 @@ Mudancas de camada meta/retencao no jogo:
 - `docs/screenshots/2026-03-08/space-groomers-preview.html`
   - Harness local com markup atualizado da Fase 3, pronto para captura assim que houver servidor HTTP acessivel no mesmo contexto do navegador automatizado.
 - `docs/screenshots/2026-03-08/portal-game-summary-preview.html`
-  - Preview estatico do resumo sincronizado do portal, alinhado ao padrao M3 usado na implementacao.
+  - Preview estatico do resumo sincronizado do portal, alinhado ao padrao DPS Signature usado na implementacao.
 
 ### Observacao especifica do portal
 - Como o WordPress local nao estava acessivel no navegador automatizado desta sessao, o registro visual do portal foi salvo como preview estatico e PNG renderizado localmente.
-- O card segue `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do padrao M3.
+- O card segue `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do padrao DPS Signature.
 
 ## Registro desta entrega (graphics enhancement)
 ### Contexto

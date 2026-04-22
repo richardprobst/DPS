@@ -1,17 +1,17 @@
-/**
+﻿/**
  * Estilos do Booking Add-on - DPS
  *
- * CSS complementar para a página dedicada de agendamentos.
- * Herda estilos do plugin base e adiciona ajustes específicos para a página.
+ * CSS complementar para a pÃ¡gina dedicada de agendamentos.
+ * Herda estilos do plugin base e adiciona ajustes especÃ­ficos para a pÃ¡gina.
  *
  * @package Desi_Pet_Shower_Booking
  * @since 1.0.0
  * @since 1.1.0 Simplificado para herdar estilos do plugin base.
- * @since 1.3.0 Migrado para Material 3 Expressive design tokens.
+ * @since 1.3.0 Migrado para DPS Signature design tokens.
  */
 
 /* ==========================================================================
-   Semantic Mapping — Booking Addon Wrapper
+   Semantic Mapping â€” Booking Addon Wrapper
    ========================================================================== */
 
 .dps-booking-wrapper {
@@ -22,7 +22,7 @@
     --booking-surface-subtle: var(--dps-color-surface-container-low);
     --booking-border: var(--dps-color-outline-variant);
     --booking-border-hover: var(--dps-color-outline);
-    
+
     /* Typography */
     font-family: var(--dps-font-system);
 }
@@ -38,7 +38,7 @@
 }
 
 /* ==========================================================================
-   2. Header da Página
+   2. Header da PÃ¡gina
    ========================================================================== */
 
 .dps-booking-page-header {
@@ -120,7 +120,7 @@
 }
 
 /* ==========================================================================
-   4. Seção de Agendamentos
+   4. SeÃ§Ã£o de Agendamentos
    ========================================================================== */
 
 .dps-booking-wrapper .dps-section {
@@ -143,7 +143,7 @@
 }
 
 /* ==========================================================================
-   5. Ajustes de Formulário para Página Dedicada
+   5. Ajustes de FormulÃ¡rio para PÃ¡gina Dedicada
    ========================================================================== */
 
 .dps-booking-wrapper .dps-surface {
@@ -232,16 +232,16 @@
 }
 
 @keyframes dps-booking-bounce {
-    0% { 
-        transform: scale(0.5); 
-        opacity: 0; 
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
     }
-    60% { 
-        transform: scale(1.1); 
+    60% {
+        transform: scale(1.1);
     }
-    100% { 
-        transform: scale(1); 
-        opacity: 1; 
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
 }
 

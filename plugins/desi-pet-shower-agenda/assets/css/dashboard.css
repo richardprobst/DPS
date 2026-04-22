@@ -1,11 +1,11 @@
-/**
+﻿/**
  * Estilos do Dashboard Operacional da Agenda - DPS
- * Material Design 3 Expressive
+ * DPS Signature
  *
- * Segue o sistema de design M3 Expressive do DPS:
+ * Segue o sistema de design DPS Signature do DPS:
  * - Todas as cores via var(--dps-color-*) tokens
  * - Formas via var(--dps-shape-*) tokens
- * - Elevação via var(--dps-elevation-*) tokens
+ * - ElevaÃ§Ã£o via var(--dps-elevation-*) tokens
  * - Movimento via var(--dps-motion-*) tokens
  * - Tipografia via var(--dps-typescale-*) tokens
  *
@@ -127,7 +127,7 @@
     color: var(--dps-color-on-surface-variant);
 }
 
-/* === Próximos Atendimentos === */
+/* === PrÃ³ximos Atendimentos === */
 .dps-dashboard-next-appointments {
     background: var(--dps-color-surface-container-lowest);
     border: 1px solid var(--dps-color-outline-variant);
@@ -194,7 +194,7 @@
     margin: 0;
 }
 
-/* === Ações === */
+/* === AÃ§Ãµes === */
 .dps-dashboard-actions {
     text-align: center;
     padding: var(--dps-space-5) 0;
@@ -252,7 +252,7 @@
     }
 }
 
-/* === FASE 4: Capacidade / Lotação Heatmap === */
+/* === FASE 4: Capacidade / LotaÃ§Ã£o Heatmap === */
 .dps-dashboard-capacity-section {
     background: var(--dps-color-surface-container-lowest);
     border: 1px solid var(--dps-color-outline-variant);
@@ -290,7 +290,7 @@
     border-radius: var(--dps-shape-extra-small);
 }
 
-/* Configuração de Capacidade */
+/* ConfiguraÃ§Ã£o de Capacidade */
 .dps-capacity-config {
     background: var(--dps-color-surface-container-low);
     border: 1px solid var(--dps-color-outline-variant);
@@ -523,7 +523,7 @@
     }
 }
 
-/* M3 dashboard normalization */
+/* DPS Signature dashboard normalization */
 .dps-dashboard-wrapper {
     display: grid;
     gap: var(--dps-space-5);

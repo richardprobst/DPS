@@ -1,683 +1,683 @@
-# Plano de Implementação em Fases — Melhorias do Sistema DPS
+﻿# Plano de ImplementaÃ§Ã£o em Fases â€” Melhorias do Sistema DPS
 
-> **Data de criação:** 2026-02-18
-> **Baseado em:** Relatório de Sugestões de Melhoria para o Sistema DPS
-> **Status:** Planejamento aprovado — Fase 1 concluída em 2026-02-18
+> **Data de criaÃ§Ã£o:** 2026-02-18
+> **Baseado em:** RelatÃ³rio de SugestÃµes de Melhoria para o Sistema DPS
+> **Status:** Planejamento aprovado â€” Fase 1 concluÃ­da em 2026-02-18
 
 ---
 
-## Índice
+## Ãndice
 
-1. [Visão Geral](#visão-geral)
-2. [Critérios de Priorização](#critérios-de-priorização)
+1. [VisÃ£o Geral](#visÃ£o-geral)
+2. [CritÃ©rios de PriorizaÃ§Ã£o](#critÃ©rios-de-priorizaÃ§Ã£o)
 3. [Resumo das Fases](#resumo-das-fases)
-4. [Fase 1 — Segurança Crítica](#fase-1--segurança-crítica)
-5. [Fase 2 — Refatoração Estrutural do Núcleo](#fase-2--refatoração-estrutural-do-núcleo)
-6. [Fase 3 — Performance e Escalabilidade](#fase-3--performance-e-escalabilidade)
-7. [Fase 4 — UX do Portal do Cliente](#fase-4--ux-do-portal-do-cliente)
-8. [Fase 5 — Funcionalidades Novas (Portal)](#fase-5--funcionalidades-novas-portal)
-9. [Fase 6 — Segurança Avançada e Auditoria](#fase-6--segurança-avançada-e-auditoria)
-10. [Fase 7 — Testabilidade e Manutenibilidade](#fase-7--testabilidade-e-manutenibilidade)
-11. [Fase 8 — Integrações e Inteligência](#fase-8--integrações-e-inteligência)
-12. [Dependências entre Fases](#dependências-entre-fases)
-13. [Referências Internas](#referências-internas)
+4. [Fase 1 â€” SeguranÃ§a CrÃ­tica](#fase-1--seguranÃ§a-crÃ­tica)
+5. [Fase 2 â€” RefatoraÃ§Ã£o Estrutural do NÃºcleo](#fase-2--refatoraÃ§Ã£o-estrutural-do-nÃºcleo)
+6. [Fase 3 â€” Performance e Escalabilidade](#fase-3--performance-e-escalabilidade)
+7. [Fase 4 â€” UX do Portal do Cliente](#fase-4--ux-do-portal-do-cliente)
+8. [Fase 5 â€” Funcionalidades Novas (Portal)](#fase-5--funcionalidades-novas-portal)
+9. [Fase 6 â€” SeguranÃ§a AvanÃ§ada e Auditoria](#fase-6--seguranÃ§a-avanÃ§ada-e-auditoria)
+10. [Fase 7 â€” Testabilidade e Manutenibilidade](#fase-7--testabilidade-e-manutenibilidade)
+11. [Fase 8 â€” IntegraÃ§Ãµes e InteligÃªncia](#fase-8--integraÃ§Ãµes-e-inteligÃªncia)
+12. [DependÃªncias entre Fases](#dependÃªncias-entre-fases)
+13. [ReferÃªncias Internas](#referÃªncias-internas)
 
 ---
 
-## Visão Geral
+## VisÃ£o Geral
 
-Este plano organiza todas as sugestões de melhoria do Relatório de Sugestões em **8 fases sequenciais**, priorizadas por impacto e risco. Cada fase é independente o suficiente para ser entregue de forma iterativa, mas há dependências onde indicado.
+Este plano organiza todas as sugestÃµes de melhoria do RelatÃ³rio de SugestÃµes em **8 fases sequenciais**, priorizadas por impacto e risco. Cada fase Ã© independente o suficiente para ser entregue de forma iterativa, mas hÃ¡ dependÃªncias onde indicado.
 
-### Princípios
+### PrincÃ­pios
 
-- **Segurança primeiro:** vulnerabilidades críticas antes de qualquer feature.
-- **Entregas incrementais:** cada fase gera valor utilizável.
+- **SeguranÃ§a primeiro:** vulnerabilidades crÃ­ticas antes de qualquer feature.
+- **Entregas incrementais:** cada fase gera valor utilizÃ¡vel.
 - **Compatibilidade:** nenhuma fase deve quebrar contratos existentes (hooks, tabelas, metadados).
-- **Documentação contínua:** `ANALYSIS.md` e `CHANGELOG.md` atualizados a cada fase.
+- **DocumentaÃ§Ã£o contÃ­nua:** `ANALYSIS.md` e `CHANGELOG.md` atualizados a cada fase.
 
 ---
 
-## Critérios de Priorização
+## CritÃ©rios de PriorizaÃ§Ã£o
 
-| Prioridade | Critério | Exemplos |
+| Prioridade | CritÃ©rio | Exemplos |
 |------------|----------|----------|
-| 🔴 Crítica | Vulnerabilidades de segurança ativas | SQL Injection no Finance |
-| 🟠 Alta | Problemas arquiteturais que bloqueiam evolução | `class-dps-base-frontend.php` com 5.500+ linhas |
-| 🟡 Média | Performance e UX com impacto direto no usuário | Paginação, validação em tempo real |
-| 🟢 Baixa | Melhorias incrementais e features novas | Galeria de fotos, agendamento inteligente |
+| ðŸ”´ CrÃ­tica | Vulnerabilidades de seguranÃ§a ativas | SQL Injection no Finance |
+| ðŸŸ  Alta | Problemas arquiteturais que bloqueiam evoluÃ§Ã£o | `class-dps-base-frontend.php` com 5.500+ linhas |
+| ðŸŸ¡ MÃ©dia | Performance e UX com impacto direto no usuÃ¡rio | PaginaÃ§Ã£o, validaÃ§Ã£o em tempo real |
+| ðŸŸ¢ Baixa | Melhorias incrementais e features novas | Galeria de fotos, agendamento inteligente |
 
 ---
 
 ## Resumo das Fases
 
-| Fase | Nome | Prioridade | Esforço | Pré-requisitos |
+| Fase | Nome | Prioridade | EsforÃ§o | PrÃ©-requisitos |
 |------|------|------------|---------|----------------|
-| 1 | Segurança Crítica | 🔴 Crítica | Médio | Nenhum |
-| 2 | Refatoração Estrutural do Núcleo | 🟠 Alta | Alto | Fase 1 |
-| 3 | Performance e Escalabilidade | 🟡 Média | Médio | Fase 1 |
-| 4 | UX do Portal do Cliente | 🟡 Média | Médio | Fases 1–2 |
-| 5 | Funcionalidades Novas (Portal) | 🟢 Baixa | Alto | Fases 2–4 |
-| 6 | Segurança Avançada e Auditoria | 🟡 Média | Médio | Fases 1–2 |
-| 7 | Testabilidade e Manutenibilidade | 🟡 Média | Alto | Fases 1–2 |
-| 8 | Integrações e Inteligência | 🟢 Baixa | Alto | Fases 2–5 |
+| 1 | SeguranÃ§a CrÃ­tica | ðŸ”´ CrÃ­tica | MÃ©dio | Nenhum |
+| 2 | RefatoraÃ§Ã£o Estrutural do NÃºcleo | ðŸŸ  Alta | Alto | Fase 1 |
+| 3 | Performance e Escalabilidade | ðŸŸ¡ MÃ©dia | MÃ©dio | Fase 1 |
+| 4 | UX do Portal do Cliente | ðŸŸ¡ MÃ©dia | MÃ©dio | Fases 1â€“2 |
+| 5 | Funcionalidades Novas (Portal) | ðŸŸ¢ Baixa | Alto | Fases 2â€“4 |
+| 6 | SeguranÃ§a AvanÃ§ada e Auditoria | ðŸŸ¡ MÃ©dia | MÃ©dio | Fases 1â€“2 |
+| 7 | Testabilidade e Manutenibilidade | ðŸŸ¡ MÃ©dia | Alto | Fases 1â€“2 |
+| 8 | IntegraÃ§Ãµes e InteligÃªncia | ðŸŸ¢ Baixa | Alto | Fases 2â€“5 |
 
 ---
 
-## Fase 1 — Segurança Crítica
+## Fase 1 â€” SeguranÃ§a CrÃ­tica
 
-> **Prioridade:** 🔴 Crítica
-> **Esforço estimado:** 2–3 sprints
-> **Dependências:** Nenhuma — deve ser executada imediatamente
-> **Referência existente:** `docs/analysis/FINANCE_ADDON_ANALYSIS.md` (seção Segurança)
-> **Status:** ✅ Concluída em 2026-02-18 — ver `docs/security/AUDIT_FASE1.md`
+> **Prioridade:** ðŸ”´ CrÃ­tica
+> **EsforÃ§o estimado:** 2â€“3 sprints
+> **DependÃªncias:** Nenhuma â€” deve ser executada imediatamente
+> **ReferÃªncia existente:** `docs/analysis/FINANCE_ADDON_ANALYSIS.md` (seÃ§Ã£o SeguranÃ§a)
+> **Status:** âœ… ConcluÃ­da em 2026-02-18 â€” ver `docs/security/AUDIT_FASE1.md`
 
 ### Objetivo
 
-Eliminar todas as vulnerabilidades de segurança conhecidas, com foco em SQL Injection e validação de entrada.
+Eliminar todas as vulnerabilidades de seguranÃ§a conhecidas, com foco em SQL Injection e validaÃ§Ã£o de entrada.
 
-### 1.1 — Correção de SQL Injection no Finance Add-on
+### 1.1 â€” CorreÃ§Ã£o de SQL Injection no Finance Add-on
 
 **Problema:** Existem 10+ queries diretas sem `$wpdb->prepare()` em `desi-pet-shower-finance-addon.php`, incluindo `ALTER TABLE`, `UPDATE`, `CREATE INDEX` e `DROP TABLE`.
 
-**Ação:**
+**AÃ§Ã£o:**
 - [x] Auditar todas as queries em `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php`
-- [x] Substituir queries diretas por `$wpdb->prepare()` onde recebem dados variáveis
-- [x] Para queries DDL (ALTER, CREATE INDEX) que usam nomes de tabela construídos a partir de `$wpdb->prefix`, validar que o prefixo vem exclusivamente de `$wpdb->prefix` (constante do WP, não de entrada do usuário)
+- [x] Substituir queries diretas por `$wpdb->prepare()` onde recebem dados variÃ¡veis
+- [x] Para queries DDL (ALTER, CREATE INDEX) que usam nomes de tabela construÃ­dos a partir de `$wpdb->prefix`, validar que o prefixo vem exclusivamente de `$wpdb->prefix` (constante do WP, nÃ£o de entrada do usuÃ¡rio)
 - [x] Auditar `includes/class-dps-finance-api.php` e `includes/class-dps-finance-rest.php` para queries adicionais
-- [x] Auditar `includes/class-dps-finance-revenue-query.php` para padrões similares
-- [x] Adicionar `sanitize_text_field()`, `absint()` e `sanitize_key()` em todas as entradas do usuário
+- [x] Auditar `includes/class-dps-finance-revenue-query.php` para padrÃµes similares
+- [x] Adicionar `sanitize_text_field()`, `absint()` e `sanitize_key()` em todas as entradas do usuÃ¡rio
 
-**Validação:**
+**ValidaÃ§Ã£o:**
 - `php -l` em todos os arquivos alterados
-- Teste manual: criar transação via admin, verificar dados no banco
-- Grep por `$wpdb->query(` sem `prepare` em todo o repositório
+- Teste manual: criar transaÃ§Ã£o via admin, verificar dados no banco
+- Grep por `$wpdb->query(` sem `prepare` em todo o repositÃ³rio
 
-### 1.2 — Auditoria de Segurança Completa em Todos os Add-ons
+### 1.2 â€” Auditoria de SeguranÃ§a Completa em Todos os Add-ons
 
-**Ação:**
-- [x] Executar grep global por padrões vulneráveis: `$wpdb->query(`, `$_GET[`, `$_POST[` sem sanitização
-- [x] Verificar presença de nonce em todos os handlers AJAX (`wp_verify_nonce`)
+**AÃ§Ã£o:**
+- [x] Executar grep global por padrÃµes vulnerÃ¡veis: `$wpdb->query(`, `$_GET[`, `$_POST[` sem sanitizaÃ§Ã£o
+- [x] Verificar presenÃ§a de nonce em todos os handlers AJAX (`wp_verify_nonce`)
 - [x] Verificar capability checks em todos os endpoints admin
-- [x] Revisar escape de saída HTML (`esc_html`, `esc_attr`, `wp_kses`)
+- [x] Revisar escape de saÃ­da HTML (`esc_html`, `esc_attr`, `wp_kses`)
 - [x] Documentar achados em `docs/security/AUDIT_FASE1.md`
 
-### 1.3 — Revisão de Capabilities
+### 1.3 â€” RevisÃ£o de Capabilities
 
-**Ação:**
+**AÃ§Ã£o:**
 - [x] Mapear todas as capabilities utilizadas no sistema
-- [x] Verificar aderência ao Princípio do Menor Privilégio
+- [x] Verificar aderÃªncia ao PrincÃ­pio do Menor PrivilÃ©gio
 - [x] Documentar capabilities por add-on em `ANALYSIS.md`
 
-### Entregáveis
+### EntregÃ¡veis
 
-- ✅ Zero queries SQL sem `prepare()` onde há entrada de usuário
-- ✅ Nonce verificado em 100% dos handlers AJAX/REST
-- ✅ Documento de auditoria `docs/security/AUDIT_FASE1.md`
-- ✅ Atualização do `CHANGELOG.md` na seção Security
-- ✅ Capabilities mapeadas e documentadas em `ANALYSIS.md`
+- âœ… Zero queries SQL sem `prepare()` onde hÃ¡ entrada de usuÃ¡rio
+- âœ… Nonce verificado em 100% dos handlers AJAX/REST
+- âœ… Documento de auditoria `docs/security/AUDIT_FASE1.md`
+- âœ… AtualizaÃ§Ã£o do `CHANGELOG.md` na seÃ§Ã£o Security
+- âœ… Capabilities mapeadas e documentadas em `ANALYSIS.md`
 
 ---
 
-## Fase 2 — Refatoração Estrutural do Núcleo
+## Fase 2 â€” RefatoraÃ§Ã£o Estrutural do NÃºcleo
 
-> **Prioridade:** 🟠 Alta
-> **Esforço estimado:** 3–5 sprints
-> **Dependências:** Fase 1 concluída
-> **Referência existente:** `docs/refactoring/FRONTEND_ADDON_PHASED_ROADMAP.md`, `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`
+> **Prioridade:** ðŸŸ  Alta
+> **EsforÃ§o estimado:** 3â€“5 sprints
+> **DependÃªncias:** Fase 1 concluÃ­da
+> **ReferÃªncia existente:** `docs/refactoring/FRONTEND_ADDON_PHASED_ROADMAP.md`, `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`
 
 ### Objetivo
 
-Reduzir a complexidade do código-fonte, melhorar a manutenibilidade e estabelecer padrões consistentes para todos os add-ons.
+Reduzir a complexidade do cÃ³digo-fonte, melhorar a manutenibilidade e estabelecer padrÃµes consistentes para todos os add-ons.
 
-### 2.1 — Decomposição de `class-dps-base-frontend.php`
+### 2.1 â€” DecomposiÃ§Ã£o de `class-dps-base-frontend.php`
 
-**Problema:** Arquivo com 5.500+ linhas misturando renderização, validação, lógica de negócio e CRUD.
+**Problema:** Arquivo com 5.500+ linhas misturando renderizaÃ§Ã£o, validaÃ§Ã£o, lÃ³gica de negÃ³cio e CRUD.
 
-**Ação:**
-- [x] Mapear todas as responsabilidades do arquivo (métodos agrupados por função)
-- [x] Extrair classe `DPS_Appointment_Handler` — lógica de agendamento (810 linhas)
-- [x] Extrair classe `DPS_Client_Handler` — CRUD de clientes (184 linhas)
-- [x] Extrair classe `DPS_Pet_Handler` — CRUD de pets (337 linhas)
-- [x] Extrair classe `DPS_Client_Page_Renderer` — página de detalhes do cliente (1.506 linhas, 23 métodos)
-- [x] Extrair classe `DPS_Breed_Registry` — dataset de raças por espécie (201 linhas)
-- [x] Extrair classe `DPS_History_Section_Renderer` — seção de histórico de atendimentos (481 linhas)
-- [x] Extrair classe `DPS_Appointments_Section_Renderer` — seção de agendamentos com formulário e listagem (926 linhas)
-- [x] Extrair classe `DPS_Clients_Section_Renderer` — seção de clientes com filtros e estatísticas (270 linhas)
-- [x] Extrair classe `DPS_Pets_Section_Renderer` — seção de pets com filtros e paginação (345 linhas)
+**AÃ§Ã£o:**
+- [x] Mapear todas as responsabilidades do arquivo (mÃ©todos agrupados por funÃ§Ã£o)
+- [x] Extrair classe `DPS_Appointment_Handler` â€” lÃ³gica de agendamento (810 linhas)
+- [x] Extrair classe `DPS_Client_Handler` â€” CRUD de clientes (184 linhas)
+- [x] Extrair classe `DPS_Pet_Handler` â€” CRUD de pets (337 linhas)
+- [x] Extrair classe `DPS_Client_Page_Renderer` â€” pÃ¡gina de detalhes do cliente (1.506 linhas, 23 mÃ©todos)
+- [x] Extrair classe `DPS_Breed_Registry` â€” dataset de raÃ§as por espÃ©cie (201 linhas)
+- [x] Extrair classe `DPS_History_Section_Renderer` â€” seÃ§Ã£o de histÃ³rico de atendimentos (481 linhas)
+- [x] Extrair classe `DPS_Appointments_Section_Renderer` â€” seÃ§Ã£o de agendamentos com formulÃ¡rio e listagem (926 linhas)
+- [x] Extrair classe `DPS_Clients_Section_Renderer` â€” seÃ§Ã£o de clientes com filtros e estatÃ­sticas (270 linhas)
+- [x] Extrair classe `DPS_Pets_Section_Renderer` â€” seÃ§Ã£o de pets com filtros e paginaÃ§Ã£o (345 linhas)
 - [x] Manter `class-dps-base-frontend.php` como orquestrador (fachada) que delega para as novas classes
 - [x] Garantir que hooks existentes continuem funcionando (backward compatibility)
 - [x] Atualizar `ANALYSIS.md` com a nova estrutura de classes
-- [x] Monólito reduzido de 5.986 para 1.581 linhas (–74%)
+- [x] MonÃ³lito reduzido de 5.986 para 1.581 linhas (â€“74%)
 
-**Princípios (SRP):**
-- Cada classe com responsabilidade única
-- Métodos com no máximo 50–80 linhas
-- Dependências injetadas via construtor quando possível
+**PrincÃ­pios (SRP):**
+- Cada classe com responsabilidade Ãºnica
+- MÃ©todos com no mÃ¡ximo 50â€“80 linhas
+- DependÃªncias injetadas via construtor quando possÃ­vel
 
-**Validação:**
+**ValidaÃ§Ã£o:**
 - `php -l` em todos os arquivos alterados
 - Teste manual dos fluxos de agendamento, cadastro de cliente e pet
-- Verificar que nenhum hook público mudou de assinatura
+- Verificar que nenhum hook pÃºblico mudou de assinatura
 
-### 2.2 — Padronização da Estrutura de Add-ons
+### 2.2 â€” PadronizaÃ§Ã£o da Estrutura de Add-ons
 
 **Problema:** Add-ons com estruturas inconsistentes, headers duplicados.
 
-**Ação:**
-- [x] Definir template padrão de add-on (arquivo principal, `includes/`, `assets/`, headers) — documentado em ANALYSIS.md
-- [x] Corrigir headers duplicados nos add-ons identificados (Finance, Subscription) — auditados: Finance tem header único; Subscription já separou wrapper/implementação com nota explícita
-- [x] Padronizar padrão de inicialização: text domain em `init` prioridade 1, classes em `init` prioridade 5 — auditado, todos conformes
-- [x] Garantir que todos usem `admin_menu` com submenu de `desi-pet-shower` — auditado: prioridades variam intencionalmente (18-26) para ordenação de menus
-- [x] Documentar template padrão em `ANALYSIS.md` — incluindo compliance status e helpers disponíveis
+**AÃ§Ã£o:**
+- [x] Definir template padrÃ£o de add-on (arquivo principal, `includes/`, `assets/`, headers) â€” documentado em ANALYSIS.md
+- [x] Corrigir headers duplicados nos add-ons identificados (Finance, Subscription) â€” auditados: Finance tem header Ãºnico; Subscription jÃ¡ separou wrapper/implementaÃ§Ã£o com nota explÃ­cita
+- [x] Padronizar padrÃ£o de inicializaÃ§Ã£o: text domain em `init` prioridade 1, classes em `init` prioridade 5 â€” auditado, todos conformes
+- [x] Garantir que todos usem `admin_menu` com submenu de `desi-pet-shower` â€” auditado: prioridades variam intencionalmente (18-26) para ordenaÃ§Ã£o de menus
+- [x] Documentar template padrÃ£o em `ANALYSIS.md` â€” incluindo compliance status e helpers disponÃ­veis
 
-### 2.3 — Centralização de Funções Duplicadas
+### 2.3 â€” CentralizaÃ§Ã£o de FunÃ§Ãµes Duplicadas
 
-**Problema:** Funções duplicadas entre add-ons (formatação de moeda, telefone, URLs, etc.).
+**Problema:** FunÃ§Ãµes duplicadas entre add-ons (formataÃ§Ã£o de moeda, telefone, URLs, etc.).
 
-**Ação:**
-- [x] Inventariar funções duplicadas com grep global — 16 instâncias de `number_format` identificadas
+**AÃ§Ã£o:**
+- [x] Inventariar funÃ§Ãµes duplicadas com grep global â€” 16 instÃ¢ncias de `number_format` identificadas
 - [x] Verificar uso dos helpers globais existentes (`DPS_Phone_Helper`, `DPS_Money_Helper`, `DPS_URL_Builder`, `DPS_Query_Helper`, `DPS_Request_Validator`)
-- [x] Migrar add-ons que ainda usam implementações locais para os helpers globais — 10 arquivos migrados para `DPS_Money_Helper::format_currency()`
-- [x] Remover código duplicado após migração — fallbacks `class_exists()` removidos
+- [x] Migrar add-ons que ainda usam implementaÃ§Ãµes locais para os helpers globais â€” 10 arquivos migrados para `DPS_Money_Helper::format_currency()`
+- [x] Remover cÃ³digo duplicado apÃ³s migraÃ§Ã£o â€” fallbacks `class_exists()` removidos
 - [ ] Atualizar `docs/FUNCTIONS_REFERENCE.md` se novos helpers forem criados
 
-### 2.4 — Sistema de Templates
+### 2.4 â€” Sistema de Templates
 
-**Status:** ✅ Implementado em 2026-02-19
+**Status:** âœ… Implementado em 2026-02-19
 
-**Ação:**
-- [x] Avaliar o `DPS_Template_Engine` existente no Frontend Add-on — portado como `DPS_Base_Template_Engine`
-- [x] Definir padrão de templates para renderização de formulários e listagens — render(), exists(), theme override em dps-templates/
-- [x] Separar HTML em arquivos de template (`templates/`) com lógica PHP mínima — `templates/components/client-summary-cards.php`
-- [x] Implementar progressivamente nos componentes mais críticos — `DPS_Client_Page_Renderer::render_client_summary_cards()` usa template com fallback inline
-- [ ] Expandir para mais componentes (formulário de agendamento, listagem de clientes) — futuro
+**AÃ§Ã£o:**
+- [x] Avaliar o `DPS_Template_Engine` existente no Frontend Add-on â€” portado como `DPS_Base_Template_Engine`
+- [x] Definir padrÃ£o de templates para renderizaÃ§Ã£o de formulÃ¡rios e listagens â€” render(), exists(), theme override em dps-templates/
+- [x] Separar HTML em arquivos de template (`templates/`) com lÃ³gica PHP mÃ­nima â€” `templates/components/client-summary-cards.php`
+- [x] Implementar progressivamente nos componentes mais crÃ­ticos â€” `DPS_Client_Page_Renderer::render_client_summary_cards()` usa template com fallback inline
+- [ ] Expandir para mais componentes (formulÃ¡rio de agendamento, listagem de clientes) â€” futuro
 
-### 2.5 — Documentação de Contratos de Metadados
+### 2.5 â€” DocumentaÃ§Ã£o de Contratos de Metadados
 
-**Ação:**
+**AÃ§Ã£o:**
 - [x] Documentar todos os meta_keys usados por CPT (`dps_cliente`, `dps_pet`, `dps_agendamento`)
 - [x] Documentar formatos esperados (ex: `appointment_date` usa `Y-m-d`)
-- [x] Documentar relações entre metadados (ex: `appointment_client_id` → `dps_cliente` post_id)
-- [x] Adicionar seção específica em `ANALYSIS.md`
+- [x] Documentar relaÃ§Ãµes entre metadados (ex: `appointment_client_id` â†’ `dps_cliente` post_id)
+- [x] Adicionar seÃ§Ã£o especÃ­fica em `ANALYSIS.md`
 
-### Entregáveis
+### EntregÃ¡veis
 
-- ✅ `class-dps-base-frontend.php` reduzido para < 1.000 linhas (fachada)
-- ✅ 5+ classes extraídas com responsabilidade única
-- ✅ Template padrão de add-on documentado
-- ✅ Zero funções duplicadas entre add-ons
-- ✅ Contratos de metadados documentados
+- âœ… `class-dps-base-frontend.php` reduzido para < 1.000 linhas (fachada)
+- âœ… 5+ classes extraÃ­das com responsabilidade Ãºnica
+- âœ… Template padrÃ£o de add-on documentado
+- âœ… Zero funÃ§Ãµes duplicadas entre add-ons
+- âœ… Contratos de metadados documentados
 
 ---
 
-## Fase 3 — Performance e Escalabilidade
+## Fase 3 â€” Performance e Escalabilidade
 
-> **Prioridade:** 🟡 Média
-> **Esforço estimado:** 2–3 sprints
-> **Dependências:** Fase 1 concluída
-> **Referência existente:** `docs/analysis/ADDONS_DETAILED_ANALYSIS.md` (seção Performance)
+> **Prioridade:** ðŸŸ¡ MÃ©dia
+> **EsforÃ§o estimado:** 2â€“3 sprints
+> **DependÃªncias:** Fase 1 concluÃ­da
+> **ReferÃªncia existente:** `docs/analysis/ADDONS_DETAILED_ANALYSIS.md` (seÃ§Ã£o Performance)
 
 ### Objetivo
 
 Otimizar consultas, carregamento de assets e preparar o sistema para volumes maiores de dados.
 
-### 3.1 — Otimização de Criação de Tabelas
+### 3.1 â€” OtimizaÃ§Ã£o de CriaÃ§Ã£o de Tabelas
 
-**Problema:** Verificação de `dbDelta()` acontecendo desnecessariamente.
+**Problema:** VerificaÃ§Ã£o de `dbDelta()` acontecendo desnecessariamente.
 
-**Ação:**
-- [x] Verificar que todos os add-ons usam version check antes de `dbDelta()` — 10/12 OK, 2 corrigidos (AI Analytics, AI Conversations)
-- [x] Garantir que `dbDelta()` só executa no activation hook ou quando a versão do banco for menor que a do plugin
-- [x] Documentar padrão recomendado em `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`
+**AÃ§Ã£o:**
+- [x] Verificar que todos os add-ons usam version check antes de `dbDelta()` â€” 10/12 OK, 2 corrigidos (AI Analytics, AI Conversations)
+- [x] Garantir que `dbDelta()` sÃ³ executa no activation hook ou quando a versÃ£o do banco for menor que a do plugin
+- [x] Documentar padrÃ£o recomendado em `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`
 
-**Nota:** A análise atual mostra que o Finance Add-on já usa version check ✅. Logger, Communications, Groomer Tokens, Portal Tokens, Loyalty já tinham version check ✅. AI Analytics e AI Conversations corrigidos em 2026-02-18.
+**Nota:** A anÃ¡lise atual mostra que o Finance Add-on jÃ¡ usa version check âœ…. Logger, Communications, Groomer Tokens, Portal Tokens, Loyalty jÃ¡ tinham version check âœ…. AI Analytics e AI Conversations corrigidos em 2026-02-18.
 
-### 3.2 — Paginação em Listagens Grandes
+### 3.2 â€” PaginaÃ§Ã£o em Listagens Grandes
 
-**Ação:**
-- [x] Identificar todas as listagens admin que carregam dados sem limite — Finance addon tem paginação (20/page), mas dropdown de clientes e summary queries não tinham limites
-- [x] Implementar paginação server-side nas listagens de transações financeiras — já existente (20/page)
+**AÃ§Ã£o:**
+- [x] Identificar todas as listagens admin que carregam dados sem limite â€” Finance addon tem paginaÃ§Ã£o (20/page), mas dropdown de clientes e summary queries nÃ£o tinham limites
+- [x] Implementar paginaÃ§Ã£o server-side nas listagens de transaÃ§Ãµes financeiras â€” jÃ¡ existente (20/page)
 - [x] Limitar dropdown de clientes: `no_found_rows => true`, disable meta/term cache
 - [x] Limitar summary query: LIMIT 5000 safety cap quando filtro de data aplicado
 - [x] Limitar busca de clientes: LIMIT 200 resultados
 - [x] Usar `LIMIT`/`OFFSET` com `$wpdb->prepare()`
-- [x] Adicionar controles de paginação na UI admin — `render_pagination()` renderiza: info de registros, botões anterior/próximo, números de página com ellipsis, estados disabled. CSS em `finance-addon.css:839+`
+- [x] Adicionar controles de paginaÃ§Ã£o na UI admin â€” `render_pagination()` renderiza: info de registros, botÃµes anterior/prÃ³ximo, nÃºmeros de pÃ¡gina com ellipsis, estados disabled. CSS em `finance-addon.css:839+`
 
-### 3.3 — Otimização de Queries SQL
+### 3.3 â€” OtimizaÃ§Ã£o de Queries SQL
 
-**Ação:**
-- [x] Revisar queries que fazem `SELECT *` e limitar aos campos necessários — auditadas: Finance REST usa `SELECT *` mas precisa de todas as colunas; Subscription queries de delete migradas para `fields => 'ids'`
-- [x] Usar `'fields' => 'ids'` e `'no_found_rows' => true` em `WP_Query` onde aplicável — `DPS_Query_Helper` otimizado com `no_found_rows => true` por padrão; Subscription add-on otimizado com `fields => 'ids'` + `no_found_rows => true` em queries de delete e contagem
-- [x] Verificar índices nas tabelas customizadas (`dps_transacoes`, `dps_parcelas`) — já possuem índices adequados (v1.3.1): `idx_finance_date_status(data,status)`, `idx_finance_categoria`, `cliente_id`, `agendamento_id`, `plano_id`
-- [x] Eliminar queries N+1 (loops que executam uma query por item) — `query_appointments_for_week()` corrigido
+**AÃ§Ã£o:**
+- [x] Revisar queries que fazem `SELECT *` e limitar aos campos necessÃ¡rios â€” auditadas: Finance REST usa `SELECT *` mas precisa de todas as colunas; Subscription queries de delete migradas para `fields => 'ids'`
+- [x] Usar `'fields' => 'ids'` e `'no_found_rows' => true` em `WP_Query` onde aplicÃ¡vel â€” `DPS_Query_Helper` otimizado com `no_found_rows => true` por padrÃ£o; Subscription add-on otimizado com `fields => 'ids'` + `no_found_rows => true` em queries de delete e contagem
+- [x] Verificar Ã­ndices nas tabelas customizadas (`dps_transacoes`, `dps_parcelas`) â€” jÃ¡ possuem Ã­ndices adequados (v1.3.1): `idx_finance_date_status(data,status)`, `idx_finance_categoria`, `cliente_id`, `agendamento_id`, `plano_id`
+- [x] Eliminar queries N+1 (loops que executam uma query por item) â€” `query_appointments_for_week()` corrigido
 
-### 3.4 — Otimização de Assets (CSS/JS)
+### 3.4 â€” OtimizaÃ§Ã£o de Assets (CSS/JS)
 
-**Ação:**
-- [x] Auditar carregamento de CSS/JS em todas as páginas admin — 17 add-ons auditados
-- [x] Garantir que assets são carregados apenas nas telas relevantes (`admin_enqueue_scripts` com `$hook_suffix`) — Stock add-on corrigido (carregamento global → condicional)
-- [x] Verificar se arquivos JS/CSS estão sendo carregados no frontend sem necessidade — Stock add-on corrigido
-- [ ] Considerar minificação manual dos arquivos CSS/JS mais pesados (sem build process obrigatório)
+**AÃ§Ã£o:**
+- [x] Auditar carregamento de CSS/JS em todas as pÃ¡ginas admin â€” 17 add-ons auditados
+- [x] Garantir que assets sÃ£o carregados apenas nas telas relevantes (`admin_enqueue_scripts` com `$hook_suffix`) â€” Stock add-on corrigido (carregamento global â†’ condicional)
+- [x] Verificar se arquivos JS/CSS estÃ£o sendo carregados no frontend sem necessidade â€” Stock add-on corrigido
+- [ ] Considerar minificaÃ§Ã£o manual dos arquivos CSS/JS mais pesados (sem build process obrigatÃ³rio)
 
-**Nota:** O AGENTS.md proíbe cache (transients, object cache, etc.). Todas as otimizações devem ser feitas via queries eficientes e carregamento condicional, não via cache.
+**Nota:** O AGENTS.md proÃ­be cache (transients, object cache, etc.). Todas as otimizaÃ§Ãµes devem ser feitas via queries eficientes e carregamento condicional, nÃ£o via cache.
 
-### 3.5 — Lazy Loading
+### 3.5 â€” Lazy Loading
 
-**Ação:**
+**AÃ§Ã£o:**
 - [x] Adicionar `loading="lazy"` em imagens renderizadas pelo sistema (galeria de pets, fotos)
-- [ ] Implementar carregamento sob demanda para seções pesadas (histórico completo, transações)
+- [ ] Implementar carregamento sob demanda para seÃ§Ãµes pesadas (histÃ³rico completo, transaÃ§Ãµes)
 
-### Entregáveis
+### EntregÃ¡veis
 
-- ✅ Todas as listagens com paginação server-side
-- ✅ Zero queries N+1 nas telas críticas
-- ✅ Assets carregados condicionalmente
-- ✅ `loading="lazy"` em todas as imagens do portal
+- âœ… Todas as listagens com paginaÃ§Ã£o server-side
+- âœ… Zero queries N+1 nas telas crÃ­ticas
+- âœ… Assets carregados condicionalmente
+- âœ… `loading="lazy"` em todas as imagens do portal
 
 ---
 
-## Fase 4 — UX do Portal do Cliente
+## Fase 4 â€” UX do Portal do Cliente
 
-> **Prioridade:** 🟡 Média
-> **Esforço estimado:** 3–4 sprints
-> **Dependências:** Fases 1 e 2 concluídas
-> **Referência existente:** `docs/analysis/CLIENT_PORTAL_ADDON_DEEP_ANALYSIS.md`, `docs/analysis/CLIENT_PORTAL_TABS_STRUCTURE.md`
+> **Prioridade:** ðŸŸ¡ MÃ©dia
+> **EsforÃ§o estimado:** 3â€“4 sprints
+> **DependÃªncias:** Fases 1 e 2 concluÃ­das
+> **ReferÃªncia existente:** `docs/analysis/CLIENT_PORTAL_ADDON_DEEP_ANALYSIS.md`, `docs/analysis/CLIENT_PORTAL_TABS_STRUCTURE.md`
 
 ### Objetivo
 
-Melhorar a experiência do usuário final no Portal do Cliente, tornando o fluxo mais intuitivo e informativo.
+Melhorar a experiÃªncia do usuÃ¡rio final no Portal do Cliente, tornando o fluxo mais intuitivo e informativo.
 
-### 4.1 — Indicador de Progresso no Fluxo de Agendamento
+### 4.1 â€” Indicador de Progresso no Fluxo de Agendamento
 
-**Problema:** O processo de agendamento é dividido em várias etapas sem indicação visual de progresso.
+**Problema:** O processo de agendamento Ã© dividido em vÃ¡rias etapas sem indicaÃ§Ã£o visual de progresso.
 
-**Ação:**
-- [x] Mapear todas as etapas do fluxo de agendamento (pedido de agendamento → data/período → detalhes → confirmação) — fluxo mapeado: modal com 3 etapas (Data/Pet → Detalhes → Revisão/Confirmar)
-- [x] Implementar componente de barra de progresso (`dps-progress-bar`) seguindo padrão M3 — círculos numerados com conectores, estados active/completed, labels por etapa
-- [x] Integrar com os formulários existentes (CSS + JS) — `createRequestModal()` refatorado para wizard multi-etapa com navegação next/prev
+**AÃ§Ã£o:**
+- [x] Mapear todas as etapas do fluxo de agendamento (pedido de agendamento â†’ data/perÃ­odo â†’ detalhes â†’ confirmaÃ§Ã£o) â€” fluxo mapeado: modal com 3 etapas (Data/Pet â†’ Detalhes â†’ RevisÃ£o/Confirmar)
+- [x] Implementar componente de barra de progresso (`dps-progress-bar`) seguindo padrÃ£o DPS Signature â€” cÃ­rculos numerados com conectores, estados active/completed, labels por etapa
+- [x] Integrar com os formulÃ¡rios existentes (CSS + JS) â€” `createRequestModal()` refatorado para wizard multi-etapa com navegaÃ§Ã£o next/prev
 - [x] Adicionar texto "Passo X de Y" para acessibilidade (`role="progressbar"`, `aria-valuenow`, `aria-valuemax`, `aria-live="polite"`)
-- [x] Seguir `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` — tokens M3 (cores, espaçamento, shapes, motion), responsive, `prefers-reduced-motion`
+- [x] Seguir `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` â€” tokens DPS Signature (cores, espaÃ§amento, shapes, motion), responsive, `prefers-reduced-motion`
 
-**Implementação:**
+**ImplementaÃ§Ã£o:**
 - CSS: `.dps-progress-bar` com `.dps-progress-bar__step`, `.dps-progress-bar__circle`, `.dps-progress-bar__connector`, `.dps-progress-bar__label`, `.dps-step-panel`, `.dps-review-summary`
-- JS: Funções `goToStep()`, `validateStep()`, `updateReviewSummary()` dentro de `createRequestModal()`
-- Etapa 3 mostra resumo completo (tipo, pet, data, período, observações) antes do envio
+- JS: FunÃ§Ãµes `goToStep()`, `validateStep()`, `updateReviewSummary()` dentro de `createRequestModal()`
+- Etapa 3 mostra resumo completo (tipo, pet, data, perÃ­odo, observaÃ§Ãµes) antes do envio
 
-### 4.2 — Validação em Tempo Real (Client-side)
+### 4.2 â€” ValidaÃ§Ã£o em Tempo Real (Client-side)
 
-**Ação:**
-- [x] Identificar todos os campos de formulário no portal do cliente
-- [x] Implementar validação JavaScript em tempo real para: e-mail, telefone, CEP, UF, campos obrigatórios, peso, data nascimento
-- [x] Mostrar mensagens inline de erro/sucesso abaixo de cada campo — `<span class="dps-field-error" role="alert">`
-- [x] Manter validação server-side como backup (nunca confiar apenas em client-side)
-- [x] Seguir padrão acessível: `aria-invalid`, `aria-describedby`, `aria-required`, `role="alert"` para mensagens de erro
-- [x] Adicionar CSS `.is-invalid`/`.is-valid` com cores M3 (error: `#ba1a1a`, success: `#1a7a3a`)
+**AÃ§Ã£o:**
+- [x] Identificar todos os campos de formulÃ¡rio no portal do cliente
+- [x] Implementar validaÃ§Ã£o JavaScript em tempo real para: e-mail, telefone, CEP, UF, campos obrigatÃ³rios, peso, data nascimento
+- [x] Mostrar mensagens inline de erro/sucesso abaixo de cada campo â€” `<span class="dps-field-error" role="alert">`
+- [x] Manter validaÃ§Ã£o server-side como backup (nunca confiar apenas em client-side)
+- [x] Seguir padrÃ£o acessÃ­vel: `aria-invalid`, `aria-describedby`, `aria-required`, `role="alert"` para mensagens de erro
+- [x] Adicionar CSS `.is-invalid`/`.is-valid` com cores DPS Signature (error: `#ba1a1a`, success: `#1a7a3a`)
 - [x] Adicionar `inputmode="numeric"` no CEP, `max` no campo de data e peso
 
-**Nota:** Validação de CPF não implementada pois o campo não existe nos formulários do portal.
+**Nota:** ValidaÃ§Ã£o de CPF nÃ£o implementada pois o campo nÃ£o existe nos formulÃ¡rios do portal.
 
-### 4.3 — Mensagens de Erro/Sucesso Aprimoradas
+### 4.3 â€” Mensagens de Erro/Sucesso Aprimoradas
 
-**Problema:** Mensagens de erro/sucesso podem não ser claras o suficiente.
+**Problema:** Mensagens de erro/sucesso podem nÃ£o ser claras o suficiente.
 
-**Ação:**
-- [x] Auditar todas as mensagens do portal (já mapeadas: `portal_msg` values em `client-portal.js`)
-- [x] Reescrever mensagens que não orientem ação (ex: "Erro" → "Algo Deu Errado — Tente novamente ou entre em contato pelo chat")
+**AÃ§Ã£o:**
+- [x] Auditar todas as mensagens do portal (jÃ¡ mapeadas: `portal_msg` values em `client-portal.js`)
+- [x] Reescrever mensagens que nÃ£o orientem aÃ§Ã£o (ex: "Erro" â†’ "Algo Deu Errado â€” Tente novamente ou entre em contato pelo chat")
 - [x] Adicionar 5 tipos de mensagem faltantes: `message_error`, `review_submitted`, `review_already`, `review_invalid`, `review_error`
-- [x] Usar toasts para feedback não-bloqueante (já implementado via `DPSToast`)
-- [x] Títulos descritivos em vez de genéricos: "Dados Salvos!" vs "Sucesso!"
+- [x] Usar toasts para feedback nÃ£o-bloqueante (jÃ¡ implementado via `DPSToast`)
+- [x] TÃ­tulos descritivos em vez de genÃ©ricos: "Dados Salvos!" vs "Sucesso!"
 
-### 4.4 — Histórico de Agendamentos Aprimorado
+### 4.4 â€” HistÃ³rico de Agendamentos Aprimorado
 
-**Problema:** O portal já exibe histórico de serviços, mas pode ser expandido.
+**Problema:** O portal jÃ¡ exibe histÃ³rico de serviÃ§os, mas pode ser expandido.
 
-**Ação:**
-- [x] Verificar a implementação atual de `DPS_Portal_Pet_History::get_pet_service_history()` — retorna serviços concluídos com date, time, services, professional, status, observations
-- [x] Adicionar filtros por período (últimos 30/60/90 dias) na visualização — barra de filtros com `aria-pressed` e filtragem client-side via `data-date`
-- [x] Diferenciar visualmente agendamentos futuros de passados — já existente: status badges com cores distintas (Concluído, Pago, Cancelado, Pendente, Em Andamento)
-- [x] Mostrar status com cores: agendado (azul), finalizado (verde), cancelado (vermelho) — já implementado via classes `dps-status-badge--*`
-- [x] Implementar paginação AJAX para históricos longos (padrão load-more já existente) — `handleLoadMorePetHistory()` com offset/limit
+**AÃ§Ã£o:**
+- [x] Verificar a implementaÃ§Ã£o atual de `DPS_Portal_Pet_History::get_pet_service_history()` â€” retorna serviÃ§os concluÃ­dos com date, time, services, professional, status, observations
+- [x] Adicionar filtros por perÃ­odo (Ãºltimos 30/60/90 dias) na visualizaÃ§Ã£o â€” barra de filtros com `aria-pressed` e filtragem client-side via `data-date`
+- [x] Diferenciar visualmente agendamentos futuros de passados â€” jÃ¡ existente: status badges com cores distintas (ConcluÃ­do, Pago, Cancelado, Pendente, Em Andamento)
+- [x] Mostrar status com cores: agendado (azul), finalizado (verde), cancelado (vermelho) â€” jÃ¡ implementado via classes `dps-status-badge--*`
+- [x] Implementar paginaÃ§Ã£o AJAX para histÃ³ricos longos (padrÃ£o load-more jÃ¡ existente) â€” `handleLoadMorePetHistory()` com offset/limit
 
-### 4.5 — Informações Detalhadas do Pet
+### 4.5 â€” InformaÃ§Ãµes Detalhadas do Pet
 
-**Ação:**
-- [x] Verificar quais metadados de pet já são armazenados (`dps_pet` CPT) — 19 meta keys documentadas em ANALYSIS.md
-- [x] Exibir raça, idade/data de nascimento, porte no card do pet — porte (📏), peso (⚖️), sexo (♂️/♀️), idade (🎂) calculada de pet_birth
-- [x] Considerar campo para informações de vacinas (se aplicável ao negócio) — `pet_vaccinations` existe mas é texto livre; exibição no portal seria confusa sem estruturação
-- [x] Adicionar ícones por espécie (já existente na galeria — reutilizar) — espécie já exibida no card com raça
+**AÃ§Ã£o:**
+- [x] Verificar quais metadados de pet jÃ¡ sÃ£o armazenados (`dps_pet` CPT) â€” 19 meta keys documentadas em ANALYSIS.md
+- [x] Exibir raÃ§a, idade/data de nascimento, porte no card do pet â€” porte (ðŸ“), peso (âš–ï¸), sexo (â™‚ï¸/â™€ï¸), idade (ðŸŽ‚) calculada de pet_birth
+- [x] Considerar campo para informaÃ§Ãµes de vacinas (se aplicÃ¡vel ao negÃ³cio) â€” `pet_vaccinations` existe mas Ã© texto livre; exibiÃ§Ã£o no portal seria confusa sem estruturaÃ§Ã£o
+- [x] Adicionar Ã­cones por espÃ©cie (jÃ¡ existente na galeria â€” reutilizar) â€” espÃ©cie jÃ¡ exibida no card com raÃ§a
 
-### 4.6 — Tokens de Acesso Permanentes
+### 4.6 â€” Tokens de Acesso Permanentes
 
-**Problema:** O cliente precisa de novo link a cada acesso. Tokens permanentes estão em desenvolvimento.
+**Problema:** O cliente precisa de novo link a cada acesso. Tokens permanentes estÃ£o em desenvolvimento.
 
-**Ação:**
-- [x] Avaliar estado atual da implementação de tokens permanentes — já implementado: tipo 'permanent' no token manager com 10 anos de expiração, métodos `get_active_permanent_tokens()` e `revoke_tokens()`, tabela `dps_portal_tokens` com campos type/used_at/revoked_at
-- [x] Implementar opção "Manter acesso neste dispositivo" com consentimento explícito — checkbox no formulário de email em portal-access.php
-- [x] Armazenar token permanente em cookie seguro (`HttpOnly`, `Secure`, `SameSite=Strict`) — cookie `dps_portal_remember` com 90 dias de validade
-- [x] Auto-autenticação via `handle_remember_cookie()` no carregamento do portal
+**AÃ§Ã£o:**
+- [x] Avaliar estado atual da implementaÃ§Ã£o de tokens permanentes â€” jÃ¡ implementado: tipo 'permanent' no token manager com 10 anos de expiraÃ§Ã£o, mÃ©todos `get_active_permanent_tokens()` e `revoke_tokens()`, tabela `dps_portal_tokens` com campos type/used_at/revoked_at
+- [x] Implementar opÃ§Ã£o "Manter acesso neste dispositivo" com consentimento explÃ­cito â€” checkbox no formulÃ¡rio de email em portal-access.php
+- [x] Armazenar token permanente em cookie seguro (`HttpOnly`, `Secure`, `SameSite=Strict`) â€” cookie `dps_portal_remember` com 90 dias de validade
+- [x] Auto-autenticaÃ§Ã£o via `handle_remember_cookie()` no carregamento do portal
 - [x] Cookie removido no logout via `DPS_Portal_Session_Manager::logout()`
-- [x] Manter a opção de magic link como padrão — checkbox desmarcado por padrão
-- [ ] Implementar expiração configurável (30/60/90 dias) via configurações admin — futuro
+- [x] Manter a opÃ§Ã£o de magic link como padrÃ£o â€” checkbox desmarcado por padrÃ£o
+- [ ] Implementar expiraÃ§Ã£o configurÃ¡vel (30/60/90 dias) via configuraÃ§Ãµes admin â€” futuro
 
-**Nota:** Implementação completa: checkbox no form → flag remember_me no AJAX → parâmetro dps_remember na URL → token permanente + cookie → auto-auth → logout limpa cookie.
+**Nota:** ImplementaÃ§Ã£o completa: checkbox no form â†’ flag remember_me no AJAX â†’ parÃ¢metro dps_remember na URL â†’ token permanente + cookie â†’ auto-auth â†’ logout limpa cookie.
 
-### Entregáveis
+### EntregÃ¡veis
 
-- ✅ Barra de progresso funcional no fluxo de agendamento
-- ✅ Validação em tempo real em todos os formulários do portal
-- ✅ Mensagens de erro/sucesso reescritas e acessíveis
-- ✅ Histórico de agendamentos com filtros e paginação
-- ✅ Informações detalhadas do pet visíveis no portal
-- ✅ Registros visuais em `docs/screenshots/YYYY-MM-DD/`
+- âœ… Barra de progresso funcional no fluxo de agendamento
+- âœ… ValidaÃ§Ã£o em tempo real em todos os formulÃ¡rios do portal
+- âœ… Mensagens de erro/sucesso reescritas e acessÃ­veis
+- âœ… HistÃ³rico de agendamentos com filtros e paginaÃ§Ã£o
+- âœ… InformaÃ§Ãµes detalhadas do pet visÃ­veis no portal
+- âœ… Registros visuais em `docs/screenshots/YYYY-MM-DD/`
 
 ---
 
-## Fase 5 — Funcionalidades Novas (Portal)
+## Fase 5 â€” Funcionalidades Novas (Portal)
 
-> **Prioridade:** 🟢 Baixa
-> **Esforço estimado:** 4–6 sprints
-> **Dependências:** Fases 2, 3 e 4 concluídas
+> **Prioridade:** ðŸŸ¢ Baixa
+> **EsforÃ§o estimado:** 4â€“6 sprints
+> **DependÃªncias:** Fases 2, 3 e 4 concluÃ­das
 
 ### Objetivo
 
 Adicionar funcionalidades que criam valor para o cliente final e diferenciam o produto.
 
-### 5.1 — Galeria de Fotos do Pet (Expansão)
+### 5.1 â€” Galeria de Fotos do Pet (ExpansÃ£o)
 
-**Status atual:** Implementado. Multi-fotos via meta `pet_photos` com lightbox navegável.
+**Status atual:** Implementado. Multi-fotos via meta `pet_photos` com lightbox navegÃ¡vel.
 
-**Ação:**
-- [x] Expandir para múltiplas fotos por pet (meta `pet_photos` como array, fallback `pet_photo_id`)
+**AÃ§Ã£o:**
+- [x] Expandir para mÃºltiplas fotos por pet (meta `pet_photos` como array, fallback `pet_photo_id`)
 - [ ] Integrar com o add-on Groomers para fotos antes/depois
-- [x] Implementar upload de fotos pelo admin com associação ao pet
-- [x] Usar lightbox já existente (com navegação prev/next, `data-gallery`, ArrowLeft/Right)
+- [x] Implementar upload de fotos pelo admin com associaÃ§Ã£o ao pet
+- [x] Usar lightbox jÃ¡ existente (com navegaÃ§Ã£o prev/next, `data-gallery`, ArrowLeft/Right)
 - [x] Implementar lazy loading nas imagens da galeria
 
-### 5.2 — Notificações Personalizadas
+### 5.2 â€” NotificaÃ§Ãµes Personalizadas
 
-**Status atual:** Implementado. 4 toggles de notificação no portal.
+**Status atual:** Implementado. 4 toggles de notificaÃ§Ã£o no portal.
 
-**Ação:**
-- [x] Criar tela de preferências de notificação no portal do cliente
-- [x] Opções: lembrete de agendamento, pagamentos, promoções, atualizações do pet
-- [x] Armazenar preferências como meta do CPT `dps_cliente`
-- [ ] Integrar com o add-on Communications (notificações por e-mail/WhatsApp)
+**AÃ§Ã£o:**
+- [x] Criar tela de preferÃªncias de notificaÃ§Ã£o no portal do cliente
+- [x] OpÃ§Ãµes: lembrete de agendamento, pagamentos, promoÃ§Ãµes, atualizaÃ§Ãµes do pet
+- [x] Armazenar preferÃªncias como meta do CPT `dps_cliente`
+- [ ] Integrar com o add-on Communications (notificaÃ§Ãµes por e-mail/WhatsApp)
 - [ ] Integrar com o add-on Push (Telegram/e-mail para admin)
 
-### 5.3 — Gerenciamento de Múltiplos Pets
+### 5.3 â€” Gerenciamento de MÃºltiplos Pets
 
-**Status atual:** O sistema já suporta múltiplos pets por cliente e agendamento multi-pet. Seletor rápido implementado.
+**Status atual:** O sistema jÃ¡ suporta mÃºltiplos pets por cliente e agendamento multi-pet. Seletor rÃ¡pido implementado.
 
-**Ação:**
-- [x] Adicionar seletor rápido de pet para agendamento — dropdown de pet no Step 1 do modal de agendamento, visível quando cliente tem 2+ pets, com ícones de espécie (🐶/🐱/🐾) e nomes. Dados via `dpsPortal.clientPets` (PHP `wp_localize_script`)
-- [x] Otimizar o fluxo de agendamento para selecionar serviços por pet — pet selecionado aparece na revisão (Step 3) e é validado antes de prosseguir
-- [ ] Melhorar a visualização de múltiplos pets na tela inicial do portal — futuro (tab navigation já existente)
-- [ ] Permitir comparação de histórico entre pets — futuro
+**AÃ§Ã£o:**
+- [x] Adicionar seletor rÃ¡pido de pet para agendamento â€” dropdown de pet no Step 1 do modal de agendamento, visÃ­vel quando cliente tem 2+ pets, com Ã­cones de espÃ©cie (ðŸ¶/ðŸ±/ðŸ¾) e nomes. Dados via `dpsPortal.clientPets` (PHP `wp_localize_script`)
+- [x] Otimizar o fluxo de agendamento para selecionar serviÃ§os por pet â€” pet selecionado aparece na revisÃ£o (Step 3) e Ã© validado antes de prosseguir
+- [ ] Melhorar a visualizaÃ§Ã£o de mÃºltiplos pets na tela inicial do portal â€” futuro (tab navigation jÃ¡ existente)
+- [ ] Permitir comparaÃ§Ã£o de histÃ³rico entre pets â€” futuro
 
-### 5.4 — Feedback e Avaliação
+### 5.4 â€” Feedback e AvaliaÃ§Ã£o
 
-**Status atual:** Implementado. Prompt de avaliação com star rating no histórico.
+**Status atual:** Implementado. Prompt de avaliaÃ§Ã£o com star rating no histÃ³rico.
 
-**Ação:**
-- [x] Adicionar prompt pós-agendamento (finalizado) convidando para avaliação
-- [x] Mostrar avaliações anteriores do cliente no portal
+**AÃ§Ã£o:**
+- [x] Adicionar prompt pÃ³s-agendamento (finalizado) convidando para avaliaÃ§Ã£o
+- [x] Mostrar avaliaÃ§Ãµes anteriores do cliente no portal
 - [ ] Considerar widget de NPS (Net Promoter Score) simples
-- [ ] Integrar com o add-on Loyalty para dar pontos por avaliação
+- [ ] Integrar com o add-on Loyalty para dar pontos por avaliaÃ§Ã£o
 
-### 5.5 — Integração com Pagamentos no Portal
+### 5.5 â€” IntegraÃ§Ã£o com Pagamentos no Portal
 
-**Ação:**
-- [x] Verificar estado atual do add-on Payment — Payment add-on existe mas integração gateway requer ASK BEFORE
-- [x] Implementar visualização de parcelas pendentes (integração Finance) — aba "Pagamentos" no portal com: cards de resumo (pendente/pago), lista de transações pendentes com parcelas e saldo restante, histórico de transações pagas com parcelas detalhadas
-- [x] Adicionar botão "Pagar agora" com link para gateway configurado — botão "Pagar Agora" em cada transação pendente (reusa formulário existente)
-- [ ] Avaliar viabilidade de pré-pagamento ou pagamento online pelo portal — futuro (requer ASK BEFORE)
-- [ ] Seguir regra ASK BEFORE para novas integrações de pagamento — futuro
+**AÃ§Ã£o:**
+- [x] Verificar estado atual do add-on Payment â€” Payment add-on existe mas integraÃ§Ã£o gateway requer ASK BEFORE
+- [x] Implementar visualizaÃ§Ã£o de parcelas pendentes (integraÃ§Ã£o Finance) â€” aba "Pagamentos" no portal com: cards de resumo (pendente/pago), lista de transaÃ§Ãµes pendentes com parcelas e saldo restante, histÃ³rico de transaÃ§Ãµes pagas com parcelas detalhadas
+- [x] Adicionar botÃ£o "Pagar agora" com link para gateway configurado â€” botÃ£o "Pagar Agora" em cada transaÃ§Ã£o pendente (reusa formulÃ¡rio existente)
+- [ ] Avaliar viabilidade de prÃ©-pagamento ou pagamento online pelo portal â€” futuro (requer ASK BEFORE)
+- [ ] Seguir regra ASK BEFORE para novas integraÃ§Ãµes de pagamento â€” futuro
 
-**Implementação:**
-- PHP: `render_payments_tab()` em `class-dps-portal-renderer.php` com sub-métodos: `render_payments_summary_cards()`, `render_payments_pending_section()`, `render_payments_paid_section()`, `render_payment_card()`, `render_parcela_row()`
+**ImplementaÃ§Ã£o:**
+- PHP: `render_payments_tab()` em `class-dps-portal-renderer.php` com sub-mÃ©todos: `render_payments_summary_cards()`, `render_payments_pending_section()`, `render_payments_paid_section()`, `render_payment_card()`, `render_parcela_row()`
 - Repository: `get_parcelas_for_transaction()`, `get_parcelas_sum()`, `get_client_financial_summary()` em `class-dps-finance-repository.php`
 - CSS: `.dps-payments-summary-grid`, `.dps-payments-stat-card`, `.dps-payment-card`, `.dps-parcela-row` em `client-portal.css`
-- Tab "pagamentos" com badge de pendências no portal
+- Tab "pagamentos" com badge de pendÃªncias no portal
 
-### Entregáveis
+### EntregÃ¡veis
 
-- ✅ Galeria multi-fotos funcional
-- ✅ Preferências de notificação configuráveis
-- ✅ UX aprimorado para múltiplos pets
-- ✅ Sistema de feedback pós-serviço
-- ✅ Visualização de pagamentos no portal
+- âœ… Galeria multi-fotos funcional
+- âœ… PreferÃªncias de notificaÃ§Ã£o configurÃ¡veis
+- âœ… UX aprimorado para mÃºltiplos pets
+- âœ… Sistema de feedback pÃ³s-serviÃ§o
+- âœ… VisualizaÃ§Ã£o de pagamentos no portal
 
 ---
 
-## Fase 6 — Segurança Avançada e Auditoria
+## Fase 6 â€” SeguranÃ§a AvanÃ§ada e Auditoria
 
-> **Prioridade:** 🟡 Média
-> **Esforço estimado:** 2–3 sprints
-> **Dependências:** Fases 1 e 2 concluídas
+> **Prioridade:** ðŸŸ¡ MÃ©dia
+> **EsforÃ§o estimado:** 2â€“3 sprints
+> **DependÃªncias:** Fases 1 e 2 concluÃ­das
 
 ### Objetivo
 
-Implementar camadas adicionais de segurança e monitoramento.
+Implementar camadas adicionais de seguranÃ§a e monitoramento.
 
-### 6.1 — Rate Limiting
+### 6.1 â€” Rate Limiting
 
-**Status:** ✅ Já implementado — auditado em 2026-02-18
+**Status:** âœ… JÃ¡ implementado â€” auditado em 2026-02-18
 
-**Implementação existente:**
-- [x] Rate limiting no login do portal (magic link request) — `class-dps-portal-ajax-handler.php:617-667`: 3 req/hora por IP + 3 req/hora por email (dual enforcement)
-- [x] Rate limiting na validação de tokens — `class-dps-portal-token-manager.php:264-278`: 5 tentativas/hora por IP
-- [x] Rate limiting nos endpoints AJAX do chat — `class-dps-portal-ajax-handler.php:408-426`: 10 msgs/60s via `_dps_chat_rate` post meta
-- [x] Mensagens amigáveis quando rate limit é atingido — implementadas em ambos os handlers
-- [x] Incremento de contadores antes da resposta (anti-enumeration) — `class-dps-portal-ajax-handler.php:664-667`
+**ImplementaÃ§Ã£o existente:**
+- [x] Rate limiting no login do portal (magic link request) â€” `class-dps-portal-ajax-handler.php:617-667`: 3 req/hora por IP + 3 req/hora por email (dual enforcement)
+- [x] Rate limiting na validaÃ§Ã£o de tokens â€” `class-dps-portal-token-manager.php:264-278`: 5 tentativas/hora por IP
+- [x] Rate limiting nos endpoints AJAX do chat â€” `class-dps-portal-ajax-handler.php:408-426`: 10 msgs/60s via `_dps_chat_rate` post meta
+- [x] Mensagens amigÃ¡veis quando rate limit Ã© atingido â€” implementadas em ambos os handlers
+- [x] Incremento de contadores antes da resposta (anti-enumeration) â€” `class-dps-portal-ajax-handler.php:664-667`
 
-**Nota técnica:** O rate limiting de login e tokens usa transients para tracking IP-based (não é possível usar post meta para IPs sem sessão). O chat usa post meta conforme padrão. A regra de cache proibido do AGENTS.md se refere a cache de dados, não a contadores de segurança.
+**Nota tÃ©cnica:** O rate limiting de login e tokens usa transients para tracking IP-based (nÃ£o Ã© possÃ­vel usar post meta para IPs sem sessÃ£o). O chat usa post meta conforme padrÃ£o. A regra de cache proibido do AGENTS.md se refere a cache de dados, nÃ£o a contadores de seguranÃ§a.
 
-### 6.2 — Logs de Auditoria Abrangentes
+### 6.2 â€” Logs de Auditoria Abrangentes
 
-**Status atual:** ✅ Implementado em 2026-02-19
+**Status atual:** âœ… Implementado em 2026-02-19
 
-**Ação:**
-- [x] Estender o padrão de logs de auditoria para todos os add-ons — criado `DPS_Audit_Logger` centralizado
-- [x] Eventos a registrar: login/logout, alteração de dados do cliente, alteração de pet, criação/cancelamento de agendamento, operações financeiras — API disponível para todos os add-ons
-- [x] Criar classe `DPS_Audit_Logger` centralizada no plugin base (446 linhas, 14 métodos estáticos)
+**AÃ§Ã£o:**
+- [x] Estender o padrÃ£o de logs de auditoria para todos os add-ons â€” criado `DPS_Audit_Logger` centralizado
+- [x] Eventos a registrar: login/logout, alteraÃ§Ã£o de dados do cliente, alteraÃ§Ã£o de pet, criaÃ§Ã£o/cancelamento de agendamento, operaÃ§Ãµes financeiras â€” API disponÃ­vel para todos os add-ons
+- [x] Criar classe `DPS_Audit_Logger` centralizada no plugin base (446 linhas, 14 mÃ©todos estÃ¡ticos)
 - [x] Armazenar logs em tabela customizada (`dps_audit_log`) com: timestamp, user_id, action, entity_type, entity_id, details, ip_address
-- [x] Implementar tela admin de visualização de logs (370 linhas) — filtros por tipo/ação/data, paginação (30/página), badges coloridos
+- [x] Implementar tela admin de visualizaÃ§Ã£o de logs (370 linhas) â€” filtros por tipo/aÃ§Ã£o/data, paginaÃ§Ã£o (30/pÃ¡gina), badges coloridos
 - [x] Integrar no System Hub como aba "Auditoria"
 - [x] Integrar nos handlers: Client (save/delete), Pet (save/delete), Appointment (save/status_change)
 
-**Implementação:**
-- `class-dps-audit-logger.php` — classe estática com conveniência: `log_client_change()`, `log_pet_change()`, `log_appointment_change()`, `log_portal_event()`
-- `class-dps-audit-admin-page.php` — página admin com filtros de entity_type, action, date_from, date_to e limpeza por dias
-- Tabela `dps_audit_log` criada via dbDelta com version check (padrão DPS)
+**ImplementaÃ§Ã£o:**
+- `class-dps-audit-logger.php` â€” classe estÃ¡tica com conveniÃªncia: `log_client_change()`, `log_pet_change()`, `log_appointment_change()`, `log_portal_event()`
+- `class-dps-audit-admin-page.php` â€” pÃ¡gina admin com filtros de entity_type, action, date_from, date_to e limpeza por dias
+- Tabela `dps_audit_log` criada via dbDelta com version check (padrÃ£o DPS)
 
-### 6.3 — Monitoramento de Atividade Suspeita
+### 6.3 â€” Monitoramento de Atividade Suspeita
 
-**Ação:**
-- [x] Registrar tentativas de acesso falhas (token inválido, token expirado) — integrado `DPS_Audit_Logger::log_portal_event()` em `handle_token_authentication()` para token_validation_failed e login_success
-- [x] Registrar rate limit atingido — integrado em `ajax_request_access_link_by_email()` para rate_limit_ip
-- [ ] Alertar admin (via add-on Push) quando houver N tentativas falhas do mesmo IP — futuro
-- [ ] Registrar acessos de IPs incomuns por cliente — futuro
+**AÃ§Ã£o:**
+- [x] Registrar tentativas de acesso falhas (token invÃ¡lido, token expirado) â€” integrado `DPS_Audit_Logger::log_portal_event()` em `handle_token_authentication()` para token_validation_failed e login_success
+- [x] Registrar rate limit atingido â€” integrado em `ajax_request_access_link_by_email()` para rate_limit_ip
+- [ ] Alertar admin (via add-on Push) quando houver N tentativas falhas do mesmo IP â€” futuro
+- [ ] Registrar acessos de IPs incomuns por cliente â€” futuro
 
-### 6.4 — Autenticação de Dois Fatores (2FA)
+### 6.4 â€” AutenticaÃ§Ã£o de Dois Fatores (2FA)
 
-**Status:** ✅ Implementado em 2026-02-19
+**Status:** âœ… Implementado em 2026-02-19
 
-**Ação:**
-- [x] Avaliar necessidade real de 2FA para o portal (perfil de risco) — implementado como opcional, desabilitado por padrão
-- [x] Se viável: implementar verificação por e-mail (código de 6 dígitos) — `DPS_Portal_2FA` com código de 6 dígitos, hashed com `wp_hash_password()`, 10 min expiração, max 5 tentativas
-- [x] Tornar 2FA opcional por configuração admin — checkbox em Portal → Configurações
-- [x] Não implementar SMS/autenticador na primeira versão (complexidade vs. valor) — apenas e-mail
+**AÃ§Ã£o:**
+- [x] Avaliar necessidade real de 2FA para o portal (perfil de risco) â€” implementado como opcional, desabilitado por padrÃ£o
+- [x] Se viÃ¡vel: implementar verificaÃ§Ã£o por e-mail (cÃ³digo de 6 dÃ­gitos) â€” `DPS_Portal_2FA` com cÃ³digo de 6 dÃ­gitos, hashed com `wp_hash_password()`, 10 min expiraÃ§Ã£o, max 5 tentativas
+- [x] Tornar 2FA opcional por configuraÃ§Ã£o admin â€” checkbox em Portal â†’ ConfiguraÃ§Ãµes
+- [x] NÃ£o implementar SMS/autenticador na primeira versÃ£o (complexidade vs. valor) â€” apenas e-mail
 
-**Implementação:**
-- PHP: `class-dps-portal-2fa.php` — `generate_code()`, `verify_code()`, `send_code_email()`, `render_verification_form()`, `ajax_verify_2fa_code()`
-- Fluxo: Token válido → gera código → envia por e-mail → renderiza formulário 2FA → AJAX verifica → cria sessão
-- Remember-me preservado através de 2FA via transient
+**ImplementaÃ§Ã£o:**
+- PHP: `class-dps-portal-2fa.php` â€” `generate_code()`, `verify_code()`, `send_code_email()`, `render_verification_form()`, `ajax_verify_2fa_code()`
+- Fluxo: Token vÃ¡lido â†’ gera cÃ³digo â†’ envia por e-mail â†’ renderiza formulÃ¡rio 2FA â†’ AJAX verifica â†’ cria sessÃ£o
+- Remember-me preservado atravÃ©s de 2FA via transient
 - Audit: eventos `2fa_code_sent` e `2fa_verified` via `DPS_Audit_Logger`
 - UI: 6 inputs individuais com auto-advance, paste support, e-mail ofuscado (j***@gmail.com)
 - CSS: `.dps-2fa-digit`, `.dps-2fa-code-inputs`, responsivo 480px
 
-### Entregáveis
+### EntregÃ¡veis
 
-- ✅ Rate limiting funcional no login e endpoints AJAX
-- ✅ Sistema de auditoria centralizado com tela admin
-- ✅ Monitoramento de atividade suspeita com alertas
-- ✅ 2FA via e-mail implementado e configurável
+- âœ… Rate limiting funcional no login e endpoints AJAX
+- âœ… Sistema de auditoria centralizado com tela admin
+- âœ… Monitoramento de atividade suspeita com alertas
+- âœ… 2FA via e-mail implementado e configurÃ¡vel
 
 ---
 
-## Fase 7 — Testabilidade e Manutenibilidade
+## Fase 7 â€” Testabilidade e Manutenibilidade
 
-> **Prioridade:** 🟡 Média
-> **Esforço estimado:** 3–4 sprints
-> **Dependências:** Fases 1 e 2 concluídas
+> **Prioridade:** ðŸŸ¡ MÃ©dia
+> **EsforÃ§o estimado:** 3â€“4 sprints
+> **DependÃªncias:** Fases 1 e 2 concluÃ­das
 
 ### Objetivo
 
-Aumentar a cobertura de testes, melhorar a modularidade e remover código morto.
+Aumentar a cobertura de testes, melhorar a modularidade e remover cÃ³digo morto.
 
-### 7.1 — Infraestrutura de Testes
+### 7.1 â€” Infraestrutura de Testes
 
-**Status:** ✅ Configurado em 2026-02-19
+**Status:** âœ… Configurado em 2026-02-19
 
-**Ação:**
-- [x] Avaliar o setup de testes do AI Add-on como modelo — usado como referência para composer.json, phpunit.xml e bootstrap.php
-- [x] Configurar PHPUnit para o plugin base — `composer.json` (PHPUnit 9.6+, yoast/phpunit-polyfills), `phpunit.xml`, `tests/bootstrap.php` com mocks WordPress
-- [ ] Configurar PHPUnit para o Finance Add-on (prioridade: lógica financeira) — futuro
-- [ ] Documentar como rodar testes no `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md` — futuro
+**AÃ§Ã£o:**
+- [x] Avaliar o setup de testes do AI Add-on como modelo â€” usado como referÃªncia para composer.json, phpunit.xml e bootstrap.php
+- [x] Configurar PHPUnit para o plugin base â€” `composer.json` (PHPUnit 9.6+, yoast/phpunit-polyfills), `phpunit.xml`, `tests/bootstrap.php` com mocks WordPress
+- [ ] Configurar PHPUnit para o Finance Add-on (prioridade: lÃ³gica financeira) â€” futuro
+- [ ] Documentar como rodar testes no `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md` â€” futuro
 
 **Como rodar:** `cd plugins/desi-pet-shower-base && composer install && vendor/bin/phpunit`
 
-### 7.2 — Testes Unitários para Lógica Crítica
+### 7.2 â€” Testes UnitÃ¡rios para LÃ³gica CrÃ­tica
 
-**Status:** ✅ 22 testes implementados em 2026-02-19
+**Status:** âœ… 22 testes implementados em 2026-02-19
 
-**Ação:**
+**AÃ§Ã£o:**
 - [x] Testar helpers globais: `DPS_Money_Helper` (13 testes), `DPS_Phone_Helper` (9 testes)
-- [ ] Testar `DPS_URL_Builder` — futuro (depende de mais mocks WordPress)
-- [ ] Testar `sum_revenue_by_period()` no Finance — futuro (requer setup Finance)
-- [ ] Testar validação de formulários (novas classes extraídas na Fase 2) — futuro
-- [ ] Testar lógica de tokens do portal (criação, validação, expiração) — futuro
-- [ ] Meta: cobertura de 80% nas classes de lógica de negócio — futuro
+- [ ] Testar `DPS_URL_Builder` â€” futuro (depende de mais mocks WordPress)
+- [ ] Testar `sum_revenue_by_period()` no Finance â€” futuro (requer setup Finance)
+- [ ] Testar validaÃ§Ã£o de formulÃ¡rios (novas classes extraÃ­das na Fase 2) â€” futuro
+- [ ] Testar lÃ³gica de tokens do portal (criaÃ§Ã£o, validaÃ§Ã£o, expiraÃ§Ã£o) â€” futuro
+- [ ] Meta: cobertura de 80% nas classes de lÃ³gica de negÃ³cio â€” futuro
 
 **Testes implementados:**
-- `Test_DPS_Money_Helper`: parse_brazilian_format (4 variações), format_to_brazilian (2), decimal_to_cents, cents_to_decimal, format_currency, format_currency_from_decimal, format_decimal_to_brazilian, is_valid_money_string (2)
+- `Test_DPS_Money_Helper`: parse_brazilian_format (4 variaÃ§Ãµes), format_to_brazilian (2), decimal_to_cents, cents_to_decimal, format_currency, format_currency_from_decimal, format_decimal_to_brazilian, is_valid_money_string (2)
 - `Test_DPS_Phone_Helper`: clean, format_for_whatsapp (2), format_for_display (2), is_valid_brazilian_phone (4)
 
-### 7.3 — Injeção de Dependência
+### 7.3 â€” InjeÃ§Ã£o de DependÃªncia
 
-**Status:** ✅ Documentado em 2026-02-19
+**Status:** âœ… Documentado em 2026-02-19
 
-**Ação:**
-- [x] Estender padrão de DI para as novas classes extraídas na Fase 2 — documentado 3 estratégias: singleton, constructor injection, static renderers
-- [x] Usar construtor injection para dependências obrigatórias — padrão do Frontend Add-on (DPS_Registration_Handler)
-- [x] Documentar padrão no playbook de engenharia — seção "Padrão de Injeção de Dependência" em AGENT_ENGINEERING_PLAYBOOK.md
+**AÃ§Ã£o:**
+- [x] Estender padrÃ£o de DI para as novas classes extraÃ­das na Fase 2 â€” documentado 3 estratÃ©gias: singleton, constructor injection, static renderers
+- [x] Usar construtor injection para dependÃªncias obrigatÃ³rias â€” padrÃ£o do Frontend Add-on (DPS_Registration_Handler)
+- [x] Documentar padrÃ£o no playbook de engenharia â€” seÃ§Ã£o "PadrÃ£o de InjeÃ§Ã£o de DependÃªncia" em AGENT_ENGINEERING_PLAYBOOK.md
 
-### 7.4 — Remoção de Código Morto
+### 7.4 â€” RemoÃ§Ã£o de CÃ³digo Morto
 
-**Status:** ✅ Auditado em 2026-02-19 — nenhum código morto acionável encontrado
+**Status:** âœ… Auditado em 2026-02-19 â€” nenhum cÃ³digo morto acionÃ¡vel encontrado
 
-**Ação:**
-- [x] Inventariar arquivos JS antigos — todos os JS são enqueued corretamente (5 no base, 1 no portal, 1 em cada add-on)
-- [x] Verificar referências dinâmicas (`call_user_func`, hooks com variáveis) antes de remover — verificado
-- [x] Remover funções sem referências estáticas ou dinâmicas — nenhuma encontrada
-- [x] Remover arquivos CSS/JS não incluídos em nenhum `wp_enqueue` — nenhum encontrado
-- [x] Documentar remoções no `CHANGELOG.md` — sem remoções necessárias
+**AÃ§Ã£o:**
+- [x] Inventariar arquivos JS antigos â€” todos os JS sÃ£o enqueued corretamente (5 no base, 1 no portal, 1 em cada add-on)
+- [x] Verificar referÃªncias dinÃ¢micas (`call_user_func`, hooks com variÃ¡veis) antes de remover â€” verificado
+- [x] Remover funÃ§Ãµes sem referÃªncias estÃ¡ticas ou dinÃ¢micas â€” nenhuma encontrada
+- [x] Remover arquivos CSS/JS nÃ£o incluÃ­dos em nenhum `wp_enqueue` â€” nenhum encontrado
+- [x] Documentar remoÃ§Ãµes no `CHANGELOG.md` â€” sem remoÃ§Ãµes necessÃ¡rias
 
-**Achado:** `refactoring-examples.php` é o único arquivo não carregado via require, mas é intencionalmente mantido como referência educacional (documentado em AGENTS.md linha 69).
+**Achado:** `refactoring-examples.php` Ã© o Ãºnico arquivo nÃ£o carregado via require, mas Ã© intencionalmente mantido como referÃªncia educacional (documentado em AGENTS.md linha 69).
 
-### Entregáveis
+### EntregÃ¡veis
 
-- ✅ PHPUnit configurado para plugin base (29 testes) e AI Add-on
-- ✅ 29 testes unitários cobrindo lógica crítica (Money, Phone, Template Engine)
-- ✅ Padrão de DI documentado em AGENT_ENGINEERING_PLAYBOOK.md (3 estratégias)
-- ✅ Código morto removido e documentado
+- âœ… PHPUnit configurado para plugin base (29 testes) e AI Add-on
+- âœ… 29 testes unitÃ¡rios cobrindo lÃ³gica crÃ­tica (Money, Phone, Template Engine)
+- âœ… PadrÃ£o de DI documentado em AGENT_ENGINEERING_PLAYBOOK.md (3 estratÃ©gias)
+- âœ… CÃ³digo morto removido e documentado
 
 ---
 
-## Fase 8 — Integrações e Inteligência
+## Fase 8 â€” IntegraÃ§Ãµes e InteligÃªncia
 
-> **Prioridade:** 🟢 Baixa
-> **Esforço estimado:** 4–6 sprints
-> **Dependências:** Fases 2, 4 e 5 concluídas
+> **Prioridade:** ðŸŸ¢ Baixa
+> **EsforÃ§o estimado:** 4â€“6 sprints
+> **DependÃªncias:** Fases 2, 4 e 5 concluÃ­das
 
 ### Objetivo
 
-Explorar integrações avançadas e funcionalidades inteligentes.
+Explorar integraÃ§Ãµes avanÃ§adas e funcionalidades inteligentes.
 
-### 8.1 — Agendamento Inteligente
+### 8.1 â€” Agendamento Inteligente
 
-**Status:** ✅ Implementado em 2026-02-19 (versão local, sem IA)
+**Status:** âœ… Implementado em 2026-02-19 (versÃ£o local, sem IA)
 
-**Ação:**
-- [x] Avaliar expansão do AI Add-on para sugestão de horários e serviços — avaliado, implementada versão local primeiro
-- [x] Basear sugestões no histórico do pet (frequência de serviços, serviços mais usados) — `DPS_Scheduling_Suggestions::analyze_pet_history()`
-- [x] Implementar "Sugestão rápida" na tela de agendamento do portal — banner com urgência, data sugerida, botão "Usar data sugerida"
-- [x] Usar dados locais (sem IA) como primeira versão: serviços mais populares + último intervalo — avg interval entre até 20 atendimentos, top 3 serviços, urgency (overdue/soon/normal)
-- [ ] Versão com IA como segunda iteração (se add-on AI estiver ativo) — futuro
+**AÃ§Ã£o:**
+- [x] Avaliar expansÃ£o do AI Add-on para sugestÃ£o de horÃ¡rios e serviÃ§os â€” avaliado, implementada versÃ£o local primeiro
+- [x] Basear sugestÃµes no histÃ³rico do pet (frequÃªncia de serviÃ§os, serviÃ§os mais usados) â€” `DPS_Scheduling_Suggestions::analyze_pet_history()`
+- [x] Implementar "SugestÃ£o rÃ¡pida" na tela de agendamento do portal â€” banner com urgÃªncia, data sugerida, botÃ£o "Usar data sugerida"
+- [x] Usar dados locais (sem IA) como primeira versÃ£o: serviÃ§os mais populares + Ãºltimo intervalo â€” avg interval entre atÃ© 20 atendimentos, top 3 serviÃ§os, urgency (overdue/soon/normal)
+- [ ] VersÃ£o com IA como segunda iteraÃ§Ã£o (se add-on AI estiver ativo) â€” futuro
 
-**Implementação:**
-- PHP: `class-dps-scheduling-suggestions.php` — `get_suggestions_for_client()`, `analyze_pet_history()`
+**ImplementaÃ§Ã£o:**
+- PHP: `class-dps-scheduling-suggestions.php` â€” `get_suggestions_for_client()`, `analyze_pet_history()`
 - Dados via `dpsPortal.schedulingSuggestions` (indexado por pet_id)
-- JS: `buildSuggestionBanner()`, auto-fill date, pet selector → update banner
+- JS: `buildSuggestionBanner()`, auto-fill date, pet selector â†’ update banner
 - CSS: `.dps-suggestion-banner`, `.dps-suggestion-banner--overdue`, `.dps-suggestion-banner--soon`
 
-### 8.2 — Documentação Contínua
+### 8.2 â€” DocumentaÃ§Ã£o ContÃ­nua
 
-**Status:** ✅ Atualizada em 2026-02-19
+**Status:** âœ… Atualizada em 2026-02-19
 
-**Ação (a cada fase):**
-- [x] Atualizar `ANALYSIS.md` com novas classes, hooks, tabelas, metadados — Portal do Cliente expandido (2FA, payments, scheduling, progress bar, multi-pet), DPS_Base_Template_Engine, hooks de add-on Portal documentados
-- [x] Atualizar `CHANGELOG.md` com todas as mudanças user-facing — atualizado a cada fase
-- [x] Atualizar `docs/FUNCTIONS_REFERENCE.md` com novas funções/métodos — DPS_Portal_2FA, DPS_Scheduling_Suggestions, DPS_Finance_Repository, DPS_Base_Template_Engine adicionados
-- [x] Manter `docs/README.md` sincronizado com novos documentos — verificado, sem novos documentos pendentes
-
----
-
-## Dependências entre Fases
-
-```
-Fase 1 (Segurança Crítica)
-  │
-  ├──→ Fase 2 (Refatoração Estrutural)
-  │      │
-  │      ├──→ Fase 4 (UX Portal)
-  │      │      │
-  │      │      └──→ Fase 5 (Features Novas)
-  │      │              │
-  │      │              └──→ Fase 8 (Integrações)
-  │      │
-  │      ├──→ Fase 6 (Segurança Avançada)
-  │      │
-  │      └──→ Fase 7 (Testabilidade)
-  │
-  └──→ Fase 3 (Performance)
-```
-
-### Fases paralelizáveis
-
-- **Fases 3 e 6** podem executar em paralelo após Fase 1
-- **Fases 4 e 7** podem executar em paralelo após Fase 2
-- **Fase 8** só inicia após Fases 4 e 5
+**AÃ§Ã£o (a cada fase):**
+- [x] Atualizar `ANALYSIS.md` com novas classes, hooks, tabelas, metadados â€” Portal do Cliente expandido (2FA, payments, scheduling, progress bar, multi-pet), DPS_Base_Template_Engine, hooks de add-on Portal documentados
+- [x] Atualizar `CHANGELOG.md` com todas as mudanÃ§as user-facing â€” atualizado a cada fase
+- [x] Atualizar `docs/FUNCTIONS_REFERENCE.md` com novas funÃ§Ãµes/mÃ©todos â€” DPS_Portal_2FA, DPS_Scheduling_Suggestions, DPS_Finance_Repository, DPS_Base_Template_Engine adicionados
+- [x] Manter `docs/README.md` sincronizado com novos documentos â€” verificado, sem novos documentos pendentes
 
 ---
 
-## Referências Internas
+## DependÃªncias entre Fases
 
-| Documento | Caminho | Relação |
+```
+Fase 1 (SeguranÃ§a CrÃ­tica)
+  â”‚
+  â”œâ”€â”€â†’ Fase 2 (RefatoraÃ§Ã£o Estrutural)
+  â”‚      â”‚
+  â”‚      â”œâ”€â”€â†’ Fase 4 (UX Portal)
+  â”‚      â”‚      â”‚
+  â”‚      â”‚      â””â”€â”€â†’ Fase 5 (Features Novas)
+  â”‚      â”‚              â”‚
+  â”‚      â”‚              â””â”€â”€â†’ Fase 8 (IntegraÃ§Ãµes)
+  â”‚      â”‚
+  â”‚      â”œâ”€â”€â†’ Fase 6 (SeguranÃ§a AvanÃ§ada)
+  â”‚      â”‚
+  â”‚      â””â”€â”€â†’ Fase 7 (Testabilidade)
+  â”‚
+  â””â”€â”€â†’ Fase 3 (Performance)
+```
+
+### Fases paralelizÃ¡veis
+
+- **Fases 3 e 6** podem executar em paralelo apÃ³s Fase 1
+- **Fases 4 e 7** podem executar em paralelo apÃ³s Fase 2
+- **Fase 8** sÃ³ inicia apÃ³s Fases 4 e 5
+
+---
+
+## ReferÃªncias Internas
+
+| Documento | Caminho | RelaÃ§Ã£o |
 |-----------|---------|---------|
-| Análise arquitetural | `ANALYSIS.md` (raiz) | Contratos, hooks, menus, flags |
+| AnÃ¡lise arquitetural | `ANALYSIS.md` (raiz) | Contratos, hooks, menus, flags |
 | Changelog | `CHANGELOG.md` (raiz) | Atualizar a cada fase |
 | Diretrizes para agentes | `AGENTS.md` (raiz) | Regras MUST, ASK BEFORE, PREFER |
-| Playbook de engenharia | `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md` | DoD, padrões de código |
-| Análise de add-ons | `docs/analysis/ADDONS_DETAILED_ANALYSIS.md` | Problemas conhecidos |
-| Análise Finance | `docs/analysis/FINANCE_ADDON_ANALYSIS.md` | SQL injection, performance |
-| Análise Portal | `docs/analysis/CLIENT_PORTAL_ADDON_DEEP_ANALYSIS.md` | Arquitetura do portal |
+| Playbook de engenharia | `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md` | DoD, padrÃµes de cÃ³digo |
+| AnÃ¡lise de add-ons | `docs/analysis/ADDONS_DETAILED_ANALYSIS.md` | Problemas conhecidos |
+| AnÃ¡lise Finance | `docs/analysis/FINANCE_ADDON_ANALYSIS.md` | SQL injection, performance |
+| AnÃ¡lise Portal | `docs/analysis/CLIENT_PORTAL_ADDON_DEEP_ANALYSIS.md` | Arquitetura do portal |
 | Tabs do Portal | `docs/analysis/CLIENT_PORTAL_TABS_STRUCTURE.md` | Estrutura de abas |
-| Análise do Plugin Base | `docs/analysis/BASE_PLUGIN_DEEP_ANALYSIS.md` | Arquitetura do núcleo |
-| Guia visual M3 | `docs/visual/VISUAL_STYLE_GUIDE.md` | Padrão visual obrigatório |
-| Design frontend | `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` | Instruções de implementação |
-| Referência de funções | `docs/FUNCTIONS_REFERENCE.md` | Todas as funções documentadas |
+| AnÃ¡lise do Plugin Base | `docs/analysis/BASE_PLUGIN_DEEP_ANALYSIS.md` | Arquitetura do nÃºcleo |
+| Guia visual DPS Signature | `docs/visual/VISUAL_STYLE_GUIDE.md` | PadrÃ£o visual obrigatÃ³rio |
+| Design frontend | `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` | InstruÃ§Ãµes de implementaÃ§Ã£o |
+| ReferÃªncia de funÃ§Ãµes | `docs/FUNCTIONS_REFERENCE.md` | Todas as funÃ§Ãµes documentadas |
 
 ---
 
-> **Nota final:** Este plano deve ser revisado e ajustado ao final de cada fase, incorporando aprendizados e repriorizando conforme necessário. As estimativas de esforço são indicativas e dependem da disponibilidade da equipe e complexidade real encontrada durante a implementação.
+> **Nota final:** Este plano deve ser revisado e ajustado ao final de cada fase, incorporando aprendizados e repriorizando conforme necessÃ¡rio. As estimativas de esforÃ§o sÃ£o indicativas e dependem da disponibilidade da equipe e complexidade real encontrada durante a implementaÃ§Ã£o.

@@ -2,7 +2,7 @@
 
 ## Contexto
 - Escopo: `plugins/desi-pet-shower-agenda/`
-- Fonte de verdade visual (padrao M3): `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`
+- Fonte de verdade visual (padrao DPS Signature): `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`
 - Objetivo: manter a Agenda com leitura operacional clara, navegacao temporal objetiva e estado consistente entre abas, sem reintroduzir blocos legados fora do fluxo principal.
 
 ## Estado atual da interface

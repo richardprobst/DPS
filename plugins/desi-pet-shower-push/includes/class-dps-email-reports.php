@@ -1,11 +1,11 @@
-<?php
+﻿<?php
 /**
- * Classe de Relatórios por Email para o DPS.
+ * Classe de RelatÃ³rios por Email para o DPS.
  *
- * Implementa envio automático de relatórios por email e Telegram:
- * - Resumo diário de agendamentos
- * - Relatório financeiro diário
- * - Relatório semanal de pets inativos
+ * Implementa envio automÃ¡tico de relatÃ³rios por email e Telegram:
+ * - Resumo diÃ¡rio de agendamentos
+ * - RelatÃ³rio financeiro diÃ¡rio
+ * - RelatÃ³rio semanal de pets inativos
  *
  * @package DPS_Push_Addon
  * @since 1.1.0
@@ -16,19 +16,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Classe de Relatórios por Email.
+ * Classe de RelatÃ³rios por Email.
  */
 class DPS_Email_Reports {
 
     /**
-     * Instância única (singleton).
+     * InstÃ¢ncia Ãºnica (singleton).
      *
      * @var DPS_Email_Reports|null
      */
     private static $instance = null;
 
     /**
-     * Recupera a instância única.
+     * Recupera a instÃ¢ncia Ãºnica.
      *
      * @return DPS_Email_Reports
      */
@@ -54,27 +54,27 @@ class DPS_Email_Reports {
             add_action( 'dps_send_push_notification', [ $telegram, 'send' ], 10, 2 );
         }
 
-        // Reagendar crons após salvar configurações de horário.
+        // Reagendar crons apÃ³s salvar configuraÃ§Ãµes de horÃ¡rio.
         add_action( 'update_option_dps_push_agenda_time', [ $this, 'reschedule_agenda_cron' ] );
         add_action( 'update_option_dps_push_report_time', [ $this, 'reschedule_report_cron' ] );
         add_action( 'update_option_dps_push_weekly_time', [ $this, 'reschedule_weekly_cron' ] );
         add_action( 'update_option_dps_push_weekly_day', [ $this, 'reschedule_weekly_cron' ] );
 
-        // Reagendar crons quando habilitação mudar.
+        // Reagendar crons quando habilitaÃ§Ã£o mudar.
         add_action( 'update_option_dps_push_agenda_enabled', [ $this, 'reschedule_agenda_cron' ] );
         add_action( 'update_option_dps_push_report_enabled', [ $this, 'reschedule_report_cron' ] );
         add_action( 'update_option_dps_push_weekly_enabled', [ $this, 'reschedule_weekly_cron' ] );
 
-        // Agenda crons que estão faltando (fallback caso ativação não tenha sido executada).
-        // Executado em admin_init para não impactar performance do frontend.
+        // Agenda crons que estÃ£o faltando (fallback caso ativaÃ§Ã£o nÃ£o tenha sido executada).
+        // Executado em admin_init para nÃ£o impactar performance do frontend.
         add_action( 'admin_init', [ $this, 'maybe_schedule_crons' ] );
     }
 
     /**
      * Agenda crons se estiverem faltando (fallback).
-     * 
-     * Este método garante que os crons sejam agendados mesmo que o hook
-     * de ativação não tenha sido executado corretamente.
+     *
+     * Este mÃ©todo garante que os crons sejam agendados mesmo que o hook
+     * de ativaÃ§Ã£o nÃ£o tenha sido executado corretamente.
      *
      * @since 1.3.1
      */
@@ -102,19 +102,19 @@ class DPS_Email_Reports {
      * Agenda os cron jobs.
      */
     public function schedule_crons() {
-        // Agenda diária
+        // Agenda diÃ¡ria
         if ( get_option( 'dps_push_agenda_enabled', true ) && ! wp_next_scheduled( 'dps_send_agenda_notification' ) ) {
             $time = $this->get_next_daily_timestamp( get_option( 'dps_push_agenda_time', '08:00' ) );
             wp_schedule_event( $time, 'daily', 'dps_send_agenda_notification' );
         }
 
-        // Relatório financeiro
+        // RelatÃ³rio financeiro
         if ( get_option( 'dps_push_report_enabled', true ) && ! wp_next_scheduled( 'dps_send_daily_report' ) ) {
             $time = $this->get_next_daily_timestamp( get_option( 'dps_push_report_time', '19:00' ) );
             wp_schedule_event( $time, 'daily', 'dps_send_daily_report' );
         }
 
-        // Relatório semanal
+        // RelatÃ³rio semanal
         if ( get_option( 'dps_push_weekly_enabled', true ) && ! wp_next_scheduled( 'dps_send_weekly_inactive_report' ) ) {
             $time = $this->get_next_weekly_timestamp(
                 get_option( 'dps_push_weekly_day', 'monday' ),
@@ -125,9 +125,9 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Calcula o próximo timestamp para horário diário.
+     * Calcula o prÃ³ximo timestamp para horÃ¡rio diÃ¡rio.
      *
-     * @param string $time Horário no formato HH:MM.
+     * @param string $time HorÃ¡rio no formato HH:MM.
      * @return int Timestamp.
      */
     private function get_next_daily_timestamp( $time ) {
@@ -144,10 +144,10 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Calcula o próximo timestamp para horário semanal.
+     * Calcula o prÃ³ximo timestamp para horÃ¡rio semanal.
      *
-     * @param string $day  Dia da semana em inglês.
-     * @param string $time Horário no formato HH:MM.
+     * @param string $day  Dia da semana em inglÃªs.
+     * @param string $time HorÃ¡rio no formato HH:MM.
      * @return int Timestamp.
      */
     private function get_next_weekly_timestamp( $day, $time ) {
@@ -161,7 +161,7 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Obtém o timezone do WordPress.
+     * ObtÃ©m o timezone do WordPress.
      *
      * @return DateTimeZone
      */
@@ -180,7 +180,7 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Envia o resumo diário de agendamentos.
+     * Envia o resumo diÃ¡rio de agendamentos.
      */
     public function send_agenda_notification() {
         if ( ! get_option( 'dps_push_agenda_enabled', true ) ) {
@@ -196,7 +196,7 @@ class DPS_Email_Reports {
         $appointments = $this->get_appointments_for_date( $today );
 
         $subject = sprintf(
-            __( '📅 Agenda do dia %s - %d agendamento(s)', 'dps-push-addon' ),
+            __( 'ðŸ“… Agenda do dia %s - %d agendamento(s)', 'dps-push-addon' ),
             date_i18n( 'd/m/Y', strtotime( $today ) ),
             count( $appointments )
         );
@@ -211,11 +211,11 @@ class DPS_Email_Reports {
         // Enviar para Telegram
         do_action( 'dps_send_push_notification', $this->build_agenda_text( $appointments, $today ), 'agenda' );
 
-        $this->log( 'info', 'Agenda diária enviada', [ 'recipients' => count( $recipients ), 'appointments' => count( $appointments ) ] );
+        $this->log( 'info', 'Agenda diÃ¡ria enviada', [ 'recipients' => count( $recipients ), 'appointments' => count( $appointments ) ] );
     }
 
     /**
-     * Envia o relatório financeiro diário.
+     * Envia o relatÃ³rio financeiro diÃ¡rio.
      */
     public function send_daily_report() {
         if ( ! get_option( 'dps_push_report_enabled', true ) ) {
@@ -232,7 +232,7 @@ class DPS_Email_Reports {
         $transactions = $this->get_transactions_for_date( $today );
 
         $subject = sprintf(
-            __( '💰 Relatório Financeiro - %s', 'dps-push-addon' ),
+            __( 'ðŸ’° RelatÃ³rio Financeiro - %s', 'dps-push-addon' ),
             date_i18n( 'd/m/Y', strtotime( $today ) )
         );
 
@@ -246,11 +246,11 @@ class DPS_Email_Reports {
         // Enviar para Telegram
         do_action( 'dps_send_push_notification', $this->build_report_text( $appointments, $transactions, $today ), 'report' );
 
-        $this->log( 'info', 'Relatório financeiro enviado', [ 'recipients' => count( $recipients ), 'transactions' => count( $transactions ) ] );
+        $this->log( 'info', 'RelatÃ³rio financeiro enviado', [ 'recipients' => count( $recipients ), 'transactions' => count( $transactions ) ] );
     }
 
     /**
-     * Envia o relatório semanal de pets inativos.
+     * Envia o relatÃ³rio semanal de pets inativos.
      */
     public function send_weekly_inactive_report() {
         if ( ! get_option( 'dps_push_weekly_enabled', true ) ) {
@@ -270,7 +270,7 @@ class DPS_Email_Reports {
         }
 
         $subject = sprintf(
-            __( '🐾 %d pet(s) sem atendimento há mais de %d dias', 'dps-push-addon' ),
+            __( 'ðŸ¾ %d pet(s) sem atendimento hÃ¡ mais de %d dias', 'dps-push-addon' ),
             count( $inactive_pets ),
             $inactive_days
         );
@@ -284,14 +284,14 @@ class DPS_Email_Reports {
         // Enviar para Telegram
         do_action( 'dps_send_push_notification', $this->build_inactive_pets_text( $inactive_pets, $inactive_days ), 'weekly' );
 
-        $this->log( 'info', 'Relatório semanal enviado', [ 'recipients' => count( $recipients ), 'inactive_pets' => count( $inactive_pets ) ] );
+        $this->log( 'info', 'RelatÃ³rio semanal enviado', [ 'recipients' => count( $recipients ), 'inactive_pets' => count( $inactive_pets ) ] );
     }
 
     /**
-     * Obtém destinatários de uma opção.
+     * ObtÃ©m destinatÃ¡rios de uma opÃ§Ã£o.
      *
-     * @param string $option_key Chave da opção.
-     * @return array Lista de emails válidos.
+     * @param string $option_key Chave da opÃ§Ã£o.
+     * @return array Lista de emails vÃ¡lidos.
      */
     private function get_recipients( $option_key ) {
         $raw = get_option( $option_key, get_option( 'admin_email' ) );
@@ -305,7 +305,7 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Obtém agendamentos para uma data.
+     * ObtÃ©m agendamentos para uma data.
      *
      * @param string $date Data no formato Y-m-d.
      * @return array Lista de agendamentos.
@@ -330,10 +330,10 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Obtém transações para uma data.
+     * ObtÃ©m transaÃ§Ãµes para uma data.
      *
      * @param string $date Data no formato Y-m-d.
-     * @return array Lista de transações.
+     * @return array Lista de transaÃ§Ãµes.
      */
     private function get_transactions_for_date( $date ) {
         global $wpdb;
@@ -346,7 +346,7 @@ class DPS_Email_Reports {
             return [];
         }
 
-        // Sanitizar a data para garantir formato válido.
+        // Sanitizar a data para garantir formato vÃ¡lido.
         $sanitized_date = sanitize_text_field( $date );
         if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $sanitized_date ) ) {
             return [];
@@ -360,7 +360,7 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Obtém pets inativos.
+     * ObtÃ©m pets inativos.
      *
      * @param int $days Dias de inatividade.
      * @return array Lista de pets inativos.
@@ -416,7 +416,7 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Constrói HTML da agenda.
+     * ConstrÃ³i HTML da agenda.
      *
      * @param array  $appointments Agendamentos.
      * @param string $date         Data.
@@ -424,7 +424,7 @@ class DPS_Email_Reports {
      */
     private function build_agenda_html( $appointments, $date ) {
         $count = count( $appointments );
-        $html  = $this->get_email_header( '📅', __( 'Agenda do Dia', 'dps-push-addon' ), date_i18n( 'l, d \d\e F \d\e Y', strtotime( $date ) ) );
+        $html  = $this->get_email_header( 'ðŸ“…', __( 'Agenda do Dia', 'dps-push-addon' ), date_i18n( 'l, d \d\e F \d\e Y', strtotime( $date ) ) );
 
         // Card de resumo
         $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">';
@@ -441,7 +441,7 @@ class DPS_Email_Reports {
         } else {
             $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:12px;overflow:hidden;border:1px solid #c3c6cf;">';
             $html .= '<tr style="background:#0b6bcb;">';
-            $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Horário', 'dps-push-addon' ) . '</th>';
+            $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'HorÃ¡rio', 'dps-push-addon' ) . '</th>';
             $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Pet', 'dps-push-addon' ) . '</th>';
             $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Cliente', 'dps-push-addon' ) . '</th>';
             $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Status', 'dps-push-addon' ) . '</th>';
@@ -474,14 +474,14 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Constrói texto da agenda para Telegram.
+     * ConstrÃ³i texto da agenda para Telegram.
      *
      * @param array  $appointments Agendamentos.
      * @param string $date         Data.
      * @return string Texto.
      */
     private function build_agenda_text( $appointments, $date ) {
-        $text = "📅 *Agenda do Dia*\n";
+        $text = "ðŸ“… *Agenda do Dia*\n";
         $text .= date_i18n( 'd/m/Y', strtotime( $date ) ) . "\n\n";
 
         if ( empty( $appointments ) ) {
@@ -492,7 +492,7 @@ class DPS_Email_Reports {
                 $time = get_post_meta( $appt->ID, 'appointment_time', true );
                 $pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
                 $pet = get_post( $pet_id );
-                $text .= "• {$time} - " . ( $pet ? $pet->post_title : 'Pet' ) . "\n";
+                $text .= "â€¢ {$time} - " . ( $pet ? $pet->post_title : 'Pet' ) . "\n";
             }
         }
 
@@ -500,10 +500,10 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Constrói HTML do relatório financeiro.
+     * ConstrÃ³i HTML do relatÃ³rio financeiro.
      *
      * @param array  $appointments  Agendamentos.
-     * @param array  $transactions  Transações.
+     * @param array  $transactions  TransaÃ§Ãµes.
      * @param string $date          Data.
      * @return string HTML.
      */
@@ -521,7 +521,7 @@ class DPS_Email_Reports {
 
         $saldo = $total_receitas - $total_despesas;
 
-        $html = $this->get_email_header( '💰', __( 'Relatório Financeiro', 'dps-push-addon' ), date_i18n( 'l, d \d\e F \d\e Y', strtotime( $date ) ) );
+        $html = $this->get_email_header( 'ðŸ’°', __( 'RelatÃ³rio Financeiro', 'dps-push-addon' ), date_i18n( 'l, d \d\e F \d\e Y', strtotime( $date ) ) );
 
         // Cards de resumo (3 colunas: receitas, despesas, saldo)
         $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">';
@@ -531,7 +531,7 @@ class DPS_Email_Reports {
         $html .= '<td width="33%" style="padding:0 6px 0 0;">';
         $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">';
         $html .= '<tr><td style="background:#a8f5b5;border-radius:12px;padding:16px;text-align:center;">';
-        $html .= '<div style="font-size:11px;color:#00210a;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">📈 ' . esc_html__( 'Receitas', 'dps-push-addon' ) . '</div>';
+        $html .= '<div style="font-size:11px;color:#00210a;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">ðŸ“ˆ ' . esc_html__( 'Receitas', 'dps-push-addon' ) . '</div>';
         $html .= '<div style="font-size:20px;font-weight:700;color:#1a7a3a;">' . DPS_Money_Helper::format_currency_from_decimal( $total_receitas ) . '</div>';
         $html .= '</td></tr></table></td>';
 
@@ -539,7 +539,7 @@ class DPS_Email_Reports {
         $html .= '<td width="33%" style="padding:0 3px;">';
         $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">';
         $html .= '<tr><td style="background:#ffdad6;border-radius:12px;padding:16px;text-align:center;">';
-        $html .= '<div style="font-size:11px;color:#410002;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">📉 ' . esc_html__( 'Despesas', 'dps-push-addon' ) . '</div>';
+        $html .= '<div style="font-size:11px;color:#410002;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">ðŸ“‰ ' . esc_html__( 'Despesas', 'dps-push-addon' ) . '</div>';
         $html .= '<div style="font-size:20px;font-weight:700;color:#ba1a1a;">' . DPS_Money_Helper::format_currency_from_decimal( $total_despesas ) . '</div>';
         $html .= '</td></tr></table></td>';
 
@@ -550,7 +550,7 @@ class DPS_Email_Reports {
         $html .= '<td width="33%" style="padding:0 0 0 6px;">';
         $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">';
         $html .= '<tr><td style="background:' . $saldo_bg . ';border-radius:12px;padding:16px;text-align:center;">';
-        $html .= '<div style="font-size:11px;color:' . $saldo_label_color . ';font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">💵 ' . esc_html__( 'Saldo', 'dps-push-addon' ) . '</div>';
+        $html .= '<div style="font-size:11px;color:' . $saldo_label_color . ';font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">ðŸ’µ ' . esc_html__( 'Saldo', 'dps-push-addon' ) . '</div>';
         $html .= '<div style="font-size:20px;font-weight:700;color:' . $saldo_color . ';">' . DPS_Money_Helper::format_currency_from_decimal( $saldo ) . '</div>';
         $html .= '</td></tr></table></td>';
 
@@ -559,17 +559,17 @@ class DPS_Email_Reports {
         // Resumo de atendimentos
         $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">';
         $html .= '<tr><td style="background:#f2f3fa;border-radius:12px;padding:16px;">';
-        $html .= '<span style="font-size:14px;color:#191c20;">📋 <strong>' . count( $appointments ) . '</strong> ' . esc_html__( 'atendimento(s) realizado(s) no dia', 'dps-push-addon' ) . '</span>';
+        $html .= '<span style="font-size:14px;color:#191c20;">ðŸ“‹ <strong>' . count( $appointments ) . '</strong> ' . esc_html__( 'atendimento(s) realizado(s) no dia', 'dps-push-addon' ) . '</span>';
         $html .= '</td></tr></table>';
 
-        // Lista de transações
+        // Lista de transaÃ§Ãµes
         if ( ! empty( $transactions ) ) {
             $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">';
-            $html .= '<tr><td style="font-size:15px;font-weight:600;color:#191c20;padding-bottom:12px;">📊 ' . esc_html__( 'Transações', 'dps-push-addon' ) . '</td></tr></table>';
+            $html .= '<tr><td style="font-size:15px;font-weight:600;color:#191c20;padding-bottom:12px;">ðŸ“Š ' . esc_html__( 'TransaÃ§Ãµes', 'dps-push-addon' ) . '</td></tr></table>';
 
             $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:12px;overflow:hidden;border:1px solid #c3c6cf;">';
             $html .= '<tr style="background:#0b6bcb;">';
-            $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Descrição', 'dps-push-addon' ) . '</th>';
+            $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'DescriÃ§Ã£o', 'dps-push-addon' ) . '</th>';
             $html .= '<th style="padding:12px 16px;text-align:right;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Valor', 'dps-push-addon' ) . '</th>';
             $html .= '</tr>';
 
@@ -593,10 +593,10 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Constrói texto do relatório para Telegram.
+     * ConstrÃ³i texto do relatÃ³rio para Telegram.
      *
      * @param array  $appointments  Agendamentos.
-     * @param array  $transactions  Transações.
+     * @param array  $transactions  TransaÃ§Ãµes.
      * @param string $date          Data.
      * @return string Texto.
      */
@@ -612,18 +612,18 @@ class DPS_Email_Reports {
             }
         }
 
-        $text = "💰 *Relatório Financeiro*\n";
+        $text = "ðŸ’° *RelatÃ³rio Financeiro*\n";
         $text .= date_i18n( 'd/m/Y', strtotime( $date ) ) . "\n\n";
-        $text .= "📋 " . count( $appointments ) . " atendimento(s)\n";
-        $text .= "💵 Receitas: " . DPS_Money_Helper::format_currency_from_decimal( $total_receitas ) . "\n";
-        $text .= "💸 Despesas: " . DPS_Money_Helper::format_currency_from_decimal( $total_despesas ) . "\n";
-        $text .= "📊 Saldo: " . DPS_Money_Helper::format_currency_from_decimal( $total_receitas - $total_despesas );
+        $text .= "ðŸ“‹ " . count( $appointments ) . " atendimento(s)\n";
+        $text .= "ðŸ’µ Receitas: " . DPS_Money_Helper::format_currency_from_decimal( $total_receitas ) . "\n";
+        $text .= "ðŸ’¸ Despesas: " . DPS_Money_Helper::format_currency_from_decimal( $total_despesas ) . "\n";
+        $text .= "ðŸ“Š Saldo: " . DPS_Money_Helper::format_currency_from_decimal( $total_receitas - $total_despesas );
 
         return $text;
     }
 
     /**
-     * Constrói HTML do relatório de pets inativos.
+     * ConstrÃ³i HTML do relatÃ³rio de pets inativos.
      *
      * @param array $inactive_pets Pets inativos.
      * @param int   $days          Dias de inatividade.
@@ -632,9 +632,9 @@ class DPS_Email_Reports {
     private function build_inactive_pets_html( $inactive_pets, $days ) {
         $count = count( $inactive_pets );
         $html  = $this->get_email_header(
-            '🐾',
+            'ðŸ¾',
             __( 'Pets Inativos', 'dps-push-addon' ),
-            sprintf( __( 'Pets sem atendimento há mais de %d dias', 'dps-push-addon' ), $days )
+            sprintf( __( 'Pets sem atendimento hÃ¡ mais de %d dias', 'dps-push-addon' ), $days )
         );
 
         // Card de alerta
@@ -647,7 +647,7 @@ class DPS_Email_Reports {
         $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:12px;overflow:hidden;border:1px solid #c3c6cf;">';
         $html .= '<tr style="background:#0b6bcb;">';
         $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Pet', 'dps-push-addon' ) . '</th>';
-        $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Último Atendimento', 'dps-push-addon' ) . '</th>';
+        $html .= '<th style="padding:12px 16px;text-align:left;color:#ffffff;font-size:13px;font-weight:600;">' . esc_html__( 'Ãšltimo Atendimento', 'dps-push-addon' ) . '</th>';
         $html .= '</tr>';
 
         foreach ( $inactive_pets as $i => $item ) {
@@ -665,7 +665,7 @@ class DPS_Email_Reports {
         // Dica de reengajamento
         $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px;">';
         $html .= '<tr><td style="background:#f2f3fa;border-radius:12px;padding:16px;font-size:13px;color:#43474e;">';
-        $html .= '💡 <strong>' . esc_html__( 'Dica:', 'dps-push-addon' ) . '</strong> ';
+        $html .= 'ðŸ’¡ <strong>' . esc_html__( 'Dica:', 'dps-push-addon' ) . '</strong> ';
         $html .= esc_html__( 'Considere enviar uma mensagem ou oferta especial para os tutores desses pets!', 'dps-push-addon' );
         $html .= '</td></tr></table>';
 
@@ -674,20 +674,20 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Constrói texto de pets inativos para Telegram.
+     * ConstrÃ³i texto de pets inativos para Telegram.
      *
      * @param array $inactive_pets Pets inativos.
      * @param int   $days          Dias de inatividade.
      * @return string Texto.
      */
     private function build_inactive_pets_text( $inactive_pets, $days ) {
-        $text = "🐾 *Pets Inativos*\n";
-        $text .= "Sem atendimento há mais de {$days} dias\n\n";
+        $text = "ðŸ¾ *Pets Inativos*\n";
+        $text .= "Sem atendimento hÃ¡ mais de {$days} dias\n\n";
         $text .= count( $inactive_pets ) . " pet(s):\n\n";
 
         foreach ( array_slice( $inactive_pets, 0, 10 ) as $item ) {
             $last = $item['last_date'] ? date_i18n( 'd/m', strtotime( $item['last_date'] ) ) : 'nunca';
-            $text .= "• " . $item['pet']->post_title . " (último: {$last})\n";
+            $text .= "â€¢ " . $item['pet']->post_title . " (Ãºltimo: {$last})\n";
         }
 
         if ( count( $inactive_pets ) > 10 ) {
@@ -698,12 +698,12 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Gera o cabeçalho padrão M3 do email.
+     * Gera o cabeÃ§alho padrÃ£o DPS Signature do email.
      *
      * @since 1.4.0
-     * @param string $icon     Emoji do ícone.
-     * @param string $title    Título do relatório.
-     * @param string $subtitle Subtítulo (data/contexto).
+     * @param string $icon     Emoji do Ã­cone.
+     * @param string $title    TÃ­tulo do relatÃ³rio.
+     * @param string $subtitle SubtÃ­tulo (data/contexto).
      * @return string HTML.
      */
     private function get_email_header( $icon, $title, $subtitle ) {
@@ -715,14 +715,14 @@ class DPS_Email_Reports {
         $html .= '</head>';
         $html .= '<body style="margin:0;padding:0;background:#f8f9ff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,\'Helvetica Neue\',Arial,sans-serif;">';
 
-        // Wrapper de centralização
+        // Wrapper de centralizaÃ§Ã£o
         $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9ff;">';
         $html .= '<tr><td align="center" style="padding:32px 16px;">';
 
         // Container principal (card)
         $html .= '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #c3c6cf;">';
 
-        // Header com cor primária
+        // Header com cor primÃ¡ria
         $html .= '<tr><td style="background:#0b6bcb;padding:28px 32px;">';
         $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">';
         $html .= '<tr><td>';
@@ -735,22 +735,22 @@ class DPS_Email_Reports {
         $html .= '</td></tr></table>';
         $html .= '</td></tr>';
 
-        // Início da área de conteúdo
+        // InÃ­cio da Ã¡rea de conteÃºdo
         $html .= '<tr><td style="padding:28px 32px;">';
 
         return $html;
     }
 
     /**
-     * Gera o rodapé padrão M3 do email.
+     * Gera o rodapÃ© padrÃ£o DPS Signature do email.
      *
      * @since 1.4.0
      * @return string HTML.
      */
     private function get_email_footer() {
-        $html  = '</td></tr>'; // Fecha a área de conteúdo
+        $html  = '</td></tr>'; // Fecha a Ã¡rea de conteÃºdo
 
-        // Rodapé
+        // RodapÃ©
         $html .= '<tr><td style="background:#f2f3fa;padding:20px 32px;border-top:1px solid #c3c6cf;">';
         $html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">';
         $html .= '<tr><td style="font-size:12px;color:#43474e;line-height:1.6;">';
@@ -764,7 +764,7 @@ class DPS_Email_Reports {
 
         $html .= '</table>'; // Fecha container principal
 
-        $html .= '</td></tr></table>'; // Fecha wrapper de centralização
+        $html .= '</td></tr></table>'; // Fecha wrapper de centralizaÃ§Ã£o
         $html .= '</body></html>';
 
         return $html;
@@ -795,11 +795,11 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Envia emails para destinatários.
+     * Envia emails para destinatÃ¡rios.
      *
-     * @param array  $recipients Destinatários.
+     * @param array  $recipients DestinatÃ¡rios.
      * @param string $subject    Assunto.
-     * @param string $html       Conteúdo HTML.
+     * @param string $html       ConteÃºdo HTML.
      */
     private function send_emails( $recipients, $subject, $html ) {
         $headers = [
@@ -817,13 +817,13 @@ class DPS_Email_Reports {
     /**
      * Registra log.
      *
-     * @param string $level   Nível (info, error, warning).
+     * @param string $level   NÃ­vel (info, error, warning).
      * @param string $message Mensagem.
      * @param array  $context Contexto adicional.
      */
     private function log( $level, $message, $context = [] ) {
         if ( class_exists( 'DPS_Logger' ) ) {
-            // Validar nível de log para evitar execução de métodos arbitrários.
+            // Validar nÃ­vel de log para evitar execuÃ§Ã£o de mÃ©todos arbitrÃ¡rios.
             $allowed_levels = [ 'info', 'error', 'warning', 'debug' ];
             if ( ! in_array( $level, $allowed_levels, true ) ) {
                 $level = 'info';
@@ -844,7 +844,7 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Reagenda cron do relatório.
+     * Reagenda cron do relatÃ³rio.
      */
     public function reschedule_report_cron() {
         wp_clear_scheduled_hook( 'dps_send_daily_report' );
@@ -871,13 +871,13 @@ class DPS_Email_Reports {
     /**
      * Reagenda todos os crons de uma vez.
      *
-     * Este método deve ser chamado após salvar configurações para garantir
-     * que todos os crons sejam reagendados com os novos horários.
+     * Este mÃ©todo deve ser chamado apÃ³s salvar configuraÃ§Ãµes para garantir
+     * que todos os crons sejam reagendados com os novos horÃ¡rios.
      *
      * @since 1.3.1
      */
     public function reschedule_all_crons() {
-        // Limpar cache de opções para garantir valores atualizados.
+        // Limpar cache de opÃ§Ãµes para garantir valores atualizados.
         wp_cache_delete( 'dps_push_agenda_time', 'options' );
         wp_cache_delete( 'dps_push_agenda_enabled', 'options' );
         wp_cache_delete( 'dps_push_report_time', 'options' );
@@ -895,7 +895,7 @@ class DPS_Email_Reports {
         $next_report = wp_next_scheduled( 'dps_send_daily_report' );
         $next_weekly = wp_next_scheduled( 'dps_send_weekly_inactive_report' );
 
-        $this->log( 'info', 'Todos os crons de relatórios reagendados', [
+        $this->log( 'info', 'Todos os crons de relatÃ³rios reagendados', [
             'agenda_time'   => get_option( 'dps_push_agenda_time', '08:00' ),
             'report_time'   => get_option( 'dps_push_report_time', '19:00' ),
             'weekly_day'    => get_option( 'dps_push_weekly_day', 'monday' ),
@@ -907,7 +907,7 @@ class DPS_Email_Reports {
     }
 
     /**
-     * Envia teste de relatório.
+     * Envia teste de relatÃ³rio.
      *
      * @param string $type Tipo (agenda, report, weekly).
      * @return bool Sucesso.

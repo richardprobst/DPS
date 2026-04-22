@@ -3,7 +3,7 @@
 ## Contexto
 - Objetivo da mudanca: consolidar a auditoria da Agenda e registrar o shell operacional vigente.
 - Ambiente original: preview estatico servido localmente via `http://127.0.0.1:8766/`.
-- Referencia de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Referencia de design DPS Signature utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
 
 ## Situacao atual do registro
 - O shell principal da Agenda permanece com header contextual, overview cards, paineis por dia e tabs acessiveis.

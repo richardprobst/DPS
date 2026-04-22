@@ -1,0 +1,243 @@
+{
+  "registration": [
+    {
+      "width": 375,
+      "title": "QA Signature Cadastro 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasSignatureButton": true,
+        "hasTutorStep": true,
+        "hasPetStep": true
+      }
+    },
+    {
+      "width": 600,
+      "title": "QA Signature Cadastro 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasSignatureButton": true,
+        "hasTutorStep": true,
+        "hasPetStep": true
+      }
+    },
+    {
+      "width": 840,
+      "title": "QA Signature Cadastro 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasSignatureButton": true,
+        "hasTutorStep": true,
+        "hasPetStep": true
+      }
+    },
+    {
+      "width": 1200,
+      "title": "QA Signature Cadastro 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasSignatureButton": true,
+        "hasTutorStep": true,
+        "hasPetStep": true
+      }
+    },
+    {
+      "width": 1920,
+      "title": "QA Signature Cadastro 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasSignatureButton": true,
+        "hasTutorStep": true,
+        "hasPetStep": true
+      }
+    }
+  ],
+  "registrationErrors": {
+    "title": "QA Signature Cadastro 20260421-222213 – Desi Pet Shower",
+    "hasValidationText": true
+  },
+  "portalPublic": [
+    {
+      "width": 375,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasMagicLink": true,
+        "hasPasswordEntry": false,
+        "hasWhatsappCard": false
+      }
+    },
+    {
+      "width": 600,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasMagicLink": true,
+        "hasPasswordEntry": false,
+        "hasWhatsappCard": false
+      }
+    },
+    {
+      "width": 840,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasMagicLink": true,
+        "hasPasswordEntry": false,
+        "hasWhatsappCard": false
+      }
+    },
+    {
+      "width": 1200,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasMagicLink": true,
+        "hasPasswordEntry": false,
+        "hasWhatsappCard": false
+      }
+    },
+    {
+      "width": 1920,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasMagicLink": true,
+        "hasPasswordEntry": false,
+        "hasWhatsappCard": false
+      }
+    }
+  ],
+  "passwordReset": [
+    {
+      "width": 375,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasResetTitle": false,
+        "hasSubmit": false
+      }
+    },
+    {
+      "width": 600,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasResetTitle": false,
+        "hasSubmit": false
+      }
+    },
+    {
+      "width": 840,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasResetTitle": false,
+        "hasSubmit": false
+      }
+    },
+    {
+      "width": 1200,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasResetTitle": false,
+        "hasSubmit": false
+      }
+    },
+    {
+      "width": 1920,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasResetTitle": false,
+        "hasSubmit": false
+      }
+    }
+  ],
+  "portalTokenSeed": {
+    "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+    "textSample": "Skip to content\nDESI PET SHOWER\nHOME\nDESI PET SHOWER\nPORTAL DO CLIENTE\nADMIN\nOla, QA Signature Tutor 20260421-222213\nSair\n🤖\nAssistente desi.pet\nOnline • Resposta instantânea\nPortal do Cliente\n>\nInicio\nINICIO\nFIDELIDADE\nAVALIACOES\nMENSAGENS\nAGENDAMENTOS\nPAGAMENTOS\nHISTORICO DOS PETS\nGALERIA\nMEUS DAD"
+  },
+  "portalAuth": [
+    {
+      "width": 375,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hidesAccessForm": true,
+        "hasPortalShell": true,
+        "hasMessagesTab": true
+      }
+    },
+    {
+      "width": 600,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hidesAccessForm": true,
+        "hasPortalShell": true,
+        "hasMessagesTab": true
+      }
+    },
+    {
+      "width": 840,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hidesAccessForm": true,
+        "hasPortalShell": true,
+        "hasMessagesTab": true
+      }
+    },
+    {
+      "width": 1200,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hidesAccessForm": true,
+        "hasPortalShell": true,
+        "hasMessagesTab": true
+      }
+    },
+    {
+      "width": 1920,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hidesAccessForm": true,
+        "hasPortalShell": true,
+        "hasMessagesTab": true
+      }
+    }
+  ],
+  "profileUpdate": [
+    {
+      "width": 375,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasTutorData": true,
+        "hasPetData": false,
+        "hasSave": false
+      }
+    },
+    {
+      "width": 600,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasTutorData": true,
+        "hasPetData": false,
+        "hasSave": false
+      }
+    },
+    {
+      "width": 840,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasTutorData": true,
+        "hasPetData": false,
+        "hasSave": false
+      }
+    },
+    {
+      "width": 1200,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasTutorData": true,
+        "hasPetData": false,
+        "hasSave": false
+      }
+    },
+    {
+      "width": 1920,
+      "title": "QA Signature Portal 20260421-222213 – Desi Pet Shower",
+      "checks": {
+        "hasTutorData": true,
+        "hasPetData": false,
+        "hasSave": false
+      }
+    }
+  ],
+  "profileAddPet": {
+    "hasSecondNewPet": true
+  }
+}

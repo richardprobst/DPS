@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Classe principal do add-on Space Groomers.
  *
@@ -218,7 +218,7 @@ class DPS_Game_Addon {
 
         echo '<div class="dps-game-hub__hero">';
         echo '<div class="dps-game-hub__hero-copy">';
-        echo '<p class="dps-game-hub__eyebrow">' . esc_html__( 'Padrao M3 aplicado via docs/visual', 'dps-game' ) . '</p>';
+        echo '<p class="dps-game-hub__eyebrow">' . esc_html__( 'Padrao DPS Signature aplicado via docs/visual', 'dps-game' ) . '</p>';
         echo '<h2 class="dps-game-hub__title">' . esc_html( sprintf( __( '%s no comando da nave', 'dps-game' ), $payload['client']['firstName'] ?? __( 'Tutor', 'dps-game' ) ) ) . '</h2>';
         echo '<p class="dps-game-hub__intro">' . esc_html__( 'Este perfil conecta recorde, rotina do pet, status do portal e recompensas simbolicas do jogo em uma unica superficie.', 'dps-game' ) . '</p>';
         echo '</div>';

@@ -1,4 +1,4 @@
-# Screenshots 2026-04-21 - Agenda (operacao, modal do pet e reagendamento)
+﻿# Screenshots 2026-04-21 - Agenda (operacao, modal do pet e reagendamento)
 
 ## Contexto
 - Objetivo da mudanca: corrigir inconsistencias visuais e funcionais da Agenda em runtime real, com foco na aba Operacao, no modal de perfil do pet, no modal de reagendamento e no fluxo de checklist/check-in/check-out.
@@ -178,7 +178,7 @@
 ## Contexto
 - Objetivo da mudanca: remover a aparencia de manual do cadastro publico, mantendo apenas copy curta, labels objetivos, erros inline e acoes diretas.
 - Ambiente: pagina oficial publicada em `https://desi.pet/cadastro-de-clientes-e-pets/`, apos envio dos arquivos por SFTP.
-- Padrão visual aplicado: DPS Signature como unica linguagem visual do fluxo.
+- PadrÃ£o visual aplicado: DPS Signature como unica linguagem visual do fluxo.
 
 ## Antes/Depois
 - Antes: hero, painel e campos tinham textos explicativos longos, com linguagem tecnica e instrucional demais para um formulario publico.
@@ -219,10 +219,10 @@
 - O HTML publicado retornou o titulo `Cadastro de tutor e pets`, carregou `registration-v2.css` e nao exibiu as frases explicativas removidas.
 - As capturas confirmaram ausencia de overflow horizontal nos cinco breakpoints.
 
-# Ajuste complementar - UI Signature sem resquicios M3
+# Ajuste complementar - UI Signature sem resquicios DPS Signature
 
 ## Contexto
-- Objetivo da mudanca: consolidar cadastro, portal de acesso e atualizacao de perfil em uma unica linguagem DPS Signature, sem step rail, hero duplicado, metric cards, copy de manual ou fallback visual M3.
+- Objetivo da mudanca: consolidar cadastro, portal de acesso e atualizacao de perfil em uma unica linguagem DPS Signature, sem step rail, hero duplicado, metric cards, copy de manual ou fallback visual DPS Signature.
 - Ambiente: paginas publicadas em `https://desi.pet/cadastro-de-clientes-e-pets/` e `https://desi.pet/portal-do-cliente/`, apos envio dos arquivos por SFTP.
 - O token temporario de atualizacao de perfil foi gerado via WP-CLI para QA real e revogado ao final.
 
@@ -299,7 +299,7 @@
 - `./signature-profile-update-clean-1920.png`
 
 ## Validacao
-- Cadastro: `#dps-registration-signature-form` renderizado, `#dps-reg-form` ausente, sem step rail, sem texto M3/Material, sem copy de manual e sem overflow nos cinco breakpoints.
+- Cadastro: `#dps-registration-signature-form` renderizado, `#dps-reg-form` ausente, sem step rail, sem texto DPS Signature/Material, sem copy de manual e sem overflow nos cinco breakpoints.
 - Cadastro complementar: sem texto visivel `DPS Signature` no topo, sem frase introdutoria redundante e sem os titulos antigos `Contato principal`, `Dados do pet` ou `Concluir cadastro`.
-- Portal de acesso: sem step rail, sem texto M3/Material, sem overflow, hero com acento primario e botoes com largura utilizavel.
-- Atualizacao de perfil: formulario com token real renderizado, sem step rail, sem texto M3/Material, sem copy de manual e sem overflow nos cinco breakpoints.
+- Portal de acesso: sem step rail, sem texto DPS Signature/Material, sem overflow, hero com acento primario e botoes com largura utilizavel.
+- Atualizacao de perfil: formulario com token real renderizado, sem step rail, sem texto DPS Signature/Material, sem copy de manual e sem overflow nos cinco breakpoints.

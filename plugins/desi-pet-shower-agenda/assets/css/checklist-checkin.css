@@ -1,870 +1,306 @@
-/**
- * Estilos para Checklist Operacional e Check-in / Check-out.
+﻿/**
+ * Estilos do fluxo operacional da Agenda.
  *
- * Usa design tokens M3 Expressive definidos em dps-design-tokens.css.
- *
- * @package DPS_Agenda_Addon
- * @since   1.2.0
+ * Fonte de verdade visual: docs/visual/ (padrao DPS Signature / DPS Signature).
  */
-
-/* ===========================
-   CHECKLIST OPERACIONAL
-   =========================== */
-
-.dps-checklist-panel {
-    margin-top: 12px;
-}
-
-.dps-checklist-progress {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.dps-checklist-progress-bar {
-    flex: 1;
-    height: 6px;
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-    border-radius: 3px;
-    overflow: hidden;
-}
-
-.dps-checklist-progress-fill {
-    height: 100%;
-    background: var(--md-sys-color-primary, #6750a4);
-    border-radius: 3px;
-    transition: width 0.3s ease;
-}
-
-.dps-checklist-progress-text {
-    font-size: 12px;
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    min-width: 36px;
-    text-align: right;
-}
-
-.dps-checklist-steps {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.dps-checklist-step {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: 8px;
-    transition: background 0.15s;
-}
-
-.dps-checklist-step:hover {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-}
-
-.dps-checklist-step-icon {
-    font-size: 18px;
-    flex-shrink: 0;
-    width: 28px;
-    text-align: center;
-}
-
-.dps-checklist-step-label {
-    flex: 1;
-    font-size: 13px;
-    color: var(--md-sys-color-on-surface, #1d1b20);
-}
-
-.dps-checklist-step[data-status="done"] .dps-checklist-step-label {
-    text-decoration: line-through;
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-}
-
-.dps-checklist-step[data-status="skipped"] .dps-checklist-step-label {
-    text-decoration: line-through;
-    opacity: 0.5;
-}
-
-.dps-checklist-step-actions {
-    display: flex;
-    gap: 4px;
-    flex-shrink: 0;
-}
-
-.dps-checklist-btn {
-    border: none;
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 11px;
-    cursor: pointer;
-    transition: opacity 0.15s, background 0.15s;
-    line-height: 1.4;
-}
-
-.dps-checklist-btn:hover {
-    opacity: 0.85;
-}
-
-.dps-checklist-btn:disabled,
-.dps-checklist-btn[aria-disabled="true"] {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-.dps-checklist-btn:focus-visible,
-.dps-checkin-btn:focus-visible,
-.dps-expand-panels-btn:focus-visible,
-.dps-checklist-modal-close:focus-visible,
-.dps-checklist-modal-close-btn:focus-visible {
-    outline: 2px solid var(--md-sys-color-primary, #6750a4);
-    outline-offset: 2px;
-}
-
-.dps-checklist-btn--done {
-    background: var(--md-sys-color-primary, #6750a4);
-    color: var(--md-sys-color-on-primary, #fff);
-}
-
-.dps-checklist-btn--undo {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-}
-
-.dps-checklist-btn--rework {
-    background: var(--md-sys-color-error-container, #f9dedc);
-    color: var(--md-sys-color-on-error-container, #410e0b);
-}
-
-.dps-checklist-btn--skip {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    font-size: 10px;
-}
-
-/* Rework badge */
-.dps-checklist-rework-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    background: var(--md-sys-color-error-container, #f9dedc);
-    color: var(--md-sys-color-on-error-container, #410e0b);
-    border-radius: 10px;
-    padding: 1px 6px;
-    font-size: 10px;
-    font-weight: 600;
-}
-
-/* Rework modal */
-.dps-rework-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.dps-rework-modal {
-    background: var(--md-sys-color-surface, #fff);
-    border-radius: 16px;
-    padding: 24px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-}
-
-.dps-rework-modal h4 {
-    margin: 0 0 12px;
-    font-size: 16px;
-}
-
-.dps-rework-modal textarea {
-    width: 100%;
-    min-height: 80px;
-    border: 1px solid var(--md-sys-color-outline, #79747e);
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 13px;
-    resize: vertical;
-    box-sizing: border-box;
-}
-
-.dps-rework-modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 12px;
-}
-
-/* ===========================
-   CHECK-IN / CHECK-OUT
-   =========================== */
-
-.dps-checkin-panel {
-    margin-top: 12px;
-}
-
-.dps-checkin-status {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-}
-
-.dps-checkin-status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.dps-checkin-status-badge--pending {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
-    font-weight: 600;
-}
-
-.dps-checkin-status-badge--in {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.dps-checkin-status-badge--out {
-    background: #dbeafe;
-    color: #1e40af;
-}
-
-.dps-checkin-status-badge--duration {
-    background: var(--md-sys-color-tertiary-container, #ffd8e4);
-    color: var(--md-sys-color-on-tertiary-container, #31111d);
-}
-
-/* Safety items grid */
-.dps-safety-items {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 10px;
-    margin: 12px 0;
-}
-
-.dps-safety-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 8px 10px;
-    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
-    border-radius: 8px;
-    transition: border-color 0.15s, background 0.15s;
-    cursor: pointer;
-}
-
-.dps-safety-item:hover {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-}
-
-.dps-safety-item--checked {
-    border-color: var(--md-sys-color-error, #b3261e);
-    background: var(--md-sys-color-error-container, #f9dedc);
-}
-
-.dps-safety-item--checked[data-severity="info"] {
-    border-color: var(--md-sys-color-outline, #79747e);
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-}
-
-.dps-safety-item--checked[data-severity="warning"] {
-    border-color: #f59e0b;
-    background: #fffbeb;
-}
-
-.dps-safety-item-icon {
-    font-size: 18px;
-    flex-shrink: 0;
-}
-
-.dps-safety-item-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.dps-safety-item-label {
-    font-size: 12px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.dps-safety-item-label input[type="checkbox"] {
-    margin: 0;
-}
-
-.dps-safety-item-notes {
-    width: 100%;
-    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
-    border-radius: 4px;
-    padding: 4px 6px;
-    font-size: 11px;
-    margin-top: 4px;
-    resize: none;
-    display: none;
-    box-sizing: border-box;
-}
-
-.dps-safety-item--checked .dps-safety-item-notes {
-    display: block;
-}
-
-/* Observations field */
-.dps-checkin-observations {
-    margin: 12px 0;
-}
-
-.dps-checkin-observations label {
-    display: block;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    margin-bottom: 4px;
-}
-
-.dps-checkin-observations textarea {
-    width: 100%;
-    min-height: 60px;
-    border: 1px solid var(--md-sys-color-outline, #79747e);
-    border-radius: 8px;
-    padding: 8px 10px;
-    font-size: 13px;
-    resize: vertical;
-    box-sizing: border-box;
-}
-
-/* Action buttons */
-.dps-checkin-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-    flex-wrap: wrap;
-}
-
-.dps-checkin-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: none;
-    border-radius: 20px;
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
-}
-
-.dps-checkin-btn:hover {
-    opacity: 0.9;
-}
-
-.dps-checkin-btn:active {
-    transform: scale(0.97);
-}
-
-.dps-checkin-btn--checkin {
-    background: #16a34a;
-    color: #fff;
-}
-
-.dps-checkin-btn--checkout {
-    background: #2563eb;
-    color: #fff;
-}
-
-.dps-checkin-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* WhatsApp report button */
-.dps-checkin-whatsapp {
-    margin-top: 8px;
-}
-
-.dps-checkin-whatsapp--hidden {
-    display: none;
-}
-
-.dps-checkin-btn--whatsapp {
-    background: #25d366;
-    color: #fff;
-    text-decoration: none;
-}
-
-.dps-checkin-btn--whatsapp:hover {
-    background: #1ebe57;
-    color: #fff;
-}
-
-/* Safety summary (read-only, after check-in) */
-.dps-safety-summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 8px 0;
-}
-
-.dps-safety-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 500;
-}
-
-.dps-safety-tag--alert {
-    background: var(--md-sys-color-error-container, #f9dedc);
-    color: var(--md-sys-color-on-error-container, #410e0b);
-}
-
-.dps-safety-tag--warning {
-    background: #fffbeb;
-    color: #92400e;
-}
-
-.dps-safety-tag--info {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-}
-
-/* Checklist modal popup (triggered on status change to FINALIZADO / FINALIZADO E PAGO) */
-.dps-checklist-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.dps-checklist-modal {
-    background: var(--md-sys-color-surface, #fff);
-    border-radius: 16px;
-    width: 90%;
-    max-width: 520px;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    animation: dps-checklist-modal-in 0.2s ease-out;
-}
-
-@keyframes dps-checklist-modal-in {
-    from { opacity: 0; transform: translateY(20px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.dps-checklist-modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
-}
-
-.dps-checklist-modal-header h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--md-sys-color-on-surface, #1d1b20);
-}
-
-.dps-checklist-modal-close {
-    background: none;
-    border: none;
-    font-size: 22px;
-    cursor: pointer;
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    padding: 4px 8px;
-    border-radius: 50%;
-    line-height: 1;
-    transition: background 0.15s;
-}
-
-.dps-checklist-modal-close:hover {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-}
-
-.dps-checklist-modal-body {
-    padding: 16px 20px;
-    overflow-y: auto;
-    flex: 1;
-}
-
-.dps-checklist-modal-body .dps-checklist-panel {
-    border: none;
-    padding: 0;
-    margin-top: 0;
-}
-
-.dps-checklist-modal-loading,
-.dps-checklist-modal-error {
-    text-align: center;
-    padding: 24px 0;
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    font-size: 14px;
-}
-
-.dps-checklist-modal-error {
-    color: var(--md-sys-color-error, #b3261e);
-}
-
-.dps-checklist-modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    padding: 12px 20px;
-    border-top: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
-}
-
-.dps-checklist-modal-close-btn {
-    background: var(--md-sys-color-surface-variant, #e7e0ec);
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    padding: 8px 16px;
-    font-size: 13px;
-}
-
-/* Compact view for appointment cards */
-.dps-checkin-compact {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-}
-
-.dps-checklist-compact {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-}
-
-
-.dps-operational-cell {
-    min-width: 176px;
-}
-
-/* Operational indicators wrapper in Tab 2 */
-.dps-operational-indicators {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    width: 100%;
-}
-
-/* Expand/collapse button for detail panels */
-.dps-expand-panels-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid var(--md-sys-color-outline-variant, #c4c7c5);
-    border-radius: 20px;
-    background: var(--md-sys-color-surface, #fff);
-    color: var(--md-sys-color-on-surface, #1d1b20);
-    padding: 5px 12px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
-    white-space: nowrap;
-    line-height: 1.4;
-}
-
-.dps-expand-panels-btn__label-short {
-    display: none;
-    font-size: 12px;
-}
-
-.dps-expand-panels-btn__icon {
-    font-size: 14px;
-    line-height: 1;
-}
-
-.dps-expand-panels-btn__label {
-    font-size: 12px;
-}
-
-
-.dps-expand-panels-btn__arrow {
-    font-size: 10px;
-    transition: transform 0.2s;
-    opacity: 0.6;
-}
-
-.dps-expand-panels-btn:hover {
-    background: var(--md-sys-color-primary-container, #eaddff);
-    border-color: var(--md-sys-color-primary, #6750a4);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.dps-expand-panels-btn[aria-expanded="true"] {
-    background: var(--md-sys-color-primary-container, #eaddff);
-    border-color: var(--md-sys-color-primary, #6750a4);
-}
-
-.dps-expand-panels-btn[aria-expanded="true"] .dps-expand-panels-btn__arrow {
-    transform: rotate(180deg);
-}
-
-/* State-specific button styles */
-.dps-expand-panels-btn--pending {
-    border-color: var(--md-sys-color-primary, #6750a4);
-    background: var(--md-sys-color-primary-container, #eaddff);
-    color: var(--md-sys-color-on-primary-container, #21005d);
-}
-
-.dps-expand-panels-btn--checkin {
-    border-color: #2563eb;
-    background: #eff6ff;
-    color: #1e40af;
-}
-
-.dps-expand-panels-btn--done {
-    border-color: #16a34a;
-    background: #f0fdf4;
-    color: #166534;
-}
-
-/* Detail row with full panels */
-.dps-detail-row td {
-    padding: 0 !important;
-    background: var(--md-sys-color-surface-variant, #f5f0fa);
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-    .dps-safety-items {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .dps-safety-item-label {
-        align-items: flex-start;
-        line-height: 1.35;
-    }
-}
-
-@media (max-width: 600px) {
-    .dps-safety-items {
-        grid-template-columns: 1fr;
-    }
-
-    .dps-checkin-actions {
-        flex-direction: column;
-    }
-
-    .dps-checkin-btn {
-        justify-content: center;
-        width: 100%;
-    }
-
-    .dps-operational-cell {
-        min-width: 0;
-    }
-
-    .dps-operational-indicators {
-        justify-content: flex-end;
-    }
-
-    .dps-expand-panels-btn {
-        width: 100%;
-        justify-content: space-between;
-        padding: 7px 10px;
-        border-radius: 14px;
-    }
-
-    .dps-expand-panels-btn__label {
-        display: none;
-    }
-
-    .dps-expand-panels-btn__label-short {
-        display: inline;
-    }
-
-}
-
-/* ===========================
-   HISTORY OPS SUMMARY (read-only, used in history views)
-   =========================== */
-
-.dps-history-ops-summary {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 12px;
-    line-height: 1.4;
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-}
-
-.dps-history-ops-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.dps-history-ops-label {
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-.dps-history-ops-value {
-    color: var(--md-sys-color-on-surface, #1d1b20);
-}
-
-.dps-history-ops-value--complete {
-    color: var(--md-sys-color-primary, #6750a4);
-    font-weight: 600;
-}
-
-.dps-history-ops-badge--rework {
-    font-size: 11px;
-    background: var(--md-sys-color-error-container, #f9dedc);
-    color: var(--md-sys-color-on-error-container, #410e0b);
-    border-radius: 10px;
-    padding: 1px 6px;
-}
-
-.dps-history-ops-safety {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-top: 2px;
-}
-
-.dps-history-ops-obs {
-    display: flex;
-    gap: 4px;
-    margin-top: 2px;
-}
-
-.dps-history-ops-obs-text {
-    color: var(--md-sys-color-on-surface-variant, #49454f);
-    font-style: italic;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 200px;
-}
-
-/* M3 detail panels normalization */
-.dps-checkin-status-badge--pending,
-.dps-safety-tag--info {
-    background: var(--dps-color-surface-container);
-    color: var(--dps-color-on-surface-variant);
-    border: 1px solid var(--dps-color-outline-variant);
-}
-
-.dps-checkin-status-badge--in,
-.dps-safety-tag--success {
-    background: var(--dps-color-success-container);
-    color: var(--dps-color-on-success-container);
-}
-
-.dps-checkin-status-badge--out {
-    background: var(--dps-color-primary-container);
-    color: var(--dps-color-on-primary-container);
-}
-
-.dps-checkin-status-badge--duration,
-.dps-safety-tag--warning {
-    background: var(--dps-color-warning-container);
-    color: var(--dps-color-on-warning-container);
-}
-
-.dps-safety-tag--alert {
-    background: var(--dps-color-error-container);
-    color: var(--dps-color-on-error-container);
-}
-
-.dps-expand-panels-btn {
-    background: var(--dps-color-surface-container-lowest);
-    border-color: var(--dps-color-outline-variant);
-    color: var(--dps-color-on-surface);
-}
-
-.dps-expand-panels-btn:hover,
-.dps-expand-panels-btn[aria-expanded="true"] {
-    background: var(--dps-color-primary-container);
-    border-color: var(--dps-color-primary);
-    color: var(--dps-color-on-primary-container);
-    box-shadow: var(--dps-elevation-1);
-}
-
-/* ==========================================================================
-   Lista de Atendimentos - Painel operacional M3 unificado
-   Fonte de verdade visual: docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md
-   + docs/visual/VISUAL_STYLE_GUIDE.md
-   ========================================================================== */
-
-.dps-detail-panels {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-    gap: var(--dps-space-4);
-    padding: var(--dps-space-4);
-    background: var(--dps-color-surface-container-low);
-    border: 1px solid var(--dps-color-outline-variant);
-    border-radius: var(--dps-shape-large);
-}
 
 .dps-checklist-panel,
 .dps-checkin-panel {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: var(--dps-space-4);
+    min-width: 0;
     padding: var(--dps-space-5);
+    border: 1px solid var(--dps-color-outline-variant);
     border-radius: var(--dps-shape-large);
     background: var(--dps-color-surface-container-lowest);
-    border: 1px solid var(--dps-color-outline-variant);
+    box-shadow: var(--dps-elevation-1);
 }
 
 .dps-checklist-panel h4,
 .dps-checkin-panel h4 {
     margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
     color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-title-large-size);
+    line-height: var(--dps-typescale-title-large-line);
+    font-weight: var(--dps-typescale-title-large-weight);
+}
+
+.dps-checklist-modal-loading,
+.dps-checklist-modal-error {
+    margin: 0;
+    padding: var(--dps-space-5);
+    border-radius: var(--dps-shape-medium);
+    background: var(--dps-color-surface-container-low);
+    color: var(--dps-color-on-surface-variant);
+    text-align: center;
+}
+
+.dps-checklist-modal-error {
+    border: 1px solid color-mix(in srgb, var(--dps-color-error) 24%, transparent);
+    background: color-mix(in srgb, var(--dps-color-error-container) 76%, var(--dps-color-surface-container-lowest));
+    color: var(--dps-color-on-error-container);
+}
+
+.dps-operation-modal-shell {
+    display: grid;
+    gap: var(--dps-space-5);
+    min-width: 0;
+}
+
+.dps-operation-modal-summary,
+.dps-operational-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    min-width: 0;
+}
+
+.dps-operation-modal-panels {
+    display: grid;
+    gap: var(--dps-space-5);
+    min-width: 0;
+    grid-template-columns: 1fr;
+}
+
+.dps-operational-stack {
+    display: grid;
+    gap: 0.85rem;
+    min-width: 0;
+}
+
+.dps-operational-pill {
+    display: inline-grid;
+    gap: 0.15rem;
+    align-content: center;
+    min-width: 0;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+    background: var(--dps-color-surface-container-low);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-operational-pill__label {
+    color: var(--dps-color-on-surface-variant);
+    font-size: var(--dps-typescale-label-small-size);
+    line-height: var(--dps-typescale-label-small-line);
+    font-weight: var(--dps-typescale-label-small-weight);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.dps-operational-pill__value {
+    min-width: 0;
     font-size: var(--dps-typescale-title-small-size);
     line-height: var(--dps-typescale-title-small-line);
     font-weight: var(--dps-typescale-title-small-weight);
 }
 
-.dps-checklist-progress {
-    gap: var(--dps-space-3);
+.dps-operational-pill--checklist {
+    border-color: color-mix(in srgb, var(--dps-color-primary) 24%, transparent);
+    background: color-mix(in srgb, var(--dps-color-primary-container) 72%, var(--dps-color-surface-container-lowest));
 }
 
-.dps-checklist-progress-bar {
-    height: 0.6rem;
-    border-radius: var(--dps-shape-full);
+.dps-operational-pill--rework {
+    border-color: color-mix(in srgb, var(--dps-color-warning) 28%, transparent);
+    background: color-mix(in srgb, var(--dps-color-warning-container) 74%, var(--dps-color-surface-container-lowest));
+}
+
+.dps-operational-pill--checkin {
+    border-color: color-mix(in srgb, var(--dps-color-success) 24%, transparent);
+    background: color-mix(in srgb, var(--dps-color-success-container) 76%, var(--dps-color-surface-container-lowest));
+}
+
+.dps-operational-pill--checkout {
+    border-color: color-mix(in srgb, var(--dps-color-tertiary) 24%, transparent);
+    background: color-mix(in srgb, var(--dps-color-tertiary-container) 72%, var(--dps-color-surface-container-lowest));
+}
+
+.dps-operational-pill--pending,
+.dps-operational-pill--summary {
     background: var(--dps-color-surface-container);
 }
 
-.dps-checklist-progress-fill {
-    border-radius: inherit;
-    background: linear-gradient(90deg, var(--dps-color-primary), var(--dps-color-secondary));
+.dps-operational-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+    min-width: 0;
 }
 
-.dps-checklist-steps {
+.dps-expand-panels-btn,
+.dps-operation-action-btn,
+.dps-checklist-btn,
+.dps-checkin-btn {
+    min-height: 2.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-width: 0;
+    padding: 0.75rem 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--dps-shape-full);
+    text-decoration: none;
+    font-size: var(--dps-typescale-label-large-size);
+    line-height: var(--dps-typescale-label-large-line);
+    font-weight: var(--dps-typescale-label-large-weight);
+    cursor: pointer;
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease, color 180ms ease, opacity 180ms ease;
+}
+
+.dps-expand-panels-btn:hover,
+.dps-operation-action-btn:hover,
+.dps-checklist-btn:hover,
+.dps-checkin-btn:hover,
+.dps-expand-panels-btn:focus-visible,
+.dps-operation-action-btn:focus-visible,
+.dps-checklist-btn:focus-visible,
+.dps-checkin-btn:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: var(--dps-elevation-1);
+    outline: none;
+}
+
+.dps-expand-panels-btn:focus-visible,
+.dps-operation-action-btn:focus-visible,
+.dps-checklist-btn:focus-visible,
+.dps-checkin-btn:focus-visible {
+    border-color: color-mix(in srgb, var(--dps-color-primary) 28%, transparent);
+}
+
+.dps-expand-panels-btn:disabled,
+.dps-operation-action-btn:disabled,
+.dps-checklist-btn:disabled,
+.dps-checkin-btn:disabled,
+.dps-expand-panels-btn[aria-disabled="true"],
+.dps-operation-action-btn[aria-disabled="true"],
+.dps-checklist-btn[aria-disabled="true"],
+.dps-checkin-btn[aria-disabled="true"] {
+    opacity: 0.56;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.dps-expand-panels-btn,
+.dps-expand-panels-btn--pending,
+.dps-expand-panels-btn--checkin,
+.dps-expand-panels-btn--done {
+    background: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+}
+
+.dps-expand-panels-btn--checkin {
+    background: color-mix(in srgb, var(--dps-color-primary) 84%, var(--dps-color-secondary));
+}
+
+.dps-expand-panels-btn--done {
+    background: color-mix(in srgb, var(--dps-color-success) 80%, var(--dps-color-primary));
+}
+
+.dps-operation-action-btn {
+    background: var(--dps-color-surface-container-low);
+    border-color: var(--dps-color-outline-variant);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-operation-action-btn--checkin {
+    background: color-mix(in srgb, var(--dps-color-success-container) 80%, var(--dps-color-surface-container-lowest));
+    border-color: color-mix(in srgb, var(--dps-color-success) 24%, transparent);
+}
+
+.dps-operation-action-btn--checkout {
+    background: color-mix(in srgb, var(--dps-color-tertiary-container) 76%, var(--dps-color-surface-container-lowest));
+    border-color: color-mix(in srgb, var(--dps-color-tertiary) 24%, transparent);
+}
+
+.dps-operation-action-btn--done {
+    background: color-mix(in srgb, var(--dps-color-primary-container) 76%, var(--dps-color-surface-container-lowest));
+    border-color: color-mix(in srgb, var(--dps-color-primary) 24%, transparent);
+}
+
+.dps-expand-panels-btn__icon,
+.dps-operation-action-btn__icon {
+    flex: 0 0 auto;
+}
+
+.dps-expand-panels-btn__label,
+.dps-operation-action-btn__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dps-expand-panels-btn__label-short,
+.dps-operation-action-btn__label-short {
+    display: none;
+}
+
+.dps-checklist-btn--done {
+    background: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+}
+
+.dps-checklist-btn--undo,
+.dps-checklist-btn--skip {
+    border-color: var(--dps-color-outline-variant);
+    background: var(--dps-color-surface-container-low);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-checklist-btn--rework {
+    border-color: color-mix(in srgb, var(--dps-color-warning) 28%, transparent);
+    background: color-mix(in srgb, var(--dps-color-warning-container) 78%, var(--dps-color-surface-container-lowest));
+    color: var(--dps-color-on-surface);
+}
+
+.dps-checkin-btn--checkin {
+    background: color-mix(in srgb, var(--dps-color-success) 90%, var(--dps-color-primary));
+    color: var(--dps-color-on-primary);
+}
+
+.dps-checkin-btn--checkout {
+    background: color-mix(in srgb, var(--dps-color-tertiary) 84%, var(--dps-color-primary));
+    color: var(--dps-color-on-primary);
+}
+
+.dps-checkin-btn--whatsapp {
+    background: #25d366;
+    color: #fff;
+}
+
+.dps-checklist-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.dps-checklist-progress-bar {
+    flex: 1 1 auto;
+    height: 0.5rem;
+    overflow: hidden;
+    border-radius: var(--dps-shape-full);
+    background: var(--dps-color-surface-container-high);
+}
+
+.dps-checklist-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--dps-color-primary), color-mix(in srgb, var(--dps-color-primary) 68%, var(--dps-color-tertiary)));
+    transition: width 220ms ease;
+}
+
+.dps-checklist-progress-text {
+    color: var(--dps-color-on-surface-variant);
+    font-size: var(--dps-typescale-label-medium-size);
+    line-height: var(--dps-typescale-label-medium-line);
+    font-weight: var(--dps-typescale-label-medium-weight);
+}
+
+.dps-checklist-steps,
+.dps-checkin-stage-list {
     display: grid;
-    gap: 0.75rem;
+    gap: var(--dps-space-3);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -872,23 +308,45 @@
 
 .dps-checklist-step {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 0.75rem;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
     align-items: center;
-    padding: 0.9rem 1rem;
+    gap: 0.75rem;
+    min-width: 0;
+    padding: 0.95rem 1rem;
     border: 1px solid var(--dps-color-outline-variant);
     border-radius: var(--dps-shape-medium);
     background: var(--dps-color-surface-container-low);
 }
 
 .dps-checklist-step[data-status="done"] {
-    background: var(--dps-color-success-container);
-    border-color: color-mix(in srgb, var(--dps-color-success) 34%, var(--dps-color-outline-variant));
+    background: color-mix(in srgb, var(--dps-color-success-container) 72%, var(--dps-color-surface-container-lowest));
 }
 
 .dps-checklist-step[data-status="skipped"] {
-    background: var(--dps-color-warning-container);
-    border-color: color-mix(in srgb, var(--dps-color-warning) 36%, var(--dps-color-outline-variant));
+    background: color-mix(in srgb, var(--dps-color-surface-container) 86%, var(--dps-color-surface-container-lowest));
+}
+
+.dps-checklist-step-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--dps-shape-full);
+    background: var(--dps-color-surface-container-high);
+}
+
+.dps-checklist-step-label {
+    min-width: 0;
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-body-medium-size);
+    line-height: var(--dps-typescale-body-medium-line);
+}
+
+.dps-checklist-step[data-status="done"] .dps-checklist-step-label,
+.dps-checklist-step[data-status="skipped"] .dps-checklist-step-label {
+    color: var(--dps-color-on-surface-variant);
+    text-decoration: line-through;
 }
 
 .dps-checklist-step-actions {
@@ -898,118 +356,206 @@
     gap: 0.5rem;
 }
 
-.dps-checklist-btn,
-.dps-checkin-btn,
-.dps-expand-panels-btn {
-    min-height: 2.75rem;
+.dps-checklist-rework-badge,
+.dps-safety-tag,
+.dps-checkin-status-badge,
+.dps-checkin-stage__time {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: 0.35rem;
-    padding: 0.6rem 1rem;
+    min-width: 0;
+    padding: 0.45rem 0.75rem;
     border-radius: var(--dps-shape-full);
-    font-size: var(--dps-typescale-label-large-size);
-    line-height: var(--dps-typescale-label-large-line);
-    font-weight: var(--dps-typescale-label-large-weight);
+    font-size: var(--dps-typescale-label-medium-size);
+    line-height: var(--dps-typescale-label-medium-line);
+    font-weight: var(--dps-typescale-label-medium-weight);
+}
+
+.dps-checklist-rework-badge {
+    border: 1px solid color-mix(in srgb, var(--dps-color-warning) 28%, transparent);
+    background: color-mix(in srgb, var(--dps-color-warning-container) 82%, var(--dps-color-surface-container-lowest));
+    color: var(--dps-color-on-surface);
 }
 
 .dps-checkin-status {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.65rem;
 }
 
-.dps-safety-summary {
+.dps-checkin-status-badge {
+    border: 1px solid var(--dps-color-outline-variant);
+    background: var(--dps-color-surface-container-low);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-checkin-status-badge--pending {
+    background: var(--dps-color-surface-container);
+    color: var(--dps-color-on-surface-variant);
+}
+
+.dps-checkin-status-badge--in {
+    border-color: color-mix(in srgb, var(--dps-color-success) 24%, transparent);
+    background: color-mix(in srgb, var(--dps-color-success-container) 76%, var(--dps-color-surface-container-lowest));
+}
+
+.dps-checkin-status-badge--out {
+    border-color: color-mix(in srgb, var(--dps-color-tertiary) 24%, transparent);
+    background: color-mix(in srgb, var(--dps-color-tertiary-container) 74%, var(--dps-color-surface-container-lowest));
+}
+
+.dps-checkin-status-badge--duration {
+    background: color-mix(in srgb, var(--dps-color-primary-container) 74%, var(--dps-color-surface-container-lowest));
+}
+
+.dps-checkin-stage {
+    display: grid;
+    gap: var(--dps-space-4);
+    min-width: 0;
+    padding: var(--dps-space-4);
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+    background: var(--dps-color-surface-container-low);
+}
+
+.dps-checkin-stage--saving {
+    opacity: 0.7;
+}
+
+.dps-checkin-stage--locked {
+    opacity: 0.72;
+}
+
+.dps-checkin-stage__header {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--dps-space-3);
+}
+
+.dps-checkin-stage__heading {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.dps-checkin-stage__heading h5 {
+    margin: 0;
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-title-medium-size);
+    line-height: var(--dps-typescale-title-medium-line);
+    font-weight: var(--dps-typescale-title-medium-weight);
+}
+
+.dps-checkin-stage__heading p {
+    margin: 0;
+    color: var(--dps-color-on-surface-variant);
+    font-size: var(--dps-typescale-body-small-size);
+    line-height: var(--dps-typescale-body-small-line);
+}
+
+.dps-checkin-stage__meta {
+    flex: 0 0 auto;
+}
+
+.dps-checkin-stage__time {
+    border: 1px solid var(--dps-color-outline-variant);
+    background: var(--dps-color-surface-container-high);
+    color: var(--dps-color-on-surface);
+}
+
+.dps-checkin-stage__time--pending {
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-safety-items {
+    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--dps-space-3);
+    gap: 0.75rem;
+    min-width: 0;
 }
 
 .dps-safety-item {
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.85rem;
-    align-items: start;
-    padding: 1rem;
-    border-radius: var(--dps-shape-large);
-    background: var(--dps-color-surface-container-low);
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.75rem;
+    align-items: flex-start;
+    min-width: 0;
+    padding: 0.9rem 1rem;
     border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+    background: var(--dps-color-surface-container-lowest);
+    transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
 }
 
 .dps-safety-item:hover {
-    border-color: var(--dps-color-primary);
+    border-color: color-mix(in srgb, var(--dps-color-primary) 20%, transparent);
     box-shadow: var(--dps-elevation-1);
+}
+
+.dps-safety-item--checked {
+    border-color: color-mix(in srgb, var(--dps-color-primary) 26%, transparent);
+    background: color-mix(in srgb, var(--dps-color-primary-container) 74%, var(--dps-color-surface-container-lowest));
+}
+
+.dps-safety-item[data-severity="warning"].dps-safety-item--checked {
+    border-color: color-mix(in srgb, var(--dps-color-warning) 26%, transparent);
+    background: color-mix(in srgb, var(--dps-color-warning-container) 80%, var(--dps-color-surface-container-lowest));
+}
+
+.dps-safety-item-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--dps-shape-full);
+    background: var(--dps-color-surface-container-high);
 }
 
 .dps-safety-item-content {
     display: grid;
-    gap: 0.65rem;
+    gap: 0.55rem;
+    min-width: 0;
 }
 
 .dps-safety-item-label {
     display: flex;
-    gap: 0.75rem;
-    align-items: center;
+    align-items: flex-start;
+    gap: 0.55rem;
     color: var(--dps-color-on-surface);
-    font-weight: var(--dps-typescale-label-large-weight);
-    cursor: pointer;
+    font-size: var(--dps-typescale-body-small-size);
+    line-height: var(--dps-typescale-body-small-line);
+    font-weight: var(--dps-typescale-label-medium-weight);
 }
 
 .dps-safety-item-label input[type="checkbox"] {
-    appearance: none;
-    width: 1.25rem;
-    height: 1.25rem;
-    margin: 0;
-    flex: 0 0 1.25rem;
-    border: 2px solid var(--dps-color-outline);
-    border-radius: var(--dps-shape-small);
-    background: var(--dps-color-surface-container-lowest);
-    position: relative;
-    transition: background var(--dps-motion-hover), border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
-}
-
-.dps-safety-item-label input[type="checkbox"]:checked {
-    background: var(--dps-color-primary);
-    border-color: var(--dps-color-primary);
-}
-
-.dps-safety-item-label input[type="checkbox"]:checked::after {
-    content: "";
-    position: absolute;
-    left: 0.26rem;
-    top: 0.02rem;
-    width: 0.3rem;
-    height: 0.62rem;
-    border-right: 2px solid var(--dps-color-on-primary);
-    border-bottom: 2px solid var(--dps-color-on-primary);
-    transform: rotate(45deg);
-}
-
-.dps-safety-item-label input[type="checkbox"]:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--dps-color-primary) 26%, transparent);
-    outline-offset: 2px;
+    margin: 0.1rem 0 0;
+    accent-color: var(--dps-color-primary);
 }
 
 .dps-safety-item-notes,
 .dps-checkin-observations textarea {
     width: 100%;
-    min-height: 2.8rem;
+    min-height: 3rem;
     padding: 0.8rem 0.95rem;
     border: 1px solid var(--dps-color-outline-variant);
     border-radius: var(--dps-shape-medium);
     background: var(--dps-color-surface-container-lowest);
     color: var(--dps-color-on-surface);
+    font: inherit;
     box-sizing: border-box;
+    resize: vertical;
+}
+
+.dps-safety-item-notes::placeholder,
+.dps-checkin-observations textarea::placeholder {
+    color: var(--dps-color-on-surface-variant);
 }
 
 .dps-checkin-observations {
     display: grid;
-    gap: 0.55rem;
+    gap: 0.5rem;
 }
 
 .dps-checkin-observations label {
@@ -1020,45 +566,91 @@
 }
 
 .dps-checkin-actions,
-.dps-checkin-whatsapp {
+.dps-checkin-whatsapp,
+.dps-safety-summary {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.65rem;
 }
 
-.dps-expand-panels-btn {
-    min-width: 11rem;
-    justify-content: space-between;
+.dps-checkin-whatsapp--hidden {
+    display: none;
 }
 
-.dps-operational-indicators {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
-    justify-content: flex-start;
+.dps-safety-tag {
+    border: 1px solid var(--dps-color-outline-variant);
+    background: var(--dps-color-surface-container-low);
+    color: var(--dps-color-on-surface);
 }
 
-.dps-detail-row td {
-    padding: 0 !important;
-    border-top: 0;
-    background: transparent;
+.dps-safety-tag--warning {
+    border-color: color-mix(in srgb, var(--dps-color-warning) 24%, transparent);
+    background: color-mix(in srgb, var(--dps-color-warning-container) 78%, var(--dps-color-surface-container-lowest));
 }
 
-.dps-rework-modal-overlay,
+.dps-safety-tag--critical,
+.dps-safety-tag--danger {
+    border-color: color-mix(in srgb, var(--dps-color-error) 24%, transparent);
+    background: color-mix(in srgb, var(--dps-color-error-container) 82%, var(--dps-color-surface-container-lowest));
+}
+
+.dps-rework-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10030;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(12, 18, 28, 0.54);
+}
+
 .dps-rework-modal {
-    border-radius: var(--dps-shape-dialog);
+    width: min(100%, 26rem);
+    display: grid;
+    gap: var(--dps-space-4);
+    padding: var(--dps-space-5);
+    border-radius: var(--dps-shape-extra-large);
+    background: var(--dps-color-surface-container-lowest);
+    box-shadow: var(--dps-elevation-2);
 }
 
-@media (max-width: 1200px) {
-    .dps-detail-panels {
+.dps-rework-modal h4 {
+    margin: 0;
+    color: var(--dps-color-on-surface);
+    font-size: var(--dps-typescale-title-medium-size);
+    line-height: var(--dps-typescale-title-medium-line);
+    font-weight: var(--dps-typescale-title-medium-weight);
+}
+
+.dps-rework-modal textarea {
+    width: 100%;
+    min-height: 8rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: var(--dps-shape-medium);
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.dps-rework-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.65rem;
+}
+
+@media (max-width: 720px) {
+    .dps-operational-actions,
+    .dps-safety-items {
         grid-template-columns: 1fr;
     }
-}
 
-@media (max-width: 840px) {
     .dps-checklist-step {
         grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .dps-checklist-rework-badge {
+        grid-column: 2;
+        justify-self: start;
     }
 
     .dps-checklist-step-actions {
@@ -1066,30 +658,57 @@
         justify-content: flex-start;
     }
 
-    .dps-safety-items {
-        grid-template-columns: 1fr;
+    .dps-expand-panels-btn__label,
+    .dps-operation-action-btn__label {
+        display: none;
+    }
+
+    .dps-expand-panels-btn__label-short,
+    .dps-operation-action-btn__label-short {
+        display: inline;
     }
 }
 
 @media (max-width: 600px) {
-    .dps-detail-panels {
-        padding: var(--dps-space-3);
-        gap: var(--dps-space-3);
-    }
-
     .dps-checklist-panel,
     .dps-checkin-panel {
         padding: var(--dps-space-4);
     }
 
+    .dps-checkin-stage {
+        padding: var(--dps-space-3);
+    }
+
+    .dps-checkin-stage__header {
+        flex-direction: column;
+    }
+
     .dps-checklist-btn,
     .dps-checkin-btn,
-    .dps-expand-panels-btn {
+    .dps-expand-panels-btn,
+    .dps-operation-action-btn {
         width: 100%;
     }
 
     .dps-checkin-actions,
-    .dps-checkin-whatsapp {
+    .dps-checkin-whatsapp,
+    .dps-rework-modal-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-operation-modal-shell {
+        gap: var(--dps-space-4);
+    }
+
+    .dps-operational-summary {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .dps-checklist-progress {
+        align-items: flex-start;
         flex-direction: column;
     }
 }

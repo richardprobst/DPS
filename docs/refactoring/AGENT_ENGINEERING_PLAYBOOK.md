@@ -1,30 +1,30 @@
-# Playbook de engenharia para agentes (Core + Add-ons)
+﻿# Playbook de engenharia para agentes (Core + Add-ons)
 
-Este documento complementa o `AGENTS.md` da raiz com diretrizes práticas para implementação e refatoração.
-Objetivo: manter código limpo, sustentável e escalável para o plugin base e add-ons, preservando compatibilidade com WordPress.
+Este documento complementa o `AGENTS.md` da raiz com diretrizes prÃ¡ticas para implementaÃ§Ã£o e refatoraÃ§Ã£o.
+Objetivo: manter cÃ³digo limpo, sustentÃ¡vel e escalÃ¡vel para o plugin base e add-ons, preservando compatibilidade com WordPress.
 
-## Princípios de implementação
+## PrincÃ­pios de implementaÃ§Ã£o
 
-1. **Clareza > esperteza**: o código deve ser óbvio para quem mantém.
-2. **KISS e YAGNI**: sem abstrações sem uso real.
-3. **DRY com bom senso**: evitar duplicação de regra de negócio sem criar acoplamento indevido entre add-ons.
-4. **Extensibilidade**: core pequeno e estável; add-ons integram por contratos (hooks/interfaces).
-5. **Segurança e performance**: tratadas como requisitos de entrega.
+1. **Clareza > esperteza**: o cÃ³digo deve ser Ã³bvio para quem mantÃ©m.
+2. **KISS e YAGNI**: sem abstraÃ§Ãµes sem uso real.
+3. **DRY com bom senso**: evitar duplicaÃ§Ã£o de regra de negÃ³cio sem criar acoplamento indevido entre add-ons.
+4. **Extensibilidade**: core pequeno e estÃ¡vel; add-ons integram por contratos (hooks/interfaces).
+5. **SeguranÃ§a e performance**: tratadas como requisitos de entrega.
 
 ## Regras arquiteturais
 
-- Regra de negócio não deve ficar em callbacks de hooks/shortcodes.
-- O core deve expor contratos estáveis por:
+- Regra de negÃ³cio nÃ£o deve ficar em callbacks de hooks/shortcodes.
+- O core deve expor contratos estÃ¡veis por:
   - interfaces PHP (uso interno), e/ou
-  - actions/filters (extensões/add-ons).
-- Add-ons não devem acessar internals do core por caminhos não oficiais.
-- Dependências explícitas por construtor/factory; evitar espalhar singletons/globais.
+  - actions/filters (extensÃµes/add-ons).
+- Add-ons nÃ£o devem acessar internals do core por caminhos nÃ£o oficiais.
+- DependÃªncias explÃ­citas por construtor/factory; evitar espalhar singletons/globais.
 
-## Regras WordPress (execução)
+## Regras WordPress (execuÃ§Ã£o)
 
 - Sempre aplicar:
   - capability checks em rotas/admin actions;
-  - nonce em formulários/admin actions;
+  - nonce em formulÃ¡rios/admin actions;
   - sanitize/validate de input e escape de output;
   - `$wpdb->prepare()` em SQL.
 - Evitar:
@@ -32,73 +32,73 @@ Objetivo: manter código limpo, sustentável e escalável para o plugin base e a
   - uso indiscriminado de `wp_postmeta` para dados relacionais complexos.
 - REST:
   - endpoints paginados;
-  - autorização explícita;
+  - autorizaÃ§Ã£o explÃ­cita;
   - payload validado.
 
-## Padrões de código
+## PadrÃµes de cÃ³digo
 
-- Nomes descritivos, sem abreviações obscuras.
-- Funções pequenas, com responsabilidade única (SRP).
-- Evitar “classes Deus”.
+- Nomes descritivos, sem abreviaÃ§Ãµes obscuras.
+- FunÃ§Ãµes pequenas, com responsabilidade Ãºnica (SRP).
+- Evitar â€œclasses Deusâ€.
 - Preferir early returns para reduzir aninhamento.
-- Comentários explicam o **porquê**, não o **o quê**.
+- ComentÃ¡rios explicam o **porquÃª**, nÃ£o o **o quÃª**.
 
 ## Definition of Done (DoD)
 
-Uma alteração é considerada pronta quando, conforme aplicável ao escopo:
+Uma alteraÃ§Ã£o Ã© considerada pronta quando, conforme aplicÃ¡vel ao escopo:
 
-- Passa em lint/PHPCS (WordPress standards) e análise estática (PHPStan no nível acordado).
-- Mantém compatibilidade com versões de PHP/WordPress suportadas pelo projeto.
-- Inclui testes unitários para regra de negócio (quando aplicável).
-- Inclui teste de integração para endpoints/repositórios críticos (quando aplicável).
+- Passa em lint/PHPCS (WordPress standards) e anÃ¡lise estÃ¡tica (PHPStan no nÃ­vel acordado).
+- MantÃ©m compatibilidade com versÃµes de PHP/WordPress suportadas pelo projeto.
+- Inclui testes unitÃ¡rios para regra de negÃ³cio (quando aplicÃ¡vel).
+- Inclui teste de integraÃ§Ã£o para endpoints/repositÃ³rios crÃ­ticos (quando aplicÃ¡vel).
 - Inclui log adequado para falhas relevantes.
-- Não introduz regressões de performance perceptíveis (ex.: N+1, queries não indexáveis).
+- NÃ£o introduz regressÃµes de performance perceptÃ­veis (ex.: N+1, queries nÃ£o indexÃ¡veis).
 - Atualiza docs/README quando houver novo contrato/hook exposto.
 
 ## Processo recomendado para agentes
 
 Antes de codar:
-- resumir intenção e impacto (arquitetura/dados/API);
-- quebrar em mudanças pequenas e revisáveis.
+- resumir intenÃ§Ã£o e impacto (arquitetura/dados/API);
+- quebrar em mudanÃ§as pequenas e revisÃ¡veis.
 
 Ao encerrar:
 - registrar trade-offs e alternativas consideradas, quando houver;
-- se alguma regra precisar ser violada por motivo técnico, justificar no PR.
+- se alguma regra precisar ser violada por motivo tÃ©cnico, justificar no PR.
 
-## Regra para demandas visuais (M3)
+## Regra para demandas visuais (DPS Signature)
 
 Quando a tarefa envolver UI, frontend ou layout:
-- seguir obrigatoriamente as referências em `docs/visual/`;
-- tratar `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do padrão visual M3;
-- declarar na resposta/PR que as orientações M3 foram aplicadas;
-- documentar a mudança com resumo de antes/depois e arquivos impactados;
+- seguir obrigatoriamente as referÃªncias em `docs/visual/`;
+- tratar `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do padrÃ£o visual DPS Signature;
+- declarar na resposta/PR que as orientaÃ§Ãµes DPS Signature foram aplicadas;
+- documentar a mudanÃ§a com resumo de antes/depois e arquivos impactados;
 - capturar prints completos das telas alteradas e salvar em `docs/screenshots/YYYY-MM-DD/`;
 - informar no fechamento/PR o caminho exato onde os registros e prints foram salvos.
 
-## Validação recomendada por tipo de mudança
+## ValidaÃ§Ã£o recomendada por tipo de mudanÃ§a
 
-- **Documentação apenas:** `git diff --check` e revisão de apontamentos/paths citados.
+- **DocumentaÃ§Ã£o apenas:** `git diff --check` e revisÃ£o de apontamentos/paths citados.
 - **PHP alterado:** executar `php -l` por arquivo modificado.
-- **Mudança funcional:** validar fluxo crítico no WordPress local.
-- **Mudança visual (M3):** validar aderência com `docs/visual/` + registrar prints em `docs/screenshots/YYYY-MM-DD/`.
+- **MudanÃ§a funcional:** validar fluxo crÃ­tico no WordPress local.
+- **MudanÃ§a visual (DPS Signature):** validar aderÃªncia com `docs/visual/` + registrar prints em `docs/screenshots/YYYY-MM-DD/`.
 
-## Checklist rápido de fechamento
+## Checklist rÃ¡pido de fechamento
 
 - Confirmar escopo da trilha (A ou B) e impactos.
 - Listar testes/comandos executados e resultado.
 - Informar trade-offs relevantes (quando houver).
 - Para tarefas visuais: citar o caminho do documento e dos screenshots salvos.
 
-## Conflitos e precedência
+## Conflitos e precedÃªncia
 
-- Em conflito, prevalecem as regras da raiz em `AGENTS.md` (MUST / ASK BEFORE / segurança).
-- Este playbook funciona como guia complementar para decisões de implementação.
+- Em conflito, prevalecem as regras da raiz em `AGENTS.md` (MUST / ASK BEFORE / seguranÃ§a).
+- Este playbook funciona como guia complementar para decisÃµes de implementaÃ§Ã£o.
 
 ---
 
-## Padrão de dbDelta e Versionamento de Tabelas (Fase 3.1)
+## PadrÃ£o de dbDelta e Versionamento de Tabelas (Fase 3.1)
 
-Toda criação ou alteração de tabela customizada DEVE seguir este padrão:
+Toda criaÃ§Ã£o ou alteraÃ§Ã£o de tabela customizada DEVE seguir este padrÃ£o:
 
 ```php
 public static function maybe_create_tables() {
@@ -106,7 +106,7 @@ public static function maybe_create_tables() {
     $option_key = 'dps_{addon}_db_version';
     $installed  = get_option( $option_key, '' );
 
-    // Guard: só executa dbDelta se a versão mudou
+    // Guard: sÃ³ executa dbDelta se a versÃ£o mudou
     if ( $installed === $db_version ) {
         return;
     }
@@ -117,9 +117,9 @@ public static function maybe_create_tables() {
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-    // IMPORTANTE: dbDelta() exige formatação estrita:
-    // - 2 espaços entre 'PRIMARY KEY' e '(' (não 1)
-    // - Usar 'KEY' em vez de 'INDEX' para índices secundários
+    // IMPORTANTE: dbDelta() exige formataÃ§Ã£o estrita:
+    // - 2 espaÃ§os entre 'PRIMARY KEY' e '(' (nÃ£o 1)
+    // - Usar 'KEY' em vez de 'INDEX' para Ã­ndices secundÃ¡rios
     // Ref: https://developer.wordpress.org/reference/functions/dbdelta/
     $sql = "CREATE TABLE {$table_name} (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -135,20 +135,20 @@ public static function maybe_create_tables() {
 
 ### Regras:
 1. **Sempre** usar `get_option()` com version check antes de `dbDelta()`
-2. **Sempre** chamar `update_option()` após `dbDelta()` bem-sucedido
-3. Incrementar a versão ao alterar schema (novas colunas, índices, etc.)
-4. Migrações de dados devem estar em blocos `version_compare()` separados
-5. DDL queries (ALTER TABLE, CREATE INDEX) usam `$wpdb->prefix` direto — são seguras por não receberem input do usuário
+2. **Sempre** chamar `update_option()` apÃ³s `dbDelta()` bem-sucedido
+3. Incrementar a versÃ£o ao alterar schema (novas colunas, Ã­ndices, etc.)
+4. MigraÃ§Ãµes de dados devem estar em blocos `version_compare()` separados
+5. DDL queries (ALTER TABLE, CREATE INDEX) usam `$wpdb->prefix` direto â€” sÃ£o seguras por nÃ£o receberem input do usuÃ¡rio
 
 ---
 
-## Padrão de Injeção de Dependência (Fase 7.3)
+## PadrÃ£o de InjeÃ§Ã£o de DependÃªncia (Fase 7.3)
 
-O projeto utiliza duas estratégias de instanciação, escolhidas conforme o caso:
+O projeto utiliza duas estratÃ©gias de instanciaÃ§Ã£o, escolhidas conforme o caso:
 
-### 1. Singleton (classes utilitárias e repositórios)
+### 1. Singleton (classes utilitÃ¡rias e repositÃ³rios)
 
-Usado para classes sem estado mutável ou com estado compartilhado (repositórios, helpers):
+Usado para classes sem estado mutÃ¡vel ou com estado compartilhado (repositÃ³rios, helpers):
 
 ```php
 class DPS_Appointment_Repository {
@@ -167,9 +167,9 @@ class DPS_Appointment_Repository {
 
 **Quando usar:** Repositories, Helpers (Money, Phone, URL), Template Engine, Suggestion Services.
 
-### 2. Constructor Injection (classes com dependências substituíveis)
+### 2. Constructor Injection (classes com dependÃªncias substituÃ­veis)
 
-Usado no Frontend Add-on para handlers que precisam de serviços injetáveis (testabilidade, substituição):
+Usado no Frontend Add-on para handlers que precisam de serviÃ§os injetÃ¡veis (testabilidade, substituiÃ§Ã£o):
 
 ```php
 class DPS_Registration_Handler {
@@ -184,27 +184,27 @@ class DPS_Registration_Handler {
         DPS_Logger $logger
     ) {
         $this->formValidator = $formValidator;
-        // ... demais atribuições
+        // ... demais atribuiÃ§Ãµes
     }
 }
 ```
 
-**Composição root** (no arquivo principal do plugin):
+**ComposiÃ§Ã£o root** (no arquivo principal do plugin):
 ```php
 $formValidator = new DPS_Form_Validator();
 $clientService = new DPS_Client_Service();
-// ... instancia serviços
+// ... instancia serviÃ§os
 $handler = new DPS_Registration_Handler(
     $formValidator, $clientService, ...
 );
 $registrationV2->setHandler( $handler );
 ```
 
-**Quando usar:** Handlers com lógica complexa que se beneficiam de substituição em testes, ou quando há múltiplas implementações possíveis.
+**Quando usar:** Handlers com lÃ³gica complexa que se beneficiam de substituiÃ§Ã£o em testes, ou quando hÃ¡ mÃºltiplas implementaÃ§Ãµes possÃ­veis.
 
-### 3. Renderers estáticos (classes do base plugin)
+### 3. Renderers estÃ¡ticos (classes do base plugin)
 
-Os section renderers (`DPS_Clients_Section_Renderer`, `DPS_Pets_Section_Renderer`, etc.) usam métodos estáticos por serem puros (dados in, HTML out) e não precisarem de estado ou substituição:
+Os section renderers (`DPS_Clients_Section_Renderer`, `DPS_Pets_Section_Renderer`, etc.) usam mÃ©todos estÃ¡ticos por serem puros (dados in, HTML out) e nÃ£o precisarem de estado ou substituiÃ§Ã£o:
 
 ```php
 class DPS_Clients_Section_Renderer {
@@ -220,11 +220,11 @@ public static function render_clients_section() {
 }
 ```
 
-**Trade-off:** Métodos estáticos não são facilmente mockáveis em testes unitários, mas a simplicidade compensa para renderers puros. Se no futuro for necessário testar renderers com mock de dados, converter para instâncias com DI.
+**Trade-off:** MÃ©todos estÃ¡ticos nÃ£o sÃ£o facilmente mockÃ¡veis em testes unitÃ¡rios, mas a simplicidade compensa para renderers puros. Se no futuro for necessÃ¡rio testar renderers com mock de dados, converter para instÃ¢ncias com DI.
 
 ### Regras:
-1. **Preferir singleton** para classes utilitárias sem dependências externas
-2. **Preferir constructor injection** para handlers com lógica de negócio e múltiplas dependências
-3. **Composição root** no arquivo principal do plugin (não instanciar serviços dentro de handlers)
-4. **Não usar service locator** (anti-pattern) — dependências devem ser explícitas
-5. Renderers estáticos são aceitáveis quando puros (sem side effects além de HTML output)
+1. **Preferir singleton** para classes utilitÃ¡rias sem dependÃªncias externas
+2. **Preferir constructor injection** para handlers com lÃ³gica de negÃ³cio e mÃºltiplas dependÃªncias
+3. **ComposiÃ§Ã£o root** no arquivo principal do plugin (nÃ£o instanciar serviÃ§os dentro de handlers)
+4. **NÃ£o usar service locator** (anti-pattern) â€” dependÃªncias devem ser explÃ­citas
+5. Renderers estÃ¡ticos sÃ£o aceitÃ¡veis quando puros (sem side effects alÃ©m de HTML output)

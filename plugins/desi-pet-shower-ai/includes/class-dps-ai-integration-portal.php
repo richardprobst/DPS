@@ -1,8 +1,8 @@
-<?php
+﻿<?php
 /**
- * Integração do Assistente de IA com o Portal do Cliente.
+ * IntegraÃ§Ã£o do Assistente de IA com o Portal do Cliente.
  *
- * Este arquivo contém a classe responsável por integrar o assistente de IA
+ * Este arquivo contÃ©m a classe responsÃ¡vel por integrar o assistente de IA
  * ao Portal do Cliente, incluindo widget de chat e handlers AJAX.
  *
  * @package DPS_AI_Addon
@@ -13,25 +13,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Classe de integração com o Portal do Cliente.
+ * Classe de integraÃ§Ã£o com o Portal do Cliente.
  *
- * Responsável por:
+ * ResponsÃ¡vel por:
  * - Renderizar widget de chat no Portal do Cliente
  * - Processar perguntas via AJAX
- * - Validar permissões e sessão do cliente
- * - Carregar assets (JS e CSS) apenas quando necessário
+ * - Validar permissÃµes e sessÃ£o do cliente
+ * - Carregar assets (JS e CSS) apenas quando necessÃ¡rio
  */
 class DPS_AI_Integration_Portal {
 
     /**
-     * Instância única (singleton).
+     * InstÃ¢ncia Ãºnica (singleton).
      *
      * @var DPS_AI_Integration_Portal|null
      */
     private static $instance = null;
 
     /**
-     * Recupera a instância única.
+     * Recupera a instÃ¢ncia Ãºnica.
      *
      * @return DPS_AI_Integration_Portal
      */
@@ -43,13 +43,13 @@ class DPS_AI_Integration_Portal {
     }
 
     /**
-     * Construtor privado. Registra hooks necessários.
+     * Construtor privado. Registra hooks necessÃ¡rios.
      */
     private function __construct() {
-        // Adiciona widget ao Portal do Cliente (antes do conteúdo, no topo)
+        // Adiciona widget ao Portal do Cliente (antes do conteÃºdo, no topo)
         add_action( 'dps_client_portal_before_content', [ $this, 'render_ai_widget' ] );
 
-        // Registra handler AJAX para perguntas (usuários logados e não logados)
+        // Registra handler AJAX para perguntas (usuÃ¡rios logados e nÃ£o logados)
         add_action( 'wp_ajax_dps_ai_portal_ask', [ $this, 'handle_ajax_ask' ] );
         add_action( 'wp_ajax_nopriv_dps_ai_portal_ask', [ $this, 'handle_ajax_ask' ] );
 
@@ -59,20 +59,20 @@ class DPS_AI_Integration_Portal {
 
     /**
      * Renderiza o widget de IA no Portal do Cliente.
-     * 
+     *
      * Design v2.0.0: Layout moderno full-width integrado ao estilo das tabs.
      *
      * @param int $client_id ID do cliente logado.
      */
     public function render_ai_widget( $client_id = 0 ) {
-        // Verifica se a IA está habilitada
+        // Verifica se a IA estÃ¡ habilitada
         $settings = get_option( 'dps_ai_settings', [] );
         if ( empty( $settings['enabled'] ) || empty( $settings['api_key'] ) ) {
-            // IA desabilitada ou sem API key - não exibe widget
+            // IA desabilitada ou sem API key - nÃ£o exibe widget
             return;
         }
 
-        // Fallback: obtém client_id se não foi passado pelo hook
+        // Fallback: obtÃ©m client_id se nÃ£o foi passado pelo hook
         if ( ! $client_id ) {
             $client_id = $this->get_current_client_id();
         }
@@ -81,19 +81,19 @@ class DPS_AI_Integration_Portal {
             return;
         }
 
-        // Configurações de widget
+        // ConfiguraÃ§Ãµes de widget
         $widget_mode       = $settings['widget_mode'] ?? 'inline';
         $floating_position = $settings['floating_position'] ?? 'bottom-right';
         $enable_feedback   = ! empty( $settings['enable_feedback'] );
 
-        // Nome e logo do assistente configuráveis
+        // Nome e logo do assistente configurÃ¡veis
         $assistant_name = $settings['assistant_name'] ?? __( 'Assistente desi.pet', 'dps-ai' );
         $assistant_logo = $settings['assistant_logo'] ?? ''; // URL da logo personalizada
 
         // FAQs sugeridas
         $faq_suggestions = DPS_AI_Knowledge_Base::get_faq_suggestions( 4 );
 
-        // Cliente nome para personalização
+        // Cliente nome para personalizaÃ§Ã£o
         $client_name = get_the_title( $client_id );
         $name_parts  = explode( ' ', $client_name );
         $first_name  = ! empty( $name_parts[0] ) ? $name_parts[0] : $client_name;
@@ -104,10 +104,10 @@ class DPS_AI_Integration_Portal {
             $widget_classes .= ' dps-ai-assistant--floating dps-ai-assistant--' . $floating_position;
         }
 
-        // Estado inicial: começa colapsado (discreto) em ambos os modos
+        // Estado inicial: comeÃ§a colapsado (discreto) em ambos os modos
         $initial_expanded = false;
 
-        // Inline mode: adiciona classe colapsado por padrão
+        // Inline mode: adiciona classe colapsado por padrÃ£o
         if ( 'floating' !== $widget_mode ) {
             $widget_classes .= ' is-collapsed';
         }
@@ -115,14 +115,14 @@ class DPS_AI_Integration_Portal {
         ?>
         <section id="dps-ai-assistant" class="<?php echo esc_attr( $widget_classes ); ?>" role="region" aria-label="<?php esc_attr_e( 'Assistente virtual', 'dps-ai' ); ?>" data-client-id="<?php echo esc_attr( $client_id ); ?>" data-feedback="<?php echo esc_attr( $enable_feedback ? 'true' : 'false' ); ?>">
             <?php if ( 'floating' === $widget_mode ) : ?>
-                <!-- Botão flutuante -->
+                <!-- BotÃ£o flutuante -->
                 <button id="dps-ai-fab" class="dps-ai-assistant__fab" aria-label="<?php esc_attr_e( 'Abrir assistente', 'dps-ai' ); ?>">
                     <?php if ( $assistant_logo ) : ?>
                         <img src="<?php echo esc_url( $assistant_logo ); ?>" alt="" class="dps-ai-assistant__fab-logo">
                     <?php else : ?>
-                        <span class="dps-ai-assistant__fab-icon">🤖</span>
+                        <span class="dps-ai-assistant__fab-icon">ðŸ¤–</span>
                     <?php endif; ?>
-                    <span class="dps-ai-assistant__fab-close">✕</span>
+                    <span class="dps-ai-assistant__fab-close">âœ•</span>
                 </button>
             <?php endif; ?>
 
@@ -134,13 +134,13 @@ class DPS_AI_Integration_Portal {
                             <?php if ( $assistant_logo ) : ?>
                                 <img src="<?php echo esc_url( $assistant_logo ); ?>" alt="" class="dps-ai-assistant__avatar-logo">
                             <?php else : ?>
-                                <span class="dps-ai-assistant__avatar-icon">🤖</span>
+                                <span class="dps-ai-assistant__avatar-icon">ðŸ¤–</span>
                             <?php endif; ?>
                             <span class="dps-ai-assistant__status-dot"></span>
                         </div>
                         <div class="dps-ai-assistant__header-info">
                             <h3 class="dps-ai-assistant__title"><?php echo esc_html( $assistant_name ); ?></h3>
-                            <span class="dps-ai-assistant__subtitle"><?php esc_html_e( 'Online • Resposta instantânea', 'dps-ai' ); ?></span>
+                            <span class="dps-ai-assistant__subtitle"><?php esc_html_e( 'Online â€¢ Resposta instantÃ¢nea', 'dps-ai' ); ?></span>
                         </div>
                     </div>
                     <button id="dps-ai-toggle" class="dps-ai-assistant__toggle" aria-label="<?php esc_attr_e( 'Expandir/Recolher assistente', 'dps-ai' ); ?>" aria-expanded="<?php echo esc_attr( $initial_expanded ? 'true' : 'false' ); ?>">
@@ -150,7 +150,7 @@ class DPS_AI_Integration_Portal {
                     </button>
                 </header>
 
-                <!-- Conteúdo principal do assistente -->
+                <!-- ConteÃºdo principal do assistente -->
                 <div id="dps-ai-content" class="dps-ai-assistant__content">
                     <!-- Mensagem de boas-vindas personalizada -->
                     <div class="dps-ai-assistant__welcome">
@@ -159,22 +159,22 @@ class DPS_AI_Integration_Portal {
                                 <?php
                                 printf(
                                     /* translators: %s: Nome do cliente */
-                                    esc_html__( 'Olá, %s! 👋', 'dps-ai' ),
+                                    esc_html__( 'OlÃ¡, %s! ðŸ‘‹', 'dps-ai' ),
                                     '<strong>' . esc_html( $first_name ) . '</strong>'
                                 );
                                 ?>
                             </p>
                             <p class="dps-ai-assistant__welcome-message">
-                                <?php esc_html_e( 'Sou o assistente virtual do DPS. Posso ajudar com agendamentos, serviços, histórico e dúvidas sobre o portal. Como posso ajudá-lo hoje?', 'dps-ai' ); ?>
+                                <?php esc_html_e( 'Sou o assistente virtual do DPS. Posso ajudar com agendamentos, serviÃ§os, histÃ³rico e dÃºvidas sobre o portal. Como posso ajudÃ¡-lo hoje?', 'dps-ai' ); ?>
                             </p>
                         </div>
                     </div>
 
                     <?php if ( ! empty( $faq_suggestions ) ) : ?>
-                        <!-- Sugestões de perguntas frequentes -->
+                        <!-- SugestÃµes de perguntas frequentes -->
                         <div class="dps-ai-assistant__suggestions">
                             <p class="dps-ai-assistant__suggestions-label">
-                                <span class="dps-ai-assistant__suggestions-icon">💡</span>
+                                <span class="dps-ai-assistant__suggestions-icon">ðŸ’¡</span>
                                 <?php esc_html_e( 'Perguntas populares', 'dps-ai' ); ?>
                             </p>
                             <div class="dps-ai-assistant__suggestions-grid">
@@ -190,12 +190,12 @@ class DPS_AI_Integration_Portal {
                         </div>
                     <?php endif; ?>
 
-                    <!-- Área de conversa -->
+                    <!-- Ãrea de conversa -->
                     <div id="dps-ai-messages" class="dps-ai-assistant__messages" aria-live="polite" aria-relevant="additions">
-                        <!-- Mensagens da conversa aparecerão aqui -->
+                        <!-- Mensagens da conversa aparecerÃ£o aqui -->
                     </div>
 
-                    <!-- Indicador de digitação/pensando -->
+                    <!-- Indicador de digitaÃ§Ã£o/pensando -->
                     <div id="dps-ai-loading" class="dps-ai-assistant__loading" style="display: none;">
                         <div class="dps-ai-assistant__loading-dots">
                             <span></span>
@@ -235,29 +235,29 @@ class DPS_AI_Integration_Portal {
     /**
      * Processa perguntas via AJAX.
      *
-     * SEGURANÇA (Isolamento de Dados):
-     * - Verifica nonce para proteção CSRF
-     * - Obtém client_id exclusivamente via autenticação do portal (não aceita de POST)
+     * SEGURANÃ‡A (Isolamento de Dados):
+     * - Verifica nonce para proteÃ§Ã£o CSRF
+     * - ObtÃ©m client_id exclusivamente via autenticaÃ§Ã£o do portal (nÃ£o aceita de POST)
      * - Busca pet_ids filtrando por pet_client_id = client_id
      * - Passa dados validados para DPS_AI_Assistant que filtra consultas por client_id
      *
-     * Isso garante que um cliente não pode acessar dados de outros clientes.
+     * Isso garante que um cliente nÃ£o pode acessar dados de outros clientes.
      */
     public function handle_ajax_ask() {
-        // Verifica nonce (não requer capability - portal público)
+        // Verifica nonce (nÃ£o requer capability - portal pÃºblico)
         if ( ! DPS_Request_Validator::verify_ajax_nonce( 'dps_ai_ask' ) ) {
             return;
         }
 
-        // Obtém ID do cliente
+        // ObtÃ©m ID do cliente
         $client_id = $this->get_current_client_id();
         if ( ! $client_id ) {
             wp_send_json_error( [
-                'message' => __( 'Você precisa estar logado para usar o assistente.', 'dps-ai' ),
+                'message' => __( 'VocÃª precisa estar logado para usar o assistente.', 'dps-ai' ),
             ] );
         }
 
-        // Obtém a pergunta
+        // ObtÃ©m a pergunta
         $question = isset( $_POST['question'] ) ? sanitize_text_field( wp_unslash( $_POST['question'] ) ) : '';
         if ( empty( $question ) ) {
             wp_send_json_error( [
@@ -268,14 +268,14 @@ class DPS_AI_Integration_Portal {
         // Limita tamanho da pergunta
         if ( mb_strlen( $question ) > 500 ) {
             wp_send_json_error( [
-                'message' => __( 'Pergunta muito longa. Por favor, resuma em até 500 caracteres.', 'dps-ai' ),
+                'message' => __( 'Pergunta muito longa. Por favor, resuma em atÃ© 500 caracteres.', 'dps-ai' ),
             ] );
         }
 
-        // Obtém ou cria conversa ativa para este cliente
+        // ObtÃ©m ou cria conversa ativa para este cliente
         $conversation_id = $this->get_or_create_conversation( $client_id );
 
-        // Salva mensagem do usuário
+        // Salva mensagem do usuÃ¡rio
         if ( $conversation_id && class_exists( 'DPS_AI_Conversations_Repository' ) ) {
             $repo = DPS_AI_Conversations_Repository::get_instance();
             $repo->add_message( $conversation_id, [
@@ -294,37 +294,37 @@ class DPS_AI_Integration_Portal {
         // Se a IA retornou null, significa que houve falha na API
         if ( null === $answer ) {
             wp_send_json_error( [
-                'message' => __( 'No momento não foi possível gerar uma resposta automática. Por favor, fale diretamente com a equipe.', 'dps-ai' ),
+                'message' => __( 'No momento nÃ£o foi possÃ­vel gerar uma resposta automÃ¡tica. Por favor, fale diretamente com a equipe.', 'dps-ai' ),
             ] );
         }
 
         // Extrai texto da resposta para processamento
         $answer_text = $this->extract_answer_text( $answer );
 
-        // Adiciona sugestão proativa de agendamento se aplicável
+        // Adiciona sugestÃ£o proativa de agendamento se aplicÃ¡vel
         if ( class_exists( 'DPS_AI_Proactive_Scheduler' ) ) {
             $scheduler = DPS_AI_Proactive_Scheduler::get_instance();
             $answer_text = $scheduler->append_suggestion_to_response( $answer_text, $client_id, 'portal' );
         }
 
-        // Salva resposta da IA (com sugestão, se aplicável)
+        // Salva resposta da IA (com sugestÃ£o, se aplicÃ¡vel)
         if ( $conversation_id && class_exists( 'DPS_AI_Conversations_Repository' ) ) {
             $repo = DPS_AI_Conversations_Repository::get_instance();
-            
+
             // Extrai metadados da resposta original
             $answer_data = $this->extract_answer_data( $answer );
-            
+
             $repo->add_message( $conversation_id, [
                 'sender_type'       => 'assistant',
                 'sender_identifier' => 'ai',
-                'message_text'      => $answer_text, // Usa texto com sugestão
+                'message_text'      => $answer_text, // Usa texto com sugestÃ£o
                 'metadata'          => $answer_data['metadata'],
             ] );
         }
 
         // Retorna a resposta com sucesso
         wp_send_json_success( [
-            'answer' => $answer_text, // Retorna texto com sugestão
+            'answer' => $answer_text, // Retorna texto com sugestÃ£o
         ] );
     }
 
@@ -372,7 +372,7 @@ class DPS_AI_Integration_Portal {
     }
 
     /**
-     * Obtém ou cria conversa ativa para o cliente no portal.
+     * ObtÃ©m ou cria conversa ativa para o cliente no portal.
      *
      * @param int $client_id ID do cliente.
      *
@@ -385,13 +385,13 @@ class DPS_AI_Integration_Portal {
 
         $repo = DPS_AI_Conversations_Repository::get_instance();
 
-        // Busca conversa aberta recente do cliente no portal (últimas 24 horas)
+        // Busca conversa aberta recente do cliente no portal (Ãºltimas 24 horas)
         $conversations = $repo->get_conversations_by_customer( $client_id, 'portal', 1 );
 
         if ( ! empty( $conversations ) ) {
             $conversation = $conversations[0];
-            
-            // Se a última atividade foi há menos de 24 horas, reutiliza
+
+            // Se a Ãºltima atividade foi hÃ¡ menos de 24 horas, reutiliza
             $last_activity = strtotime( $conversation->last_activity_at );
             if ( ( current_time( 'timestamp' ) - $last_activity ) < DAY_IN_SECONDS ) {
                 return (int) $conversation->id;
@@ -412,19 +412,19 @@ class DPS_AI_Integration_Portal {
      * Carrega assets (JS e CSS) apenas no Portal do Cliente.
      */
     public function enqueue_portal_assets() {
-        // Verifica se estamos em uma página com o shortcode do Portal
+        // Verifica se estamos em uma pÃ¡gina com o shortcode do Portal
         global $post;
         if ( ! is_a( $post, 'WP_Post' ) || ! has_shortcode( (string) $post->post_content, 'dps_client_portal' ) ) {
             return;
         }
 
-        // Verifica se a IA está habilitada
+        // Verifica se a IA estÃ¡ habilitada
         $settings = get_option( 'dps_ai_settings', [] );
         if ( empty( $settings['enabled'] ) || empty( $settings['api_key'] ) ) {
             return;
         }
 
-        // CSS do widget (depende dos design tokens M3)
+        // CSS do widget (depende dos design tokens DPS Signature)
         wp_enqueue_style(
             'dps-ai-portal',
             DPS_AI_ADDON_URL . 'assets/css/dps-ai-portal.css',
@@ -441,7 +441,7 @@ class DPS_AI_Integration_Portal {
             true
         );
 
-        // Localiza script com dados necessários
+        // Localiza script com dados necessÃ¡rios
         wp_localize_script( 'dps-ai-portal', 'dpsAI', [
             'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
             'nonce'          => wp_create_nonce( 'dps_ai_ask' ),
@@ -451,26 +451,26 @@ class DPS_AI_Integration_Portal {
             'widgetMode'     => $settings['widget_mode'] ?? 'inline',
             'i18n'           => [
                 'errorGeneric'        => __( 'Ocorreu um erro ao processar sua pergunta. Tente novamente.', 'dps-ai' ),
-                'errorTimeout'        => __( 'A resposta está demorando mais que o esperado. Tente novamente em alguns instantes.', 'dps-ai' ),
-                'you'                 => __( 'Você', 'dps-ai' ),
+                'errorTimeout'        => __( 'A resposta estÃ¡ demorando mais que o esperado. Tente novamente em alguns instantes.', 'dps-ai' ),
+                'you'                 => __( 'VocÃª', 'dps-ai' ),
                 'assistant'           => __( 'Assistente', 'dps-ai' ),
                 'pleaseEnterQuestion' => __( 'Por favor, digite uma pergunta.', 'dps-ai' ),
                 'feedbackThanks'      => __( 'Obrigado pelo feedback!', 'dps-ai' ),
-                'wasHelpful'          => __( 'Esta resposta foi útil?', 'dps-ai' ),
+                'wasHelpful'          => __( 'Esta resposta foi Ãºtil?', 'dps-ai' ),
             ],
         ] );
     }
 
     /**
-     * Obtém o ID do cliente logado.
+     * ObtÃ©m o ID do cliente logado.
      *
-     * Compatível com o sistema de autenticação do Portal do Cliente
-     * (que pode usar sessão PHP ou usuário WordPress).
+     * CompatÃ­vel com o sistema de autenticaÃ§Ã£o do Portal do Cliente
+     * (que pode usar sessÃ£o PHP ou usuÃ¡rio WordPress).
      *
-     * @return int ID do cliente ou 0 se não estiver logado.
+     * @return int ID do cliente ou 0 se nÃ£o estiver logado.
      */
     private function get_current_client_id() {
-        // Tenta obter via método do Portal do Cliente se disponível
+        // Tenta obter via mÃ©todo do Portal do Cliente se disponÃ­vel
         if ( class_exists( 'DPS_Client_Portal' ) && method_exists( 'DPS_Client_Portal', 'get_current_client_id' ) ) {
             $instance  = DPS_Client_Portal::get_instance();
             $client_id = $instance->get_current_client_id();
@@ -479,7 +479,7 @@ class DPS_AI_Integration_Portal {
             }
         }
 
-        // Fallback: tenta via usuário WordPress logado
+        // Fallback: tenta via usuÃ¡rio WordPress logado
         if ( is_user_logged_in() ) {
             $user_id   = get_current_user_id();
             $client_id = absint( get_user_meta( $user_id, 'dps_client_id', true ) );
@@ -516,9 +516,9 @@ class DPS_AI_Integration_Portal {
     /**
      * Busca os IDs dos pets de um cliente.
      *
-     * SEGURANÇA: Filtra pets por pet_client_id no banco de dados para garantir
+     * SEGURANÃ‡A: Filtra pets por pet_client_id no banco de dados para garantir
      * que apenas pets do cliente autenticado sejam retornados.
-     * Esta validação é crítica para o isolamento de dados no assistente de IA.
+     * Esta validaÃ§Ã£o Ã© crÃ­tica para o isolamento de dados no assistente de IA.
      *
      * @param int $client_id ID do cliente autenticado.
      *

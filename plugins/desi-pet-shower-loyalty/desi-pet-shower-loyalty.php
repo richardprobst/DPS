@@ -1,8 +1,8 @@
-<?php
+﻿<?php
 /**
- * Plugin Name:       desi.pet by PRObst – Campanhas & Fidelidade
+ * Plugin Name:       desi.pet by PRObst â€“ Campanhas & Fidelidade
  * Plugin URI:        https://www.probst.pro
- * Description:       Programa de fidelidade e campanhas promocionais. Fidelize seus clientes com pontos e benefícios exclusivos.
+ * Description:       Programa de fidelidade e campanhas promocionais. Fidelize seus clientes com pontos e benefÃ­cios exclusivos.
  * Version:           2.0.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
@@ -23,8 +23,8 @@ define( 'DPS_LOYALTY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_LOYALTY_URL', plugin_dir_url( __FILE__ ) );
 
 /**
- * Verifica se o plugin base desi.pet by PRObst está ativo.
- * Se não estiver, exibe aviso e interrompe carregamento do add-on.
+ * Verifica se o plugin base desi.pet by PRObst estÃ¡ ativo.
+ * Se nÃ£o estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_loyalty_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
@@ -45,14 +45,14 @@ add_action( 'plugins_loaded', function() {
 
 /**
  * Carrega o text domain do Loyalty Add-on.
- * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 5).
+ * Usa prioridade 1 para garantir que rode antes da inicializaÃ§Ã£o da classe (prioridade 5).
  */
 function dps_loyalty_load_textdomain() {
     load_plugin_textdomain( 'dps-loyalty-addon', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 add_action( 'init', 'dps_loyalty_load_textdomain', 1 );
 
-// Carrega helpers e APIs públicas
+// Carrega helpers e APIs pÃºblicas
 require_once DPS_LOYALTY_DIR . 'includes/class-dps-loyalty-api.php';
 require_once DPS_LOYALTY_DIR . 'includes/class-dps-loyalty-achievements.php';
 require_once DPS_LOYALTY_DIR . 'includes/class-dps-loyalty-rest.php';
@@ -69,7 +69,7 @@ class DPS_Loyalty_Addon {
     private $cpt_helper;
 
     public function __construct() {
-        // Registra CPT (o helper será inicializado dentro do método register_post_type)
+        // Registra CPT (o helper serÃ¡ inicializado dentro do mÃ©todo register_post_type)
         add_action( 'init', [ $this, 'register_post_type' ] );
         add_action( 'add_meta_boxes', [ $this, 'register_campaign_metaboxes' ] );
         add_action( 'save_post_dps_campaign', [ $this, 'save_campaign_meta' ] );
@@ -85,15 +85,15 @@ class DPS_Loyalty_Addon {
         add_action( 'init', [ $this, 'maybe_schedule_crons' ] );
         add_action( 'dps_loyalty_expire_points_daily', [ $this, 'handle_points_expiration' ] );
         add_action( 'dps_loyalty_expiration_notices_daily', [ $this, 'handle_expiration_notices' ] );
-        
+
         // AJAX para busca de clientes (autocomplete).
         add_action( 'wp_ajax_dps_loyalty_search_clients', [ $this, 'ajax_search_clients' ] );
-        
+
         // Enfileira assets
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_frontend_assets' ] );
 
-        // Registra aba de fidelidade no frontend de configurações.
+        // Registra aba de fidelidade no frontend de configuraÃ§Ãµes.
         add_action( 'dps_settings_register_tabs', [ $this, 'register_frontend_settings_tab' ] );
     }
 
@@ -106,16 +106,16 @@ class DPS_Loyalty_Addon {
         // Cast para string para compatibilidade com PHP 8.4+
         $hook = (string) $hook;
 
-        // Carrega apenas nas páginas relevantes
+        // Carrega apenas nas pÃ¡ginas relevantes
         $is_loyalty_page = strpos( $hook, 'dps-loyalty' ) !== false;
         $is_campaign_edit = false;
-        
+
         // Verifica se estamos editando uma campanha
         if ( function_exists( 'get_current_screen' ) ) {
             $screen = get_current_screen();
             $is_campaign_edit = $screen && $screen->post_type === 'dps_campaign';
         }
-        
+
         if ( ! $is_loyalty_page && ! $is_campaign_edit ) {
             return;
         }
@@ -128,7 +128,7 @@ class DPS_Loyalty_Addon {
             true
         );
 
-        // Enfileira design tokens do plugin base (M3 Expressive).
+        // Enfileira design tokens do plugin base (DPS Signature).
         if ( defined( 'DPS_BASE_URL' ) && defined( 'DPS_BASE_VERSION' ) ) {
             wp_enqueue_style(
                 'dps-design-tokens',
@@ -175,12 +175,12 @@ class DPS_Loyalty_Addon {
      * Enfileira assets no frontend.
      */
     public function enqueue_frontend_assets() {
-        // Carrega apenas quando necessário (ex: portal do cliente)
+        // Carrega apenas quando necessÃ¡rio (ex: portal do cliente)
         if ( ! is_singular() ) {
             return;
         }
 
-        // Enfileira design tokens do plugin base (M3 Expressive).
+        // Enfileira design tokens do plugin base (DPS Signature).
         if ( defined( 'DPS_BASE_URL' ) && defined( 'DPS_BASE_VERSION' ) ) {
             wp_enqueue_style(
                 'dps-design-tokens',
@@ -212,14 +212,14 @@ class DPS_Loyalty_Addon {
      * @since 1.3.0
      */
     public function ajax_search_clients() {
-        // Verifica permissão.
+        // Verifica permissÃ£o.
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-loyalty-addon' ) ], 403 );
+            wp_send_json_error( [ 'message' => __( 'PermissÃ£o negada.', 'dps-loyalty-addon' ) ], 403 );
         }
 
         // Verifica nonce.
         if ( ! check_ajax_referer( 'dps_loyalty_clients_nonce', 'nonce', false ) ) {
-            wp_send_json_error( [ 'message' => __( 'Nonce inválido.', 'dps-loyalty-addon' ) ], 403 );
+            wp_send_json_error( [ 'message' => __( 'Nonce invÃ¡lido.', 'dps-loyalty-addon' ) ], 403 );
         }
 
         $search = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
@@ -237,12 +237,12 @@ class DPS_Loyalty_Addon {
             'post_status'    => 'publish',
         ];
 
-        // Busca por título (nome).
+        // Busca por tÃ­tulo (nome).
         $title_args = $base_args;
         $title_args['s'] = $search;
         $clients = get_posts( $title_args );
 
-        // Se não encontrou por título, tenta por telefone/email.
+        // Se nÃ£o encontrou por tÃ­tulo, tenta por telefone/email.
         if ( empty( $clients ) ) {
             $meta_args = $base_args;
             $meta_args['meta_query'] = [
@@ -265,7 +265,7 @@ class DPS_Loyalty_Addon {
         foreach ( $clients as $client ) {
             $phone = get_post_meta( $client->ID, 'client_phone', true );
             $points = dps_loyalty_get_points( $client->ID );
-            
+
             $results[] = [
                 'id'     => $client->ID,
                 'text'   => $client->post_title,
@@ -278,22 +278,22 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Formata o saldo de créditos de um cliente para exibição.
+     * Formata o saldo de crÃ©ditos de um cliente para exibiÃ§Ã£o.
      *
-     * Padroniza a leitura e formatação de créditos em todos os pontos do add-on:
+     * Padroniza a leitura e formataÃ§Ã£o de crÃ©ditos em todos os pontos do add-on:
      * - Garante que valores negativos sejam tratados como zero.
-     * - Formata usando o DPS_Money_Helper quando disponível.
-     * - Retorna string pronta para exibição (ex: "R$ 10,00").
+     * - Formata usando o DPS_Money_Helper quando disponÃ­vel.
+     * - Retorna string pronta para exibiÃ§Ã£o (ex: "R$ 10,00").
      *
      * @since 1.3.0
      *
      * @param int $client_id ID do cliente.
-     * @return string Saldo formatado (ex: "R$ 0,00" ou "Sem créditos").
+     * @return string Saldo formatado (ex: "R$ 0,00" ou "Sem crÃ©ditos").
      */
     private function get_credit_for_display( $client_id ) {
         $credit_cents = (int) get_post_meta( $client_id, '_dps_credit_balance', true );
-        
-        // Garante que não haja valores negativos.
+
+        // Garante que nÃ£o haja valores negativos.
         if ( $credit_cents < 0 ) {
             $credit_cents = 0;
         }
@@ -302,17 +302,17 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Formata o saldo de créditos para exibição nas métricas globais.
+     * Formata o saldo de crÃ©ditos para exibiÃ§Ã£o nas mÃ©tricas globais.
      *
      * @since 1.3.0
      *
-     * @param int $total_credits Total de créditos em centavos.
+     * @param int $total_credits Total de crÃ©ditos em centavos.
      * @return string Saldo formatado.
      */
     private function format_credits_display( $total_credits ) {
         $credits = (int) $total_credits;
-        
-        // Garante que não haja valores negativos.
+
+        // Garante que nÃ£o haja valores negativos.
         if ( $credits < 0 ) {
             $credits = 0;
         }
@@ -321,7 +321,7 @@ class DPS_Loyalty_Addon {
     }
 
     public function register_post_type() {
-        // Inicializa o CPT helper se necessário
+        // Inicializa o CPT helper se necessÃ¡rio
         if ( ! $this->cpt_helper ) {
             if ( ! class_exists( 'DPS_CPT_Helper' ) && defined( 'DPS_BASE_DIR' ) ) {
                 require_once DPS_BASE_DIR . 'includes/class-dps-cpt-helper.php';
@@ -366,7 +366,7 @@ class DPS_Loyalty_Addon {
     public function register_campaign_metaboxes() {
         add_meta_box(
             'dps_campaign_details',
-            __( 'Configurações da campanha', 'dps-loyalty-addon' ),
+            __( 'ConfiguraÃ§Ãµes da campanha', 'dps-loyalty-addon' ),
             [ $this, 'render_campaign_details_meta_box' ],
             'dps_campaign',
             'normal',
@@ -393,13 +393,13 @@ class DPS_Loyalty_Addon {
                 <option value="double_points" <?php selected( $campaign_type, 'double_points' ); ?>><?php esc_html_e( 'Pontos em dobro', 'dps-loyalty-addon' ); ?></option>
             </select>
         </p>
-        
+
         <fieldset style="border: 1px solid #e5e7eb; padding: 16px; margin: 16px 0; border-radius: 4px;">
-            <legend style="font-weight: 600; color: #374151; padding: 0 8px;"><strong><?php esc_html_e( 'Critérios de elegibilidade', 'dps-loyalty-addon' ); ?></strong></legend>
+            <legend style="font-weight: 600; color: #374151; padding: 0 8px;"><strong><?php esc_html_e( 'CritÃ©rios de elegibilidade', 'dps-loyalty-addon' ); ?></strong></legend>
             <p>
                 <label>
                     <input type="checkbox" name="dps_campaign_eligibility[]" value="inactive" <?php checked( in_array( 'inactive', $eligibility_selection, true ) ); ?> />
-                    <?php esc_html_e( 'Clientes sem atendimento há X dias', 'dps-loyalty-addon' ); ?>
+                    <?php esc_html_e( 'Clientes sem atendimento hÃ¡ X dias', 'dps-loyalty-addon' ); ?>
                 </label>
                 <input type="number" name="dps_campaign_inactive_days" value="<?php echo esc_attr( $inactive_days ); ?>" min="0" class="small-text" />
             </p>
@@ -411,11 +411,11 @@ class DPS_Loyalty_Addon {
                 <input type="number" name="dps_campaign_points_threshold" value="<?php echo esc_attr( $points_threshold ); ?>" min="0" class="small-text" />
             </p>
         </fieldset>
-        
+
         <fieldset style="border: 1px solid #e5e7eb; padding: 16px; margin: 16px 0; border-radius: 4px;">
-            <legend style="font-weight: 600; color: #374151; padding: 0 8px;"><strong><?php esc_html_e( 'Período da campanha', 'dps-loyalty-addon' ); ?></strong></legend>
+            <legend style="font-weight: 600; color: #374151; padding: 0 8px;"><strong><?php esc_html_e( 'PerÃ­odo da campanha', 'dps-loyalty-addon' ); ?></strong></legend>
             <p>
-                <label for="dps_campaign_start_date"><strong><?php esc_html_e( 'Início', 'dps-loyalty-addon' ); ?></strong></label>
+                <label for="dps_campaign_start_date"><strong><?php esc_html_e( 'InÃ­cio', 'dps-loyalty-addon' ); ?></strong></label>
                 <input type="date" id="dps_campaign_start_date" name="dps_campaign_start_date" value="<?php echo esc_attr( $start_date ); ?>" />
             </p>
             <p>
@@ -427,7 +427,7 @@ class DPS_Loyalty_Addon {
     }
 
     public function save_campaign_meta( $post_id ) {
-        // Usa helper para verificar nonce de formulário POST
+        // Usa helper para verificar nonce de formulÃ¡rio POST
         if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_request_nonce( 'dps_campaign_details', 'dps_campaign_details_nonce' ) ) {
             return;
         }
@@ -467,7 +467,7 @@ class DPS_Loyalty_Addon {
             [ $this, 'render_loyalty_page' ]
         );
 
-        // REMOVIDO: Submenu redundante "Campanhas" - já acessível via aba interna
+        // REMOVIDO: Submenu redundante "Campanhas" - jÃ¡ acessÃ­vel via aba interna
         // add_submenu_page(
         //     'desi-pet-shower',
         //     __( 'Campanhas', 'dps-loyalty-addon' ),
@@ -487,13 +487,13 @@ class DPS_Loyalty_Addon {
         $selected_id = isset( $_GET['dps_client_id'] ) ? intval( $_GET['dps_client_id'] ) : 0;
         $active_tab  = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard';
 
-        // Obtém métricas globais
+        // ObtÃ©m mÃ©tricas globais
         $metrics = DPS_Loyalty_API::get_global_metrics();
         ?>
         <div class="wrap dps-loyalty-wrap">
             <h1><?php echo esc_html__( 'Campanhas & Fidelidade', 'dps-loyalty-addon' ); ?></h1>
 
-            <!-- Navegação por abas -->
+            <!-- NavegaÃ§Ã£o por abas -->
             <nav class="nav-tab-wrapper">
                 <a href="<?php echo esc_url( add_query_arg( 'tab', 'dashboard', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>"
                    class="nav-tab <?php echo $active_tab === 'dashboard' ? 'nav-tab-active' : ''; ?>">
@@ -502,7 +502,7 @@ class DPS_Loyalty_Addon {
                 <?php if ( self::is_campaign_enabled( 'promotions' ) ) : ?>
                 <a href="<?php echo esc_url( add_query_arg( 'tab', 'reports', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>"
                    class="nav-tab <?php echo $active_tab === 'reports' ? 'nav-tab-active' : ''; ?>">
-                    <?php esc_html_e( 'Relatórios', 'dps-loyalty-addon' ); ?>
+                    <?php esc_html_e( 'RelatÃ³rios', 'dps-loyalty-addon' ); ?>
                 </a>
                 <?php endif; ?>
                 <?php if ( self::is_campaign_enabled( 'points' ) ) : ?>
@@ -514,14 +514,14 @@ class DPS_Loyalty_Addon {
                 <?php if ( self::is_campaign_enabled( 'referrals' ) ) : ?>
                 <a href="<?php echo esc_url( add_query_arg( 'tab', 'referrals', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>"
                    class="nav-tab <?php echo $active_tab === 'referrals' ? 'nav-tab-active' : ''; ?>">
-                    <?php esc_html_e( 'Indicações', 'dps-loyalty-addon' ); ?>
+                    <?php esc_html_e( 'IndicaÃ§Ãµes', 'dps-loyalty-addon' ); ?>
                 </a>
                 <?php endif; ?>
-                <a href="<?php echo esc_url( add_query_arg( 'tab', 'settings', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>" 
+                <a href="<?php echo esc_url( add_query_arg( 'tab', 'settings', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>"
                    class="nav-tab <?php echo $active_tab === 'settings' ? 'nav-tab-active' : ''; ?>">
-                    <?php esc_html_e( 'Configurações', 'dps-loyalty-addon' ); ?>
+                    <?php esc_html_e( 'ConfiguraÃ§Ãµes', 'dps-loyalty-addon' ); ?>
                 </a>
-                <a href="<?php echo esc_url( add_query_arg( 'tab', 'clients', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>" 
+                <a href="<?php echo esc_url( add_query_arg( 'tab', 'clients', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>"
                    class="nav-tab <?php echo $active_tab === 'clients' ? 'nav-tab-active' : ''; ?>">
                     <?php esc_html_e( 'Consulta de Cliente', 'dps-loyalty-addon' ); ?>
                 </a>
@@ -568,52 +568,52 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Renderiza a aba de dashboard com métricas.
+     * Renderiza a aba de dashboard com mÃ©tricas.
      *
      * @since 1.2.0
-     * @since 1.3.0 Usa método padronizado para exibição de créditos.
+     * @since 1.3.0 Usa mÃ©todo padronizado para exibiÃ§Ã£o de crÃ©ditos.
      *
-     * @param array $metrics Métricas globais.
+     * @param array $metrics MÃ©tricas globais.
      */
     private function render_dashboard_tab( $metrics ) {
         $timeseries         = DPS_Loyalty_API::get_points_timeseries( 6 );
         $tier_distribution  = DPS_Loyalty_API::get_tier_distribution();
         $recent_summary     = $this->get_recent_points_summary();
         ?>
-        <!-- Cards de Métricas -->
+        <!-- Cards de MÃ©tricas -->
         <div class="dps-loyalty-dashboard">
             <div class="dps-loyalty-card">
-                <span class="dps-loyalty-card-icon">👥</span>
+                <span class="dps-loyalty-card-icon">ðŸ‘¥</span>
                 <span class="dps-loyalty-card-value"><?php echo esc_html( number_format( $metrics['clients_with_points'], 0, ',', '.' ) ); ?></span>
                 <span class="dps-loyalty-card-label"><?php esc_html_e( 'Clientes com Pontos', 'dps-loyalty-addon' ); ?></span>
             </div>
             <div class="dps-loyalty-card dps-loyalty-card--info">
-                <span class="dps-loyalty-card-icon">⭐</span>
+                <span class="dps-loyalty-card-icon">â­</span>
                 <span class="dps-loyalty-card-value"><?php echo esc_html( number_format( $metrics['total_points'], 0, ',', '.' ) ); ?></span>
-                <span class="dps-loyalty-card-label"><?php esc_html_e( 'Pontos em Circulação', 'dps-loyalty-addon' ); ?></span>
+                <span class="dps-loyalty-card-label"><?php esc_html_e( 'Pontos em CirculaÃ§Ã£o', 'dps-loyalty-addon' ); ?></span>
             </div>
             <div class="dps-loyalty-card">
-                <span class="dps-loyalty-card-icon">🤝</span>
+                <span class="dps-loyalty-card-icon">ðŸ¤</span>
                 <span class="dps-loyalty-card-value"><?php echo esc_html( $metrics['referrals_this_month'] ); ?></span>
-                <span class="dps-loyalty-card-label"><?php esc_html_e( 'Indicações Este Mês', 'dps-loyalty-addon' ); ?></span>
+                <span class="dps-loyalty-card-label"><?php esc_html_e( 'IndicaÃ§Ãµes Este MÃªs', 'dps-loyalty-addon' ); ?></span>
             </div>
             <div class="dps-loyalty-card dps-loyalty-card--success">
-                <span class="dps-loyalty-card-icon">✅</span>
+                <span class="dps-loyalty-card-icon">âœ…</span>
                 <span class="dps-loyalty-card-value"><?php echo esc_html( $metrics['rewarded_this_month'] ); ?></span>
                 <span class="dps-loyalty-card-label"><?php esc_html_e( 'Recompensadas', 'dps-loyalty-addon' ); ?></span>
             </div>
             <div class="dps-loyalty-card dps-loyalty-card--warning">
-                <span class="dps-loyalty-card-icon">💰</span>
+                <span class="dps-loyalty-card-icon">ðŸ’°</span>
                 <span class="dps-loyalty-card-value"><?php echo esc_html( $this->format_credits_display( $metrics['total_credits'] ) ); ?></span>
-                <span class="dps-loyalty-card-label"><?php esc_html_e( 'Créditos em Circulação', 'dps-loyalty-addon' ); ?></span>
+                <span class="dps-loyalty-card-label"><?php esc_html_e( 'CrÃ©ditos em CirculaÃ§Ã£o', 'dps-loyalty-addon' ); ?></span>
             </div>
             <div class="dps-loyalty-card dps-loyalty-card--info">
-                <span class="dps-loyalty-card-icon">📈</span>
+                <span class="dps-loyalty-card-icon">ðŸ“ˆ</span>
                 <span class="dps-loyalty-card-value"><?php echo esc_html( number_format( $recent_summary['granted_30d'], 0, ',', '.' ) ); ?></span>
                 <span class="dps-loyalty-card-label"><?php esc_html_e( 'Pontos concedidos (30d)', 'dps-loyalty-addon' ); ?></span>
             </div>
             <div class="dps-loyalty-card dps-loyalty-card--danger">
-                <span class="dps-loyalty-card-icon">↘️</span>
+                <span class="dps-loyalty-card-icon">â†˜ï¸</span>
                 <span class="dps-loyalty-card-value"><?php echo esc_html( number_format( $recent_summary['redeemed_30d'], 0, ',', '.' ) ); ?></span>
                 <span class="dps-loyalty-card-label"><?php esc_html_e( 'Pontos resgatados (30d)', 'dps-loyalty-addon' ); ?></span>
             </div>
@@ -627,12 +627,12 @@ class DPS_Loyalty_Addon {
                 <canvas id="dps-loyalty-timeseries" data-timeseries="<?php echo esc_attr( wp_json_encode( $timeseries ) ); ?>"></canvas>
             </div>
             <div class="dps-loyalty-panel">
-                <h2><?php esc_html_e( 'Distribuição por nível', 'dps-loyalty-addon' ); ?></h2>
+                <h2><?php esc_html_e( 'DistribuiÃ§Ã£o por nÃ­vel', 'dps-loyalty-addon' ); ?></h2>
                 <canvas id="dps-loyalty-tiers" data-tiers="<?php echo esc_attr( wp_json_encode( $tier_distribution ) ); ?>"></canvas>
                 <ul class="dps-tier-legend">
-                    <li><span class="dps-tier-dot dps-tier-bronze"></span><?php esc_html_e( 'Bronze', 'dps-loyalty-addon' ); ?> – <?php echo esc_html( isset( $tier_distribution['bronze'] ) ? $tier_distribution['bronze'] : 0 ); ?></li>
-                    <li><span class="dps-tier-dot dps-tier-prata"></span><?php esc_html_e( 'Prata', 'dps-loyalty-addon' ); ?> – <?php echo esc_html( isset( $tier_distribution['prata'] ) ? $tier_distribution['prata'] : 0 ); ?></li>
-                    <li><span class="dps-tier-dot dps-tier-ouro"></span><?php esc_html_e( 'Ouro', 'dps-loyalty-addon' ); ?> – <?php echo esc_html( isset( $tier_distribution['ouro'] ) ? $tier_distribution['ouro'] : 0 ); ?></li>
+                    <li><span class="dps-tier-dot dps-tier-bronze"></span><?php esc_html_e( 'Bronze', 'dps-loyalty-addon' ); ?> â€“ <?php echo esc_html( isset( $tier_distribution['bronze'] ) ? $tier_distribution['bronze'] : 0 ); ?></li>
+                    <li><span class="dps-tier-dot dps-tier-prata"></span><?php esc_html_e( 'Prata', 'dps-loyalty-addon' ); ?> â€“ <?php echo esc_html( isset( $tier_distribution['prata'] ) ? $tier_distribution['prata'] : 0 ); ?></li>
+                    <li><span class="dps-tier-dot dps-tier-ouro"></span><?php esc_html_e( 'Ouro', 'dps-loyalty-addon' ); ?> â€“ <?php echo esc_html( isset( $tier_distribution['ouro'] ) ? $tier_distribution['ouro'] : 0 ); ?></li>
                 </ul>
             </div>
         </div>
@@ -640,7 +640,7 @@ class DPS_Loyalty_Addon {
         <hr />
 
         <h2><?php esc_html_e( 'Rotinas de Campanhas', 'dps-loyalty-addon' ); ?></h2>
-        <p><?php esc_html_e( 'Execute uma varredura para identificar clientes elegíveis e registrar ofertas pendentes.', 'dps-loyalty-addon' ); ?></p>
+        <p><?php esc_html_e( 'Execute uma varredura para identificar clientes elegÃ­veis e registrar ofertas pendentes.', 'dps-loyalty-addon' ); ?></p>
         <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
             <?php wp_nonce_field( 'dps_loyalty_run_audit', 'dps_loyalty_run_audit_nonce' ); ?>
             <input type="hidden" name="action" value="dps_loyalty_run_audit" />
@@ -656,14 +656,14 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Renderiza relatório de campanhas com métricas agregadas.
+     * Renderiza relatÃ³rio de campanhas com mÃ©tricas agregadas.
      *
      * @since 1.4.0
      */
     private function render_reports_tab() {
         $campaigns = DPS_Loyalty_API::get_campaign_effectiveness();
         ?>
-        <h2><?php esc_html_e( 'Relatório de Campanhas', 'dps-loyalty-addon' ); ?></h2>
+        <h2><?php esc_html_e( 'RelatÃ³rio de Campanhas', 'dps-loyalty-addon' ); ?></h2>
         <p class="description"><?php esc_html_e( 'Acompanhe elegibilidade, uso e pontos gerados por campanha.', 'dps-loyalty-addon' ); ?></p>
 
         <div class="dps-referrals-table-wrapper">
@@ -671,8 +671,8 @@ class DPS_Loyalty_Addon {
                 <thead>
                     <tr>
                         <th><?php esc_html_e( 'Campanha', 'dps-loyalty-addon' ); ?></th>
-                        <th><?php esc_html_e( 'Período', 'dps-loyalty-addon' ); ?></th>
-                        <th><?php esc_html_e( 'Elegíveis', 'dps-loyalty-addon' ); ?></th>
+                        <th><?php esc_html_e( 'PerÃ­odo', 'dps-loyalty-addon' ); ?></th>
+                        <th><?php esc_html_e( 'ElegÃ­veis', 'dps-loyalty-addon' ); ?></th>
                         <th><?php esc_html_e( 'Usaram', 'dps-loyalty-addon' ); ?></th>
                         <th><?php esc_html_e( 'Taxa de uso', 'dps-loyalty-addon' ); ?></th>
                         <th><?php esc_html_e( 'Pontos gerados', 'dps-loyalty-addon' ); ?></th>
@@ -692,9 +692,9 @@ class DPS_Loyalty_Addon {
                                 </td>
                                 <td>
                                     <?php
-                                    $start = $campaign['start'] ? esc_html( $campaign['start'] ) : '—';
-                                    $end   = $campaign['end'] ? esc_html( $campaign['end'] ) : '—';
-                                    echo $start . ' → ' . $end;
+                                    $start = $campaign['start'] ? esc_html( $campaign['start'] ) : 'â€”';
+                                    $end   = $campaign['end'] ? esc_html( $campaign['end'] ) : 'â€”';
+                                    echo $start . ' â†’ ' . $end;
                                     ?>
                                 </td>
                                 <td><?php echo esc_html( number_format_i18n( $campaign['eligible'] ) ); ?></td>
@@ -746,12 +746,12 @@ class DPS_Loyalty_Addon {
             <input type="hidden" name="page" value="dps-loyalty" />
             <input type="hidden" name="tab" value="ranking" />
             <label for="ranking_period">
-                <?php esc_html_e( 'Período', 'dps-loyalty-addon' ); ?>
+                <?php esc_html_e( 'PerÃ­odo', 'dps-loyalty-addon' ); ?>
             </label>
             <select name="ranking_period" id="ranking_period">
-                <option value="30d" <?php selected( $period, '30d' ); ?>><?php esc_html_e( 'Últimos 30 dias', 'dps-loyalty-addon' ); ?></option>
-                <option value="90d" <?php selected( $period, '90d' ); ?>><?php esc_html_e( 'Últimos 90 dias', 'dps-loyalty-addon' ); ?></option>
-                <option value="365d" <?php selected( $period, '365d' ); ?>><?php esc_html_e( 'Últimos 12 meses', 'dps-loyalty-addon' ); ?></option>
+                <option value="30d" <?php selected( $period, '30d' ); ?>><?php esc_html_e( 'Ãšltimos 30 dias', 'dps-loyalty-addon' ); ?></option>
+                <option value="90d" <?php selected( $period, '90d' ); ?>><?php esc_html_e( 'Ãšltimos 90 dias', 'dps-loyalty-addon' ); ?></option>
+                <option value="365d" <?php selected( $period, '365d' ); ?>><?php esc_html_e( 'Ãšltimos 12 meses', 'dps-loyalty-addon' ); ?></option>
             </select>
 
             <label for="ranking_limit" style="margin-left:12px;">
@@ -769,7 +769,7 @@ class DPS_Loyalty_Addon {
                         <th><?php esc_html_e( 'Cliente', 'dps-loyalty-addon' ); ?></th>
                         <th><?php esc_html_e( 'Pontos ganhos', 'dps-loyalty-addon' ); ?></th>
                         <th><?php esc_html_e( 'Pontos resgatados', 'dps-loyalty-addon' ); ?></th>
-                        <th><?php esc_html_e( 'Indicações', 'dps-loyalty-addon' ); ?></th>
+                        <th><?php esc_html_e( 'IndicaÃ§Ãµes', 'dps-loyalty-addon' ); ?></th>
                         <th><?php esc_html_e( 'Atendimentos', 'dps-loyalty-addon' ); ?></th>
                         <th><?php esc_html_e( 'Score', 'dps-loyalty-addon' ); ?></th>
                     </tr>
@@ -777,7 +777,7 @@ class DPS_Loyalty_Addon {
                 <tbody>
                     <?php if ( empty( $ranking ) ) : ?>
                         <tr>
-                            <td colspan="7"><?php esc_html_e( 'Nenhum dado para o período selecionado.', 'dps-loyalty-addon' ); ?></td>
+                            <td colspan="7"><?php esc_html_e( 'Nenhum dado para o perÃ­odo selecionado.', 'dps-loyalty-addon' ); ?></td>
                         </tr>
                     <?php else : ?>
                         <?php foreach ( $ranking as $index => $client ) : ?>
@@ -802,7 +802,7 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Resumo rápido de pontos concedidos e resgatados nos últimos 30 dias.
+     * Resumo rÃ¡pido de pontos concedidos e resgatados nos Ãºltimos 30 dias.
      *
      * @since 1.4.0
      *
@@ -845,7 +845,7 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Renderiza a aba de indicações.
+     * Renderiza a aba de indicaÃ§Ãµes.
      */
     private function render_referrals_tab() {
         $status_filter = isset( $_GET['ref_status'] ) ? sanitize_text_field( $_GET['ref_status'] ) : '';
@@ -860,8 +860,8 @@ class DPS_Loyalty_Addon {
         $referrals = $referrals_data['items'];
         $total_pages = $referrals_data['pages'];
         $total_referrals = $referrals_data['total'];
-        
-        // URL para exportação CSV
+
+        // URL para exportaÃ§Ã£o CSV
         $export_url = wp_nonce_url(
             add_query_arg( [
                 'action' => 'dps_loyalty_export_referrals',
@@ -871,10 +871,10 @@ class DPS_Loyalty_Addon {
         );
         ?>
         <div class="dps-referrals-header">
-            <h2><?php esc_html_e( 'Indicações', 'dps-loyalty-addon' ); ?></h2>
+            <h2><?php esc_html_e( 'IndicaÃ§Ãµes', 'dps-loyalty-addon' ); ?></h2>
             <?php if ( $total_referrals > 0 ) : ?>
                 <a href="<?php echo esc_url( $export_url ); ?>" class="button">
-                    📥 <?php esc_html_e( 'Exportar CSV', 'dps-loyalty-addon' ); ?>
+                    ðŸ“¥ <?php esc_html_e( 'Exportar CSV', 'dps-loyalty-addon' ); ?>
                 </a>
             <?php endif; ?>
         </div>
@@ -887,21 +887,21 @@ class DPS_Loyalty_Addon {
                 <option value="rewarded" <?php selected( $status_filter, 'rewarded' ); ?>><?php esc_html_e( 'Recompensadas', 'dps-loyalty-addon' ); ?></option>
             </select>
             <span class="dps-referrals-count">
-                <?php 
+                <?php
                 /* translators: %d: number of referrals */
-                echo esc_html( sprintf( _n( '%d indicação', '%d indicações', $total_referrals, 'dps-loyalty-addon' ), $total_referrals ) ); 
+                echo esc_html( sprintf( _n( '%d indicaÃ§Ã£o', '%d indicaÃ§Ãµes', $total_referrals, 'dps-loyalty-addon' ), $total_referrals ) );
                 ?>
             </span>
         </div>
 
-        <!-- Tabela de Indicações -->
+        <!-- Tabela de IndicaÃ§Ãµes -->
         <div class="dps-referrals-table-wrapper">
             <table class="dps-referrals-table widefat">
                 <thead>
                     <tr>
                         <th><?php esc_html_e( 'Indicador', 'dps-loyalty-addon' ); ?></th>
                         <th><?php esc_html_e( 'Indicado', 'dps-loyalty-addon' ); ?></th>
-                        <th><?php esc_html_e( 'Código', 'dps-loyalty-addon' ); ?></th>
+                        <th><?php esc_html_e( 'CÃ³digo', 'dps-loyalty-addon' ); ?></th>
                         <th><?php esc_html_e( 'Data', 'dps-loyalty-addon' ); ?></th>
                         <th><?php esc_html_e( 'Status', 'dps-loyalty-addon' ); ?></th>
                         <th><?php esc_html_e( 'Recompensas', 'dps-loyalty-addon' ); ?></th>
@@ -911,17 +911,17 @@ class DPS_Loyalty_Addon {
                     <?php if ( empty( $referrals ) ) : ?>
                         <tr>
                             <td colspan="6" style="text-align: center; padding: 20px;">
-                                <?php esc_html_e( 'Nenhuma indicação encontrada.', 'dps-loyalty-addon' ); ?>
+                                <?php esc_html_e( 'Nenhuma indicaÃ§Ã£o encontrada.', 'dps-loyalty-addon' ); ?>
                             </td>
                         </tr>
                     <?php else : ?>
-                        <?php foreach ( $referrals as $ref ) : 
+                        <?php foreach ( $referrals as $ref ) :
                             $referrer = get_post( $ref->referrer_client_id );
                             $referee = get_post( $ref->referee_client_id );
                         ?>
                         <tr>
-                            <td><?php echo esc_html( $referrer ? $referrer->post_title : '—' ); ?></td>
-                            <td><?php echo esc_html( $referee ? $referee->post_title : '—' ); ?></td>
+                            <td><?php echo esc_html( $referrer ? $referrer->post_title : 'â€”' ); ?></td>
+                            <td><?php echo esc_html( $referee ? $referee->post_title : 'â€”' ); ?></td>
                             <td><code><?php echo esc_html( $ref->referral_code ); ?></code></td>
                             <td><?php echo esc_html( date_i18n( 'd/m/Y H:i', strtotime( $ref->created_at ) ) ); ?></td>
                             <td>
@@ -931,10 +931,10 @@ class DPS_Loyalty_Addon {
                             </td>
                             <td>
                                 <?php if ( $ref->status === 'rewarded' ) : ?>
-                                    <?php echo esc_html( $this->format_reward_display( $ref->reward_type_referrer, $ref->reward_value_referrer ) ); ?> / 
+                                    <?php echo esc_html( $this->format_reward_display( $ref->reward_type_referrer, $ref->reward_value_referrer ) ); ?> /
                                     <?php echo esc_html( $this->format_reward_display( $ref->reward_type_referee, $ref->reward_value_referee ) ); ?>
                                 <?php else : ?>
-                                    —
+                                    â€”
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -944,7 +944,7 @@ class DPS_Loyalty_Addon {
             </table>
         </div>
 
-        <!-- Paginação -->
+        <!-- PaginaÃ§Ã£o -->
         <?php if ( $total_pages > 1 ) : ?>
             <div class="dps-pagination">
                 <?php
@@ -960,13 +960,13 @@ class DPS_Loyalty_Addon {
                 <?php endif; ?>
 
                 <span class="dps-pagination-info">
-                    <?php echo esc_html( sprintf( __( 'Página %d de %d', 'dps-loyalty-addon' ), $current_page, $total_pages ) ); ?>
+                    <?php echo esc_html( sprintf( __( 'PÃ¡gina %d de %d', 'dps-loyalty-addon' ), $current_page, $total_pages ) ); ?>
                 </span>
 
                 <?php if ( $current_page < $total_pages ) :
                     $next_url = add_query_arg( 'ref_page', $current_page + 1, $base_url );
                 ?>
-                    <a class="button" href="<?php echo esc_url( $next_url ); ?>"><?php esc_html_e( 'Próxima', 'dps-loyalty-addon' ); ?> &raquo;</a>
+                    <a class="button" href="<?php echo esc_url( $next_url ); ?>"><?php esc_html_e( 'PrÃ³xima', 'dps-loyalty-addon' ); ?> &raquo;</a>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
@@ -974,7 +974,7 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Formata exibição de recompensa.
+     * Formata exibiÃ§Ã£o de recompensa.
      *
      * @param string $type  Tipo de recompensa.
      * @param mixed  $value Valor da recompensa.
@@ -989,12 +989,12 @@ class DPS_Loyalty_Addon {
             case 'percent':
                 return $value . '%';
             default:
-                return '—';
+                return 'â€”';
         }
     }
 
     /**
-     * Verifica se uma campanha específica está ativa nas configurações.
+     * Verifica se uma campanha especÃ­fica estÃ¡ ativa nas configuraÃ§Ãµes.
      *
      * @since 2.0.0
      *
@@ -1005,7 +1005,7 @@ class DPS_Loyalty_Addon {
         $settings = get_option( self::OPTION_KEY, [] );
         $key = 'enable_campaign_' . $campaign_key;
 
-        // Padrão: todas ativas se não configurado ainda.
+        // PadrÃ£o: todas ativas se nÃ£o configurado ainda.
         if ( ! isset( $settings[ $key ] ) ) {
             return true;
         }
@@ -1014,7 +1014,7 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Renderiza a aba de configurações.
+     * Renderiza a aba de configuraÃ§Ãµes.
      *
      * @param float $brl_per_pt Valor atual de BRL por ponto.
      */
@@ -1030,15 +1030,15 @@ class DPS_Loyalty_Addon {
         $portal_max_discount = isset( $settings['portal_max_discount_amount'] ) ? (int) $settings['portal_max_discount_amount'] : 0;
         $send_points_notification   = ! empty( $settings['send_points_notification'] );
         $send_referral_notification = ! empty( $settings['send_referral_notification'] );
-        $points_template = isset( $settings['points_notification_template'] ) ? $settings['points_notification_template'] : __( 'Olá {client_name}! 🎉 Você acabou de ganhar {points} pontos no programa de fidelidade. Seu saldo agora é de {new_balance} pontos.', 'dps-loyalty-addon' );
-        $referral_template = isset( $settings['referral_notification_template'] ) ? $settings['referral_notification_template'] : __( 'Obrigad@ por indicar amigos! 🐾 Você recebeu uma recompensa no programa de fidelidade.', 'dps-loyalty-addon' );
+        $points_template = isset( $settings['points_notification_template'] ) ? $settings['points_notification_template'] : __( 'OlÃ¡ {client_name}! ðŸŽ‰ VocÃª acabou de ganhar {points} pontos no programa de fidelidade. Seu saldo agora Ã© de {new_balance} pontos.', 'dps-loyalty-addon' );
+        $referral_template = isset( $settings['referral_notification_template'] ) ? $settings['referral_notification_template'] : __( 'Obrigad@ por indicar amigos! ðŸ¾ VocÃª recebeu uma recompensa no programa de fidelidade.', 'dps-loyalty-addon' );
         $enable_expiration = ! empty( $settings['enable_points_expiration'] );
         $expiration_months = isset( $settings['points_expire_after_months'] ) ? absint( $settings['points_expire_after_months'] ) : 12;
         $enable_expiration_notices = ! empty( $settings['enable_expiration_notifications'] );
         $days_before_notice = isset( $settings['days_before_expiration_notice'] ) ? absint( $settings['days_before_expiration_notice'] ) : 15;
-        $expiration_template = isset( $settings['expiration_notification_template'] ) ? $settings['expiration_notification_template'] : __( 'Olá {client_name}! Você tem {expiring_points} pontos que expiram em {days} dias. Aproveite para usar seus benefícios com a gente! 🐾', 'dps-loyalty-addon' );
-        
-        // Busca todas as páginas publicadas para o dropdown
+        $expiration_template = isset( $settings['expiration_notification_template'] ) ? $settings['expiration_notification_template'] : __( 'OlÃ¡ {client_name}! VocÃª tem {expiring_points} pontos que expiram em {days} dias. Aproveite para usar seus benefÃ­cios com a gente! ðŸ¾', 'dps-loyalty-addon' );
+
+        // Busca todas as pÃ¡ginas publicadas para o dropdown
         $pages = get_pages( [
             'post_status' => 'publish',
             'sort_column' => 'post_title',
@@ -1052,18 +1052,18 @@ class DPS_Loyalty_Addon {
 
             <fieldset class="dps-loyalty-campaigns-fieldset">
                 <legend><?php esc_html_e( 'Campanhas Ativas', 'dps-loyalty-addon' ); ?></legend>
-                <p class="description"><?php esc_html_e( 'Ative ou desative cada tipo de campanha individualmente. As campanhas desativadas não serão processadas nem exibidas no sistema.', 'dps-loyalty-addon' ); ?></p>
+                <p class="description"><?php esc_html_e( 'Ative ou desative cada tipo de campanha individualmente. As campanhas desativadas nÃ£o serÃ£o processadas nem exibidas no sistema.', 'dps-loyalty-addon' ); ?></p>
 
                 <div class="dps-campaign-toggles">
                     <div class="dps-campaign-toggle-card dps-campaign-toggle-card--featured">
                         <div class="dps-campaign-toggle-header">
-                            <span class="dps-campaign-toggle-icon">🤝</span>
+                            <span class="dps-campaign-toggle-icon">ðŸ¤</span>
                             <div class="dps-campaign-toggle-info">
                                 <strong><?php esc_html_e( 'Indique e Ganhe', 'dps-loyalty-addon' ); ?></strong>
                                 <span class="dps-campaign-toggle-badge"><?php esc_html_e( 'Recomendado', 'dps-loyalty-addon' ); ?></span>
                             </div>
                         </div>
-                        <p class="dps-campaign-toggle-desc"><?php esc_html_e( 'Seus clientes indicam amigos e ambos ganham recompensas. A campanha mais eficaz para aquisição orgânica de novos clientes.', 'dps-loyalty-addon' ); ?></p>
+                        <p class="dps-campaign-toggle-desc"><?php esc_html_e( 'Seus clientes indicam amigos e ambos ganham recompensas. A campanha mais eficaz para aquisiÃ§Ã£o orgÃ¢nica de novos clientes.', 'dps-loyalty-addon' ); ?></p>
                         <label class="dps-campaign-toggle-switch">
                             <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_campaign_referrals]" value="1" <?php checked( $enable_referrals ); ?> />
                             <span class="dps-toggle-slider"></span>
@@ -1073,12 +1073,12 @@ class DPS_Loyalty_Addon {
 
                     <div class="dps-campaign-toggle-card">
                         <div class="dps-campaign-toggle-header">
-                            <span class="dps-campaign-toggle-icon">⭐</span>
+                            <span class="dps-campaign-toggle-icon">â­</span>
                             <div class="dps-campaign-toggle-info">
                                 <strong><?php esc_html_e( 'Programa de Pontos', 'dps-loyalty-addon' ); ?></strong>
                             </div>
                         </div>
-                        <p class="dps-campaign-toggle-desc"><?php esc_html_e( 'Clientes acumulam pontos a cada atendimento pago. Inclui níveis de fidelidade, resgate e expiração de pontos.', 'dps-loyalty-addon' ); ?></p>
+                        <p class="dps-campaign-toggle-desc"><?php esc_html_e( 'Clientes acumulam pontos a cada atendimento pago. Inclui nÃ­veis de fidelidade, resgate e expiraÃ§Ã£o de pontos.', 'dps-loyalty-addon' ); ?></p>
                         <label class="dps-campaign-toggle-switch">
                             <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_campaign_points]" value="1" <?php checked( $enable_points ); ?> />
                             <span class="dps-toggle-slider"></span>
@@ -1088,12 +1088,12 @@ class DPS_Loyalty_Addon {
 
                     <div class="dps-campaign-toggle-card">
                         <div class="dps-campaign-toggle-header">
-                            <span class="dps-campaign-toggle-icon">🎯</span>
+                            <span class="dps-campaign-toggle-icon">ðŸŽ¯</span>
                             <div class="dps-campaign-toggle-info">
                                 <strong><?php esc_html_e( 'Campanhas Promocionais', 'dps-loyalty-addon' ); ?></strong>
                             </div>
                         </div>
-                        <p class="dps-campaign-toggle-desc"><?php esc_html_e( 'Crie campanhas promocionais segmentadas com descontos, pontos em dobro e critérios de elegibilidade personalizados.', 'dps-loyalty-addon' ); ?></p>
+                        <p class="dps-campaign-toggle-desc"><?php esc_html_e( 'Crie campanhas promocionais segmentadas com descontos, pontos em dobro e critÃ©rios de elegibilidade personalizados.', 'dps-loyalty-addon' ); ?></p>
                         <label class="dps-campaign-toggle-switch">
                             <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_campaign_promotions]" value="1" <?php checked( $enable_promotions ); ?> />
                             <span class="dps-toggle-slider"></span>
@@ -1120,19 +1120,19 @@ class DPS_Loyalty_Addon {
             </fieldset>
 
             <fieldset style="margin-top: 20px;">
-                <legend><?php esc_html_e( 'Níveis de Fidelidade', 'dps-loyalty-addon' ); ?></legend>
-                <p class="description"><?php esc_html_e( 'Configure os níveis, limiares de pontos e multiplicadores. O último nível da lista é considerado o máximo.', 'dps-loyalty-addon' ); ?></p>
+                <legend><?php esc_html_e( 'NÃ­veis de Fidelidade', 'dps-loyalty-addon' ); ?></legend>
+                <p class="description"><?php esc_html_e( 'Configure os nÃ­veis, limiares de pontos e multiplicadores. O Ãºltimo nÃ­vel da lista Ã© considerado o mÃ¡ximo.', 'dps-loyalty-addon' ); ?></p>
                 <?php $tiers = DPS_Loyalty_API::get_tiers_config(); ?>
                 <table class="widefat fixed dps-tier-table" id="dps-tier-table">
                     <thead>
                         <tr>
                             <th><?php esc_html_e( 'Slug', 'dps-loyalty-addon' ); ?></th>
                             <th><?php esc_html_e( 'Nome', 'dps-loyalty-addon' ); ?></th>
-                            <th><?php esc_html_e( 'Pontos mínimos', 'dps-loyalty-addon' ); ?></th>
+                            <th><?php esc_html_e( 'Pontos mÃ­nimos', 'dps-loyalty-addon' ); ?></th>
                             <th><?php esc_html_e( 'Multiplicador', 'dps-loyalty-addon' ); ?></th>
-                            <th><?php esc_html_e( 'Ícone', 'dps-loyalty-addon' ); ?></th>
+                            <th><?php esc_html_e( 'Ãcone', 'dps-loyalty-addon' ); ?></th>
                             <th><?php esc_html_e( 'Cor', 'dps-loyalty-addon' ); ?></th>
-                            <th><?php esc_html_e( 'Ações', 'dps-loyalty-addon' ); ?></th>
+                            <th><?php esc_html_e( 'AÃ§Ãµes', 'dps-loyalty-addon' ); ?></th>
                         </tr>
                     </thead>
                     <tbody id="dps-tier-rows">
@@ -1149,7 +1149,7 @@ class DPS_Loyalty_Addon {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-                <p><button type="button" class="button" id="dps-add-tier"><?php esc_html_e( 'Adicionar nível', 'dps-loyalty-addon' ); ?></button></p>
+                <p><button type="button" class="button" id="dps-add-tier"><?php esc_html_e( 'Adicionar nÃ­vel', 'dps-loyalty-addon' ); ?></button></p>
                 <template id="dps-tier-template">
                     <tr class="dps-tier-row">
                         <td><input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[loyalty_tiers][__index__][slug]" required /></td>
@@ -1162,17 +1162,17 @@ class DPS_Loyalty_Addon {
                     </tr>
                 </template>
             </fieldset>
-            
+
             <fieldset style="margin-top: 20px;">
-                <legend><?php esc_html_e( 'Link de Indicação', 'dps-loyalty-addon' ); ?></legend>
+                <legend><?php esc_html_e( 'Link de IndicaÃ§Ã£o', 'dps-loyalty-addon' ); ?></legend>
                 <table class="form-table" role="presentation">
                     <tr>
                         <th scope="row">
-                            <label for="dps_referral_page_id"><?php esc_html_e( 'Página de cadastro para indicações', 'dps-loyalty-addon' ); ?></label>
+                            <label for="dps_referral_page_id"><?php esc_html_e( 'PÃ¡gina de cadastro para indicaÃ§Ãµes', 'dps-loyalty-addon' ); ?></label>
                         </th>
                         <td>
                             <select name="<?php echo esc_attr( self::OPTION_KEY ); ?>[referral_page_id]" id="dps_referral_page_id">
-                                <option value="0"><?php esc_html_e( '— Usar página de cadastro padrão —', 'dps-loyalty-addon' ); ?></option>
+                                <option value="0"><?php esc_html_e( 'â€” Usar pÃ¡gina de cadastro padrÃ£o â€”', 'dps-loyalty-addon' ); ?></option>
                                 <?php foreach ( $pages as $page ) : ?>
                                     <option value="<?php echo esc_attr( $page->ID ); ?>" <?php selected( $referral_page_id, $page->ID ); ?>>
                                         <?php echo esc_html( $page->post_title ); ?>
@@ -1180,17 +1180,17 @@ class DPS_Loyalty_Addon {
                                 <?php endforeach; ?>
                             </select>
                             <p class="description">
-                                <?php esc_html_e( 'Escolha a página para onde o link de indicação irá direcionar novos clientes. Se não configurar, será usada a página do add-on "Cadastro".', 'dps-loyalty-addon' ); ?>
+                                <?php esc_html_e( 'Escolha a pÃ¡gina para onde o link de indicaÃ§Ã£o irÃ¡ direcionar novos clientes. Se nÃ£o configurar, serÃ¡ usada a pÃ¡gina do add-on "Cadastro".', 'dps-loyalty-addon' ); ?>
                             </p>
-                            <?php 
+                            <?php
                             // Mostra preview da URL atual
                             $preview_url = DPS_Loyalty_API::get_referral_url( 0 );
-                            // Remove o ?ref= já que não temos um cliente real
+                            // Remove o ?ref= jÃ¡ que nÃ£o temos um cliente real
                             $preview_base = remove_query_arg( 'ref', $preview_url );
                             if ( $preview_base ) :
                             ?>
                             <p class="description" style="margin-top: 8px;">
-                                <strong><?php esc_html_e( 'URL base atual:', 'dps-loyalty-addon' ); ?></strong> 
+                                <strong><?php esc_html_e( 'URL base atual:', 'dps-loyalty-addon' ); ?></strong>
                                 <code><?php echo esc_html( $preview_base ); ?></code>
                             </p>
                             <?php endif; ?>
@@ -1200,11 +1200,11 @@ class DPS_Loyalty_Addon {
             </fieldset>
 
             <fieldset style="margin-top: 20px;">
-                <legend><?php esc_html_e( 'Comunicações', 'dps-loyalty-addon' ); ?></legend>
-                <p class="description"><?php esc_html_e( 'Configure avisos automáticos via Communications quando o cliente ganhar pontos ou receber recompensas de indicação.', 'dps-loyalty-addon' ); ?></p>
+                <legend><?php esc_html_e( 'ComunicaÃ§Ãµes', 'dps-loyalty-addon' ); ?></legend>
+                <p class="description"><?php esc_html_e( 'Configure avisos automÃ¡ticos via Communications quando o cliente ganhar pontos ou receber recompensas de indicaÃ§Ã£o.', 'dps-loyalty-addon' ); ?></p>
                 <table class="form-table" role="presentation">
                     <tr>
-                        <th scope="row"><?php esc_html_e( 'Bonificação de pontos', 'dps-loyalty-addon' ); ?></th>
+                        <th scope="row"><?php esc_html_e( 'BonificaÃ§Ã£o de pontos', 'dps-loyalty-addon' ); ?></th>
                         <td>
                             <p>
                                 <label>
@@ -1222,12 +1222,12 @@ class DPS_Loyalty_Addon {
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row"><?php esc_html_e( 'Recompensa de indicação', 'dps-loyalty-addon' ); ?></th>
+                        <th scope="row"><?php esc_html_e( 'Recompensa de indicaÃ§Ã£o', 'dps-loyalty-addon' ); ?></th>
                         <td>
                             <p>
                                 <label>
                                     <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[send_referral_notification]" value="1" <?php checked( $send_referral_notification ); ?> />
-                                    <?php esc_html_e( 'Enviar mensagem quando bônus de indicação for aplicado', 'dps-loyalty-addon' ); ?>
+                                    <?php esc_html_e( 'Enviar mensagem quando bÃ´nus de indicaÃ§Ã£o for aplicado', 'dps-loyalty-addon' ); ?>
                                 </label>
                             </p>
                             <p>
@@ -1243,22 +1243,22 @@ class DPS_Loyalty_Addon {
             </fieldset>
 
             <fieldset style="margin-top: 20px;">
-                <legend><?php esc_html_e( 'Expiração de Pontos', 'dps-loyalty-addon' ); ?></legend>
+                <legend><?php esc_html_e( 'ExpiraÃ§Ã£o de Pontos', 'dps-loyalty-addon' ); ?></legend>
                 <table class="form-table" role="presentation">
                     <tr>
-                        <th scope="row"><?php esc_html_e( 'Ativar expiração automática', 'dps-loyalty-addon' ); ?></th>
+                        <th scope="row"><?php esc_html_e( 'Ativar expiraÃ§Ã£o automÃ¡tica', 'dps-loyalty-addon' ); ?></th>
                         <td>
                             <label>
                                 <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_points_expiration]" value="1" <?php checked( $enable_expiration ); ?> />
-                                <?php esc_html_e( 'Expirar pontos após X meses', 'dps-loyalty-addon' ); ?>
+                                <?php esc_html_e( 'Expirar pontos apÃ³s X meses', 'dps-loyalty-addon' ); ?>
                             </label>
                             <p style="margin-top:8px;">
                                 <label>
-                                    <?php esc_html_e( 'Meses até expirar', 'dps-loyalty-addon' ); ?>
+                                    <?php esc_html_e( 'Meses atÃ© expirar', 'dps-loyalty-addon' ); ?>
                                     <input type="number" min="1" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[points_expire_after_months]" value="<?php echo esc_attr( $expiration_months ); ?>" />
                                 </label>
                             </p>
-                            <p class="description"><?php esc_html_e( 'Os lançamentos mais antigos são expirados primeiro (FIFO) com um lançamento negativo no histórico.', 'dps-loyalty-addon' ); ?></p>
+                            <p class="description"><?php esc_html_e( 'Os lanÃ§amentos mais antigos sÃ£o expirados primeiro (FIFO) com um lanÃ§amento negativo no histÃ³rico.', 'dps-loyalty-addon' ); ?></p>
                         </td>
                     </tr>
                     <tr>
@@ -1267,7 +1267,7 @@ class DPS_Loyalty_Addon {
                             <p>
                                 <label>
                                     <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_expiration_notifications]" value="1" <?php checked( $enable_expiration_notices ); ?> />
-                                    <?php esc_html_e( 'Enviar alerta antes da expiração', 'dps-loyalty-addon' ); ?>
+                                    <?php esc_html_e( 'Enviar alerta antes da expiraÃ§Ã£o', 'dps-loyalty-addon' ); ?>
                                 </label>
                             </p>
                             <p>
@@ -1290,7 +1290,7 @@ class DPS_Loyalty_Addon {
 
             <fieldset style="margin-top: 20px;">
                 <legend><?php esc_html_e( 'Resgate no Portal', 'dps-loyalty-addon' ); ?></legend>
-                <p class="description"><?php esc_html_e( 'Permite que o cliente converta pontos em crédito diretamente pelo Portal do Cliente, respeitando limite por resgate.', 'dps-loyalty-addon' ); ?></p>
+                <p class="description"><?php esc_html_e( 'Permite que o cliente converta pontos em crÃ©dito diretamente pelo Portal do Cliente, respeitando limite por resgate.', 'dps-loyalty-addon' ); ?></p>
                 <table class="form-table" role="presentation">
                     <tr>
                         <th scope="row"><?php esc_html_e( 'Habilitar resgate', 'dps-loyalty-addon' ); ?></th>
@@ -1302,38 +1302,38 @@ class DPS_Loyalty_Addon {
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row"><?php esc_html_e( 'Mínimo de pontos', 'dps-loyalty-addon' ); ?></th>
+                        <th scope="row"><?php esc_html_e( 'MÃ­nimo de pontos', 'dps-loyalty-addon' ); ?></th>
                         <td>
                             <input type="number" min="0" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[portal_min_points_to_redeem]" value="<?php echo esc_attr( $portal_min_points ); ?>" />
-                            <p class="description"><?php esc_html_e( 'Quantidade mínima que o cliente precisa ter para iniciar um resgate.', 'dps-loyalty-addon' ); ?></p>
+                            <p class="description"><?php esc_html_e( 'Quantidade mÃ­nima que o cliente precisa ter para iniciar um resgate.', 'dps-loyalty-addon' ); ?></p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e( 'Pontos por R$ 1,00', 'dps-loyalty-addon' ); ?></th>
                         <td>
                             <input type="number" min="1" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[portal_points_per_real]" value="<?php echo esc_attr( $portal_points_per_real ); ?>" />
-                            <p class="description"><?php esc_html_e( 'Exemplo: 100 pontos = R$ 1,00 de crédito.', 'dps-loyalty-addon' ); ?></p>
+                            <p class="description"><?php esc_html_e( 'Exemplo: 100 pontos = R$ 1,00 de crÃ©dito.', 'dps-loyalty-addon' ); ?></p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e( 'Limite por resgate (R$)', 'dps-loyalty-addon' ); ?></th>
                         <td>
                             <input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[portal_max_discount_amount]" value="<?php echo esc_attr( DPS_Money_Helper::format_to_brazilian( $portal_max_discount ) ); ?>" />
-                            <p class="description"><?php esc_html_e( 'Teto de crédito convertido a cada solicitação no Portal.', 'dps-loyalty-addon' ); ?></p>
+                            <p class="description"><?php esc_html_e( 'Teto de crÃ©dito convertido a cada solicitaÃ§Ã£o no Portal.', 'dps-loyalty-addon' ); ?></p>
                         </td>
                     </tr>
                 </table>
             </fieldset>
 
             <fieldset style="margin-top: 20px;">
-                <legend><?php esc_html_e( 'Uso de créditos no Financeiro', 'dps-loyalty-addon' ); ?></legend>
+                <legend><?php esc_html_e( 'Uso de crÃ©ditos no Financeiro', 'dps-loyalty-addon' ); ?></legend>
                 <table class="form-table" role="presentation">
                     <tr>
                         <th scope="row"><?php esc_html_e( 'Permitir abatimento', 'dps-loyalty-addon' ); ?></th>
                         <td>
                             <label>
                                 <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_finance_credit_usage]" value="1" <?php checked( ! empty( $settings['enable_finance_credit_usage'] ) ); ?> />
-                                <?php esc_html_e( 'Permitir usar créditos de fidelidade ao registrar pagamentos no Financeiro.', 'dps-loyalty-addon' ); ?>
+                                <?php esc_html_e( 'Permitir usar crÃ©ditos de fidelidade ao registrar pagamentos no Financeiro.', 'dps-loyalty-addon' ); ?>
                             </label>
                         </td>
                     </tr>
@@ -1341,7 +1341,7 @@ class DPS_Loyalty_Addon {
                         <th scope="row"><?php esc_html_e( 'Limite por atendimento (R$)', 'dps-loyalty-addon' ); ?></th>
                         <td>
                             <input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[finance_max_credit_per_appointment]" value="<?php echo esc_attr( DPS_Money_Helper::format_to_brazilian( isset( $settings['finance_max_credit_per_appointment'] ) ? (int) $settings['finance_max_credit_per_appointment'] : 0 ) ); ?>" />
-                            <p class="description"><?php esc_html_e( 'Valor máximo de créditos que podem ser abatidos em um atendimento.', 'dps-loyalty-addon' ); ?></p>
+                            <p class="description"><?php esc_html_e( 'Valor mÃ¡ximo de crÃ©ditos que podem ser abatidos em um atendimento.', 'dps-loyalty-addon' ); ?></p>
                         </td>
                     </tr>
                 </table>
@@ -1352,7 +1352,7 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Registra a aba de fidelidade no frontend de configurações.
+     * Registra a aba de fidelidade no frontend de configuraÃ§Ãµes.
      *
      * @since 2.0.0
      */
@@ -1368,7 +1368,7 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Renderiza a aba de configurações de campanhas no frontend.
+     * Renderiza a aba de configuraÃ§Ãµes de campanhas no frontend.
      *
      * @since 2.0.0
      */
@@ -1377,17 +1377,17 @@ class DPS_Loyalty_Addon {
         $enable_points     = self::is_campaign_enabled( 'points' );
         $enable_promotions = self::is_campaign_enabled( 'promotions' );
 
-        // Nonce para proteção do formulário AJAX/REST.
+        // Nonce para proteÃ§Ã£o do formulÃ¡rio AJAX/REST.
         $nonce = wp_create_nonce( 'wp_rest' );
         ?>
         <div class="dps-loyalty-frontend-settings" data-nonce="<?php echo esc_attr( $nonce ); ?>" data-rest-url="<?php echo esc_url( rest_url( 'dps-loyalty/v1/campaign-settings' ) ); ?>">
             <h2><?php esc_html_e( 'Campanhas de Fidelidade', 'dps-loyalty-addon' ); ?></h2>
-            <p class="dps-settings-description"><?php esc_html_e( 'Ative ou desative cada tipo de campanha. As alterações são salvas automaticamente.', 'dps-loyalty-addon' ); ?></p>
+            <p class="dps-settings-description"><?php esc_html_e( 'Ative ou desative cada tipo de campanha. As alteraÃ§Ãµes sÃ£o salvas automaticamente.', 'dps-loyalty-addon' ); ?></p>
 
             <div class="dps-campaign-toggles">
                 <div class="dps-campaign-toggle-card dps-campaign-toggle-card--featured">
                     <div class="dps-campaign-toggle-header">
-                        <span class="dps-campaign-toggle-icon">🤝</span>
+                        <span class="dps-campaign-toggle-icon">ðŸ¤</span>
                         <div class="dps-campaign-toggle-info">
                             <strong><?php esc_html_e( 'Indique e Ganhe', 'dps-loyalty-addon' ); ?></strong>
                             <span class="dps-campaign-toggle-badge"><?php esc_html_e( 'Recomendado', 'dps-loyalty-addon' ); ?></span>
@@ -1403,12 +1403,12 @@ class DPS_Loyalty_Addon {
 
                 <div class="dps-campaign-toggle-card">
                     <div class="dps-campaign-toggle-header">
-                        <span class="dps-campaign-toggle-icon">⭐</span>
+                        <span class="dps-campaign-toggle-icon">â­</span>
                         <div class="dps-campaign-toggle-info">
                             <strong><?php esc_html_e( 'Programa de Pontos', 'dps-loyalty-addon' ); ?></strong>
                         </div>
                     </div>
-                    <p class="dps-campaign-toggle-desc"><?php esc_html_e( 'Acumule pontos a cada atendimento com níveis e resgates.', 'dps-loyalty-addon' ); ?></p>
+                    <p class="dps-campaign-toggle-desc"><?php esc_html_e( 'Acumule pontos a cada atendimento com nÃ­veis e resgates.', 'dps-loyalty-addon' ); ?></p>
                     <label class="dps-campaign-toggle-switch">
                         <input type="checkbox" data-campaign="enable_campaign_points" <?php checked( $enable_points ); ?> />
                         <span class="dps-toggle-slider"></span>
@@ -1418,7 +1418,7 @@ class DPS_Loyalty_Addon {
 
                 <div class="dps-campaign-toggle-card">
                     <div class="dps-campaign-toggle-header">
-                        <span class="dps-campaign-toggle-icon">🎯</span>
+                        <span class="dps-campaign-toggle-icon">ðŸŽ¯</span>
                         <div class="dps-campaign-toggle-info">
                             <strong><?php esc_html_e( 'Campanhas Promocionais', 'dps-loyalty-addon' ); ?></strong>
                         </div>
@@ -1443,7 +1443,7 @@ class DPS_Loyalty_Addon {
      * Renderiza a aba de consulta de clientes.
      *
      * @since 1.2.0
-     * @since 1.3.0 Substituído dropdown por autocomplete.
+     * @since 1.3.0 SubstituÃ­do dropdown por autocomplete.
      *
      * @param int $selected_id ID do cliente selecionado.
      */
@@ -1468,7 +1468,7 @@ class DPS_Loyalty_Addon {
             $total_logs_pages = $logs_limit > 0 ? max( 1, (int) ceil( $total_logs / $logs_limit ) ) : 1;
         }
         $selected_name = '';
-        
+
         // Busca nome do cliente selecionado para exibir no campo.
         if ( $selected_id ) {
             $selected_client = get_post( $selected_id );
@@ -1478,19 +1478,19 @@ class DPS_Loyalty_Addon {
         }
         ?>
         <h2><?php esc_html_e( 'Resumo de Fidelidade', 'dps-loyalty-addon' ); ?></h2>
-        
-        <!-- Formulário com autocomplete -->
+
+        <!-- FormulÃ¡rio com autocomplete -->
         <div class="dps-client-search-container">
             <form method="get" id="dps-loyalty-client-form">
                 <input type="hidden" name="page" value="dps-loyalty" />
                 <input type="hidden" name="tab" value="clients" />
                 <input type="hidden" id="dps-loyalty-client-id" name="dps_client_id" value="<?php echo esc_attr( $selected_id ); ?>" />
-                
+
                 <label for="dps-loyalty-client-search"><?php esc_html_e( 'Buscar cliente', 'dps-loyalty-addon' ); ?></label>
                 <div class="dps-autocomplete-wrapper">
-                    <input 
-                        type="text" 
-                        id="dps-loyalty-client-search" 
+                    <input
+                        type="text"
+                        id="dps-loyalty-client-search"
                         class="regular-text"
                         placeholder="<?php esc_attr_e( 'Digite o nome ou telefone do cliente...', 'dps-loyalty-addon' ); ?>"
                         value="<?php echo esc_attr( $selected_name ); ?>"
@@ -1500,10 +1500,10 @@ class DPS_Loyalty_Addon {
                 </div>
                 <?php submit_button( __( 'Carregar', 'dps-loyalty-addon' ), 'secondary', '', false ); ?>
             </form>
-            
+
             <?php if ( $selected_id && $selected_name ) : ?>
                 <p class="dps-selected-client-info">
-                    <?php 
+                    <?php
                     printf(
                         /* translators: %s: client name */
                         esc_html__( 'Cliente selecionado: %s', 'dps-loyalty-addon' ),
@@ -1527,35 +1527,35 @@ class DPS_Loyalty_Addon {
             $unlocked_achievements  = DPS_Loyalty_Achievements::get_client_achievements( $selected_id );
         ?>
             <hr />
-            
+
             <!-- Cards de resumo do cliente -->
             <div class="dps-loyalty-dashboard" style="margin-top: 20px;">
                 <div class="dps-loyalty-card">
                     <span class="dps-loyalty-card-icon"><?php echo esc_html( $tier_info['icon'] ); ?></span>
                     <span class="dps-loyalty-card-value"><?php echo esc_html( $tier_info['label'] ); ?></span>
-                    <span class="dps-loyalty-card-label"><?php esc_html_e( 'Nível', 'dps-loyalty-addon' ); ?></span>
+                    <span class="dps-loyalty-card-label"><?php esc_html_e( 'NÃ­vel', 'dps-loyalty-addon' ); ?></span>
                 </div>
                 <div class="dps-loyalty-card dps-loyalty-card--info">
-                    <span class="dps-loyalty-card-icon">⭐</span>
+                    <span class="dps-loyalty-card-icon">â­</span>
                     <span class="dps-loyalty-card-value"><?php echo esc_html( number_format( $client_points, 0, ',', '.' ) ); ?></span>
                     <span class="dps-loyalty-card-label"><?php esc_html_e( 'Pontos', 'dps-loyalty-addon' ); ?></span>
                 </div>
                 <div class="dps-loyalty-card dps-loyalty-card--warning">
-                    <span class="dps-loyalty-card-icon">💰</span>
+                    <span class="dps-loyalty-card-icon">ðŸ’°</span>
                     <span class="dps-loyalty-card-value"><?php echo esc_html( $client_credit ); ?></span>
-                    <span class="dps-loyalty-card-label"><?php esc_html_e( 'Crédito', 'dps-loyalty-addon' ); ?></span>
+                    <span class="dps-loyalty-card-label"><?php esc_html_e( 'CrÃ©dito', 'dps-loyalty-addon' ); ?></span>
                 </div>
                 <div class="dps-loyalty-card dps-loyalty-card--success">
-                    <span class="dps-loyalty-card-icon">🤝</span>
+                    <span class="dps-loyalty-card-icon">ðŸ¤</span>
                     <span class="dps-loyalty-card-value"><?php echo esc_html( $referral_stats['rewarded'] ); ?>/<?php echo esc_html( $referral_stats['total'] ); ?></span>
-                    <span class="dps-loyalty-card-label"><?php esc_html_e( 'Indicações', 'dps-loyalty-addon' ); ?></span>
+                    <span class="dps-loyalty-card-label"><?php esc_html_e( 'IndicaÃ§Ãµes', 'dps-loyalty-addon' ); ?></span>
                 </div>
             </div>
 
-            <!-- Barra de progresso para próximo nível -->
+            <!-- Barra de progresso para prÃ³ximo nÃ­vel -->
             <?php if ( $tier_info['next_tier'] ) : ?>
             <div class="dps-points-progress-wrapper">
-                <p><strong><?php esc_html_e( 'Progresso para o próximo nível:', 'dps-loyalty-addon' ); ?></strong></p>
+                <p><strong><?php esc_html_e( 'Progresso para o prÃ³ximo nÃ­vel:', 'dps-loyalty-addon' ); ?></strong></p>
                 <div class="dps-tier-progress">
                     <div class="dps-tier-current">
                         <span class="dps-tier-icon"><?php echo esc_html( $tier_info['icon'] ); ?></span>
@@ -1565,7 +1565,7 @@ class DPS_Loyalty_Addon {
                         <div class="dps-points-progress">
                             <div class="dps-points-progress-fill" style="width: <?php echo esc_attr( $tier_info['progress'] ); ?>%;"></div>
                             <span class="dps-points-progress-text">
-                                <?php echo esc_html( number_format( $tier_info['points'], 0, ',', '.' ) ); ?> / 
+                                <?php echo esc_html( number_format( $tier_info['points'], 0, ',', '.' ) ); ?> /
                                 <?php echo esc_html( number_format( $tier_info['next_points'], 0, ',', '.' ) ); ?>
                             </span>
                         </div>
@@ -1573,7 +1573,7 @@ class DPS_Loyalty_Addon {
                     <div class="dps-tier-next">
                         <span class="dps-tier-icon"><?php
                             $tiers = DPS_Loyalty_API::get_tiers_config();
-                            $next_tier_icon = '🏆';
+                            $next_tier_icon = 'ðŸ†';
                             foreach ( $tiers as $tier_item ) {
                                 if ( $tier_item['slug'] === $tier_info['next_tier'] ) {
                                     $next_tier_icon = $tier_item['icon'];
@@ -1597,28 +1597,28 @@ class DPS_Loyalty_Addon {
                         <div class="dps-achievement-card <?php echo $unlocked ? '' : 'is-locked'; ?>">
                             <h4><?php echo esc_html( $achievement['label'] ); ?></h4>
                             <p><?php echo esc_html( $achievement['description'] ); ?></p>
-                            <span class="dps-achievement-status"><?php echo esc_html( $unlocked ? __( 'Conquistado', 'dps-loyalty-addon' ) : __( 'Ainda não', 'dps-loyalty-addon' ) ); ?></span>
+                            <span class="dps-achievement-status"><?php echo esc_html( $unlocked ? __( 'Conquistado', 'dps-loyalty-addon' ) : __( 'Ainda nÃ£o', 'dps-loyalty-addon' ) ); ?></span>
                         </div>
                     <?php endforeach; ?>
                 </div>
             </div>
 
-            <!-- Código de indicação -->
+            <!-- CÃ³digo de indicaÃ§Ã£o -->
             <div class="dps-referral-section">
-                <p><strong><?php esc_html_e( 'Código de indicação:', 'dps-loyalty-addon' ); ?></strong></p>
+                <p><strong><?php esc_html_e( 'CÃ³digo de indicaÃ§Ã£o:', 'dps-loyalty-addon' ); ?></strong></p>
                 <div class="dps-referral-code-box">
                     <div class="dps-referral-code">
                         <code><?php echo esc_html( $referral_code ); ?></code>
                         <button type="button" class="button dps-copy-referral-code" data-code="<?php echo esc_attr( $referral_code ); ?>">
-                            📋 <?php esc_html_e( 'Copiar', 'dps-loyalty-addon' ); ?>
+                            ðŸ“‹ <?php esc_html_e( 'Copiar', 'dps-loyalty-addon' ); ?>
                         </button>
                     </div>
-                    <?php 
-                    // Gerar link de indicação e botão WhatsApp
+                    <?php
+                    // Gerar link de indicaÃ§Ã£o e botÃ£o WhatsApp
                     $referral_url = DPS_Loyalty_API::get_referral_url( $selected_id );
                     $share_message = sprintf(
                         /* translators: 1: referral code, 2: referral URL */
-                        __( 'Use meu código %1$s e ganhe benefícios no seu primeiro atendimento! Cadastre-se aqui: %2$s', 'dps-loyalty-addon' ),
+                        __( 'Use meu cÃ³digo %1$s e ganhe benefÃ­cios no seu primeiro atendimento! Cadastre-se aqui: %2$s', 'dps-loyalty-addon' ),
                         $referral_code,
                         $referral_url
                     );
@@ -1627,17 +1627,17 @@ class DPS_Loyalty_Addon {
                     <div class="dps-referral-actions">
                         <input type="text" value="<?php echo esc_attr( $referral_url ); ?>" readonly class="dps-referral-link-input" />
                         <button type="button" class="button dps-copy-referral-link" data-link="<?php echo esc_attr( $referral_url ); ?>">
-                            🔗 <?php esc_html_e( 'Copiar Link', 'dps-loyalty-addon' ); ?>
+                            ðŸ”— <?php esc_html_e( 'Copiar Link', 'dps-loyalty-addon' ); ?>
                         </button>
                         <a href="<?php echo esc_url( $whatsapp_url ); ?>" target="_blank" class="button dps-btn-whatsapp">
-                            📲 <?php esc_html_e( 'Compartilhar via WhatsApp', 'dps-loyalty-addon' ); ?>
+                            ðŸ“² <?php esc_html_e( 'Compartilhar via WhatsApp', 'dps-loyalty-addon' ); ?>
                         </a>
                     </div>
                 </div>
             </div>
 
             <?php if ( ! empty( $logs ) ) : ?>
-                <h3><?php esc_html_e( 'Histórico de pontos', 'dps-loyalty-addon' ); ?></h3>
+                <h3><?php esc_html_e( 'HistÃ³rico de pontos', 'dps-loyalty-addon' ); ?></h3>
                 <ul class="dps-points-history">
                     <?php foreach ( $logs as $entry ) :
                         $context_label = $this->get_context_label( $entry['context'] );
@@ -1673,18 +1673,18 @@ class DPS_Loyalty_Addon {
                         <?php endif; ?>
 
                         <span class="dps-pagination-info">
-                            <?php echo esc_html( sprintf( __( 'Página %1$d de %2$d', 'dps-loyalty-addon' ), $logs_page, $total_logs_pages ) ); ?>
+                            <?php echo esc_html( sprintf( __( 'PÃ¡gina %1$d de %2$d', 'dps-loyalty-addon' ), $logs_page, $total_logs_pages ) ); ?>
                         </span>
 
                         <?php if ( $logs_page < $total_logs_pages ) :
                             $next_url = add_query_arg( 'logs_page', $logs_page + 1, $base_url );
                             ?>
-                            <a class="button" href="<?php echo esc_url( $next_url ); ?>"><?php esc_html_e( 'Próxima', 'dps-loyalty-addon' ); ?> &raquo;</a>
+                            <a class="button" href="<?php echo esc_url( $next_url ); ?>"><?php esc_html_e( 'PrÃ³xima', 'dps-loyalty-addon' ); ?> &raquo;</a>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>
             <?php else : ?>
-                <p><?php esc_html_e( 'Nenhum histórico disponível.', 'dps-loyalty-addon' ); ?></p>
+                <p><?php esc_html_e( 'Nenhum histÃ³rico disponÃ­vel.', 'dps-loyalty-addon' ); ?></p>
             <?php endif; ?>
         <?php endif; ?>
         <?php
@@ -1707,27 +1707,27 @@ class DPS_Loyalty_Addon {
     }
 
     public function handle_campaign_audit() {
-        // Verifica se campanhas promocionais estão ativas.
+        // Verifica se campanhas promocionais estÃ£o ativas.
         if ( ! self::is_campaign_enabled( 'promotions' ) ) {
             wp_safe_redirect( admin_url( 'admin.php?page=dps-loyalty' ) );
             exit;
         }
 
-        // Usa helper para verificar nonce de formulário POST com capability
+        // Usa helper para verificar nonce de formulÃ¡rio POST com capability
         if ( class_exists( 'DPS_Request_Validator' ) ) {
             if ( ! DPS_Request_Validator::verify_admin_form( 'dps_loyalty_run_audit', 'dps_loyalty_run_audit_nonce' ) ) {
-                wp_die( __( 'Nonce inválido.', 'dps-loyalty-addon' ) );
+                wp_die( __( 'Nonce invÃ¡lido.', 'dps-loyalty-addon' ) );
             }
         } else {
             if ( ! current_user_can( 'manage_options' ) ) {
                 wp_die( __( 'Acesso negado.', 'dps-loyalty-addon' ) );
             }
             if ( ! isset( $_POST['dps_loyalty_run_audit_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['dps_loyalty_run_audit_nonce'] ), 'dps_loyalty_run_audit' ) ) {
-                wp_die( __( 'Nonce inválido.', 'dps-loyalty-addon' ) );
+                wp_die( __( 'Nonce invÃ¡lido.', 'dps-loyalty-addon' ) );
             }
         }
 
-        // Limite de campanhas processadas em uma única execução.
+        // Limite de campanhas processadas em uma Ãºnica execuÃ§Ã£o.
         $campaigns = get_posts( [
             'post_type'      => 'dps_campaign',
             'posts_per_page' => 50,
@@ -1750,44 +1750,44 @@ class DPS_Loyalty_Addon {
      * @since 1.2.0
      */
     public function handle_export_referrals() {
-        // Usa helper para verificar nonce de ação GET com capability
+        // Usa helper para verificar nonce de aÃ§Ã£o GET com capability
         if ( class_exists( 'DPS_Request_Validator' ) ) {
             if ( ! DPS_Request_Validator::verify_admin_action( 'dps_export_referrals' ) ) {
-                wp_die( __( 'Nonce inválido.', 'dps-loyalty-addon' ) );
+                wp_die( __( 'Nonce invÃ¡lido.', 'dps-loyalty-addon' ) );
             }
         } else {
             if ( ! current_user_can( 'manage_options' ) ) {
                 wp_die( __( 'Acesso negado.', 'dps-loyalty-addon' ) );
             }
             if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'dps_export_referrals' ) ) {
-                wp_die( __( 'Nonce inválido.', 'dps-loyalty-addon' ) );
+                wp_die( __( 'Nonce invÃ¡lido.', 'dps-loyalty-addon' ) );
             }
         }
 
         $status = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
-        
+
         $csv = DPS_Loyalty_API::export_referrals_csv( [ 'status' => $status ] );
-        
+
         // Sanitize filename to prevent header injection
         $filename = sanitize_file_name( 'indicacoes-' . gmdate( 'Y-m-d' ) . '.csv' );
-        
+
         header( 'Content-Type: text/csv; charset=UTF-8' );
         header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
         header( 'Pragma: no-cache' );
         header( 'Expires: 0' );
-        
+
         echo $csv;
         exit;
     }
 
     /**
-     * Encontra clientes elegíveis para uma campanha.
+     * Encontra clientes elegÃ­veis para uma campanha.
      *
      * @since 1.2.0
      * @since 1.3.0 Otimizado para usar batch query em vez de N+1.
      *
      * @param int $campaign_id ID da campanha.
-     * @return int[] Array de IDs de clientes elegíveis.
+     * @return int[] Array de IDs de clientes elegÃ­veis.
      */
     private function find_eligible_clients_for_campaign( $campaign_id ) {
         $eligibility      = get_post_meta( $campaign_id, 'dps_campaign_eligibility', true );
@@ -1810,7 +1810,7 @@ class DPS_Loyalty_Addon {
             return $eligible_clients;
         }
 
-        // Carrega datas de último atendimento em batch (elimina N+1).
+        // Carrega datas de Ãºltimo atendimento em batch (elimina N+1).
         $last_appointments = [];
         if ( $check_inactive && $inactive_days > 0 ) {
             $last_appointments = $this->get_last_appointments_batch( $clients );
@@ -1840,14 +1840,14 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Retorna, em batch, a última data de atendimento por cliente.
+     * Retorna, em batch, a Ãºltima data de atendimento por cliente.
      *
-     * Otimização para evitar queries N+1 ao verificar inatividade.
+     * OtimizaÃ§Ã£o para evitar queries N+1 ao verificar inatividade.
      *
      * @since 1.3.0
      *
      * @param int[] $client_ids Array de IDs de clientes.
-     * @return array Associativo: client_id => 'Y-m-d' (data do último atendimento).
+     * @return array Associativo: client_id => 'Y-m-d' (data do Ãºltimo atendimento).
      */
     private function get_last_appointments_batch( $client_ids ) {
         if ( empty( $client_ids ) ) {
@@ -1867,20 +1867,20 @@ class DPS_Loyalty_Addon {
         // Cria placeholders para IN clause.
         $placeholders = implode( ',', array_fill( 0, count( $client_ids ), '%d' ) );
 
-        // Query otimizada: busca a última data de atendimento para cada cliente.
+        // Query otimizada: busca a Ãºltima data de atendimento para cada cliente.
         // Usa subquery com MAX para obter apenas a data mais recente.
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT 
+                "SELECT
                     m1.meta_value AS client_id,
                     MAX(m2.meta_value) AS last_date
                 FROM {$wpdb->postmeta} m1
-                INNER JOIN {$wpdb->postmeta} m2 
-                    ON m1.post_id = m2.post_id 
+                INNER JOIN {$wpdb->postmeta} m2
+                    ON m1.post_id = m2.post_id
                     AND m2.meta_key = 'appointment_date'
-                INNER JOIN {$wpdb->posts} p 
-                    ON m1.post_id = p.ID 
+                INNER JOIN {$wpdb->posts} p
+                    ON m1.post_id = p.ID
                     AND p.post_type = 'dps_agendamento'
                     AND p.post_status = 'publish'
                 WHERE m1.meta_key = 'appointment_client_id'
@@ -1903,20 +1903,20 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Verifica se um cliente está inativo com base na data do último atendimento.
+     * Verifica se um cliente estÃ¡ inativo com base na data do Ãºltimo atendimento.
      *
      * @since 1.3.0
      *
-     * @param string $last_date Data do último atendimento (Y-m-d ou vazio).
-     * @param int    $days      Número de dias para considerar inativo.
-     * @return bool True se inativo, false caso contrário.
+     * @param string $last_date Data do Ãºltimo atendimento (Y-m-d ou vazio).
+     * @param int    $days      NÃºmero de dias para considerar inativo.
+     * @return bool True se inativo, false caso contrÃ¡rio.
      */
     private function is_client_inactive_from_date( $last_date, $days ) {
         if ( $days <= 0 ) {
             return false;
         }
 
-        // Cliente sem atendimentos é considerado inativo.
+        // Cliente sem atendimentos Ã© considerado inativo.
         if ( empty( $last_date ) ) {
             return true;
         }
@@ -1926,12 +1926,12 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Verifica se um cliente está inativo há X dias.
+     * Verifica se um cliente estÃ¡ inativo hÃ¡ X dias.
      *
      * @deprecated 1.3.0 Use is_client_inactive_from_date() com dados do batch.
      *
      * @param int $client_id ID do cliente.
-     * @param int $days      Número de dias.
+     * @param int $days      NÃºmero de dias.
      * @return bool True se inativo.
      */
     private function is_client_inactive_for_days( $client_id, $days ) {
@@ -1944,9 +1944,9 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Obtém a data do último atendimento de um cliente individual.
+     * ObtÃ©m a data do Ãºltimo atendimento de um cliente individual.
      *
-     * @deprecated 1.3.0 Use get_last_appointments_batch() para múltiplos clientes.
+     * @deprecated 1.3.0 Use get_last_appointments_batch() para mÃºltiplos clientes.
      *
      * @param int $client_id ID do cliente.
      * @return string Data no formato Y-m-d ou vazio.
@@ -2051,7 +2051,7 @@ class DPS_Loyalty_Addon {
                     'label'      => isset( $tier['label'] ) ? sanitize_text_field( $tier['label'] ) : strtoupper( sanitize_key( $tier['slug'] ) ),
                     'min_points' => isset( $tier['min_points'] ) ? absint( $tier['min_points'] ) : 0,
                     'multiplier' => isset( $tier['multiplier'] ) ? (float) $tier['multiplier'] : 1.0,
-                    'icon'       => isset( $tier['icon'] ) ? sanitize_text_field( $tier['icon'] ) : '⭐',
+                    'icon'       => isset( $tier['icon'] ) ? sanitize_text_field( $tier['icon'] ) : 'â­',
                     'color'      => isset( $tier['color'] ) ? sanitize_hex_color( $tier['color'] ) : '',
                 ];
             }
@@ -2061,9 +2061,9 @@ class DPS_Loyalty_Addon {
             $output['loyalty_tiers'] = DPS_Loyalty_API::get_default_tiers();
         }
 
-        $default_points_template  = __( 'Olá {client_name}! 🎉 Você acabou de ganhar {points} pontos no programa de fidelidade. Seu saldo agora é de {new_balance} pontos.', 'dps-loyalty-addon' );
-        $default_referral_template = __( 'Obrigad@ por indicar amigos! 🐾 Você recebeu uma recompensa no programa de fidelidade.', 'dps-loyalty-addon' );
-        $default_expiration_template = __( 'Olá {client_name}! Você tem {expiring_points} pontos que expiram em {days} dias. Aproveite para usar seus benefícios com a gente! 🐾', 'dps-loyalty-addon' );
+        $default_points_template  = __( 'OlÃ¡ {client_name}! ðŸŽ‰ VocÃª acabou de ganhar {points} pontos no programa de fidelidade. Seu saldo agora Ã© de {new_balance} pontos.', 'dps-loyalty-addon' );
+        $default_referral_template = __( 'Obrigad@ por indicar amigos! ðŸ¾ VocÃª recebeu uma recompensa no programa de fidelidade.', 'dps-loyalty-addon' );
+        $default_expiration_template = __( 'OlÃ¡ {client_name}! VocÃª tem {expiring_points} pontos que expiram em {days} dias. Aproveite para usar seus benefÃ­cios com a gente! ðŸ¾', 'dps-loyalty-addon' );
 
         $output['send_points_notification']   = ! empty( $input['send_points_notification'] ) ? 1 : 0;
         $output['send_referral_notification'] = ! empty( $input['send_referral_notification'] ) ? 1 : 0;
@@ -2083,7 +2083,7 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Garante o agendamento dos crons diários.
+     * Garante o agendamento dos crons diÃ¡rios.
      */
     public function maybe_schedule_crons() {
         if ( ! wp_next_scheduled( 'dps_loyalty_expire_points_daily' ) ) {
@@ -2096,10 +2096,10 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Expira pontos vencidos com base no número de meses configurado.
+     * Expira pontos vencidos com base no nÃºmero de meses configurado.
      */
     public function handle_points_expiration() {
-        // Verifica se a campanha de pontos está ativa.
+        // Verifica se a campanha de pontos estÃ¡ ativa.
         if ( ! self::is_campaign_enabled( 'points' ) ) {
             return;
         }
@@ -2133,7 +2133,7 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Envia avisos de pontos próximos de expirar.
+     * Envia avisos de pontos prÃ³ximos de expirar.
      */
     public function handle_expiration_notices() {
         $settings = get_option( self::OPTION_KEY, [] );
@@ -2147,7 +2147,7 @@ class DPS_Loyalty_Addon {
 
         $months       = isset( $settings['points_expire_after_months'] ) ? max( 1, absint( $settings['points_expire_after_months'] ) ) : 12;
         $days_before  = isset( $settings['days_before_expiration_notice'] ) ? max( 1, absint( $settings['days_before_expiration_notice'] ) ) : 15;
-        $template     = isset( $settings['expiration_notification_template'] ) ? $settings['expiration_notification_template'] : __( 'Olá {client_name}! Você tem {expiring_points} pontos que expiram em {days} dias. Aproveite para usar seus benefícios com a gente! 🐾', 'dps-loyalty-addon' );
+        $template     = isset( $settings['expiration_notification_template'] ) ? $settings['expiration_notification_template'] : __( 'OlÃ¡ {client_name}! VocÃª tem {expiring_points} pontos que expiram em {days} dias. Aproveite para usar seus benefÃ­cios com a gente! ðŸ¾', 'dps-loyalty-addon' );
         $today        = new DateTime( 'now', wp_timezone() );
         $notice_limit = ( clone $today )->modify( '+' . $days_before . ' days' );
 
@@ -2188,10 +2188,10 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Calcula pontos que irão expirar até uma data limite.
+     * Calcula pontos que irÃ£o expirar atÃ© uma data limite.
      *
      * @param int       $client_id   Cliente.
-     * @param int       $months      Meses para expiração total.
+     * @param int       $months      Meses para expiraÃ§Ã£o total.
      * @param DateTime  $notice_date Data limite para aviso.
      * @return int
      */
@@ -2264,11 +2264,11 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Envia notificação quando pontos são adicionados, se habilitado.
+     * Envia notificaÃ§Ã£o quando pontos sÃ£o adicionados, se habilitado.
      *
      * @param int    $client_id ID do cliente.
      * @param int    $points    Pontos creditados.
-     * @param string $context   Contexto do crédito.
+     * @param string $context   Contexto do crÃ©dito.
      */
     public function maybe_notify_points_added( $client_id, $points, $context ) {
         if ( ! class_exists( 'DPS_Communications_API' ) ) {
@@ -2280,18 +2280,18 @@ class DPS_Loyalty_Addon {
             return;
         }
 
-        $template = isset( $settings['points_notification_template'] ) ? $settings['points_notification_template'] : __( 'Olá {client_name}! 🎉 Você acabou de ganhar {points} pontos no programa de fidelidade. Seu saldo agora é de {new_balance} pontos.', 'dps-loyalty-addon' );
+        $template = isset( $settings['points_notification_template'] ) ? $settings['points_notification_template'] : __( 'OlÃ¡ {client_name}! ðŸŽ‰ VocÃª acabou de ganhar {points} pontos no programa de fidelidade. Seu saldo agora Ã© de {new_balance} pontos.', 'dps-loyalty-addon' );
         $message  = $this->prepare_loyalty_message( $template, $client_id, $points, $context );
 
         $this->dispatch_loyalty_message( $client_id, $message, 'points_awarded' );
     }
 
     /**
-     * Envia notificação para recompensa de indicação, se habilitado.
+     * Envia notificaÃ§Ã£o para recompensa de indicaÃ§Ã£o, se habilitado.
      *
      * @param int   $client_id  ID do cliente.
-     * @param int   $bonus      Bônus aplicado.
-     * @param float $multiplier Multiplicador (não utilizado na mensagem, mas mantido para compatibilidade).
+     * @param int   $bonus      BÃ´nus aplicado.
+     * @param float $multiplier Multiplicador (nÃ£o utilizado na mensagem, mas mantido para compatibilidade).
      */
     public function maybe_notify_referral_bonus( $client_id, $bonus, $multiplier ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
         if ( ! class_exists( 'DPS_Communications_API' ) ) {
@@ -2303,7 +2303,7 @@ class DPS_Loyalty_Addon {
             return;
         }
 
-        $template = isset( $settings['referral_notification_template'] ) ? $settings['referral_notification_template'] : __( 'Obrigad@ por indicar amigos! 🐾 Você recebeu uma recompensa no programa de fidelidade.', 'dps-loyalty-addon' );
+        $template = isset( $settings['referral_notification_template'] ) ? $settings['referral_notification_template'] : __( 'Obrigad@ por indicar amigos! ðŸ¾ VocÃª recebeu uma recompensa no programa de fidelidade.', 'dps-loyalty-addon' );
         $message  = $this->prepare_loyalty_message( $template, $client_id, $bonus, 'referral_reward' );
 
         $this->dispatch_loyalty_message( $client_id, $message, 'referral_reward' );
@@ -2314,8 +2314,8 @@ class DPS_Loyalty_Addon {
      *
      * @param string $template  Template configurado.
      * @param int    $client_id ID do cliente.
-     * @param int    $points    Valor de pontos ou bônus.
-     * @param string $context   Contexto da ação.
+     * @param int    $points    Valor de pontos ou bÃ´nus.
+     * @param string $context   Contexto da aÃ§Ã£o.
      * @return string Mensagem formatada.
      */
     private function prepare_loyalty_message( $template, $client_id, $points, $context ) {
@@ -2337,10 +2337,10 @@ class DPS_Loyalty_Addon {
     }
 
     /**
-     * Encaminha mensagem via Communications (WhatsApp e e-mail quando disponível).
+     * Encaminha mensagem via Communications (WhatsApp e e-mail quando disponÃ­vel).
      *
      * @param int    $client_id ID do cliente.
-     * @param string $message   Mensagem já formatada.
+     * @param string $message   Mensagem jÃ¡ formatada.
      * @param string $type      Tipo de evento.
      */
     private function dispatch_loyalty_message( $client_id, $message, $type ) {
@@ -2361,13 +2361,13 @@ class DPS_Loyalty_Addon {
         }
 
         if ( $email ) {
-            $subject = __( 'Atualização do programa de fidelidade', 'dps-loyalty-addon' );
+            $subject = __( 'AtualizaÃ§Ã£o do programa de fidelidade', 'dps-loyalty-addon' );
             $api->send_email( $email, $subject, $message, $context );
         }
     }
 
     public function render_referrals_section_intro() {
-        echo '<p>' . esc_html__( 'Configure as regras do programa de indicações, incluindo recompensas e limites.', 'dps-loyalty-addon' ) . '</p>';
+        echo '<p>' . esc_html__( 'Configure as regras do programa de indicaÃ§Ãµes, incluindo recompensas e limites.', 'dps-loyalty-addon' ) . '</p>';
     }
 
     public function render_referrals_enabled_field() {
@@ -2398,13 +2398,13 @@ class DPS_Loyalty_Addon {
         ?>
         <p>
             <label>
-                <?php esc_html_e( 'Valor mínimo do primeiro atendimento para liberar recompensa (R$)', 'dps-loyalty-addon' ); ?><br />
+                <?php esc_html_e( 'Valor mÃ­nimo do primeiro atendimento para liberar recompensa (R$)', 'dps-loyalty-addon' ); ?><br />
                 <input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[referrals_minimum_amount]" value="<?php echo esc_attr( DPS_Money_Helper::format_to_brazilian( $minimum_amount ) ); ?>" />
             </label>
         </p>
         <p>
             <label>
-                <?php esc_html_e( 'Máximo de indicações recompensadas por cliente (0 para ilimitado)', 'dps-loyalty-addon' ); ?><br />
+                <?php esc_html_e( 'MÃ¡ximo de indicaÃ§Ãµes recompensadas por cliente (0 para ilimitado)', 'dps-loyalty-addon' ); ?><br />
                 <input type="number" min="0" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[referrals_max_per_referrer]" value="<?php echo esc_attr( $max_referrals ); ?>" />
             </label>
         </p>
@@ -2426,8 +2426,8 @@ class DPS_Loyalty_Addon {
                 <select id="<?php echo esc_attr( $type_key ); ?>" name="<?php echo esc_attr( $type_key ); ?>">
                     <option value="none" <?php selected( $type, 'none' ); ?>><?php esc_html_e( 'Sem recompensa', 'dps-loyalty-addon' ); ?></option>
                     <option value="points" <?php selected( $type, 'points' ); ?>><?php esc_html_e( 'Pontos de fidelidade', 'dps-loyalty-addon' ); ?></option>
-                    <option value="fixed" <?php selected( $type, 'fixed' ); ?>><?php esc_html_e( 'Crédito fixo (R$)', 'dps-loyalty-addon' ); ?></option>
-                    <option value="percent" <?php selected( $type, 'percent' ); ?>><?php esc_html_e( 'Crédito percentual', 'dps-loyalty-addon' ); ?></option>
+                    <option value="fixed" <?php selected( $type, 'fixed' ); ?>><?php esc_html_e( 'CrÃ©dito fixo (R$)', 'dps-loyalty-addon' ); ?></option>
+                    <option value="percent" <?php selected( $type, 'percent' ); ?>><?php esc_html_e( 'CrÃ©dito percentual', 'dps-loyalty-addon' ); ?></option>
                 </select>
             </label>
             <input type="text" name="<?php echo esc_attr( $value_key ); ?>" value="<?php echo esc_attr( $this->format_reward_value( $value, $type ) ); ?>" placeholder="<?php esc_attr_e( 'Valor', 'dps-loyalty-addon' ); ?>" />
@@ -2464,7 +2464,7 @@ class DPS_Loyalty_Addon {
             return;
         }
 
-        // Verifica se a campanha de pontos está ativa.
+        // Verifica se a campanha de pontos estÃ¡ ativa.
         if ( ! self::is_campaign_enabled( 'points' ) ) {
             return;
         }
@@ -2525,11 +2525,11 @@ class DPS_Loyalty_Addon {
         if ( $client_id > 0 && class_exists( 'DPS_Loyalty_API' ) ) {
             $tier_info = DPS_Loyalty_API::get_loyalty_tier( $client_id );
             $multiplier = isset( $tier_info['multiplier'] ) ? (float) $tier_info['multiplier'] : 1.0;
-            
+
             if ( $multiplier > 1.0 ) {
                 $base_points = (int) $points_float;
                 $points_float = floor( $points_float * $multiplier );
-                
+
                 // Log the bonus points separately for transparency
                 $bonus = (int) $points_float - $base_points;
                 if ( $bonus > 0 ) {
@@ -2632,7 +2632,7 @@ class DPS_Loyalty_Referrals {
     }
 
     public function render_registration_field() {
-        // Não exibe campo de indicação se a campanha está desativada.
+        // NÃ£o exibe campo de indicaÃ§Ã£o se a campanha estÃ¡ desativada.
         if ( ! DPS_Loyalty_Addon::is_campaign_enabled( 'referrals' ) ) {
             return;
         }
@@ -2640,7 +2640,7 @@ class DPS_Loyalty_Referrals {
         $referral_param = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref'] ) ) : '';
         ?>
         <p class="dps-referral-field">
-            <label><?php esc_html_e( 'Código de indicação (opcional)', 'dps-loyalty-addon' ); ?><br />
+            <label><?php esc_html_e( 'CÃ³digo de indicaÃ§Ã£o (opcional)', 'dps-loyalty-addon' ); ?><br />
                 <input type="text" name="dps_referral_code" value="<?php echo esc_attr( $referral_param ); ?>" maxlength="20" />
             </label>
         </p>
@@ -2652,7 +2652,7 @@ class DPS_Loyalty_Referrals {
             return;
         }
 
-        // Verifica se a campanha de indicações está ativa.
+        // Verifica se a campanha de indicaÃ§Ãµes estÃ¡ ativa.
         if ( ! DPS_Loyalty_Addon::is_campaign_enabled( 'referrals' ) ) {
             return;
         }
@@ -2682,7 +2682,7 @@ class DPS_Loyalty_Referrals {
     }
 
     public function handle_booking_paid( $appointment_id, $client_id, $amount_in_cents ) {
-        // Verifica se a campanha de indicações está ativa.
+        // Verifica se a campanha de indicaÃ§Ãµes estÃ¡ ativa.
         if ( ! DPS_Loyalty_Addon::is_campaign_enabled( 'referrals' ) ) {
             return;
         }
@@ -2698,7 +2698,7 @@ class DPS_Loyalty_Referrals {
         }
 
         if ( (int) $pending->referrer_client_id === (int) $client_id ) {
-            error_log( 'DPS Referrals: tentativa de autopromoção ignorada para cliente ' . $client_id );
+            error_log( 'DPS Referrals: tentativa de autopromoÃ§Ã£o ignorada para cliente ' . $client_id );
             return;
         }
 
@@ -2845,9 +2845,9 @@ class DPS_Loyalty_Referrals {
 
 if ( ! function_exists( 'dps_loyalty_init' ) ) {
     /**
-     * Inicializa o Loyalty Add-on após o hook 'init' para garantir que o text domain seja carregado primeiro.
-     * Usa prioridade 5 para rodar após o carregamento do text domain (prioridade 1) mas antes
-     * dos métodos de registro que usam prioridade padrão (10).
+     * Inicializa o Loyalty Add-on apÃ³s o hook 'init' para garantir que o text domain seja carregado primeiro.
+     * Usa prioridade 5 para rodar apÃ³s o carregamento do text domain (prioridade 1) mas antes
+     * dos mÃ©todos de registro que usam prioridade padrÃ£o (10).
      */
     function dps_loyalty_init() {
         static $instance = null;
@@ -2982,7 +2982,7 @@ if ( ! function_exists( 'dps_loyalty_get_logs' ) ) {
 
 if ( ! function_exists( 'dps_loyalty_parse_money_br' ) ) {
     /**
-     * Converte valor monetário no formato brasileiro para centavos.
+     * Converte valor monetÃ¡rio no formato brasileiro para centavos.
      *
      * @deprecated 1.1.0 Use DPS_Money_Helper::parse_brazilian_format() instead.
      * @param string $value Valor no formato brasileiro (ex: "1.234,56").
@@ -2993,7 +2993,7 @@ if ( ! function_exists( 'dps_loyalty_parse_money_br' ) ) {
             return DPS_Money_Helper::parse_brazilian_format( $value );
         }
 
-        // Fallback se helper não disponível
+        // Fallback se helper nÃ£o disponÃ­vel
         $raw = trim( (string) $value );
         if ( '' === $raw ) {
             return 0;
@@ -3013,7 +3013,7 @@ if ( ! function_exists( 'dps_loyalty_parse_money_br' ) ) {
 
 if ( ! function_exists( 'dps_format_money_br' ) ) {
     /**
-     * Formata um valor em centavos para string no padrão brasileiro.
+     * Formata um valor em centavos para string no padrÃ£o brasileiro.
      *
      * @deprecated 1.1.0 Use DPS_Money_Helper::format_to_brazilian() instead.
      * @param int $int Valor em centavos.

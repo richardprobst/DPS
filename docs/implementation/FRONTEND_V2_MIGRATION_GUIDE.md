@@ -1,65 +1,65 @@
-# Guia de Migração — Frontend V1 para V2
+﻿# Guia de MigraÃ§Ã£o â€” Frontend V1 para V2
 
-> **Versão**: 1.0.0
+> **VersÃ£o**: 1.0.0
 > **Data**: 2026-02-12
 > **Autor**: PRObst
 > **Site**: [www.probst.pro](https://www.probst.pro)
 
 ---
 
-## 1. Visão Geral
+## 1. VisÃ£o Geral
 
-### O que é V1 (dual-run)
+### O que Ã© V1 (dual-run)
 
-O Frontend V1 opera como **wrapper de dual-run** sobre os add-ons legados (`DPS_Registration_Addon` e `DPS_Booking_Addon`). Ele aplica uma camada visual M3 sobre a renderização original, mas continua dependendo do código, lógica e hooks dos plugins legados para funcionar.
+O Frontend V1 opera como **wrapper de dual-run** sobre os add-ons legados (`DPS_Registration_Addon` e `DPS_Booking_Addon`). Ele aplica uma camada visual DPS Signature sobre a renderizaÃ§Ã£o original, mas continua dependendo do cÃ³digo, lÃ³gica e hooks dos plugins legados para funcionar.
 
 **Shortcodes V1:**
-- `[dps_registration_form]` — flag: `registration`
-- `[dps_booking_form]` — flag: `booking`
+- `[dps_registration_form]` â€” flag: `registration`
+- `[dps_booking_form]` â€” flag: `booking`
 
-### O que é V2 (nativo M3 Expressive)
+### O que Ã© V2 (nativo DPS Signature)
 
-O Frontend V2 é uma **reimplementação 100% nativa**, sem qualquer dependência dos add-ons legados. Toda a lógica de formulários, validação, AJAX e integração de hooks foi reescrita do zero, seguindo o padrão M3 Expressive e eliminando jQuery.
+O Frontend V2 Ã© uma **reimplementaÃ§Ã£o 100% nativa**, sem qualquer dependÃªncia dos add-ons legados. Toda a lÃ³gica de formulÃ¡rios, validaÃ§Ã£o, AJAX e integraÃ§Ã£o de hooks foi reescrita do zero, seguindo o padrÃ£o DPS Signature e eliminando jQuery.
 
 **Shortcodes V2:**
-- `[dps_registration_v2]` — flag: `registration_v2`
-- `[dps_booking_v2]` — flag: `booking_v2`
+- `[dps_registration_v2]` â€” flag: `registration_v2`
+- `[dps_booking_v2]` â€” flag: `booking_v2`
 
 ### Por que migrar
 
-| Benefício | Detalhe |
+| BenefÃ­cio | Detalhe |
 |-----------|---------|
-| **Independência** | V2 não requer `desi-pet-shower-registration` nem `desi-pet-shower-booking` ativos |
+| **IndependÃªncia** | V2 nÃ£o requer `desi-pet-shower-registration` nem `desi-pet-shower-booking` ativos |
 | **Performance** | Zero jQuery, JS nativo com lazy loading |
-| **UX nativa M3** | Componentes M3 Expressive nativos (não wrappers sobre legado) |
-| **Manutenibilidade** | Código único — sem camada de compatibilidade dual-run |
-| **Segurança** | Validações nativas (CPF mod-11, nonce, reCAPTCHA v3) sem depender de implementações legadas |
+| **UX nativa DPS Signature** | Componentes DPS Signature nativos (nÃ£o wrappers sobre legado) |
+| **Manutenibilidade** | CÃ³digo Ãºnico â€” sem camada de compatibilidade dual-run |
+| **SeguranÃ§a** | ValidaÃ§Ãµes nativas (CPF mod-11, nonce, reCAPTCHA v3) sem depender de implementaÃ§Ãµes legadas |
 
-### Recomendação de timeline
+### RecomendaÃ§Ã£o de timeline
 
-| Semana | Ação |
+| Semana | AÃ§Ã£o |
 |--------|------|
-| 1 | Habilitar V2 em paralelo + criar páginas de teste |
-| 2 | Validar integrações (hooks, add-ons, telemetria) |
-| 3 | Migrar shortcodes em produção |
+| 1 | Habilitar V2 em paralelo + criar pÃ¡ginas de teste |
+| 2 | Validar integraÃ§Ãµes (hooks, add-ons, telemetria) |
+| 3 | Migrar shortcodes em produÃ§Ã£o |
 | 4 | Desabilitar V1 |
-| 5–8 | Período de observação (30 dias) |
+| 5â€“8 | PerÃ­odo de observaÃ§Ã£o (30 dias) |
 
 ---
 
-## 2. Pré-requisitos
+## 2. PrÃ©-requisitos
 
 - **WordPress** 6.9+ instalado e ativo.
 - **PHP** 8.4+ configurado no servidor.
 - Plugin base `desi-pet-shower-base` ativo e atualizado.
 - Frontend add-on `desi-pet-shower-frontend` instalado e ativo.
-- Design tokens CSS (`dps-design-tokens.css`) disponíveis no base.
-- **Não é necessário** ter `desi-pet-shower-registration` ou `desi-pet-shower-booking` ativos para V2.
+- Design tokens CSS (`dps-design-tokens.css`) disponÃ­veis no base.
+- **NÃ£o Ã© necessÃ¡rio** ter `desi-pet-shower-registration` ou `desi-pet-shower-booking` ativos para V2.
 
-### Verificação rápida
+### VerificaÃ§Ã£o rÃ¡pida
 
 ```bash
-# Verificar versões
+# Verificar versÃµes
 wp core version
 php -v
 
@@ -72,63 +72,63 @@ wp option get dps_frontend_feature_flags --format=json
 
 ---
 
-## 3. Comparação de Features V1 vs V2
+## 3. ComparaÃ§Ã£o de Features V1 vs V2
 
 ### 3.1 Registration (Cadastro)
 
 | Feature | V1 (dual-run) | V2 (nativo) |
 |---------|---------------|-------------|
-| Renderização do form | Legado com superfície M3 | 100% nativo M3 Expressive |
-| Validação de CPF | Via `DPS_Registration_Addon` | Nativa (algoritmo mod-11) |
-| Detecção de duplicatas | Via add-on legado | Nativa (baseada em telefone) |
-| reCAPTCHA v3 | Via add-on legado | Nativo (integração direta) |
-| Confirmação por e-mail | Via add-on legado | Nativa (token com expiração de 48h) |
-| Hooks de Loyalty | Disparados pelo legado | Via Hook Bridge (legado → V2) |
+| RenderizaÃ§Ã£o do form | Legado com superfÃ­cie DPS Signature | 100% nativo DPS Signature |
+| ValidaÃ§Ã£o de CPF | Via `DPS_Registration_Addon` | Nativa (algoritmo mod-11) |
+| DetecÃ§Ã£o de duplicatas | Via add-on legado | Nativa (baseada em telefone) |
+| reCAPTCHA v3 | Via add-on legado | Nativo (integraÃ§Ã£o direta) |
+| ConfirmaÃ§Ã£o por e-mail | Via add-on legado | Nativa (token com expiraÃ§Ã£o de 48h) |
+| Hooks de Loyalty | Disparados pelo legado | Via Hook Bridge (legado â†’ V2) |
 | Repetidor de Pets | JS legado (jQuery) | JS nativo (vanilla) |
-| Datalist de raças | Via add-on legado | Nativo (44 cães + 20 gatos) |
-| Dependência de jQuery | Sim | Não |
-| Dependência do add-on legado | **Obrigatória** | **Nenhuma** |
+| Datalist de raÃ§as | Via add-on legado | Nativo (44 cÃ£es + 20 gatos) |
+| DependÃªncia de jQuery | Sim | NÃ£o |
+| DependÃªncia do add-on legado | **ObrigatÃ³ria** | **Nenhuma** |
 
 ### 3.2 Booking (Agendamento)
 
 | Feature | V1 (dual-run) | V2 (nativo) |
 |---------|---------------|-------------|
-| Wizard de etapas | Legado com superfície M3 | 100% nativo M3 Expressive |
-| Requisições AJAX | Via add-on legado (jQuery) | Nativo (Fetch API) |
-| TaxiDog / Tosa | Lógica legada | Implementação nativa |
+| Wizard de etapas | Legado com superfÃ­cie DPS Signature | 100% nativo DPS Signature |
+| RequisiÃ§Ãµes AJAX | Via add-on legado (jQuery) | Nativo (Fetch API) |
+| TaxiDog / Tosa | LÃ³gica legada | ImplementaÃ§Ã£o nativa |
 | 3 tipos de agendamento | Via `DPS_Booking_Addon` | Nativo (banho, tosa, banho+tosa) |
-| Verificação de conflito de horário | Via add-on legado | Nativa (AJAX em tempo real) |
-| Seleção de horário | Legado com wrapper | Nativo (slot picker M3) |
-| Integração com 8 add-ons | Via hooks legados | Via Hook Bridge (compatibilidade total) |
-| Calendário visual | Legado | Nativo M3 |
-| Dependência de jQuery | Sim | Não |
-| Dependência do add-on legado | **Obrigatória** | **Nenhuma** |
+| VerificaÃ§Ã£o de conflito de horÃ¡rio | Via add-on legado | Nativa (AJAX em tempo real) |
+| SeleÃ§Ã£o de horÃ¡rio | Legado com wrapper | Nativo (slot picker DPS Signature) |
+| IntegraÃ§Ã£o com 8 add-ons | Via hooks legados | Via Hook Bridge (compatibilidade total) |
+| CalendÃ¡rio visual | Legado | Nativo DPS Signature |
+| DependÃªncia de jQuery | Sim | NÃ£o |
+| DependÃªncia do add-on legado | **ObrigatÃ³ria** | **Nenhuma** |
 
-### 3.3 Hook Bridge — Compatibilidade de integrações
+### 3.3 Hook Bridge â€” Compatibilidade de integraÃ§Ãµes
 
 O Hook Bridge garante que os **hooks legados disparam primeiro** e os **hooks V2 disparam em seguida**, preservando a compatibilidade com todos os add-ons que consomem `dps_base_after_save_appointment`:
 
 1. Stock (controle de estoque)
 2. Payment (pagamentos/financeiro)
 3. Groomers (groomer assignment)
-4. Calendar (sincronização de calendário)
+4. Calendar (sincronizaÃ§Ã£o de calendÃ¡rio)
 5. Communications (e-mail/SMS)
-6. Push (notificações push)
-7. Services (serviços adicionais)
-8. Booking (lógica de agendamento)
+6. Push (notificaÃ§Ãµes push)
+7. Services (serviÃ§os adicionais)
+8. Booking (lÃ³gica de agendamento)
 
 ---
 
-## 4. Guia Passo a Passo de Migração
+## 4. Guia Passo a Passo de MigraÃ§Ã£o
 
 ### Etapa 1: Verificar Compatibilidade
 
 ```bash
-# 1. Verificar versão do WordPress
+# 1. Verificar versÃ£o do WordPress
 wp core version
 # Esperado: 6.9 ou superior
 
-# 2. Verificar versão do PHP
+# 2. Verificar versÃ£o do PHP
 php -v
 # Esperado: 8.4 ou superior
 
@@ -145,10 +145,10 @@ find wp-content/plugins/desi-pet-shower-frontend -name "*.php" -exec php -l {} \
 ### Etapa 2: Habilitar V2 em Paralelo
 
 **Via painel administrativo:**
-1. Acesse **Configurações → Frontend** (aba "Frontend").
-2. Marque `registration_v2` ✅ (mantendo `registration` ✅ ativo).
-3. Marque `booking_v2` ✅ (mantendo `booking` ✅ ativo).
-4. Salve as configurações.
+1. Acesse **ConfiguraÃ§Ãµes â†’ Frontend** (aba "Frontend").
+2. Marque `registration_v2` âœ… (mantendo `registration` âœ… ativo).
+3. Marque `booking_v2` âœ… (mantendo `booking` âœ… ativo).
+4. Salve as configuraÃ§Ãµes.
 
 **Via WP-CLI:**
 ```bash
@@ -163,35 +163,35 @@ wp eval "update_option('dps_frontend_feature_flags', [
 
 > **Nota:** V1 e V2 podem coexistir sem conflitos. Cada shortcode funciona de forma independente.
 
-### Etapa 3: Criar Páginas V2
+### Etapa 3: Criar PÃ¡ginas V2
 
-1. Crie uma nova página no WordPress com o shortcode `[dps_registration_v2]`.
-2. Crie uma nova página com o shortcode `[dps_booking_v2]`.
-3. Teste ambas as páginas em paralelo com as páginas V1 existentes.
-4. **Mantenha as páginas V1 ativas** durante todo o período de testes.
+1. Crie uma nova pÃ¡gina no WordPress com o shortcode `[dps_registration_v2]`.
+2. Crie uma nova pÃ¡gina com o shortcode `[dps_booking_v2]`.
+3. Teste ambas as pÃ¡ginas em paralelo com as pÃ¡ginas V1 existentes.
+4. **Mantenha as pÃ¡ginas V1 ativas** durante todo o perÃ­odo de testes.
 
-### Etapa 4: Validar Integrações
+### Etapa 4: Validar IntegraÃ§Ãµes
 
-**Registration — Loyalty hooks:**
-- Preencha um cadastro V2 e verifique se o campo de indicação do Loyalty está presente.
+**Registration â€” Loyalty hooks:**
+- Preencha um cadastro V2 e verifique se o campo de indicaÃ§Ã£o do Loyalty estÃ¡ presente.
 - Confirme que o hook `dps_after_registration` dispara corretamente (check via debug log).
 
-**Booking — 8 add-ons:**
-- Crie um agendamento V2 e valide cada integração:
+**Booking â€” 8 add-ons:**
+- Crie um agendamento V2 e valide cada integraÃ§Ã£o:
 
 | Add-on | O que verificar |
 |--------|-----------------|
-| Stock | Estoque decrementado após agendamento |
-| Payment | Transação criada em `dps_transacoes` |
-| Groomers | Groomer atribuído ao agendamento |
+| Stock | Estoque decrementado apÃ³s agendamento |
+| Payment | TransaÃ§Ã£o criada em `dps_transacoes` |
+| Groomers | Groomer atribuÃ­do ao agendamento |
 | Calendar | Evento sincronizado |
 | Communications | E-mail/SMS enviado |
-| Push | Notificação push disparada |
-| Services | Serviços adicionais vinculados |
+| Push | NotificaÃ§Ã£o push disparada |
+| Services | ServiÃ§os adicionais vinculados |
 | Booking | Dados salvos corretamente no post type |
 
 **Telemetria:**
-- Acesse **Configurações → Frontend** e verifique se os contadores V2 estão registrando uso.
+- Acesse **ConfiguraÃ§Ãµes â†’ Frontend** e verifique se os contadores V2 estÃ£o registrando uso.
 
 ```bash
 # Verificar contadores via WP-CLI
@@ -200,22 +200,22 @@ wp option get dps_frontend_usage_counters --format=json
 
 ### Etapa 5: Migrar Shortcodes
 
-Após validação bem-sucedida, migre as páginas de produção:
+ApÃ³s validaÃ§Ã£o bem-sucedida, migre as pÃ¡ginas de produÃ§Ã£o:
 
-**Opção A — Trocar shortcodes nas páginas:**
-- Edite a página de cadastro: substitua `[dps_registration_form]` por `[dps_registration_v2]`.
-- Edite a página de agendamento: substitua `[dps_booking_form]` por `[dps_booking_v2]`.
+**OpÃ§Ã£o A â€” Trocar shortcodes nas pÃ¡ginas:**
+- Edite a pÃ¡gina de cadastro: substitua `[dps_registration_form]` por `[dps_registration_v2]`.
+- Edite a pÃ¡gina de agendamento: substitua `[dps_booking_form]` por `[dps_booking_v2]`.
 
-**Opção B — Trocar feature flags (sem editar páginas):**
-- Se cada página já usa o shortcode V2, basta desabilitar os flags V1 (próxima etapa).
+**OpÃ§Ã£o B â€” Trocar feature flags (sem editar pÃ¡ginas):**
+- Se cada pÃ¡gina jÃ¡ usa o shortcode V2, basta desabilitar os flags V1 (prÃ³xima etapa).
 
 ### Etapa 6: Desabilitar V1
 
 **Via painel administrativo:**
-1. Acesse **Configurações → Frontend**.
-2. Desmarque `registration` ❌.
-3. Desmarque `booking` ❌.
-4. Salve as configurações.
+1. Acesse **ConfiguraÃ§Ãµes â†’ Frontend**.
+2. Desmarque `registration` âŒ.
+3. Desmarque `booking` âŒ.
+4. Salve as configuraÃ§Ãµes.
 
 **Via WP-CLI:**
 ```bash
@@ -228,17 +228,17 @@ wp eval "update_option('dps_frontend_feature_flags', [
 ]);"
 ```
 
-> **Importante:** Monitore o site por no mínimo **48 horas** após desabilitar V1.
+> **Importante:** Monitore o site por no mÃ­nimo **48 horas** apÃ³s desabilitar V1.
 
-### Etapa 7: Observação
+### Etapa 7: ObservaÃ§Ã£o
 
 - Monitore a **telemetria** por pelo menos 30 dias.
-- Confirme que os contadores V1 estão zerados (nenhum uso residual).
-- Verifique que todas as integrações dos 8 add-ons continuam funcionando.
+- Confirme que os contadores V1 estÃ£o zerados (nenhum uso residual).
+- Verifique que todas as integraÃ§Ãµes dos 8 add-ons continuam funcionando.
 - Acompanhe os logs para erros: `grep '\[DPS Frontend\]' wp-content/debug.log`.
 
 ```bash
-# Verificar telemetria após 30 dias
+# Verificar telemetria apÃ³s 30 dias
 wp option get dps_frontend_usage_counters --format=json
 # Esperado: contadores V1 = 0, contadores V2 > 0
 ```
@@ -247,7 +247,7 @@ wp option get dps_frontend_usage_counters --format=json
 
 ## 5. Plano de Rollback
 
-O rollback é **instantâneo** e sem perda de dados.
+O rollback Ã© **instantÃ¢neo** e sem perda de dados.
 
 ### Como reverter
 
@@ -262,13 +262,13 @@ wp eval "update_option('dps_frontend_feature_flags', [
 ]);"
 ```
 
-Ou via painel: **Configurações → Frontend** → desmarcar V2, marcar V1.
+Ou via painel: **ConfiguraÃ§Ãµes â†’ Frontend** â†’ desmarcar V2, marcar V1.
 
-### Por que não há perda de dados
+### Por que nÃ£o hÃ¡ perda de dados
 
 - V1 e V2 utilizam os **mesmos post types e meta fields**.
-- Nenhum dado é migrado ou transformado entre versões.
-- Todos os hooks são preservados via Hook Bridge.
+- Nenhum dado Ã© migrado ou transformado entre versÃµes.
+- Todos os hooks sÃ£o preservados via Hook Bridge.
 
 ### Garantias
 
@@ -276,90 +276,90 @@ Ou via painel: **Configurações → Frontend** → desmarcar V2, marcar V1.
 |---------|----------|
 | Dados de cadastro | Mesmo `post_type`, mesmos `post_meta` |
 | Dados de agendamento | Mesmo `post_type`, mesmos `post_meta` |
-| Hooks | Hook Bridge mantém compatibilidade bidirecional |
-| Feature flags | Alternância instantânea, sem restart |
+| Hooks | Hook Bridge mantÃ©m compatibilidade bidirecional |
+| Feature flags | AlternÃ¢ncia instantÃ¢nea, sem restart |
 
 ---
 
 ## 6. Checklist de Compatibilidade
 
-Use esta checklist antes, durante e após a migração:
+Use esta checklist antes, durante e apÃ³s a migraÃ§Ã£o:
 
 - [ ] WordPress 6.9+ instalado
 - [ ] PHP 8.4+ ativo
 - [ ] Plugin base `desi-pet-shower-base` ativo e atualizado
 - [ ] Frontend add-on `desi-pet-shower-frontend` ativo
-- [ ] Páginas V1 funcionando normalmente
-- [ ] Páginas V2 criadas e testadas
+- [ ] PÃ¡ginas V1 funcionando normalmente
+- [ ] PÃ¡ginas V2 criadas e testadas
 - [ ] Loyalty hooks testados (registration)
 - [ ] 8 add-ons de booking testados
 - [ ] Telemetria V2 registrando contagens
-- [ ] Rollback testado (V2 → V1 → V2)
-- [ ] 48h de observação sem erros
+- [ ] Rollback testado (V2 â†’ V1 â†’ V2)
+- [ ] 48h de observaÃ§Ã£o sem erros
 - [ ] 30 dias de monitoramento planejado
 
 ---
 
 ## 7. Troubleshooting
 
-### V2 shortcode exibe página em branco
+### V2 shortcode exibe pÃ¡gina em branco
 
-**Causa provável:** Feature flag V2 não está habilitado.
+**Causa provÃ¡vel:** Feature flag V2 nÃ£o estÃ¡ habilitado.
 
 ```bash
 wp option get dps_frontend_feature_flags --format=json
-# Verificar se registration_v2 ou booking_v2 está true
+# Verificar se registration_v2 ou booking_v2 estÃ¡ true
 ```
 
-**Solução:** Habilitar o flag correspondente via Configurações → Frontend ou WP-CLI.
+**SoluÃ§Ã£o:** Habilitar o flag correspondente via ConfiguraÃ§Ãµes â†’ Frontend ou WP-CLI.
 
-### Hooks não disparam após agendamento V2
+### Hooks nÃ£o disparam apÃ³s agendamento V2
 
-**Causa provável:** Hook Bridge não está ativo ou há conflito de prioridade.
+**Causa provÃ¡vel:** Hook Bridge nÃ£o estÃ¡ ativo ou hÃ¡ conflito de prioridade.
 
 ```bash
-# Verificar se o hook está registrado
+# Verificar se o hook estÃ¡ registrado
 wp eval "global \$wp_filter; var_dump(isset(\$wp_filter['dps_base_after_save_appointment']));"
 ```
 
-**Solução:** Verificar se o Frontend add-on está ativo e atualizado. O Hook Bridge registra callbacks com prioridade específica (legado primeiro, V2 depois).
+**SoluÃ§Ã£o:** Verificar se o Frontend add-on estÃ¡ ativo e atualizado. O Hook Bridge registra callbacks com prioridade especÃ­fica (legado primeiro, V2 depois).
 
-### Estilos M3 não carregam no V2
+### Estilos DPS Signature nÃ£o carregam no V2
 
-**Causa provável:** Design tokens CSS não está enfileirado.
+**Causa provÃ¡vel:** Design tokens CSS nÃ£o estÃ¡ enfileirado.
 
-**Solução:** Verificar se `dps-design-tokens.css` está registrado no plugin base. Limpar cache do navegador e de plugins de cache (W3 Total Cache, WP Super Cache, etc.).
+**SoluÃ§Ã£o:** Verificar se `dps-design-tokens.css` estÃ¡ registrado no plugin base. Limpar cache do navegador e de plugins de cache (W3 Total Cache, WP Super Cache, etc.).
 
 ### Erros AJAX no booking V2
 
-**Causa provável:** Nonce expirado ou capability insuficiente.
+**Causa provÃ¡vel:** Nonce expirado ou capability insuficiente.
 
 ```bash
 # Verificar logs de erro
 grep 'dps_booking_v2' wp-content/debug.log | tail -20
 ```
 
-**Solução:** Verificar se o nonce está sendo gerado corretamente na página. Confirmar que o usuário (ou visitante) tem as capabilities necessárias para a ação.
+**SoluÃ§Ã£o:** Verificar se o nonce estÃ¡ sendo gerado corretamente na pÃ¡gina. Confirmar que o usuÃ¡rio (ou visitante) tem as capabilities necessÃ¡rias para a aÃ§Ã£o.
 
 ### reCAPTCHA v3 falhando no V2
 
-**Causa provável:** Chave do site (site key) não configurada ou domínio não autorizado.
+**Causa provÃ¡vel:** Chave do site (site key) nÃ£o configurada ou domÃ­nio nÃ£o autorizado.
 
-**Solução:** Verificar a configuração do reCAPTCHA em **Configurações → Frontend**. Confirmar que o domínio do site está autorizado no painel do Google reCAPTCHA.
+**SoluÃ§Ã£o:** Verificar a configuraÃ§Ã£o do reCAPTCHA em **ConfiguraÃ§Ãµes â†’ Frontend**. Confirmar que o domÃ­nio do site estÃ¡ autorizado no painel do Google reCAPTCHA.
 
-### Telemetria V2 não registra contagens
+### Telemetria V2 nÃ£o registra contagens
 
-**Causa provável:** Option `dps_frontend_usage_counters` não existe ou não está sendo incrementada.
+**Causa provÃ¡vel:** Option `dps_frontend_usage_counters` nÃ£o existe ou nÃ£o estÃ¡ sendo incrementada.
 
 ```bash
 wp option get dps_frontend_usage_counters --format=json
 ```
 
-**Solução:** Verificar se o módulo Settings está habilitado (`settings: true`). A telemetria depende do módulo Settings ativo.
+**SoluÃ§Ã£o:** Verificar se o mÃ³dulo Settings estÃ¡ habilitado (`settings: true`). A telemetria depende do mÃ³dulo Settings ativo.
 
 ---
 
-## 8. Configuração via WP-CLI
+## 8. ConfiguraÃ§Ã£o via WP-CLI
 
 ### Verificar flags atuais
 
@@ -413,11 +413,11 @@ wp eval "update_option('dps_frontend_feature_flags', [
 
 ## 9. Documentos Relacionados
 
-| Documento | Caminho | Descrição |
+| Documento | Caminho | DescriÃ§Ã£o |
 |-----------|---------|-----------|
-| Guia de Rollout | `docs/implementation/FRONTEND_ROLLOUT_GUIDE.md` | Procedimentos operacionais de ativação por ambiente |
-| Runbook de Incidentes | `docs/implementation/FRONTEND_RUNBOOK.md` | Diagnóstico e rollback para incidentes |
-| Análise Arquitetural | `ANALYSIS.md` | Visão completa de contratos, hooks e integrações |
-| Design Frontend | `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` | Instruções de design M3 Expressive |
-| Guia Visual | `docs/visual/VISUAL_STYLE_GUIDE.md` | Paleta, componentes e espaçamento |
-| Changelog | `CHANGELOG.md` | Histórico de versões e releases |
+| Guia de Rollout | `docs/implementation/FRONTEND_ROLLOUT_GUIDE.md` | Procedimentos operacionais de ativaÃ§Ã£o por ambiente |
+| Runbook de Incidentes | `docs/implementation/FRONTEND_RUNBOOK.md` | DiagnÃ³stico e rollback para incidentes |
+| AnÃ¡lise Arquitetural | `ANALYSIS.md` | VisÃ£o completa de contratos, hooks e integraÃ§Ãµes |
+| Design Frontend | `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` | InstruÃ§Ãµes de design DPS Signature |
+| Guia Visual | `docs/visual/VISUAL_STYLE_GUIDE.md` | Paleta, componentes e espaÃ§amento |
+| Changelog | `CHANGELOG.md` | HistÃ³rico de versÃµes e releases |

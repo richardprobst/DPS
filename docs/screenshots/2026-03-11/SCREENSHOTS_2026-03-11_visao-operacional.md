@@ -1,9 +1,9 @@
-# Screenshots 2026-03-11 - Agenda (bloco Visao operacional)
+﻿# Screenshots 2026-03-11 - Agenda (bloco Visao operacional)
 
 ## Contexto
 - Objetivo da mudanca: limpar o header do bloco "Visao operacional" da Agenda, removendo duplicidade de data, retirando o botao "Imprimir" e refinando alinhamento + motion do fundo.
 - Ambiente: preview estatico local com os estilos reais do add-on.
-- Referencia de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Referencia de design DPS Signature utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
 
 ## Antes/Depois
 - Resumo do antes: o header repetia o periodo visualmente, mantinha a acao de imprimir no bloco principal e tinha uma leitura mais carregada entre titulo, data e navegacao.
@@ -32,5 +32,5 @@
 - `./agenda-visao-operacional-preview.html`
 
 ## Observacoes
-- As capturas foram geradas a partir de um preview estatico para validar a aderencia ao padrao M3 sem depender de uma instancia WordPress ativa neste workspace.
+- As capturas foram geradas a partir de um preview estatico para validar a aderencia ao padrao DPS Signature sem depender de uma instancia WordPress ativa neste workspace.
 - O registro cobre os breakpoints operacionais do sistema e documenta explicitamente a limpeza visual do bloco principal da Agenda.

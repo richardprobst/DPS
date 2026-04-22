@@ -1,7 +1,7 @@
-# Registro de screenshots - 2026-03-07
+﻿# Registro de screenshots - 2026-03-07
 
 ## Contexto
-Validacao visual da **Fase 2** do add-on `desi-pet-shower-game`, seguindo `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do padrao M3.
+Validacao visual da **Fase 2** do add-on `desi-pet-shower-game`, seguindo `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do padrao DPS Signature.
 
 ## Escopo validado
 - overlay inicial com onboarding curto e leitura mais clara dos power-ups;

@@ -23,7 +23,7 @@ A entrega endurece o lifecycle do jogo sem criar backend novo nem expandir o dom
 ### Duplicacoes e acoplamentos ainda presentes
 - `assets/js/space-groomers.js` continua sendo um arquivo grande e concentra engine, HUD, persistencia e eventos em um mesmo modulo.
 - Os pools de missao/badges continuam espelhados em JS e PHP. O comportamento segue coerente, mas a duplicacao ainda exige disciplina manual para manter sincronia.
-- A camada visual do canvas ainda mistura varias constantes literais de cor/tipografia fora dos tokens M3 do DPS.
+- A camada visual do canvas ainda mistura varias constantes literais de cor/tipografia fora dos tokens DPS Signature do DPS.
 
 ## Revisao do fluxo de eventos
 ### Start
@@ -102,7 +102,7 @@ Sem criar tabela nova nem fila de analytics:
 ## Debitos tecnicos restantes
 - quebrar `space-groomers.js` em modulos menores: engine, ui-state, persistence, telemetry
 - remover espelhamento manual entre definicoes JS/PHP de missoes e badges
-- migrar mais estilos literais para tokens M3 do DPS
+- migrar mais estilos literais para tokens DPS Signature do DPS
 - adicionar harness automatizado minimo para validar pause/resume/retry sem depender apenas de testes manuais
 
 ## Melhorias futuras de alto impacto

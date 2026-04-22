@@ -5,7 +5,7 @@
 ### Contexto
 - Objetivo da mudanca: reestruturar o acesso do Portal do Cliente com magic link + e-mail e senha, revisar o admin de logins e atualizar a tela inicial publica.
 - Ambiente: previews estaticos locais, sem WordPress ativo nem banco de dados.
-- Referencia de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Referencia de design DPS Signature utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
 
 ### Antes/Depois
 - Resumo do antes: portal com foco em magic link, tela inicial antiga e admin de logins centrado em tokens.
@@ -46,7 +46,7 @@
 ### Contexto
 - Objetivo da mudanca: revisar profundamente a UX/UI da Agenda, recriar o shell operacional principal e corrigir inconsistencias de estado, navegacao e paginacao.
 - Ambiente: preview HTML local com os estilos oficiais do add-on.
-- Referencia de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Referencia de design DPS Signature utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
 
 ### Antes/Depois
 - Resumo do antes: topo com pouca hierarquia, leitura operacional concentrada apenas nas tabelas, empty state pouco orientado e perda de contexto em parte da navegacao.
@@ -80,7 +80,7 @@
 ### Contexto
 - Objetivo da mudanca: revisar a home autenticada do Portal do Cliente, reorganizar a leitura inicial, corrigir a navegacao contextual e destacar agenda, mensagens, pagamentos e fidelidade logo na entrada.
 - Ambiente: preview HTML local com o CSS real do add-on, sem WordPress ativo nem banco de dados.
-- Referencia de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Referencia de design DPS Signature utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
 
 ### Antes/Depois
 - Resumo do antes: aba Inicio concentrava cards e secoes importantes sem hierarquia suficiente, badges eram montados por chamadas dispersas e os atalhos dependiam de tabs hardcoded no JS.

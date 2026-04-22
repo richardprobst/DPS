@@ -1,27 +1,34 @@
-/**
- * DPS Design Tokens — DPS Signature
+﻿/**
+ * DPS Design Tokens â€” DPS Signature
  *
- * Tokens de design do padrão DPS Signature, adaptados para o contexto
+ * Tokens de design do padrÃ£o DPS Signature, adaptados para o contexto
  * WordPress do desi.pet by PRObst.
  *
- * Versão: 2.0
- * Última atualização: 07/02/2026
+ * ObservaÃ§Ã£o normativa:
+ * - a semÃ¢ntica visual oficial vive em docs/visual/;
+ * - nomes tÃ©cnicos herdados como primary/secondary/tertiary permanecem aqui
+ *   por compatibilidade;
+ * - novas decisÃµes visuais devem seguir a semÃ¢ntica DPS Signature, nÃ£o a
+ *   leitura histÃ³rica desses aliases.
+ *
+ * VersÃ£o: 2.0
+ * Ãšltima atualizaÃ§Ã£o: 07/02/2026
  *
  * COMO USAR:
  *   1. Importe este arquivo ANTES de qualquer outro CSS do DPS.
- *   2. Use as variáveis via var(--dps-*) em seus componentes.
+ *   2. Use as variÃ¡veis via var(--dps-*) em seus componentes.
  *   3. Para temas escuros, sobrescreva com [data-dps-theme="dark"].
- *   4. Nunca use valores hex literais — sempre referencie tokens.
+ *   4. Nunca use valores hex literais â€” sempre referencie tokens.
  */
 
 /* ==========================================================================
-   1. COLOR TOKENS — Sistema de Cores DPS Signature
+   1. COLOR TOKENS â€” Sistema de Cores DPS Signature
    ========================================================================== */
 
 :root {
 
     /* -----------------------------------------------------------------------
-       1.1 Primary — Ações principais, botões, links, FABs
+       1.1 Primary â€” Alias tÃ©cnico legado para aÃ§Ã£o principal
        ----------------------------------------------------------------------- */
     --dps-color-primary:               #0b6bcb;
     --dps-color-on-primary:            #ffffff;
@@ -31,7 +38,7 @@
     --dps-color-primary-pressed:       #084a8a;
 
     /* -----------------------------------------------------------------------
-       1.2 Secondary — Ações de suporte, chips, filtros
+       1.2 Secondary â€” Alias tÃ©cnico legado para apoio estrutural
        ----------------------------------------------------------------------- */
     --dps-color-secondary:              #545f70;
     --dps-color-on-secondary:           #ffffff;
@@ -39,7 +46,7 @@
     --dps-color-on-secondary-container: #111c2b;
 
     /* -----------------------------------------------------------------------
-       1.3 Tertiary — Destaques expressivos, badges, acentos criativos
+       1.3 Tertiary â€” Alias tÃ©cnico legado; evitar como acento dominante
        ----------------------------------------------------------------------- */
     --dps-color-tertiary:               #6d5e78;
     --dps-color-on-tertiary:            #ffffff;
@@ -47,7 +54,7 @@
     --dps-color-on-tertiary-container:  #271432;
 
     /* -----------------------------------------------------------------------
-       1.4 Error — Erros, alertas críticos, ações destrutivas
+       1.4 Error â€” Erros, alertas crÃ­ticos, aÃ§Ãµes destrutivas
        ----------------------------------------------------------------------- */
     --dps-color-error:                  #ba1a1a;
     --dps-color-on-error:               #ffffff;
@@ -55,7 +62,7 @@
     --dps-color-on-error-container:     #410002;
 
     /* -----------------------------------------------------------------------
-       1.5 Success — Confirmações, ações concluídas
+       1.5 Success â€” ConfirmaÃ§Ãµes, aÃ§Ãµes concluÃ­das
        ----------------------------------------------------------------------- */
     --dps-color-success:                #1a7a3a;
     --dps-color-on-success:             #ffffff;
@@ -63,7 +70,7 @@
     --dps-color-on-success-container:   #00210a;
 
     /* -----------------------------------------------------------------------
-       1.6 Warning — Pendências, atenção necessária
+       1.6 Warning â€” PendÃªncias, atenÃ§Ã£o necessÃ¡ria
        ----------------------------------------------------------------------- */
     --dps-color-warning:                #8b6914;
     --dps-color-on-warning:             #ffffff;
@@ -71,7 +78,7 @@
     --dps-color-on-warning-container:   #2c1f00;
 
     /* -----------------------------------------------------------------------
-       1.7 Surface — Fundos, containers, elevação tonal
+       1.7 Surface â€” Alias tÃ©cnico legado para fundos e superfÃ­cies
        ----------------------------------------------------------------------- */
     --dps-color-surface:                    #f8f9ff;
     --dps-color-on-surface:                 #191c20;
@@ -85,13 +92,13 @@
     --dps-color-surface-bright:             #f8f9ff;
 
     /* -----------------------------------------------------------------------
-       1.8 Outline — Bordas, divisores
+       1.8 Outline â€” Alias tÃ©cnico legado para linhas estruturais
        ----------------------------------------------------------------------- */
     --dps-color-outline:                #73777f;
     --dps-color-outline-variant:        #c3c6cf;
 
     /* -----------------------------------------------------------------------
-       1.9 Inverse — Snackbars, tooltips
+       1.9 Inverse â€” Alias tÃ©cnico legado para superfÃ­cies inversas
        ----------------------------------------------------------------------- */
     --dps-color-inverse-surface:        #2e3036;
     --dps-color-inverse-on-surface:     #eff0f7;
@@ -102,10 +109,23 @@
        ----------------------------------------------------------------------- */
     --dps-color-scrim:                  #000000;
     --dps-color-shadow:                 #000000;
+
+    /* -----------------------------------------------------------------------
+       1.11 Canonical Signature aliases â€” semÃ¢ntica normativa atual
+       ----------------------------------------------------------------------- */
+    --dps-signature-ink:                #11161c;
+    --dps-signature-petrol:             #173042;
+    --dps-signature-paper:              #f7f2ea;
+    --dps-signature-bone:               #ece2d3;
+    --dps-signature-line:               #d9ccba;
+    --dps-signature-sky:                #bdd8e7;
+    --dps-signature-action:             #1f8c57;
+    --dps-signature-warning:            #8a6622;
+    --dps-signature-danger:             #a44439;
 }
 
 /* ==========================================================================
-   2. TYPOGRAPHY TOKENS — Escala Tipográfica DPS Signature
+   2. TYPOGRAPHY TOKENS â€” Escala TipogrÃ¡fica DPS Signature
    ========================================================================== */
 
 :root {
@@ -114,23 +134,27 @@
        2.1 Font Families
        ----------------------------------------------------------------------- */
 
-    /* Admin: fontes do sistema — máxima performance */
+    /* Admin: fontes do sistema â€” mÃ¡xima performance */
     --dps-font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
                        "Helvetica Neue", Arial, sans-serif;
 
-    /* Portal/Público: fontes com personalidade (Google Fonts) */
+    /* Portal/PÃºblico: aliases legados ainda usados em runtime */
     --dps-font-display: 'Outfit', var(--dps-font-system);
     --dps-font-body:    'Source Sans 3', var(--dps-font-system);
 
-    /* Mono: código, dados tabulares */
+    /* Par tipogrÃ¡fico normativo do DPS Signature */
+    --dps-signature-font-display: 'Sora', var(--dps-font-system);
+    --dps-signature-font-body:    'Manrope', var(--dps-font-system);
+
+    /* Mono: cÃ³digo, dados tabulares */
     --dps-font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
 
     /* -----------------------------------------------------------------------
-       2.2 Type Scale — 5 papéis × 3 tamanhos (Large, Medium, Small)
+       2.2 Type Scale â€” 5 papÃ©is Ã— 3 tamanhos (Large, Medium, Small)
        Valores adaptados para contexto web
        ----------------------------------------------------------------------- */
 
-    /* Display — Textos heróicos, landing pages */
+    /* Display â€” Textos herÃ³icos, landing pages */
     --dps-typescale-display-large-size:      57px;
     --dps-typescale-display-large-line:       64px;
     --dps-typescale-display-large-tracking:  -0.25px;
@@ -146,7 +170,7 @@
     --dps-typescale-display-small-tracking:    0px;
     --dps-typescale-display-small-weight:      400;
 
-    /* Headline — Títulos de seção, introduções */
+    /* Headline â€” TÃ­tulos de seÃ§Ã£o, introduÃ§Ãµes */
     --dps-typescale-headline-large-size:      32px;
     --dps-typescale-headline-large-line:       40px;
     --dps-typescale-headline-large-tracking:   0px;
@@ -162,7 +186,7 @@
     --dps-typescale-headline-small-tracking:    0px;
     --dps-typescale-headline-small-weight:      400;
 
-    /* Title — Títulos de card, cabeçalhos de lista */
+    /* Title â€” TÃ­tulos de card, cabeÃ§alhos de lista */
     --dps-typescale-title-large-size:          22px;
     --dps-typescale-title-large-line:           28px;
     --dps-typescale-title-large-tracking:       0px;
@@ -178,7 +202,7 @@
     --dps-typescale-title-small-tracking:         0.1px;
     --dps-typescale-title-small-weight:           500;
 
-    /* Body — Parágrafos, descrições, conteúdo longo */
+    /* Body â€” ParÃ¡grafos, descriÃ§Ãµes, conteÃºdo longo */
     --dps-typescale-body-large-size:             16px;
     --dps-typescale-body-large-line:              24px;
     --dps-typescale-body-large-tracking:          0.5px;
@@ -194,7 +218,7 @@
     --dps-typescale-body-small-tracking:           0.4px;
     --dps-typescale-body-small-weight:             400;
 
-    /* Label — Botões, chips, campos, captions */
+    /* Label â€” BotÃµes, chips, campos, captions */
     --dps-typescale-label-large-size:             14px;
     --dps-typescale-label-large-line:              20px;
     --dps-typescale-label-large-tracking:          0.1px;
@@ -212,14 +236,17 @@
 }
 
 /* ==========================================================================
-   3. SHAPE TOKENS — Sistema de Formas DPS Signature
+   3. SHAPE TOKENS â€” Sistema de Formas DPS Signature
    ========================================================================== */
 
 :root {
 
     /* -----------------------------------------------------------------------
-       Escala de arredondamento (corner radius)
-       DPS Signature: formas arredondadas e acolhedoras
+       Escala de shape legada.
+       O DPS Signature vigente privilegia geometria reta; estes aliases seguem
+       disponÃ­veis para compatibilidade de runtime. Em novas UI, preferir
+       `--dps-shape-none`, `2px` ou `4px`, e reservar pills para exceÃ§Ãµes
+       explÃ­citas de canal.
        ----------------------------------------------------------------------- */
     --dps-shape-none:        0px;
     --dps-shape-extra-small: 4px;
@@ -229,7 +256,7 @@
     --dps-shape-extra-large: 28px;
     --dps-shape-full:        9999px;  /* Pill / totalmente arredondado */
 
-    /* Formas por componente */
+    /* Formas por componente â€” aliases herdados */
     --dps-shape-button:      var(--dps-shape-full);
     --dps-shape-fab:         var(--dps-shape-large);
     --dps-shape-card:        var(--dps-shape-medium);
@@ -242,14 +269,20 @@
     --dps-shape-menu:        var(--dps-shape-extra-small);
     --dps-shape-sheet:       var(--dps-shape-extra-large);
     --dps-shape-surface:     var(--dps-shape-medium);
+
+    /* Shapes canÃ´nicos para novas implementaÃ§Ãµes */
+    --dps-signature-shape-base:    0px;
+    --dps-signature-shape-control: 2px;
+    --dps-signature-shape-soft:    4px;
+    --dps-signature-shape-channel: 9999px;
 }
 
 /* ==========================================================================
-   4. ELEVATION TOKENS — Sistema de Profundidade DPS Signature
+   4. ELEVATION TOKENS â€” Sistema de Profundidade DPS Signature
    ========================================================================== */
 
 :root {
-    /* Sombras por nível de elevação (0–5) */
+    /* Sombras por nÃ­vel de elevaÃ§Ã£o (0â€“5) */
     --dps-elevation-0: none;
     --dps-elevation-1: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --dps-elevation-2: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
@@ -261,7 +294,7 @@
     --dps-elevation-5: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
                        0 8px 10px -6px rgba(0, 0, 0, 0.1);
 
-    /* Elevação por componente */
+    /* ElevaÃ§Ã£o por componente */
     --dps-elevation-surface:   var(--dps-elevation-0);
     --dps-elevation-card:      var(--dps-elevation-1);
     --dps-elevation-button:    var(--dps-elevation-1);
@@ -275,33 +308,38 @@
 }
 
 /* ==========================================================================
-   5. MOTION TOKENS — Sistema de Movimento DPS Signature
+   5. MOTION TOKENS â€” Sistema de Movimento DPS Signature
    ========================================================================== */
 
 :root {
 
     /* -----------------------------------------------------------------------
-       5.1 Easing — Curvas com overshoot sutil (expressivas)
-       Curvas rápidas e suaves para interações do DPS Signature
+       5.1 Easing â€” Curvas com resposta controlada
+       Curvas rÃ¡pidas e suaves para interaÃ§Ãµes do DPS Signature
        ----------------------------------------------------------------------- */
 
-    /* Expressive: com bounce sutil — para momentos importantes */
-    --dps-motion-easing-expressive-fast:     cubic-bezier(0.42, 1.67, 0.21, 0.90);
-    --dps-motion-easing-expressive-default:  cubic-bezier(0.38, 1.21, 0.22, 1.00);
-    --dps-motion-easing-expressive-slow:     cubic-bezier(0.39, 1.29, 0.35, 0.98);
+    /* Curvas canÃ´nicas do DPS Signature */
+    --dps-motion-easing-signature-fast:      cubic-bezier(0.42, 1.67, 0.21, 0.90);
+    --dps-motion-easing-signature-default:   cubic-bezier(0.38, 1.21, 0.22, 1.00);
+    --dps-motion-easing-signature-slow:      cubic-bezier(0.39, 1.29, 0.35, 0.98);
 
-    /* Standard: sem bounce — para ações utilitárias */
+    /* Aliases legados preservados por compatibilidade */
+    --dps-motion-easing-expressive-fast:     var(--dps-motion-easing-signature-fast);
+    --dps-motion-easing-expressive-default:  var(--dps-motion-easing-signature-default);
+    --dps-motion-easing-expressive-slow:     var(--dps-motion-easing-signature-slow);
+
+    /* Standard: sem bounce â€” para aÃ§Ãµes utilitÃ¡rias */
     --dps-motion-easing-standard:            cubic-bezier(0.2, 0.0, 0.0, 1.0);
     --dps-motion-easing-standard-decelerate: cubic-bezier(0.0, 0.0, 0.0, 1.0);
     --dps-motion-easing-standard-accelerate: cubic-bezier(0.3, 0.0, 1.0, 1.0);
 
-    /* Emphasis: entrada/saída de elementos */
+    /* Emphasis: entrada/saÃ­da de elementos */
     --dps-motion-easing-emphasized:          cubic-bezier(0.2, 0.0, 0.0, 1.0);
     --dps-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1.0);
     --dps-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0.0, 0.8, 0.15);
 
     /* -----------------------------------------------------------------------
-       5.2 Duration — Tempos por tipo de interação
+       5.2 Duration â€” Tempos por tipo de interaÃ§Ã£o
        ----------------------------------------------------------------------- */
     --dps-motion-duration-short-1:  50ms;
     --dps-motion-duration-short-2:  100ms;
@@ -318,18 +356,18 @@
     --dps-motion-duration-extra-long: 800ms;
 
     /* -----------------------------------------------------------------------
-       5.3 Atalhos de transição por uso comum
+       5.3 Atalhos de transiÃ§Ã£o por uso comum
        ----------------------------------------------------------------------- */
     --dps-motion-hover:   var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
     --dps-motion-press:   var(--dps-motion-duration-short-3) var(--dps-motion-easing-standard);
     --dps-motion-enter:   var(--dps-motion-duration-medium-2) var(--dps-motion-easing-emphasized-decelerate);
     --dps-motion-exit:    var(--dps-motion-duration-short-4) var(--dps-motion-easing-emphasized-accelerate);
-    --dps-motion-expand:  var(--dps-motion-duration-medium-3) var(--dps-motion-easing-expressive-default);
-    --dps-motion-morph:   var(--dps-motion-duration-medium-4) var(--dps-motion-easing-expressive-fast);
+    --dps-motion-expand:  var(--dps-motion-duration-medium-3) var(--dps-motion-easing-signature-default);
+    --dps-motion-morph:   var(--dps-motion-duration-medium-4) var(--dps-motion-easing-signature-fast);
 }
 
 /* ==========================================================================
-   6. SPACING TOKENS — Escala de Espaçamento
+   6. SPACING TOKENS â€” Escala de EspaÃ§amento
    ========================================================================== */
 
 :root {
@@ -350,7 +388,7 @@
 }
 
 /* ==========================================================================
-   7. STATE LAYER TOKENS — Opacidades de estado interativo
+   7. STATE LAYER TOKENS â€” Opacidades de estado interativo
    ========================================================================== */
 
 :root {
@@ -363,7 +401,7 @@
 }
 
 /* ==========================================================================
-   8. BREAKPOINTS (referência — usar em media queries)
+   8. BREAKPOINTS (referÃªncia â€” usar em media queries)
    ========================================================================== */
 
 /*
@@ -375,7 +413,7 @@
 */
 
 /* ==========================================================================
-   9. DARK THEME — Sobreposição para tema escuro
+   9. DARK THEME â€” SobreposiÃ§Ã£o para tema escuro
    ========================================================================== */
 
 [data-dps-theme="dark"] {
@@ -434,7 +472,7 @@
 }
 
 /* ==========================================================================
-   10. REDUCED MOTION — Acessibilidade obrigatória
+   10. REDUCED MOTION â€” Acessibilidade obrigatÃ³ria
    ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
@@ -449,13 +487,13 @@
 }
 
 /* ==========================================================================
-   11. COMPAT — Aliases para transição do sistema legado
+   11. COMPAT â€” Aliases para transiÃ§Ã£o do sistema legado
    Mapeia os tokens antigos (--dps-bg-*, --dps-accent, etc.)
-   para os tokens atuais. Remover após migração completa.
+   para os tokens atuais. Remover apÃ³s migraÃ§Ã£o completa.
    ========================================================================== */
 
 :root {
-    /* Cores legadas → novos tokens */
+    /* Cores legadas â†’ novos tokens */
     --dps-bg-primary:       var(--dps-color-surface);
     --dps-bg-white:         var(--dps-color-surface-container-lowest);
     --dps-border:           var(--dps-color-outline-variant);

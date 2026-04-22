@@ -1,9 +1,9 @@
-# Auditoria de Redesign - Agenda / Lista de Atendimentos (2026-03-23)
+﻿# Auditoria de Redesign - Agenda / Lista de Atendimentos (2026-03-23)
 
 ## Contexto
 - Escopo analisado: secao `Lista de Atendimentos` da Agenda e todos os componentes acionados a partir dela.
 - Fonte de verdade visual seguida: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
-- Perfil M3 aplicado ao contexto: **Admin / Dashboard -> Standard**, com foco em densidade legivel, hierarquia tonal, interacoes contidas e alto valor operacional.
+- Perfil DPS Signature aplicado ao contexto: **Admin / Dashboard -> Standard**, com foco em densidade legivel, hierarquia tonal, interacoes contidas e alto valor operacional.
 - Objetivo desta auditoria: identificar cada parte da secao, mapear seus elementos e registrar uma analise profunda para orientar um redesign completo, coerente e implementavel.
 
 ## Arquivos-base do estado atual
@@ -16,7 +16,7 @@
 - `plugins/desi-pet-shower-agenda/assets/js/pet-profile-modal.js`
 
 ## Tese visual e de interacao
-- Tese visual: transformar a Lista de Atendimentos em um workspace operacional M3 limpo, sereno e preciso, onde o estado do atendimento seja entendido em um olhar e a proxima acao fique obvia sem ruido visual.
+- Tese visual: transformar a Lista de Atendimentos em um workspace operacional DPS Signature limpo, sereno e preciso, onde o estado do atendimento seja entendido em um olhar e a proxima acao fique obvia sem ruido visual.
 - Tese de conteudo: reduzir textos redundantes, dar nomes mais funcionais aos blocos e padronizar labels, estados e CTAs para que a leitura seja orientada a operacao.
 - Tese de interacao: unificar a linguagem de tabs, linhas, badges, seletores, checkboxes e modais para que todas as acoes parecam parte do mesmo sistema, nao de subsistemas costurados.
 
@@ -123,7 +123,7 @@
 - Reduzir o peso visual acima da primeira linha.
 - Unificar comportamento de linha, densidade, alinhamento e linguagem de CTA nas 3 abas.
 
-## 2.2 Sistema visual e consistencia M3
+## 2.2 Sistema visual e consistencia DPS Signature
 ### Achado critico
 - O desenho atual usa **dois sistemas visuais em paralelo**:
   - `agenda-addon.css` usa tokens `--dps-*`
@@ -135,7 +135,7 @@
 - Qualquer redesign parcial corre risco de ficar inconsistente logo ao abrir checklist, retrabalho ou check-in.
 
 ### Direcao de redesign
-- Unificar tudo em um unico dialeto de tokens DPS/M3.
+- Unificar tudo em um unico dialeto de tokens DPS/DPS Signature.
 - Eliminar hex solto e fallbacks visuais arbitrarios dos componentes vivos da lista.
 - Definir um kit especifico da Agenda:
   - surface base
@@ -288,7 +288,7 @@
 ### Dropdowns
 - Problema: cada dropdown usa classes e semanticas diferentes (`confirmacao`, `status`, `taxidog`), com pesos e cromias pouco alinhados.
 - Problema: labels em uppercase total e com emoji deixam o visual mais ruidoso do que necessario.
-- Direcao: criar uma unica base de `select field` M3 para a Agenda, com variacoes semanticas por estado.
+- Direcao: criar uma unica base de `select field` DPS Signature para a Agenda, com variacoes semanticas por estado.
 
 ### Checkboxes de safety items
 - Problema: os checkboxes ainda sao nativos, pequenos e pouco expressivos.
@@ -296,7 +296,7 @@
 - Problema: a digitacao de notas aparece depois, mas sem uma hierarquia forte de motivo/contexto.
 - Direcao:
   - aumentar alvo de toque
-  - customizar estado checked/unchecked no padrao M3
+  - customizar estado checked/unchecked no padrao DPS Signature
   - dar mais clareza entre item obrigatorio, alerta e anotacao opcional
 
 ### Botoes
@@ -435,7 +435,7 @@
 ### Fase 4 - Operacao profunda
 - Redesenhar check-in/check-out, safety items e painel operacional.
 - Decidir um unico modelo de profundidade para checklist e operacao.
-- Substituir checkboxes nativos por controle M3 coerente.
+- Substituir checkboxes nativos por controle DPS Signature coerente.
 
 ### Fase 5 - Modais
 - Reimplementar servicos, perfil, pagamento, reagendamento, checklist e retrabalho em um mesmo sistema de dialog.
@@ -454,5 +454,5 @@
 ## 6. Conclusao
 - A secao ja tem uma boa base funcional, mas ainda nao opera como um sistema visual unico.
 - O principal problema nao e falta de componentes; e falta de **unificacao** entre shell, linhas, controles, operacao e dialogs.
-- O redesign completo deve começar pela consolidacao estrutural e so depois partir para o refinamento visual final.
-- Seguindo `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`, a Agenda pode evoluir para uma superficie admin M3 realmente elegante, clara e estavel sem perder densidade operacional.
+- O redesign completo deve comeÃ§ar pela consolidacao estrutural e so depois partir para o refinamento visual final.
+- Seguindo `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`, a Agenda pode evoluir para uma superficie admin DPS Signature realmente elegante, clara e estavel sem perder densidade operacional.

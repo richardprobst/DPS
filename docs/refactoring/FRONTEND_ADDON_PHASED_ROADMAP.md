@@ -1,91 +1,91 @@
-# Plano em fases para criação do Add-on FRONTEND
+﻿# Plano em fases para criaÃ§Ã£o do Add-on FRONTEND
 
 ## 1) Contexto e objetivo
 
-Este documento define um plano **amplo, incremental e seguro** para criar o novo add-on `desi-pet-shower-frontend`, consolidando experiências frontend hoje distribuídas entre plugin base e add-ons de cadastro (`desi-pet-shower-registration`) e agendamento (`desi-pet-shower-booking`).
+Este documento define um plano **amplo, incremental e seguro** para criar o novo add-on `desi-pet-shower-frontend`, consolidando experiÃªncias frontend hoje distribuÃ­das entre plugin base e add-ons de cadastro (`desi-pet-shower-registration`) e agendamento (`desi-pet-shower-booking`).
 
-A decisão deste plano é:
-- **não remover código legado nesta etapa inicial**;
+A decisÃ£o deste plano Ã©:
+- **nÃ£o remover cÃ³digo legado nesta etapa inicial**;
 - construir o novo add-on com **compatibilidade retroativa**;
-- preparar, desde já, a trilha de evidências para remoção futura sem risco.
+- preparar, desde jÃ¡, a trilha de evidÃªncias para remoÃ§Ã£o futura sem risco.
 
 ### Documentos relacionados
 
-| Documento | Propósito |
+| Documento | PropÃ³sito |
 |-----------|-----------|
-| `AGENT_ENGINEERING_PLAYBOOK.md` | Princípios de engenharia, DoD e processo de implementação |
-| `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` | Instruções de design frontend M3 Expressive |
+| `AGENT_ENGINEERING_PLAYBOOK.md` | PrincÃ­pios de engenharia, DoD e processo de implementaÃ§Ã£o |
+| `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` | InstruÃ§Ãµes de design frontend DPS Signature |
 | `docs/visual/VISUAL_STYLE_GUIDE.md` | Tokens, paleta, tipografia e componentes CSS |
 | `ANALYSIS.md` | Arquitetura, hooks e contratos do sistema |
 | `AGENTS.md` | Regras globais (MUST / ASK BEFORE / PREFER) |
 
 ## 2) Resultado esperado ao final do programa
 
-Ao concluir todas as fases deste roadmap, o projeto terá:
+Ao concluir todas as fases deste roadmap, o projeto terÃ¡:
 - add-on `FRONTEND` operacional com arquitetura modular;
 - compatibilidade com shortcodes e fluxos atuais;
-- documentação de contratos e integrações centralizada;
+- documentaÃ§Ã£o de contratos e integraÃ§Ãµes centralizada;
 - rollout controlado por fases (feature flags e fallback);
-- critérios objetivos para remoção futura de legado.
+- critÃ©rios objetivos para remoÃ§Ã£o futura de legado.
 
-> **Importante:** este plano foi desenhado para reduzir risco de quebra em produção e manter a continuidade operacional dos clientes atuais.
+> **Importante:** este plano foi desenhado para reduzir risco de quebra em produÃ§Ã£o e manter a continuidade operacional dos clientes atuais.
 
 ---
 
-## 3) Princípios de implementação
+## 3) PrincÃ­pios de implementaÃ§Ã£o
 
 1. **Compatibilidade primeiro**
-   - Toda migração deve preservar comportamento de shortcodes/hooks existentes durante a transição.
+   - Toda migraÃ§Ã£o deve preservar comportamento de shortcodes/hooks existentes durante a transiÃ§Ã£o.
 
-2. **Dual-run e rollback rápido**
-   - Cada módulo migrado roda com fallback para legado via feature flag.
+2. **Dual-run e rollback rÃ¡pido**
+   - Cada mÃ³dulo migrado roda com fallback para legado via feature flag.
 
-3. **Contratos explícitos**
-   - APIs de integração (hooks, shortcodes, opções) devem ser documentadas antes e depois da migração.
+3. **Contratos explÃ­citos**
+   - APIs de integraÃ§Ã£o (hooks, shortcodes, opÃ§Ãµes) devem ser documentadas antes e depois da migraÃ§Ã£o.
 
-4. **Mudanças pequenas e verificáveis**
-   - Entregas incrementais com critérios de aceite e validação funcional por fase.
+4. **MudanÃ§as pequenas e verificÃ¡veis**
+   - Entregas incrementais com critÃ©rios de aceite e validaÃ§Ã£o funcional por fase.
 
-5. **Observabilidade desde o início**
-   - Logs e métricas de uso para guiar decisões de estabilização e remoção futura.
+5. **Observabilidade desde o inÃ­cio**
+   - Logs e mÃ©tricas de uso para guiar decisÃµes de estabilizaÃ§Ã£o e remoÃ§Ã£o futura.
 
 ---
 
-## 4) Escopo funcional da consolidação FRONTEND
+## 4) Escopo funcional da consolidaÃ§Ã£o FRONTEND
 
 ### 4.1 Em escopo nesta iniciativa
-- Experiências frontend relacionadas a:
-  - formulário de cadastro;
-  - formulário de agendamento;
-  - página de configurações frontend e abas associadas;
-  - assets e templates correlatos dessas experiências.
+- ExperiÃªncias frontend relacionadas a:
+  - formulÃ¡rio de cadastro;
+  - formulÃ¡rio de agendamento;
+  - pÃ¡gina de configuraÃ§Ãµes frontend e abas associadas;
+  - assets e templates correlatos dessas experiÃªncias.
 
 ### 4.2 Fora de escopo (por ora)
-- Remoção de funções, classes ou add-ons legados.
-- Alterações de schema em tabelas compartilhadas.
-- Mudanças de contrato sem camada de compatibilidade.
+- RemoÃ§Ã£o de funÃ§Ãµes, classes ou add-ons legados.
+- AlteraÃ§Ãµes de schema em tabelas compartilhadas.
+- MudanÃ§as de contrato sem camada de compatibilidade.
 
 ---
 
-## 5) Inventário inicial (baseline obrigatório)
+## 5) InventÃ¡rio inicial (baseline obrigatÃ³rio)
 
-Antes de codar, deve existir inventário consolidado com:
+Antes de codar, deve existir inventÃ¡rio consolidado com:
 
 - **Shortcodes atuais** usados nos fluxos-alvo.
-- **Hooks de integração** consumidos e expostos (incluindo legados/deprecados).
+- **Hooks de integraÃ§Ã£o** consumidos e expostos (incluindo legados/deprecados).
 - **Options/metadados** persistidos por cada fluxo.
-- **Entradas de segurança** (nonces, capabilities, sanitização, escapes).
-- **Fluxos operacionais críticos** com passo a passo e resultado esperado.
-- **Dependências cruzadas** entre base e add-ons envolvidos.
+- **Entradas de seguranÃ§a** (nonces, capabilities, sanitizaÃ§Ã£o, escapes).
+- **Fluxos operacionais crÃ­ticos** com passo a passo e resultado esperado.
+- **DependÃªncias cruzadas** entre base e add-ons envolvidos.
 
-### 5.1 Entregável da fase de inventário
-Criar matriz de contratos em formato tabular contendo, no mínimo:
+### 5.1 EntregÃ¡vel da fase de inventÃ¡rio
+Criar matriz de contratos em formato tabular contendo, no mÃ­nimo:
 
-| Tipo | Nome | Origem atual | Consumidores | Risco de quebra | Estratégia de compatibilidade |
+| Tipo | Nome | Origem atual | Consumidores | Risco de quebra | EstratÃ©gia de compatibilidade |
 |------|------|--------------|--------------|-----------------|-------------------------------|
-| Shortcode | `...` | plugin X | páginas Y | Alto/Médio/Baixo | Alias/Wrapper/Manter |
-| Hook | `...` | plugin X | addon Y | Alto/Médio/Baixo | Bridge/Deprecated |
-| Option | `...` | plugin X | módulo Y | Alto/Médio/Baixo | Leitura dupla/Migração lazy |
+| Shortcode | `...` | plugin X | pÃ¡ginas Y | Alto/MÃ©dio/Baixo | Alias/Wrapper/Manter |
+| Hook | `...` | plugin X | addon Y | Alto/MÃ©dio/Baixo | Bridge/Deprecated |
+| Option | `...` | plugin X | mÃ³dulo Y | Alto/MÃ©dio/Baixo | Leitura dupla/MigraÃ§Ã£o lazy |
 
 ---
 
@@ -95,31 +95,31 @@ Criar matriz de contratos em formato tabular contendo, no mínimo:
 
 ```text
 plugins/desi-pet-shower-frontend/
-├── desi-pet-shower-frontend-addon.php
-├── includes/
-│   ├── class-dps-frontend-addon.php
-│   ├── class-dps-frontend-module-registry.php
-│   ├── class-dps-frontend-compatibility.php
-│   ├── class-dps-frontend-feature-flags.php
-│   ├── modules/
-│   │   ├── class-dps-frontend-registration-module.php
-│   │   ├── class-dps-frontend-booking-module.php
-│   │   └── class-dps-frontend-settings-module.php
-│   └── support/
-│       ├── class-dps-frontend-assets.php
-│       ├── class-dps-frontend-logger.php
-│       └── class-dps-frontend-request-guard.php
-├── templates/
-└── assets/
+â”œâ”€â”€ desi-pet-shower-frontend-addon.php
+â”œâ”€â”€ includes/
+â”‚   â”œâ”€â”€ class-dps-frontend-addon.php
+â”‚   â”œâ”€â”€ class-dps-frontend-module-registry.php
+â”‚   â”œâ”€â”€ class-dps-frontend-compatibility.php
+â”‚   â”œâ”€â”€ class-dps-frontend-feature-flags.php
+â”‚   â”œâ”€â”€ modules/
+â”‚   â”‚   â”œâ”€â”€ class-dps-frontend-registration-module.php
+â”‚   â”‚   â”œâ”€â”€ class-dps-frontend-booking-module.php
+â”‚   â”‚   â””â”€â”€ class-dps-frontend-settings-module.php
+â”‚   â””â”€â”€ support/
+â”‚       â”œâ”€â”€ class-dps-frontend-assets.php
+â”‚       â”œâ”€â”€ class-dps-frontend-logger.php
+â”‚       â””â”€â”€ class-dps-frontend-request-guard.php
+â”œâ”€â”€ templates/
+â””â”€â”€ assets/
 ```
 
-### 6.2 Cabeçalho do plugin (padrão do projeto)
+### 6.2 CabeÃ§alho do plugin (padrÃ£o do projeto)
 
 ```php
 /**
- * Plugin Name: desi.pet by PRObst – Frontend Add-on
+ * Plugin Name: desi.pet by PRObst â€“ Frontend Add-on
  * Plugin URI:  https://www.probst.pro
- * Description: Consolida experiências frontend (cadastro, agendamento, configurações) em add-on modular.
+ * Description: Consolida experiÃªncias frontend (cadastro, agendamento, configuraÃ§Ãµes) em add-on modular.
  * Version:     1.0.0
  * Author:      PRObst
  * Text Domain: dps-frontend-addon
@@ -133,145 +133,145 @@ plugins/desi-pet-shower-frontend/
 
 ### 6.3 Responsabilidades macro
 - `Addon`: bootstrap, i18n, ciclo de vida.
-- `Registry`: habilita/desabilita módulos e conecta hooks.
+- `Registry`: habilita/desabilita mÃ³dulos e conecta hooks.
 - `Compatibility`: camada de aliases/wrappers para legado.
-- `Feature Flags`: controle de rollout por módulo/fluxo.
-- `Modules/*`: regra de negócio e renderização por domínio.
-- `Support/*`: segurança, assets, logging e utilitários.
+- `Feature Flags`: controle de rollout por mÃ³dulo/fluxo.
+- `Modules/*`: regra de negÃ³cio e renderizaÃ§Ã£o por domÃ­nio.
+- `Support/*`: seguranÃ§a, assets, logging e utilitÃ¡rios.
 
-### 6.4 Arquitetura de assets e padrão visual M3
+### 6.4 Arquitetura de assets e padrÃ£o visual DPS Signature
 
-O add-on FRONTEND é intrinsecamente visual e **deve** seguir o padrão **Material 3 Expressive** do projeto desde a Fase 1. Referências obrigatórias:
+O add-on FRONTEND Ã© intrinsecamente visual e **deve** seguir o padrÃ£o **DPS Signature** do projeto desde a Fase 1. ReferÃªncias obrigatÃ³rias:
 
-- `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` — metodologia, contextos de uso, checklist
-- `docs/visual/VISUAL_STYLE_GUIDE.md` — tokens, paleta, componentes CSS
+- `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` â€” metodologia, contextos de uso, checklist
+- `docs/visual/VISUAL_STYLE_GUIDE.md` â€” tokens, paleta, componentes CSS
 
 #### Estrutura de assets recomendada
 
 ```text
 assets/
-├── css/
-│   └── frontend-addon.css      /* Estilos do add-on — sem hex literais, via var(--dps-*) */
-└── js/
-    └── frontend-addon.js       /* Vanilla JS, IIFE, 'use strict' */
+â”œâ”€â”€ css/
+â”‚   â””â”€â”€ frontend-addon.css      /* Estilos do add-on â€” sem hex literais, via var(--dps-*) */
+â””â”€â”€ js/
+    â””â”€â”€ frontend-addon.js       /* Vanilla JS, IIFE, 'use strict' */
 ```
 
-#### Requisitos M3 para o add-on
+#### Requisitos DPS Signature para o add-on
 
-1. **Importar `dps-design-tokens.css`** como dependência (já fornecido pelo plugin base).
-2. **Cores exclusivamente via tokens** — `var(--dps-color-*)`, sem hex/rgba literais.
-3. **Formas via tokens** — `var(--dps-shape-*)`, sem `border-radius` literal.
-4. **Tipografia** — escala M3 (`var(--dps-typescale-*)`), pesos 400 e 500 apenas.
-5. **Botões pill** — classe `.dps-submit-btn` (M3 pill button) para ações primárias.
-6. **Enqueue condicional** — assets carregados apenas nas páginas onde o add-on atua.
-7. **`prefers-reduced-motion`** — respeitado automaticamente via tokens globais.
-8. **Perfil por contexto** — Standard (admin) vs. Expressive (portal/público).
+1. **Importar `dps-design-tokens.css`** como dependÃªncia (jÃ¡ fornecido pelo plugin base).
+2. **Cores exclusivamente via tokens** â€” `var(--dps-color-*)`, sem hex/rgba literais.
+3. **Formas via tokens** â€” `var(--dps-shape-*)`, sem `border-radius` literal.
+4. **Tipografia** â€” escala DPS Signature (`var(--dps-typescale-*)`), pesos 400 e 500 apenas.
+5. **BotÃµes pill** â€” classe `.dps-submit-btn` (DPS Signature pill button) para aÃ§Ãµes primÃ¡rias.
+6. **Enqueue condicional** â€” assets carregados apenas nas pÃ¡ginas onde o add-on atua.
+7. **`prefers-reduced-motion`** â€” respeitado automaticamente via tokens globais.
+8. **Perfil por contexto** â€” mais contido no admin e mais aberto no portal/pÃºblico.
 
-> Consultar o checklist completo em `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`, seção 14.
+> Consultar o checklist completo em `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`, seÃ§Ã£o 14.
 
 ---
 
-## 7) Estratégia de compatibilidade
+## 7) EstratÃ©gia de compatibilidade
 
 ### 7.1 Shortcodes
-- Manter shortcodes existentes funcionais na transição.
-- Se houver shortcode canônico novo, publicar alias dos antigos para ele.
-- Logar uso de shortcode legado para telemetria de desativação futura.
+- Manter shortcodes existentes funcionais na transiÃ§Ã£o.
+- Se houver shortcode canÃ´nico novo, publicar alias dos antigos para ele.
+- Logar uso de shortcode legado para telemetria de desativaÃ§Ã£o futura.
 
 ### 7.2 Hooks
-- Não quebrar assinaturas atuais.
-- Se necessário evoluir contrato, criar novo hook e manter bridge para o antigo.
-- Documentar depreciação apenas quando houver substituto estável.
+- NÃ£o quebrar assinaturas atuais.
+- Se necessÃ¡rio evoluir contrato, criar novo hook e manter bridge para o antigo.
+- Documentar depreciaÃ§Ã£o apenas quando houver substituto estÃ¡vel.
 
-### 7.3 Persistência de dados
-- Evitar migração destrutiva imediata.
-- Preferir compatibilidade por leitura dupla (chave nova + chave antiga) até estabilização.
-
----
-
-## 8) Plano de execução por fases
-
-## Fase 0 — Governança, discovery e baseline
-
-**Objetivo:** reduzir incerteza técnica e mapear riscos antes da implementação.
-
-### Entregas
-- Matriz de contratos e dependências.
-- Catálogo de fluxos críticos com critérios de aceite.
-- Matriz de risco por módulo.
-- Estratégia de rollback por feature flag.
-
-### Critério de saída
-- Nenhuma dependência crítica “desconhecida”.
-- Contratos públicos mapeados e revisados.
+### 7.3 PersistÃªncia de dados
+- Evitar migraÃ§Ã£o destrutiva imediata.
+- Preferir compatibilidade por leitura dupla (chave nova + chave antiga) atÃ© estabilizaÃ§Ã£o.
 
 ---
 
-## Fase 1 — Fundação do add-on FRONTEND
+## 8) Plano de execuÃ§Ã£o por fases
 
-**Objetivo:** criar esqueleto do add-on sem impacto funcional visível.
+## Fase 0 â€” GovernanÃ§a, discovery e baseline
+
+**Objetivo:** reduzir incerteza tÃ©cnica e mapear riscos antes da implementaÃ§Ã£o.
 
 ### Entregas
-- Plugin principal com bootstrap e textdomain (cabeçalho conforme seção 6.2).
+- Matriz de contratos e dependÃªncias.
+- CatÃ¡logo de fluxos crÃ­ticos com critÃ©rios de aceite.
+- Matriz de risco por mÃ³dulo.
+- EstratÃ©gia de rollback por feature flag.
+
+### CritÃ©rio de saÃ­da
+- Nenhuma dependÃªncia crÃ­tica â€œdesconhecidaâ€.
+- Contratos pÃºblicos mapeados e revisados.
+
+---
+
+## Fase 1 â€” FundaÃ§Ã£o do add-on FRONTEND
+
+**Objetivo:** criar esqueleto do add-on sem impacto funcional visÃ­vel.
+
+### Entregas
+- Plugin principal com bootstrap e textdomain (cabeÃ§alho conforme seÃ§Ã£o 6.2).
 - Registry modular e feature flags.
-- Infra de logging/diagnóstico.
+- Infra de logging/diagnÃ³stico.
 - Camada de compatibilidade vazia preparada.
-- Estrutura de assets com dependência de `dps-design-tokens.css` (padrão M3).
-- Documentação da seção FRONTEND no `ANALYSIS.md`.
+- Estrutura de assets com dependÃªncia de `dps-design-tokens.css` (padrÃ£o DPS Signature).
+- DocumentaÃ§Ã£o da seÃ§Ã£o FRONTEND no `ANALYSIS.md`.
 
-### Critério de saída
+### CritÃ©rio de saÃ­da
 - Add-on ativa sem erro e sem interferir no fluxo atual.
-- Assets M3 carregam condicionalmente sem conflito.
+- Assets DPS Signature carregam condicionalmente sem conflito.
 
 ---
 
-## Fase 2 — Migração do módulo Cadastro (piloto)
+## Fase 2 â€” MigraÃ§Ã£o do mÃ³dulo Cadastro (piloto)
 
-**Objetivo:** validar estratégia com módulo de risco controlado.
+**Objetivo:** validar estratÃ©gia com mÃ³dulo de risco controlado.
 
 ### Entregas
-- Módulo `registration` no FRONTEND.
+- MÃ³dulo `registration` no FRONTEND.
 - Wrapper/alias para shortcode legado correspondente.
 - Fallback para legado por flag.
 - Testes funcionais do fluxo completo de cadastro.
 
-### Critério de saída
-- Paridade funcional comprovada em homologação.
+### CritÃ©rio de saÃ­da
+- Paridade funcional comprovada em homologaÃ§Ã£o.
 - Rollback validado.
 
 ---
 
-## Fase 3 — Migração do módulo Agendamento
+## Fase 3 â€” MigraÃ§Ã£o do mÃ³dulo Agendamento
 
 **Objetivo:** transferir fluxo de agendamento com dual-run.
 
 ### Entregas
-- Módulo `booking` no FRONTEND.
-- Compatibilidade com shortcode e integrações atuais.
-- Enqueue condicional de assets no novo módulo.
-- Checklist de regressão do fluxo de agendamento.
+- MÃ³dulo `booking` no FRONTEND.
+- Compatibilidade com shortcode e integraÃ§Ãµes atuais.
+- Enqueue condicional de assets no novo mÃ³dulo.
+- Checklist de regressÃ£o do fluxo de agendamento.
 
-### Critério de saída
-- Fluxo de agendamento estável com flag ligada.
-- Incidentes críticos = 0 durante janela de observação.
+### CritÃ©rio de saÃ­da
+- Fluxo de agendamento estÃ¡vel com flag ligada.
+- Incidentes crÃ­ticos = 0 durante janela de observaÃ§Ã£o.
 
 ---
 
-## Fase 4 — Migração do módulo Configurações frontend
+## Fase 4 â€” MigraÃ§Ã£o do mÃ³dulo ConfiguraÃ§Ãµes frontend
 
-**Objetivo:** consolidar integração com configurações mantendo contratos.
+**Objetivo:** consolidar integraÃ§Ã£o com configuraÃ§Ãµes mantendo contratos.
 
 ### Entregas
-- Módulo `settings` integrado ao mecanismo oficial de abas.
-- Compatibilidade com ações de salvamento existentes.
-- Documentação de contratos (`register_tab`, callbacks, saves).
+- MÃ³dulo `settings` integrado ao mecanismo oficial de abas.
+- Compatibilidade com aÃ§Ãµes de salvamento existentes.
+- DocumentaÃ§Ã£o de contratos (`register_tab`, callbacks, saves).
 
-### Critério de saída
-- Paridade de funcionalidades de configuração confirmada.
+### CritÃ©rio de saÃ­da
+- Paridade de funcionalidades de configuraÃ§Ã£o confirmada.
 
 ---
 
-## Fase 5 — Consolidação, hardening e documentação final
+## Fase 5 â€” ConsolidaÃ§Ã£o, hardening e documentaÃ§Ã£o final
 
 **Objetivo:** estabilizar FRONTEND como camada principal de frontend.
 
@@ -279,148 +279,148 @@ assets/
 - Guia operacional de rollout por ambiente.
 - Matriz final de compatibilidade (base + add-ons).
 - Runbook de incidentes/rollback.
-- Checklist de prontidão para remoção futura de legado.
+- Checklist de prontidÃ£o para remoÃ§Ã£o futura de legado.
 - Registro visual completo de todas as telas em `docs/screenshots/`.
 
-### Critério de saída
-- FRONTEND apto para padrão de uso recomendado.
-- Conformidade visual M3 verificada em todos os módulos.
+### CritÃ©rio de saÃ­da
+- FRONTEND apto para padrÃ£o de uso recomendado.
+- Conformidade visual DPS Signature verificada em todos os mÃ³dulos.
 
 ---
 
-## Fase 6 — Preparação para depreciação e remoção futura (sem remover ainda)
+## Fase 6 â€” PreparaÃ§Ã£o para depreciaÃ§Ã£o e remoÃ§Ã£o futura (sem remover ainda)
 
-**Objetivo:** deixar governança pronta para remoções seguras em releases futuros.
+**Objetivo:** deixar governanÃ§a pronta para remoÃ§Ãµes seguras em releases futuros.
 
 ### Entregas
-- Política de depreciação (janela mínima e comunicação).
-- Lista de alvos de remoção com risco e plano de reversão.
-- Evidências de uso real do legado (telemetria/observabilidade).
+- PolÃ­tica de depreciaÃ§Ã£o (janela mÃ­nima e comunicaÃ§Ã£o).
+- Lista de alvos de remoÃ§Ã£o com risco e plano de reversÃ£o.
+- EvidÃªncias de uso real do legado (telemetria/observabilidade).
 
-### Critério de saída
-- Projeto pronto para iniciar remoções em lotes pequenos quando aprovado.
+### CritÃ©rio de saÃ­da
+- Projeto pronto para iniciar remoÃ§Ãµes em lotes pequenos quando aprovado.
 
 ---
 
-## 9) Critérios de aceite por módulo (DoD)
+## 9) CritÃ©rios de aceite por mÃ³dulo (DoD)
 
-Cada módulo migrado só pode avançar se cumprir os critérios abaixo, alinhados com o `AGENT_ENGINEERING_PLAYBOOK.md`:
+Cada mÃ³dulo migrado sÃ³ pode avanÃ§ar se cumprir os critÃ©rios abaixo, alinhados com o `AGENT_ENGINEERING_PLAYBOOK.md`:
 
 1. **Paridade funcional**
-   - Mesmo comportamento para entradas válidas/inválidas e mensagens de feedback.
+   - Mesmo comportamento para entradas vÃ¡lidas/invÃ¡lidas e mensagens de feedback.
 
-2. **Segurança**
-   - Nonce, capability, sanitização e escape equivalentes ou superiores ao legado.
+2. **SeguranÃ§a**
+   - Nonce, capability, sanitizaÃ§Ã£o e escape equivalentes ou superiores ao legado.
    - `$wpdb->prepare()` em toda query SQL.
 
 3. **Compatibilidade**
-   - Shortcodes/hooks legados ainda funcionam durante transição.
+   - Shortcodes/hooks legados ainda funcionam durante transiÃ§Ã£o.
 
-4. **Conformidade visual M3**
+4. **Conformidade visual DPS Signature**
    - Templates e assets seguem `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`.
    - Cores, formas, tipografia e motion via design tokens (`var(--dps-*)`).
-   - Mudanças visuais documentadas com prints em `docs/screenshots/YYYY-MM-DD/`.
+   - MudanÃ§as visuais documentadas com prints em `docs/screenshots/YYYY-MM-DD/`.
 
-5. **Qualidade de código**
+5. **Qualidade de cÃ³digo**
    - Passa em `php -l` e PHPCS (WordPress standards).
-   - Funções pequenas (SRP), early returns, nomes descritivos.
-   - Regra de negócio fora de callbacks de hooks/shortcodes.
+   - FunÃ§Ãµes pequenas (SRP), early returns, nomes descritivos.
+   - Regra de negÃ³cio fora de callbacks de hooks/shortcodes.
 
 6. **Observabilidade**
-   - Logs de erro/uso disponíveis para monitorar adoção e anomalias.
+   - Logs de erro/uso disponÃ­veis para monitorar adoÃ§Ã£o e anomalias.
 
 7. **Rollback testado**
    - Retorno ao legado por flag sem perda operacional.
 
 ---
 
-## 10) Estratégia de testes e validação
+## 10) EstratÃ©gia de testes e validaÃ§Ã£o
 
-### 10.1 Testes mínimos por fase
+### 10.1 Testes mÃ­nimos por fase
 - `php -l` em todos os arquivos PHP alterados.
-- Verificação de diffs (`git diff --check`).
-- Validação funcional manual dos fluxos impactados em WP local/homolog.
+- VerificaÃ§Ã£o de diffs (`git diff --check`).
+- ValidaÃ§Ã£o funcional manual dos fluxos impactados em WP local/homolog.
 
-### 10.2 Validação visual M3 (obrigatória para fases com UI)
-- Conformidade com `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` (checklist seção 14).
+### 10.2 ValidaÃ§Ã£o visual DPS Signature (obrigatÃ³ria para fases com UI)
+- Conformidade com `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` (checklist seÃ§Ã£o 14).
 - Testar em viewports: 375px, 600px, 840px, 1200px.
-- Contraste WCAG AA verificado (sistema de pareamento M3).
-- Focus visible e navegação por teclado funcional.
-- Touch targets ≥ 48×48px em mobile.
+- Contraste WCAG AA verificado (sistema de pareamento DPS Signature).
+- Focus visible e navegaÃ§Ã£o por teclado funcional.
+- Touch targets â‰¥ 48Ã—48px em mobile.
 - Capturas das telas salvas em `docs/screenshots/YYYY-MM-DD/`.
 
-### 10.3 Suite de regressão funcional recomendada
-- Cadastro: envio com sucesso, validação de campos, erros esperados.
-- Agendamento: seleção de serviço/horário, persistência e feedback.
-- Configurações: abertura de abas, salvamento por ação, feedback de sucesso/erro.
-- Compatibilidade: páginas existentes com shortcodes legados.
+### 10.3 Suite de regressÃ£o funcional recomendada
+- Cadastro: envio com sucesso, validaÃ§Ã£o de campos, erros esperados.
+- Agendamento: seleÃ§Ã£o de serviÃ§o/horÃ¡rio, persistÃªncia e feedback.
+- ConfiguraÃ§Ãµes: abertura de abas, salvamento por aÃ§Ã£o, feedback de sucesso/erro.
+- Compatibilidade: pÃ¡ginas existentes com shortcodes legados.
 
-### 10.4 Evidências obrigatórias
+### 10.4 EvidÃªncias obrigatÃ³rias
 - Registro dos comandos executados e resultado.
-- Checklist de fluxos validada por módulo.
-- Logs de execução para incidentes e fallback.
+- Checklist de fluxos validada por mÃ³dulo.
+- Logs de execuÃ§Ã£o para incidentes e fallback.
 
 ---
 
-## 11) Observabilidade e métricas de decisão
+## 11) Observabilidade e mÃ©tricas de decisÃ£o
 
-Métricas recomendadas para orientar avanço e futura remoção:
+MÃ©tricas recomendadas para orientar avanÃ§o e futura remoÃ§Ã£o:
 - Taxa de uso de shortcodes legados vs novos.
-- Taxa de erro por módulo (antes/depois da migração).
+- Taxa de erro por mÃ³dulo (antes/depois da migraÃ§Ã£o).
 - Incidentes por release relacionados a frontend.
-- Tempo médio de rollback (quando executado).
+- Tempo mÃ©dio de rollback (quando executado).
 
-Essas métricas devem alimentar o comitê de decisão de descontinuação do legado.
+Essas mÃ©tricas devem alimentar o comitÃª de decisÃ£o de descontinuaÃ§Ã£o do legado.
 
 ---
 
 ## 12) Plano de rollback
 
-### 12.1 Rollback técnico
-- Desligar feature flag do módulo afetado.
-- Restaurar roteamento para implementação legada.
-- Manter dados preservados (sem migração destrutiva).
+### 12.1 Rollback tÃ©cnico
+- Desligar feature flag do mÃ³dulo afetado.
+- Restaurar roteamento para implementaÃ§Ã£o legada.
+- Manter dados preservados (sem migraÃ§Ã£o destrutiva).
 
 ### 12.2 Rollback operacional
-- Comunicar equipe interna sobre retorno temporário.
-- Registrar causa raiz e ação corretiva para nova tentativa.
+- Comunicar equipe interna sobre retorno temporÃ¡rio.
+- Registrar causa raiz e aÃ§Ã£o corretiva para nova tentativa.
 
 ---
 
-## 13) Riscos principais e mitigação
+## 13) Riscos principais e mitigaÃ§Ã£o
 
-| Risco | Probabilidade | Impacto | Mitigação |
+| Risco | Probabilidade | Impacto | MitigaÃ§Ã£o |
 |------|---------------|---------|-----------|
-| Quebra de shortcode em páginas ativas | Média | Alto | Alias + fallback + validação prévia |
-| Divergência de comportamento entre legado e novo | Média | Alto | Dual-run + checklist de paridade |
-| Acoplamento oculto entre add-ons | Alta | Médio/Alto | Inventário detalhado + rollout faseado |
-| Regressão em segurança | Baixa/Média | Alto | Guard central de request + revisão de segurança |
-| Inconsistência visual M3 entre módulos | Média | Médio | Design tokens obrigatórios + checklist M3 por fase |
-| Dificuldade de remover legado no futuro | Média | Médio | Telemetria + critérios objetivos de depreciação |
+| Quebra de shortcode em pÃ¡ginas ativas | MÃ©dia | Alto | Alias + fallback + validaÃ§Ã£o prÃ©via |
+| DivergÃªncia de comportamento entre legado e novo | MÃ©dia | Alto | Dual-run + checklist de paridade |
+| Acoplamento oculto entre add-ons | Alta | MÃ©dio/Alto | InventÃ¡rio detalhado + rollout faseado |
+| RegressÃ£o em seguranÃ§a | Baixa/MÃ©dia | Alto | Guard central de request + revisÃ£o de seguranÃ§a |
+| InconsistÃªncia visual DPS Signature entre mÃ³dulos | MÃ©dia | MÃ©dio | Design tokens obrigatÃ³rios + checklist DPS Signature por fase |
+| Dificuldade de remover legado no futuro | MÃ©dia | MÃ©dio | Telemetria + critÃ©rios objetivos de depreciaÃ§Ã£o |
 
 ---
 
-## 14) Documentação obrigatória durante a execução
+## 14) DocumentaÃ§Ã£o obrigatÃ³ria durante a execuÃ§Ã£o
 
-Para garantir remoção futura sem interferência, manter os artefatos abaixo atualizados:
+Para garantir remoÃ§Ã£o futura sem interferÃªncia, manter os artefatos abaixo atualizados:
 
 1. **Arquitetura e contratos**
-   - Atualizar `ANALYSIS.md` com seção do add-on FRONTEND e contratos públicos.
+   - Atualizar `ANALYSIS.md` com seÃ§Ã£o do add-on FRONTEND e contratos pÃºblicos.
 
-2. **Planejamento de execução**
-   - Atualizar este roadmap a cada fase concluída (status, decisões e riscos).
+2. **Planejamento de execuÃ§Ã£o**
+   - Atualizar este roadmap a cada fase concluÃ­da (status, decisÃµes e riscos).
 
-3. **Implementação e rollout**
-   - Registrar em `docs/implementation/` o passo a passo de ativação por ambiente.
+3. **ImplementaÃ§Ã£o e rollout**
+   - Registrar em `docs/implementation/` o passo a passo de ativaÃ§Ã£o por ambiente.
 
-4. **QA e aceitação**
-   - Registrar em `docs/qa/` os resultados de regressão por módulo.
+4. **QA e aceitaÃ§Ã£o**
+   - Registrar em `docs/qa/` os resultados de regressÃ£o por mÃ³dulo.
 
 5. **Registro visual**
    - Capturas de telas alteradas em `docs/screenshots/YYYY-MM-DD/`, conforme `docs/screenshots/README.md`.
 
-6. **Depreciação futura**
-   - Manter checklist de “pronto para remover” com evidências.
+6. **DepreciaÃ§Ã£o futura**
+   - Manter checklist de â€œpronto para removerâ€ com evidÃªncias.
 
 ---
 
@@ -429,35 +429,34 @@ Para garantir remoção futura sem interferência, manter os artefatos abaixo at
 - **Release A:** Fase 0 + Fase 1
 - **Release B:** Fase 2 (Cadastro)
 - **Release C:** Fase 3 (Agendamento)
-- **Release D:** Fase 4 (Configurações)
-- **Release E:** Fase 5 + preparação da Fase 6
+- **Release D:** Fase 4 (ConfiguraÃ§Ãµes)
+- **Release E:** Fase 5 + preparaÃ§Ã£o da Fase 6
 
-> Ajustar cronograma conforme capacidade da equipe e janela de homologação.
+> Ajustar cronograma conforme capacidade da equipe e janela de homologaÃ§Ã£o.
 
 ---
 
 ## 16) Checklists operacionais
 
 ### 16.1 Checklist de entrada de fase
-- [ ] Contratos do módulo mapeados
+- [ ] Contratos do mÃ³dulo mapeados
 - [ ] Riscos registrados
 - [ ] Plano de rollback definido
-- [ ] Critérios de aceite aprovados
+- [ ] CritÃ©rios de aceite aprovados
 
-### 16.2 Checklist de saída de fase
+### 16.2 Checklist de saÃ­da de fase
 - [ ] Paridade funcional validada
-- [ ] Segurança validada
+- [ ] SeguranÃ§a validada
 - [ ] Compatibilidade legada preservada
-- [ ] Conformidade visual M3 verificada (para fases com UI)
-- [ ] Logs/métricas coletados
-- [ ] Documentação atualizada
+- [ ] Conformidade visual DPS Signature verificada (para fases com UI)
+- [ ] Logs/mÃ©tricas coletados
+- [ ] DocumentaÃ§Ã£o atualizada
 - [ ] Capturas visuais registradas em `docs/screenshots/` (para fases com UI)
 
 ---
 
-## 17) Decisões para esta etapa (sem remoções)
+## 17) DecisÃµes para esta etapa (sem remoÃ§Ãµes)
 
-1. O add-on FRONTEND será criado com foco em **adicionalidade**, não substituição imediata.
-2. O legado será mantido durante toda a migração inicial, com fallback ativo.
-3. Remoção de código antigo será tratada em programa posterior, com base em evidência operacional e critérios formais.
-
+1. O add-on FRONTEND serÃ¡ criado com foco em **adicionalidade**, nÃ£o substituiÃ§Ã£o imediata.
+2. O legado serÃ¡ mantido durante toda a migraÃ§Ã£o inicial, com fallback ativo.
+3. RemoÃ§Ã£o de cÃ³digo antigo serÃ¡ tratada em programa posterior, com base em evidÃªncia operacional e critÃ©rios formais.

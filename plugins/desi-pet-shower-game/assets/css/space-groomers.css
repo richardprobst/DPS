@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Space Groomers: Invasao das Pulgas
  * Estilos do jogo tematico desi.pet
  *
@@ -751,7 +751,7 @@
 
 
 
-/* Space Groomers visual refresh - M3 aligned, mobile-first */
+/* Space Groomers visual refresh - DPS Signature aligned, mobile-first */
 .dps-space-groomers {
     --dps-sg-shell-top: #051427;
     --dps-sg-shell-mid: #0d2747;
@@ -1031,7 +1031,7 @@
     .dps-sg-overlay__result-grid { grid-template-columns: 1fr; }
     .dps-sg-overlay__actions { flex-direction: column; align-items: stretch; }
 }
-/* Desi Pet Shower branding pass - M3 aligned */
+/* Desi Pet Shower branding pass - DPS Signature aligned */
 .dps-space-groomers {
     --dps-sg-shell-top: #07223f;
     --dps-sg-shell-mid: #0a4b7f;

@@ -20,7 +20,7 @@ Alinhar o add-on `desi-pet-shower-game` a uma leitura clara de jogo oficial da `
 - Missoes, badges e toasts do gameplay receberam nomes menos genericos e mais conectados ao universo de banho e tosa.
 
 ## Elementos visuais personalizados
-- Paleta refinada para o azul principal do projeto com acentos aqua e areia, mantendo coerencia com o M3 do DPS.
+- Paleta refinada para o azul principal do projeto com acentos aqua e areia, mantendo coerencia com o DPS Signature do DPS.
 - Overlay inicial e overlays finais reforcados com hierarquia visual mais institucional.
 - Canvas com novo pano de fundo usando bolhas, espuma e marcas sutis de pata para aproximar o tema do universo pet/grooming.
 - Card do portal recebeu titulo, descricao e icone mais coerentes com a Desi Pet Shower.

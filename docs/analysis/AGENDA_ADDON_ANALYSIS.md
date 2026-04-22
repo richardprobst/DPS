@@ -1,143 +1,152 @@
-# Análise Profunda do Add-on Agenda DPS
+﻿# AnÃ¡lise Profunda do Add-on Agenda DPS
 
-**Data da Análise**: 2025-12-03
-**Versão Analisada**: 1.0.1
+**Data da AnÃ¡lise**: 2025-12-03
+**VersÃ£o Analisada**: 1.0.1
 **Analista**: GitHub Copilot Agent
-**Diretório**: `plugins/desi-pet-shower-agenda/`
+**DiretÃ³rio**: `plugins/desi-pet-shower-agenda/`
 
 ---
 
-## Sumário Executivo
+## SumÃ¡rio Executivo
 
-O **Agenda Add-on** é um componente essencial do sistema desi.pet by PRObst, responsável pela visualização e gerenciamento da agenda de atendimentos. Esta análise profunda examina a funcionalidade atual, qualidade do código, layout/UX, performance e identifica oportunidades de melhoria e novas funcionalidades.
+O **Agenda Add-on** Ã© um componente essencial do sistema desi.pet by PRObst, responsÃ¡vel pela visualizaÃ§Ã£o e gerenciamento da agenda de atendimentos. Esta anÃ¡lise profunda examina a funcionalidade atual, qualidade do cÃ³digo, layout/UX, performance e identifica oportunidades de melhoria e novas funcionalidades.
 
-### Avaliação Geral
+### AvaliaÃ§Ã£o Geral
 
-| Aspecto | Nota | Observação |
+| Aspecto | Nota | ObservaÃ§Ã£o |
 |---------|------|------------|
-| **Funcionalidade** | 8/10 | Recursos sólidos, faltam agrupamento de clientes e relatórios |
-| **Código** | 7/10 | Bem estruturado, mas método principal ainda extenso (~700 linhas) |
-| **Segurança** | 9/10 | Vulnerabilidades críticas corrigidas em 2025-11-27 |
-| **Performance** | 8/10 | Cache implementado, queries otimizadas, paginação disponível |
+| **Funcionalidade** | 8/10 | Recursos sÃ³lidos, faltam agrupamento de clientes e relatÃ³rios |
+| **CÃ³digo** | 7/10 | Bem estruturado, mas mÃ©todo principal ainda extenso (~700 linhas) |
+| **SeguranÃ§a** | 9/10 | Vulnerabilidades crÃ­ticas corrigidas em 2025-11-27 |
+| **Performance** | 8/10 | Cache implementado, queries otimizadas, paginaÃ§Ã£o disponÃ­vel |
 | **Layout/UX** | 8/10 | Melhorias de FASE 1 e 2 implementadas, estilo minimalista |
 | **Acessibilidade** | 7/10 | ARIA parcialmente implementado, faltam testes de daltonismo |
-| **Documentação** | 9/10 | Excelente documentação em README, CODE_REVIEW e docs/layout |
+| **DocumentaÃ§Ã£o** | 9/10 | Excelente documentaÃ§Ã£o em README, CODE_REVIEW e docs/layout |
 
 ---
 
-## 1. Visão Geral da Funcionalidade
+## 1. VisÃ£o Geral da Funcionalidade
 
-### 1.1 Propósito Principal
+### 1.1 PropÃ³sito Principal
 O add-on gerencia a agenda de atendimentos do pet shop, permitindo:
-- Visualização diária, semanal e listagem completa de agendamentos
-- Atualização de status via AJAX (pendente → finalizado → finalizado_pago → cancelado)
-- Filtragem por cliente, status e serviço
-- Envio de lembretes automáticos via cron job
-- Integração com WhatsApp para confirmação e cobrança
+- VisualizaÃ§Ã£o diÃ¡ria, semanal e listagem completa de agendamentos
+- AtualizaÃ§Ã£o de status via AJAX (pendente â†’ finalizado â†’ finalizado_pago â†’ cancelado)
+- Filtragem por cliente, status e serviÃ§o
+- Envio de lembretes automÃ¡ticos via cron job
+- IntegraÃ§Ã£o com WhatsApp para confirmaÃ§Ã£o e cobranÃ§a
 
 ### 1.2 Shortcodes Expostos
 
-| Shortcode | Descrição | Status |
+| Shortcode | DescriÃ§Ã£o | Status |
 |-----------|-----------|--------|
-| `[dps_agenda_page]` | Página completa de agenda | ✅ Ativo |
-| `[dps_charges_notes]` | Cobranças pendentes | ⚠️ Deprecated (redireciona para Finance) |
+| `[dps_agenda_page]` | PÃ¡gina completa de agenda | âœ… Ativo |
+| `[dps_charges_notes]` | CobranÃ§as pendentes | âš ï¸ Deprecated (redireciona para Finance) |
 
 ### 1.3 Endpoints AJAX
 
-| Endpoint | Propósito | Autenticação |
+#### Atualizacao 2026-04-21 - fluxo operacional
+
+- `dps_checklist_update`: atualiza etapas do checklist operacional com validacao autenticada.
+- `dps_checklist_rework`: reabre o checklist com motivo de retrabalho.
+- `dps_get_checklist_panel`: mantem compatibilidade com o painel operacional sob demanda.
+- `dps_get_operation_panel`: entrega o HTML do modal operacional unificado.
+- `dps_appointment_checkin`: registra ou edita o check-in do atendimento.
+- `dps_appointment_checkout`: registra ou edita o check-out do atendimento.
+
+| Endpoint | PropÃ³sito | AutenticaÃ§Ã£o |
 |----------|-----------|--------------|
 | `dps_update_status` | Atualizar status de agendamento | `manage_options` + nonce |
-| `dps_get_services_details` | Detalhes de serviços do agendamento | `manage_options` + nonce |
+| `dps_get_services_details` | Detalhes de serviÃ§os do agendamento | `manage_options` + nonce |
 
 ### 1.4 Cron Jobs
 
-| Hook | Frequência | Propósito |
+| Hook | FrequÃªncia | PropÃ³sito |
 |------|------------|-----------|
-| `dps_agenda_send_reminders` | Diário (08:00) | Enviar lembretes de agendamentos do dia |
+| `dps_agenda_send_reminders` | DiÃ¡rio (08:00) | Enviar lembretes de agendamentos do dia |
 
 ---
 
-## 2. Análise de Código
+## 2. AnÃ¡lise de CÃ³digo
 
 ### 2.1 Estrutura de Arquivos
 
 ```
 desi-pet-shower-agenda_addon/
-├── desi-pet-shower-agenda-addon.php    # Arquivo principal (~1870 linhas)
-├── includes/                           # FASE 3: Traits de refatoração
-│   ├── trait-dps-agenda-renderer.php   # Métodos de renderização (~290 linhas)
-│   └── trait-dps-agenda-query.php      # Métodos de query (~210 linhas)
-├── assets/
-│   ├── css/
-│   │   └── agenda-addon.css            # Estilos externos (~780 linhas)
-│   └── js/
-│       ├── agenda-addon.js             # Interações AJAX (~175 linhas)
-│       └── services-modal.js           # Modal de serviços (173 linhas)
-├── languages/
-│   └── dps-agenda-addon.pot            # Template de traduções (~70 strings)
-├── uninstall.php                       # Rotina de desinstalação
-├── README.md                           # Documentação do add-on
-├── CODE_REVIEW_REPORT.md               # Relatório de revisão de código
-└── DEPRECATED_FILES.md                 # Histórico de arquivos removidos
+â”œâ”€â”€ desi-pet-shower-agenda-addon.php    # Arquivo principal (~1870 linhas)
+â”œâ”€â”€ includes/                           # FASE 3: Traits de refatoraÃ§Ã£o
+â”‚   â”œâ”€â”€ trait-dps-agenda-renderer.php   # MÃ©todos de renderizaÃ§Ã£o (~290 linhas)
+â”‚   â””â”€â”€ trait-dps-agenda-query.php      # MÃ©todos de query (~210 linhas)
+â”œâ”€â”€ assets/
+â”‚   â”œâ”€â”€ css/
+â”‚   â”‚   â””â”€â”€ agenda-addon.css            # Estilos externos (~780 linhas)
+â”‚   â””â”€â”€ js/
+â”‚       â”œâ”€â”€ agenda-addon.js             # InteraÃ§Ãµes AJAX (~175 linhas)
+â”‚       â””â”€â”€ services-modal.js           # Modal de serviÃ§os (173 linhas)
+â”œâ”€â”€ languages/
+â”‚   â””â”€â”€ dps-agenda-addon.pot            # Template de traduÃ§Ãµes (~70 strings)
+â”œâ”€â”€ uninstall.php                       # Rotina de desinstalaÃ§Ã£o
+â”œâ”€â”€ README.md                           # DocumentaÃ§Ã£o do add-on
+â”œâ”€â”€ CODE_REVIEW_REPORT.md               # RelatÃ³rio de revisÃ£o de cÃ³digo
+â””â”€â”€ DEPRECATED_FILES.md                 # HistÃ³rico de arquivos removidos
 ```
 
 ### 2.2 Classe Principal: `DPS_Agenda_Addon`
 
-**Métricas de Código** (atualizado após Fase 3):
+**MÃ©tricas de CÃ³digo** (atualizado apÃ³s Fase 3):
 - **Total de linhas arquivo principal**: ~1870
-- **Linhas em traits**: ~500 (extraídas)
-- **Método mais extenso**: `render_agenda_shortcode()` (~700 linhas, parcialmente refatorado)
+- **Linhas em traits**: ~500 (extraÃ­das)
+- **MÃ©todo mais extenso**: `render_agenda_shortcode()` (~700 linhas, parcialmente refatorado)
 - **Constantes definidas**: 4 (APPOINTMENTS_PER_PAGE, DAILY_LIMIT, CLIENTS_LIMIT, SERVICES_LIMIT)
-- **Métodos públicos**: 13
-- **Métodos privados via traits**: 15+ (FASE 3)
+- **MÃ©todos pÃºblicos**: 13
+- **MÃ©todos privados via traits**: 15+ (FASE 3)
 
-### 2.3 Análise de Métodos
+### 2.3 AnÃ¡lise de MÃ©todos
 
-| Método | Linhas | Complexidade | Recomendação |
+| MÃ©todo | Linhas | Complexidade | RecomendaÃ§Ã£o |
 |--------|--------|--------------|--------------|
-| `render_agenda_shortcode()` | ~700 | Alta | ⏳ Parcialmente refatorado |
-| `update_status_ajax()` | ~85 | Média | OK |
+| `render_agenda_shortcode()` | ~700 | Alta | â³ Parcialmente refatorado |
+| `update_status_ajax()` | ~85 | MÃ©dia | OK |
 | `get_services_details_ajax()` | ~65 | Baixa | OK |
-| `send_reminders()` | ~145 | Média | OK |
+| `send_reminders()` | ~145 | MÃ©dia | OK |
 | `enqueue_assets()` | ~55 | Baixa | OK |
 
-### 2.4 Dependências
+### 2.4 DependÃªncias
 
-**Obrigatórias**:
+**ObrigatÃ³rias**:
 - `DPS_Base_Plugin` - Plugin base do DPS
 
 **Recomendadas**:
-- `DPS_Finance_API` - Funcionalidade completa de cobranças
-- `DPS_Services_API` - Cálculo de preços e detalhes de serviços
+- `DPS_Finance_API` - Funcionalidade completa de cobranÃ§as
+- `DPS_Services_API` - CÃ¡lculo de preÃ§os e detalhes de serviÃ§os
 - `DPS_Communications_API` - Envio de lembretes por WhatsApp/email
 
 **Helpers Utilizados**:
-- `DPS_Phone_Helper::format_for_whatsapp()` - Formatação de telefone
+- `DPS_Phone_Helper::format_for_whatsapp()` - FormataÃ§Ã£o de telefone
 - `DPS_WhatsApp_Helper::get_link_to_client()` - Links de WhatsApp
-- `DPS_Logger` - Auditoria de ações
+- `DPS_Logger` - Auditoria de aÃ§Ãµes
 
 ---
 
-## 3. Análise de Segurança
+## 3. AnÃ¡lise de SeguranÃ§a
 
 ### 3.1 Vulnerabilidades Corrigidas (2025-11-27)
 
 | Issue | Severidade | Status |
 |-------|------------|--------|
-| Controle de acesso por cookie | 🔴 Crítico | ✅ Corrigido |
-| Handlers AJAX nopriv desnecessários | 🟡 Médio | ✅ Corrigido |
-| Verificação de nonce "tolerante" | 🟡 Médio | ✅ Corrigido |
+| Controle de acesso por cookie | ðŸ”´ CrÃ­tico | âœ… Corrigido |
+| Handlers AJAX nopriv desnecessÃ¡rios | ðŸŸ¡ MÃ©dio | âœ… Corrigido |
+| VerificaÃ§Ã£o de nonce "tolerante" | ðŸŸ¡ MÃ©dio | âœ… Corrigido |
 
-### 3.2 Práticas de Segurança Implementadas
+### 3.2 PrÃ¡ticas de SeguranÃ§a Implementadas
 
-- ✅ Verificação de `manage_options` capability em todas as ações
-- ✅ Nonces obrigatórios em endpoints AJAX
-- ✅ Sanitização com `sanitize_text_field()` em inputs
-- ✅ Escape com `esc_html()`, `esc_attr()`, `esc_url()` em saídas
-- ✅ Versionamento de agendamentos para prevenir conflitos de escrita
-- ✅ Logging de auditoria via `DPS_Logger`
+- âœ… VerificaÃ§Ã£o de `manage_options` capability em todas as aÃ§Ãµes
+- âœ… Nonces obrigatÃ³rios em endpoints AJAX
+- âœ… SanitizaÃ§Ã£o com `sanitize_text_field()` em inputs
+- âœ… Escape com `esc_html()`, `esc_attr()`, `esc_url()` em saÃ­das
+- âœ… Versionamento de agendamentos para prevenir conflitos de escrita
+- âœ… Logging de auditoria via `DPS_Logger`
 
-### 3.3 Proteção ABSPATH
+### 3.3 ProteÃ§Ã£o ABSPATH
 
 ```php
 if ( ! defined( 'ABSPATH' ) ) {
@@ -147,21 +156,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ---
 
-## 4. Análise de Performance
+## 4. AnÃ¡lise de Performance
 
-### 4.1 Otimizações Implementadas
+### 4.1 OtimizaÃ§Ãµes Implementadas
 
-| Otimização | Implementação |
+| OtimizaÃ§Ã£o | ImplementaÃ§Ã£o |
 |------------|---------------|
 | Limite de queries | `posts_per_page` definido (50-200) |
 | Pre-cache de metadados | `update_meta_cache('post', $ids)` |
-| Paginação no modo "Todos" | 50 registros por página |
-| `no_found_rows => true` | Queries de visualização |
+| PaginaÃ§Ã£o no modo "Todos" | 50 registros por pÃ¡gina |
+| `no_found_rows => true` | Queries de visualizaÃ§Ã£o |
 
-### 4.2 Constantes Configuráveis
+### 4.2 Constantes ConfigurÃ¡veis
 
 ```php
-const APPOINTMENTS_PER_PAGE = 50;        // Paginação modo "Todos"
+const APPOINTMENTS_PER_PAGE = 50;        // PaginaÃ§Ã£o modo "Todos"
 const DAILY_APPOINTMENTS_LIMIT = 200;    // Limite por dia
 ```
 
@@ -173,47 +182,56 @@ const DAILY_APPOINTMENTS_LIMIT = 200;    // Limite por dia
 
 ### 4.4 Oportunidades de Melhoria
 
+> Atualizacao 2026-04-21: qualquer sugestao antiga de cache neste documento ficou obsoleta. O repositorio proibe transients, object cache e qualquer camada equivalente; a Agenda deve permanecer em tempo real.
+
 1. **Pre-carregamento de posts relacionados**
    - Usar `_prime_post_caches()` para clientes e pets antes do loop
-   - Estimativa: redução de 20-30% em chamadas `get_post()`
+   - Estimativa: reduÃ§Ã£o de 20-30% em chamadas `get_post()`
 
 2. **Cache de dados de agendamentos do dia**
-   - Implementar transient para visualização diária
+   - Implementar transient para visualizaÃ§Ã£o diÃ¡ria
    - Invalidar ao salvar/excluir agendamento
 
 ---
 
-## 5. Análise de Layout e UX
+## 5. AnÃ¡lise de Layout e UX
 
 ### 5.1 Melhorias Implementadas (FASE 1 e 2)
 
+### 5.1.1 Addendum 2026-04-21
+
+- A revisao visual e funcional da Agenda passou a seguir explicitamente `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do padrao DPS Signature.
+- O checklist operacional agora abre em modal somente quando o atendimento muda para `finalizado` ou quando o operador usa os CTAs dedicados da aba Operacao.
+- Check-in e check-out agora possuem fluxo de criacao e edicao fora da malha da tabela, com persistencia em meta do atendimento e registro complementar em `_dps_appointment_history`.
+- O modal de perfil rapido do pet foi migrado para a mesma infraestrutura de dialogos da Agenda, eliminando a quebra de layout observada no fluxo anterior.
+
 | Melhoria | Status | Impacto |
 |----------|--------|---------|
-| CSS extraído para arquivo externo | ✅ | Melhor cache, manutenibilidade |
-| Botão "➕ Novo Agendamento" | ✅ | Workflow completo |
-| Modal de serviços (substituiu alert) | ✅ | UX moderna |
-| Ícones em links de ação | ✅ | Melhor affordance |
-| Flag de pet agressivo ⚠️ | ✅ | Clareza visual |
-| Navegação consolidada | ✅ | Interface limpa |
-| Border-left 3px | ✅ | Estilo clean |
+| CSS extraÃ­do para arquivo externo | âœ… | Melhor cache, manutenibilidade |
+| BotÃ£o "âž• Novo Agendamento" | âœ… | Workflow completo |
+| Modal de serviÃ§os (substituiu alert) | âœ… | UX moderna |
+| Ãcones em links de aÃ§Ã£o | âœ… | Melhor affordance |
+| Flag de pet agressivo âš ï¸ | âœ… | Clareza visual |
+| NavegaÃ§Ã£o consolidada | âœ… | Interface limpa |
+| Border-left 3px | âœ… | Estilo clean |
 
 ### 5.2 Estrutura Visual da Agenda
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│ Navegação: [← Anterior] [Hoje] [Próximo →] | [📅 Semana] [📋 Todos] | [➕ Novo] │
-├─────────────────────────────────────────────────────────────────────┤
-│ Seletor de Data: [input date] [Ver]                                 │
-├─────────────────────────────────────────────────────────────────────┤
-│ Filtros: [Cliente ▼] [Status ▼] [Serviço ▼] [Aplicar] [Limpar]     │
-├─────────────────────────────────────────────────────────────────────┤
-│ Resumo: 3 pendentes | 2 finalizados | 5 total                      │
-├─────────────────────────────────────────────────────────────────────┤
-│ Tabela: Próximos Atendimentos (ordenados por data/hora)            │
-│ Tabela: Atendimentos Finalizados (ordenados por data/hora)         │
-├─────────────────────────────────────────────────────────────────────┤
-│ [← Página anterior] Página 1 [Próxima página →]                    │
-└─────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ NavegaÃ§Ã£o: [â† Anterior] [Hoje] [PrÃ³ximo â†’] | [ðŸ“… Semana] [ðŸ“‹ Todos] | [âž• Novo] â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Seletor de Data: [input date] [Ver]                                 â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Filtros: [Cliente â–¼] [Status â–¼] [ServiÃ§o â–¼] [Aplicar] [Limpar]     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Resumo: 3 pendentes | 2 finalizados | 5 total                      â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Tabela: PrÃ³ximos Atendimentos (ordenados por data/hora)            â”‚
+â”‚ Tabela: Atendimentos Finalizados (ordenados por data/hora)         â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ [â† PÃ¡gina anterior] PÃ¡gina 1 [PrÃ³xima pÃ¡gina â†’]                    â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 5.3 Responsividade
@@ -221,46 +239,46 @@ const DAILY_APPOINTMENTS_LIMIT = 200;    // Limite por dia
 | Breakpoint | Comportamento |
 |------------|---------------|
 | >1024px | Layout completo, tabela horizontal |
-| 768-1024px | Navegação empilhada |
+| 768-1024px | NavegaÃ§Ã£o empilhada |
 | 640-768px | Filtros empilhados |
-| <640px | Tabela → Cards verticais |
-| <420px | Botões empilhados 100% largura |
+| <640px | Tabela â†’ Cards verticais |
+| <420px | BotÃµes empilhados 100% largura |
 
 ### 5.4 Cores de Status
 
-| Status | Cor Borda | Cor Fundo | Semântica |
+| Status | Cor Borda | Cor Fundo | SemÃ¢ntica |
 |--------|-----------|-----------|-----------|
-| `pendente` | `#f59e0b` (laranja) | `#fffbeb` | ⚠️ Atenção |
-| `finalizado` | `#0ea5e9` (azul) | `#f0f9ff` | ℹ️ Concluído |
-| `finalizado_pago` | `#22c55e` (verde) | `#f0fdf4` | ✅ Pago |
-| `cancelado` | `#ef4444` (vermelho) | `#fef2f2` | ❌ Cancelado |
+| `pendente` | `#f59e0b` (laranja) | `#fffbeb` | âš ï¸ AtenÃ§Ã£o |
+| `finalizado` | `#0ea5e9` (azul) | `#f0f9ff` | â„¹ï¸ ConcluÃ­do |
+| `finalizado_pago` | `#22c55e` (verde) | `#f0fdf4` | âœ… Pago |
+| `cancelado` | `#ef4444` (vermelho) | `#fef2f2` | âŒ Cancelado |
 
 ---
 
-## 6. Integração com Outros Add-ons
+## 6. IntegraÃ§Ã£o com Outros Add-ons
 
 ### 6.1 Finance Add-on
 
-**Integração atual**:
-- Sincronização de status via hooks do Finance
-- Delegação de lógica financeira (removidas ~55 linhas de SQL direto)
-- Verificação de dependência com aviso no admin
+**IntegraÃ§Ã£o atual**:
+- SincronizaÃ§Ã£o de status via hooks do Finance
+- DelegaÃ§Ã£o de lÃ³gica financeira (removidas ~55 linhas de SQL direto)
+- VerificaÃ§Ã£o de dependÃªncia com aviso no admin
 
 **Hooks consumidos**:
-- `updated_post_meta` → Finance monitora `appointment_status`
-- `dps_base_after_save_appointment` → Cria/atualiza transações
+- `updated_post_meta` â†’ Finance monitora `appointment_status`
+- `dps_base_after_save_appointment` â†’ Cria/atualiza transaÃ§Ãµes
 
 ### 6.2 Services Add-on
 
-**Integração atual**:
-- Delegação de `dps_get_services_details` para `DPS_Services_API`
-- Fallback para implementação legada se Services não estiver ativo
+**IntegraÃ§Ã£o atual**:
+- DelegaÃ§Ã£o de `dps_get_services_details` para `DPS_Services_API`
+- Fallback para implementaÃ§Ã£o legada se Services nÃ£o estiver ativo
 
 ### 6.3 Communications Add-on
 
-**Integração atual**:
+**IntegraÃ§Ã£o atual**:
 - Lembretes via `DPS_Communications_API::send_appointment_reminder()`
-- Fallback para `wp_mail()` se Communications não estiver ativo
+- Fallback para `wp_mail()` se Communications nÃ£o estiver ativo
 
 ---
 
@@ -269,14 +287,14 @@ const DAILY_APPOINTMENTS_LIMIT = 200;    // Limite por dia
 ### 7.1 Prioridade Alta (Impacto significativo)
 
 #### 7.1.1 Agrupamento por Cliente
-**Descrição**: Agrupar agendamentos do mesmo cliente na visualização diária.
+**DescriÃ§Ã£o**: Agrupar agendamentos do mesmo cliente na visualizaÃ§Ã£o diÃ¡ria.
 
-**Benefícios**:
-- Visualização rápida de múltiplos pets do mesmo dono
-- Facilita cobrança conjunta
+**BenefÃ­cios**:
+- VisualizaÃ§Ã£o rÃ¡pida de mÃºltiplos pets do mesmo dono
+- Facilita cobranÃ§a conjunta
 - Melhora planejamento de rota (TaxiDog)
 
-**Implementação sugerida**:
+**ImplementaÃ§Ã£o sugerida**:
 ```php
 // Agrupar por client_id antes de renderizar
 $grouped = [];
@@ -289,94 +307,94 @@ foreach ( $appointments as $appt ) {
 }
 ```
 
-**Esforço estimado**: 4-6 horas
+**EsforÃ§o estimado**: 4-6 horas
 
-#### 7.1.2 Visualização de Calendário Mensal
-**Descrição**: Implementar calendário visual com FullCalendar.js
+#### 7.1.2 VisualizaÃ§Ã£o de CalendÃ¡rio Mensal
+**DescriÃ§Ã£o**: Implementar calendÃ¡rio visual com FullCalendar.js
 
-**Benefícios**:
-- Visão macro do mês
-- Identificação rápida de dias cheios/vazios
-- Navegação intuitiva
+**BenefÃ­cios**:
+- VisÃ£o macro do mÃªs
+- IdentificaÃ§Ã£o rÃ¡pida de dias cheios/vazios
+- NavegaÃ§Ã£o intuitiva
 
-**Status atual**: Código legado removido, infraestrutura pronta
+**Status atual**: CÃ³digo legado removido, infraestrutura pronta
 
-**Implementação sugerida**:
+**ImplementaÃ§Ã£o sugerida**:
 - Usar FullCalendar 6.x (modular, leve)
-- Endpoint AJAX para buscar eventos por mês
+- Endpoint AJAX para buscar eventos por mÃªs
 - Popover com detalhes ao clicar
 
-**Esforço estimado**: 8-12 horas
+**EsforÃ§o estimado**: 8-12 horas
 
-#### 7.1.3 Relatório de Ocupação
-**Descrição**: Dashboard com métricas de ocupação da agenda.
+#### 7.1.3 RelatÃ³rio de OcupaÃ§Ã£o
+**DescriÃ§Ã£o**: Dashboard com mÃ©tricas de ocupaÃ§Ã£o da agenda.
 
-**Métricas sugeridas**:
-- Taxa de ocupação por período (%)
-- Horários mais/menos ocupados
+**MÃ©tricas sugeridas**:
+- Taxa de ocupaÃ§Ã£o por perÃ­odo (%)
+- HorÃ¡rios mais/menos ocupados
 - Dias com mais cancelamentos
-- Média de atendimentos por dia
+- MÃ©dia de atendimentos por dia
 
-**Esforço estimado**: 6-8 horas
+**EsforÃ§o estimado**: 6-8 horas
 
-### 7.2 Prioridade Média
+### 7.2 Prioridade MÃ©dia
 
 #### 7.2.1 Arrastar e Soltar para Reagendamento
-**Descrição**: Permitir reagendar arrastando agendamento para outra data/hora.
+**DescriÃ§Ã£o**: Permitir reagendar arrastando agendamento para outra data/hora.
 
-**Implementação sugerida**:
+**ImplementaÃ§Ã£o sugerida**:
 - Usar SortableJS ou FullCalendar drag-drop
 - Endpoint AJAX para atualizar data/hora
-- Confirmação visual antes de salvar
+- ConfirmaÃ§Ã£o visual antes de salvar
 
-**Esforço estimado**: 10-14 horas
+**EsforÃ§o estimado**: 10-14 horas
 
-#### 7.2.2 Notificações em Tempo Real
-**Descrição**: Atualizar agenda automaticamente quando outro usuário fizer alterações.
+#### 7.2.2 NotificaÃ§Ãµes em Tempo Real
+**DescriÃ§Ã£o**: Atualizar agenda automaticamente quando outro usuÃ¡rio fizer alteraÃ§Ãµes.
 
-**Implementação sugerida**:
+**ImplementaÃ§Ã£o sugerida**:
 - Server-Sent Events (SSE) ou polling a cada 30s
-- Badge de "atualizações disponíveis"
-- Botão "Atualizar agora"
+- Badge de "atualizaÃ§Ãµes disponÃ­veis"
+- BotÃ£o "Atualizar agora"
 
-**Esforço estimado**: 8-12 horas
+**EsforÃ§o estimado**: 8-12 horas
 
-#### 7.2.3 Impressão/Exportação da Agenda
-**Descrição**: Exportar agenda do dia/semana em PDF ou Excel.
+#### 7.2.3 ImpressÃ£o/ExportaÃ§Ã£o da Agenda
+**DescriÃ§Ã£o**: Exportar agenda do dia/semana em PDF ou Excel.
 
-**Implementação sugerida**:
+**ImplementaÃ§Ã£o sugerida**:
 - Usar biblioteca jsPDF ou Dompdf
-- Botão "Imprimir" com layout otimizado
-- Exportação CSV para Excel
+- BotÃ£o "Imprimir" com layout otimizado
+- ExportaÃ§Ã£o CSV para Excel
 
-**Esforço estimado**: 4-6 horas
+**EsforÃ§o estimado**: 4-6 horas
 
 ### 7.3 Prioridade Baixa
 
-#### 7.3.1 Bloqueio de Horários
-**Descrição**: Marcar horários como indisponíveis (almoço, feriados, manutenção).
+#### 7.3.1 Bloqueio de HorÃ¡rios
+**DescriÃ§Ã£o**: Marcar horÃ¡rios como indisponÃ­veis (almoÃ§o, feriados, manutenÃ§Ã£o).
 
-**Esforço estimado**: 6-8 horas
+**EsforÃ§o estimado**: 6-8 horas
 
-#### 7.3.2 Integração com Google Calendar
-**Descrição**: Sincronizar agenda com Google Calendar.
+#### 7.3.2 IntegraÃ§Ã£o com Google Calendar
+**DescriÃ§Ã£o**: Sincronizar agenda com Google Calendar.
 
-**Esforço estimado**: 12-16 horas
+**EsforÃ§o estimado**: 12-16 horas
 
-#### 7.3.3 Confirmação de Agendamento pelo Cliente
-**Descrição**: Link para cliente confirmar/cancelar sem contato manual.
+#### 7.3.3 ConfirmaÃ§Ã£o de Agendamento pelo Cliente
+**DescriÃ§Ã£o**: Link para cliente confirmar/cancelar sem contato manual.
 
-**Esforço estimado**: 8-10 horas
+**EsforÃ§o estimado**: 8-10 horas
 
 ---
 
 ## 8. Melhorias de Arquitetura Propostas
 
-### 8.1 Refatoração do `render_agenda_shortcode()` (Prioridade Alta)
+### 8.1 RefatoraÃ§Ã£o do `render_agenda_shortcode()` (Prioridade Alta)
 
-**Problema**: Método com ~700 linhas, múltiplas responsabilidades.
+**Problema**: MÃ©todo com ~700 linhas, mÃºltiplas responsabilidades.
 
-**Solução proposta**: Extrair em métodos privados
+**SoluÃ§Ã£o proposta**: Extrair em mÃ©todos privados
 
 ```php
 class DPS_Agenda_Addon {
@@ -412,37 +430,37 @@ class DPS_Agenda_Addon {
 }
 ```
 
-**Esforço estimado**: 4-6 horas
+**EsforÃ§o estimado**: 4-6 horas
 
-### 8.2 Separação em Múltiplos Arquivos (Prioridade Média)
+### 8.2 SeparaÃ§Ã£o em MÃºltiplos Arquivos (Prioridade MÃ©dia)
 
 **Estrutura proposta**:
 ```
 desi-pet-shower-agenda_addon/
-├── desi-pet-shower-agenda-addon.php    # Bootstrap (~100 linhas)
-├── includes/
-│   ├── class-dps-agenda-addon.php      # Classe principal refatorada
-│   ├── class-dps-agenda-renderer.php   # Renderização HTML
-│   ├── class-dps-agenda-ajax.php       # Handlers AJAX
-│   ├── class-dps-agenda-cron.php       # Lembretes e cron jobs
-│   └── class-dps-agenda-api.php        # API pública (futuro)
-├── assets/
-│   ├── css/
-│   └── js/
-└── templates/
-    ├── agenda-navigation.php
-    ├── agenda-filters.php
-    ├── agenda-table.php
-    └── agenda-card.php                  # Template para mobile
+â”œâ”€â”€ desi-pet-shower-agenda-addon.php    # Bootstrap (~100 linhas)
+â”œâ”€â”€ includes/
+â”‚   â”œâ”€â”€ class-dps-agenda-addon.php      # Classe principal refatorada
+â”‚   â”œâ”€â”€ class-dps-agenda-renderer.php   # RenderizaÃ§Ã£o HTML
+â”‚   â”œâ”€â”€ class-dps-agenda-ajax.php       # Handlers AJAX
+â”‚   â”œâ”€â”€ class-dps-agenda-cron.php       # Lembretes e cron jobs
+â”‚   â””â”€â”€ class-dps-agenda-api.php        # API pÃºblica (futuro)
+â”œâ”€â”€ assets/
+â”‚   â”œâ”€â”€ css/
+â”‚   â””â”€â”€ js/
+â””â”€â”€ templates/
+    â”œâ”€â”€ agenda-navigation.php
+    â”œâ”€â”€ agenda-filters.php
+    â”œâ”€â”€ agenda-table.php
+    â””â”€â”€ agenda-card.php                  # Template para mobile
 ```
 
-**Esforço estimado**: 8-12 horas
+**EsforÃ§o estimado**: 8-12 horas
 
-### 8.3 Criação de API Pública (Prioridade Baixa)
+### 8.3 CriaÃ§Ã£o de API PÃºblica (Prioridade Baixa)
 
-**Propósito**: Permitir integração de outros add-ons com a agenda.
+**PropÃ³sito**: Permitir integraÃ§Ã£o de outros add-ons com a agenda.
 
-**Métodos sugeridos**:
+**MÃ©todos sugeridos**:
 ```php
 class DPS_Agenda_API {
     public static function get_appointments_by_date( $date ) { ... }
@@ -453,7 +471,7 @@ class DPS_Agenda_API {
 }
 ```
 
-**Esforço estimado**: 6-10 horas
+**EsforÃ§o estimado**: 6-10 horas
 
 ---
 
@@ -461,37 +479,37 @@ class DPS_Agenda_API {
 
 ### 9.1 Implementadas
 
-- ✅ `aria-live="polite"` em feedback de status
-- ✅ `role="status"` em resumo de agendamentos
-- ✅ `role="dialog"` em modal de serviços
-- ✅ `data-label` para tabelas responsivas (mobile)
-- ✅ Tooltips em flags e links de ação
+- âœ… `aria-live="polite"` em feedback de status
+- âœ… `role="status"` em resumo de agendamentos
+- âœ… `role="dialog"` em modal de serviÃ§os
+- âœ… `data-label` para tabelas responsivas (mobile)
+- âœ… Tooltips em flags e links de aÃ§Ã£o
 
 ### 9.2 Pendentes
 
-| Melhoria | Prioridade | Esforço |
+| Melhoria | Prioridade | EsforÃ§o |
 |----------|------------|---------|
-| Testar cores para daltonismo | 🟢 Baixa | 1h |
-| Adicionar padrões de borda além de cor | 🟢 Baixa | 2h |
-| ARIA labels em todos os selects | 🟡 Média | 1h |
-| Skip links para navegação por teclado | 🟢 Baixa | 2h |
-| Contraste WCAG AA validado | 🟡 Média | 1h |
+| Testar cores para daltonismo | ðŸŸ¢ Baixa | 1h |
+| Adicionar padrÃµes de borda alÃ©m de cor | ðŸŸ¢ Baixa | 2h |
+| ARIA labels em todos os selects | ðŸŸ¡ MÃ©dia | 1h |
+| Skip links para navegaÃ§Ã£o por teclado | ðŸŸ¢ Baixa | 2h |
+| Contraste WCAG AA validado | ðŸŸ¡ MÃ©dia | 1h |
 
 ---
 
-## 10. Internacionalização (i18n)
+## 10. InternacionalizaÃ§Ã£o (i18n)
 
 ### 10.1 Status Atual
 
-- ✅ Text domain: `dps-agenda-addon`
-- ✅ Domain path: `/languages`
-- ✅ 163+ strings traduzíveis usando `__()`, `esc_html__()`, etc.
-- ✅ Carregamento de text domain no hook `init` (prioridade 1)
+- âœ… Text domain: `dps-agenda-addon`
+- âœ… Domain path: `/languages`
+- âœ… 163+ strings traduzÃ­veis usando `__()`, `esc_html__()`, etc.
+- âœ… Carregamento de text domain no hook `init` (prioridade 1)
 
 ### 10.2 Pendente
 
-- ⏳ Criar arquivo `.pot` para traduções
-- ⏳ Tradução para pt_BR (se diferente do padrão do sistema)
+- â³ Criar arquivo `.pot` para traduÃ§Ãµes
+- â³ TraduÃ§Ã£o para pt_BR (se diferente do padrÃ£o do sistema)
 
 ---
 
@@ -499,7 +517,7 @@ class DPS_Agenda_API {
 
 ### 11.1 Cobertura Atual
 
-❌ **Nenhuma estrutura de testes implementada**
+âŒ **Nenhuma estrutura de testes implementada**
 
 ### 11.2 Testes Recomendados
 
@@ -508,13 +526,13 @@ class DPS_Agenda_API {
 class Test_DPS_Agenda_Addon extends WP_UnitTestCase {
 
     public function test_update_status_requires_authentication() {
-        // Simular requisição AJAX sem autenticação
-        // Esperar erro de permissão
+        // Simular requisiÃ§Ã£o AJAX sem autenticaÃ§Ã£o
+        // Esperar erro de permissÃ£o
     }
 
     public function test_update_status_requires_valid_nonce() {
-        // Simular requisição com nonce inválido
-        // Esperar erro de segurança
+        // Simular requisiÃ§Ã£o com nonce invÃ¡lido
+        // Esperar erro de seguranÃ§a
     }
 
     public function test_update_status_changes_appointment_status() {
@@ -524,13 +542,13 @@ class Test_DPS_Agenda_Addon extends WP_UnitTestCase {
     }
 
     public function test_version_conflict_detection() {
-        // Simular dois usuários editando mesmo agendamento
-        // Esperar erro de conflito de versão
+        // Simular dois usuÃ¡rios editando mesmo agendamento
+        // Esperar erro de conflito de versÃ£o
     }
 
     public function test_create_agenda_page_on_activation() {
         // Ativar plugin
-        // Verificar página criada
+        // Verificar pÃ¡gina criada
         // Verificar option salva
     }
 
@@ -542,140 +560,140 @@ class Test_DPS_Agenda_Addon extends WP_UnitTestCase {
 }
 ```
 
-**Esforço estimado**: 8-12 horas
+**EsforÃ§o estimado**: 8-12 horas
 
 ---
 
-## 12. Plano de Implementação
+## 12. Plano de ImplementaÃ§Ã£o
 
-### 12.1 Fase 1: Melhorias Imediatas (4-8h) ✅ IMPLEMENTADA
+### 12.1 Fase 1: Melhorias Imediatas (4-8h) âœ… IMPLEMENTADA
 
-| Item | Esforço | Prioridade | Status |
+| Item | EsforÃ§o | Prioridade | Status |
 |------|---------|------------|--------|
-| Pre-carregamento de posts relacionados | 2h | 🔴 Alta | ✅ Implementado |
-| ARIA labels em selects | 1h | 🟡 Média | ✅ Implementado |
-| Teste de cores para daltonismo | 1h | 🟢 Baixa | ⏳ Pendente (manual) |
-| Criar arquivo .pot | 1h | 🟢 Baixa | ✅ Implementado |
+| Pre-carregamento de posts relacionados | 2h | ðŸ”´ Alta | âœ… Implementado |
+| ARIA labels em selects | 1h | ðŸŸ¡ MÃ©dia | âœ… Implementado |
+| Teste de cores para daltonismo | 1h | ðŸŸ¢ Baixa | â³ Pendente (manual) |
+| Criar arquivo .pot | 1h | ðŸŸ¢ Baixa | âœ… Implementado |
 
-**Detalhes da implementação (2025-12-03):**
-- **Pre-carregamento**: Adicionado `_prime_post_caches()` e `update_meta_cache()` antes do loop de renderização, coletando IDs de clientes e pets para carregar em batch.
-- **ARIA labels**: Adicionados `aria-label` nos selects de filtros (cliente, status, serviço) e no select de alteração de status na tabela.
-- **Arquivo .pot**: Criado `languages/dps-agenda-addon.pot` com ~70 strings traduzíveis.
+**Detalhes da implementaÃ§Ã£o (2025-12-03):**
+- **Pre-carregamento**: Adicionado `_prime_post_caches()` e `update_meta_cache()` antes do loop de renderizaÃ§Ã£o, coletando IDs de clientes e pets para carregar em batch.
+- **ARIA labels**: Adicionados `aria-label` nos selects de filtros (cliente, status, serviÃ§o) e no select de alteraÃ§Ã£o de status na tabela.
+- **Arquivo .pot**: Criado `languages/dps-agenda-addon.pot` com ~70 strings traduzÃ­veis.
 
-### 12.2 Fase 2: Funcionalidades Novas (12-20h) ✅ IMPLEMENTADA
+### 12.2 Fase 2: Funcionalidades Novas (12-20h) âœ… IMPLEMENTADA
 
-| Item | Esforço | Prioridade | Status |
+| Item | EsforÃ§o | Prioridade | Status |
 |------|---------|------------|--------|
-| Agrupamento por cliente | 4-6h | 🔴 Alta | ✅ Implementado |
-| Exportação CSV/Excel | 4-6h | 🟡 Média | ✅ Implementado |
-| Relatório de ocupação | 6-8h | 🟡 Média | ✅ Implementado |
+| Agrupamento por cliente | 4-6h | ðŸ”´ Alta | âœ… Implementado |
+| ExportaÃ§Ã£o CSV/Excel | 4-6h | ðŸŸ¡ MÃ©dia | âœ… Implementado |
+| RelatÃ³rio de ocupaÃ§Ã£o | 6-8h | ðŸŸ¡ MÃ©dia | âœ… Implementado |
 
-**Detalhes da implementação (2025-12-03):**
-- **Agrupamento por cliente**: Botão "👥 Agrupar" na navegação que alterna para visualização agrupada por cliente. Cada cliente tem um grupo colapsável com seus agendamentos em lista compacta, link direto para WhatsApp e contador de pendentes.
-- **Exportação CSV**: Botão "📥 Exportar" que gera CSV com BOM UTF-8 (compatível com Excel). Inclui data, hora, cliente, pet, status e telefone.
-- **Relatório de ocupação**: Seção colapsável "📊 Relatório de Ocupação" com métricas: taxa de conclusão, taxa de cancelamento, horário de pico, média por hora e distribuição visual por status.
+**Detalhes da implementaÃ§Ã£o (2025-12-03):**
+- **Agrupamento por cliente**: BotÃ£o "ðŸ‘¥ Agrupar" na navegaÃ§Ã£o que alterna para visualizaÃ§Ã£o agrupada por cliente. Cada cliente tem um grupo colapsÃ¡vel com seus agendamentos em lista compacta, link direto para WhatsApp e contador de pendentes.
+- **ExportaÃ§Ã£o CSV**: BotÃ£o "ðŸ“¥ Exportar" que gera CSV com BOM UTF-8 (compatÃ­vel com Excel). Inclui data, hora, cliente, pet, status e telefone.
+- **RelatÃ³rio de ocupaÃ§Ã£o**: SeÃ§Ã£o colapsÃ¡vel "ðŸ“Š RelatÃ³rio de OcupaÃ§Ã£o" com mÃ©tricas: taxa de conclusÃ£o, taxa de cancelamento, horÃ¡rio de pico, mÃ©dia por hora e distribuiÃ§Ã£o visual por status.
 
-### 12.3 Fase 3: Refatoração (16-24h) ⏳ PARCIALMENTE IMPLEMENTADA
+### 12.3 Fase 3: RefatoraÃ§Ã£o (16-24h) â³ PARCIALMENTE IMPLEMENTADA
 
-| Item | Esforço | Prioridade | Status |
+| Item | EsforÃ§o | Prioridade | Status |
 |------|---------|------------|--------|
-| Refatorar `render_agenda_shortcode()` | 4-6h | 🔴 Alta | ✅ Traits criados |
-| Separar em múltiplos arquivos | 8-12h | 🟡 Média | ✅ Estrutura criada |
-| Implementar testes | 8-12h | 🟡 Média | ⏳ Pendente |
+| Refatorar `render_agenda_shortcode()` | 4-6h | ðŸ”´ Alta | âœ… Traits criados |
+| Separar em mÃºltiplos arquivos | 8-12h | ðŸŸ¡ MÃ©dia | âœ… Estrutura criada |
+| Implementar testes | 8-12h | ðŸŸ¡ MÃ©dia | â³ Pendente |
 
-**Detalhes da implementação (2025-12-03):**
-- **Traits de refatoração**: Criados `includes/trait-dps-agenda-renderer.php` e `includes/trait-dps-agenda-query.php` com ~15 métodos auxiliares extraídos
+**Detalhes da implementaÃ§Ã£o (2025-12-03):**
+- **Traits de refatoraÃ§Ã£o**: Criados `includes/trait-dps-agenda-renderer.php` e `includes/trait-dps-agenda-query.php` com ~15 mÃ©todos auxiliares extraÃ­dos
 - **Metodos extraidos para Renderer**: `render_access_denied()`, `get_column_labels()`, `calculate_nav_dates()`, `get_agenda_scope_label()`, `get_agenda_context_description()`, `get_agenda_overview_stats()`, `separate_appointments_by_status()`, `sort_appointments_by_datetime()`, `prime_related_caches()`
-- **Métodos extraídos para Query**: `query_appointments_for_date()`, `query_appointments_for_week()`, `query_all_appointments()`, `query_appointments_for_export()`, `get_client_group_data()`
-- **Testes**: Pendente para próxima iteração
+- **MÃ©todos extraÃ­dos para Query**: `query_appointments_for_date()`, `query_appointments_for_week()`, `query_all_appointments()`, `query_appointments_for_export()`, `get_client_group_data()`
+- **Testes**: Pendente para prÃ³xima iteraÃ§Ã£o
 
-### 12.4 Fase 4: Funcionalidades Avançadas (20-40h) ⏳ PARCIALMENTE IMPLEMENTADA
+### 12.4 Fase 4: Funcionalidades AvanÃ§adas (20-40h) â³ PARCIALMENTE IMPLEMENTADA
 
-| Item | Esforço | Prioridade | Status |
+| Item | EsforÃ§o | Prioridade | Status |
 |------|---------|------------|--------|
-| Calendário mensal | 8-12h | 🟡 Média | ✅ Implementado |
-| Drag-and-drop para reagendamento | 10-14h | 🟢 Baixa | ⏳ Pendente |
-| Notificações em tempo real | 8-12h | 🟢 Baixa | ⏳ Pendente |
+| CalendÃ¡rio mensal | 8-12h | ðŸŸ¡ MÃ©dia | âœ… Implementado |
+| Drag-and-drop para reagendamento | 10-14h | ðŸŸ¢ Baixa | â³ Pendente |
+| NotificaÃ§Ãµes em tempo real | 8-12h | ðŸŸ¢ Baixa | â³ Pendente |
 
-**Detalhes da implementação (2025-12-03):**
-- **Calendário mensal**: Implementado calendário HTML nativo (sem dependência de FullCalendar.js)
-- **Navegação**: Botão "📆 Mês" na barra de navegação, navegação entre meses
-- **Grid visual**: 7 colunas (Seg-Dom), células por dia com badges de status coloridos
+**Detalhes da implementaÃ§Ã£o (2025-12-03):**
+- **CalendÃ¡rio mensal**: Implementado calendÃ¡rio HTML nativo (sem dependÃªncia de FullCalendar.js)
+- **NavegaÃ§Ã£o**: BotÃ£o "ðŸ“† MÃªs" na barra de navegaÃ§Ã£o, navegaÃ§Ã£o entre meses
+- **Grid visual**: 7 colunas (Seg-Dom), cÃ©lulas por dia com badges de status coloridos
 - **Indicadores**: Contagem por status (pendente=laranja, finalizado=azul, pago=verde, cancelado=vermelho)
-- **Interação**: Clique no dia abre visualização diária
-- **AJAX endpoint**: `calendar_events_ajax()` preparado para integrações futuras
+- **InteraÃ§Ã£o**: Clique no dia abre visualizaÃ§Ã£o diÃ¡ria
+- **AJAX endpoint**: `calendar_events_ajax()` preparado para integraÃ§Ãµes futuras
 - **Responsivo**: Adaptado para mobile com breakpoints em 768px e 480px
 
 ---
 
 ## 13. Funcionalidades Administrativas (NOVO)
 
-Para análise completa de melhorias administrativas, consulte:
+Para anÃ¡lise completa de melhorias administrativas, consulte:
 **`docs/analysis/AGENDA_ADMIN_IMPROVEMENTS_ANALYSIS.md`**
 
 ### 13.1 Funcionalidades Administrativas Atuais
 
 | Funcionalidade | Status | Impacto |
 |----------------|--------|---------|
-| Alteração de status inline | ✅ Implementado | Alto |
-| Exportação CSV | ✅ Implementado | Alto |
-| Relatório de ocupação | ✅ Implementado | Médio |
-| Agrupamento por cliente | ✅ Implementado | Alto |
-| Calendário mensal visual | ✅ Implementado | Médio |
+| AlteraÃ§Ã£o de status inline | âœ… Implementado | Alto |
+| ExportaÃ§Ã£o CSV | âœ… Implementado | Alto |
+| RelatÃ³rio de ocupaÃ§Ã£o | âœ… Implementado | MÃ©dio |
+| Agrupamento por cliente | âœ… Implementado | Alto |
+| CalendÃ¡rio mensal visual | âœ… Implementado | MÃ©dio |
 
-### 13.2 Gaps Identificados para Administração
+### 13.2 Gaps Identificados para AdministraÃ§Ã£o
 
-| Funcionalidade | Impacto | Prioridade | Esforço |
+| Funcionalidade | Impacto | Prioridade | EsforÃ§o |
 |----------------|---------|------------|---------|
-| Ações em lote (multi-seleção) | Alto | 🔴 Alta | 6-8h |
-| Dashboard de KPIs | Alto | 🔴 Alta | 8-10h |
-| Reagendamento rápido | Médio | 🟡 Média | 4-6h |
-| Gestão de slots/horários | Alto | 🟡 Média | 12-16h |
-| Histórico de alterações | Médio | 🟢 Baixa | 4-6h |
+| AÃ§Ãµes em lote (multi-seleÃ§Ã£o) | Alto | ðŸ”´ Alta | 6-8h |
+| Dashboard de KPIs | Alto | ðŸ”´ Alta | 8-10h |
+| Reagendamento rÃ¡pido | MÃ©dio | ðŸŸ¡ MÃ©dia | 4-6h |
+| GestÃ£o de slots/horÃ¡rios | Alto | ðŸŸ¡ MÃ©dia | 12-16h |
+| HistÃ³rico de alteraÃ§Ãµes | MÃ©dio | ðŸŸ¢ Baixa | 4-6h |
 
 ---
 
-## 14. Conclusão
+## 14. ConclusÃ£o
 
-O add-on Agenda está em bom estado após as melhorias implementadas em novembro/dezembro de 2025. Os principais problemas críticos (segurança, CSS inline, UX do alert) foram resolvidos.
+O add-on Agenda estÃ¡ em bom estado apÃ³s as melhorias implementadas em novembro/dezembro de 2025. Os principais problemas crÃ­ticos (seguranÃ§a, CSS inline, UX do alert) foram resolvidos.
 
 ### Pontos Fortes
-- ✅ Segurança robusta (nonces, capabilities, sanitização)
-- ✅ Performance otimizada (cache, limites, paginação)
-- ✅ Layout responsivo (cards em mobile)
-- ✅ Integração sólida com outros add-ons
-- ✅ Documentação excelente
-- ✅ Calendário mensal implementado
-- ✅ Relatório de ocupação funcional
-- ✅ Exportação CSV disponível
+- âœ… SeguranÃ§a robusta (nonces, capabilities, sanitizaÃ§Ã£o)
+- âœ… Performance otimizada (cache, limites, paginaÃ§Ã£o)
+- âœ… Layout responsivo (cards em mobile)
+- âœ… IntegraÃ§Ã£o sÃ³lida com outros add-ons
+- âœ… DocumentaÃ§Ã£o excelente
+- âœ… CalendÃ¡rio mensal implementado
+- âœ… RelatÃ³rio de ocupaÃ§Ã£o funcional
+- âœ… ExportaÃ§Ã£o CSV disponÃ­vel
 
-### Oportunidades Prioritárias
-1. ~~**Agrupamento por cliente**~~ ✅ Implementado
-2. ~~**Calendário mensal**~~ ✅ Implementado
-3. ~~**Relatório de ocupação**~~ ✅ Implementado
-4. **Ações em lote** (maior produtividade administrativa)
-5. **Dashboard de KPIs** (visão gerencial)
-6. **Refatorar método principal** (~700 linhas → múltiplos métodos)
+### Oportunidades PrioritÃ¡rias
+1. ~~**Agrupamento por cliente**~~ âœ… Implementado
+2. ~~**CalendÃ¡rio mensal**~~ âœ… Implementado
+3. ~~**RelatÃ³rio de ocupaÃ§Ã£o**~~ âœ… Implementado
+4. **AÃ§Ãµes em lote** (maior produtividade administrativa)
+5. **Dashboard de KPIs** (visÃ£o gerencial)
+6. **Refatorar mÃ©todo principal** (~700 linhas â†’ mÃºltiplos mÃ©todos)
 7. **Testes automatizados** (garantia de qualidade)
 
-### Recomendação Final
+### RecomendaÃ§Ã£o Final
 
-Priorizar **ações em lote** e **dashboard de KPIs** para melhorar a produtividade administrativa. A refatoração do método principal permanece como oportunidade técnica para próximas iterações.
+Priorizar **aÃ§Ãµes em lote** e **dashboard de KPIs** para melhorar a produtividade administrativa. A refatoraÃ§Ã£o do mÃ©todo principal permanece como oportunidade tÃ©cnica para prÃ³ximas iteraÃ§Ãµes.
 
 ---
 
-## 15. Referências
+## 15. ReferÃªncias
 
-- **Código fonte**: `plugins/desi-pet-shower-agenda/`
-- **Documentação existente**:
+- **CÃ³digo fonte**: `plugins/desi-pet-shower-agenda/`
+- **DocumentaÃ§Ã£o existente**:
   - `docs/layout/agenda/AGENDA_LAYOUT_ANALYSIS.md`
   - `docs/layout/agenda/AGENDA_EXECUTIVE_SUMMARY.md`
   - `docs/analysis/AGENDA_ADMIN_IMPROVEMENTS_ANALYSIS.md` **(NOVO)**
   - `plugins/desi-pet-shower-agenda/CODE_REVIEW_REPORT.md`
   - `plugins/desi-pet-shower-agenda/README.md`
-- **Padrões de desenvolvimento**: `AGENTS.md` (seção "Convenções de código")
-- **Arquitetura do sistema**: `ANALYSIS.md` (seção "Agenda Add-on")
+- **PadrÃµes de desenvolvimento**: `AGENTS.md` (seÃ§Ã£o "ConvenÃ§Ãµes de cÃ³digo")
+- **Arquitetura do sistema**: `ANALYSIS.md` (seÃ§Ã£o "Agenda Add-on")
 
 ---
 
-*Análise realizada por GitHub Copilot Agent. Última atualização: 2025-12-04*
+*AnÃ¡lise realizada por GitHub Copilot Agent. Ãšltima atualizaÃ§Ã£o: 2025-12-04*

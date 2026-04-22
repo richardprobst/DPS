@@ -1,9 +1,9 @@
-# Screenshots 2026-03-11 - Agenda
+﻿# Screenshots 2026-03-11 - Agenda
 
 ## Contexto
 - Objetivo da mudanca: reposicionar as abas da "Lista de Atendimentos" para que fiquem junto do bloco de listagem, sem o resumo operacional entre elas e as tabelas.
 - Ambiente: preview estatico local com os estilos reais do add-on.
-- Referencia de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Referencia de design DPS Signature utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
 
 ## Antes/Depois
 - Resumo do antes: a Agenda renderizava o resumo operacional entre as abas e a relacao de atendimentos, separando visualmente a navegacao da lista.

@@ -1,15 +1,15 @@
-/**
+﻿/**
  * Estilos do Assistente de IA no Portal do Cliente.
  *
- * Design v3.0.0: M3 Expressive — Rebranding completo.
+ * Design v3.0.0: DPS Signature â€” Rebranding completo.
  * Usa exclusivamente tokens de dps-design-tokens.css.
  *
  * Regras:
  * - Zero hex literals (usa var(--dps-*))
  * - font-weight apenas 400 ou 500
- * - Espaçamento via var(--dps-space-*)
+ * - EspaÃ§amento via var(--dps-space-*)
  * - Formas via var(--dps-shape-*)
- * - Elevação via var(--dps-elevation-*)
+ * - ElevaÃ§Ã£o via var(--dps-elevation-*)
  * - Movimento via var(--dps-motion-*)
  *
  * Requer: dps-design-tokens.css carregado antes deste arquivo.
@@ -40,7 +40,7 @@
 }
 
 /* =====================================================
-   HEADER — M3 Expressive
+   HEADER â€” DPS Signature
    ===================================================== */
 .dps-ai-assistant__header {
     display: flex;
@@ -191,7 +191,7 @@
 }
 
 /* =====================================================
-   CONTEÚDO PRINCIPAL
+   CONTEÃšDO PRINCIPAL
    ===================================================== */
 .dps-ai-assistant__content {
     padding: var(--dps-space-6);
@@ -231,7 +231,7 @@
 }
 
 /* =====================================================
-   SUGESTÕES DE PERGUNTAS
+   SUGESTÃ•ES DE PERGUNTAS
    ===================================================== */
 .dps-ai-assistant__suggestions {
     margin-bottom: var(--dps-space-5);
@@ -310,7 +310,7 @@
 }
 
 /* =====================================================
-   ÁREA DE MENSAGENS/CONVERSA
+   ÃREA DE MENSAGENS/CONVERSA
    ===================================================== */
 .dps-ai-assistant__messages {
     max-height: 400px;
@@ -376,7 +376,7 @@
     letter-spacing: var(--dps-typescale-label-small-tracking);
 }
 
-/* Conteúdo da mensagem */
+/* ConteÃºdo da mensagem */
 .dps-ai-message-content {
     padding: var(--dps-space-3) var(--dps-space-4);
     border-radius: var(--dps-shape-small);
@@ -387,7 +387,7 @@
     word-wrap: break-word;
 }
 
-/* Mensagem do usuário - alinhada à direita */
+/* Mensagem do usuÃ¡rio - alinhada Ã  direita */
 .dps-ai-message-user {
     text-align: right;
 }
@@ -405,7 +405,7 @@
     border-bottom-right-radius: var(--dps-shape-extra-small);
 }
 
-/* Mensagem do assistente - alinhada à esquerda */
+/* Mensagem do assistente - alinhada Ã  esquerda */
 .dps-ai-message-assistant .dps-ai-message-label {
     color: var(--dps-color-success);
 }
@@ -600,7 +600,7 @@
 }
 
 /* =====================================================
-   BOTÕES DE FEEDBACK
+   BOTÃ•ES DE FEEDBACK
    ===================================================== */
 .dps-ai-feedback {
     display: flex;
@@ -812,7 +812,7 @@
     }
 
     .dps-ai-assistant.is-collapsed .dps-ai-assistant__subtitle {
-        display: none; /* Oculta subtítulo em mobile quando colapsado */
+        display: none; /* Oculta subtÃ­tulo em mobile quando colapsado */
     }
 }
 
@@ -1013,7 +1013,7 @@
 }
 
 /* =====================================================
-   ACESSIBILIDADE — Reduced motion
+   ACESSIBILIDADE â€” Reduced motion
    ===================================================== */
 @media (prefers-reduced-motion: reduce) {
     .dps-ai-assistant__status-dot,

@@ -1,9 +1,9 @@
-# Screenshots 2026-03-10 - Agenda
+﻿# Screenshots 2026-03-10 - Agenda
 
 ## Contexto
 - Objetivo da mudanca: remover completamente duas areas contextuais da Agenda que exibiam os textos "Use as abas para acompanhar a operacao sem poluicao visual de filtros adicionais." e "Resumo operacional em tempo real da agenda."
 - Ambiente: preview estatico local com os estilos reais do add-on.
-- Referencia de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Referencia de design DPS Signature utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
 
 ## Antes/Depois
 - Resumo do antes: a Agenda exibia duas barras contextuais extras entre a navegacao/abas e o conteudo operacional.

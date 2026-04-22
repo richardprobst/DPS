@@ -1,11 +1,11 @@
-<?php
+﻿<?php
 /**
- * Serviço de Checklist Operacional para agendamentos.
+ * ServiÃ§o de Checklist Operacional para agendamentos.
  *
- * Gerencia o checklist de etapas do banho e tosa (pré-banho, secagem, corte,
+ * Gerencia o checklist de etapas do banho e tosa (prÃ©-banho, secagem, corte,
  * orelhas/unhas) com rastreamento de retrabalho por etapa.
  *
- * Meta key: '_dps_checklist' — array serializado com status por etapa.
+ * Meta key: '_dps_checklist' â€” array serializado com status por etapa.
  *
  * @package DPS_Agenda_Addon
  * @since   1.2.0
@@ -25,38 +25,38 @@ class DPS_Agenda_Checklist_Service {
     const META_KEY = '_dps_checklist';
 
     /**
-     * Etapas padrão do checklist operacional.
+     * Etapas padrÃ£o do checklist operacional.
      *
-     * Filtrável via 'dps_checklist_default_steps' para que add-ons possam
-     * adicionar etapas extras (ex.: hidratação, perfume).
+     * FiltrÃ¡vel via 'dps_checklist_default_steps' para que add-ons possam
+     * adicionar etapas extras (ex.: hidrataÃ§Ã£o, perfume).
      *
      * @return array<string, array{label: string, icon: string}>
      */
     public static function get_default_steps() {
         $steps = [
             'pre_bath'   => [
-                'label' => __( 'Pré-banho (desembaraçar / escovação)', 'dps-agenda-addon' ),
-                'icon'  => '🧹',
+                'label' => __( 'PrÃ©-banho (desembaraÃ§ar / escovaÃ§Ã£o)', 'dps-agenda-addon' ),
+                'icon'  => 'ðŸ§¹',
             ],
             'bath'       => [
                 'label' => __( 'Banho', 'dps-agenda-addon' ),
-                'icon'  => '🛁',
+                'icon'  => 'ðŸ›',
             ],
             'drying'     => [
                 'label' => __( 'Secagem', 'dps-agenda-addon' ),
-                'icon'  => '💨',
+                'icon'  => 'ðŸ’¨',
             ],
             'cutting'    => [
                 'label' => __( 'Tosa / Corte', 'dps-agenda-addon' ),
-                'icon'  => '✂️',
+                'icon'  => 'âœ‚ï¸',
             ],
             'ears_nails' => [
                 'label' => __( 'Orelhas / Unhas', 'dps-agenda-addon' ),
-                'icon'  => '👂',
+                'icon'  => 'ðŸ‘‚',
             ],
             'finishing'  => [
-                'label' => __( 'Acabamento (perfume / laço)', 'dps-agenda-addon' ),
-                'icon'  => '🎀',
+                'label' => __( 'Acabamento (perfume / laÃ§o)', 'dps-agenda-addon' ),
+                'icon'  => 'ðŸŽ€',
             ],
         ];
 
@@ -64,7 +64,7 @@ class DPS_Agenda_Checklist_Service {
          * Permite adicionar ou modificar etapas do checklist operacional.
          *
          * @since 1.2.0
-         * @param array $steps Etapas padrão.
+         * @param array $steps Etapas padrÃ£o.
          */
         return apply_filters( 'dps_checklist_default_steps', $steps );
     }
@@ -72,7 +72,7 @@ class DPS_Agenda_Checklist_Service {
     /**
      * Retorna o checklist atual de um agendamento.
      *
-     * Se o agendamento ainda não tem checklist, retorna a estrutura inicial
+     * Se o agendamento ainda nÃ£o tem checklist, retorna a estrutura inicial
      * com todas as etapas como 'pending'.
      *
      * @param int $appointment_id ID do agendamento.
@@ -90,7 +90,7 @@ class DPS_Agenda_Checklist_Service {
             return self::build_initial_checklist();
         }
 
-        // Mescla com etapas padrão caso novas tenham sido adicionadas via filtro
+        // Mescla com etapas padrÃ£o caso novas tenham sido adicionadas via filtro
         $defaults = self::build_initial_checklist();
         foreach ( $defaults as $key => $default_item ) {
             if ( ! isset( $saved[ $key ] ) ) {
@@ -135,6 +135,9 @@ class DPS_Agenda_Checklist_Service {
         if ( 'done' === $new_status ) {
             $checklist[ $step_key ]['done_at'] = current_time( 'mysql' );
             $checklist[ $step_key ]['done_by'] = get_current_user_id();
+        } else {
+            $checklist[ $step_key ]['done_at'] = '';
+            $checklist[ $step_key ]['done_by'] = 0;
         }
 
         return (bool) update_post_meta( $appointment_id, self::META_KEY, $checklist );
@@ -201,7 +204,7 @@ class DPS_Agenda_Checklist_Service {
     }
 
     /**
-     * Retorna o percentual de conclusão do checklist.
+     * Retorna o percentual de conclusÃ£o do checklist.
      *
      * @param int $appointment_id ID do agendamento.
      * @return int Percentual de 0 a 100.
@@ -225,7 +228,7 @@ class DPS_Agenda_Checklist_Service {
     }
 
     /**
-     * Verifica se o checklist está 100% concluído.
+     * Verifica se o checklist estÃ¡ 100% concluÃ­do.
      *
      * @param int $appointment_id ID do agendamento.
      * @return bool
@@ -254,7 +257,20 @@ class DPS_Agenda_Checklist_Service {
     }
 
     /**
-     * Constrói checklist inicial com todas as etapas como 'pending'.
+     * Retorna o label humano de uma etapa do checklist.
+     *
+     * @param string $step_key Chave da etapa.
+     * @return string
+     */
+    public static function get_step_label( $step_key ) {
+        $step_key = sanitize_key( $step_key );
+        $steps    = self::get_default_steps();
+
+        return isset( $steps[ $step_key ]['label'] ) ? $steps[ $step_key ]['label'] : $step_key;
+    }
+
+    /**
+     * ConstrÃ³i checklist inicial com todas as etapas como 'pending'.
      *
      * @return array
      */
@@ -270,7 +286,7 @@ class DPS_Agenda_Checklist_Service {
     }
 
     /**
-     * Cria uma entrada padrão de etapa.
+     * Cria uma entrada padrÃ£o de etapa.
      *
      * @return array
      */

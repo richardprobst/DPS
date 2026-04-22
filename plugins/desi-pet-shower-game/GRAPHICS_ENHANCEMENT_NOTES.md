@@ -1,10 +1,10 @@
-# Space Groomers - Graphics Enhancement Notes
+﻿# Space Groomers - Graphics Enhancement Notes
 
 ## Objetivo
 Melhorar a apresentacao visual geral do add-on `desi-pet-shower-game` sem reescrever a engine, preservando o carater arcade casual, a leitura em telas pequenas e a performance mobile.
 
 ## Referencia visual aplicada
-A revisao visual seguiu explicitamente o padrao M3 descrito em:
+A revisao visual seguiu explicitamente o padrao DPS Signature descrito em:
 - `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`
 - `docs/visual/VISUAL_STYLE_GUIDE.md`
 

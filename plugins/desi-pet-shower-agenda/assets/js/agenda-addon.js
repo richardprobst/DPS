@@ -1,4 +1,4 @@
-(function($){
+﻿(function($){
   /**
    * Escapa caracteres especiais HTML para prevenir XSS.
    * @param {string} str String a ser escapada.
@@ -14,11 +14,11 @@
   }
 
   /**
-   * Exibe notificação toast estilizada para feedback do usuário.
-   * Substitui alert() nativo por uma notificação moderna.
+   * Exibe notificaÃ§Ã£o toast estilizada para feedback do usuÃ¡rio.
+   * Substitui alert() nativo por uma notificaÃ§Ã£o moderna.
    * @param {string} message Mensagem a ser exibida.
-   * @param {string} type Tipo da notificação: 'error', 'success', 'warning', 'info'.
-   * @param {number} duration Duração em ms (padrão: 4000).
+   * @param {string} type Tipo da notificaÃ§Ã£o: 'error', 'success', 'warning', 'info'.
+   * @param {number} duration DuraÃ§Ã£o em ms (padrÃ£o: 4000).
    */
   function showToast(message, type, duration) {
     type = type || 'error';
@@ -28,10 +28,10 @@
     $('.dps-toast').remove();
 
     var icons = {
-      error: '❌',
-      success: '✅',
-      warning: '⚠️',
-      info: 'ℹ️'
+      error: 'âŒ',
+      success: 'âœ…',
+      warning: 'âš ï¸',
+      info: 'â„¹ï¸'
     };
 
     var icon = icons[type] || icons.info;
@@ -55,7 +55,7 @@
       setTimeout(function() { toast.remove(); }, 300);
     });
 
-    // Auto-remove após duração
+    // Auto-remove apÃ³s duraÃ§Ã£o
     if (duration > 0) {
       setTimeout(function() {
         toast.removeClass('dps-toast--visible');
@@ -64,7 +64,7 @@
     }
   }
 
-  // Expõe globalmente para uso em outros módulos
+  // ExpÃµe globalmente para uso em outros mÃ³dulos
   window.DPSToast = { show: showToast };
 
   var AGENDA_DIALOG_SELECTOR = '.dps-agenda-dialog-overlay';
@@ -240,39 +240,70 @@
     return dialog;
   }
 
+  function focusOperationModal(dialog, focusTarget) {
+    if (!dialog || !dialog.length) {
+      return;
+    }
+
+    var selectorMap = {
+      checklist: '.dps-checklist-panel .dps-checklist-btn, .dps-checklist-panel textarea, .dps-checklist-panel button',
+      checkin: '.dps-checkin-stage[data-stage="checkin"] .dps-checkin-btn, .dps-checkin-stage[data-stage="checkin"] textarea, .dps-checkin-stage[data-stage="checkin"] input[type="checkbox"]',
+      checkout: '.dps-checkin-stage[data-stage="checkout"] .dps-checkin-btn, .dps-checkin-stage[data-stage="checkout"] textarea, .dps-checkin-stage[data-stage="checkout"] input[type="checkbox"]'
+    };
+    var selector = selectorMap[focusTarget] || selectorMap.checklist;
+
+    window.setTimeout(function() {
+      var focusable = dialog.find(selector).filter(':visible:not(:disabled)').first();
+      if (!focusable.length) {
+        focusable = dialog.find(AGENDA_DIALOG_FOCUSABLE_SELECTOR).filter(':visible:not(:disabled)').first();
+      }
+      if (focusable.length) {
+        focusable.trigger('focus');
+      }
+    }, 120);
+  }
+
   function openOperationPanel(apptId, options) {
     var settings = $.extend({
       focusPanel: false,
+      focusTarget: 'checklist',
       toast: ''
     }, options || {});
     var row = $('tr[data-appt-id="' + apptId + '"]').first();
-    var trigger = row.find('.dps-expand-panels-btn').first();
-    var detailRow = row.next('.dps-detail-row[data-appt-id="' + apptId + '"]');
+    var trigger = row.find('[data-operation-focus="' + settings.focusTarget + '"]').first();
 
-    if (!row.length || !trigger.length || !detailRow.length) {
+    if (!row.length) {
       return false;
     }
 
-    if (trigger.attr('aria-expanded') !== 'true') {
-      var isCardLayout = detailRow.closest('tbody').css('display') === 'flex';
-      var expandedDisplay = isCardLayout ? 'flex' : 'table-row';
-      detailRow.stop(true, true).slideDown(200, function() {
-        $(this).css('display', expandedDisplay);
-      });
-      trigger.attr('aria-expanded', 'true');
-    }
+    var dialog = showAgendaContentDialog({
+      title: getMessage('operationDialogTitle', 'OperaÃ§Ã£o do atendimento'),
+      subtitle: getMessage('operationDialogSubtitle', 'Checklist, check-in e check-out em um fluxo Ãºnico.'),
+      size: 'large',
+      trigger: trigger.length ? trigger : null,
+      bodyHtml: '<p class="dps-checklist-modal-loading">' + escapeHtml(getMessage('checklistLoading', 'Carregando checklist...')) + '</p>'
+    });
+
+    dialog.attr('data-operation-appt-id', apptId);
+
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_get_operation_panel',
+      appointment_id: apptId,
+      agenda_tab: getCurrentAgendaTab(),
+      nonce: DPS_AG_Addon.nonce_checklist
+    }, function(resp) {
+      if (resp && resp.success && resp.data && resp.data.html) {
+        dialog.find('.dps-agenda-dialog__body').html(resp.data.html);
+        focusOperationModal(dialog, settings.focusTarget);
+      } else {
+        dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Nao foi possivel carregar o checklist.')) + '</p>');
+      }
+    }).fail(function() {
+      dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Nao foi possivel carregar o checklist.')) + '</p>');
+    });
 
     if (settings.toast) {
       showToast(settings.toast, 'info', 2200);
-    }
-
-    if (settings.focusPanel) {
-      window.setTimeout(function() {
-        var focusable = detailRow.find(AGENDA_DIALOG_FOCUSABLE_SELECTOR).filter(':visible').first();
-        if (focusable.length) {
-          focusable.trigger('focus');
-        }
-      }, 220);
     }
 
     return true;
@@ -283,6 +314,17 @@
     close: closeAgendaDialog,
     content: showAgendaContentDialog,
     confirm: showAgendaConfirmDialog
+  };
+
+  window.DPSAgendaOperation = {
+    open: openOperationPanel,
+    focus: focusOperationModal
+  };
+
+  window.DPSAgendaShared = {
+    getCurrentTab: getCurrentAgendaTab,
+    replaceRow: replaceAgendaRow,
+    showToast: showToast
   };
 
   $(document).on('click', '.dps-agenda-dialog__close, [data-dialog-close="true"]', function(event) {
@@ -303,46 +345,46 @@
   });
 
   /**
-   * Obtém o label e ícone do porte do pet.
+   * ObtÃ©m o label e Ã­cone do porte do pet.
    * @param {string} size Porte do pet (pequeno, medio, grande, small, medium, large).
    * @return {object} Objeto com label e icon.
    */
   function getPetSizeInfo(size) {
-    if (!size) return { label: '', icon: '🐕' };
+    if (!size) return { label: '', icon: 'ðŸ•' };
 
     var sizeLower = size.toLowerCase();
     var sizeMap = {
-      'pequeno': { label: 'Pequeno', icon: '🐕' },
-      'small': { label: 'Pequeno', icon: '🐕' },
-      'medio': { label: 'Médio', icon: '🦮' },
-      'médio': { label: 'Médio', icon: '🦮' },
-      'medium': { label: 'Médio', icon: '🦮' },
-      'grande': { label: 'Grande', icon: '🐕‍🦺' },
-      'large': { label: 'Grande', icon: '🐕‍🦺' }
+      'pequeno': { label: 'Pequeno', icon: 'ðŸ•' },
+      'small': { label: 'Pequeno', icon: 'ðŸ•' },
+      'medio': { label: 'MÃ©dio', icon: 'ðŸ¦®' },
+      'mÃ©dio': { label: 'MÃ©dio', icon: 'ðŸ¦®' },
+      'medium': { label: 'MÃ©dio', icon: 'ðŸ¦®' },
+      'grande': { label: 'Grande', icon: 'ðŸ•â€ðŸ¦º' },
+      'large': { label: 'Grande', icon: 'ðŸ•â€ðŸ¦º' }
     };
 
-    return sizeMap[sizeLower] || { label: '', icon: '🐕' };
+    return sizeMap[sizeLower] || { label: '', icon: 'ðŸ•' };
   }
 
   /**
-   * Obtém informações visuais do serviço (ícone, classe, label).
-   * @param {object} service Objeto do serviço com name, type, category, is_taxidog.
+   * ObtÃ©m informaÃ§Ãµes visuais do serviÃ§o (Ã­cone, classe, label).
+   * @param {object} service Objeto do serviÃ§o com name, type, category, is_taxidog.
    * @return {object} Objeto com icon, typeClass, typeLabel.
    */
   function getServiceVisualInfo(service) {
-    // Mapas de ícones por tipo e categoria
+    // Mapas de Ã­cones por tipo e categoria
     var typeIcons = {
-      'taxidog': { icon: '🚐', typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' },
-      'extra': { icon: '✨', typeClass: 'dps-service-type-extra', typeLabel: 'Extra' },
-      'package': { icon: '📦', typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' }
+      'taxidog': { icon: 'ðŸš', typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' },
+      'extra': { icon: 'âœ¨', typeClass: 'dps-service-type-extra', typeLabel: 'Extra' },
+      'package': { icon: 'ðŸ“¦', typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' }
     };
 
     var categoryIcons = {
-      'banho': '🛁',
-      'tosa': '✂️',
-      'unha': '💅',
-      'ouvido': '👂',
-      'dente': '🦷'
+      'banho': 'ðŸ›',
+      'tosa': 'âœ‚ï¸',
+      'unha': 'ðŸ’…',
+      'ouvido': 'ðŸ‘‚',
+      'dente': 'ðŸ¦·'
     };
 
     // Verifica TaxiDog primeiro
@@ -353,24 +395,24 @@
     // Verifica tipo
     if (service.type && typeIcons[service.type]) {
       var info = Object.assign({}, typeIcons[service.type]);
-      // Determina ícone pela categoria ou nome
+      // Determina Ã­cone pela categoria ou nome
       info.icon = getCategoryIcon(service, categoryIcons);
       return info;
     }
 
-    // Serviço padrão
+    // ServiÃ§o padrÃ£o
     return {
       icon: getCategoryIcon(service, categoryIcons),
       typeClass: 'dps-service-type-padrao',
-      typeLabel: 'Serviço'
+      typeLabel: 'ServiÃ§o'
     };
   }
 
   /**
-   * Obtém o ícone baseado na categoria ou nome do serviço.
-   * @param {object} service Objeto do serviço.
-   * @param {object} categoryIcons Mapa de ícones por categoria.
-   * @return {string} Ícone emoji.
+   * ObtÃ©m o Ã­cone baseado na categoria ou nome do serviÃ§o.
+   * @param {object} service Objeto do serviÃ§o.
+   * @param {object} categoryIcons Mapa de Ã­cones por categoria.
+   * @return {string} Ãcone emoji.
    */
   function getCategoryIcon(service, categoryIcons) {
     // Verifica categoria diretamente
@@ -378,7 +420,7 @@
       return categoryIcons[service.category];
     }
 
-    // Verifica pelo nome do serviço
+    // Verifica pelo nome do serviÃ§o
     if (service.name) {
       var nameLower = service.name.toLowerCase();
       for (var cat in categoryIcons) {
@@ -388,8 +430,8 @@
       }
     }
 
-    // Ícone padrão
-    return '✂️';
+    // Ãcone padrÃ£o
+    return 'âœ‚ï¸';
   }
 
   $(document).ready(function(){
@@ -419,7 +461,7 @@
     } catch(e) {
       // Ignora erros de URL/sessionStorage (modo privado, etc)
     }
-    // Evento de alteração de status
+    // Evento de alteraÃ§Ã£o de status
 
     $(document).on('change', '.dps-status-select', function(){
       var select = $(this);
@@ -474,7 +516,7 @@
       function handleError(response){
         var fallback = 'Erro ao atualizar status.';
         if ( response && response.data && response.data.error_code === 'version_conflict' ) {
-          feedback.addClass('dps-status-feedback--error').text(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.'));
+          feedback.addClass('dps-status-feedback--error').text(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuÃ¡rio. Atualize a pÃ¡gina para ver as alteraÃ§Ãµes.'));
           select.val(previous);
           return;
         }
@@ -485,7 +527,7 @@
         }
       }
     });
-    // Evento para visualizar serviços de um agendamento
+    // Evento para visualizar serviÃ§os de um agendamento
     // Usa modal customizado em vez de alert() para melhor UX
     $(document).on('click', '.dps-services-link', function(e){
       e.preventDefault();
@@ -493,7 +535,7 @@
       var apptId = parseInt(link.data('appt-id'), 10) || 0;
 
       if (!apptId) {
-        showToast('Agendamento inválido.', 'error');
+        showToast('Agendamento invÃ¡lido.', 'error');
         return;
       }
 
@@ -526,15 +568,15 @@
               });
             }
           } else {
-            // Lista vazia - exibe modal com mensagem apropriada se disponível
+            // Lista vazia - exibe modal com mensagem apropriada se disponÃ­vel
             if ( typeof window.DPSServicesModal !== 'undefined' ) {
               window.DPSServicesModal.show([]);
             } else {
-              showToast('Nenhum serviço encontrado para este agendamento.', 'info');
+              showToast('Nenhum serviÃ§o encontrado para este agendamento.', 'info');
             }
           }
         } else {
-          showToast(resp && resp.data ? resp.data.message : 'Erro ao buscar serviços.', 'error');
+          showToast(resp && resp.data ? resp.data.message : 'Erro ao buscar serviÃ§os.', 'error');
         }
       }).fail(function(xhr){
         showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
@@ -583,7 +625,7 @@
       }
     });
 
-    // CONF-2: Evento para botões de confirmação
+    // CONF-2: Evento para botÃµes de confirmaÃ§Ã£o
 
     $(document).on('click', '.dps-confirmation-btn', function(e){
       e.preventDefault();
@@ -627,7 +669,7 @@
 
   /**
    * Atualiza a classe de uma linha da tabela da agenda com o novo status.
-   * Cada linha utiliza data-appt-id para identificá-la e classes CSS no formato
+   * Cada linha utiliza data-appt-id para identificÃ¡-la e classes CSS no formato
    * status-pendente, status-finalizado, status-finalizado_pago ou status-cancelado.
    * @param {string|number} apptId ID do agendamento
    * @param {string} status Novo status definido
@@ -758,30 +800,30 @@
     return fallback;
   }
 
-  // FASE 2: Exportação PDF (abre página de impressão em nova janela)
+  // FASE 2: ExportaÃ§Ã£o PDF (abre pÃ¡gina de impressÃ£o em nova janela)
   $(document).on('click', '.dps-export-pdf-btn', function(e){
     e.preventDefault();
     var btn = $(this);
     var date = btn.data('date') || '';
     var view = btn.data('view') || 'day';
 
-    // Constrói URL para a página de impressão PDF
+    // ConstrÃ³i URL para a pÃ¡gina de impressÃ£o PDF
     var pdfUrl = DPS_AG_Addon.ajax +
       '?action=dps_agenda_export_pdf' +
       '&date=' + encodeURIComponent(date) +
       '&view=' + encodeURIComponent(view) +
       '&nonce=' + encodeURIComponent(DPS_AG_Addon.nonce_export_pdf);
 
-    // Calcula dimensões responsivas para a janela
+    // Calcula dimensÃµes responsivas para a janela
     var width = Math.min(950, window.screen.availWidth - 100);
     var height = Math.min(700, window.screen.availHeight - 100);
 
-    // Abre em nova janela com dimensões responsivas
+    // Abre em nova janela com dimensÃµes responsivas
     window.open(pdfUrl, '_blank', 'width=' + width + ',height=' + height + ',scrollbars=yes');
   });
 
   // =========================================================================
-  // FASE 5: Reagendamento Rápido
+  // FASE 5: Reagendamento RÃ¡pido
   // =========================================================================
 
   // Abrir dialog de reagendamento
@@ -840,7 +882,7 @@
       if ( resp && resp.success ) {
         closeAgendaDialog(dialog, 'saved');
         showToast(resp.data.message, 'success');
-        // Aguarda 2 segundos para o usuário ver a mensagem de sucesso antes de recarregar
+        // Aguarda 2 segundos para o usuÃ¡rio ver a mensagem de sucesso antes de recarregar
         setTimeout(function(){ location.reload(); }, 2000);
       } else {
         showToast(resp.data ? resp.data.message : getMessage('error', 'Erro ao reagendar.'), 'error');
@@ -853,7 +895,7 @@
   });
 
   // =========================================================================
-  // FASE 5: Histórico de Alterações
+  // FASE 5: HistÃ³rico de AlteraÃ§Ãµes
   // =========================================================================
 
   function buildHistoryDialogBody(history) {
@@ -875,6 +917,9 @@
         if ( entry.details.old_date && entry.details.new_date ) {
           html += '<div class="dps-agenda-history-item__detail">De ' + escapeHtml(entry.details.old_date + ' ' + (entry.details.old_time || '')) + '</div>';
           html += '<div class="dps-agenda-history-item__detail">Para ' + escapeHtml(entry.details.new_date + ' ' + (entry.details.new_time || '')) + '</div>';
+        }
+        if ( entry.details.message ) {
+          html += '<div class="dps-agenda-history-item__detail">' + escapeHtml(entry.details.message) + '</div>';
         }
       }
 
@@ -921,12 +966,18 @@
     var labels = {
       'created': getMessage('action_created', 'Criado'),
       'status_change': getMessage('action_status_change', 'Status alterado'),
-      'rescheduled': getMessage('action_rescheduled', 'Reagendado')
+      'rescheduled': getMessage('action_rescheduled', 'Reagendado'),
+      'checklist_update': getMessage('action_checklist_update', 'Checklist atualizado'),
+      'checklist_rework': getMessage('action_checklist_rework', 'Retrabalho registrado'),
+      'checkin_created': getMessage('action_checkin_created', 'Check-in registrado'),
+      'checkin_updated': getMessage('action_checkin_updated', 'Check-in atualizado'),
+      'checkout_created': getMessage('action_checkout_created', 'Check-out registrado'),
+      'checkout_updated': getMessage('action_checkout_updated', 'Check-out atualizado')
     };
     return labels[action] || action;
   }
 
-  // FASE 3: Ações rápidas de TaxiDog
+  // FASE 3: AÃ§Ãµes rÃ¡pidas de TaxiDog
 
   $(document).on('click', '.dps-taxidog-action-btn', function(e){
     e.preventDefault();
@@ -1091,7 +1142,7 @@
   // FASE 7: Novos Handlers para Dropdowns e Popups
   // =========================================================================
 
-  // Handler para dropdown de confirmação (Tab1)
+  // Handler para dropdown de confirmaÃ§Ã£o (Tab1)
 
   $(document).on('change', '.dps-confirmation-dropdown', function(){
     var select = $(this);
@@ -1202,7 +1253,7 @@
         }
       } else {
         if (resp && resp.data && resp.data.error_code === 'version_conflict') {
-          showToast(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.'), 'warning');
+          showToast(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuÃ¡rio. Atualize a pÃ¡gina para ver as alteraÃ§Ãµes.'), 'warning');
         } else {
           showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar status.', 'error');
         }
@@ -1216,7 +1267,7 @@
     });
   });
 
-  // Handler para botão de popup de serviços (Tab1)
+  // Handler para botÃ£o de popup de serviÃ§os (Tab1)
   var SERVICES_MODAL_SELECTOR = '.dps-services-modal';
   var SERVICES_MODAL_CONTENT_SELECTOR = '.dps-services-modal-content';
   var SERVICES_MODAL_CLOSE_SELECTOR = '.dps-services-modal-close';
@@ -1267,7 +1318,7 @@
       return 'Pequeno';
     }
 
-    if (normalized === 'medio' || normalized === 'médio' || normalized === 'medium') {
+    if (normalized === 'medio' || normalized === 'mÃ©dio' || normalized === 'medium') {
       return 'M\u00E9dio';
     }
 
@@ -1643,7 +1694,7 @@
     });
   });
 
-  // Handler para botão de solicitar TaxiDog (Tab3)
+  // Handler para botÃ£o de solicitar TaxiDog (Tab3)
 
   $(document).on('click', '.dps-taxidog-request-btn', function(e){
     e.preventDefault();
@@ -1685,7 +1736,7 @@
   });
 
   /* ===========================
-     CHECKLIST OPERACIONAL — POPUP
+     CHECKLIST OPERACIONAL â€” POPUP
      =========================== */
 
   /**

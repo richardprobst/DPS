@@ -1,37 +1,37 @@
-# Assistente de IA - Correção Full Width & Colapsado Discreto
+﻿# Assistente de IA - CorreÃ§Ã£o Full Width & Colapsado Discreto
 
-**Data:** 09/02/2026  
-**PR:** #570 (correção)  
-**Componente:** Assistente de IA no Portal do Cliente  
+**Data:** 09/02/2026
+**PR:** #570 (correÃ§Ã£o)
+**Componente:** Assistente de IA no Portal do Cliente
 **Arquivos modificados:** `plugins/desi-pet-shower-ai/assets/css/dps-ai-portal.css`
 
 ## Problema Identificado
 
-O assistente de IA implementado no PR #570 não estava apresentando:
+O assistente de IA implementado no PR #570 nÃ£o estava apresentando:
 1. A barra colapsada de forma **discreta** o suficiente
 2. A barra colapsada estava muito **grossa/alta**
 3. Necessidade de melhorar a responsividade do estado colapsado
 
-## Solução Implementada
+## SoluÃ§Ã£o Implementada
 
 ### 1. Estado Colapsado - Desktop
-A barra colapsada foi tornada significativamente mais fina e discreta através das seguintes alterações:
+A barra colapsada foi tornada significativamente mais fina e discreta atravÃ©s das seguintes alteraÃ§Ãµes:
 
 **Antes:**
 - Padding do header: `16px 24px`
 - Avatar: `44px`
 - Status dot: `10px`
-- Título: `title-medium (16px, peso 500)`
-- Subtítulo: `body-small (12px)`
+- TÃ­tulo: `title-medium (16px, peso 500)`
+- SubtÃ­tulo: `body-small (12px)`
 - Toggle icon: `20px`
 
 **Depois:**
-- Padding do header: `8px 16px` ⬇️ 50% de redução
-- Avatar: `32px` ⬇️ 27% menor
-- Status dot: `8px` ⬇️ 20% menor
-- Título: `body-large (16px, peso 400)` ⬇️ peso mais leve
-- Subtítulo: `label-small (11px)` ⬇️ 8% menor
-- Toggle icon: `16px` ⬇️ 20% menor
+- Padding do header: `8px 16px` â¬‡ï¸ 50% de reduÃ§Ã£o
+- Avatar: `32px` â¬‡ï¸ 27% menor
+- Status dot: `8px` â¬‡ï¸ 20% menor
+- TÃ­tulo: `body-large (16px, peso 400)` â¬‡ï¸ peso mais leve
+- SubtÃ­tulo: `label-small (11px)` â¬‡ï¸ 8% menor
+- Toggle icon: `16px` â¬‡ï¸ 20% menor
 
 ### 2. Estado Colapsado - Tablet (< 768px)
 - Padding: `8px 12px`
@@ -40,42 +40,42 @@ A barra colapsada foi tornada significativamente mais fina e discreta através d
 ### 3. Estado Colapsado - Mobile (< 480px)
 - Padding: `8px 12px`
 - Avatar: `24px` (45% menor que o original)
-- Título: `body-medium (14px)`
-- **Subtítulo: oculto** (economiza espaço vertical)
+- TÃ­tulo: `body-medium (14px)`
+- **SubtÃ­tulo: oculto** (economiza espaÃ§o vertical)
 
-### 4. Transições Suaves
-Adicionada transição CSS para `padding` no header:
+### 4. TransiÃ§Ãµes Suaves
+Adicionada transiÃ§Ã£o CSS para `padding` no header:
 ```css
 transition: background-color var(--dps-motion-hover), padding var(--dps-motion-expand);
 ```
 
-Todas as propriedades alteradas no estado colapsado também possuem transições suaves.
+Todas as propriedades alteradas no estado colapsado tambÃ©m possuem transiÃ§Ãµes suaves.
 
-## Características Mantidas
+## CaracterÃ­sticas Mantidas
 
-✅ **Full Width (100%)** - O assistente continua ocupando 100% da largura do container em todos os tamanhos de tela  
-✅ **M3 Expressive Design Tokens** - Uso exclusivo de tokens do sistema de design  
-✅ **Estado Expandido** - Permanece inalterado, com layout completo e espaçoso  
-✅ **Acessibilidade** - Atributos ARIA e foco mantidos  
-✅ **Modo Floating** - Não afetado pelas mudanças (funciona independentemente)
+âœ… **Full Width (100%)** - O assistente continua ocupando 100% da largura do container em todos os tamanhos de tela
+âœ… **DPS Signature Design Tokens** - Uso exclusivo de tokens do sistema de design
+âœ… **Estado Expandido** - Permanece inalterado, com layout completo e espaÃ§oso
+âœ… **Acessibilidade** - Atributos ARIA e foco mantidos
+âœ… **Modo Floating** - NÃ£o afetado pelas mudanÃ§as (funciona independentemente)
 
 ## Impacto Visual
 
-### Redução de Altura (Estado Colapsado)
+### ReduÃ§Ã£o de Altura (Estado Colapsado)
 - **Desktop:** Aproximadamente 30-35% mais fino
 - **Tablet:** Aproximadamente 35-40% mais fino
 - **Mobile:** Aproximadamente 40-45% mais fino
 
-### Economia de Espaço Vertical
-O estado colapsado agora ocupa muito menos espaço vertical, tornando-o verdadeiramente **discreto** conforme solicitado no PR #570.
+### Economia de EspaÃ§o Vertical
+O estado colapsado agora ocupa muito menos espaÃ§o vertical, tornando-o verdadeiramente **discreto** conforme solicitado no PR #570.
 
 ## Viewports Testados
 
-| Viewport | Dimensões | Status |
+| Viewport | DimensÃµes | Status |
 |----------|-----------|--------|
-| Desktop  | > 768px   | ✅ Testado |
-| Tablet   | 480-768px | ✅ Testado |
-| Mobile   | < 480px   | ✅ Testado |
+| Desktop  | > 768px   | âœ… Testado |
+| Tablet   | 480-768px | âœ… Testado |
+| Mobile   | < 480px   | âœ… Testado |
 
 ## Screenshots
 
@@ -83,12 +83,12 @@ O estado colapsado agora ocupa muito menos espaço vertical, tornando-o verdadei
 ![AI Assistant Fix Demo](assets/ai-assistant/ai-assistant-fix-demo.png)
 
 A screenshot acima demonstra:
-1. **Estado Colapsado (Discreto)** - Barra fina com especificações detalhadas
+1. **Estado Colapsado (Discreto)** - Barra fina com especificaÃ§Ãµes detalhadas
 2. **Estado Expandido** - Layout completo inalterado
-3. **Comparação Antes vs. Depois** - Side-by-side visual comparison
-4. **Teste de Responsividade** - Instruções e objetivos alcançados
+3. **ComparaÃ§Ã£o Antes vs. Depois** - Side-by-side visual comparison
+4. **Teste de Responsividade** - InstruÃ§Ãµes e objetivos alcanÃ§ados
 
-## Código CSS Adicionado
+## CÃ³digo CSS Adicionado
 
 ```css
 /* =====================================================
@@ -177,35 +177,35 @@ A screenshot acima demonstra:
     }
 
     .dps-ai-assistant.is-collapsed .dps-ai-assistant__subtitle {
-        display: none; /* Oculta subtítulo em mobile quando colapsado */
+        display: none; /* Oculta subtÃ­tulo em mobile quando colapsado */
     }
 }
 ```
 
-## Conclusão
+## ConclusÃ£o
 
-A correção atende completamente aos requisitos:
-- ✅ **Full width** (100%) em todos os tamanhos de tela
-- ✅ **Barra colapsada fina e discreta** (50% de redução no padding)
-- ✅ **Responsivo** com adaptações específicas para tablet e mobile
-- ✅ **Transições suaves** entre estados expandido/colapsado
-- ✅ **M3 Expressive** design tokens aplicados
-- ✅ **Zero breaking changes** no estado expandido ou modo floating
+A correÃ§Ã£o atende completamente aos requisitos:
+- âœ… **Full width** (100%) em todos os tamanhos de tela
+- âœ… **Barra colapsada fina e discreta** (50% de reduÃ§Ã£o no padding)
+- âœ… **Responsivo** com adaptaÃ§Ãµes especÃ­ficas para tablet e mobile
+- âœ… **TransiÃ§Ãµes suaves** entre estados expandido/colapsado
+- âœ… **DPS Signature** design tokens aplicados
+- âœ… **Zero breaking changes** no estado expandido ou modo floating
 
 ## Testes Realizados
 
 - [x] Estado colapsado em desktop (> 768px)
 - [x] Estado colapsado em tablet (480-768px)
 - [x] Estado colapsado em mobile (< 480px)
-- [x] Transição suave ao expandir/colapsar
+- [x] TransiÃ§Ã£o suave ao expandir/colapsar
 - [x] Full width em todos os viewports
-- [x] Compatibilidade com M3 design tokens
-- [x] Estado expandido não afetado
-- [x] Modo floating não afetado
+- [x] Compatibilidade com DPS Signature design tokens
+- [x] Estado expandido nÃ£o afetado
+- [x] Modo floating nÃ£o afetado
 
-## Referências
+## ReferÃªncias
 
 - PR Original: #570
 - Arquivo CSS: `plugins/desi-pet-shower-ai/assets/css/dps-ai-portal.css`
 - Arquivo PHP: `plugins/desi-pet-shower-ai/includes/class-dps-ai-integration-portal.php`
-- Design System: M3 Expressive (`dps-design-tokens.css`)
+- Design System: DPS Signature (`dps-design-tokens.css`)

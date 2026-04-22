@@ -1,13 +1,7 @@
-(function ($) {
+﻿(function ($) {
   'use strict';
 
-  var MODAL_SELECTOR = '.dps-pet-profile-modal';
-  var MODAL_CONTENT_SELECTOR = '.dps-pet-profile-modal-content';
-  var MODAL_CLOSE_SELECTOR = '.dps-pet-profile-modal-close';
-  var FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])';
-
-  var modalCounter = 0;
-  var lastTrigger = null;
+  var activeDialog = null;
 
   function escapeHtml(value) {
     return $('<div>').text(value || '').html();
@@ -42,62 +36,6 @@
     return normalized.length ? applyAccentFixes(normalized) : '\u2014';
   }
 
-  function closePetProfileModal() {
-    var modal = $(MODAL_SELECTOR);
-
-    if (!modal.length) {
-      return;
-    }
-
-    modal.remove();
-    $('body').removeClass('dps-pet-profile-modal-open');
-    $(document).off('keydown.dpsPetProfileModal');
-    $('.dps-pet-profile-trigger[aria-expanded="true"]').attr('aria-expanded', 'false');
-
-    if (lastTrigger && lastTrigger.length) {
-      lastTrigger.trigger('focus');
-    }
-
-    lastTrigger = null;
-  }
-
-  function getFocusables(modal) {
-    return modal.find(FOCUSABLE_SELECTOR).filter(':visible');
-  }
-
-  function trapFocus(event) {
-    if (event.key !== 'Tab') {
-      return;
-    }
-
-    var modal = $(MODAL_SELECTOR);
-    if (!modal.length) {
-      return;
-    }
-
-    var focusables = getFocusables(modal);
-
-    if (!focusables.length) {
-      event.preventDefault();
-      modal.find(MODAL_CONTENT_SELECTOR).trigger('focus');
-      return;
-    }
-
-    var first = focusables.first()[0];
-    var last = focusables.last()[0];
-
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-      return;
-    }
-
-    if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  }
-
   function buildProfileItem(label, value) {
     return '<div class="dps-pet-profile-item">' +
       '<dt>' + escapeHtml(label) + '</dt>' +
@@ -112,12 +50,7 @@
     '</section>';
   }
 
-  function buildModalHtml(data) {
-    modalCounter += 1;
-
-    var titleId = 'dps-pet-profile-modal-title-' + modalCounter;
-    var descId = 'dps-pet-profile-modal-desc-' + modalCounter;
-
+  function buildDialogBody(data) {
     var petItems = '';
     petItems += buildProfileItem('Nome', data.petName);
     petItems += buildProfileItem('Esp\u00E9cie', data.petSpecies);
@@ -132,26 +65,14 @@
     tutorItems += buildProfileItem('E-mail', data.clientEmail);
     tutorItems += buildProfileItem('Endere\u00E7o', data.clientAddress);
 
-    return '<div class="dps-pet-profile-modal" role="dialog" aria-modal="true" aria-labelledby="' + titleId + '" aria-describedby="' + descId + '">' +
-      '<div class="dps-pet-profile-modal-content" role="document" tabindex="-1">' +
-        '<div class="dps-pet-profile-modal-header">' +
-          '<div>' +
-            '<h3 id="' + titleId + '" class="dps-pet-profile-modal-title">Perfil r\u00E1pido do pet</h3>' +
-          '</div>' +
-          '<button type="button" class="dps-pet-profile-modal-close" aria-label="Fechar modal">&times;</button>' +
-        '</div>' +
-        '<div class="dps-pet-profile-modal-body" id="' + descId + '">' +
-          '<div class="dps-pet-profile-grid">' +
-            buildSection('Pet', 'dps-pet-profile-section--pet', petItems) +
-            buildSection('Tutor', 'dps-pet-profile-section--tutor', tutorItems) +
-          '</div>' +
-        '</div>' +
-      '</div>' +
+    return '<div class="dps-pet-profile-grid">' +
+      buildSection('Pet', 'dps-pet-profile-section--pet', petItems) +
+      buildSection('Tutor', 'dps-pet-profile-section--tutor', tutorItems) +
     '</div>';
   }
 
-  function openPetProfileModal(trigger) {
-    var data = {
+  function collectTriggerData(trigger) {
+    return {
       petName: normalizeValue(trigger.data('pet-name')),
       petSpecies: normalizeValue(trigger.data('pet-species')),
       petBreed: normalizeValue(trigger.data('pet-breed')),
@@ -163,49 +84,42 @@
       clientEmail: normalizeValue(trigger.data('client-email')),
       clientAddress: normalizeValue(trigger.data('client-address'))
     };
+  }
 
-    closePetProfileModal();
+  function closeActivePetDialog(reason) {
+    if (activeDialog && activeDialog.length && window.DPSAgendaDialog && typeof window.DPSAgendaDialog.close === 'function') {
+      window.DPSAgendaDialog.close(activeDialog, reason || 'dismiss');
+    }
+  }
 
-    lastTrigger = trigger;
+  function openPetProfileModal(trigger) {
+    if (!window.DPSAgendaDialog || typeof window.DPSAgendaDialog.content !== 'function') {
+      return;
+    }
+
+    closeActivePetDialog('redirect');
+    $('.dps-pet-profile-trigger[aria-expanded="true"]').attr('aria-expanded', 'false');
+
+    var data = collectTriggerData(trigger);
     trigger.attr('aria-expanded', 'true');
 
-    $('body').addClass('dps-pet-profile-modal-open').append(buildModalHtml(data));
-
-    $(document).on('keydown.dpsPetProfileModal', function (event) {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        closePetProfileModal();
-        return;
+    activeDialog = window.DPSAgendaDialog.content({
+      eyebrow: 'Agenda',
+      title: 'Perfil r\u00E1pido do pet',
+      subtitle: data.petName + ' | ' + data.clientName,
+      size: 'medium',
+      trigger: trigger,
+      dialogClass: 'dps-agenda-dialog--pet-profile',
+      bodyHtml: buildDialogBody(data),
+      onClose: function () {
+        trigger.attr('aria-expanded', 'false');
+        activeDialog = null;
       }
-
-      trapFocus(event);
     });
-
-    window.setTimeout(function () {
-      var modal = $(MODAL_SELECTOR);
-      var focusables = getFocusables(modal);
-
-      if (focusables.length) {
-        focusables.first().trigger('focus');
-      } else {
-        modal.find(MODAL_CONTENT_SELECTOR).trigger('focus');
-      }
-    }, 0);
   }
 
   $(document).on('click', '.dps-pet-profile-trigger', function (event) {
     event.preventDefault();
     openPetProfileModal($(this));
-  });
-
-  $(document).on('click', MODAL_CLOSE_SELECTOR, function (event) {
-    event.preventDefault();
-    closePetProfileModal();
-  });
-
-  $(document).on('click', MODAL_SELECTOR, function (event) {
-    if ($(event.target).is(MODAL_SELECTOR)) {
-      closePetProfileModal();
-    }
   });
 })(jQuery);

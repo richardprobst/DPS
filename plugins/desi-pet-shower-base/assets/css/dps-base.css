@@ -1,24 +1,24 @@
-/**
+﻿/**
  * Estilos do Base Plugin - DPS
  * DPS Signature
  *
  * Este arquivo segue o sistema de design DPS Signature:
  * - Todas as cores via var(--dps-color-*) / var(--dps-*) tokens
  * - Formas via var(--dps-shape-*) tokens
- * - Elevação via var(--dps-elevation-*) tokens
+ * - ElevaÃ§Ã£o via var(--dps-elevation-*) tokens
  * - Movimento via var(--dps-motion-*) tokens
  * - Tipografia via var(--dps-font-*) / var(--dps-typescale-*) tokens
  *
- * Perfil: Expressive (formulário público)
- * - Fontes expressivas (Outfit / Source Sans 3)
+ * Perfil: pÃºblico do sistema
+ * - Tipografia pÃºblica com maior presenÃ§a visual
  *
  * Requer: dps-design-tokens.css carregado antes deste arquivo.
  *
  * Compatibilidade:
  * - Suporta navegadores modernos (Chrome 88+, Firefox 78+, Safari 14+, Edge 88+)
- * - Fallbacks incluídos para Edge Legacy e versões mais antigas
+ * - Fallbacks incluÃ­dos para Edge Legacy e versÃµes mais antigas
  * - Seletores :has() possuem fallback via classes JS (.is-selected, .is-checked)
- * - accent-color tem fallback para aparência nativa do navegador
+ * - accent-color tem fallback para aparÃªncia nativa do navegador
  *
  * Breakpoints:
  * - 1200px: Desktop grande
@@ -29,7 +29,7 @@
  *
  * @package Desi_Pet_Shower_Base
  * @since 1.0.0
- * @version 2.0.0 Migração completa para DPS Signature design tokens
+ * @version 2.0.0 MigraÃ§Ã£o completa para DPS Signature design tokens
  */
 
 .dps-base-wrapper {
@@ -38,13 +38,13 @@
     max-width: 100%;
     box-sizing: border-box;
 }
-/* Container de navegação - inclui abas e seletor mobile */
+/* Container de navegaÃ§Ã£o - inclui abas e seletor mobile */
 .dps-nav-container {
     position: relative;
     margin-bottom: 0;
 }
 
-/* Toggle mobile: oculto por padrão em desktop (display: block via media query < 768px).
+/* Toggle mobile: oculto por padrÃ£o em desktop (display: block via media query < 768px).
    Especificidade aumentada (.dps-base-wrapper .dps-nav-container) para evitar sobrescrita por temas. */
 .dps-base-wrapper .dps-nav-container .dps-nav-mobile-toggle {
     display: none;
@@ -124,15 +124,15 @@
     font-weight: 500;
 }
 
-/* === NAVEGAÇÃO RESPONSIVA - DESKTOP (min-width: 769px) === */
-/* Garantir que em desktop: toggle oculto, abas visíveis */
+/* === NAVEGAÃ‡ÃƒO RESPONSIVA - DESKTOP (min-width: 769px) === */
+/* Garantir que em desktop: toggle oculto, abas visÃ­veis */
 @media (min-width: 769px) {
     /* Ocultar toggle em desktop - !important para evitar overrides de temas WordPress */
     .dps-base-wrapper .dps-nav-container .dps-nav-mobile-toggle {
         display: none !important;
     }
-    
-    /* Garantir que abas estejam visíveis em desktop */
+
+    /* Garantir que abas estejam visÃ­veis em desktop */
     .dps-base-wrapper .dps-nav-container .dps-nav {
         display: flex !important;
     }
@@ -149,7 +149,7 @@
     display: block;
 }
 
-/* Containers reutilizáveis para manter o padrão visual da aba Agendamentos em todo o sistema */
+/* Containers reutilizÃ¡veis para manter o padrÃ£o visual da aba Agendamentos em todo o sistema */
 .dps-section-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -217,10 +217,10 @@
 }
 
 /* ================================================
-   SISTEMA DE DESIGN MODERNO - TÍTULOS E SUBTÍTULOS
+   SISTEMA DE DESIGN MODERNO - TÃTULOS E SUBTÃTULOS
    ================================================ */
 
-/* Título principal de seção (H2) - Estilo moderno e elegante */
+/* TÃ­tulo principal de seÃ§Ã£o (H2) - Estilo moderno e elegante */
 .dps-section-header {
     margin-bottom: 24px;
 }
@@ -245,7 +245,7 @@
     line-height: 1.5;
 }
 
-/* Subtítulos de seção (H3, H4) - Estilo moderno */
+/* SubtÃ­tulos de seÃ§Ã£o (H3, H4) - Estilo moderno */
 .dps-section h3,
 .dps-subsection-title {
     display: flex;
@@ -268,10 +268,10 @@
 }
 
 /* ================================================
-   SISTEMA DE DESIGN MODERNO - BOTÕES
+   SISTEMA DE DESIGN MODERNO - BOTÃ•ES
    ================================================ */
 
-/* Botão Principal (Primary) - Gradiente azul moderno */
+/* BotÃ£o Principal (Primary) - Gradiente azul moderno */
 .dps-btn-primary,
 .dps-section .button-primary,
 .dps-base-wrapper .button-primary {
@@ -317,7 +317,7 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-primary) 30%, transparent), 0 2px 8px color-mix(in srgb, var(--dps-color-primary) 25%, transparent);
 }
 
-/* Botão Secundário (Secondary) - Gradiente elegante cinza/azul */
+/* BotÃ£o SecundÃ¡rio (Secondary) - Gradiente elegante cinza/azul */
 .dps-btn-secondary,
 .dps-section .button-secondary,
 .dps-base-wrapper .button-secondary {
@@ -364,7 +364,7 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-secondary) 20%, transparent), 0 1px 3px color-mix(in srgb, var(--dps-color-on-surface) 8%, transparent);
 }
 
-/* Botão de Sucesso (Success) - Gradiente verde moderno */
+/* BotÃ£o de Sucesso (Success) - Gradiente verde moderno */
 .dps-btn-success {
     display: inline-flex;
     align-items: center;
@@ -400,7 +400,7 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-success) 30%, transparent), 0 2px 8px color-mix(in srgb, var(--dps-color-success) 25%, transparent);
 }
 
-/* Botão com ícone - wrapper para ícone decorativo */
+/* BotÃ£o com Ã­cone - wrapper para Ã­cone decorativo */
 .dps-btn-icon {
     display: inline-flex;
     align-items: center;
@@ -412,7 +412,7 @@
     font-size: 14px;
 }
 
-/* Tamanhos de botão alternativos */
+/* Tamanhos de botÃ£o alternativos */
 .dps-btn-sm {
     padding: 8px 16px;
     font-size: 13px;
@@ -424,7 +424,7 @@
     font-size: 16px;
 }
 
-/* Botão desabilitado */
+/* BotÃ£o desabilitado */
 .dps-btn-primary:disabled,
 .dps-btn-secondary:disabled,
 .dps-btn-success:disabled {
@@ -434,7 +434,7 @@
     box-shadow: none !important;
 }
 
-/* Container de ações com espaçamento consistente */
+/* Container de aÃ§Ãµes com espaÃ§amento consistente */
 .dps-actions-container {
     display: flex;
     flex-wrap: wrap;
@@ -442,7 +442,7 @@
     margin-bottom: 24px;
 }
 
-/* === SEÇÃO DE AGENDAMENTOS - CABEÇALHO VISUAL === */
+/* === SEÃ‡ÃƒO DE AGENDAMENTOS - CABEÃ‡ALHO VISUAL === */
 #dps-section-agendas > h2 {
     display: flex;
     align-items: center;
@@ -516,7 +516,7 @@
     color: var(--dps-color-on-surface-variant);
 }
 
-/* Largura máxima para campos específicos - evita inputs muito largos em telas grandes */
+/* Largura mÃ¡xima para campos especÃ­ficos - evita inputs muito largos em telas grandes */
 .dps-form .dps-client-select,
 .dps-form #appointment_date,
 .dps-form #appointment_time {
@@ -617,7 +617,7 @@
     border-bottom: 0;
 }
 
-/* === AÇÕES NA TABELA (EDITAR, DUPLICAR, EXCLUIR) === */
+/* === AÃ‡Ã•ES NA TABELA (EDITAR, DUPLICAR, EXCLUIR) === */
 .dps-table td a {
     color: var(--dps-color-primary);
     text-decoration: none;
@@ -634,9 +634,9 @@
     text-decoration: none;
 }
 
-/* Link de Excluir com cor vermelha 
+/* Link de Excluir com cor vermelha
    Nota: Usa seletor de onclick como fallback para templates existentes.
-   Preferir usar a classe .dps-action-delete quando possível. */
+   Preferir usar a classe .dps-action-delete quando possÃ­vel. */
 .dps-table td a[onclick*="confirm"],
 .dps-table td a.dps-action-delete {
     color: var(--dps-color-error);
@@ -665,7 +665,7 @@
     gap: 12px;
     margin-bottom: 15px;
 }
-/* Filtros de período rápido */
+/* Filtros de perÃ­odo rÃ¡pido */
 .dps-history-quick-filters {
     display: flex;
     flex-wrap: wrap;
@@ -731,7 +731,7 @@
     font-size: 14px;
     font-weight: 500;
 }
-/* Estilos para ordenação de tabelas */
+/* Estilos para ordenaÃ§Ã£o de tabelas */
 .dps-table-sortable .dps-sortable {
     cursor: pointer;
     user-select: none;
@@ -746,10 +746,10 @@
     margin-left: 4px;
 }
 .dps-sortable.asc .dps-sort-icon::after {
-    content: '↑';
+    content: 'â†‘';
 }
 .dps-sortable.desc .dps-sort-icon::after {
-    content: '↓';
+    content: 'â†“';
 }
 .dps-sortable.asc .dps-sort-icon,
 .dps-sortable.desc .dps-sort-icon {
@@ -775,7 +775,7 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-error) 15%, transparent);
 }
 
-/* Título do pet picker */
+/* TÃ­tulo do pet picker */
 .dps-pet-picker > p:first-child {
     margin-top: 0;
     margin-bottom: 8px;
@@ -923,7 +923,7 @@
 }
 
 .dps-appointments > h3::before {
-    content: '📋';
+    content: 'ðŸ“‹';
     font-size: 1.2em;
 }
 
@@ -1045,7 +1045,7 @@
 }
 
 .dps-appointments-group--overdue h4::before {
-    content: '⚠️';
+    content: 'âš ï¸';
     font-size: 1.1em;
 }
 
@@ -1070,11 +1070,11 @@
 }
 
 .dps-appointments-group--finalized h4::before {
-    content: '✅';
+    content: 'âœ…';
     font-size: 1em;
 }
 
-/* Grupo: Próximos atendimentos */
+/* Grupo: PrÃ³ximos atendimentos */
 .dps-appointments-group--upcoming {
     border-left-color: var(--dps-color-primary);
     background: var(--dps-color-surface-container-low);
@@ -1090,13 +1090,13 @@
 }
 
 .dps-appointments-group--upcoming h4::before {
-    content: '📅';
+    content: 'ðŸ“…';
     font-size: 1em;
 }
 
 /* === TABELA DE AGENDAMENTOS === */
-/* Nota: border-collapse: separate é necessário para que as bordas laterais coloridas
-   nas células funcionem corretamente. border-spacing: 0 mantém o visual sem gaps. */
+/* Nota: border-collapse: separate Ã© necessÃ¡rio para que as bordas laterais coloridas
+   nas cÃ©lulas funcionem corretamente. border-spacing: 0 mantÃ©m o visual sem gaps. */
 .dps-appointments .dps-table {
     min-width: 640px;
     border-collapse: separate;
@@ -1116,7 +1116,7 @@
 }
 
 /* === CORES DE STATUS DAS LINHAS === */
-/* Nota: border-left aplicada apenas na primeira célula para melhor compatibilidade
+/* Nota: border-left aplicada apenas na primeira cÃ©lula para melhor compatibilidade
    com border-collapse e temas que possam sobrescrever estilos de linha */
 
 /* Pendente: laranja/amarelo com borda laranja */
@@ -1162,7 +1162,7 @@
     text-decoration: line-through;
     color: var(--dps-color-outline);
 }
-/* === FORMULÁRIO DE STATUS INLINE === */
+/* === FORMULÃRIO DE STATUS INLINE === */
 .dps-inline-status-form {
     position: relative;
     display: inline-flex;
@@ -1199,7 +1199,7 @@
 }
 
 .dps-inline-status-form.is-updating::after {
-    content: '⏳';
+    content: 'â³';
     font-size: 0.9rem;
     animation: spin 1s linear infinite;
 }
@@ -1266,24 +1266,24 @@
         width: 100%;
     }
 
-    /* Garantir que tabelas tenham largura mínima em tablets */
+    /* Garantir que tabelas tenham largura mÃ­nima em tablets */
     .dps-table-wrapper .dps-table {
         min-width: 620px;
     }
-    
-    /* Ajustar espaçamento em grupos de agendamentos */
+
+    /* Ajustar espaÃ§amento em grupos de agendamentos */
     .dps-appointments-group {
         margin-top: 16px;
         margin-bottom: 16px;
         padding: 14px;
         border-radius: var(--dps-shape-small);
     }
-    
+
     .dps-appointments-group h4 {
         font-size: 1.05rem;
         margin-bottom: 12px;
     }
-    
+
     /* Campo de busca em telas menores */
     .dps-appointments .dps-appointments-search {
         padding-left: 36px;
@@ -1297,34 +1297,34 @@
         overflow-x: hidden;
         max-width: 100%;
     }
-    
+
     .dps-section {
         overflow-x: hidden;
         max-width: 100%;
     }
-    
+
     .dps-form {
         max-width: 100%;
         overflow-x: hidden;
     }
-    
+
     .dps-surface {
         max-width: 100%;
         box-sizing: border-box;
     }
-    
+
     .dps-section-grid {
         max-width: 100%;
     }
-    
-    /* === NAVEGAÇÃO RESPONSIVA - DROPDOWN EM MOBILE === */
-    /* Mostrar o botão toggle em mobile - !important para garantir sobrescrita de temas */
+
+    /* === NAVEGAÃ‡ÃƒO RESPONSIVA - DROPDOWN EM MOBILE === */
+    /* Mostrar o botÃ£o toggle em mobile - !important para garantir sobrescrita de temas */
     .dps-base-wrapper .dps-nav-container .dps-nav-mobile-toggle {
         display: block !important;
         margin-bottom: 0;
     }
-    
-    /* Ocultar abas por padrão em mobile (apenas mostrar quando toggle está aberto) */
+
+    /* Ocultar abas por padrÃ£o em mobile (apenas mostrar quando toggle estÃ¡ aberto) */
     /* !important para garantir que sobrescreva estilos base e de temas */
     .dps-base-wrapper .dps-nav-container .dps-nav {
         display: none !important;
@@ -1336,27 +1336,27 @@
         border-radius: 0 0 var(--dps-shape-extra-small) var(--dps-shape-extra-small);
         background: var(--dps-color-surface-container-lowest);
         box-shadow: 0 4px 12px color-mix(in srgb, var(--dps-color-on-surface) 10%, transparent);
-        /* 300px permite exibir ~6-7 itens de 44px cada (padrão de altura de toque em mobile)
-           Se houver mais itens, scroll vertical é habilitado */
+        /* 300px permite exibir ~6-7 itens de 44px cada (padrÃ£o de altura de toque em mobile)
+           Se houver mais itens, scroll vertical Ã© habilitado */
         max-height: 300px;
         overflow-y: auto;
     }
-    
-    /* Mostrar abas quando container está aberto */
+
+    /* Mostrar abas quando container estÃ¡ aberto */
     .dps-base-wrapper .dps-nav-container.is-open .dps-nav {
         display: flex !important;
     }
-    
+
     .dps-base-wrapper .dps-nav-container.is-open .dps-nav-mobile-toggle {
         border-radius: var(--dps-shape-extra-small) var(--dps-shape-extra-small) 0 0;
         border-bottom: none;
     }
-    
+
     .dps-base-wrapper .dps-nav-container .dps-nav li {
         margin: 0;
         width: 100%;
     }
-    
+
     .dps-base-wrapper .dps-nav-container .dps-nav .dps-tab-link {
         display: block;
         width: 100%;
@@ -1368,54 +1368,54 @@
         text-align: left;
         font-size: 15px;
     }
-    
+
     .dps-base-wrapper .dps-nav-container .dps-nav li:last-child .dps-tab-link {
         border-bottom: none;
     }
-    
+
     .dps-base-wrapper .dps-nav-container .dps-nav .dps-tab-link:hover,
     .dps-base-wrapper .dps-nav-container .dps-nav .dps-tab-link:focus {
         background: var(--dps-color-surface-container-low);
         color: var(--dps-color-primary);
     }
-    
+
     .dps-base-wrapper .dps-nav-container .dps-nav .dps-tab-link.active {
         background: var(--dps-color-primary-container);
         color: var(--dps-color-primary);
         font-weight: 500;
     }
-    /* === FIM NAVEGAÇÃO RESPONSIVA === */
-    
-    /* Ajustar padding das células em mobile */
+    /* === FIM NAVEGAÃ‡ÃƒO RESPONSIVA === */
+
+    /* Ajustar padding das cÃ©lulas em mobile */
     .dps-table th,
     .dps-table td {
         padding: 8px 6px;
         font-size: 0.875rem;
     }
-    
+
     /* Esconder colunas menos importantes em mobile */
     .dps-table .hide-mobile {
         display: none;
     }
-    
+
     /* Ajustar tabela dentro do wrapper */
     .dps-table-wrapper .dps-table {
         min-width: 600px;
         white-space: nowrap;
     }
-    
-    /* Grid de formulários empilha em coluna única */
+
+    /* Grid de formulÃ¡rios empilha em coluna Ãºnica */
     .dps-form-row--2col,
     .dps-form-row--3col {
         grid-template-columns: 1fr;
     }
-    
+
     /* Ajustes para fieldsets */
     .dps-fieldset {
         padding: var(--dps-space-4);
         margin-bottom: var(--dps-space-4);
     }
-    
+
     /* Reduzir padding em inputs e selects para mobile */
     .dps-form input[type="text"],
     .dps-form input[type="email"],
@@ -1426,16 +1426,16 @@
     .dps-form select,
     .dps-form textarea {
         padding: var(--dps-space-3);
-        font-size: 16px; /* iOS: prevents auto-zoom on input focus (Apple HIG requires ≥16px) */
+        font-size: 16px; /* iOS: prevents auto-zoom on input focus (Apple HIG requires â‰¥16px) */
         min-height: 44px;
     }
-    
+
     /* Inputs de valor em mobile */
     .dps-form input.dps-input-money {
         width: 100%;
         max-width: 180px;
     }
-    
+
     /* Compactar grupos de agendamentos em mobile */
     .dps-appointments-group {
         padding: 12px;
@@ -1451,35 +1451,35 @@
         padding: 6px 4px;
         font-size: 0.8125rem;
     }
-    
+
     .dps-table-wrapper .dps-table {
         min-width: 450px;
     }
-    
-    /* Reduzir ainda mais o espaçamento dos grupos */
+
+    /* Reduzir ainda mais o espaÃ§amento dos grupos */
     .dps-appointments-group {
         padding: 12px;
         margin-top: 12px;
         margin-bottom: 12px;
         border-radius: var(--dps-shape-extra-small);
     }
-    
+
     .dps-appointments-group h4 {
         font-size: 0.95rem;
         margin-bottom: 10px;
         flex-wrap: wrap;
     }
-    
+
     .dps-appointments-group h4::before {
         font-size: 0.9em;
     }
-    
+
     .dps-group-badge {
         font-size: 0.7rem;
         min-width: 18px;
         height: 18px;
     }
-    
+
     /* Campo de busca em mobile pequeno */
     .dps-appointments .dps-appointments-search {
         padding: 10px 12px 10px 34px;
@@ -1487,19 +1487,19 @@
         background-size: 14px;
         background-position: 10px center;
     }
-    
-    /* Título principal em mobile */
+
+    /* TÃ­tulo principal em mobile */
     .dps-appointments > h3 {
         font-size: 1.15rem;
         padding-bottom: 10px;
     }
-    
+
     .dps-appointments > h3::before {
         font-size: 1em;
     }
 }
 
-/* Grid responsivo para formulários */
+/* Grid responsivo para formulÃ¡rios */
 .dps-form-row {
     display: grid;
     gap: var(--dps-space-4);
@@ -1523,9 +1523,9 @@
     margin: 0;
 }
 
-/* === FORMULÁRIO DE AGENDAMENTO - LAYOUT MELHORADO === */
+/* === FORMULÃRIO DE AGENDAMENTO - LAYOUT MELHORADO === */
 
-/* Fieldsets padronizados — padrão DPS Signature */
+/* Fieldsets padronizados â€” padrÃ£o DPS Signature */
 .dps-fieldset {
     border: none;
     border-left: 3px solid var(--dps-color-primary);
@@ -1549,12 +1549,12 @@
     gap: var(--dps-space-2);
 }
 
-/* Ícones para cada seção do formulário */
+/* Ãcones para cada seÃ§Ã£o do formulÃ¡rio */
 .dps-fieldset__legend::before {
     font-size: 1.1em;
 }
 
-/* Descrição do fieldset */
+/* DescriÃ§Ã£o do fieldset */
 .dps-fieldset__description {
     font-size: var(--dps-typescale-body-medium-size);
     line-height: var(--dps-typescale-body-medium-line);
@@ -1562,7 +1562,7 @@
     margin: 0 0 var(--dps-space-4);
 }
 
-/* Labels de formulário — padrão DPS Signature */
+/* Labels de formulÃ¡rio â€” padrÃ£o DPS Signature */
 .dps-form label {
     display: block;
     font-size: var(--dps-typescale-label-large-size);
@@ -1581,7 +1581,7 @@
 
 /* ---- Appointment form section colorization (scoped to .dps-surface context) ---- */
 
-/* Seção 1: Tipo de Agendamento */
+/* SeÃ§Ã£o 1: Tipo de Agendamento */
 .dps-surface .dps-fieldset:nth-of-type(1) {
     border-left-color: var(--dps-color-tertiary);
 }
@@ -1590,7 +1590,7 @@
     color: var(--dps-color-on-tertiary-container);
 }
 
-/* Seção 2: Cliente e Pet(s) */
+/* SeÃ§Ã£o 2: Cliente e Pet(s) */
 .dps-surface .dps-fieldset:nth-of-type(2) {
     border-left-color: var(--dps-color-primary);
 }
@@ -1599,7 +1599,7 @@
     color: var(--dps-color-primary-pressed);
 }
 
-/* Seção 3: Data e Horário */
+/* SeÃ§Ã£o 3: Data e HorÃ¡rio */
 .dps-surface .dps-fieldset:nth-of-type(3) {
     border-left-color: var(--dps-color-warning);
 }
@@ -1608,7 +1608,7 @@
     color: var(--dps-color-on-warning-container);
 }
 
-/* Seção 4: Serviços e Extras */
+/* SeÃ§Ã£o 4: ServiÃ§os e Extras */
 .dps-surface .dps-fieldset:nth-of-type(4) {
     border-left-color: var(--dps-color-success);
 }
@@ -1617,7 +1617,7 @@
     color: var(--dps-color-on-success-container);
 }
 
-/* Seção 5: Pagamento (agendamentos passados) */
+/* SeÃ§Ã£o 5: Pagamento (agendamentos passados) */
 #dps-past-payment-wrapper {
     border-left-color: var(--dps-color-error);
 }
@@ -1626,7 +1626,7 @@
     color: var(--dps-color-on-error-container);
 }
 
-/* Seção 6: Observações */
+/* SeÃ§Ã£o 6: ObservaÃ§Ãµes */
 .dps-surface .dps-fieldset:last-of-type {
     border-left-color: var(--dps-color-on-surface-variant);
 }
@@ -1635,13 +1635,13 @@
     color: var(--dps-color-on-surface);
 }
 
-/* Indicador de campo obrigatório */
+/* Indicador de campo obrigatÃ³rio */
 .dps-required {
     color: var(--dps-color-error);
     font-weight: 500;
 }
 
-/* Checkbox melhorado — inline-flex, 18px, accent-color, weight 400 */
+/* Checkbox melhorado â€” inline-flex, 18px, accent-color, weight 400 */
 .dps-checkbox-label {
     display: inline-flex;
     align-items: center;
@@ -1673,7 +1673,7 @@
     flex: 1;
 }
 
-/* Upload de arquivo estilizado — container DPS Signature */
+/* Upload de arquivo estilizado â€” container DPS Signature */
 .dps-file-upload {
     margin-bottom: var(--dps-space-4);
 }
@@ -1729,7 +1729,7 @@
     border: 1px solid var(--dps-color-outline-variant);
 }
 
-/* Botão de submit — DPS Signature filled button */
+/* BotÃ£o de submit â€” DPS Signature filled button */
 .dps-submit-btn {
     display: inline-flex;
     align-items: center;
@@ -1774,7 +1774,7 @@
     transform: none;
 }
 
-/* Variante secundária — DPS Signature tonal */
+/* Variante secundÃ¡ria â€” DPS Signature tonal */
 .dps-submit-btn--secondary {
     background: var(--dps-color-surface-container-high);
     color: var(--dps-color-on-surface);
@@ -1863,7 +1863,7 @@
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--dps-color-primary) 20%, transparent);
 }
 
-/* === SEÇÃO TAXIDOG INDEPENDENTE === */
+/* === SEÃ‡ÃƒO TAXIDOG INDEPENDENTE === */
 .dps-taxidog-section {
     margin: 24px 0;
 }
@@ -1999,7 +1999,7 @@
     text-align: right;
 }
 
-/* === SEÇÃO DE TOSA (para assinaturas) === */
+/* === SEÃ‡ÃƒO DE TOSA (para assinaturas) === */
 .dps-tosa-section {
     margin: 16px 0;
 }
@@ -2104,17 +2104,17 @@
     .dps-tosa-card {
         padding: 16px;
     }
-    
+
     .dps-tosa-card__fields {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-tosa-title {
         font-size: 16px;
     }
 }
 
-/* === SEÇÃO DE ATRIBUIÇÃO === */
+/* === SEÃ‡ÃƒO DE ATRIBUIÃ‡ÃƒO === */
 .dps-assignment-fieldset {
     border-left-color: var(--dps-color-tertiary) !important;
     background: var(--dps-color-tertiary-container) !important;
@@ -2154,7 +2154,7 @@
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--dps-color-tertiary) 20%, transparent);
 }
 
-/* Inputs de valores monetários */
+/* Inputs de valores monetÃ¡rios */
 .dps-form input.dps-input-money {
     width: 120px;
     max-width: 100%;
@@ -2235,7 +2235,7 @@
     grid-column: 1 / -1;
 }
 
-/* Item de serviços ocupa toda a largura para melhor visualização */
+/* Item de serviÃ§os ocupa toda a largura para melhor visualizaÃ§Ã£o */
 .dps-appointment-summary__list li.dps-summary-services-item {
     grid-column: 1 / -1;
     flex-direction: column;
@@ -2278,7 +2278,7 @@
     word-break: break-word;
 }
 
-/* Lista de serviços no resumo - formato visual melhorado */
+/* Lista de serviÃ§os no resumo - formato visual melhorado */
 .dps-summary-services-list {
     list-style: none;
     margin: 8px 0 0 0;
@@ -2307,7 +2307,7 @@
     color: var(--dps-color-on-warning-container);
 }
 
-/* Mensagens de erro do formulário */
+/* Mensagens de erro do formulÃ¡rio */
 .dps-form-error {
     background: var(--dps-color-error-container);
     border: 1px solid var(--dps-color-error-container);
@@ -2403,7 +2403,7 @@
     z-index: 10;
 }
 
-/* === AÇÕES DO FORMULÁRIO - DESTAQUE === */
+/* === AÃ‡Ã•ES DO FORMULÃRIO - DESTAQUE === */
 .dps-form-actions {
     display: flex;
     flex-wrap: wrap;
@@ -2478,8 +2478,8 @@
 }
 
 /* Estado selecionado - com fallback usando classe .is-selected para browsers antigos
-   Nota: O checkmark visual (✓) é decorativo; o estado selecionado é comunicado
-   pelo input radio nativo que é acessível por screen readers */
+   Nota: O checkmark visual (âœ“) Ã© decorativo; o estado selecionado Ã© comunicado
+   pelo input radio nativo que Ã© acessÃ­vel por screen readers */
 .dps-radio-option.is-selected,
 .dps-radio-option:has(input:checked) {
     border-color: var(--dps-color-primary);
@@ -2489,15 +2489,15 @@
 
 .dps-radio-option.is-selected::before,
 .dps-radio-option:has(input:checked)::before {
-    content: '✓';
+    content: 'âœ“';
     position: absolute;
     top: 8px;
     right: 10px;
     font-size: 12px;
     color: var(--dps-color-primary);
     font-weight: 500;
-    /* aria-hidden via CSS não é possível, mas o input radio nativo
-       já comunica o estado selecionado para screen readers */
+    /* aria-hidden via CSS nÃ£o Ã© possÃ­vel, mas o input radio nativo
+       jÃ¡ comunica o estado selecionado para screen readers */
 }
 
 /* Fallback adicional para browsers antigos */
@@ -2534,12 +2534,12 @@
     .dps-summary-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-form-actions {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .dps-form-actions .dps-btn {
         width: 100%;
     }
@@ -2549,8 +2549,8 @@
     .dps-pet-list {
         grid-template-columns: 1fr;
     }
-    
-    /* Ajustar todos os inputs de formulário em mobile pequeno */
+
+    /* Ajustar todos os inputs de formulÃ¡rio em mobile pequeno */
     .dps-form input[type="text"],
     .dps-form input[type="email"],
     .dps-form input[type="date"],
@@ -2560,64 +2560,64 @@
         font-size: 16px;
         padding: 10px 8px;
     }
-    
-    /* Textarea também precisa de ajuste */
+
+    /* Textarea tambÃ©m precisa de ajuste */
     .dps-form textarea {
         font-size: 16px;
         padding: 10px 8px;
     }
-    
+
     .dps-alert {
         padding: 12px 16px;
         font-size: 14px;
     }
-    
+
     .dps-submit-btn {
         width: 100%;
     }
-    
+
     .dps-conditional-field {
         padding-left: 12px;
     }
-    
+
     .dps-appointment-summary {
         padding: 16px;
         margin: 24px auto 16px auto;
     }
-    
+
     .dps-appointment-summary__list {
         grid-template-columns: 1fr;
         gap: 8px;
     }
-    
-    /* Reduzir largura mínima dos labels em telas pequenas */
+
+    /* Reduzir largura mÃ­nima dos labels em telas pequenas */
     .dps-appointment-summary__list strong {
         min-width: 100px;
         font-size: 13px;
     }
-    
+
     .dps-appointment-summary__list li {
         font-size: 13px;
         justify-content: flex-start;
     }
-    
+
     .dps-appointment-summary h3 {
         font-size: 16px;
     }
-    
+
     /* Inputs de valor em mobile pequeno */
     .dps-form input.dps-input-money {
         width: 100%;
         max-width: 150px;
-        font-size: 16px; /* Evita zoom automático no iOS */
+        font-size: 16px; /* Evita zoom automÃ¡tico no iOS */
     }
-    
-    /* Reduzir padding em fieldsets para aproveitar espaço */
+
+    /* Reduzir padding em fieldsets para aproveitar espaÃ§o */
     .dps-fieldset {
         padding: 12px;
         margin-bottom: 12px;
     }
-    
+
     /* Labels e textos menores em telas muito pequenas */
     .dps-fieldset__legend {
         font-size: 15px;
@@ -2634,23 +2634,23 @@
         padding: 8px;
         margin-top: 8px;
     }
-    
+
     .dps-pet-list::-webkit-scrollbar {
         width: 8px;
     }
-    
+
     .dps-pet-list::-webkit-scrollbar-thumb {
         background: var(--dps-color-outline-variant);
         border-radius: var(--dps-shape-extra-small);
     }
-    
+
     .dps-pet-list::-webkit-scrollbar-track {
         background: var(--dps-color-surface-container-low);
     }
 }
 
 /* ================================================
-   PÁGINA DE DETALHES DO CLIENTE
+   PÃGINA DE DETALHES DO CLIENTE
    ================================================ */
 
 /* Container principal */
@@ -2660,7 +2660,7 @@
     padding: 0 16px;
 }
 
-/* Barra de navegação superior */
+/* Barra de navegaÃ§Ã£o superior */
 .dps-client-nav {
     margin-bottom: 16px;
 }
@@ -2679,7 +2679,7 @@
     color: var(--dps-color-primary);
 }
 
-/* Header principal com título e ações primárias */
+/* Header principal com tÃ­tulo e aÃ§Ãµes primÃ¡rias */
 .dps-client-header {
     display: flex;
     flex-wrap: wrap;
@@ -2714,7 +2714,7 @@
     gap: 8px;
 }
 
-/* Painel de Ações Rápidas */
+/* Painel de AÃ§Ãµes RÃ¡pidas */
 .dps-quick-actions-panel {
     background: var(--dps-color-primary-container);
     border: 1px solid var(--dps-color-primary-container);
@@ -2749,7 +2749,7 @@
     gap: 16px;
 }
 
-/* Grupo de ações dentro do painel */
+/* Grupo de aÃ§Ãµes dentro do painel */
 .dps-quick-action-group {
     background: var(--dps-color-surface-container-lowest);
     border: 1px solid var(--dps-color-primary-container);
@@ -2785,7 +2785,7 @@
     gap: 10px;
 }
 
-/* Ajustes para elementos dentro do painel de ações rápidas */
+/* Ajustes para elementos dentro do painel de aÃ§Ãµes rÃ¡pidas */
 .dps-quick-actions-panel .dps-consent-status {
     display: flex;
     flex-direction: column;
@@ -2807,18 +2807,18 @@
     white-space: nowrap;
 }
 
-/* Responsividade do painel de ações rápidas */
+/* Responsividade do painel de aÃ§Ãµes rÃ¡pidas */
 @media (max-width: 600px) {
     .dps-quick-action-group__content {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .dps-quick-action-group__content .dps-btn-action {
         width: 100%;
         justify-content: center;
     }
-    
+
     .dps-quick-action-group__content .dps-consent-link-container,
     .dps-quick-action-group__content .dps-profile-update-link-container {
         flex-direction: column;
@@ -2847,7 +2847,7 @@
     gap: 8px;
 }
 
-/* Cards de resumo/métricas */
+/* Cards de resumo/mÃ©tricas */
 .dps-client-summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -2896,7 +2896,7 @@
     letter-spacing: 0.025em;
 }
 
-/* Seções de informações */
+/* SeÃ§Ãµes de informaÃ§Ãµes */
 .dps-client-section {
     background: var(--dps-color-surface-container-lowest);
     border: 1px solid var(--dps-color-outline-variant);
@@ -2947,7 +2947,7 @@
     padding: 20px;
 }
 
-/* Seção com estilo alternativo para notas */
+/* SeÃ§Ã£o com estilo alternativo para notas */
 .dps-client-section--notes {
     background: var(--dps-color-warning-container);
     border-color: var(--dps-color-warning-container);
@@ -2965,7 +2965,7 @@
     color: var(--dps-color-on-surface-variant);
 }
 
-/* Formulário de notas internas */
+/* FormulÃ¡rio de notas internas */
 .dps-notes-form {
     display: flex;
     flex-direction: column;
@@ -3014,7 +3014,7 @@
     color: var(--dps-color-error);
 }
 
-/* Grid de informações do cliente */
+/* Grid de informaÃ§Ãµes do cliente */
 .dps-info-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -3171,7 +3171,7 @@
 }
 
 .dps-pet-card__notes::before {
-    content: '📋 ';
+    content: 'ðŸ“‹ ';
 }
 
 .dps-pet-card__actions {
@@ -3271,7 +3271,7 @@
     margin-top: 12px;
 }
 
-/* Ações na tabela de atendimentos */
+/* AÃ§Ãµes na tabela de atendimentos */
 .dps-table .dps-actions-cell {
     white-space: nowrap;
 }
@@ -3286,7 +3286,7 @@
     color: var(--dps-color-primary);
 }
 
-/* Botões de ação no header */
+/* BotÃµes de aÃ§Ã£o no header */
 .dps-btn-action {
     display: inline-flex;
     align-items: center;
@@ -3345,7 +3345,7 @@
     color: var(--dps-color-on-error-container);
 }
 
-/* Container para link de atualização de perfil */
+/* Container para link de atualizaÃ§Ã£o de perfil */
 .dps-profile-update-link-container {
     display: flex;
     align-items: center;
@@ -3357,49 +3357,49 @@
     color: var(--dps-color-on-surface-variant);
 }
 
-/* Responsividade da página de detalhes */
+/* Responsividade da pÃ¡gina de detalhes */
 @media (max-width: 768px) {
     .dps-client-detail {
         padding: 0 12px;
     }
-    
+
     .dps-client-header {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .dps-client-header__title {
         order: -1;
         width: 100%;
     }
-    
+
     .dps-client-header__actions {
         width: 100%;
         justify-content: flex-start;
     }
-    
+
     .dps-client-summary {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .dps-pet-cards {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-info-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-client-section__header {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
-    
+
     .dps-client-section__actions {
         width: 100%;
     }
-    
+
     .dps-client-section__actions .button {
         flex: 1;
     }
@@ -3409,19 +3409,19 @@
     .dps-client-summary {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-summary-card {
         padding: 12px;
     }
-    
+
     .dps-pet-card__info {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-pet-card__actions {
         flex-direction: column;
     }
-    
+
     .dps-btn-action {
         width: 100%;
         justify-content: center;
@@ -3429,15 +3429,15 @@
 }
 
 /* ================================================
-   ABA HISTÓRICO - LAYOUT REDESENHADO
+   ABA HISTÃ“RICO - LAYOUT REDESENHADO
    ================================================ */
 
-/* Grid da seção de histórico - sempre uma coluna para melhor legibilidade */
+/* Grid da seÃ§Ã£o de histÃ³rico - sempre uma coluna para melhor legibilidade */
 #dps-section-historico .dps-section-grid {
     grid-template-columns: 1fr;
 }
 
-/* Header da seção de histórico */
+/* Header da seÃ§Ã£o de histÃ³rico */
 .dps-history-header {
     margin-bottom: 24px;
 }
@@ -3455,12 +3455,12 @@
     color: var(--dps-color-on-surface-variant);
 }
 
-/* Container de visão geral */
+/* Container de visÃ£o geral */
 .dps-history-overview {
     margin-bottom: 32px;
 }
 
-/* Cards de métricas */
+/* Cards de mÃ©tricas */
 .dps-history-cards {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -3517,7 +3517,7 @@
     letter-spacing: 0.025em;
 }
 
-/* Variações de cores para cada card */
+/* VariaÃ§Ãµes de cores para cada card */
 .dps-history-card--today {
     border-left: 4px solid var(--dps-color-primary);
 }
@@ -3662,7 +3662,7 @@
     cursor: pointer;
 }
 
-/* Botões de período rápido */
+/* BotÃµes de perÃ­odo rÃ¡pido */
 .dps-history-quick-filters {
     display: flex;
     flex-wrap: wrap;
@@ -3698,16 +3698,16 @@
     color: var(--dps-color-on-primary) !important;
 }
 
-/* Responsividade da aba Histórico */
+/* Responsividade da aba HistÃ³rico */
 @media (max-width: 1024px) {
     .dps-history-cards {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .dps-history-filters__row {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .dps-history-filter--checkbox {
         grid-column: 1 / -1;
         padding-top: 0;
@@ -3719,52 +3719,52 @@
         grid-template-columns: 1fr 1fr;
         gap: 12px;
     }
-    
+
     .dps-history-card {
         padding: 16px;
         gap: 12px;
     }
-    
+
     .dps-history-card__icon {
         width: 40px;
         height: 40px;
         font-size: 22px;
     }
-    
+
     .dps-history-card__value {
         font-size: 20px;
     }
-    
+
     .dps-history-card__label {
         font-size: 11px;
     }
-    
+
     .dps-history-toolbar {
         padding: 16px;
     }
-    
+
     .dps-history-toolbar__header {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
-    
+
     .dps-history-toolbar__actions {
         width: 100%;
     }
-    
+
     .dps-history-toolbar__actions .button {
         flex: 1;
     }
-    
+
     .dps-history-filters__row {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-history-quick-filters {
         flex-wrap: wrap;
     }
-    
+
     .dps-history-quick-btn {
         flex: 1 1 calc(50% - 8px);
         min-width: 80px;
@@ -3776,15 +3776,15 @@
     .dps-history-cards {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-history-card {
         padding: 14px;
     }
-    
+
     .dps-history-card__value {
         font-size: 18px;
     }
-    
+
     .dps-history-quick-btn {
         flex: 1 1 100%;
     }
@@ -3863,7 +3863,7 @@
     font-size: 16px;
 }
 
-/* Variante de painel para cards de informação - usado em seções Clientes e Pets */
+/* Variante de painel para cards de informaÃ§Ã£o - usado em seÃ§Ãµes Clientes e Pets */
 .dps-inline-stats--panel {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     margin-bottom: 16px;
@@ -3893,7 +3893,7 @@
     line-height: 1;
 }
 
-/* Ajustes específicos da aba Clientes */
+/* Ajustes especÃ­ficos da aba Clientes */
 #dps-section-clientes .dps-section-grid {
     grid-template-columns: 1fr;
 }
@@ -3967,7 +3967,7 @@
     margin-left: 8px;
 }
 
-/* Card de edição de cliente */
+/* Card de ediÃ§Ã£o de cliente */
 #dps-section-clientes .dps-clients-edit-card {
     max-width: 800px;
 }
@@ -3997,7 +3997,7 @@
     background: var(--dps-color-error-container);
 }
 
-/* Título da seção */
+/* TÃ­tulo da seÃ§Ã£o */
 .dps-section-title {
     display: flex;
     align-items: center;
@@ -4015,7 +4015,7 @@
     font-size: 1.1em;
 }
 
-/* Ajustes específicos da aba Pets */
+/* Ajustes especÃ­ficos da aba Pets */
 #dps-section-pets .dps-section-title__icon {
     font-size: 1.2em;
 }
@@ -4036,12 +4036,12 @@
     padding: 24px;
 }
 
-/* Seção do formulário ao final */
+/* SeÃ§Ã£o do formulÃ¡rio ao final */
 #dps-section-pets .dps-pets-form-section {
     margin-top: 24px;
 }
 
-/* Card de edição de pet */
+/* Card de ediÃ§Ã£o de pet */
 #dps-section-pets .dps-pets-edit-card .dps-surface__description {
     display: flex;
     align-items: center;
@@ -4049,7 +4049,7 @@
     gap: 8px;
 }
 
-/* Estatísticas de agendamentos na lista de pets */
+/* EstatÃ­sticas de agendamentos na lista de pets */
 .dps-pet-appointments-info {
     display: flex;
     flex-direction: column;
@@ -4086,7 +4086,7 @@
     }
 }
 
-/* Células especiais na tabela */
+/* CÃ©lulas especiais na tabela */
 .dps-pet-cell {
     display: flex;
     align-items: center;
@@ -4101,7 +4101,7 @@
     font-weight: 500;
 }
 
-/* Badge de espécie */
+/* Badge de espÃ©cie */
 .dps-species-badge {
     display: inline-flex;
     align-items: center;
@@ -4171,7 +4171,7 @@
     border-left: 4px solid var(--dps-color-error);
 }
 
-/* Ações na tabela */
+/* AÃ§Ãµes na tabela */
 .dps-actions {
     display: flex;
     flex-wrap: wrap;
@@ -4179,7 +4179,7 @@
     gap: 4px;
 }
 
-/* Variante empilhada para cards de informação */
+/* Variante empilhada para cards de informaÃ§Ã£o */
 .dps-actions--stacked {
     flex-direction: column;
     align-items: stretch;
@@ -4191,7 +4191,7 @@
     justify-content: center;
 }
 
-/* Variante inline para botões de ação compactos e elegantes */
+/* Variante inline para botÃµes de aÃ§Ã£o compactos e elegantes */
 .dps-actions--inline {
     flex-direction: row;
     align-items: flex-start;
@@ -4290,43 +4290,43 @@
         padding-top: 16px;
         font-size: 16px;
     }
-    
+
     .dps-list-toolbar {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .dps-list-toolbar .dps-search {
         min-width: 0;
         width: 100%;
     }
-    
+
     .dps-list-toolbar .button {
         width: 100%;
         text-align: center;
     }
-    
+
     .dps-actions {
         flex-wrap: nowrap;
     }
-    
+
     .dps-action-link {
         font-size: 12px;
         padding: 2px 2px;
     }
-    
-    /* Botões de ação inline em mobile - manter tamanho adequado para toque */
+
+    /* BotÃµes de aÃ§Ã£o inline em mobile - manter tamanho adequado para toque */
     .dps-actions--inline .button {
         padding: 12px 20px;
         font-size: 15px;
-        min-height: 44px; /* Área mínima de toque recomendada */
+        min-height: 44px; /* Ãrea mÃ­nima de toque recomendada */
     }
-    
-    /* Cards de estatísticas em 2 colunas para tablet */
+
+    /* Cards de estatÃ­sticas em 2 colunas para tablet */
     .dps-inline-stats--panel {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     /* Surface cards ajustados */
     .dps-surface {
         padding: 20px;
@@ -4334,8 +4334,8 @@
 }
 
 @media (max-width: 480px) {
-    /* Reforço de prevenção de overflow para mobile pequeno */
-    /* box-sizing é adicionado aqui pois não está no breakpoint 768px */
+    /* ReforÃ§o de prevenÃ§Ã£o de overflow para mobile pequeno */
+    /* box-sizing Ã© adicionado aqui pois nÃ£o estÃ¡ no breakpoint 768px */
     .dps-base-wrapper,
     .dps-section,
     .dps-surface,
@@ -4344,76 +4344,76 @@
         overflow-x: hidden;
         box-sizing: border-box;
     }
-    
+
     .dps-section-title {
         font-size: 18px;
         margin-bottom: 16px;
         padding-bottom: 12px;
     }
-    
+
     .dps-list-header {
         font-size: 15px;
     }
-    
+
     .dps-size-badge,
     .dps-pets-badge {
         font-size: 11px;
         padding: 2px 6px;
     }
-    
-    /* === CORREÇÕES DE RESPONSIVIDADE PARA MOBILE === */
-    
-    /* Cards de estatísticas empilhados verticalmente em mobile */
+
+    /* === CORREÃ‡Ã•ES DE RESPONSIVIDADE PARA MOBILE === */
+
+    /* Cards de estatÃ­sticas empilhados verticalmente em mobile */
     .dps-inline-stats--panel {
         grid-template-columns: 1fr;
         gap: 8px;
     }
-    
+
     .dps-inline-stats--panel li {
         flex-direction: row;
         padding: 12px 14px;
         max-width: 100%;
         box-sizing: border-box;
     }
-    
+
     .dps-inline-stats__value {
         font-size: 18px;
     }
-    
+
     .dps-inline-stats__label small {
         display: none;
     }
-    
-    /* Ações de tabela mais compactas */
+
+    /* AÃ§Ãµes de tabela mais compactas */
     .dps-action-separator {
         display: none;
     }
-    
+
     .dps-actions {
         flex-direction: column;
         gap: 4px;
         align-items: flex-start;
     }
-    
+
     .dps-action-link {
         padding: 4px 0;
         font-size: 12px;
     }
-    
+
     /* Surface cards com menos padding */
     .dps-surface {
         padding: 16px;
     }
-    
+
     .dps-surface__title {
         font-size: 14px;
     }
-    
+
     /* Lista de toolbar empilhada */
     .dps-list-toolbar {
         gap: 8px;
     }
-    
+
     .dps-list-toolbar .dps-search,
     .dps-list-toolbar .dps-filter-control,
     .dps-list-toolbar .button {
@@ -4423,7 +4423,7 @@
     }
 }
 
-/* === Card Component para Formulários === */
+/* === Card Component para FormulÃ¡rios === */
 .dps-card {
     background: var(--dps-color-surface-container-lowest);
     border: 1px solid var(--dps-color-outline-variant);
@@ -4486,12 +4486,12 @@
         gap: 16px;
         padding: 16px 20px;
     }
-    
+
     .dps-card__actions {
         width: 100%;
         justify-content: flex-start;
     }
-    
+
     .dps-card__body {
         padding: 16px 20px 20px;
     }
@@ -4501,21 +4501,21 @@
     .dps-card__header {
         padding: 12px 16px;
     }
-    
+
     .dps-card__body {
         padding: 12px 16px 16px;
     }
-    
+
     .dps-card__title {
         font-size: 18px;
     }
 }
 
 /* ================================================
-   HISTÓRICO - MELHORIAS DE LAYOUT v2.0
+   HISTÃ“RICO - MELHORIAS DE LAYOUT v2.0
    ================================================ */
 
-/* Container de métricas fora do grid */
+/* Container de mÃ©tricas fora do grid */
 .dps-history-metrics {
     margin-bottom: 24px;
 }
@@ -4525,7 +4525,7 @@
     grid-template-columns: repeat(5, 1fr);
 }
 
-/* Card de pendências (a receber) */
+/* Card de pendÃªncias (a receber) */
 .dps-history-card--pending {
     border-left: 4px solid var(--dps-color-warning);
 }
@@ -4559,7 +4559,7 @@
     color: var(--dps-color-success);
 }
 
-/* Links de ação na tabela de histórico */
+/* Links de aÃ§Ã£o na tabela de histÃ³rico */
 .dps-history-actions {
     white-space: nowrap;
 }
@@ -4612,12 +4612,12 @@
     color: var(--dps-color-on-error-container);
 }
 
-/* Tooltip para ícones em desktop */
+/* Tooltip para Ã­cones em desktop */
 @media (min-width: 1200px) {
     .dps-action-link .dps-action-text {
         display: inline;
     }
-    
+
     .dps-action-link .dps-action-icon {
         display: none;
     }
@@ -4640,17 +4640,17 @@
     .dps-history-cards--five {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-action-link .dps-action-text {
         display: none !important;
     }
-    
+
     .dps-action-link .dps-action-icon {
         display: inline !important;
     }
 }
 
-/* Resumo dinâmico melhorado */
+/* Resumo dinÃ¢mico melhorado */
 .dps-history-summary {
     display: flex;
     flex-wrap: wrap;
@@ -4709,12 +4709,12 @@
     color: var(--dps-color-on-warning-container);
 }
 
-/* Título da toolbar com ícone */
+/* TÃ­tulo da toolbar com Ã­cone */
 .dps-history-toolbar__title .dps-section-title__icon {
     margin-right: 6px;
 }
 
-/* Botões na toolbar com ícone */
+/* BotÃµes na toolbar com Ã­cone */
 .dps-history-toolbar__actions .button span {
     margin-right: 4px;
 }
@@ -4724,13 +4724,13 @@
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .dps-history-summary__content {
         flex-direction: column;
         align-items: flex-start;
         gap: 4px;
     }
-    
+
     .dps-history-summary__separator {
         display: none;
     }
@@ -4755,7 +4755,7 @@
     color: var(--dps-color-outline);
 }
 
-/* Seção de timeline de histórico */
+/* SeÃ§Ã£o de timeline de histÃ³rico */
 .dps-history-timeline-section {
     margin-bottom: 24px;
 }
@@ -4783,10 +4783,10 @@
 }
 
 /* ================================================
-   PÁGINA DE CONFIGURAÇÕES - FRONTEND
+   PÃGINA DE CONFIGURAÃ‡Ã•ES - FRONTEND
    ================================================ */
 
-/* Container principal da página de configurações */
+/* Container principal da pÃ¡gina de configuraÃ§Ãµes */
 .dps-settings-wrapper {
     max-width: 960px;
     margin: 0 auto;
@@ -4802,12 +4802,12 @@
     color: var(--dps-color-on-surface);
 }
 
-/* Navegação de configurações */
+/* NavegaÃ§Ã£o de configuraÃ§Ãµes */
 .dps-settings-nav {
     margin-bottom: 0;
 }
 
-/* Seção de configurações */
+/* SeÃ§Ã£o de configuraÃ§Ãµes */
 .dps-settings-section {
     border: 1px solid var(--dps-color-outline-variant);
     border-top: none;
@@ -4820,7 +4820,7 @@
     display: block;
 }
 
-/* Formulário de configurações */
+/* FormulÃ¡rio de configuraÃ§Ãµes */
 .dps-settings-form {
     max-width: 100%;
 }
@@ -4829,7 +4829,7 @@
     margin-bottom: 24px;
 }
 
-/* Fieldset dentro de configurações */
+/* Fieldset dentro de configuraÃ§Ãµes */
 .dps-settings-section .dps-fieldset {
     margin: 0 0 24px 0;
     padding: 20px;
@@ -4850,7 +4850,7 @@
     margin-bottom: var(--dps-space-4);
 }
 
-/* Linhas de formulário — Settings context */
+/* Linhas de formulÃ¡rio â€” Settings context */
 .dps-settings-section .dps-form-row {
     margin-bottom: 20px;
 }
@@ -4906,7 +4906,7 @@
     line-height: 1.4;
 }
 
-/* Ações do formulário */
+/* AÃ§Ãµes do formulÃ¡rio */
 .dps-form-actions {
     margin-top: 24px;
     padding-top: 20px;
@@ -4926,7 +4926,7 @@
     margin-right: 6px;
 }
 
-/* Notice dentro de configurações */
+/* Notice dentro de configuraÃ§Ãµes */
 .dps-notice {
     display: flex;
     align-items: flex-start;
@@ -4982,24 +4982,24 @@
     color: var(--dps-color-error);
 }
 
-/* Responsividade para configurações */
+/* Responsividade para configuraÃ§Ãµes */
 @media (max-width: 768px) {
     .dps-settings-wrapper {
         padding: 0 16px;
     }
-    
+
     .dps-settings-wrapper .dps-page-title {
         font-size: 22px;
     }
-    
+
     .dps-settings-section {
         padding: 16px;
     }
-    
+
     .dps-settings-section .dps-fieldset {
         padding: 16px;
     }
-    
+
     .dps-settings-section .dps-form-row input[type="text"],
     .dps-settings-section .dps-form-row input[type="password"],
     .dps-settings-section .dps-form-row input[type="email"],
@@ -5008,7 +5008,7 @@
     }
 }
 
-/* Checkbox label para configurações — scoped */
+/* Checkbox label para configuraÃ§Ãµes â€” scoped */
 .dps-settings-section .dps-checkbox-label {
     display: inline-flex;
     align-items: center;
@@ -5044,10 +5044,10 @@
 }
 
 /* ========================================
- * FASE 4: Estilos para abas de automação
+ * FASE 4: Estilos para abas de automaÃ§Ã£o
  * ======================================== */
 
-/* Badge de próximo agendamento */
+/* Badge de prÃ³ximo agendamento */
 .dps-next-schedule {
     display: inline-block;
     margin-left: 12px;
@@ -5060,7 +5060,7 @@
     border-left: 3px solid var(--dps-color-success);
 }
 
-/* Campos de horário e número */
+/* Campos de horÃ¡rio e nÃºmero */
 .dps-form-row input[type="time"],
 .dps-form-row input[type="number"] {
     font-family: var(--dps-font-body);
@@ -5098,7 +5098,7 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-primary) 10%, transparent);
 }
 
-/* Espaçamento entre surfaces */
+/* EspaÃ§amento entre surfaces */
 .dps-settings-section .dps-surface + .dps-surface {
     margin-top: 20px;
 }
@@ -5121,7 +5121,7 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--dps-color-primary) 10%, transparent);
 }
 
-/* Notice de informação */
+/* Notice de informaÃ§Ã£o */
 .dps-notice--info {
     display: flex;
     align-items: flex-start;

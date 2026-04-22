@@ -1,9 +1,9 @@
-# Screenshots 2026-03-12 — Agenda (cabecalho minimalista)
+﻿# Screenshots 2026-03-12 â€” Agenda (cabecalho minimalista)
 
 ## Contexto
 - Objetivo da mudanca: reposicionar `Periodo ativo` para abaixo de `Agenda de Atendimentos` sem container visual e mover o seletor de data para o bloco `Ver:` com o mesmo padrao visual.
 - Ambiente: preview local estatico em `http://127.0.0.1:8766/docs/screenshots/2026-03-12/agenda-header-minimal-preview.html`.
-- Referencia de design M3 utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Referencia de design DPS Signature utilizada: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
 
 ## Antes/Depois
 - Antes: `Periodo ativo` ficava em badge separado no header e o seletor de data ficava no bloco superior.

@@ -1,9 +1,9 @@
-<?php
+﻿<?php
 /**
  * Google Integrations Settings Page
  *
- * Interface administrativa para configurar integrações com Google Calendar e Tasks.
- * 
+ * Interface administrativa para configurar integraÃ§Ãµes com Google Calendar e Tasks.
+ *
  * @package    DPS_Agenda_Addon
  * @subpackage Integrations
  * @since      2.0.0
@@ -15,15 +15,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Classe de configurações das integrações Google.
+ * Classe de configuraÃ§Ãµes das integraÃ§Ãµes Google.
  *
- * Adiciona uma aba "Integrações Google" no hub da Agenda
- * para gerenciar conexão OAuth e configurações de sincronização.
+ * Adiciona uma aba "IntegraÃ§Ãµes Google" no hub da Agenda
+ * para gerenciar conexÃ£o OAuth e configuraÃ§Ãµes de sincronizaÃ§Ã£o.
  *
  * @since 2.0.0
  */
 class DPS_Google_Integrations_Settings {
-    
+
     /**
      * Inicializa a classe.
      *
@@ -32,16 +32,16 @@ class DPS_Google_Integrations_Settings {
     public function __construct() {
         // Adiciona aba ao hub da Agenda
         add_filter( 'dps_agenda_hub_tabs', [ $this, 'add_tab' ], 20 );
-        
-        // Renderiza conteúdo da aba
+
+        // Renderiza conteÃºdo da aba
         add_action( 'dps_agenda_hub_tab_content_google-integrations', [ $this, 'render_tab_content' ] );
-        
-        // Processa ações (conectar, desconectar, salvar configurações)
+
+        // Processa aÃ§Ãµes (conectar, desconectar, salvar configuraÃ§Ãµes)
         add_action( 'admin_init', [ $this, 'handle_actions' ] );
     }
-    
+
     /**
-     * Adiciona aba "Integrações Google" ao hub da Agenda.
+     * Adiciona aba "IntegraÃ§Ãµes Google" ao hub da Agenda.
      *
      * @since 2.0.0
      *
@@ -49,24 +49,24 @@ class DPS_Google_Integrations_Settings {
      * @return array Abas com nova aba adicionada.
      */
     public function add_tab( $tabs ) {
-        $tabs['google-integrations'] = __( 'Integrações Google', 'dps-agenda-addon' );
+        $tabs['google-integrations'] = __( 'IntegraÃ§Ãµes Google', 'dps-agenda-addon' );
 
         return $tabs;
     }
 
     /**
-     * Renderiza conteúdo da aba de integrações.
+     * Renderiza conteÃºdo da aba de integraÃ§Ãµes.
      *
      * @since 2.0.0
      */
     public function render_tab_content() {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'dps-agenda-addon' ) );
+            wp_die( esc_html__( 'VocÃª nÃ£o tem permissÃ£o para acessar esta pÃ¡gina.', 'dps-agenda-addon' ) );
         }
 
         $is_connected = DPS_Google_Auth::is_connected();
 
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura de parâmetro.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura de parÃ¢metro.
         $message = isset( $_GET['message'] ) ? sanitize_text_field( wp_unslash( $_GET['message'] ) ) : '';
         ?>
         <div class="dps-agenda-admin-page dps-google-integrations-settings">
@@ -78,9 +78,9 @@ class DPS_Google_Integrations_Settings {
                 <div class="dps-agenda-admin-card__header">
                     <div>
                         <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'Agenda + Google Workspace', 'dps-agenda-addon' ); ?></p>
-                        <h2 class="dps-agenda-admin-subtitle"><?php esc_html_e( 'Integrações com Google Workspace', 'dps-agenda-addon' ); ?></h2>
+                        <h2 class="dps-agenda-admin-subtitle"><?php esc_html_e( 'IntegraÃ§Ãµes com Google Workspace', 'dps-agenda-addon' ); ?></h2>
                         <p class="dps-agenda-admin-description">
-                            <?php esc_html_e( 'Conecte o DPS com Google Calendar e Google Tasks para sincronizar agendamentos e tarefas administrativas seguindo o padrão visual M3 da Agenda.', 'dps-agenda-addon' ); ?>
+                            <?php esc_html_e( 'Conecte o DPS com Google Calendar e Google Tasks para sincronizar agendamentos e tarefas administrativas seguindo o padrÃ£o visual DPS Signature da Agenda.', 'dps-agenda-addon' ); ?>
                         </p>
                     </div>
                     <div class="dps-agenda-admin-chips">
@@ -102,7 +102,7 @@ class DPS_Google_Integrations_Settings {
     }
 
     /**
-     * Renderiza mensagem de feedback após operações.
+     * Renderiza mensagem de feedback apÃ³s operaÃ§Ãµes.
      *
      * @since 2.0.0
      *
@@ -112,15 +112,15 @@ class DPS_Google_Integrations_Settings {
         $messages = [
             'connected' => [
                 'type'    => 'success',
-                'message' => __( 'Conectado ao Google com sucesso! Agora configure as sincronizações desejadas.', 'dps-agenda-addon' ),
+                'message' => __( 'Conectado ao Google com sucesso! Agora configure as sincronizaÃ§Ãµes desejadas.', 'dps-agenda-addon' ),
             ],
             'disconnected' => [
                 'type'    => 'info',
-                'message' => __( 'Desconectado do Google. As sincronizações foram interrompidas.', 'dps-agenda-addon' ),
+                'message' => __( 'Desconectado do Google. As sincronizaÃ§Ãµes foram interrompidas.', 'dps-agenda-addon' ),
             ],
             'settings_saved' => [
                 'type'    => 'success',
-                'message' => __( 'Configurações salvas com sucesso!', 'dps-agenda-addon' ),
+                'message' => __( 'ConfiguraÃ§Ãµes salvas com sucesso!', 'dps-agenda-addon' ),
             ],
         ];
 
@@ -143,31 +143,31 @@ class DPS_Google_Integrations_Settings {
     }
 
     /**
-     * Renderiza seção de status de conexão.
+     * Renderiza seÃ§Ã£o de status de conexÃ£o.
      *
      * @since 2.0.0
      *
-     * @param bool $is_connected Se está conectado.
+     * @param bool $is_connected Se estÃ¡ conectado.
      */
     private function render_connection_status( $is_connected ) {
         $status_text = $is_connected
             ? __( 'Conectado ao Google', 'dps-agenda-addon' )
-            : __( 'Conexão pendente', 'dps-agenda-addon' );
+            : __( 'ConexÃ£o pendente', 'dps-agenda-addon' );
 
-        $status_icon = $is_connected ? '✓' : '!';
+        $status_icon = $is_connected ? 'âœ“' : '!';
         $status_chip = $is_connected ? 'dps-agenda-admin-chip--success' : 'dps-agenda-admin-chip--warning';
         ?>
         <div class="dps-agenda-admin-card dps-agenda-admin-card--subtle dps-google-status-card">
             <div class="dps-google-status-card__header">
                 <div>
-                    <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'Status da conexão', 'dps-agenda-addon' ); ?></p>
+                    <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'Status da conexÃ£o', 'dps-agenda-addon' ); ?></p>
                     <h3 class="dps-agenda-admin-subtitle">
                         <span class="dps-google-status-card__icon" aria-hidden="true"><?php echo esc_html( $status_icon ); ?></span>
                         <?php echo esc_html( $status_text ); ?>
                     </h3>
                     <p class="dps-agenda-admin-description">
                         <?php if ( $is_connected ) : ?>
-                            <?php esc_html_e( 'Sua conta Google está conectada e pronta para sincronizar agenda e tarefas.', 'dps-agenda-addon' ); ?>
+                            <?php esc_html_e( 'Sua conta Google estÃ¡ conectada e pronta para sincronizar agenda e tarefas.', 'dps-agenda-addon' ); ?>
                         <?php else : ?>
                             <?php esc_html_e( 'Conecte sua conta para ativar os fluxos de Calendar e Tasks no DPS.', 'dps-agenda-addon' ); ?>
                         <?php endif; ?>
@@ -185,7 +185,7 @@ class DPS_Google_Integrations_Settings {
 
                 if ( ! empty( $settings['connected_at'] ) ) {
                     $meta_items[] = sprintf(
-                        /* translators: %s: Data de conexão. */
+                        /* translators: %s: Data de conexÃ£o. */
                         __( 'Conectado em %s', 'dps-agenda-addon' ),
                         date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $settings['connected_at'] )
                     );
@@ -193,13 +193,13 @@ class DPS_Google_Integrations_Settings {
 
                 $webhook_data = get_option( 'dps_google_calendar_webhook' );
                 if ( ! empty( $webhook_data['id'] ) ) {
-                    $meta_items[] = __( 'Sincronização bidirecional ativa', 'dps-agenda-addon' );
+                    $meta_items[] = __( 'SincronizaÃ§Ã£o bidirecional ativa', 'dps-agenda-addon' );
 
                     if ( ! empty( $webhook_data['expiration'] ) ) {
                         $expires_at   = intval( $webhook_data['expiration'] / 1000 );
                         $meta_items[] = sprintf(
-                            /* translators: %s: Data de renovação. */
-                            __( 'Renovação automática em %s', 'dps-agenda-addon' ),
+                            /* translators: %s: Data de renovaÃ§Ã£o. */
+                            __( 'RenovaÃ§Ã£o automÃ¡tica em %s', 'dps-agenda-addon' ),
                             date_i18n( get_option( 'date_format' ), $expires_at )
                         );
                     }
@@ -218,7 +218,7 @@ class DPS_Google_Integrations_Settings {
                     <a
                         href="<?php echo esc_url( $this->get_disconnect_url() ); ?>"
                         class="dps-btn dps-btn--danger"
-                        onclick="return confirm('<?php echo esc_js( __( 'Tem certeza que deseja desconectar? As sincronizações serão interrompidas.', 'dps-agenda-addon' ) ); ?>');"
+                        onclick="return confirm('<?php echo esc_js( __( 'Tem certeza que deseja desconectar? As sincronizaÃ§Ãµes serÃ£o interrompidas.', 'dps-agenda-addon' ) ); ?>');"
                     >
                         <?php esc_html_e( 'Desconectar', 'dps-agenda-addon' ); ?>
                     </a>
@@ -229,7 +229,7 @@ class DPS_Google_Integrations_Settings {
     }
 
     /**
-     * Renderiza seção de conexão (quando não conectado).
+     * Renderiza seÃ§Ã£o de conexÃ£o (quando nÃ£o conectado).
      *
      * @since 2.0.0
      */
@@ -245,13 +245,13 @@ class DPS_Google_Integrations_Settings {
         $auth_url = DPS_Google_Auth::get_auth_url();
         ?>
         <div class="dps-agenda-admin-card dps-agenda-admin-card--subtle">
-            <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'Próximo passo', 'dps-agenda-addon' ); ?></p>
+            <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'PrÃ³ximo passo', 'dps-agenda-addon' ); ?></p>
             <h3 class="dps-agenda-admin-subtitle"><?php esc_html_e( 'Conectar com Google', 'dps-agenda-addon' ); ?></h3>
             <p class="dps-agenda-admin-description">
-                <?php esc_html_e( 'Clique no botão abaixo para autorizar o DPS a acessar sua conta Google.', 'dps-agenda-addon' ); ?>
+                <?php esc_html_e( 'Clique no botÃ£o abaixo para autorizar o DPS a acessar sua conta Google.', 'dps-agenda-addon' ); ?>
             </p>
             <p class="dps-agenda-admin-field__description">
-                <?php esc_html_e( 'Você será redirecionado para a página de consentimento do Google e retornará automaticamente para esta aba após a autorização.', 'dps-agenda-addon' ); ?>
+                <?php esc_html_e( 'VocÃª serÃ¡ redirecionado para a pÃ¡gina de consentimento do Google e retornarÃ¡ automaticamente para esta aba apÃ³s a autorizaÃ§Ã£o.', 'dps-agenda-addon' ); ?>
             </p>
 
             <div class="dps-agenda-admin-form-actions">
@@ -267,7 +267,7 @@ class DPS_Google_Integrations_Settings {
                 </article>
                 <article class="dps-agenda-admin-feature-card">
                     <h4><?php esc_html_e( 'Tasks', 'dps-agenda-addon' ); ?></h4>
-                    <p><?php esc_html_e( 'Cria tarefas automáticas para follow-ups, cobranças pendentes e rotinas administrativas.', 'dps-agenda-addon' ); ?></p>
+                    <p><?php esc_html_e( 'Cria tarefas automÃ¡ticas para follow-ups, cobranÃ§as pendentes e rotinas administrativas.', 'dps-agenda-addon' ); ?></p>
                 </article>
             </div>
         </div>
@@ -275,15 +275,15 @@ class DPS_Google_Integrations_Settings {
     }
 
     /**
-     * Renderiza instruções de configuração inicial.
+     * Renderiza instruÃ§Ãµes de configuraÃ§Ã£o inicial.
      *
      * @since 2.0.0
      */
     private function render_setup_instructions() {
         ?>
         <div class="dps-agenda-admin-card dps-agenda-admin-card--subtle">
-            <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'Preparação', 'dps-agenda-addon' ); ?></p>
-            <h3 class="dps-agenda-admin-subtitle"><?php esc_html_e( 'Configuração inicial necessária', 'dps-agenda-addon' ); ?></h3>
+            <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'PreparaÃ§Ã£o', 'dps-agenda-addon' ); ?></p>
+            <h3 class="dps-agenda-admin-subtitle"><?php esc_html_e( 'ConfiguraÃ§Ã£o inicial necessÃ¡ria', 'dps-agenda-addon' ); ?></h3>
             <p class="dps-agenda-admin-description">
                 <?php esc_html_e( 'Antes de conectar, configure as credenciais do Google Cloud Console:', 'dps-agenda-addon' ); ?>
             </p>
@@ -313,14 +313,14 @@ class DPS_Google_Integrations_Settings {
             </ol>
 
             <p class="dps-agenda-admin-field__description">
-                <?php esc_html_e( 'Depois de configurar as credenciais, recarregue esta página para liberar a conexão.', 'dps-agenda-addon' ); ?>
+                <?php esc_html_e( 'Depois de configurar as credenciais, recarregue esta pÃ¡gina para liberar a conexÃ£o.', 'dps-agenda-addon' ); ?>
             </p>
         </div>
         <?php
     }
 
     /**
-     * Renderiza seção de configurações de sincronização (quando conectado).
+     * Renderiza seÃ§Ã£o de configuraÃ§Ãµes de sincronizaÃ§Ã£o (quando conectado).
      *
      * @since 2.0.0
      */
@@ -330,10 +330,10 @@ class DPS_Google_Integrations_Settings {
         $sync_tasks    = ! empty( $settings['sync_tasks'] );
         ?>
         <div class="dps-agenda-admin-card dps-agenda-admin-card--subtle">
-            <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'Sincronização', 'dps-agenda-addon' ); ?></p>
-            <h3 class="dps-agenda-admin-subtitle"><?php esc_html_e( 'Configurações de sincronização', 'dps-agenda-addon' ); ?></h3>
+            <p class="dps-agenda-admin-eyebrow"><?php esc_html_e( 'SincronizaÃ§Ã£o', 'dps-agenda-addon' ); ?></p>
+            <h3 class="dps-agenda-admin-subtitle"><?php esc_html_e( 'ConfiguraÃ§Ãµes de sincronizaÃ§Ã£o', 'dps-agenda-addon' ); ?></h3>
             <p class="dps-agenda-admin-description">
-                <?php esc_html_e( 'Escolha quais fluxos da Agenda serão espelhados no Google Workspace.', 'dps-agenda-addon' ); ?>
+                <?php esc_html_e( 'Escolha quais fluxos da Agenda serÃ£o espelhados no Google Workspace.', 'dps-agenda-addon' ); ?>
             </p>
 
             <form method="post" action="" class="dps-agenda-admin-form">
@@ -345,7 +345,7 @@ class DPS_Google_Integrations_Settings {
                         <input type="checkbox" name="sync_calendar" value="1" <?php checked( $sync_calendar ); ?>>
                         <span class="dps-google-toggle__body">
                             <span class="dps-google-toggle__title"><?php esc_html_e( 'Google Calendar', 'dps-agenda-addon' ); ?></span>
-                            <span class="dps-google-toggle__description"><?php esc_html_e( 'Cria e atualiza eventos no Google Calendar sempre que um agendamento é salvo ou alterado no DPS.', 'dps-agenda-addon' ); ?></span>
+                            <span class="dps-google-toggle__description"><?php esc_html_e( 'Cria e atualiza eventos no Google Calendar sempre que um agendamento Ã© salvo ou alterado no DPS.', 'dps-agenda-addon' ); ?></span>
                         </span>
                     </label>
 
@@ -353,24 +353,24 @@ class DPS_Google_Integrations_Settings {
                         <input type="checkbox" name="sync_tasks" value="1" <?php checked( $sync_tasks ); ?>>
                         <span class="dps-google-toggle__body">
                             <span class="dps-google-toggle__title"><?php esc_html_e( 'Google Tasks', 'dps-agenda-addon' ); ?></span>
-                            <span class="dps-google-toggle__description"><?php esc_html_e( 'Cria tarefas automáticas para follow-ups, cobranças pendentes e mensagens operacionais.', 'dps-agenda-addon' ); ?></span>
+                            <span class="dps-google-toggle__description"><?php esc_html_e( 'Cria tarefas automÃ¡ticas para follow-ups, cobranÃ§as pendentes e mensagens operacionais.', 'dps-agenda-addon' ); ?></span>
                         </span>
                     </label>
                 </div>
 
                 <div class="dps-agenda-admin-form-actions">
                     <button type="submit" class="dps-btn dps-btn--primary">
-                        <?php esc_html_e( 'Salvar configurações', 'dps-agenda-addon' ); ?>
+                        <?php esc_html_e( 'Salvar configuraÃ§Ãµes', 'dps-agenda-addon' ); ?>
                     </button>
                 </div>
             </form>
 
             <div class="dps-agenda-admin-notice dps-agenda-admin-notice--success dps-google-release-note">
-                <strong><?php esc_html_e( 'Fase 4 concluída:', 'dps-agenda-addon' ); ?></strong>
-                <?php esc_html_e( ' integração completa com Google Calendar e Google Tasks disponível no hub da Agenda.', 'dps-agenda-addon' ); ?>
+                <strong><?php esc_html_e( 'Fase 4 concluÃ­da:', 'dps-agenda-addon' ); ?></strong>
+                <?php esc_html_e( ' integraÃ§Ã£o completa com Google Calendar e Google Tasks disponÃ­vel no hub da Agenda.', 'dps-agenda-addon' ); ?>
                 <ul class="dps-agenda-admin-list">
-                    <li><?php esc_html_e( 'Sincronização bidirecional de agendamentos entre Calendar e DPS.', 'dps-agenda-addon' ); ?></li>
-                    <li><?php esc_html_e( 'Tarefas administrativas automáticas para follow-ups, cobranças e mensagens.', 'dps-agenda-addon' ); ?></li>
+                    <li><?php esc_html_e( 'SincronizaÃ§Ã£o bidirecional de agendamentos entre Calendar e DPS.', 'dps-agenda-addon' ); ?></li>
+                    <li><?php esc_html_e( 'Tarefas administrativas automÃ¡ticas para follow-ups, cobranÃ§as e mensagens.', 'dps-agenda-addon' ); ?></li>
                 </ul>
             </div>
         </div>
@@ -378,37 +378,37 @@ class DPS_Google_Integrations_Settings {
     }
 
     /**
-     * Processa ações (conectar, desconectar, salvar configurações).
+     * Processa aÃ§Ãµes (conectar, desconectar, salvar configuraÃ§Ãµes).
      *
      * @since 2.0.0
      */
     public function handle_actions() {
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Verifica parâmetros GET para roteamento
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Verifica parÃ¢metros GET para roteamento
         $page   = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
         $tab    = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : '';
         $action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
         // phpcs:enable
-        
+
         // Callback OAuth
         if ( 'dps-agenda-hub' === $page && 'google-integrations' === $tab && 'oauth_callback' === $action ) {
             $this->handle_oauth_callback();
         }
-        
+
         // Desconectar
         if ( 'dps_google_disconnect' === $action ) {
             $this->handle_disconnect();
         }
-        
-        // Salvar configurações
+
+        // Salvar configuraÃ§Ãµes
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verificado em handle_save_settings
         $post_action = isset( $_POST['dps_action'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_action'] ) ) : '';
         if ( 'save_google_settings' === $post_action ) {
             $this->handle_save_settings();
         }
     }
-    
+
     /**
-     * Processa salvamento de configurações.
+     * Processa salvamento de configuraÃ§Ãµes.
      *
      * @since 2.0.0
      */
@@ -416,27 +416,27 @@ class DPS_Google_Integrations_Settings {
         // Usa helper para verificar nonce com capability
         if ( class_exists( 'DPS_Request_Validator' ) ) {
             if ( ! DPS_Request_Validator::verify_admin_form( 'dps_google_save_settings', 'dps_google_nonce' ) ) {
-                wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
+                wp_die( esc_html__( 'Token de seguranÃ§a invÃ¡lido.', 'dps-agenda-addon' ) );
             }
         } else {
             if ( ! current_user_can( 'manage_options' ) ) {
-                wp_die( esc_html__( 'Permissão negada.', 'dps-agenda-addon' ) );
+                wp_die( esc_html__( 'PermissÃ£o negada.', 'dps-agenda-addon' ) );
             }
             $nonce = isset( $_POST['dps_google_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_google_nonce'] ) ) : '';
             if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'dps_google_save_settings' ) ) {
-                wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
+                wp_die( esc_html__( 'Token de seguranÃ§a invÃ¡lido.', 'dps-agenda-addon' ) );
             }
         }
-        
-        // Obtém settings atuais
+
+        // ObtÃ©m settings atuais
         $settings = get_option( DPS_Google_Auth::OPTION_NAME, [] );
-        
-        // Atualiza configurações
+
+        // Atualiza configuraÃ§Ãµes
         $settings['sync_calendar'] = ! empty( $_POST['sync_calendar'] ) ? 1 : 0;
         $settings['sync_tasks'] = ! empty( $_POST['sync_tasks'] ) ? 1 : 0;
-        
+
         update_option( DPS_Google_Auth::OPTION_NAME, $settings );
-        
+
         // Redireciona com mensagem de sucesso
         $redirect_url = add_query_arg(
             [
@@ -446,30 +446,30 @@ class DPS_Google_Integrations_Settings {
             ],
             admin_url( 'admin.php' )
         );
-        
+
         wp_safe_redirect( $redirect_url );
         exit;
     }
-    
+
     /**
-     * Processa callback OAuth após autorização.
+     * Processa callback OAuth apÃ³s autorizaÃ§Ã£o.
      *
      * @since 2.0.0
      */
     private function handle_oauth_callback() {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Permissão negada.', 'dps-agenda-addon' ) );
+            wp_die( esc_html__( 'PermissÃ£o negada.', 'dps-agenda-addon' ) );
         }
-        
+
         // Verifica state (nonce)
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- State é o nonce que será verificado
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- State Ã© o nonce que serÃ¡ verificado
         $state = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : '';
         if ( empty( $state ) || ! wp_verify_nonce( $state, 'dps_google_oauth' ) ) {
-            wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
+            wp_die( esc_html__( 'Token de seguranÃ§a invÃ¡lido.', 'dps-agenda-addon' ) );
         }
-        
+
         // Verifica erro
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Já verificamos o nonce acima
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- JÃ¡ verificamos o nonce acima
         if ( ! empty( $_GET['error'] ) ) {
             $error_msg = sprintf(
                 /* translators: %s: Mensagem de erro */
@@ -478,22 +478,22 @@ class DPS_Google_Integrations_Settings {
             );
             wp_die( esc_html( $error_msg ) );
         }
-        
+
         // Troca code por tokens
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Já verificamos o nonce acima
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- JÃ¡ verificamos o nonce acima
         if ( empty( $_GET['code'] ) ) {
-            wp_die( esc_html__( 'Authorization code não recebido.', 'dps-agenda-addon' ) );
+            wp_die( esc_html__( 'Authorization code nÃ£o recebido.', 'dps-agenda-addon' ) );
         }
-        
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Já verificamos o nonce acima
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- JÃ¡ verificamos o nonce acima
         $code   = sanitize_text_field( wp_unslash( $_GET['code'] ) );
         $result = DPS_Google_Auth::exchange_code_for_tokens( $code );
-        
+
         if ( is_wp_error( $result ) ) {
             wp_die( esc_html( $result->get_error_message() ) );
         }
-        
-        // Redireciona de volta para a página de configurações com mensagem de sucesso
+
+        // Redireciona de volta para a pÃ¡gina de configuraÃ§Ãµes com mensagem de sucesso
         $redirect_url = add_query_arg(
             [
                 'page'    => 'dps-agenda-hub',
@@ -502,13 +502,13 @@ class DPS_Google_Integrations_Settings {
             ],
             admin_url( 'admin.php' )
         );
-        
+
         wp_safe_redirect( $redirect_url );
         exit;
     }
-    
+
     /**
-     * Processa desconexão.
+     * Processa desconexÃ£o.
      *
      * @since 2.0.0
      */
@@ -516,21 +516,21 @@ class DPS_Google_Integrations_Settings {
         // Usa helper para verificar nonce com capability
         if ( class_exists( 'DPS_Request_Validator' ) ) {
             if ( ! DPS_Request_Validator::verify_admin_action( 'dps_google_disconnect' ) ) {
-                wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
+                wp_die( esc_html__( 'Token de seguranÃ§a invÃ¡lido.', 'dps-agenda-addon' ) );
             }
         } else {
             if ( ! current_user_can( 'manage_options' ) ) {
-                wp_die( esc_html__( 'Permissão negada.', 'dps-agenda-addon' ) );
+                wp_die( esc_html__( 'PermissÃ£o negada.', 'dps-agenda-addon' ) );
             }
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce passado via URL
             $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
             if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'dps_google_disconnect' ) ) {
-                wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
+                wp_die( esc_html__( 'Token de seguranÃ§a invÃ¡lido.', 'dps-agenda-addon' ) );
             }
         }
-        
+
         DPS_Google_Auth::disconnect();
-        
+
         // Redireciona de volta
         $redirect_url = add_query_arg(
             [
@@ -540,17 +540,17 @@ class DPS_Google_Integrations_Settings {
             ],
             admin_url( 'admin.php' )
         );
-        
+
         wp_safe_redirect( $redirect_url );
         exit;
     }
-    
+
     /**
-     * Obtém URL de desconexão com nonce.
+     * ObtÃ©m URL de desconexÃ£o com nonce.
      *
      * @since 2.0.0
      *
-     * @return string URL de desconexão.
+     * @return string URL de desconexÃ£o.
      */
     private function get_disconnect_url() {
         return wp_nonce_url(

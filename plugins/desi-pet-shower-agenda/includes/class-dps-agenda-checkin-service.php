@@ -1,13 +1,13 @@
-<?php
+﻿<?php
 /**
- * Serviço de Check-in / Check-out para agendamentos.
+ * ServiÃ§o de Check-in / Check-out para agendamentos.
  *
- * Registra a entrada e saída do pet com observações rápidas e
- * itens de segurança (pulgas, feridinhas, alergia, etc.).
+ * Registra a entrada e saÃ­da do pet com observaÃ§Ãµes rÃ¡pidas e
+ * itens de seguranÃ§a (pulgas, feridinhas, alergia, etc.).
  *
  * Meta keys:
- *   '_dps_checkin'  — dados do check-in (hora, observações, itens de segurança).
- *   '_dps_checkout' — dados do check-out (hora, observações, itens de segurança).
+ *   '_dps_checkin'  â€” dados do check-in (hora, observaÃ§Ãµes, itens de seguranÃ§a).
+ *   '_dps_checkout' â€” dados do check-out (hora, observaÃ§Ãµes, itens de seguranÃ§a).
  *
  * @package DPS_Agenda_Addon
  * @since   1.2.0
@@ -34,10 +34,10 @@ class DPS_Agenda_Checkin_Service {
     const META_CHECKOUT = '_dps_checkout';
 
     /**
-     * Retorna os itens de segurança padrão.
+     * Retorna os itens de seguranÃ§a padrÃ£o.
      *
-     * Filtrável via 'dps_checkin_safety_items' para que add-ons possam
-     * adicionar itens específicos (ex.: "carrapato", "dermatite").
+     * FiltrÃ¡vel via 'dps_checkin_safety_items' para que add-ons possam
+     * adicionar itens especÃ­ficos (ex.: "carrapato", "dermatite").
      *
      * @return array<string, array{label: string, icon: string, severity: string}>
      */
@@ -45,46 +45,46 @@ class DPS_Agenda_Checkin_Service {
         $items = [
             'pulgas'      => [
                 'label'    => __( 'Pulgas', 'dps-agenda-addon' ),
-                'icon'     => '🪲',
+                'icon'     => 'ðŸª²',
                 'severity' => 'warning',
             ],
             'carrapatos'  => [
                 'label'    => __( 'Carrapatos', 'dps-agenda-addon' ),
-                'icon'     => '🕷️',
+                'icon'     => 'ðŸ•·ï¸',
                 'severity' => 'warning',
             ],
             'feridinhas'  => [
-                'label'    => __( 'Feridinhas / Lesões', 'dps-agenda-addon' ),
-                'icon'     => '🩹',
+                'label'    => __( 'Feridinhas / LesÃµes', 'dps-agenda-addon' ),
+                'icon'     => 'ðŸ©¹',
                 'severity' => 'alert',
             ],
             'alergia'     => [
-                'label'    => __( 'Alergia / Irritação', 'dps-agenda-addon' ),
-                'icon'     => '⚠️',
+                'label'    => __( 'Alergia / IrritaÃ§Ã£o', 'dps-agenda-addon' ),
+                'icon'     => 'âš ï¸',
                 'severity' => 'alert',
             ],
             'otite'       => [
                 'label'    => __( 'Otite / Orelha inflamada', 'dps-agenda-addon' ),
-                'icon'     => '👂',
+                'icon'     => 'ðŸ‘‚',
                 'severity' => 'alert',
             ],
             'nos'         => [
-                'label'    => __( 'Nós / Pelos embolados', 'dps-agenda-addon' ),
-                'icon'     => '🧶',
+                'label'    => __( 'NÃ³s / Pelos embolados', 'dps-agenda-addon' ),
+                'icon'     => 'ðŸ§¶',
                 'severity' => 'info',
             ],
             'comportamento' => [
                 'label'    => __( 'Agressivo / Ansioso', 'dps-agenda-addon' ),
-                'icon'     => '😤',
+                'icon'     => 'ðŸ˜¤',
                 'severity' => 'warning',
             ],
         ];
 
         /**
-         * Permite adicionar ou modificar itens de segurança do check-in/check-out.
+         * Permite adicionar ou modificar itens de seguranÃ§a do check-in/check-out.
          *
          * @since 1.2.0
-         * @param array $items Itens padrão.
+         * @param array $items Itens padrÃ£o.
          */
         return apply_filters( 'dps_checkin_safety_items', $items );
     }
@@ -93,73 +93,71 @@ class DPS_Agenda_Checkin_Service {
      * Registra o check-in de um agendamento.
      *
      * @param int    $appointment_id ID do agendamento.
-     * @param string $observations   Observações textuais.
-     * @param array  $safety_items   Array de itens de segurança marcados (slug => detalhes).
+     * @param string $observations   ObservaÃ§Ãµes textuais.
+     * @param array  $safety_items   Array de itens de seguranÃ§a marcados (slug => detalhes).
      * @return bool True se registrado com sucesso.
      */
     public static function checkin( $appointment_id, $observations = '', $safety_items = [] ) {
-        $appointment_id = absint( $appointment_id );
-        if ( ! $appointment_id ) {
-            return false;
-        }
-
-        $data = [
-            'time'         => current_time( 'mysql' ),
-            'timestamp'    => current_time( 'timestamp' ),
-            'observations' => sanitize_textarea_field( $observations ),
-            'safety_items' => self::sanitize_safety_items( $safety_items ),
-            'user_id'      => get_current_user_id(),
-        ];
-
-        $updated = (bool) update_post_meta( $appointment_id, self::META_CHECKIN, $data );
-
-        if ( $updated ) {
-            /**
-             * Dispara após o check-in ser registrado.
-             *
-             * @since 1.2.0
-             * @param int   $appointment_id ID do agendamento.
-             * @param array $data           Dados do check-in.
-             */
-            do_action( 'dps_appointment_checked_in', $appointment_id, $data );
-        }
-
-        return $updated;
+        return self::save_stage( $appointment_id, self::META_CHECKIN, $observations, $safety_items, 'dps_appointment_checked_in' );
     }
 
     /**
      * Registra o check-out de um agendamento.
      *
      * @param int    $appointment_id ID do agendamento.
-     * @param string $observations   Observações textuais.
-     * @param array  $safety_items   Array de itens de segurança marcados (slug => detalhes).
+     * @param string $observations   ObservaÃ§Ãµes textuais.
+     * @param array  $safety_items   Array de itens de seguranÃ§a marcados (slug => detalhes).
      * @return bool True se registrado com sucesso.
      */
     public static function checkout( $appointment_id, $observations = '', $safety_items = [] ) {
+        return self::save_stage( $appointment_id, self::META_CHECKOUT, $observations, $safety_items, 'dps_appointment_checked_out' );
+    }
+
+    /**
+     * Salva uma etapa operacional preservando o horÃ¡rio original quando jÃ¡ existir registro.
+     *
+     * @param int    $appointment_id ID do agendamento.
+     * @param string $meta_key       Meta key da etapa.
+     * @param string $observations   ObservaÃ§Ãµes textuais.
+     * @param array  $safety_items   Array de itens de seguranÃ§a marcados (slug => detalhes).
+     * @param string $hook_name      Hook disparado apÃ³s o salvamento.
+     * @return bool
+     */
+    private static function save_stage( $appointment_id, $meta_key, $observations, $safety_items, $hook_name ) {
         $appointment_id = absint( $appointment_id );
         if ( ! $appointment_id ) {
             return false;
         }
 
+        $existing = get_post_meta( $appointment_id, $meta_key, true );
+        $existing = is_array( $existing ) ? $existing : [];
+        $is_edit  = ! empty( $existing['time'] );
+
+        $time      = $is_edit ? $existing['time'] : current_time( 'mysql' );
+        $timestamp = $is_edit && isset( $existing['timestamp'] ) ? intval( $existing['timestamp'] ) : current_time( 'timestamp' );
+        $user_id   = $is_edit && ! empty( $existing['user_id'] ) ? absint( $existing['user_id'] ) : get_current_user_id();
+
         $data = [
-            'time'         => current_time( 'mysql' ),
-            'timestamp'    => current_time( 'timestamp' ),
+            'time'         => $time,
+            'timestamp'    => $timestamp,
             'observations' => sanitize_textarea_field( $observations ),
             'safety_items' => self::sanitize_safety_items( $safety_items ),
-            'user_id'      => get_current_user_id(),
+            'user_id'      => $user_id,
+            'updated_at'   => current_time( 'mysql' ),
+            'updated_by'   => get_current_user_id(),
         ];
 
-        $updated = (bool) update_post_meta( $appointment_id, self::META_CHECKOUT, $data );
+        $updated = (bool) update_post_meta( $appointment_id, $meta_key, $data );
 
         if ( $updated ) {
             /**
-             * Dispara após o check-out ser registrado.
+             * Dispara apÃ³s a etapa operacional ser salva.
              *
              * @since 1.2.0
              * @param int   $appointment_id ID do agendamento.
-             * @param array $data           Dados do check-out.
+             * @param array $data           Dados salvos.
              */
-            do_action( 'dps_appointment_checked_out', $appointment_id, $data );
+            do_action( $hook_name, $appointment_id, $data, $existing );
         }
 
         return $updated;
@@ -169,7 +167,7 @@ class DPS_Agenda_Checkin_Service {
      * Retorna os dados de check-in de um agendamento.
      *
      * @param int $appointment_id ID do agendamento.
-     * @return array|false Dados do check-in ou false se não existir.
+     * @return array|false Dados do check-in ou false se nÃ£o existir.
      */
     public static function get_checkin( $appointment_id ) {
         $appointment_id = absint( $appointment_id );
@@ -185,7 +183,7 @@ class DPS_Agenda_Checkin_Service {
      * Retorna os dados de check-out de um agendamento.
      *
      * @param int $appointment_id ID do agendamento.
-     * @return array|false Dados do check-out ou false se não existir.
+     * @return array|false Dados do check-out ou false se nÃ£o existir.
      */
     public static function get_checkout( $appointment_id ) {
         $appointment_id = absint( $appointment_id );
@@ -218,10 +216,10 @@ class DPS_Agenda_Checkin_Service {
     }
 
     /**
-     * Calcula o tempo de permanência (check-in → check-out) em minutos.
+     * Calcula o tempo de permanÃªncia (check-in â†’ check-out) em minutos.
      *
      * @param int $appointment_id ID do agendamento.
-     * @return int|false Duração em minutos, ou false se não houver ambos.
+     * @return int|false DuraÃ§Ã£o em minutos, ou false se nÃ£o houver ambos.
      */
     public static function get_duration_minutes( $appointment_id ) {
         $checkin  = self::get_checkin( $appointment_id );
@@ -242,10 +240,10 @@ class DPS_Agenda_Checkin_Service {
     }
 
     /**
-     * Retorna um resumo dos itens de segurança marcados no check-in.
+     * Retorna um resumo dos itens de seguranÃ§a marcados no check-in.
      *
      * @param int $appointment_id ID do agendamento.
-     * @return array Lista de itens de segurança com labels, ou array vazio.
+     * @return array Lista de itens de seguranÃ§a com labels, ou array vazio.
      */
     public static function get_safety_summary( $appointment_id ) {
         $checkin = self::get_checkin( $appointment_id );
@@ -271,7 +269,7 @@ class DPS_Agenda_Checkin_Service {
     }
 
     /**
-     * Sanitiza os itens de segurança recebidos do formulário.
+     * Sanitiza os itens de seguranÃ§a recebidos do formulÃ¡rio.
      *
      * @param array $raw_items Itens vindos do POST.
      * @return array Itens sanitizados.

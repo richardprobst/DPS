@@ -1,10 +1,10 @@
-# Space Groomers - Fase 4
+﻿# Space Groomers - Fase 4
 
 ## Objetivo da fase
 Conectar o add-on `desi-pet-shower-game` ao ecossistema DPS/desi.pet sem criar acoplamentos frageis, priorizando integracoes reais com portal do cliente, contexto de cliente/pet/agendamento e loyalty opcional.
 
 ## Referencia visual aplicada
-As superficies novas do portal seguiram explicitamente o padrao M3 descrito em:
+As superficies novas do portal seguiram explicitamente o padrao DPS Signature descrito em:
 - `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md`
 - `docs/visual/VISUAL_STYLE_GUIDE.md`
 
