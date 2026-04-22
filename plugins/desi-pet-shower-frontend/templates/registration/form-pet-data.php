@@ -78,6 +78,23 @@ $size_summary = [
             $card_summary = ! empty( $summary_parts ) ? implode( ' • ', $summary_parts ) : '';
             $body_id      = 'dps-registration-pet-body-' . $index;
             $breed_list   = 'dps-registration-pet-breed-list-' . $index;
+            $pet_details_count = 0;
+
+            foreach ( [ 'pet_sex', 'pet_weight', 'pet_birth', 'pet_coat', 'pet_color', 'pet_care', 'pet_obs' ] as $pet_details_field ) {
+                if ( '' !== trim( (string) ( $pet[ $pet_details_field ] ?? '' ) ) ) {
+                    ++$pet_details_count;
+                }
+            }
+
+            if ( ! empty( $pet['pet_aggressive'] ) ) {
+                ++$pet_details_count;
+            }
+
+            $pet_details_open    = $pet_details_count > 0;
+            $pet_details_summary = sprintf(
+                _n( '%d preenchido', '%d preenchidos', $pet_details_count, 'dps-frontend-addon' ),
+                $pet_details_count
+            );
             ?>
             <article class="dps-registration-pet" data-pet-index="<?php echo esc_attr( (string) $index ); ?>">
                 <div class="dps-registration-pet__header">
@@ -103,7 +120,7 @@ $size_summary = [
                             aria-expanded="<?php echo $is_expanded ? 'true' : 'false'; ?>"
                             aria-controls="<?php echo esc_attr( $body_id ); ?>"
                         >
-                            <span><?php esc_html_e( 'Detalhes', 'dps-frontend-addon' ); ?></span>
+                            <span data-dps-pet-toggle-label><?php echo esc_html( $is_expanded ? __( 'Recolher', 'dps-frontend-addon' ) : __( 'Expandir', 'dps-frontend-addon' ) ); ?></span>
                         </button>
                     </div>
                 </div>
@@ -193,10 +210,10 @@ $size_summary = [
                         </div>
                     </div>
 
-                    <details class="dps-registration-disclosure dps-registration-disclosure--pet">
+                    <details class="dps-registration-disclosure dps-registration-disclosure--pet" <?php echo $pet_details_open ? 'open' : ''; ?>>
                         <summary>
                             <span class="dps-registration-disclosure__label"><?php esc_html_e( 'Detalhes adicionais', 'dps-frontend-addon' ); ?></span>
-                            <span class="dps-registration-disclosure__meta"><?php esc_html_e( 'Opcional', 'dps-frontend-addon' ); ?></span>
+                            <span class="dps-registration-disclosure__meta"><?php echo esc_html( $pet_details_summary ); ?></span>
                         </summary>
 
                         <div class="dps-registration-disclosure__body">
@@ -247,7 +264,7 @@ $size_summary = [
                                         type="text"
                                         name="pets[<?php echo esc_attr( (string) $index ); ?>][pet_coat]"
                                         value="<?php echo esc_attr( $pet['pet_coat'] ?? '' ); ?>"
-                                        placeholder="<?php echo esc_attr__( 'Curto ou longo', 'dps-frontend-addon' ); ?>"
+                                        placeholder="<?php echo esc_attr__( 'Curto ou longo…', 'dps-frontend-addon' ); ?>"
                                     />
                                 </div>
 
@@ -259,7 +276,7 @@ $size_summary = [
                                         type="text"
                                         name="pets[<?php echo esc_attr( (string) $index ); ?>][pet_color]"
                                         value="<?php echo esc_attr( $pet['pet_color'] ?? '' ); ?>"
-                                        placeholder="<?php echo esc_attr__( 'Branco, preto ou caramelo', 'dps-frontend-addon' ); ?>"
+                                        placeholder="<?php echo esc_attr__( 'Branco, preto ou caramelo…', 'dps-frontend-addon' ); ?>"
                                     />
                                 </div>
 

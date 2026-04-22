@@ -48,6 +48,11 @@ $form_started_at            = $form_started_at ?? time();
 $engine                     = $engine ?? null;
 $show_pets                  = $show_pets ?? true;
 $show_marketing             = $show_marketing ?? true;
+$final_preferences_count    = ! empty( $data['marketing_optin'] ) ? 1 : 0;
+$final_preferences_summary  = sprintf(
+    _n( '%d preenchido', '%d preenchidos', $final_preferences_count, 'dps-frontend-addon' ),
+    $final_preferences_count
+);
 $submit_label               = $email_confirmation_enabled
     ? __( 'Cadastrar e confirmar e-mail', 'dps-frontend-addon' )
     : __( 'Cadastrar e continuar', 'dps-frontend-addon' );
@@ -162,7 +167,7 @@ $after_fields_markup = trim( (string) ob_get_clean() );
                     <details class="dps-registration-disclosure dps-registration-disclosure--final" <?php echo ( $duplicate_warning || $has_referral_value ) ? 'open' : ''; ?>>
                         <summary>
                             <span class="dps-registration-disclosure__label"><?php esc_html_e( 'Preferências', 'dps-frontend-addon' ); ?></span>
-                            <span class="dps-registration-disclosure__meta"><?php esc_html_e( 'Opcional', 'dps-frontend-addon' ); ?></span>
+                            <span class="dps-registration-disclosure__meta"><?php echo esc_html( $final_preferences_summary ); ?></span>
                         </summary>
 
                         <div class="dps-registration-disclosure__body">

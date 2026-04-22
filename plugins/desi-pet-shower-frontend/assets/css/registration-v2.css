@@ -15,9 +15,15 @@
     --dps-registration-danger: var(--dps-signature-danger, #a44439);
     --dps-registration-warning: var(--dps-signature-warning, #8a6622);
     --dps-registration-muted: color-mix(in srgb, var(--dps-registration-ink) 64%, white);
-    width: min(100%, 1040px);
+    display: grid;
+    gap: 0;
+    width: min(100%, 1120px);
     margin: 0 auto;
-    padding: 16px;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--dps-registration-line) 88%, transparent);
+    background: color-mix(in srgb, white 92%, var(--dps-registration-paper));
+    box-shadow: 0 16px 38px rgba(17, 22, 28, 0.07);
+    overflow: hidden;
     color: var(--dps-registration-ink);
     font-family: var(--dps-signature-font-body, var(--dps-font-body, sans-serif));
 }
@@ -30,19 +36,18 @@
 
 .dps-registration__hero,
 .dps-registration__stage {
-    border: 1px solid color-mix(in srgb, var(--dps-registration-line) 88%, transparent);
+    border: 0;
     border-radius: 0;
-    background: #fff;
+    background: transparent;
 }
 
 .dps-registration__hero {
     position: relative;
     padding: clamp(1.25rem, 3vw, 2.25rem);
+    border-bottom: 1px solid color-mix(in srgb, var(--dps-registration-line) 80%, transparent);
     background:
         linear-gradient(180deg, color-mix(in srgb, white 78%, var(--dps-registration-paper)), #fff 72%);
-    box-shadow:
-        inset 0 3px 0 var(--dps-registration-accent),
-        0 12px 28px rgba(17, 22, 28, 0.05);
+    box-shadow: inset 0 3px 0 var(--dps-registration-accent);
 }
 
 .dps-registration__hero-copy {
@@ -72,10 +77,8 @@
 }
 
 .dps-registration__stage {
-    margin-top: 12px;
     padding: clamp(1.1rem, 2.2vw, 1.75rem);
     background: color-mix(in srgb, white 92%, var(--dps-registration-paper));
-    box-shadow: 0 12px 28px rgba(17, 22, 28, 0.05);
 }
 
 .dps-registration__stage--success,
@@ -413,7 +416,7 @@
 .dps-registration-pet__actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
@@ -442,13 +445,20 @@
 }
 
 .dps-registration-pet__toggle {
-    border-color: color-mix(in srgb, var(--dps-registration-line) 82%, var(--dps-registration-accent) 10%);
-    background: rgba(255, 255, 255, 0.9);
-    color: var(--dps-registration-accent);
+    min-height: auto;
+    padding: 0;
+    border-color: transparent;
+    background: transparent;
+    color: var(--dps-registration-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .dps-registration-pet__toggle::after {
     content: "+";
+    margin-left: 2px;
     font-size: 1rem;
     font-weight: 700;
     line-height: 1;
@@ -459,8 +469,13 @@
 }
 
 .dps-registration-pet__toggle:hover {
-    border-color: var(--dps-registration-accent);
-    background: color-mix(in srgb, var(--dps-registration-sky) 16%, white);
+    color: var(--dps-registration-accent);
+    border-color: transparent;
+    background: transparent;
+}
+
+.dps-registration-pet__toggle[aria-expanded="true"] {
+    color: var(--dps-registration-accent);
 }
 
 .dps-registration-pet__body {
@@ -642,7 +657,7 @@
 
 @media (min-width: 600px) {
     .dps-registration {
-        padding: 20px;
+        box-shadow: 0 18px 42px rgba(17, 22, 28, 0.08);
     }
 
     .dps-registration-grid--2 {
@@ -671,19 +686,19 @@
 
     .dps-registration-pet__actions {
         width: 100%;
+        justify-content: space-between;
     }
 
-    .dps-registration-pet__toggle,
     .dps-registration-pet__remove {
         width: 100%;
+    }
+
+    .dps-registration-pet__toggle {
+        width: auto;
     }
 }
 
 @media (max-width: 599px) {
-    .dps-registration {
-        padding: 12px;
-    }
-
     .dps-registration__hero,
     .dps-registration__stage {
         padding: 16px;

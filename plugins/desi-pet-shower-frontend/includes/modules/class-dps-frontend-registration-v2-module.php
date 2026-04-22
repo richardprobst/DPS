@@ -208,14 +208,46 @@ final class DPS_Frontend_Registration_V2_Module extends DPS_Abstract_Module_V2 {
             [
                 'googleMapsApiKey' => sanitize_text_field( (string) get_option( 'dps_google_api_key', '' ) ),
                 'i18n'             => [
-                    'nameRequired'        => __( 'Informe o nome completo do tutor.', 'dps-frontend-addon' ),
-                    'emailRequired'       => __( 'Informe um e-mail válido para o cadastro.', 'dps-frontend-addon' ),
-                    'emailInvalid'        => __( 'O e-mail informado não é válido.', 'dps-frontend-addon' ),
-                    'phoneRequired'       => __( 'Informe o telefone ou WhatsApp do tutor.', 'dps-frontend-addon' ),
-                    'petNameRequired'     => __( 'Informe o nome do pet.', 'dps-frontend-addon' ),
-                    'petSpeciesRequired'  => __( 'Selecione a espécie do pet.', 'dps-frontend-addon' ),
-                    'petSizeRequired'     => __( 'Selecione o porte do pet.', 'dps-frontend-addon' ),
-                    'recaptchaUnavailable'=> __( 'Não foi possível validar o anti-spam. Tente novamente.', 'dps-frontend-addon' ),
+                    'nameRequired'         => __( 'Informe o nome completo do tutor.', 'dps-frontend-addon' ),
+                    'emailRequired'        => __( 'Informe um e-mail válido para o cadastro.', 'dps-frontend-addon' ),
+                    'emailInvalid'         => __( 'O e-mail informado não é válido.', 'dps-frontend-addon' ),
+                    'phoneRequired'        => __( 'Informe o telefone ou WhatsApp do tutor.', 'dps-frontend-addon' ),
+                    'petNameRequired'      => __( 'Informe o nome do pet.', 'dps-frontend-addon' ),
+                    'petSpeciesRequired'   => __( 'Selecione a espécie do pet.', 'dps-frontend-addon' ),
+                    'petSizeRequired'      => __( 'Selecione o porte do pet.', 'dps-frontend-addon' ),
+                    'recaptchaUnavailable' => __( 'Não foi possível validar o anti-spam. Tente novamente.', 'dps-frontend-addon' ),
+                    'noticeWarningTitle'   => __( 'Atenção', 'dps-frontend-addon' ),
+                    'noticeErrorTitle'     => __( 'Não foi possível concluir', 'dps-frontend-addon' ),
+                    'toggleExpand'         => __( 'Expandir', 'dps-frontend-addon' ),
+                    'toggleCollapse'       => __( 'Recolher', 'dps-frontend-addon' ),
+                    'disclosureSingle'     => __( '%d preenchido', 'dps-frontend-addon' ),
+                    'disclosurePlural'     => __( '%d preenchidos', 'dps-frontend-addon' ),
+                    'unsavedChanges'       => __( 'Você tem alterações não salvas. Se sair agora, perderá o que já preencheu.', 'dps-frontend-addon' ),
+                ],
+                'validation'       => [
+                    'clientRequired' => [
+                        [
+                            'selector' => '#dps-registration-client-name',
+                            'message'  => __( 'Informe o nome completo do tutor.', 'dps-frontend-addon' ),
+                        ],
+                        [
+                            'selector' => '#dps-registration-client-email',
+                            'message'  => __( 'Informe um e-mail válido para o cadastro.', 'dps-frontend-addon' ),
+                        ],
+                        [
+                            'selector' => '#dps-registration-client-phone',
+                            'message'  => __( 'Informe o telefone ou WhatsApp do tutor.', 'dps-frontend-addon' ),
+                        ],
+                    ],
+                    'email'          => [
+                        'selector' => '#dps-registration-client-email',
+                        'invalid'  => __( 'O e-mail informado não é válido.', 'dps-frontend-addon' ),
+                    ],
+                    'petRequired'    => [
+                        'name'    => __( 'Informe o nome do pet.', 'dps-frontend-addon' ),
+                        'species' => __( 'Selecione a espécie do pet.', 'dps-frontend-addon' ),
+                        'size'    => __( 'Selecione o porte do pet.', 'dps-frontend-addon' ),
+                    ],
                 ],
             ]
         );

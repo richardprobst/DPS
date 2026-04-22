@@ -17,6 +17,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 $data           = $data ?? [];
 $field_errors   = $field_errors ?? [];
 $google_api_key = $google_api_key ?? '';
+$client_details_count = 0;
+
+foreach ( [ 'client_cpf', 'client_birth', 'client_address', 'client_instagram', 'client_facebook', 'client_referral' ] as $client_details_field ) {
+    if ( '' !== trim( (string) ( $data[ $client_details_field ] ?? '' ) ) ) {
+        ++$client_details_count;
+    }
+}
+
+if ( ! empty( $data['client_photo_auth'] ) ) {
+    ++$client_details_count;
+}
+
+$client_details_open    = $client_details_count > 0 || ! empty( $field_errors['client_cpf'] );
+$client_details_summary = sprintf(
+    _n( '%d preenchido', '%d preenchidos', $client_details_count, 'dps-frontend-addon' ),
+    $client_details_count
+);
 ?>
 
 <section class="dps-registration-section" id="dps-registration-section-client">
@@ -94,10 +111,10 @@ $google_api_key = $google_api_key ?? '';
         </div>
     </div>
 
-    <details class="dps-registration-disclosure">
+    <details class="dps-registration-disclosure" <?php echo $client_details_open ? 'open' : ''; ?>>
         <summary>
             <span class="dps-registration-disclosure__label"><?php esc_html_e( 'Dados complementares', 'dps-frontend-addon' ); ?></span>
-            <span class="dps-registration-disclosure__meta"><?php esc_html_e( 'Opcional', 'dps-frontend-addon' ); ?></span>
+            <span class="dps-registration-disclosure__meta"><?php echo esc_html( $client_details_summary ); ?></span>
         </summary>
 
         <div class="dps-registration-disclosure__body">

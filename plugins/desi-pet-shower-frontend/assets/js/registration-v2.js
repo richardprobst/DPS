@@ -7,8 +7,16 @@
         return Array.prototype.slice.call( nodeList || [] );
     }
 
+    function getRuntimeConfig() {
+        return window.dpsRegistrationV2 || {};
+    }
+
     function getI18n() {
-        return window.dpsRegistrationV2 && window.dpsRegistrationV2.i18n ? window.dpsRegistrationV2.i18n : {};
+        return getRuntimeConfig().i18n || {};
+    }
+
+    function getValidationConfig() {
+        return getRuntimeConfig().validation || {};
     }
 
     function scrollToElement( element ) {
@@ -73,9 +81,10 @@
     function applyMaskedValue( input, formatter ) {
         var cursor = input.selectionStart || 0;
         var previousLength = input.value.length;
+        var nextCursor;
+
         input.value = formatter( input.value );
-        var newLength = input.value.length;
-        var nextCursor = cursor + ( newLength - previousLength );
+        nextCursor = cursor + ( input.value.length - previousLength );
 
         if ( input === document.activeElement && typeof input.setSelectionRange === 'function' ) {
             input.setSelectionRange( nextCursor, nextCursor );
@@ -84,13 +93,19 @@
 
     function initMasks( root ) {
         var scope = root || document;
+
         toArray( scope.querySelectorAll( '[data-dps-mask]' ) ).forEach( function( input ) {
+            var formatter = null;
+
             if ( input.dataset.dpsMaskReady === '1' ) {
                 return;
             }
 
-            var type = input.getAttribute( 'data-dps-mask' );
-            var formatter = type === 'phone' ? maskPhone : ( type === 'cpf' ? maskCpf : null );
+            if ( input.getAttribute( 'data-dps-mask' ) === 'phone' ) {
+                formatter = maskPhone;
+            } else if ( input.getAttribute( 'data-dps-mask' ) === 'cpf' ) {
+                formatter = maskCpf;
+            }
 
             if ( ! formatter ) {
                 return;
@@ -130,33 +145,100 @@
         return [];
     }
 
-    function populateBreedDatalist( select ) {
+    function getBreedDatalist( select ) {
         var targetId = select.getAttribute( 'data-dps-breed-target' );
+
         if ( ! targetId ) {
-            return;
+            return null;
         }
 
-        var datalist = document.getElementById( targetId );
+        return document.getElementById( targetId );
+    }
+
+    function getBreedField( select ) {
+        var targetId = select.getAttribute( 'data-dps-breed-target' );
+        var scope = select.closest( '[data-pet-index]' ) || select.form || document;
+
+        if ( ! targetId ) {
+            return null;
+        }
+
+        return scope.querySelector( '[list="' + targetId + '"]' );
+    }
+
+    function getAvailableBreeds( select ) {
+        var datalist = getBreedDatalist( select );
+        var breedMap;
+        var currentSpecies;
+
         if ( ! datalist ) {
-            return;
+            return [];
         }
 
-        var breedMap = parseBreedMap( datalist.getAttribute( 'data-dps-breed-map' ) );
-        var currentSpecies = select.value || '';
-        var breeds = normalizeBreedList( breedMap[ currentSpecies ] || breedMap.all || [] );
+        breedMap = parseBreedMap( datalist.getAttribute( 'data-dps-breed-map' ) );
+        currentSpecies = select.value || '';
+
+        return normalizeBreedList( breedMap[ currentSpecies ] || breedMap.all || [] );
+    }
+
+    function populateBreedDatalist( select ) {
+        var datalist = getBreedDatalist( select );
+        var breeds = getAvailableBreeds( select );
         var seen = {};
 
+        if ( ! datalist ) {
+            return [];
+        }
+
         datalist.innerHTML = '';
+
         breeds.forEach( function( breed ) {
+            var option;
+
             if ( ! breed || seen[ breed ] ) {
                 return;
             }
 
             seen[ breed ] = true;
-            var option = document.createElement( 'option' );
+            option = document.createElement( 'option' );
             option.value = breed;
             datalist.appendChild( option );
         } );
+
+        return Object.keys( seen );
+    }
+
+    function syncBreedField( select, breeds ) {
+        var breedField = getBreedField( select );
+        var currentValue;
+        var isAllowed;
+
+        if ( ! breedField ) {
+            return;
+        }
+
+        currentValue = breedField.value.trim();
+
+        if ( ! currentValue ) {
+            return;
+        }
+
+        if ( ! select.value ) {
+            breedField.value = '';
+            return;
+        }
+
+        if ( ! breeds.length ) {
+            return;
+        }
+
+        isAllowed = breeds.some( function( breed ) {
+            return String( breed ).toLowerCase() === currentValue.toLowerCase();
+        } );
+
+        if ( ! isAllowed ) {
+            breedField.value = '';
+        }
     }
 
     function initBreedDatalists( root ) {
@@ -171,7 +253,7 @@
             select.dataset.dpsBreedReady = '1';
             populateBreedDatalist( select );
             select.addEventListener( 'change', function() {
-                populateBreedDatalist( select );
+                syncBreedField( select, populateBreedDatalist( select ) );
             } );
         } );
     }
@@ -191,12 +273,12 @@
 
         googlePlacesPromise = new Promise( function( resolve, reject ) {
             var callbackName = 'dpsRegistrationGooglePlacesReady';
+            var script = document.createElement( 'script' );
 
             window[ callbackName ] = function() {
                 resolve( window.google.maps.places );
             };
 
-            var script = document.createElement( 'script' );
             script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent( apiKey ) + '&libraries=places&callback=' + callbackName;
             script.async = true;
             script.defer = true;
@@ -213,15 +295,15 @@
     function initAddressAutocomplete( root ) {
         var scope = root || document;
         var fields = toArray( scope.querySelectorAll( '[data-dps-address-autocomplete]' ) );
+        var apiKey = '';
 
         if ( ! fields.length ) {
             return;
         }
 
-        var apiKey = '';
         fields.some( function( field ) {
             apiKey = field.getAttribute( 'data-dps-google-api-key' ) || '';
-            return !!apiKey;
+            return !! apiKey;
         } );
 
         if ( ! apiKey ) {
@@ -230,26 +312,28 @@
 
         loadGooglePlaces( apiKey ).then( function() {
             fields.forEach( function( field ) {
+                var autocomplete;
+
                 if ( field.dataset.dpsPlacesReady === '1' ) {
                     return;
                 }
 
                 field.dataset.dpsPlacesReady = '1';
-                var autocomplete = new window.google.maps.places.Autocomplete( field, {
+                autocomplete = new window.google.maps.places.Autocomplete( field, {
                     fields: [ 'formatted_address', 'geometry' ],
                     types: [ 'geocode' ],
                 } );
 
                 autocomplete.addListener( 'place_changed', function() {
                     var place = autocomplete.getPlace();
-                    if ( place && place.formatted_address ) {
-                        field.value = place.formatted_address;
-                    }
-
                     var latTargetId = field.getAttribute( 'data-dps-lat-target' );
                     var lngTargetId = field.getAttribute( 'data-dps-lng-target' );
                     var latField = latTargetId ? document.getElementById( latTargetId ) : null;
                     var lngField = lngTargetId ? document.getElementById( lngTargetId ) : null;
+
+                    if ( place && place.formatted_address ) {
+                        field.value = place.formatted_address;
+                    }
 
                     if ( place && place.geometry && place.geometry.location ) {
                         if ( latField ) {
@@ -263,7 +347,7 @@
                 } );
             } );
         } ).catch( function() {
-            // Falha silenciosa: o campo continua funcionando como texto livre.
+            // Campo continua funcionando como texto livre.
         } );
     }
 
@@ -280,6 +364,7 @@
     function showFormNotice( form, type, message ) {
         var shell = getShell( form );
         var stack = shell ? shell.querySelector( '.dps-registration__notice-stack' ) : null;
+        var i18n = getI18n();
         var notice;
         var title;
         var text;
@@ -289,6 +374,7 @@
         }
 
         notice = stack.querySelector( '[data-dps-runtime-notice]' );
+
         if ( ! notice ) {
             notice = document.createElement( 'article' );
             notice.setAttribute( 'data-dps-runtime-notice', '1' );
@@ -306,9 +392,13 @@
         }
 
         notice.className = 'dps-registration-notice dps-registration-notice--' + ( type || 'error' );
+
         if ( title ) {
-            title.textContent = type === 'warning' ? 'Atenção' : 'Não foi possível concluir';
+            title.textContent = type === 'warning'
+                ? ( i18n.noticeWarningTitle || 'Atencao' )
+                : ( i18n.noticeErrorTitle || 'Nao foi possivel concluir' );
         }
+
         if ( text ) {
             text.textContent = message;
         }
@@ -331,9 +421,9 @@
     function buildPetSummary( card ) {
         var speciesField = card.querySelector( '[data-dps-pet-species]' );
         var sizeField = card.querySelector( '[data-dps-pet-size]' );
+        var parts = [];
         var speciesLabel = speciesField && speciesField.selectedOptions.length ? speciesField.selectedOptions[ 0 ].textContent.trim() : '';
         var sizeLabel = sizeField && sizeField.selectedOptions.length ? sizeField.selectedOptions[ 0 ].textContent.trim() : '';
-        var parts = [];
 
         if ( speciesField && speciesField.value && speciesLabel ) {
             parts.push( speciesLabel );
@@ -343,7 +433,7 @@
             parts.push( sizeLabel );
         }
 
-        return parts.length ? parts.join( ' • ' ) : '';
+        return parts.length ? parts.join( ' / ' ) : '';
     }
 
     function updatePetSummary( summary, value ) {
@@ -353,6 +443,97 @@
 
         summary.textContent = value || '';
         summary.hidden = ! value;
+    }
+
+    function updatePetToggleLabel( toggle ) {
+        var label = toggle ? toggle.querySelector( '[data-dps-pet-toggle-label]' ) : null;
+        var i18n = getI18n();
+
+        if ( ! toggle || ! label ) {
+            return;
+        }
+
+        label.textContent = toggle.getAttribute( 'aria-expanded' ) === 'true'
+            ? ( i18n.toggleCollapse || 'Recolher' )
+            : ( i18n.toggleExpand || 'Expandir' );
+    }
+
+    function getDisclosureFilledCount( disclosure ) {
+        var body = disclosure ? disclosure.querySelector( '.dps-registration-disclosure__body' ) : null;
+        var total = 0;
+
+        if ( ! body ) {
+            return 0;
+        }
+
+        toArray( body.querySelectorAll( 'input, select, textarea' ) ).forEach( function( field ) {
+            if ( field.disabled || field.type === 'hidden' || field.hasAttribute( 'data-dps-disclosure-ignore' ) ) {
+                return;
+            }
+
+            if ( field.type === 'checkbox' || field.type === 'radio' ) {
+                if ( field.checked ) {
+                    total += 1;
+                }
+                return;
+            }
+
+            if ( field.tagName === 'SELECT' ) {
+                if ( field.value && field.value.trim() ) {
+                    total += 1;
+                }
+                return;
+            }
+
+            if ( field.value && field.value.trim() ) {
+                total += 1;
+            }
+        } );
+
+        return total;
+    }
+
+    function formatDisclosureCount( count ) {
+        var i18n = getI18n();
+        var template = count === 1
+            ? ( i18n.disclosureSingle || '%d preenchido' )
+            : ( i18n.disclosurePlural || '%d preenchidos' );
+
+        return template.replace( '%d', String( count ) );
+    }
+
+    function updateDisclosureMeta( disclosure ) {
+        var meta = disclosure ? disclosure.querySelector( '.dps-registration-disclosure__meta' ) : null;
+
+        if ( ! meta ) {
+            return;
+        }
+
+        meta.textContent = formatDisclosureCount( getDisclosureFilledCount( disclosure ) );
+    }
+
+    function initDisclosureMeta( root ) {
+        var scope = root || document;
+        var disclosures = scope.matches && scope.matches( '.dps-registration-disclosure' )
+            ? [ scope ]
+            : toArray( scope.querySelectorAll( '.dps-registration-disclosure' ) );
+
+        disclosures.forEach( function( disclosure ) {
+            if ( disclosure.dataset.dpsDisclosureReady !== '1' ) {
+                disclosure.dataset.dpsDisclosureReady = '1';
+
+                toArray( disclosure.querySelectorAll( '.dps-registration-disclosure__body input, .dps-registration-disclosure__body select, .dps-registration-disclosure__body textarea' ) ).forEach( function( field ) {
+                    field.addEventListener( 'input', function() {
+                        updateDisclosureMeta( disclosure );
+                    } );
+                    field.addEventListener( 'change', function() {
+                        updateDisclosureMeta( disclosure );
+                    } );
+                } );
+            }
+
+            updateDisclosureMeta( disclosure );
+        } );
     }
 
     function refreshPetCard( card, index, total ) {
@@ -381,9 +562,9 @@
         }
 
         if ( toggle && body ) {
-            var bodyId = 'dps-registration-pet-body-' + index;
-            toggle.setAttribute( 'aria-controls', bodyId );
-            body.id = bodyId;
+            body.id = 'dps-registration-pet-body-' + index;
+            toggle.setAttribute( 'aria-controls', body.id );
+            updatePetToggleLabel( toggle );
         }
 
         toArray( card.querySelectorAll( 'input, select, textarea, datalist' ) ).forEach( function( field ) {
@@ -454,8 +635,7 @@
     }
 
     function refreshAllPetCards( form ) {
-        var cards = getPetCards( form );
-        cards.forEach( function( card, index ) {
+        getPetCards( form ).forEach( function( card, index, cards ) {
             refreshPetCard( card, index, cards.length );
         } );
     }
@@ -463,30 +643,51 @@
     function togglePetCard( card ) {
         var toggle = card.querySelector( '[data-dps-pet-toggle]' );
         var body = card.querySelector( '.dps-registration-pet__body' );
+        var expanded;
 
         if ( ! toggle || ! body ) {
             return;
         }
 
-        var expanded = toggle.getAttribute( 'aria-expanded' ) === 'true';
+        expanded = toggle.getAttribute( 'aria-expanded' ) === 'true';
         toggle.setAttribute( 'aria-expanded', expanded ? 'false' : 'true' );
         body.hidden = expanded;
+        updatePetToggleLabel( toggle );
+    }
+
+    function markFormDirty( form ) {
+        if ( form && form.dataset.dpsNativeSubmitting !== '1' ) {
+            form.dataset.dpsDirty = '1';
+        }
+    }
+
+    function clearFormDirty( form ) {
+        if ( form ) {
+            form.dataset.dpsDirty = '0';
+        }
     }
 
     function bindCard( card, form ) {
+        var removeButton;
+        var nameField;
+        var speciesField;
+        var sizeField;
+        var summary;
+        var title;
+        var toggle;
+
         if ( card.dataset.dpsPetCardReady === '1' ) {
             return;
         }
 
         card.dataset.dpsPetCardReady = '1';
-
-        var removeButton = card.querySelector( '[data-dps-remove-pet]' );
-        var nameField = card.querySelector( '[data-dps-pet-name]' );
-        var speciesField = card.querySelector( '[data-dps-pet-species]' );
-        var sizeField = card.querySelector( '[data-dps-pet-size]' );
-        var summary = card.querySelector( '[data-dps-pet-summary]' );
-        var title = card.querySelector( '[data-dps-pet-title]' );
-        var toggle = card.querySelector( '[data-dps-pet-toggle]' );
+        removeButton = card.querySelector( '[data-dps-remove-pet]' );
+        nameField = card.querySelector( '[data-dps-pet-name]' );
+        speciesField = card.querySelector( '[data-dps-pet-species]' );
+        sizeField = card.querySelector( '[data-dps-pet-size]' );
+        summary = card.querySelector( '[data-dps-pet-summary]' );
+        title = card.querySelector( '[data-dps-pet-title]' );
+        toggle = card.querySelector( '[data-dps-pet-toggle]' );
 
         if ( nameField && title ) {
             nameField.addEventListener( 'input', function() {
@@ -504,12 +705,12 @@
 
         if ( removeButton ) {
             removeButton.addEventListener( 'click', function() {
-                var cards = getPetCards( form );
-                if ( cards.length <= 1 ) {
+                if ( getPetCards( form ).length <= 1 ) {
                     return;
                 }
 
                 card.remove();
+                markFormDirty( form );
                 refreshAllPetCards( form );
             } );
         }
@@ -518,40 +719,52 @@
             toggle.addEventListener( 'click', function() {
                 togglePetCard( card );
             } );
+            updatePetToggleLabel( toggle );
         }
     }
 
     function initPetCards( form ) {
+        var addButton = form.querySelector( '[data-dps-add-pet]' );
+
         getPetCards( form ).forEach( function( card ) {
             bindCard( card, form );
         } );
         refreshAllPetCards( form );
 
-        var addButton = form.querySelector( '[data-dps-add-pet]' );
         if ( addButton && addButton.dataset.dpsAddPetReady !== '1' ) {
             addButton.dataset.dpsAddPetReady = '1';
             addButton.addEventListener( 'click', function() {
                 var cards = getPetCards( form );
                 var source = cards[ cards.length - 1 ];
+                var clone;
+                var toggle;
+                var body;
+                var nameField;
+
                 if ( ! source ) {
                     return;
                 }
 
-                var clone = source.cloneNode( true );
+                clone = source.cloneNode( true );
                 clearClonedCard( clone );
                 form.querySelector( '[data-dps-registration-pets]' ).appendChild( clone );
                 bindCard( clone, form );
                 refreshAllPetCards( form );
                 initFieldEnhancements( clone );
+                initDisclosureMeta( clone );
+                markFormDirty( form );
 
-                var toggle = clone.querySelector( '[data-dps-pet-toggle]' );
-                var body = clone.querySelector( '.dps-registration-pet__body' );
+                toggle = clone.querySelector( '[data-dps-pet-toggle]' );
+                body = clone.querySelector( '.dps-registration-pet__body' );
+
                 if ( toggle && body ) {
                     toggle.setAttribute( 'aria-expanded', 'true' );
                     body.hidden = false;
+                    updatePetToggleLabel( toggle );
                 }
 
-                var nameField = clone.querySelector( '[data-dps-pet-name]' );
+                nameField = clone.querySelector( '[data-dps-pet-name]' );
+
                 if ( nameField ) {
                     scrollToElement( clone );
                     nameField.focus();
@@ -562,15 +775,19 @@
 
     function setFieldError( field, message ) {
         var wrapper = field.closest( '.dps-registration-field' );
+        var errorId;
+        var error;
+
         if ( ! wrapper ) {
             return;
         }
 
-        var errorId = field.id ? field.id + '-client-error' : '';
-        var error = document.createElement( 'p' );
+        errorId = field.id ? field.id + '-client-error' : '';
+        error = document.createElement( 'p' );
         error.className = 'dps-registration-field__error';
         error.setAttribute( 'role', 'alert' );
         error.setAttribute( 'data-dps-client-error', '1' );
+
         if ( errorId ) {
             error.id = errorId;
             field.setAttribute( 'aria-describedby', errorId );
@@ -590,31 +807,54 @@
         toArray( form.querySelectorAll( '[data-dps-client-validated]' ) ).forEach( function( field ) {
             field.removeAttribute( 'aria-invalid' );
             field.removeAttribute( 'data-dps-client-validated' );
+
             if ( field.getAttribute( 'aria-describedby' ) && field.getAttribute( 'aria-describedby' ).indexOf( '-client-error' ) !== -1 ) {
                 field.removeAttribute( 'aria-describedby' );
             }
         } );
     }
 
+    function expandCardForError( card ) {
+        var toggle = card.querySelector( '[data-dps-pet-toggle]' );
+        var body = card.querySelector( '.dps-registration-pet__body' );
+
+        if ( toggle && body ) {
+            toggle.setAttribute( 'aria-expanded', 'true' );
+            body.hidden = false;
+            updatePetToggleLabel( toggle );
+        }
+    }
+
     function validateForm( form ) {
+        var i18n = getI18n();
+        var validation = getValidationConfig();
+        var requiredFields;
+        var emailField;
+        var errors = [];
+
         clearClientValidation( form );
 
-        var i18n = getI18n();
-        var errors = [];
-        var requiredFields = [
-            {
-                field: form.querySelector( '#dps-registration-client-name' ),
-                message: i18n.nameRequired || 'Informe o nome completo do tutor.',
-            },
-            {
-                field: form.querySelector( '#dps-registration-client-email' ),
-                message: i18n.emailRequired || 'Informe um e-mail válido para o cadastro.',
-            },
-            {
-                field: form.querySelector( '#dps-registration-client-phone' ),
-                message: i18n.phoneRequired || 'Informe o telefone ou WhatsApp do tutor.',
-            },
-        ];
+        requiredFields = Array.isArray( validation.clientRequired ) && validation.clientRequired.length
+            ? validation.clientRequired.map( function( rule ) {
+                return {
+                    field: rule.selector ? form.querySelector( rule.selector ) : null,
+                    message: rule.message || '',
+                };
+            } )
+            : [
+                {
+                    field: form.querySelector( '#dps-registration-client-name' ),
+                    message: i18n.nameRequired || 'Informe o nome completo do tutor.',
+                },
+                {
+                    field: form.querySelector( '#dps-registration-client-email' ),
+                    message: i18n.emailRequired || 'Informe um e-mail valido para o cadastro.',
+                },
+                {
+                    field: form.querySelector( '#dps-registration-client-phone' ),
+                    message: i18n.phoneRequired || 'Informe o telefone ou WhatsApp do tutor.',
+                },
+            ];
 
         requiredFields.forEach( function( item ) {
             if ( item.field && ! item.field.value.trim() ) {
@@ -622,11 +862,16 @@
             }
         } );
 
-        var emailField = form.querySelector( '#dps-registration-client-email' );
+        emailField = validation.email && validation.email.selector
+            ? form.querySelector( validation.email.selector )
+            : form.querySelector( '#dps-registration-client-email' );
+
         if ( emailField && emailField.value.trim() && ! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test( emailField.value.trim() ) ) {
             errors.push( {
                 field: emailField,
-                message: i18n.emailInvalid || 'O e-mail informado não é válido.',
+                message: validation.email && validation.email.invalid
+                    ? validation.email.invalid
+                    : ( i18n.emailInvalid || 'O e-mail informado nao e valido.' ),
             } );
         }
 
@@ -634,40 +879,41 @@
             var nameField = card.querySelector( '[data-dps-pet-name]' );
             var speciesField = card.querySelector( '[data-dps-pet-species]' );
             var sizeField = card.querySelector( '[data-dps-pet-size]' );
-            var toggle = card.querySelector( '[data-dps-pet-toggle]' );
-            var body = card.querySelector( '.dps-registration-pet__body' );
 
             if ( nameField && ! nameField.value.trim() ) {
                 errors.push( {
                     field: nameField,
-                    message: 'Pet ' + ( index + 1 ) + ': ' + ( i18n.petNameRequired || 'Informe o nome do pet.' ),
+                    message: 'Pet ' + ( index + 1 ) + ': ' + (
+                        validation.petRequired && validation.petRequired.name
+                            ? validation.petRequired.name
+                            : ( i18n.petNameRequired || 'Informe o nome do pet.' )
+                    ),
                 } );
-                if ( toggle && body ) {
-                    toggle.setAttribute( 'aria-expanded', 'true' );
-                    body.hidden = false;
-                }
+                expandCardForError( card );
             }
 
             if ( speciesField && ! speciesField.value.trim() ) {
                 errors.push( {
                     field: speciesField,
-                    message: 'Pet ' + ( index + 1 ) + ': ' + ( i18n.petSpeciesRequired || 'Selecione a espécie do pet.' ),
+                    message: 'Pet ' + ( index + 1 ) + ': ' + (
+                        validation.petRequired && validation.petRequired.species
+                            ? validation.petRequired.species
+                            : ( i18n.petSpeciesRequired || 'Selecione a especie do pet.' )
+                    ),
                 } );
-                if ( toggle && body ) {
-                    toggle.setAttribute( 'aria-expanded', 'true' );
-                    body.hidden = false;
-                }
+                expandCardForError( card );
             }
 
             if ( sizeField && ! sizeField.value.trim() ) {
                 errors.push( {
                     field: sizeField,
-                    message: 'Pet ' + ( index + 1 ) + ': ' + ( i18n.petSizeRequired || 'Selecione o porte do pet.' ),
+                    message: 'Pet ' + ( index + 1 ) + ': ' + (
+                        validation.petRequired && validation.petRequired.size
+                            ? validation.petRequired.size
+                            : ( i18n.petSizeRequired || 'Selecione o porte do pet.' )
+                    ),
                 } );
-                if ( toggle && body ) {
-                    toggle.setAttribute( 'aria-expanded', 'true' );
-                    body.hidden = false;
-                }
+                expandCardForError( card );
             }
         } );
 
@@ -687,14 +933,15 @@
 
     function initSubmitState( form ) {
         var button = form.querySelector( '[data-dps-submit-button]' );
+        var labelNode;
+
         if ( ! button || button.dataset.dpsSubmitReady === '1' ) {
             return;
         }
 
+        labelNode = button.querySelector( '.dps-registration-button__text' );
         button.dataset.dpsSubmitReady = '1';
-        button.dataset.originalLabel = button.querySelector( '.dps-registration-button__text' )
-            ? button.querySelector( '.dps-registration-button__text' ).textContent
-            : '';
+        button.dataset.originalLabel = labelNode ? labelNode.textContent : '';
     }
 
     function startSubmitState( form ) {
@@ -729,15 +976,62 @@
         button.disabled = false;
     }
 
+    function shouldTrackField( field ) {
+        return !! ( field && field.matches && field.matches( 'input, select, textarea' ) && field.type !== 'hidden' );
+    }
+
+    function initDirtyGuard( form ) {
+        if ( form.dataset.dpsDirtyReady === '1' ) {
+            return;
+        }
+
+        form.dataset.dpsDirtyReady = '1';
+        clearFormDirty( form );
+
+        form.addEventListener( 'input', function( event ) {
+            if ( shouldTrackField( event.target ) ) {
+                markFormDirty( form );
+            }
+        } );
+
+        form.addEventListener( 'change', function( event ) {
+            if ( shouldTrackField( event.target ) ) {
+                markFormDirty( form );
+            }
+        } );
+
+        if ( document.body.dataset.dpsBeforeUnloadReady !== '1' ) {
+            document.body.dataset.dpsBeforeUnloadReady = '1';
+            window.addEventListener( 'beforeunload', function( event ) {
+                var dirtyForm = toArray( document.querySelectorAll( '#dps-registration-form[data-dps-dirty="1"]' ) ).find( function( currentForm ) {
+                    return currentForm.dataset.dpsNativeSubmitting !== '1' && currentForm.dataset.dpsRecaptchaPending !== '1';
+                } );
+
+                if ( ! dirtyForm ) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.returnValue = getI18n().unsavedChanges || 'Voce tem alteracoes nao salvas. Se sair agora, perdera o que ja preencheu.';
+            } );
+        }
+    }
+
     function initForm( form ) {
         if ( form.dataset.dpsRegistrationReady === '1' ) {
             return;
         }
 
         form.dataset.dpsRegistrationReady = '1';
+        form.dataset.dpsDirty = '0';
+        form.dataset.dpsNativeSubmitting = '0';
+        form.dataset.dpsRecaptchaPending = '0';
+
         initFieldEnhancements( form );
         initPetCards( form );
+        initDisclosureMeta( form );
         initSubmitState( form );
+        initDirtyGuard( form );
 
         form.addEventListener( 'submit', function( event ) {
             var siteKey = form.getAttribute( 'data-recaptcha-site-key' );
@@ -763,7 +1057,7 @@
                 event.preventDefault();
 
                 if ( typeof window.grecaptcha === 'undefined' ) {
-                    showFormNotice( form, 'warning', getI18n().recaptchaUnavailable || 'Não foi possível validar o anti-spam. Tente novamente.' );
+                    showFormNotice( form, 'warning', getI18n().recaptchaUnavailable || 'Nao foi possivel validar o anti-spam. Tente novamente.' );
                     return;
                 }
 
@@ -775,16 +1069,20 @@
                         tokenField.value = token;
                         form.dataset.dpsRecaptchaPending = '0';
                         form.dataset.dpsNativeSubmitting = '1';
+                        clearFormDirty( form );
                         HTMLFormElement.prototype.submit.call( form );
                     } ).catch( function() {
                         form.dataset.dpsRecaptchaPending = '0';
                         resetSubmitState( form );
-                        showFormNotice( form, 'warning', getI18n().recaptchaUnavailable || 'Não foi possível validar o anti-spam. Tente novamente.' );
+                        showFormNotice( form, 'warning', getI18n().recaptchaUnavailable || 'Nao foi possivel validar o anti-spam. Tente novamente.' );
                     } );
                 } );
+
                 return;
             }
 
+            form.dataset.dpsNativeSubmitting = '1';
+            clearFormDirty( form );
             startSubmitState( form );
         } );
     }
