@@ -214,6 +214,7 @@ final class DPS_Frontend_Registration_V2_Module extends DPS_Abstract_Module_V2 {
                     'phoneRequired'       => __( 'Informe o telefone ou WhatsApp do tutor.', 'dps-frontend-addon' ),
                     'petNameRequired'     => __( 'Informe o nome do pet.', 'dps-frontend-addon' ),
                     'petSpeciesRequired'  => __( 'Selecione a espécie do pet.', 'dps-frontend-addon' ),
+                    'petSizeRequired'     => __( 'Selecione o porte do pet.', 'dps-frontend-addon' ),
                     'recaptchaUnavailable'=> __( 'Não foi possível validar o anti-spam. Tente novamente.', 'dps-frontend-addon' ),
                 ],
             ]
@@ -296,7 +297,7 @@ final class DPS_Frontend_Registration_V2_Module extends DPS_Abstract_Module_V2 {
             'client_birth'          => DPS_Frontend_Request_Guard::text( 'client_birth' ),
             'client_instagram'      => DPS_Frontend_Request_Guard::text( 'client_instagram' ),
             'client_facebook'       => DPS_Frontend_Request_Guard::text( 'client_facebook' ),
-            'client_address'        => sanitize_textarea_field( wp_unslash( $_POST['client_address'] ?? '' ) ), // phpcs:ignore WordPress.Security.NonceVerification.Missing
+            'client_address'        => sanitize_text_field( wp_unslash( $_POST['client_address'] ?? '' ) ), // phpcs:ignore WordPress.Security.NonceVerification.Missing
             'client_lat'            => DPS_Frontend_Request_Guard::text( 'client_lat' ),
             'client_lng'            => DPS_Frontend_Request_Guard::text( 'client_lng' ),
             'client_referral'       => DPS_Frontend_Request_Guard::text( 'client_referral' ),

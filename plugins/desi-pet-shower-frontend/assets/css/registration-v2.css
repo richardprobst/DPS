@@ -295,6 +295,9 @@
     list-style: none;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "label icon"
+        "meta icon";
     align-items: center;
     gap: 10px 16px;
     padding: 14px 16px;
@@ -308,12 +311,15 @@
 }
 
 .dps-registration-disclosure__label {
+    grid-area: label;
     min-width: 0;
     font-weight: 600;
     line-height: 1.35;
 }
 
 .dps-registration-disclosure__meta {
+    grid-area: meta;
+    justify-self: start;
     color: var(--dps-registration-muted);
     font-size: 0.74rem;
     font-weight: 700;
@@ -323,6 +329,9 @@
 
 .dps-registration-disclosure summary::after {
     content: "+";
+    grid-area: icon;
+    align-self: center;
+    justify-self: end;
     color: var(--dps-registration-accent);
     font-size: 1rem;
     font-weight: 700;
@@ -680,13 +689,8 @@
         padding: 16px;
     }
 
-    .dps-registration__footer,
-    .dps-registration-disclosure summary {
+    .dps-registration__footer {
         align-items: stretch;
-    }
-
-    .dps-registration-disclosure summary {
-        grid-template-columns: minmax(0, 1fr);
     }
 
     .dps-registration-button {

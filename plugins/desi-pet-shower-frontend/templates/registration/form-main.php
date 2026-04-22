@@ -146,10 +146,6 @@ $after_fields_markup = trim( (string) ob_get_clean() );
             <?php endif; ?>
 
             <section class="dps-registration-section" id="dps-registration-section-submit">
-                <div class="dps-registration-section__header">
-                    <h2 class="dps-registration-section__title"><?php esc_html_e( 'Finalizar cadastro', 'dps-frontend-addon' ); ?></h2>
-                </div>
-
                 <?php if ( $duplicate_warning && $engine ) : ?>
                     <?php
                     echo $engine->render(

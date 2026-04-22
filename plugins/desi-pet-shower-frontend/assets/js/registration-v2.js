@@ -314,6 +314,16 @@
         }
     }
 
+    function clearFormNotice( form ) {
+        var shell = getShell( form );
+        var stack = shell ? shell.querySelector( '.dps-registration__notice-stack' ) : null;
+        var notice = stack ? stack.querySelector( '[data-dps-runtime-notice]' ) : null;
+
+        if ( notice ) {
+            notice.remove();
+        }
+    }
+
     function getPetCards( form ) {
         return toArray( form.querySelectorAll( '[data-pet-index]' ) );
     }
@@ -623,6 +633,7 @@
         getPetCards( form ).forEach( function( card, index ) {
             var nameField = card.querySelector( '[data-dps-pet-name]' );
             var speciesField = card.querySelector( '[data-dps-pet-species]' );
+            var sizeField = card.querySelector( '[data-dps-pet-size]' );
             var toggle = card.querySelector( '[data-dps-pet-toggle]' );
             var body = card.querySelector( '.dps-registration-pet__body' );
 
@@ -641,6 +652,17 @@
                 errors.push( {
                     field: speciesField,
                     message: 'Pet ' + ( index + 1 ) + ': ' + ( i18n.petSpeciesRequired || 'Selecione a espécie do pet.' ),
+                } );
+                if ( toggle && body ) {
+                    toggle.setAttribute( 'aria-expanded', 'true' );
+                    body.hidden = false;
+                }
+            }
+
+            if ( sizeField && ! sizeField.value.trim() ) {
+                errors.push( {
+                    field: sizeField,
+                    message: 'Pet ' + ( index + 1 ) + ': ' + ( i18n.petSizeRequired || 'Selecione o porte do pet.' ),
                 } );
                 if ( toggle && body ) {
                     toggle.setAttribute( 'aria-expanded', 'true' );
@@ -707,37 +729,6 @@
         button.disabled = false;
     }
 
-    function initRecaptcha( form ) {
-        if ( form.dataset.dpsRecaptchaReady === '1' ) {
-            return;
-        }
-
-        form.dataset.dpsRecaptchaReady = '1';
-        var siteKey = form.getAttribute( 'data-recaptcha-site-key' );
-        if ( ! siteKey || typeof window.grecaptcha === 'undefined' ) {
-            return;
-        }
-
-        form.addEventListener( 'submit', function( event ) {
-            var tokenField = document.getElementById( 'dps-registration-recaptcha-token' );
-            if ( ! tokenField || tokenField.value ) {
-                return;
-            }
-
-            event.preventDefault();
-
-            window.grecaptcha.ready( function() {
-                window.grecaptcha.execute( siteKey, { action: 'dps_registration' } ).then( function( token ) {
-                    tokenField.value = token;
-                    form.submit();
-                } ).catch( function() {
-                    resetSubmitState( form );
-                    showFormNotice( form, 'warning', getI18n().recaptchaUnavailable || 'Não foi possível validar o anti-spam. Tente novamente.' );
-                } );
-            } );
-        } );
-    }
-
     function initForm( form ) {
         if ( form.dataset.dpsRegistrationReady === '1' ) {
             return;
@@ -747,11 +738,50 @@
         initFieldEnhancements( form );
         initPetCards( form );
         initSubmitState( form );
-        initRecaptcha( form );
 
         form.addEventListener( 'submit', function( event ) {
+            var siteKey = form.getAttribute( 'data-recaptcha-site-key' );
+            var tokenField = document.getElementById( 'dps-registration-recaptcha-token' );
+
+            clearFormNotice( form );
+
+            if ( form.dataset.dpsRecaptchaPending === '1' ) {
+                event.preventDefault();
+                return;
+            }
+
+            if ( form.dataset.dpsNativeSubmitting === '1' ) {
+                return;
+            }
+
             if ( ! validateForm( form ) ) {
                 event.preventDefault();
+                return;
+            }
+
+            if ( siteKey && tokenField && ! tokenField.value ) {
+                event.preventDefault();
+
+                if ( typeof window.grecaptcha === 'undefined' ) {
+                    showFormNotice( form, 'warning', getI18n().recaptchaUnavailable || 'Não foi possível validar o anti-spam. Tente novamente.' );
+                    return;
+                }
+
+                form.dataset.dpsRecaptchaPending = '1';
+                startSubmitState( form );
+
+                window.grecaptcha.ready( function() {
+                    window.grecaptcha.execute( siteKey, { action: 'dps_registration' } ).then( function( token ) {
+                        tokenField.value = token;
+                        form.dataset.dpsRecaptchaPending = '0';
+                        form.dataset.dpsNativeSubmitting = '1';
+                        HTMLFormElement.prototype.submit.call( form );
+                    } ).catch( function() {
+                        form.dataset.dpsRecaptchaPending = '0';
+                        resetSubmitState( form );
+                        showFormNotice( form, 'warning', getI18n().recaptchaUnavailable || 'Não foi possível validar o anti-spam. Tente novamente.' );
+                    } );
+                } );
                 return;
             }
 

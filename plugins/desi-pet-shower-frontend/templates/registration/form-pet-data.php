@@ -62,7 +62,8 @@ $size_summary = [
             <?php
             $pet_name_error    = $field_errors[ 'pets_' . $index . '_pet_name' ] ?? '';
             $pet_species_error = $field_errors[ 'pets_' . $index . '_pet_species' ] ?? '';
-            $is_expanded       = 0 === (int) $index || '' !== $pet_name_error || '' !== $pet_species_error;
+            $pet_size_error    = $field_errors[ 'pets_' . $index . '_pet_size' ] ?? '';
+            $is_expanded       = 0 === (int) $index || '' !== $pet_name_error || '' !== $pet_species_error || '' !== $pet_size_error;
             $pet_name          = $pet['pet_name'] ?? '';
             $pet_species       = $pet['pet_species'] ?? '';
             $pet_size          = $pet['pet_size'] ?? '';
@@ -155,6 +156,29 @@ $size_summary = [
                         </div>
 
                         <div class="dps-registration-field">
+                            <label class="dps-registration-field__label" for="dps-registration-pet-size-<?php echo esc_attr( (string) $index ); ?>">
+                                <?php esc_html_e( 'Porte', 'dps-frontend-addon' ); ?>
+                                <span class="dps-registration-field__required" aria-hidden="true">*</span>
+                            </label>
+                            <select
+                                id="dps-registration-pet-size-<?php echo esc_attr( (string) $index ); ?>"
+                                class="dps-registration-control"
+                                name="pets[<?php echo esc_attr( (string) $index ); ?>][pet_size]"
+                                required
+                                aria-required="true"
+                                data-dps-pet-size
+                                <?php echo '' !== $pet_size_error ? 'aria-invalid="true" aria-describedby="dps-registration-pet-size-error-' . esc_attr( (string) $index ) . '"' : ''; ?>
+                            >
+                                <?php foreach ( $size_options as $value => $label ) : ?>
+                                    <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $pet['pet_size'] ?? '', $value ); ?>><?php echo esc_html( $label ); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <?php if ( '' !== $pet_size_error ) : ?>
+                                <p id="dps-registration-pet-size-error-<?php echo esc_attr( (string) $index ); ?>" class="dps-registration-field__error" role="alert"><?php echo esc_html( $pet_size_error ); ?></p>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="dps-registration-field dps-registration-field--full">
                             <label class="dps-registration-field__label" for="dps-registration-pet-breed-<?php echo esc_attr( (string) $index ); ?>"><?php esc_html_e( 'Raça', 'dps-frontend-addon' ); ?></label>
                             <input
                                 id="dps-registration-pet-breed-<?php echo esc_attr( (string) $index ); ?>"
@@ -166,20 +190,6 @@ $size_summary = [
                                 autocomplete="off"
                             />
                             <datalist id="<?php echo esc_attr( $breed_list ); ?>" data-dps-breed-map="<?php echo esc_attr( wp_json_encode( $breed_data ) ); ?>"></datalist>
-                        </div>
-
-                        <div class="dps-registration-field">
-                            <label class="dps-registration-field__label" for="dps-registration-pet-size-<?php echo esc_attr( (string) $index ); ?>"><?php esc_html_e( 'Porte', 'dps-frontend-addon' ); ?></label>
-                            <select
-                                id="dps-registration-pet-size-<?php echo esc_attr( (string) $index ); ?>"
-                                class="dps-registration-control"
-                                name="pets[<?php echo esc_attr( (string) $index ); ?>][pet_size]"
-                                data-dps-pet-size
-                            >
-                                <?php foreach ( $size_options as $value => $label ) : ?>
-                                    <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $pet['pet_size'] ?? '', $value ); ?>><?php echo esc_html( $label ); ?></option>
-                                <?php endforeach; ?>
-                            </select>
                         </div>
                     </div>
 

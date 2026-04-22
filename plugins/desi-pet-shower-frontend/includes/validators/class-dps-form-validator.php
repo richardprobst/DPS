@@ -109,6 +109,19 @@ final class DPS_Form_Validator extends DPS_Abstract_Validator {
                         $fieldErrors
                     );
                 }
+
+                if ( empty( $pet['pet_size'] ) ) {
+                    $this->addFieldError(
+                        'pets_' . $index . '_pet_size',
+                        sprintf(
+                            /* translators: %d: pet number */
+                            __( 'Selecione o porte do pet #%d.', 'dps-frontend-addon' ),
+                            $petNum
+                        ),
+                        $messages,
+                        $fieldErrors
+                    );
+                }
             }
         }
 

@@ -47,29 +47,6 @@ $google_api_key = $google_api_key ?? '';
         </div>
 
         <div class="dps-registration-field">
-            <label class="dps-registration-field__label" for="dps-registration-client-email">
-                <?php esc_html_e( 'E-mail', 'dps-frontend-addon' ); ?>
-                <span class="dps-registration-field__required" aria-hidden="true">*</span>
-            </label>
-            <input
-                id="dps-registration-client-email"
-                class="dps-registration-control"
-                type="email"
-                name="client_email"
-                value="<?php echo esc_attr( $data['client_email'] ?? '' ); ?>"
-                autocomplete="email"
-                inputmode="email"
-                spellcheck="false"
-                required
-                aria-required="true"
-                <?php echo ! empty( $field_errors['client_email'] ) ? 'aria-invalid="true" aria-describedby="dps-registration-client-email-error"' : ''; ?>
-            />
-            <?php if ( ! empty( $field_errors['client_email'] ) ) : ?>
-                <p id="dps-registration-client-email-error" class="dps-registration-field__error" role="alert"><?php echo esc_html( $field_errors['client_email'] ); ?></p>
-            <?php endif; ?>
-        </div>
-
-        <div class="dps-registration-field">
             <label class="dps-registration-field__label" for="dps-registration-client-phone">
                 <?php esc_html_e( 'Telefone / WhatsApp', 'dps-frontend-addon' ); ?>
                 <span class="dps-registration-field__required" aria-hidden="true">*</span>
@@ -90,6 +67,29 @@ $google_api_key = $google_api_key ?? '';
             />
             <?php if ( ! empty( $field_errors['client_phone'] ) ) : ?>
                 <p id="dps-registration-client-phone-error" class="dps-registration-field__error" role="alert"><?php echo esc_html( $field_errors['client_phone'] ); ?></p>
+            <?php endif; ?>
+        </div>
+
+        <div class="dps-registration-field">
+            <label class="dps-registration-field__label" for="dps-registration-client-email">
+                <?php esc_html_e( 'E-mail', 'dps-frontend-addon' ); ?>
+                <span class="dps-registration-field__required" aria-hidden="true">*</span>
+            </label>
+            <input
+                id="dps-registration-client-email"
+                class="dps-registration-control"
+                type="email"
+                name="client_email"
+                value="<?php echo esc_attr( $data['client_email'] ?? '' ); ?>"
+                autocomplete="email"
+                inputmode="email"
+                spellcheck="false"
+                required
+                aria-required="true"
+                <?php echo ! empty( $field_errors['client_email'] ) ? 'aria-invalid="true" aria-describedby="dps-registration-client-email-error"' : ''; ?>
+            />
+            <?php if ( ! empty( $field_errors['client_email'] ) ) : ?>
+                <p id="dps-registration-client-email-error" class="dps-registration-field__error" role="alert"><?php echo esc_html( $field_errors['client_email'] ); ?></p>
             <?php endif; ?>
         </div>
     </div>
@@ -135,18 +135,20 @@ $google_api_key = $google_api_key ?? '';
 
                 <div class="dps-registration-field dps-registration-field--full">
                     <label class="dps-registration-field__label" for="dps-registration-client-address"><?php esc_html_e( 'Endereço completo', 'dps-frontend-addon' ); ?></label>
-                    <textarea
+                    <input
                         id="dps-registration-client-address"
                         class="dps-registration-control"
+                        type="text"
                         name="client_address"
-                        rows="3"
                         autocomplete="street-address"
+                        spellcheck="false"
                         data-dps-address-autocomplete
                         data-dps-google-api-key="<?php echo esc_attr( $google_api_key ); ?>"
                         data-dps-lat-target="dps-registration-client-lat"
                         data-dps-lng-target="dps-registration-client-lng"
-                        placeholder="<?php echo esc_attr__( 'Rua, número, bairro, cidade - UF', 'dps-frontend-addon' ); ?>"
-                    ><?php echo esc_textarea( $data['client_address'] ?? '' ); ?></textarea>
+                        placeholder="<?php echo esc_attr__( 'Rua, número, bairro e cidade…', 'dps-frontend-addon' ); ?>"
+                        value="<?php echo esc_attr( $data['client_address'] ?? '' ); ?>"
+                    />
                     <input type="hidden" name="client_lat" id="dps-registration-client-lat" value="<?php echo esc_attr( $data['client_lat'] ?? '' ); ?>" />
                     <input type="hidden" name="client_lng" id="dps-registration-client-lng" value="<?php echo esc_attr( $data['client_lng'] ?? '' ); ?>" />
                 </div>
