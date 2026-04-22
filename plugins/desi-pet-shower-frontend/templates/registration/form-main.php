@@ -48,8 +48,8 @@ $form_started_at            = $form_started_at ?? time();
 $engine                     = $engine ?? null;
 $pet_count                  = isset( $data['pets'] ) && is_array( $data['pets'] ) ? count( $data['pets'] ) : 1;
 $submit_label               = $email_confirmation_enabled
-    ? __( 'Cadastrar & Confirmar E-mail', 'dps-frontend-addon' )
-    : __( 'Cadastrar & Continuar', 'dps-frontend-addon' );
+    ? __( 'Cadastrar e confirmar e-mail', 'dps-frontend-addon' )
+    : __( 'Cadastrar e continuar', 'dps-frontend-addon' );
 ?>
 
 <?php if ( $success ) : ?>
@@ -75,25 +75,14 @@ $submit_label               = $email_confirmation_enabled
             <div class="dps-signature-hero__grid">
                 <div class="dps-registration-signature__hero-copy">
                     <span class="dps-signature-hero__eyebrow"><?php esc_html_e( 'DPS Signature', 'dps-frontend-addon' ); ?></span>
-                    <h1 id="dps-registration-title" class="dps-signature-hero__title"><?php esc_html_e( 'Crie seu cadastro completo de tutor & pets em poucos minutos.', 'dps-frontend-addon' ); ?></h1>
-                    <p class="dps-signature-hero__lead"><?php esc_html_e( 'O novo fluxo segue o padrão visual DPS Signature/M3: direto, responsivo e preparado para confirmar dados, prevenir duplicidades e iniciar seu atendimento com mais segurança.', 'dps-frontend-addon' ); ?></p>
-
-                    <ul class="dps-signature-hero__list" aria-label="<?php esc_attr_e( 'O que você pode informar neste cadastro', 'dps-frontend-addon' ); ?>">
-                        <li><?php esc_html_e( 'Dados do tutor, contato, redes sociais e endereço com autocomplete quando disponível.', 'dps-frontend-addon' ); ?></li>
-                        <li><?php esc_html_e( 'Um ou mais pets com porte, comportamento, observações e cuidados especiais.', 'dps-frontend-addon' ); ?></li>
-                        <li><?php esc_html_e( 'Validação acessível, foco visível e proteção anti-spam sem camadas de cache.', 'dps-frontend-addon' ); ?></li>
-                    </ul>
+                    <h1 id="dps-registration-title" class="dps-signature-hero__title"><?php esc_html_e( 'Cadastro rápido de tutor e pets.', 'dps-frontend-addon' ); ?></h1>
+                    <p class="dps-signature-hero__lead"><?php esc_html_e( 'Informe o essencial para preparar o atendimento.', 'dps-frontend-addon' ); ?></p>
                 </div>
 
                 <aside class="dps-signature-hero__aside" aria-label="<?php esc_attr_e( 'Resumo do cadastro', 'dps-frontend-addon' ); ?>">
                     <article class="dps-signature-metric-card">
-                        <p class="dps-signature-metric-card__value"><?php echo esc_html( sprintf( _n( '%d pet pronto para cadastro', '%d pets prontos para cadastro', $pet_count, 'dps-frontend-addon' ), $pet_count ) ); ?></p>
-                        <p class="dps-signature-metric-card__note"><?php esc_html_e( 'Você pode adicionar mais pets antes de enviar. O formulário mantém os dados preenchidos se houver alguma validação pendente.', 'dps-frontend-addon' ); ?></p>
-                    </article>
-
-                    <article class="dps-signature-support-card">
-                        <h2 class="dps-signature-support-card__title"><?php esc_html_e( 'Entrega orientada por etapas', 'dps-frontend-addon' ); ?></h2>
-                        <p class="dps-signature-hero__support"><?php esc_html_e( 'Use a navegação lateral para ir direto ao bloco que deseja revisar. O envio só acontece quando os campos essenciais estiverem válidos.', 'dps-frontend-addon' ); ?></p>
+                        <p class="dps-signature-metric-card__value"><?php echo esc_html( sprintf( _n( '%d pet no cadastro', '%d pets no cadastro', $pet_count, 'dps-frontend-addon' ), $pet_count ) ); ?></p>
+                        <p class="dps-signature-metric-card__note"><?php esc_html_e( 'Adicione outros pets se precisar.', 'dps-frontend-addon' ); ?></p>
                     </article>
                 </aside>
             </div>
@@ -107,7 +96,6 @@ $submit_label               = $email_confirmation_enabled
                         <span class="dps-signature-step-list__index">1</span>
                         <span class="dps-signature-step-list__text">
                             <span class="dps-signature-step-list__label"><?php esc_html_e( 'Tutor', 'dps-frontend-addon' ); ?></span>
-                            <span class="dps-signature-step-list__detail"><?php esc_html_e( 'Contato, endereço e preferências.', 'dps-frontend-addon' ); ?></span>
                         </span>
                     </button>
                 </li>
@@ -117,7 +105,6 @@ $submit_label               = $email_confirmation_enabled
                             <span class="dps-signature-step-list__index">2</span>
                             <span class="dps-signature-step-list__text">
                                 <span class="dps-signature-step-list__label"><?php esc_html_e( 'Pets', 'dps-frontend-addon' ); ?></span>
-                                <span class="dps-signature-step-list__detail"><?php esc_html_e( 'Dados físicos, comportamento e cuidados.', 'dps-frontend-addon' ); ?></span>
                             </span>
                         </button>
                     </li>
@@ -126,8 +113,7 @@ $submit_label               = $email_confirmation_enabled
                     <button type="button" data-dps-registration-step="finish" data-dps-registration-section="dps-registration-section-submit">
                         <span class="dps-signature-step-list__index"><?php echo esc_html( $show_pets ? '3' : '2' ); ?></span>
                         <span class="dps-signature-step-list__text">
-                            <span class="dps-signature-step-list__label"><?php esc_html_e( 'Revisão & envio', 'dps-frontend-addon' ); ?></span>
-                            <span class="dps-signature-step-list__detail"><?php esc_html_e( 'Opções finais, confirmação e envio do cadastro.', 'dps-frontend-addon' ); ?></span>
+                            <span class="dps-signature-step-list__label"><?php esc_html_e( 'Enviar', 'dps-frontend-addon' ); ?></span>
                         </span>
                     </button>
                 </li>
@@ -137,9 +123,8 @@ $submit_label               = $email_confirmation_enabled
 
     <section class="dps-signature-panel dps-registration-signature__panel" aria-labelledby="dps-registration-panel-title">
         <div class="dps-signature-panel__header">
-            <span class="dps-signature-hero__tag"><?php esc_html_e( 'Cadastro público', 'dps-frontend-addon' ); ?></span>
-            <h2 id="dps-registration-panel-title" class="dps-signature-panel__title"><?php esc_html_e( 'Preencha seu cadastro com o novo padrão DPS Signature.', 'dps-frontend-addon' ); ?></h2>
-            <p class="dps-signature-panel__intro"><?php esc_html_e( 'Todos os campos seguem o padrão visual M3/DPS Signature, com feedback inline, teclados corretos no mobile e compatibilidade com os contratos já usados pelas integrações do sistema.', 'dps-frontend-addon' ); ?></p>
+            <span class="dps-signature-hero__tag"><?php esc_html_e( 'Cadastro', 'dps-frontend-addon' ); ?></span>
+            <h2 id="dps-registration-panel-title" class="dps-signature-panel__title"><?php esc_html_e( 'Dados do tutor e pets', 'dps-frontend-addon' ); ?></h2>
         </div>
 
         <div class="dps-signature-form__notice-stack" aria-live="polite">
@@ -207,8 +192,7 @@ $submit_label               = $email_confirmation_enabled
             <section class="dps-signature-section" id="dps-registration-section-submit">
                 <div class="dps-signature-section__header">
                     <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Etapa final', 'dps-frontend-addon' ); ?></p>
-                    <h3 class="dps-signature-section__title"><?php esc_html_e( 'Revise suas opções antes de enviar.', 'dps-frontend-addon' ); ?></h3>
-                    <p class="dps-signature-section__description"><?php esc_html_e( 'Se o sistema identificar um telefone duplicado ou algum campo obrigatório pendente, o formulário aponta exatamente onde revisar antes do envio final.', 'dps-frontend-addon' ); ?></p>
+                    <h3 class="dps-signature-section__title"><?php esc_html_e( 'Enviar cadastro', 'dps-frontend-addon' ); ?></h3>
                 </div>
 
                 <div class="dps-signature-grid dps-signature-grid--2">
@@ -254,16 +238,6 @@ $submit_label               = $email_confirmation_enabled
                 <?php endif; ?>
 
                 <div class="dps-signature-actions">
-                    <p class="dps-signature-actions__hint">
-                        <?php
-                        echo esc_html(
-                            $email_confirmation_enabled
-                                ? __( 'Após o envio, você receberá um link para confirmar seu e-mail antes de prosseguir.', 'dps-frontend-addon' )
-                                : __( 'Após o envio, você poderá seguir direto para o próximo passo do atendimento.', 'dps-frontend-addon' )
-                        );
-                        ?>
-                    </p>
-
                     <button
                         type="submit"
                         class="dps-signature-button dps-registration-signature__submit"

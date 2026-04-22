@@ -171,6 +171,8 @@ Antes de criar uma nova versão oficial:
 
 **Cadastro e Portal - DPS Signature**
 
+- **Cadastro sem camada de manual**: removidos textos explicativos longos, listas de instrução e helpers desnecessários do cadastro público, deixando a experiência objetiva, compacta e alinhada exclusivamente ao DPS Signature.
+- **Remoção de referências do padrão visual anterior**: templates e assets carregados pelos formulários Signature deixam de expor nomenclatura técnica antiga no código e na interface.
 - **Cadastro publico consolidado**: `[dps_registration_v2]` passa a ser o motor canonico do cadastro DPS Signature e `[dps_registration_form]` permanece apenas como alias de compatibilidade sobre o mesmo renderer nativo.
 - **Formularios alinhados ao novo padrao visual**: cadastro publico, formularios internos de cliente/pet, acesso do portal, reset de senha e atualizacao de perfil passam a compartilhar a mesma linguagem visual DPS Signature, com foco visivel, mensagens inline e comportamento mobile-first.
 - **Escopo funcional ampliado no cadastro**: o fluxo publico agora cobre tutor e pets com conjunto completo de campos, mascaras, autocomplete, multiplos pets, reCAPTCHA e confirmacao por e-mail na mesma experiencia.

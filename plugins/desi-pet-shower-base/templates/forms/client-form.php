@@ -31,7 +31,6 @@ $btn_text   = $edit_id ? esc_html__( 'Atualizar Cliente', 'desi-pet-shower' ) : 
         <div class="dps-signature-section__header">
             <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Cadastro interno', 'desi-pet-shower' ); ?></p>
             <h2 class="dps-signature-section__title"><?php esc_html_e( 'Dados do tutor', 'desi-pet-shower' ); ?></h2>
-            <p class="dps-signature-section__description"><?php esc_html_e( 'Use o mesmo padrão visual DPS Signature para manter os dados do tutor completos, legíveis e consistentes no admin.', 'desi-pet-shower' ); ?></p>
         </div>
 
         <div class="dps-signature-grid dps-signature-grid--2">
@@ -59,7 +58,6 @@ $btn_text   = $edit_id ? esc_html__( 'Atualizar Cliente', 'desi-pet-shower' ) : 
         <div class="dps-signature-section__header">
             <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Contato', 'desi-pet-shower' ); ?></p>
             <h2 class="dps-signature-section__title"><?php esc_html_e( 'Canais de comunicação', 'desi-pet-shower' ); ?></h2>
-            <p class="dps-signature-section__description"><?php esc_html_e( 'Telefone e e-mail são os campos usados para retorno, lembretes e demais fluxos automáticos do sistema.', 'desi-pet-shower' ); ?></p>
         </div>
 
         <div class="dps-signature-grid dps-signature-grid--2">
@@ -92,7 +90,6 @@ $btn_text   = $edit_id ? esc_html__( 'Atualizar Cliente', 'desi-pet-shower' ) : 
         <div class="dps-signature-section__header">
             <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Localização & preferências', 'desi-pet-shower' ); ?></p>
             <h2 class="dps-signature-section__title"><?php esc_html_e( 'Endereço e observações do cadastro', 'desi-pet-shower' ); ?></h2>
-            <p class="dps-signature-section__description"><?php esc_html_e( 'O autocomplete é carregado apenas quando houver chave configurada. Sem a chave, o campo continua funcionando como texto livre.', 'desi-pet-shower' ); ?></p>
         </div>
 
         <div class="dps-signature-grid dps-signature-grid--2">
@@ -129,7 +126,6 @@ $btn_text   = $edit_id ? esc_html__( 'Atualizar Cliente', 'desi-pet-shower' ) : 
     <input type="hidden" name="client_lng" id="dps-client-lng-admin" value="<?php echo esc_attr( $meta['lng'] ?? '' ); ?>" />
 
     <div class="dps-signature-actions dps-signature-actions--end">
-        <p class="dps-signature-actions__hint"><?php esc_html_e( 'Os dados são salvos com os mesmos contratos já usados pelo restante do sistema.', 'desi-pet-shower' ); ?></p>
         <button type="submit" class="dps-submit-btn dps-signature-button">
             <span class="dps-signature-button__text"><?php echo esc_html( $btn_text ); ?></span>
         </button>

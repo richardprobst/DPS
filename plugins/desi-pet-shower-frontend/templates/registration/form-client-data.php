@@ -23,7 +23,6 @@ $google_api_key = $google_api_key ?? '';
     <div class="dps-signature-section__header">
         <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Etapa 1', 'dps-frontend-addon' ); ?></p>
         <h2 class="dps-signature-section__title"><?php esc_html_e( 'Dados do tutor', 'dps-frontend-addon' ); ?></h2>
-        <p class="dps-signature-section__description"><?php esc_html_e( 'Informe o contato principal do tutor. O sistema usa estes dados para confirmar cadastro, agendamento e comunicações do atendimento.', 'dps-frontend-addon' ); ?></p>
     </div>
 
     <div class="dps-signature-grid dps-signature-grid--2">
@@ -66,8 +65,6 @@ $google_api_key = $google_api_key ?? '';
             />
             <?php if ( ! empty( $field_errors['client_email'] ) ) : ?>
                 <p id="dps-registration-client-email-error" class="dps-signature-field__error" role="alert"><?php echo esc_html( $field_errors['client_email'] ); ?></p>
-            <?php else : ?>
-                <p class="dps-signature-field__helper"><?php esc_html_e( 'Usado para confirmação e comunicações do atendimento.', 'dps-frontend-addon' ); ?></p>
             <?php endif; ?>
         </div>
 
@@ -109,8 +106,6 @@ $google_api_key = $google_api_key ?? '';
             />
             <?php if ( ! empty( $field_errors['client_cpf'] ) ) : ?>
                 <p id="dps-registration-client-cpf-error" class="dps-signature-field__error" role="alert"><?php echo esc_html( $field_errors['client_cpf'] ); ?></p>
-            <?php else : ?>
-                <p class="dps-signature-field__helper"><?php esc_html_e( 'Opcional, mas recomendado para evitar duplicidades.', 'dps-frontend-addon' ); ?></p>
             <?php endif; ?>
         </div>
 
@@ -163,7 +158,6 @@ $google_api_key = $google_api_key ?? '';
                 data-dps-lng-target="dps-registration-client-lng"
                 placeholder="<?php echo esc_attr__( 'Rua, número, bairro, cidade - UF…', 'dps-frontend-addon' ); ?>"
             ><?php echo esc_textarea( $data['client_address'] ?? '' ); ?></textarea>
-            <p class="dps-signature-field__helper"><?php esc_html_e( 'Se o autocomplete estiver disponível, escolha o endereço sugerido para preencher melhor a localização.', 'dps-frontend-addon' ); ?></p>
             <input type="hidden" name="client_lat" id="dps-registration-client-lat" value="<?php echo esc_attr( $data['client_lat'] ?? '' ); ?>" />
             <input type="hidden" name="client_lng" id="dps-registration-client-lng" value="<?php echo esc_attr( $data['client_lng'] ?? '' ); ?>" />
         </div>

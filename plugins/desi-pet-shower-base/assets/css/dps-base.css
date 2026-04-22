@@ -1,8 +1,8 @@
 /**
  * Estilos do Base Plugin - DPS
- * Material Design 3 Expressive
+ * DPS Signature
  *
- * Este arquivo segue o sistema de design M3 Expressive do DPS:
+ * Este arquivo segue o sistema de design DPS Signature:
  * - Todas as cores via var(--dps-color-*) / var(--dps-*) tokens
  * - Formas via var(--dps-shape-*) tokens
  * - Elevação via var(--dps-elevation-*) tokens
@@ -29,7 +29,7 @@
  *
  * @package Desi_Pet_Shower_Base
  * @since 1.0.0
- * @version 2.0.0 Migração completa para Material 3 Expressive design tokens
+ * @version 2.0.0 Migração completa para DPS Signature design tokens
  */
 
 .dps-base-wrapper {
@@ -1525,7 +1525,7 @@
 
 /* === FORMULÁRIO DE AGENDAMENTO - LAYOUT MELHORADO === */
 
-/* Fieldsets padronizados — M3 field-group pattern */
+/* Fieldsets padronizados — padrão DPS Signature */
 .dps-fieldset {
     border: none;
     border-left: 3px solid var(--dps-color-primary);
@@ -1562,7 +1562,7 @@
     margin: 0 0 var(--dps-space-4);
 }
 
-/* Labels de formulário — M3 Label Large */
+/* Labels de formulário — padrão DPS Signature */
 .dps-form label {
     display: block;
     font-size: var(--dps-typescale-label-large-size);
@@ -1641,7 +1641,7 @@
     font-weight: 500;
 }
 
-/* Checkbox melhorado — M3: inline-flex, 18px, accent-color, weight 400 */
+/* Checkbox melhorado — inline-flex, 18px, accent-color, weight 400 */
 .dps-checkbox-label {
     display: inline-flex;
     align-items: center;
@@ -1673,7 +1673,7 @@
     flex: 1;
 }
 
-/* Upload de arquivo estilizado — M3 card-like container */
+/* Upload de arquivo estilizado — container DPS Signature */
 .dps-file-upload {
     margin-bottom: var(--dps-space-4);
 }
@@ -1698,7 +1698,10 @@
     border: 2px dashed var(--dps-color-outline-variant);
     border-radius: var(--dps-shape-medium);
     cursor: pointer;
-    transition: all var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
+    transition:
+        border-color var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard),
+        background-color var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard),
+        color var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
     font-size: var(--dps-typescale-label-large-size);
     font-weight: var(--dps-typescale-label-large-weight);
     color: var(--dps-color-on-surface-variant);
@@ -1726,7 +1729,7 @@
     border: 1px solid var(--dps-color-outline-variant);
 }
 
-/* Botão de submit — M3 filled button (pill) */
+/* Botão de submit — DPS Signature filled button */
 .dps-submit-btn {
     display: inline-flex;
     align-items: center;
@@ -1743,7 +1746,11 @@
     font-weight: var(--dps-typescale-label-large-weight);
     cursor: pointer;
     box-shadow: var(--dps-elevation-button);
-    transition: all var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
+    transition:
+        background-color var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard),
+        box-shadow var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard),
+        color var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard),
+        transform var(--dps-motion-duration-short-4) var(--dps-motion-easing-standard);
     text-shadow: none;
 }
 
@@ -1767,7 +1774,7 @@
     transform: none;
 }
 
-/* Variante secundária — M3 outlined/tonal */
+/* Variante secundária — DPS Signature tonal */
 .dps-submit-btn--secondary {
     background: var(--dps-color-surface-container-high);
     color: var(--dps-color-on-surface);

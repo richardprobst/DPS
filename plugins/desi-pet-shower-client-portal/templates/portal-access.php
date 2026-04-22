@@ -21,20 +21,14 @@ $whatsapp_url = isset( $portal_access_context['whatsapp_url'] ) && is_string( $p
                 <div class="dps-signature-hero__grid">
                     <div class="dps-portal-signature__hero-copy">
                         <span class="dps-signature-hero__eyebrow"><?php esc_html_e( 'Portal do Cliente', 'dps-client-portal' ); ?></span>
-                        <h1 id="dps-portal-entry-title" class="dps-signature-hero__title"><?php esc_html_e( 'Escolha como deseja entrar no seu espaço do cliente.', 'dps-client-portal' ); ?></h1>
-                        <p class="dps-signature-hero__lead"><?php esc_html_e( 'O acesso agora segue o padrão DPS Signature/M3: visual mais claro, duas rotas de entrada e feedback imediato para solicitar link, criar senha ou revisar o e-mail cadastrado.', 'dps-client-portal' ); ?></p>
-
-                        <ul class="dps-signature-hero__list" aria-label="<?php esc_attr_e( 'Benefícios do portal', 'dps-client-portal' ); ?>">
-                            <li><?php esc_html_e( 'Link direto para acessos rápidos e temporários.', 'dps-client-portal' ); ?></li>
-                            <li><?php esc_html_e( 'Login com e-mail e senha para uso recorrente e mais previsível.', 'dps-client-portal' ); ?></li>
-                            <li><?php esc_html_e( 'Suporte orientado quando o cadastro ainda precisa de ajuste interno.', 'dps-client-portal' ); ?></li>
-                        </ul>
+                        <h1 id="dps-portal-entry-title" class="dps-signature-hero__title"><?php esc_html_e( 'Entre no seu portal.', 'dps-client-portal' ); ?></h1>
+                        <p class="dps-signature-hero__lead"><?php esc_html_e( 'Use link por e-mail ou senha cadastrada.', 'dps-client-portal' ); ?></p>
                     </div>
 
                     <aside class="dps-signature-hero__aside" aria-label="<?php esc_attr_e( 'Resumo do acesso', 'dps-client-portal' ); ?>">
                         <article class="dps-signature-metric-card">
                             <p class="dps-signature-metric-card__value"><?php esc_html_e( 'Link direto + e-mail e senha', 'dps-client-portal' ); ?></p>
-                            <p class="dps-signature-metric-card__note"><?php esc_html_e( 'Os dois caminhos convivem no mesmo fluxo. O e-mail usado no login é sempre o e-mail salvo no cadastro do cliente.', 'dps-client-portal' ); ?></p>
+                            <p class="dps-signature-metric-card__note"><?php esc_html_e( 'Escolha o caminho mais simples para agora.', 'dps-client-portal' ); ?></p>
                         </article>
                     </aside>
                 </div>
@@ -45,19 +39,17 @@ $whatsapp_url = isset( $portal_access_context['whatsapp_url'] ) && is_string( $p
                 <ol class="dps-signature-step-list">
                     <li>
                         <button type="button">
-                            <span class="dps-signature-step-list__index">1</span>
-                            <span class="dps-signature-step-list__text">
-                                <span class="dps-signature-step-list__label"><?php esc_html_e( 'Escolha a rota', 'dps-client-portal' ); ?></span>
-                                <span class="dps-signature-step-list__detail"><?php esc_html_e( 'Link direto, senha ou ajuda da equipe.', 'dps-client-portal' ); ?></span>
+                                <span class="dps-signature-step-list__index">1</span>
+                                <span class="dps-signature-step-list__text">
+                                <span class="dps-signature-step-list__label"><?php esc_html_e( 'Escolha', 'dps-client-portal' ); ?></span>
                             </span>
                         </button>
                     </li>
                     <li>
                         <button type="button">
-                            <span class="dps-signature-step-list__index">2</span>
-                            <span class="dps-signature-step-list__text">
-                                <span class="dps-signature-step-list__label"><?php esc_html_e( 'Confirme o e-mail', 'dps-client-portal' ); ?></span>
-                                <span class="dps-signature-step-list__detail"><?php esc_html_e( 'O sistema valida o cadastro salvo e responde com o próximo passo.', 'dps-client-portal' ); ?></span>
+                                <span class="dps-signature-step-list__index">2</span>
+                                <span class="dps-signature-step-list__text">
+                                <span class="dps-signature-step-list__label"><?php esc_html_e( 'Entre', 'dps-client-portal' ); ?></span>
                             </span>
                         </button>
                     </li>
@@ -90,7 +82,6 @@ $whatsapp_url = isset( $portal_access_context['whatsapp_url'] ) && is_string( $p
                 <div class="dps-signature-panel__header">
                     <span class="dps-signature-hero__tag"><?php esc_html_e( 'Link direto', 'dps-client-portal' ); ?></span>
                     <h2 class="dps-signature-panel__title"><?php esc_html_e( 'Receber link por e-mail', 'dps-client-portal' ); ?></h2>
-                    <p class="dps-signature-panel__intro"><?php esc_html_e( 'Digite o e-mail cadastrado para receber um link de acesso imediato. Este fluxo é útil para acessos rápidos sem precisar lembrar a senha.', 'dps-client-portal' ); ?></p>
                 </div>
 
                 <form class="dps-signature-form dps-portal-entry__async-form" data-dps-access-form="magic-link">
@@ -120,7 +111,6 @@ $whatsapp_url = isset( $portal_access_context['whatsapp_url'] ) && is_string( $p
                 <div class="dps-signature-panel__header">
                     <span class="dps-signature-hero__tag"><?php esc_html_e( 'E-mail e senha', 'dps-client-portal' ); ?></span>
                     <h2 class="dps-signature-panel__title"><?php esc_html_e( 'Entrar com sua senha', 'dps-client-portal' ); ?></h2>
-                    <p class="dps-signature-panel__intro"><?php esc_html_e( 'Se você já criou sua senha, entre por aqui usando sempre o e-mail salvo no cadastro do cliente.', 'dps-client-portal' ); ?></p>
                 </div>
 
                 <form method="post" action="<?php echo esc_url( $portal_url ); ?>" class="dps-signature-form dps-portal-entry__login-form" data-dps-password-login-form>
@@ -161,13 +151,12 @@ $whatsapp_url = isset( $portal_access_context['whatsapp_url'] ) && is_string( $p
                 <div class="dps-signature-panel__header">
                     <span class="dps-signature-hero__tag"><?php esc_html_e( 'Suporte', 'dps-client-portal' ); ?></span>
                     <h2 class="dps-signature-panel__title"><?php esc_html_e( 'Precisa revisar seus dados?', 'dps-client-portal' ); ?></h2>
-                    <p class="dps-signature-panel__intro"><?php esc_html_e( 'Se o e-mail ainda não estiver cadastrado ou estiver desatualizado, fale com a equipe para revisar o cadastro do cliente antes de tentar entrar novamente.', 'dps-client-portal' ); ?></p>
                 </div>
 
                 <ul class="dps-signature-support-list">
-                    <li><?php esc_html_e( 'Confirme qual e-mail está salvo no cliente antes de solicitar o link.', 'dps-client-portal' ); ?></li>
-                    <li><?php esc_html_e( 'O login com senha só funciona quando o cadastro do cliente tem um e-mail válido.', 'dps-client-portal' ); ?></li>
-                    <li><?php esc_html_e( 'Se necessário, a equipe pode ajustar o cadastro e reenviar o fluxo.', 'dps-client-portal' ); ?></li>
+                    <li><?php esc_html_e( 'E-mail desatualizado', 'dps-client-portal' ); ?></li>
+                    <li><?php esc_html_e( 'Cadastro não localizado', 'dps-client-portal' ); ?></li>
+                    <li><?php esc_html_e( 'Senha não criada', 'dps-client-portal' ); ?></li>
                 </ul>
 
                 <?php if ( '' !== $whatsapp_url ) : ?>

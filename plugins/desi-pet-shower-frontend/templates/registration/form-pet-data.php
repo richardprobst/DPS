@@ -56,7 +56,6 @@ $size_summary = [
     <div class="dps-signature-section__header">
         <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Etapa 2', 'dps-frontend-addon' ); ?></p>
         <h2 class="dps-signature-section__title"><?php esc_html_e( 'Pets do cadastro', 'dps-frontend-addon' ); ?></h2>
-        <p class="dps-signature-section__description"><?php esc_html_e( 'Adicione um ou mais pets usando o mesmo padrão visual DPS Signature. Você pode expandir, revisar e remover cards antes do envio.', 'dps-frontend-addon' ); ?></p>
     </div>
 
     <div class="dps-registration-signature__pet-stack dps-signature-card-stack" data-dps-registration-pets>
@@ -78,7 +77,7 @@ $size_summary = [
             }
             $card_summary = ! empty( $summary_parts )
                 ? implode( ' • ', $summary_parts )
-                : __( 'Revise os campos do pet antes de enviar.', 'dps-frontend-addon' );
+                : __( 'Pet sem detalhes', 'dps-frontend-addon' );
             $body_id      = 'dps-registration-pet-body-' . $index;
             $breed_list   = 'dps-registration-pet-breed-list-' . $index;
             ?>
@@ -269,7 +268,7 @@ $size_summary = [
                                     value="1"
                                     <?php checked( ! empty( $pet['pet_aggressive'] ) ); ?>
                                 />
-                                <span><?php esc_html_e( 'Este pet precisa de cuidado extra no atendimento (agressivo, medroso ou muito agitado).', 'dps-frontend-addon' ); ?></span>
+                                <span><?php esc_html_e( 'Pet requer cuidado especial no atendimento.', 'dps-frontend-addon' ); ?></span>
                             </label>
                         </div>
                     </div>
@@ -279,7 +278,6 @@ $size_summary = [
     </div>
 
     <div class="dps-signature-actions dps-signature-actions--end">
-        <p class="dps-signature-actions__hint"><?php esc_html_e( 'Adicione mais pets se o mesmo tutor atender vários animais no sistema.', 'dps-frontend-addon' ); ?></p>
         <button type="button" class="dps-signature-button dps-signature-button--secondary" data-dps-add-pet>
             <span class="dps-signature-button__text"><?php esc_html_e( 'Adicionar outro pet', 'dps-frontend-addon' ); ?></span>
         </button>

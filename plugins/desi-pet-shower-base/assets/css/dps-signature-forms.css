@@ -1,16 +1,15 @@
 /**
  * DPS Signature Forms
  *
- * Fundação visual compartilhada para formulários de cadastro no padrão
- * DPS Signature / Material 3 Expressive.
+ * Fundação visual compartilhada para formulários no padrão DPS Signature.
  *
  * @package DesiPetShower
  */
 
 .dps-signature-shell {
     display: grid;
-    gap: var(--dps-spacing-xl, 2rem);
-    width: min(100%, 1180px);
+    gap: clamp(1rem, 2vw, 1.45rem);
+    width: min(100%, 1120px);
     margin: 0 auto;
     padding: clamp(1rem, 2vw, 1.5rem);
     color: var(--dps-color-on-surface, #1f2937);
@@ -30,8 +29,8 @@
 .dps-signature-hero {
     position: relative;
     display: grid;
-    gap: var(--dps-spacing-lg, 1.5rem);
-    padding: clamp(1.25rem, 3vw, 2rem);
+    gap: clamp(0.9rem, 1.8vw, 1.25rem);
+    padding: clamp(1rem, 2.4vw, 1.65rem);
     border: 1px solid var(--dps-color-outline-variant, #d6dbe3);
     border-radius: var(--dps-shape-extra-large, 28px);
     background:
@@ -64,8 +63,8 @@
     margin: 0;
     color: var(--dps-color-on-surface, #132321);
     font-family: var(--dps-font-display, var(--dps-font-system));
-    font-size: clamp(2rem, 4vw, 3.1rem);
-    line-height: 1.04;
+    font-size: clamp(1.9rem, 3.6vw, 2.8rem);
+    line-height: 1.02;
     font-weight: 500;
     letter-spacing: -0.03em;
     text-wrap: balance;
@@ -75,10 +74,10 @@
 .dps-signature-hero__metric-copy,
 .dps-signature-hero__support {
     margin: 0;
-    max-width: 60ch;
+    max-width: 42ch;
     color: var(--dps-color-on-surface-variant, #52606d);
     font-size: var(--dps-typescale-body-large-size, 1rem);
-    line-height: 1.65;
+    line-height: 1.45;
 }
 
 .dps-signature-hero__list,
@@ -122,8 +121,8 @@
 .dps-signature-step-rail,
 .dps-signature-support-card {
     display: grid;
-    gap: 0.9rem;
-    padding: 1.15rem;
+    gap: 0.65rem;
+    padding: 1rem;
     border-radius: var(--dps-shape-large, 20px);
     border: 1px solid color-mix(in srgb, var(--dps-color-outline-variant, #d6dbe3) 88%, transparent);
     background: color-mix(in srgb, var(--dps-color-surface-container-lowest, #ffffff) 92%, var(--dps-color-surface-container-low, #f7f9fb));
@@ -143,7 +142,7 @@
 .dps-signature-metric-card__note {
     margin: 0;
     color: var(--dps-color-on-surface-variant, #60707f);
-    line-height: 1.5;
+    line-height: 1.42;
 }
 
 .dps-signature-step-rail__title {
@@ -155,7 +154,7 @@
 
 .dps-signature-step-list {
     display: grid;
-    gap: 0.7rem;
+    gap: 0.55rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -166,8 +165,8 @@
     align-items: center;
     gap: 0.75rem;
     width: 100%;
-    min-height: 52px;
-    padding: 0.75rem 0.9rem;
+    min-height: 46px;
+    padding: 0.62rem 0.75rem;
     border: 1px solid var(--dps-color-outline-variant, #d6dbe3);
     border-radius: var(--dps-shape-large, 20px);
     background: var(--dps-color-surface-container-lowest, #ffffff);
@@ -225,8 +224,8 @@
 
 .dps-signature-panel {
     display: grid;
-    gap: var(--dps-spacing-lg, 1.5rem);
-    padding: clamp(1rem, 2vw, 1.5rem);
+    gap: clamp(1rem, 2vw, 1.25rem);
+    padding: clamp(1rem, 2vw, 1.35rem);
     border-radius: var(--dps-shape-extra-large, 28px);
     border: 1px solid var(--dps-color-outline-variant, #d6dbe3);
     background: linear-gradient(180deg, color-mix(in srgb, var(--dps-color-surface-container-lowest, #ffffff) 94%, var(--dps-color-surface-container-low, #f4f6fb)), var(--dps-color-surface-container-lowest, #ffffff));
@@ -313,8 +312,8 @@
 
 .dps-signature-section {
     display: grid;
-    gap: 1rem;
-    padding: clamp(1rem, 2vw, 1.35rem);
+    gap: 0.9rem;
+    padding: clamp(0.95rem, 1.8vw, 1.2rem);
     border-radius: var(--dps-shape-large, 20px);
     border: 1px solid var(--dps-color-outline-variant, #d6dbe3);
     background: color-mix(in srgb, var(--dps-color-surface-container-low, #f7f9fb) 70%, var(--dps-color-surface-container-lowest, #ffffff));
@@ -352,7 +351,7 @@
 
 .dps-signature-grid {
     display: grid;
-    gap: 1rem;
+    gap: 0.9rem;
 }
 
 .dps-signature-grid--2,
@@ -366,7 +365,7 @@
 
 .dps-signature-field {
     display: grid;
-    gap: 0.42rem;
+    gap: 0.34rem;
     min-width: 0;
 }
 
@@ -415,10 +414,10 @@
 .dps-signature-field textarea,
 .dps-signature-file-trigger {
     width: 100%;
-    min-height: 52px;
-    padding: 0.9rem 1rem;
+    min-height: 48px;
+    padding: 0.76rem 0.95rem;
     border: 1px solid var(--dps-color-outline, #98a4b3);
-    border-radius: var(--dps-shape-large, 20px);
+    border-radius: var(--dps-shape-medium, 12px);
     background: var(--dps-color-surface-container-lowest, #ffffff);
     color: var(--dps-color-on-surface, #132321);
     font: inherit;
@@ -432,7 +431,7 @@
 
 .dps-signature-field textarea,
 .dps-signature-control--textarea {
-    min-height: 116px;
+    min-height: 96px;
     resize: vertical;
 }
 
@@ -542,7 +541,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 1rem 1.15rem;
+    padding: 0.9rem 1rem;
 }
 
 .dps-signature-card__identity {
@@ -614,7 +613,7 @@
 .dps-signature-card__body {
     display: grid;
     gap: 1rem;
-    padding: 0 1.15rem 1.15rem;
+    padding: 0 1rem 1rem;
     border-top: 1px solid color-mix(in srgb, var(--dps-color-outline-variant, #d6dbe3) 72%, transparent);
 }
 

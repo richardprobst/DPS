@@ -484,7 +484,7 @@ class DPS_Base_Plugin {
 
         $enqueued = true;
 
-        // CSS — Design Tokens M3 Expressive (carregado antes de qualquer outro CSS do DPS)
+        // CSS — Design Tokens DPS Signature (carregado antes de qualquer outro CSS do DPS)
         wp_enqueue_style( 'dps-design-tokens', DPS_BASE_URL . 'assets/css/dps-design-tokens.css', [], self::get_asset_version( 'assets/css/dps-design-tokens.css' ) );
         wp_enqueue_style( 'dps-signature-forms', DPS_BASE_URL . 'assets/css/dps-signature-forms.css', [ 'dps-design-tokens' ], self::get_asset_version( 'assets/css/dps-signature-forms.css' ) );
         wp_enqueue_style( 'dps-base-style', DPS_BASE_URL . 'assets/css/dps-base.css', [ 'dps-design-tokens', 'dps-signature-forms' ], self::get_asset_version( 'assets/css/dps-base.css' ) );

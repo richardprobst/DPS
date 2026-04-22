@@ -80,7 +80,7 @@
             parts.push( sizeLabel );
         }
 
-        return parts.length ? parts.join( ' • ' ) : 'Revise os campos do pet antes de enviar.';
+        return parts.length ? parts.join( ' • ' ) : 'Pet sem detalhes';
     }
 
     function refreshPetCard( card, index, total ) {

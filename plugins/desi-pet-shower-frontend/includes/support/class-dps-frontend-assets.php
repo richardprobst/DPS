@@ -4,7 +4,7 @@
  *
  * Enfileira CSS e JS condicionalmente — somente quando ao menos um
  * módulo está habilitado. Garante dependência de dps-design-tokens.css
- * para conformidade M3 Expressive.
+ * para conformidade DPS Signature.
  *
  * Módulos que gerenciam seus próprios assets (como registration na Fase 2)
  * enfileiram diretamente; este gerenciador cobre o enqueue genérico.

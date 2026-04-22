@@ -79,7 +79,6 @@ $accessory_options    = [
         <div class="dps-signature-section__header">
             <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Cadastro interno', 'desi-pet-shower' ); ?></p>
             <h2 class="dps-signature-section__title"><?php esc_html_e( 'Dados principais do pet', 'desi-pet-shower' ); ?></h2>
-            <p class="dps-signature-section__description"><?php esc_html_e( 'Este formulário foi reescrito no padrão DPS Signature/M3 para manter consistência com o cadastro público e com o portal do cliente.', 'desi-pet-shower' ); ?></p>
         </div>
 
         <div class="dps-signature-grid dps-signature-grid--2">
@@ -158,7 +157,6 @@ $accessory_options    = [
         <div class="dps-signature-section__header">
             <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Ficha física', 'desi-pet-shower' ); ?></p>
             <h2 class="dps-signature-section__title"><?php esc_html_e( 'Características do pet', 'desi-pet-shower' ); ?></h2>
-            <p class="dps-signature-section__description"><?php esc_html_e( 'Mantenha porte, peso, data de nascimento e pelagem atualizados para facilitar atendimentos futuros.', 'desi-pet-shower' ); ?></p>
         </div>
 
         <div class="dps-signature-grid dps-signature-grid--3">
@@ -188,7 +186,6 @@ $accessory_options    = [
         <div class="dps-signature-section__header">
             <p class="dps-signature-section__eyebrow"><?php esc_html_e( 'Saúde & comportamento', 'desi-pet-shower' ); ?></p>
             <h2 class="dps-signature-section__title"><?php esc_html_e( 'Observações do atendimento', 'desi-pet-shower' ); ?></h2>
-            <p class="dps-signature-section__description"><?php esc_html_e( 'Essas informações ajudam a equipe a preparar o banho e tosa com mais segurança e previsibilidade.', 'desi-pet-shower' ); ?></p>
         </div>
 
         <div class="dps-signature-grid dps-signature-grid--2">

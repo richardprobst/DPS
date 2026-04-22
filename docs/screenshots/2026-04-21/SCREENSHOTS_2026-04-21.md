@@ -84,7 +84,7 @@
 ## Contexto
 - Objetivo da mudanca: reescrever o cadastro publico, os formularios internos de cliente/pet e os fluxos de acesso/reset/profile update do portal para a base unica DPS Signature.
 - Ambiente: homologacao oculta no `https://desi.pet` com paginas QA dedicadas, validacao autenticada via WP-CLI e captura automatizada com Chrome headless.
-- Fonte de verdade visual seguida explicitamente: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`, tratadas como padrao M3/DPS Signature.
+- Fonte de verdade visual seguida explicitamente: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`, com a entrega final restrita ao padrao DPS Signature.
 
 ## Antes/Depois
 - Antes: o cadastro coexistia com runtime legado, o portal misturava shells diferentes, havia CSS/JS inline em pontos criticos e o portal autenticado no `desi.pet` ainda sofria com texto corrompido e scripts nao carregados em templates sem `wp_footer`.
@@ -172,3 +172,49 @@
 - O portal autenticado exigiu um ajuste adicional de runtime porque o template blank do tema nao imprimia scripts em footer; o fix foi revalidado com token QA novo e o shell deixou de exibir mojibake no titulo, breadcrumb e tabs principais.
 - O profile update foi revalidado com inclusao dinamica de novo pet, preservando o contrato do backend e sem depender de scripts inline.
 - Alguns checks textuais do relatorio JSON ficaram `false` porque a copy final mudou em relacao aos rascunhos de teste, mas as capturas finais confirmam que reset de senha e profile update renderizam corretamente com o shell Signature.
+
+# Ajuste complementar - Cadastro DPS Signature limpo
+
+## Contexto
+- Objetivo da mudanca: remover a aparencia de manual do cadastro publico, mantendo apenas copy curta, labels objetivos, erros inline e acoes diretas.
+- Ambiente: pagina oficial publicada em `https://desi.pet/cadastro-de-clientes-e-pets/`, apos envio dos arquivos por SFTP.
+- Padrão visual aplicado: DPS Signature como unica linguagem visual do fluxo.
+
+## Antes/Depois
+- Antes: hero, painel e campos tinham textos explicativos longos, com linguagem tecnica e instrucional demais para um formulario publico.
+- Depois: o cadastro exibe titulo curto, uma frase de contexto, etapas compactas e campos sem helpers desnecessarios, preservando contratos de dados, hooks, nonces e comportamento responsivo.
+
+## Arquivos de codigo alterados nesta rodada
+- `plugins/desi-pet-shower-base/desi-pet-shower-base.php`
+- `plugins/desi-pet-shower-base/assets/css/dps-base.css`
+- `plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css`
+- `plugins/desi-pet-shower-base/assets/css/dps-signature-forms.css`
+- `plugins/desi-pet-shower-base/templates/forms/client-form.php`
+- `plugins/desi-pet-shower-base/templates/forms/pet-form.php`
+- `plugins/desi-pet-shower-client-portal/templates/portal-access.php`
+- `plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php`
+- `plugins/desi-pet-shower-client-portal/templates/profile-update-form.php`
+- `plugins/desi-pet-shower-frontend/assets/css/registration-v2.css`
+- `plugins/desi-pet-shower-frontend/assets/js/registration-v2.js`
+- `plugins/desi-pet-shower-frontend/includes/support/class-dps-frontend-assets.php`
+- `plugins/desi-pet-shower-frontend/templates/registration/form-client-data.php`
+- `plugins/desi-pet-shower-frontend/templates/registration/form-main.php`
+- `plugins/desi-pet-shower-frontend/templates/registration/form-pet-data.php`
+
+## Breakpoints validados
+- `375`
+- `600`
+- `840`
+- `1200`
+- `1920`
+
+## Capturas - cadastro publico limpo
+- `./signature-registration-clean-375.png`
+- `./signature-registration-clean-600.png`
+- `./signature-registration-clean-840.png`
+- `./signature-registration-clean-1200.png`
+- `./signature-registration-clean-1920.png`
+
+## Validacao
+- O HTML publicado retornou o titulo `Cadastro rapido de tutor e pets.`, carregou `registration-v2.css` e nao exibiu as frases explicativas removidas.
+- As capturas confirmaram ausencia de overflow horizontal nos cinco breakpoints.

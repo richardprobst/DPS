@@ -22,7 +22,7 @@ $reset_user_mail = $portal_reset_valid && $portal_reset_user instanceof WP_User 
                     <div class="dps-portal-signature__hero-copy">
                         <span class="dps-signature-hero__eyebrow"><?php esc_html_e( 'Senha do portal', 'dps-client-portal' ); ?></span>
                         <h1 id="dps-portal-reset-title" class="dps-signature-hero__title"><?php esc_html_e( 'Criar ou redefinir senha', 'dps-client-portal' ); ?></h1>
-                        <p class="dps-signature-hero__lead"><?php esc_html_e( 'Depois de salvar a nova senha, o acesso recorrente passa a usar sempre o e-mail cadastrado no cliente. Este fluxo também segue o padrão visual DPS Signature/M3.', 'dps-client-portal' ); ?></p>
+                        <p class="dps-signature-hero__lead"><?php esc_html_e( 'Salve uma nova senha para entrar com seu e-mail.', 'dps-client-portal' ); ?></p>
                     </div>
                 </div>
             </section>
@@ -32,10 +32,9 @@ $reset_user_mail = $portal_reset_valid && $portal_reset_user instanceof WP_User 
                 <ol class="dps-signature-step-list">
                     <li>
                         <button type="button">
-                            <span class="dps-signature-step-list__index">1</span>
-                            <span class="dps-signature-step-list__text">
-                                <span class="dps-signature-step-list__label"><?php esc_html_e( 'Defina uma nova senha', 'dps-client-portal' ); ?></span>
-                                <span class="dps-signature-step-list__detail"><?php esc_html_e( 'Use pelo menos 8 caracteres para concluir o acesso.', 'dps-client-portal' ); ?></span>
+                                <span class="dps-signature-step-list__index">1</span>
+                                <span class="dps-signature-step-list__text">
+                                <span class="dps-signature-step-list__label"><?php esc_html_e( 'Nova senha', 'dps-client-portal' ); ?></span>
                             </span>
                         </button>
                     </li>
@@ -69,7 +68,6 @@ $reset_user_mail = $portal_reset_valid && $portal_reset_user instanceof WP_User 
                     <div class="dps-signature-panel__header">
                         <span class="dps-signature-hero__tag"><?php esc_html_e( 'Nova senha', 'dps-client-portal' ); ?></span>
                         <h2 class="dps-signature-panel__title"><?php esc_html_e( 'Defina sua nova senha de acesso', 'dps-client-portal' ); ?></h2>
-                        <p class="dps-signature-panel__intro"><?php esc_html_e( 'Esta senha ficará vinculada ao e-mail cadastrado no cliente. Você pode marcar o dispositivo para manter o acesso após o primeiro login.', 'dps-client-portal' ); ?></p>
                     </div>
 
                     <ul class="dps-signature-meta-list">
@@ -114,7 +112,6 @@ $reset_user_mail = $portal_reset_valid && $portal_reset_user instanceof WP_User 
                     <div class="dps-signature-panel__header">
                         <span class="dps-signature-hero__tag"><?php esc_html_e( 'Link inválido', 'dps-client-portal' ); ?></span>
                         <h2 class="dps-signature-panel__title"><?php esc_html_e( 'Solicite um novo e-mail para redefinir a senha', 'dps-client-portal' ); ?></h2>
-                        <p class="dps-signature-panel__intro"><?php esc_html_e( 'Este link não pode mais ser usado. Volte para a tela inicial do portal e solicite um novo envio com o e-mail cadastrado.', 'dps-client-portal' ); ?></p>
                     </div>
 
                     <div class="dps-signature-actions dps-signature-actions--end">

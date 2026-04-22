@@ -1,10 +1,8 @@
 /**
- * DPS Design Tokens — Material 3 Expressive
+ * DPS Design Tokens — DPS Signature
  *
- * Tokens de design baseados no Material 3 Expressive do Google,
- * adaptados para o contexto WordPress do desi.pet by PRObst.
- *
- * Referência: https://m3.material.io/
+ * Tokens de design do padrão DPS Signature, adaptados para o contexto
+ * WordPress do desi.pet by PRObst.
  *
  * Versão: 2.0
  * Última atualização: 07/02/2026
@@ -17,7 +15,7 @@
  */
 
 /* ==========================================================================
-   1. COLOR TOKENS — Sistema de Cores M3 Expressive
+   1. COLOR TOKENS — Sistema de Cores DPS Signature
    ========================================================================== */
 
 :root {
@@ -107,7 +105,7 @@
 }
 
 /* ==========================================================================
-   2. TYPOGRAPHY TOKENS — Escala Tipográfica M3 Expressive
+   2. TYPOGRAPHY TOKENS — Escala Tipográfica DPS Signature
    ========================================================================== */
 
 :root {
@@ -129,7 +127,7 @@
 
     /* -----------------------------------------------------------------------
        2.2 Type Scale — 5 papéis × 3 tamanhos (Large, Medium, Small)
-       Valores adaptados do M3 para contexto web (px em vez de sp)
+       Valores adaptados para contexto web
        ----------------------------------------------------------------------- */
 
     /* Display — Textos heróicos, landing pages */
@@ -214,14 +212,14 @@
 }
 
 /* ==========================================================================
-   3. SHAPE TOKENS — Sistema de Formas M3 Expressive
+   3. SHAPE TOKENS — Sistema de Formas DPS Signature
    ========================================================================== */
 
 :root {
 
     /* -----------------------------------------------------------------------
        Escala de arredondamento (corner radius)
-       M3 Expressive: formas mais expressivas e orgânicas
+       DPS Signature: formas arredondadas e acolhedoras
        ----------------------------------------------------------------------- */
     --dps-shape-none:        0px;
     --dps-shape-extra-small: 4px;
@@ -247,7 +245,7 @@
 }
 
 /* ==========================================================================
-   4. ELEVATION TOKENS — Sistema de Elevação Tonal M3
+   4. ELEVATION TOKENS — Sistema de Profundidade DPS Signature
    ========================================================================== */
 
 :root {
@@ -277,14 +275,14 @@
 }
 
 /* ==========================================================================
-   5. MOTION TOKENS — Sistema de Movimento M3 Expressive
+   5. MOTION TOKENS — Sistema de Movimento DPS Signature
    ========================================================================== */
 
 :root {
 
     /* -----------------------------------------------------------------------
        5.1 Easing — Curvas com overshoot sutil (expressivas)
-       Baseadas nas spring curves do M3 Expressive
+       Curvas rápidas e suaves para interações do DPS Signature
        ----------------------------------------------------------------------- */
 
     /* Expressive: com bounce sutil — para momentos importantes */
@@ -453,7 +451,7 @@
 /* ==========================================================================
    11. COMPAT — Aliases para transição do sistema legado
    Mapeia os tokens antigos (--dps-bg-*, --dps-accent, etc.)
-   para os novos tokens M3. Remover após migração completa.
+   para os tokens atuais. Remover após migração completa.
    ========================================================================== */
 
 :root {
