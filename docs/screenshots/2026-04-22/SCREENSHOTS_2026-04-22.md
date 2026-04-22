@@ -304,3 +304,16 @@
 - A segunda revalidacao publicada, apos remover `$.trim`, retornou `console_error_count = 0` e `console_warning_count = 0`.
 - O pacote remoto ativo tem `33` arquivos, sem `services-modal.js`, sem arquivos `.bak*` e sem residuos `agenda_tab`, `DPSServicesModal`, `dps-operational-pill`, `shape-*`, `M3` ou `Material` nos arquivos ativos da Agenda.
 - Limitacao de ambiente: o PHP CLI do servidor respondeu `PHP 8.2.30`, abaixo do requisito global `Requires PHP: 8.4`.
+
+## Verificacao posterior - achados fora da Agenda
+- Objetivo desta etapa: verificar as questoes remanescentes fora do fechamento da Agenda: PHP do servidor, rotas publicas, Portal do Cliente, Google Maps duplicado e tokens base antigos.
+- Evidencias:
+  - `./followup-verification/portal-cliente-verification-1200.png`
+  - `./followup-verification/portal-cliente-verification.json`
+  - `./followup-verification/cadastro-google-maps-verification-1200.png`
+  - `./followup-verification/cadastro-google-maps-verification.json`
+- Resultado: PHP web do site esta em `8.4.19`, mas o PHP CLI via SSH esta em `8.2.30`.
+- Resultado: as rotas `contato-e-localizacao` e `perguntas-frequentes` continuam retornando `404` e nao existem como paginas publicadas.
+- Resultado: o Portal do Cliente ainda tem erro de runtime e o botao `CRIAR OU REDEFINIR SENHA` nao abre modal nem navega.
+- Resultado: o Cadastro ainda carrega Google Maps duas vezes, com callbacks `dpsSignatureGooglePlacesReady` e `dpsRegistrationGooglePlacesReady`.
+- Resultado: o Portal publicado ainda materializa geometria antiga com `28px`, `12px` e `9999px`, contrariando a regra DPS Signature de geometria reta por padrao.

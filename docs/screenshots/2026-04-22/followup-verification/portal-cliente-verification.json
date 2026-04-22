@@ -1,0 +1,22 @@
+{
+  "url": "https://desi.pet/portal-do-cliente/",
+  "console": [],
+  "page_errors": [
+    "Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.",
+    "handleReviewForm is not defined"
+  ],
+  "button": {
+    "found_text": "CRIAR OU REDEFINIR SENHA",
+    "clicked": true,
+    "before_url": "https://desi.pet/portal-do-cliente/",
+    "after_url": "https://desi.pet/portal-do-cliente/",
+    "before_dialogs": 0,
+    "after_dialogs": 0,
+    "opened_dialog": false,
+    "navigated": false
+  },
+  "title": "Portal do Cliente – Desi Pet Shower",
+  "http_url": "https://desi.pet/portal-do-cliente/",
+  "has_portal_shell": true,
+  "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-22\\followup-verification\\portal-cliente-verification-1200.png"
+}

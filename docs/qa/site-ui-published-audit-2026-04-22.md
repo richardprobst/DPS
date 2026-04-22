@@ -85,3 +85,55 @@ Nos breakpoints `375`, `600`, `840`, `1200` e `1920`, a maior parte das paginas 
 ## Observacao de escopo
 
 Esta auditoria cobre a UI publicada das superficies publicas acessiveis sem login especial nesta rodada. A area autenticada da Agenda pode receber uma rodada separada de auditoria completa se for necessario validar novamente modais, fluxo operacional e comportamento responsivo no ambiente logado.
+
+## Verificacao posterior - ambiente e achados fora da Agenda
+
+Data: 2026-04-22
+
+### PHP do servidor
+
+- PHP CLI via SSH: `8.2.30`.
+- PHP web publicado em `https://desi.pet/`: `8.4.19` via LiteSpeed, medido com probe PHP temporario criado e removido no `public_html`.
+- Leitura: o runtime web atende ao requisito global `Requires PHP: 8.4`; o risco remanescente e apenas operacional para comandos WP-CLI/SSH que dependam do PHP CLI.
+
+### Rotas publicas
+
+- `https://desi.pet/contato-e-localizacao/`: HTTP `404`, titulo `Pagina nao encontrada - Desi Pet Shower`.
+- `https://desi.pet/perguntas-frequentes/`: HTTP `404`, titulo `Pagina nao encontrada - Desi Pet Shower`.
+- WP-CLI nao encontrou paginas publicadas com os slugs `contato-e-localizacao` ou `perguntas-frequentes`.
+
+### Portal do Cliente
+
+- URL verificada: `https://desi.pet/portal-do-cliente/`.
+- Evidencias:
+  - `docs/screenshots/2026-04-22/followup-verification/portal-cliente-verification.json`
+  - `docs/screenshots/2026-04-22/followup-verification/portal-cliente-verification-1200.png`
+- O botao `CRIAR OU REDEFINIR SENHA` foi encontrado e clicado, mas nao abriu modal nem navegou.
+- Erros de runtime confirmados:
+  - `Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.`
+  - `handleReviewForm is not defined`
+- Causas locais provaveis seguem em `plugins/desi-pet-shower-client-portal/assets/js/client-portal.js`, com chamada de `handleReviewForm()` antes da definicao disponivel no escopo e `MutationObserver` sem guarda robusta de alvo.
+
+### Google Maps no cadastro
+
+- URL verificada: `https://desi.pet/cadastro-de-clientes-e-pets/`.
+- Evidencias:
+  - `docs/screenshots/2026-04-22/followup-verification/cadastro-google-maps-verification.json`
+  - `docs/screenshots/2026-04-22/followup-verification/cadastro-google-maps-verification-1200.png`
+- Confirmadas duas cargas de `maps.googleapis.com/maps/api/js`:
+  - callback `dpsSignatureGooglePlacesReady`
+  - callback `dpsRegistrationGooglePlacesReady`
+- O console publicou o erro: `You have included the Google Maps JavaScript API multiple times on this page. This may cause unexpected errors.`
+- Pontos locais provaveis:
+  - `plugins/desi-pet-shower-base/assets/js/dps-signature-forms.js`
+  - `plugins/desi-pet-shower-frontend/assets/js/registration-v2.js`
+
+### Tokens e geometria base
+
+- `plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css` ainda declara shapes legados como `--dps-shape-full: 9999px`, `--dps-shape-extra-large: 28px` e aliases de componente para pill/card/dialog.
+- `plugins/desi-pet-shower-base/assets/css/dps-signature-forms.css` ainda usa `border-radius` grandes e pills em superficies, botoes e tags.
+- Verificacao publicada confirmou no Portal:
+  - hero e paineis com `28px`
+  - inputs com `12px`
+  - botoes com `9999px`
+- Leitura: o Cadastro publicado esta menos afetado visualmente, mas o Portal ainda materializa fortemente a geometria antiga e precisa de convergencia para DPS Signature.
