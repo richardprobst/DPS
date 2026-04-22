@@ -17,21 +17,21 @@ $duplicate_client_id = $duplicate_client_id ?? 0;
 $confirmed           = $confirmed ?? false;
 ?>
 
-<div class="dps-registration-signature__duplicate-stack">
-    <article class="dps-signature-notice dps-signature-notice--warning" role="alert">
-        <h3 class="dps-signature-notice__title"><?php esc_html_e( 'Telefone já encontrado na base', 'dps-frontend-addon' ); ?></h3>
-        <p class="dps-signature-notice__text">
+<div class="dps-registration__duplicate-stack">
+    <article class="dps-registration-notice dps-registration-notice--warning" role="alert">
+        <h3 class="dps-registration-notice__title"><?php esc_html_e( 'Telefone já cadastrado', 'dps-frontend-addon' ); ?></h3>
+        <p class="dps-registration-notice__text">
             <?php
             printf(
                 /* translators: %d: existing client ID */
-                esc_html__( 'Existe um cliente com este telefone (ID #%d). Confirme abaixo apenas se você realmente precisa criar um novo cadastro separado.', 'dps-frontend-addon' ),
+                esc_html__( 'Encontramos este telefone na base (ID #%d). Continue apenas se o novo cadastro precisar ser separado.', 'dps-frontend-addon' ),
                 $duplicate_client_id
             );
             ?>
         </p>
     </article>
 
-    <label class="dps-signature-check" for="dps-registration-confirm-duplicate">
+    <label class="dps-registration-check" for="dps-registration-confirm-duplicate">
         <input type="hidden" name="dps_confirm_duplicate" value="" />
         <input
             id="dps-registration-confirm-duplicate"

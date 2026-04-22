@@ -2639,11 +2639,20 @@ class DPS_Loyalty_Referrals {
 
         $referral_param = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref'] ) ) : '';
         ?>
-        <p class="dps-referral-field">
-            <label><?php esc_html_e( 'CÃ³digo de indicaÃ§Ã£o (opcional)', 'dps-loyalty-addon' ); ?><br />
-                <input type="text" name="dps_referral_code" value="<?php echo esc_attr( $referral_param ); ?>" maxlength="20" />
+        <div class="dps-registration-field dps-registration-field--full dps-referral-field">
+            <label class="dps-registration-field__label" for="dps-registration-referral-code">
+                <?php esc_html_e( 'CÃ³digo de indicaÃ§Ã£o', 'dps-loyalty-addon' ); ?>
             </label>
-        </p>
+            <input
+                id="dps-registration-referral-code"
+                type="text"
+                name="dps_referral_code"
+                value="<?php echo esc_attr( $referral_param ); ?>"
+                maxlength="20"
+                autocomplete="off"
+                placeholder="<?php echo esc_attr__( 'Seu cÃ³digo, se tiver', 'dps-loyalty-addon' ); ?>"
+            />
+        </div>
         <?php
     }
 

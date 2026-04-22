@@ -25,32 +25,31 @@ $primary_message            = $email_confirmation_enabled && $email_confirmation
     ? __( 'Cadastro recebido. Agora confirme seu e-mail para ativar o acesso.', 'dps-frontend-addon' )
     : __( 'Cadastro concluído com sucesso.', 'dps-frontend-addon' );
 $secondary_message          = $email_confirmation_enabled && $email_confirmation_sent
-    ? __( 'Enviamos um link de confirmação para o e-mail informado. Depois de confirmar, você poderá seguir para o agendamento com mais segurança.', 'dps-frontend-addon' )
-    : __( 'Seus dados foram salvos no novo fluxo DPS Signature. Agora você já pode seguir para o próximo passo do atendimento.', 'dps-frontend-addon' );
+    ? __( 'Enviamos um link de confirmação para o e-mail informado. Depois disso, siga para o agendamento.', 'dps-frontend-addon' )
+    : __( 'Seus dados já estão salvos.', 'dps-frontend-addon' );
 ?>
 
-<div class="dps-signature-shell dps-signature-shell--registration dps-registration-signature dps-registration-signature--success">
-    <section class="dps-signature-panel dps-registration-signature__success-panel">
-        <div class="dps-registration-signature__success-mark" aria-hidden="true">✓</div>
-        <span class="dps-signature-hero__tag"><?php esc_html_e( 'Cadastro concluído', 'dps-frontend-addon' ); ?></span>
-        <h1 class="dps-signature-panel__title"><?php echo esc_html( $primary_message ); ?></h1>
-        <p class="dps-signature-panel__intro"><?php echo esc_html( $secondary_message ); ?></p>
+<div class="dps-registration dps-registration--success">
+    <section class="dps-registration__hero dps-registration__hero--success">
+        <div class="dps-registration__success-mark" aria-hidden="true">✓</div>
+        <div class="dps-registration__hero-copy">
+            <h1 class="dps-registration__hero-title"><?php echo esc_html( $primary_message ); ?></h1>
+            <p class="dps-registration__hero-lead"><?php echo esc_html( $secondary_message ); ?></p>
+        </div>
+    </section>
 
-        <ul class="dps-signature-meta-list">
-            <li>
-                <span><?php esc_html_e( 'Pets vinculados neste envio', 'dps-frontend-addon' ); ?></span>
-                <strong><?php echo esc_html( (string) count( $pet_ids ) ); ?></strong>
-            </li>
-            <li>
-                <span><?php esc_html_e( 'Fluxo utilizado', 'dps-frontend-addon' ); ?></span>
-                <strong><?php esc_html_e( 'DPS Signature', 'dps-frontend-addon' ); ?></strong>
-            </li>
-        </ul>
+    <section class="dps-registration__stage dps-registration__stage--success">
+        <div class="dps-registration-metrics">
+            <article class="dps-registration-metric">
+                <span class="dps-registration-metric__label"><?php esc_html_e( 'Pets neste envio', 'dps-frontend-addon' ); ?></span>
+                <strong class="dps-registration-metric__value"><?php echo esc_html( (string) count( $pet_ids ) ); ?></strong>
+            </article>
+        </div>
 
-        <div class="dps-signature-actions dps-signature-actions--end">
+        <div class="dps-registration__footer">
             <?php if ( ! $email_confirmation_enabled && '' !== $booking_url ) : ?>
-                <a href="<?php echo esc_url( $booking_url ); ?>" class="dps-signature-button">
-                    <span class="dps-signature-button__text"><?php esc_html_e( 'Seguir para o agendamento', 'dps-frontend-addon' ); ?></span>
+                <a href="<?php echo esc_url( $booking_url ); ?>" class="dps-registration-button dps-registration-button--primary">
+                    <span class="dps-registration-button__text"><?php esc_html_e( 'Seguir para o agendamento', 'dps-frontend-addon' ); ?></span>
                 </a>
             <?php endif; ?>
         </div>

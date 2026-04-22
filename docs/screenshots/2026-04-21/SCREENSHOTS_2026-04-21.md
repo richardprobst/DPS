@@ -303,3 +303,47 @@
 - Cadastro complementar: sem texto visivel `DPS Signature` no topo, sem frase introdutoria redundante e sem os titulos antigos `Contato principal`, `Dados do pet` ou `Concluir cadastro`.
 - Portal de acesso: sem step rail, sem texto DPS Signature/Material, sem overflow, hero com acento primario e botoes com largura utilizavel.
 - Atualizacao de perfil: formulario com token real renderizado, sem step rail, sem texto DPS Signature/Material, sem copy de manual e sem overflow nos cinco breakpoints.
+
+# Ajuste complementar - Cadastro DPS Signature reto e sem herdanca antiga
+
+## Contexto
+- Objetivo da mudanca: consolidar o cadastro publico em uma base visual DPS Signature propria, sem depender do `dps-signature-forms` compartilhado e sem geometria herdada do padrao antigo.
+- Ambiente: pagina oficial publicada em `https://desi.pet/cadastro-de-clientes-e-pets/`, com upload por SFTP e validacao direta do HTML servido.
+- Fonte de verdade visual seguida explicitamente: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+
+## Antes/Depois
+- Antes: o cadastro ainda carregava uma linguagem visual macia demais, com estrutura herdada do shell antigo, excesso de arredondamento, copy redundante e toggles que ainda denunciavam adaptacao.
+- Depois: o formulario passou a usar uma fundacao propria, com blocos retos, labels mais objetivas, disclosures secos, botoes sem pill, hero sem texto de apoio redundante e cards de pet tratados apenas como superficie de interacao.
+- Ajuste estrutural complementar: o shortcode continua preservando hooks, nonces, handlers e nomes de campos, mas o runtime visual do cadastro nao depende mais do CSS/JS compartilhado do formulario Signature antigo.
+
+## Arquivos de codigo alterados nesta rodada
+- `plugins/desi-pet-shower-frontend/assets/css/registration-v2.css`
+- `plugins/desi-pet-shower-frontend/assets/js/registration-v2.js`
+- `plugins/desi-pet-shower-frontend/includes/modules/class-dps-frontend-registration-v2-module.php`
+- `plugins/desi-pet-shower-frontend/templates/registration/form-client-data.php`
+- `plugins/desi-pet-shower-frontend/templates/registration/form-duplicate-warning.php`
+- `plugins/desi-pet-shower-frontend/templates/registration/form-error.php`
+- `plugins/desi-pet-shower-frontend/templates/registration/form-main.php`
+- `plugins/desi-pet-shower-frontend/templates/registration/form-pet-data.php`
+- `plugins/desi-pet-shower-frontend/templates/registration/form-success.php`
+- `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php`
+
+## Breakpoints validados
+- `375`
+- `600`
+- `840`
+- `1200`
+- `1920`
+
+## Capturas - cadastro publico DPS Signature
+- `./registration-signature-dps-375.png`
+- `./registration-signature-dps-600.png`
+- `./registration-signature-dps-840.png`
+- `./registration-signature-dps-1200.png`
+- `./registration-signature-dps-1920.png`
+
+## Validacao
+- O HTML publicado retornou `200` e renderizou `dps-registration__hero` e `#dps-registration-form`.
+- O runtime publicado nao exibiu `dps-signature-shell`, `dps-signature-panel`, `dps-registration-signature`, `Preferencias e extras`, `Adicionar outro pet` nem texto visivel `DPS Signature`.
+- A nova copy publicada confirmou os titulos `Cadastro de tutor e pets`, `Dados do tutor`, `Pets`, `Detalhes adicionais`, `Finalizar cadastro` e `Adicionar pet`.
+- A captura automatizada foi feita com Chrome headless porque o Playwright MCP permaneceu bloqueado no ambiente local por `EPERM` ao tentar criar `C:\\Windows\\System32\\.playwright-mcp`.

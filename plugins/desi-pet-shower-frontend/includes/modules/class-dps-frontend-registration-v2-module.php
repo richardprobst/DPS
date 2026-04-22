@@ -173,6 +173,13 @@ final class DPS_Frontend_Registration_V2_Module extends DPS_Abstract_Module_V2 {
             return;
         }
 
+        $registrationCssVersion = file_exists( trailingslashit( DPS_FRONTEND_DIR ) . 'assets/css/registration-v2.css' )
+            ? filemtime( trailingslashit( DPS_FRONTEND_DIR ) . 'assets/css/registration-v2.css' )
+            : DPS_FRONTEND_VERSION;
+        $registrationJsVersion  = file_exists( trailingslashit( DPS_FRONTEND_DIR ) . 'assets/js/registration-v2.js' )
+            ? filemtime( trailingslashit( DPS_FRONTEND_DIR ) . 'assets/js/registration-v2.js' )
+            : DPS_FRONTEND_VERSION;
+
         wp_enqueue_style(
             'dps-design-tokens',
             DPS_BASE_URL . 'assets/css/dps-design-tokens.css',
@@ -181,36 +188,17 @@ final class DPS_Frontend_Registration_V2_Module extends DPS_Abstract_Module_V2 {
         );
 
         wp_enqueue_style(
-            'dps-signature-forms',
-            DPS_BASE_URL . 'assets/css/dps-signature-forms.css',
-            [ 'dps-design-tokens' ],
-            file_exists( trailingslashit( DPS_BASE_DIR ) . 'assets/css/dps-signature-forms.css' )
-                ? filemtime( trailingslashit( DPS_BASE_DIR ) . 'assets/css/dps-signature-forms.css' )
-                : DPS_BASE_VERSION
-        );
-
-        wp_enqueue_style(
             'dps-registration-v2',
             DPS_FRONTEND_URL . 'assets/css/registration-v2.css',
-            [ 'dps-design-tokens', 'dps-signature-forms' ],
-            DPS_FRONTEND_VERSION
-        );
-
-        wp_enqueue_script(
-            'dps-signature-forms',
-            DPS_BASE_URL . 'assets/js/dps-signature-forms.js',
-            [],
-            file_exists( trailingslashit( DPS_BASE_DIR ) . 'assets/js/dps-signature-forms.js' )
-                ? filemtime( trailingslashit( DPS_BASE_DIR ) . 'assets/js/dps-signature-forms.js' )
-                : DPS_BASE_VERSION,
-            true
+            [ 'dps-design-tokens' ],
+            $registrationCssVersion
         );
 
         wp_enqueue_script(
             'dps-registration-v2',
             DPS_FRONTEND_URL . 'assets/js/registration-v2.js',
-            [ 'dps-signature-forms' ],
-            DPS_FRONTEND_VERSION,
+            [],
+            $registrationJsVersion,
             true
         );
 

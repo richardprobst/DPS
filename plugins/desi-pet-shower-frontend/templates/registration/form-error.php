@@ -16,10 +16,10 @@ $errors = $errors ?? [];
 ?>
 
 <?php if ( ! empty( $errors ) ) : ?>
-    <article class="dps-signature-notice dps-signature-notice--error" role="alert">
-        <h3 class="dps-signature-notice__title"><?php esc_html_e( 'Revise os campos destacados para continuar.', 'dps-frontend-addon' ); ?></h3>
+    <article class="dps-registration-notice dps-registration-notice--error" role="alert">
+        <h3 class="dps-registration-notice__title"><?php esc_html_e( 'Revise os campos destacados.', 'dps-frontend-addon' ); ?></h3>
         <?php if ( 1 === count( $errors ) ) : ?>
-            <p class="dps-signature-notice__text"><?php echo esc_html( $errors[0] ); ?></p>
+            <p class="dps-registration-notice__text"><?php echo esc_html( $errors[0] ); ?></p>
         <?php else : ?>
             <ul>
                 <?php foreach ( $errors as $error ) : ?>
