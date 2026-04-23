@@ -1228,6 +1228,11 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - O acesso publico, o reset de senha e o formulario de atualizacao de perfil compartilham o mesmo shell DPS Signature, com foco visivel, mensagens inline e responsividade coerente nos breakpoints oficiais.
 - A geracao do link de atualizacao de perfil deixou de depender de transients. O link agora e gerado sob demanda via AJAX, preserva o contrato externo `dps_generate_profile_update_link` e responde sempre em tempo real.
 - O carregamento de assets do portal passou a ser contextual: `client-portal-auth.css` cobre os estados publicos de acesso/reset e `client-portal-profile-update.css` + `client-portal-profile-update.js` cobrem o link de atualizacao e o formulario tokenizado, todos apoiados pela base `dps-signature-forms`.
+- O bootstrap do portal agora protege o runtime contra inicializacao tardia: review form, historico dos pets, repetir servico, exportacao PDF e filtros/load-more da timeline sao delegados para o bloco tardio de enhancements, e o `MutationObserver` dos toasts so inicia quando `document.body` existe.
+- O CTA `Criar ou redefinir senha` permanece assincrono e anti-enumeration no acesso publico: ele nao cria um fluxo paralelo de modal, exibe feedback inline na propria tela e dispara `dps_request_portal_password_access` para enviar as instrucoes por e-mail quando o cadastro existe.
+- A casca publica de acesso/reset passou a sobrepor a fundacao compartilhada com geometria reta (`0px` e `2px`) e paleta `ink`/`petrol`/`paper`/`bone`, alinhando o Portal do Cliente ao DPS Signature sem alterar shortcodes, hooks ou endpoints do add-on.
+- O shell publico deixou de carregar o bundle autenticado do portal: `client-portal-access.js` passou a concentrar tabs de acesso, sincronizacao de e-mail, toggles de senha e AJAX da landing/reset, enquanto `client-portal.js` fica restrito ao portal autenticado.
+- O fluxo de redefinicao de senha deixou de duplamente codificar `login` e `key` nos links emitidos e nos redirects internos; com isso, `check_password_reset_key()` volta a aceitar as URLs geradas pelo proprio add-on no runtime publicado.
 
 **Diretório**: `plugins/desi-pet-shower-client-portal`
 

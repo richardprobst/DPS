@@ -543,3 +543,162 @@ Substituir o empty state generico visto no filtro `Atrasados` por uma composicao
 - varredura remota com `python3` para confirmar `REMOTE_BOM_COUNT=0`
 - Playwright autenticado no ambiente publicado em `375`, `600`, `840`, `1200` e `1920`
 - `wp post list`, `wp post delete`, `wp user get` e `wp user delete` para limpeza do fixture temporario
+
+## Portal do Cliente: bootstrap publicado e CTA `CRIAR OU REDEFINIR SENHA`
+
+Fonte de verdade visual seguida nesta correcao: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` (padrao DPS Signature).
+
+### Objetivo
+
+Fechar o blocker registrado em `2026-04-22` no Portal do Cliente publicado, eliminando os erros de runtime do bootstrap e restaurando o fluxo real do CTA `CRIAR OU REDEFINIR SENHA`, que precisava continuar assincrono, anti-enumeration e com feedback inline na propria tela.
+
+### Causa encontrada
+
+- o shell principal do portal chamava handlers declarados em um bloco tardio do mesmo `client-portal.js`, o que quebrava o bootstrap publicado com erros como `handleReviewForm is not defined` e `handlePetHistoryTabs is not defined`;
+- o observer de toasts ainda podia tentar observar `document.body` cedo demais;
+- como o bootstrap quebrava antes de estabilizar o shell, o CTA de senha deixava de responder, nao abria modal e tambem nao disparava o AJAX esperado.
+
+### Ajustes implementados
+
+- criado um mecanismo de proxy/bridge no bootstrap inicial para handlers tardios do add-on, preservando os contratos externos do portal;
+- review form, historico dos pets, repetir servico, exportacao PDF e timeline (`load more` + filtro por periodo) passaram a ser delegados para o bloco tardio de enhancements;
+- o `MutationObserver` dos toasts agora so inicia quando `document.body` existe;
+- a casca publica de acesso/reset publicada foi mantida no padrao DPS Signature com geometria reta (`0px` e `2px`) e paleta `ink`/`petrol`/`paper`/`bone`, sem alterar shortcodes, hooks ou endpoints.
+
+### Publicado e validado
+
+- publicado em `https://desi.pet/portal-do-cliente/`;
+- backups remotos:
+  - `/home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal.js.__backup_20260423-184832`
+  - `/home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css.__backup_20260423-184832`
+  - `/home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal.js.__backup_20260423-185524`
+- assets ativos confirmados no probe final:
+  - `client-portal.js?ver=1776981326`
+  - `client-portal-auth.css?ver=1776980914`
+
+### Validacao funcional
+
+- `page_errors = []` no probe final publicado;
+- CTA `Criar ou redefinir senha` encontrado e clicado com sucesso;
+- o fluxo permaneceu na mesma URL, sem navegacao e sem abertura de modal:
+  - `opened_dialog = false`
+  - `navigated = false`
+- o AJAX `dps_request_portal_password_access` respondeu `200` com `success = true`;
+- feedback inline final exibido no shell:
+  - `Se este e-mail estiver cadastrado no portal, voce recebera as instrucoes para criar ou redefinir a senha.`
+
+### Breakpoints validados
+
+- `375`: `overflowX = 0`, shell `355px`, hero `328x157`, CTA `295x56`, campos e cards empilhados corretamente;
+- `600`: `overflowX = 0`, shell `580px`, hero `548x157`, CTA `498x56`;
+- `840`: `overflowX = 0`, shell `820px`, hero `786x165`, grid em tres colunas, CTA `200x82`;
+- `1200`: `overflowX = 0`, shell `1140px`, hero `1092x191`, CTA `292x56`, feedback inline validado;
+- `1920`: `overflowX = 0`, shell maximo mantido em `1140px`, CTA `292x56`, composicao centralizada.
+
+### Console
+
+- sem erros de runtime do portal no probe final;
+- residuo externo fora do escopo do add-on: `adsbygoogle.js` bloqueado por CORS no dominio publicado;
+- log informativo do jQuery Migrate continua presente no ambiente publicado.
+
+### Artefatos
+
+- [portal-cliente-final-verification.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-final-verification.json)
+- [portal-cliente-final-verification-375.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-final-verification-375.png)
+- [portal-cliente-final-verification-600.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-final-verification-600.png)
+- [portal-cliente-final-verification-840.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-final-verification-840.png)
+- [portal-cliente-final-verification-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-final-verification-1200.png)
+- [portal-cliente-final-verification-1920.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-final-verification-1920.png)
+- [portal-cliente-final-verification-1200-feedback.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-final-verification-1200-feedback.png)
+
+### Comandos executados
+
+- `node --check plugins/desi-pet-shower-client-portal/assets/js/client-portal.js`
+- `git diff --check -- plugins/desi-pet-shower-client-portal/assets/js/client-portal.js plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css ANALYSIS.md CHANGELOG.md`
+- upload por SSH/SFTP com backup remoto de `client-portal.js` e `client-portal-auth.css`
+- republicacao final do `client-portal.js` com novo backup remoto apos o fechamento do ultimo handler tardio
+- validacao publicada com Chrome headless via `playwright`, gerando JSON e screenshots em `docs/screenshots/2026-04-23/followup-verification/`
+
+## Portal do Cliente: auditoria integral do login inicial
+
+Fonte de verdade visual seguida nesta auditoria e implementacao: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` (padrao DPS Signature).
+
+### Objetivo
+
+Auditar integralmente a pagina inicial publica do Portal do Cliente em `https://desi.pet/portal-do-cliente/`, reescrever o shell necessario para alinhar o acesso inicial ao DPS Signature publicado, estabilizar o runtime publico e validar os fluxos reais de senha, magic link e redefinicao de senha com fixture temporario emitido via WP-CLI.
+
+### Achados decisivos
+
+- a landing publica ainda estava acoplada ao bundle autenticado do portal, o que nao era adequado para um shell de acesso inicial;
+- o reset de senha emitido pelo proprio add-on estava quebrado no publicado porque `login` e `key` eram passados com `rawurlencode()` antes de `add_query_arg()`, produzindo link duplamente codificado e invalido para `check_password_reset_key()`;
+- a hierarquia publica precisava de reescrita, com caminho principal mais claro para senha recorrente, comparacao entre modos e suporte contextual sem competir com o CTA primario.
+
+### Ajustes implementados
+
+- reescrita integral da landing publica e da tela de reset no padrao DPS Signature;
+- criacao do runtime dedicado `client-portal-access.js` para tabs, sincronizacao de e-mail, toggles de senha e AJAX da tela publica;
+- manutencao dos contratos externos do add-on: shortcodes, hooks, nonces, nomes de campos e endpoints AJAX;
+- correcao do fluxo de reset publicado, removendo a dupla codificacao na geracao do link e nos redirects internos do proprio reset.
+
+### Publicado e validado
+
+- publicado em `https://desi.pet/portal-do-cliente/`;
+- backups remotos desta rodada final:
+  - `/home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php.__backup_20260423-200623`
+  - `/home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/includes/class-dps-portal-user-manager.php.__backup_20260423-200623`
+- assets publicos ativos confirmados:
+  - `client-portal-access.js?ver=1776984600`
+  - `client-portal-auth.css?ver=1776984600`
+
+### Validacao funcional
+
+- fixture temporario criado via WP-CLI remoto:
+  - `client_id = 1769`
+  - `pet_id = 1770`
+  - `user_id = 44`
+  - `email = codex.portal.audit.20260423-200043@example.com`
+- `pageErrors = []` em todas as amostras do shell publico e dos fluxos autenticados;
+- `Criar ou redefinir senha` respondeu `200` com feedback inline anti-enumeration:
+  - `Se este e-mail estiver cadastrado no portal, voce recebera as instrucoes para criar ou redefinir a senha.`
+- `Link rapido` respondeu `200` com feedback inline:
+  - `Link enviado com sucesso. Verifique sua caixa de entrada e spam.`
+- login por senha autenticou e abriu o portal com `9` tabs;
+- login por magic link autenticou e abriu o portal com `9` tabs;
+- reset abriu com os campos validos, `toggleCount = 2` e `overflowX = 0`.
+
+### Breakpoints validados
+
+- `375`: `overflowX = 0`, shell `355px`, hero `328x773`, CTA `295x56`;
+- `600`: `overflowX = 0`, shell `580px`, hero `548x504`, CTA `514x56`;
+- `840`: `overflowX = 0`, shell `820px`, hero `786x434`, CTA `751x56`;
+- `1200`: `overflowX = 0`, shell `1140px`, hero `1092x356`, CTA `617x56`;
+- `1920`: `overflowX = 0`, shell maximo `1140px`, hero `1092x356`, CTA `617x56`.
+
+### Console
+
+- sem erros de runtime do add-on no login, reset, senha recorrente ou magic link;
+- residuo externo fora do escopo do add-on: `adsbygoogle.js` bloqueado por CORS no dominio publicado;
+- notice do `all-in-one-wp-migration` apareceu apenas nas chamadas WP-CLI remotas usadas para fixture e limpeza.
+
+### Artefatos
+
+- [portal-cliente-login-audit-final.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-login-audit-final.json)
+- [portal-cliente-login-audit-375.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-login-audit-375.png)
+- [portal-cliente-login-audit-600.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-login-audit-600.png)
+- [portal-cliente-login-audit-840.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-login-audit-840.png)
+- [portal-cliente-login-audit-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-login-audit-1200.png)
+- [portal-cliente-login-audit-1920.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-login-audit-1920.png)
+- [portal-cliente-login-reset-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-login-reset-1200.png)
+- [portal-cliente-login-password-success-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-login-password-success-1200.png)
+- [portal-cliente-login-magic-success-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-login-magic-success-1200.png)
+- [portal-cliente-login-password-reset-feedback-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-login-password-reset-feedback-1200.png)
+- [portal-cliente-login-magic-request-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/portal-cliente-login-magic-request-1200.png)
+
+### Comandos executados
+
+- `php -l plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
+- `php -l plugins/desi-pet-shower-client-portal/includes/class-dps-portal-user-manager.php`
+- upload por SSH/SFTP com backup remoto de `class-dps-client-portal.php` e `class-dps-portal-user-manager.php`
+- `php -l` remoto dos dois arquivos publicados
+- fixture temporario, refresh de token/reset e limpeza de rate limit via WP-CLI remoto
+- validacao publicada com Chrome headless via `playwright`, gerando JSON e screenshots em `docs/screenshots/2026-04-23/followup-verification/`

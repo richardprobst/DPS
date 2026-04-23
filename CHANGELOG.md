@@ -236,6 +236,7 @@ Antes de criar uma nova versÃ£o oficial:
 - **Admin de logins revisado**: a ?rea administrativa passou a exibir estado de magic link, estado do acesso por senha, ?ltimo login, atividade recente e a??es de sincroniza??o/envio de acesso por senha.
 - **Sess?o h?brida unificada**: logins por magic link e por senha agora compartilham restaura??o de sessÃ£o, remember-me e registro de ?ltimo acesso.
 - **Client Portal sem transients/cache interno**: sessao do portal, 2FA, remember-me pendente, rate limiting e auditoria de tokens foram migrados para options persistentes com expiracao/retencao propria; secoes do portal passam a renderizar sempre em tempo real mantendo hooks legados de compatibilidade.
+- **Acesso publico do portal alinhado ao DPS Signature publicado**: a casca de acesso e reset publicada passou a respeitar a geometria reta (`0px` e `2px`) e a paleta `ink`/`petrol`/`paper`/`bone`, sem alterar shortcodes, hooks ou endpoints externos do add-on.
 
 **AI Add-on â€” Assistente Virtual no Portal do Cliente**
 
@@ -277,6 +278,10 @@ Antes de criar uma nova versÃ£o oficial:
 - **Sem cache/transient no cadastro publico**: anti-spam, duplicate warning e estados de confirmacao passaram a operar por nonce, honeypot, timestamp e tokens persistidos, eliminando a dependencia de cache proibido no fluxo de cadastro.
 - **Link de atualizacao de perfil em tempo real**: a geracao do link do portal deixa de depender de transient e passa a responder sob demanda via AJAX, mantendo o mesmo contrato externo para a operacao administrativa.
 - **Assets contextuais no portal**: acesso, reset e profile update agora carregam CSS/JS dedicados por contexto, reduzindo divergencias entre o runtime publicado e o renderer local.
+- **Bootstrap do Client Portal estabilizado**: o runtime publicado deixou de quebrar com handlers tardios indefinidos no shell (`handleReviewForm`, historico dos pets e acoes auxiliares) e com `MutationObserver.observe()` antes de `document.body`, restaurando a inicializacao sem mudar contratos publicos do add-on.
+- **CTA `Criar ou redefinir senha` restaurado no publicado**: o botao voltou a executar o fluxo assincrono com feedback inline e anti-enumeration na propria tela, sem abrir modal paralelo nem exigir navegacao extra.
+- **Runtime publico separado do runtime autenticado**: a landing e o reset do portal agora usam `client-portal-access.js` dedicado, evitando acoplamento com o bundle completo do portal autenticado.
+- **Reset de senha publicado corrigido**: os links gerados para criacao/redefinicao de senha deixaram de sair duplamente codificados, e a tela publicada voltou a abrir com os campos validos no proprio fluxo emitido pelo add-on.
 
 **Agenda Add-on - acabamento funcional e visual**
 

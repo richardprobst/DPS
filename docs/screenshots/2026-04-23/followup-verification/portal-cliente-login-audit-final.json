@@ -1,0 +1,352 @@
+{
+  "auditedAt": "2026-04-23T23:17:10.541Z",
+  "sourceOfTruth": [
+    "docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md",
+    "docs/visual/VISUAL_STYLE_GUIDE.md"
+  ],
+  "fixture": {
+    "email": "codex.portal.audit.20260423-200043@example.com",
+    "portalUrl": "https://desi.pet/portal-do-cliente/",
+    "magicUrl": "https://desi.pet/portal-do-cliente/?dps_token=ec1168eeb4db45afec76e2e18040bb6676713a812f288695a082b325d8c72bfb",
+    "resetUrl": "https://desi.pet/portal-do-cliente/?dps_action=portal_password_reset&key=ImeXLwUG75mfUUSVVnk0&login=codex.portal.audit.20260423-200043@example.com"
+  },
+  "breakpoints": {
+    "375": {
+      "metrics": {
+        "overflowX": 0,
+        "shellWidth": 355,
+        "hero": {
+          "width": 328,
+          "height": 773
+        },
+        "cta": {
+          "width": 295,
+          "height": 56
+        },
+        "title": "Acesse o acompanhamento do seu pet com clareza",
+        "activeMode": "password",
+        "accessScript": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal-access.js?ver=1776984600"
+        ],
+        "authCss": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css?ver=1776984600"
+        ]
+      },
+      "pageErrors": [],
+      "consoleErrors": [
+        "error: Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "error: Failed to load resource: net::ERR_FAILED"
+      ],
+      "consoleWarnings": [],
+      "dialogs": [],
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-login-audit-375.png"
+    },
+    "600": {
+      "metrics": {
+        "overflowX": 0,
+        "shellWidth": 580,
+        "hero": {
+          "width": 548,
+          "height": 504
+        },
+        "cta": {
+          "width": 514,
+          "height": 56
+        },
+        "title": "Acesse o acompanhamento do seu pet com clareza",
+        "activeMode": "password",
+        "accessScript": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal-access.js?ver=1776984600"
+        ],
+        "authCss": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css?ver=1776984600"
+        ]
+      },
+      "pageErrors": [],
+      "consoleErrors": [
+        "error: Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "error: Failed to load resource: net::ERR_FAILED"
+      ],
+      "consoleWarnings": [],
+      "dialogs": [],
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-login-audit-600.png"
+    },
+    "840": {
+      "metrics": {
+        "overflowX": 0,
+        "shellWidth": 820,
+        "hero": {
+          "width": 786,
+          "height": 434
+        },
+        "cta": {
+          "width": 751,
+          "height": 56
+        },
+        "title": "Acesse o acompanhamento do seu pet com clareza",
+        "activeMode": "password",
+        "accessScript": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal-access.js?ver=1776984600"
+        ],
+        "authCss": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css?ver=1776984600"
+        ]
+      },
+      "pageErrors": [],
+      "consoleErrors": [
+        "error: Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "error: Failed to load resource: net::ERR_FAILED"
+      ],
+      "consoleWarnings": [],
+      "dialogs": [],
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-login-audit-840.png"
+    },
+    "1200": {
+      "metrics": {
+        "overflowX": 0,
+        "shellWidth": 1140,
+        "hero": {
+          "width": 1092,
+          "height": 356
+        },
+        "cta": {
+          "width": 617,
+          "height": 56
+        },
+        "title": "Acesse o acompanhamento do seu pet com clareza",
+        "activeMode": "password",
+        "accessScript": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal-access.js?ver=1776984600"
+        ],
+        "authCss": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css?ver=1776984600"
+        ]
+      },
+      "pageErrors": [],
+      "consoleErrors": [
+        "error: Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "error: Failed to load resource: net::ERR_FAILED"
+      ],
+      "consoleWarnings": [],
+      "dialogs": [],
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-login-audit-1200.png"
+    },
+    "1920": {
+      "metrics": {
+        "overflowX": 0,
+        "shellWidth": 1140,
+        "hero": {
+          "width": 1092,
+          "height": 356
+        },
+        "cta": {
+          "width": 617,
+          "height": 56
+        },
+        "title": "Acesse o acompanhamento do seu pet com clareza",
+        "activeMode": "password",
+        "accessScript": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal-access.js?ver=1776984600"
+        ],
+        "authCss": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css?ver=1776984600"
+        ]
+      },
+      "pageErrors": [],
+      "consoleErrors": [
+        "error: Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "error: Failed to load resource: net::ERR_FAILED"
+      ],
+      "consoleWarnings": [],
+      "dialogs": [],
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-login-audit-1920.png"
+    }
+  },
+  "flows": {
+    "resetScreen": {
+      "finalUrl": "https://desi.pet/portal-do-cliente/?dps_action=portal_password_reset&key=ImeXLwUG75mfUUSVVnk0&login=codex.portal.audit.20260423-200043@example.com",
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-login-reset-1200.png",
+      "metrics": {
+        "title": "Criar ou redefinir senha com seguranca",
+        "panelTitle": "Defina sua nova credencial de acesso",
+        "toggleCount": 2,
+        "resetEmail": "codex.portal.audit.20260423-200043@example.com",
+        "overflowX": 0,
+        "firstToggleType": "text"
+      },
+      "pageErrors": [],
+      "consoleErrors": [
+        "error: Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "error: Failed to load resource: net::ERR_FAILED"
+      ],
+      "consoleWarnings": []
+    },
+    "passwordLogin": {
+      "finalUrl": "https://desi.pet/portal-do-cliente/",
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-login-password-success-1200.png",
+      "metrics": {
+        "tabsCount": 9,
+        "tabs": [
+          {
+            "tab": "inicio",
+            "label": "Inicio"
+          },
+          {
+            "tab": "fidelidade",
+            "label": "Fidelidade"
+          },
+          {
+            "tab": "avaliacoes",
+            "label": "Avaliacoes"
+          },
+          {
+            "tab": "mensagens",
+            "label": "Mensagens"
+          },
+          {
+            "tab": "agendamentos",
+            "label": "Agendamentos"
+          },
+          {
+            "tab": "pagamentos",
+            "label": "Pagamentos"
+          },
+          {
+            "tab": "historico-pets",
+            "label": "Historico dos Pets"
+          },
+          {
+            "tab": "galeria",
+            "label": "Galeria"
+          },
+          {
+            "tab": "dados",
+            "label": "Meus Dados"
+          }
+        ],
+        "activeTab": "inicio",
+        "breadcrumb": "Inicio",
+        "portalHeading": "Ola, Codex Portal Audit 20260423-200043"
+      },
+      "pageErrors": [],
+      "consoleErrors": [
+        "error: Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "error: Failed to load resource: net::ERR_FAILED"
+      ],
+      "consoleWarnings": []
+    },
+    "magicLogin": {
+      "finalUrl": "https://desi.pet/portal-do-cliente/",
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-login-magic-success-1200.png",
+      "metrics": {
+        "tabsCount": 9,
+        "tabs": [
+          {
+            "tab": "inicio",
+            "label": "Inicio"
+          },
+          {
+            "tab": "fidelidade",
+            "label": "Fidelidade"
+          },
+          {
+            "tab": "avaliacoes",
+            "label": "Avaliacoes"
+          },
+          {
+            "tab": "mensagens",
+            "label": "Mensagens"
+          },
+          {
+            "tab": "agendamentos",
+            "label": "Agendamentos"
+          },
+          {
+            "tab": "pagamentos",
+            "label": "Pagamentos"
+          },
+          {
+            "tab": "historico-pets",
+            "label": "Historico dos Pets"
+          },
+          {
+            "tab": "galeria",
+            "label": "Galeria"
+          },
+          {
+            "tab": "dados",
+            "label": "Meus Dados"
+          }
+        ],
+        "activeTab": "inicio",
+        "breadcrumb": "Inicio",
+        "portalHeading": "Ola, Codex Portal Audit 20260423-200043"
+      },
+      "pageErrors": [],
+      "consoleErrors": [
+        "error: Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "error: Failed to load resource: net::ERR_FAILED"
+      ],
+      "consoleWarnings": []
+    },
+    "publicShell": {
+      "syncedMagicEmail": "codex.portal.audit.20260423-200043@example.com",
+      "passwordToggleTypes": {
+        "visibleType": "text",
+        "maskedType": "password"
+      },
+      "passwordResetRequest": {
+        "beforeUrl": "https://desi.pet/portal-do-cliente/",
+        "afterUrl": "https://desi.pet/portal-do-cliente/",
+        "navigated": false,
+        "dialogs": [],
+        "status": 200,
+        "ok": true,
+        "response": {
+          "success": true,
+          "data": {
+            "message": "Se este e-mail estiver cadastrado no portal, voce recebera as instrucoes para criar ou redefinir a senha."
+          }
+        },
+        "feedback": {
+          "text": "Se este e-mail estiver cadastrado no portal, voce recebera as instrucoes para criar ou redefinir a senha.",
+          "className": "dps-portal-entry__feedback dps-portal-signature__feedback is-success",
+          "hidden": false
+        },
+        "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-login-password-reset-feedback-1200.png",
+        "pageErrors": [],
+        "consoleErrors": [
+          "error: Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "error: Failed to load resource: net::ERR_FAILED"
+        ],
+        "consoleWarnings": []
+      }
+    },
+    "magicRequest": {
+      "beforeUrl": "https://desi.pet/portal-do-cliente/",
+      "afterUrl": "https://desi.pet/portal-do-cliente/",
+      "navigated": false,
+      "dialogs": [],
+      "status": 200,
+      "ok": true,
+      "response": {
+        "success": true,
+        "data": {
+          "message": "Link enviado com sucesso. Verifique sua caixa de entrada e spam."
+        }
+      },
+      "feedback": {
+        "text": "Link enviado com sucesso. Verifique sua caixa de entrada e spam.",
+        "className": "dps-portal-entry__feedback dps-portal-signature__feedback is-success",
+        "hidden": false
+      },
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-login-magic-request-1200.png",
+      "pageErrors": [],
+      "consoleErrors": [
+        "error: Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "error: Failed to load resource: net::ERR_FAILED"
+      ],
+      "consoleWarnings": []
+    }
+  }
+}

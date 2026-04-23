@@ -347,8 +347,8 @@ final class DPS_Portal_User_Manager {
         return add_query_arg(
             [
                 'dps_action' => 'portal_password_reset',
-                'key'        => rawurlencode( $reset_key ),
-                'login'      => rawurlencode( $user->user_login ),
+                'key'        => $reset_key,
+                'login'      => $user->user_login,
             ],
             dps_get_portal_page_url()
         );

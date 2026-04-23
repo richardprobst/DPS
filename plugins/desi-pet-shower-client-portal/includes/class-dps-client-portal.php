@@ -544,8 +544,8 @@ final class DPS_Client_Portal {
         $reset_redirect = add_query_arg(
             [
                 'dps_action' => 'portal_password_reset',
-                'login'      => rawurlencode( $login ),
-                'key'        => rawurlencode( $key ),
+                'login'      => $login,
+                'key'        => $key,
             ],
             $portal_url
         );
@@ -893,6 +893,16 @@ final class DPS_Client_Portal {
         
         wp_register_script( 'dps-client-portal', $script_url, [], $script_version, false );
 
+        $access_script_path = trailingslashit( DPS_CLIENT_PORTAL_ADDON_DIR ) . 'assets/js/client-portal-access.js';
+        $access_script_url  = trailingslashit( DPS_CLIENT_PORTAL_ADDON_URL ) . 'assets/js/client-portal-access.js';
+        wp_register_script(
+            'dps-client-portal-access',
+            $access_script_url,
+            [],
+            file_exists( $access_script_path ) ? filemtime( $access_script_path ) : $script_version,
+            true
+        );
+
         $profile_script_path = trailingslashit( DPS_CLIENT_PORTAL_ADDON_DIR ) . 'assets/js/client-portal-profile-update.js';
         $profile_script_url  = trailingslashit( DPS_CLIENT_PORTAL_ADDON_URL ) . 'assets/js/client-portal-profile-update.js';
         wp_register_script(
@@ -942,12 +952,13 @@ final class DPS_Client_Portal {
 
         if ( $has_login_shortcode ) {
             $this->enqueue_portal_access_assets( true );
-            $this->localize_portal_script();
+            $this->localize_portal_access_script();
             return;
         }
 
         if ( 'portal_password_reset' === $action ) {
-            $this->enqueue_portal_access_assets();
+            $this->enqueue_portal_access_assets( true );
+            $this->localize_portal_access_script();
             return;
         }
 
@@ -955,7 +966,7 @@ final class DPS_Client_Portal {
 
         if ( ! $client_id ) {
             $this->enqueue_portal_access_assets( true );
-            $this->localize_portal_script();
+            $this->localize_portal_access_script();
             return;
         }
 
@@ -980,7 +991,7 @@ final class DPS_Client_Portal {
         wp_enqueue_style( 'dps-client-portal-auth' );
 
         if ( $with_script ) {
-            wp_enqueue_script( 'dps-client-portal' );
+            wp_enqueue_script( 'dps-client-portal-access' );
         }
     }
 
@@ -1006,6 +1017,7 @@ final class DPS_Client_Portal {
     private function append_missing_footer_scripts( $output ) {
         $handles = [
             'dps-client-portal',
+            'dps-client-portal-access',
             'dps-client-portal-profile-update',
             'dps-signature-forms',
         ];
@@ -1079,6 +1091,37 @@ final class DPS_Client_Portal {
     }
 
     /**
+     * Localiza o runtime dedicado da tela publica de acesso/reset.
+     *
+     * @return void
+     */
+    private function localize_portal_access_script() {
+        wp_localize_script(
+            'dps-client-portal-access',
+            'dpsPortalAccess',
+            [
+                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+                'actions' => [
+                    'magicLink'      => 'dps_request_access_link_by_email',
+                    'passwordAccess' => 'dps_request_portal_password_access',
+                ],
+                'nonces'  => [
+                    'magicLink'      => wp_create_nonce( 'dps_request_access_link' ),
+                    'passwordAccess' => wp_create_nonce( 'dps_request_password_access' ),
+                ],
+                'i18n'    => [
+                    'requestingLink'     => __( 'Enviando link...', 'dps-client-portal' ),
+                    'requestingPassword' => __( 'Enviando instrucoes...', 'dps-client-portal' ),
+                    'genericError'       => __( 'Nao foi possivel concluir sua solicitacao agora. Tente novamente em alguns instantes.', 'dps-client-portal' ),
+                    'emailRequired'      => __( 'Informe um e-mail valido para continuar.', 'dps-client-portal' ),
+                    'showPassword'       => __( 'Mostrar', 'dps-client-portal' ),
+                    'hidePassword'       => __( 'Ocultar', 'dps-client-portal' ),
+                ],
+            ]
+        );
+    }
+
+    /**
      * Localiza o script publico do portal para telas autenticadas e nao autenticadas.
      *
      * @param int   $client_id ID do cliente autenticado.
@@ -1091,19 +1134,6 @@ final class DPS_Client_Portal {
             'ajaxUrl'         => admin_url( 'admin-ajax.php' ),
             'clientId'        => absint( $client_id ),
             'isAuthenticated' => $client_id > 0,
-            'access'          => [
-                'magicLinkAction' => 'dps_request_access_link_by_email',
-                'passwordAction'  => 'dps_request_portal_password_access',
-                'requestNonce'    => wp_create_nonce( 'dps_request_access_link' ),
-                'passwordNonce'   => wp_create_nonce( 'dps_request_password_access' ),
-                'i18n'            => [
-                    'requestingLink'     => __( 'Enviando link...', 'dps-client-portal' ),
-                    'requestingPassword' => __( 'Enviando instrucoes...', 'dps-client-portal' ),
-                    'genericError'       => __( 'Nao foi possivel concluir sua solicitacao agora. Tente novamente em alguns instantes.', 'dps-client-portal' ),
-                    'emailRequired'      => __( 'Informe um e-mail valido para continuar.', 'dps-client-portal' ),
-                    'copySuccess'        => __( 'Link copiado com sucesso.', 'dps-client-portal' ),
-                ],
-            ],
         ];
 
         if ( $client_id > 0 ) {
@@ -1322,7 +1352,8 @@ final class DPS_Client_Portal {
         }
 
         if ( 'portal_password_reset' === $action ) {
-            $this->enqueue_portal_access_assets();
+            $this->enqueue_portal_access_assets( true );
+            $this->localize_portal_access_script();
             return $this->render_password_reset_screen();
         }
 
@@ -1343,7 +1374,7 @@ final class DPS_Client_Portal {
         // Se n?o autenticado, exibe tela de acesso
         if ( ! $client_id ) {
             $this->enqueue_portal_access_assets( true );
-            $this->localize_portal_script();
+            $this->localize_portal_access_script();
             return $this->render_access_screen();
         }
 

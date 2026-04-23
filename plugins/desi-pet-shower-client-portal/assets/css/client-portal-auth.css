@@ -1,22 +1,269 @@
 /**
- * DPS Signature auth screens for the client portal.
+ * DPS Signature public auth shell for the client portal.
  *
  * @package DPS_Client_Portal
  */
 
 .dps-portal-signature {
     width: min(100%, 1200px);
+    --dps-color-primary: #173042;
+    --dps-color-on-primary: #f7f2ea;
+    --dps-color-primary-container: #dbe5e8;
+    --dps-color-on-primary-container: #173042;
+    --dps-color-surface-container-lowest: #f7f2ea;
+    --dps-color-surface-container-low: #ece2d3;
+    --dps-color-on-surface: #11161c;
+    --dps-color-on-surface-variant: #4f5963;
+    --dps-color-outline: #79838c;
+    --dps-color-outline-variant: #d9ccba;
+    --dps-color-success: #1f8c57;
+    --dps-color-success-container: #e3efe6;
+    --dps-color-on-success-container: #173d2a;
+    --dps-color-warning: #8a6622;
+    --dps-color-warning-container: #f2e9d8;
+    --dps-color-on-warning-container: #5b451c;
+    --dps-color-error: #a44439;
+    --dps-color-error-container: #f2e2df;
+    --dps-color-on-error-container: #612720;
 }
 
-.dps-portal-signature__grid {
-    display: grid;
-    gap: 1rem;
-    margin-top: 1.25rem;
+.dps-portal-signature .dps-signature-hero,
+.dps-portal-signature .dps-signature-panel,
+.dps-portal-signature .dps-signature-notice,
+.dps-portal-signature .dps-signature-section,
+.dps-portal-signature .dps-signature-meta-list li,
+.dps-portal-signature .dps-signature-empty,
+.dps-portal-signature .dps-signature-field input:not([type="checkbox"]):not([type="radio"]),
+.dps-portal-signature .dps-signature-field select,
+.dps-portal-signature .dps-signature-field textarea,
+.dps-portal-signature .dps-signature-button,
+.dps-portal-signature .dps-portal-access__password-toggle,
+.dps-portal-signature .dps-portal-auth-card__tab,
+.dps-portal-signature .dps-signature-support-list li::before {
+    border-radius: 0;
 }
 
-.dps-portal-signature__hero-copy {
+.dps-portal-access {
     display: grid;
     gap: 1rem;
+}
+
+.dps-portal-access__hero {
+    display: grid;
+    gap: 1rem;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--dps-color-surface-container-lowest) 94%, #ffffff), var(--dps-color-surface-container-low));
+    border: 1px solid var(--dps-color-outline-variant);
+    box-shadow: none;
+}
+
+.dps-portal-access__hero-main {
+    display: grid;
+    gap: 0.95rem;
+}
+
+.dps-portal-access__hero-points {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.dps-portal-access__hero-point {
+    display: grid;
+    gap: 0.45rem;
+    padding: 1rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    background: color-mix(in srgb, var(--dps-color-surface-container-lowest) 86%, #ffffff);
+}
+
+.dps-portal-access__hero-point-label {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 0.38rem 0.55rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    background: color-mix(in srgb, var(--dps-color-primary-container) 75%, var(--dps-color-surface-container-lowest));
+    color: var(--dps-color-on-primary-container);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.dps-portal-access__hero-point-title {
+    color: var(--dps-color-on-surface);
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
+.dps-portal-access__hero-point p {
+    margin: 0;
+    color: var(--dps-color-on-surface-variant);
+    line-height: 1.5;
+}
+
+.dps-portal-access__layout,
+.dps-portal-access__primary,
+.dps-portal-access__rail,
+.dps-portal-access__method-list,
+.dps-portal-auth-card__actions {
+    display: grid;
+    gap: 1rem;
+}
+
+.dps-portal-signature .dps-signature-panel,
+.dps-portal-signature .dps-signature-meta-list li,
+.dps-portal-signature .dps-signature-empty {
+    background: color-mix(in srgb, var(--dps-color-surface-container-lowest) 90%, #ffffff);
+    border-color: var(--dps-color-outline-variant);
+    box-shadow: none;
+}
+
+.dps-portal-signature .dps-signature-hero__eyebrow,
+.dps-portal-signature .dps-signature-hero__tag {
+    padding: 0.42rem 0.66rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--dps-color-primary-container) 76%, var(--dps-color-surface-container-lowest));
+    color: var(--dps-color-on-primary-container);
+}
+
+.dps-portal-signature .dps-signature-panel__title,
+.dps-portal-signature .dps-signature-hero__title {
+    color: var(--dps-color-on-surface);
+}
+
+.dps-portal-signature .dps-signature-panel__intro,
+.dps-portal-signature .dps-signature-hero__lead,
+.dps-portal-signature .dps-signature-field__helper {
+    color: var(--dps-color-on-surface-variant);
+}
+
+.dps-portal-auth-card {
+    gap: 1.25rem;
+}
+
+.dps-portal-auth-card__switch {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+}
+
+.dps-portal-auth-card__tab {
+    display: grid;
+    gap: 0.2rem;
+    align-content: start;
+    min-height: 92px;
+    padding: 0.95rem 1rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    background: transparent;
+    color: var(--dps-color-on-surface);
+    text-align: left;
+    cursor: pointer;
+    transition:
+        border-color 160ms ease,
+        background-color 160ms ease,
+        color 160ms ease;
+}
+
+.dps-portal-auth-card__tab:hover,
+.dps-portal-auth-card__tab:focus-visible {
+    border-color: var(--dps-color-primary);
+}
+
+.dps-portal-auth-card__tab.is-active {
+    background: var(--dps-color-primary);
+    border-color: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+}
+
+.dps-portal-auth-card__tab-title {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.dps-portal-auth-card__tab-copy {
+    font-size: 0.82rem;
+    line-height: 1.45;
+    opacity: 0.82;
+}
+
+.dps-portal-auth-card__panel {
+    display: none;
+}
+
+.dps-portal-auth-card__panel.is-active {
+    display: block;
+}
+
+.dps-portal-auth-card__form {
+    gap: 1rem;
+}
+
+.dps-portal-signature .dps-signature-field input:not([type="checkbox"]):not([type="radio"]),
+.dps-portal-signature .dps-signature-field select,
+.dps-portal-signature .dps-signature-field textarea {
+    min-height: 52px;
+    border-color: var(--dps-color-outline);
+    background: color-mix(in srgb, var(--dps-color-surface-container-lowest) 94%, #ffffff);
+}
+
+.dps-portal-access__password-wrap {
+    position: relative;
+}
+
+.dps-portal-access__password-wrap input {
+    padding-right: 5.25rem;
+}
+
+.dps-portal-access__password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.4rem;
+    transform: translateY(-50%);
+    min-width: 4.1rem;
+    min-height: 2.25rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    background: color-mix(in srgb, var(--dps-color-surface-container-low) 72%, #ffffff);
+    color: var(--dps-color-on-surface);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.dps-portal-signature .dps-signature-actions,
+.dps-portal-auth-card__actions {
+    align-items: stretch;
+    margin-top: 0.25rem;
+}
+
+.dps-portal-signature .dps-signature-button {
+    width: 100%;
+    min-width: 0;
+    font-weight: 700;
+    box-shadow: none;
+}
+
+.dps-portal-signature .dps-signature-button:hover,
+.dps-portal-signature .dps-signature-button:focus-visible,
+.dps-portal-access__password-toggle:hover,
+.dps-portal-access__password-toggle:focus-visible {
+    box-shadow: none;
+}
+
+.dps-portal-signature .dps-signature-button--secondary {
+    background: var(--dps-color-surface-container-low);
+    color: var(--dps-color-on-surface);
+    border-color: var(--dps-color-outline-variant);
+}
+
+.dps-portal-signature .dps-signature-button--ghost {
+    background: transparent;
+    color: var(--dps-color-primary);
+    border-color: var(--dps-color-outline-variant);
 }
 
 .dps-portal-signature__feedback {
@@ -24,56 +271,156 @@
 }
 
 .dps-portal-signature__feedback.is-success,
-.dps-portal-signature__feedback.is-error {
+.dps-portal-signature__feedback.is-error,
+.dps-portal-signature__feedback.is-info {
     display: block;
     padding: 0.95rem 1rem;
-    border-radius: var(--dps-shape-large, 20px);
     border: 1px solid transparent;
-    line-height: 1.5;
+    line-height: 1.55;
 }
 
 .dps-portal-signature__feedback.is-success {
-    background: var(--dps-color-success-container, #ddf8e2);
-    border-color: color-mix(in srgb, var(--dps-color-success, #15803d) 20%, transparent);
-    color: var(--dps-color-on-success-container, #14532d);
+    background: var(--dps-color-success-container);
+    border-color: color-mix(in srgb, var(--dps-color-success) 18%, transparent);
+    color: var(--dps-color-on-success-container);
 }
 
 .dps-portal-signature__feedback.is-error {
-    background: var(--dps-color-error-container, #fee2e2);
-    border-color: color-mix(in srgb, var(--dps-color-error, #dc2626) 20%, transparent);
-    color: var(--dps-color-on-error-container, #7f1d1d);
+    background: var(--dps-color-error-container);
+    border-color: color-mix(in srgb, var(--dps-color-error) 18%, transparent);
+    color: var(--dps-color-on-error-container);
 }
 
-.dps-portal-entry__panel[data-dps-whatsapp-card].is-highlighted {
-    border-color: var(--dps-color-primary, #2563eb);
-    box-shadow: 0 18px 34px rgba(37, 99, 235, 0.12);
+.dps-portal-signature__feedback.is-info {
+    background: var(--dps-color-primary-container);
+    border-color: color-mix(in srgb, var(--dps-color-primary) 18%, transparent);
+    color: var(--dps-color-on-primary-container);
 }
 
-.dps-portal-signature .dps-signature-panel {
+.dps-portal-access__method-item {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--dps-color-surface-container-lowest) 95%, #ffffff), var(--dps-color-surface-container-lowest));
+}
+
+.dps-portal-access__method-item h3 {
+    margin: 0;
+    color: var(--dps-color-on-surface);
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
+.dps-portal-access__method-item p {
+    margin: 0;
+    color: var(--dps-color-on-surface-variant);
+    line-height: 1.55;
+}
+
+.dps-portal-access__support-card,
+.dps-portal-access__method-card,
+.dps-portal-reset-card {
     min-height: 100%;
 }
 
-.dps-portal-signature .dps-signature-actions {
-    align-items: stretch;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    margin-top: auto;
+.dps-portal-signature .dps-signature-support-list {
+    gap: 0.9rem;
 }
 
-.dps-portal-signature .dps-signature-actions .dps-signature-button {
-    flex: 1 1 100%;
-    width: 100%;
-    min-width: 0;
-    text-align: center;
+.dps-portal-signature .dps-signature-support-list li {
+    padding-left: 1.15rem;
+}
+
+.dps-portal-signature .dps-signature-support-list li::before {
+    top: 0.56rem;
+    width: 0.38rem;
+    height: 0.38rem;
+    background: var(--dps-color-primary);
+}
+
+.dps-portal-entry__panel[data-dps-whatsapp-card].is-highlighted,
+.dps-portal-access__support-card.is-highlighted {
+    border-color: var(--dps-color-warning);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--dps-color-warning) 20%, transparent);
+}
+
+.dps-portal-signature .dps-signature-meta-list {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dps-portal-signature .dps-signature-meta-list li {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.95rem 1rem;
+}
+
+.dps-portal-signature .dps-signature-meta-list span {
+    color: var(--dps-color-on-surface-variant);
+    font-size: 0.85rem;
+}
+
+.dps-portal-signature .dps-signature-meta-list strong {
+    color: var(--dps-color-on-surface);
+    font-size: 1rem;
+    line-height: 1.35;
+}
+
+.dps-client-portal-access-page--reset .dps-portal-access__hero {
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--dps-color-surface-container-lowest) 94%, #ffffff), color-mix(in srgb, var(--dps-color-primary-container) 18%, var(--dps-color-surface-container-low)));
+}
+
+@media (min-width: 600px) {
+    .dps-portal-access__hero-points {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 }
 
 @media (min-width: 840px) {
-    .dps-portal-signature__grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        align-items: stretch;
+    .dps-portal-access__hero {
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.95fr);
+        align-items: start;
     }
 
-    .dps-portal-entry__grid--single {
+    .dps-portal-access__rail {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dps-client-portal-access-page--reset .dps-signature-grid--2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1200px) {
+    .dps-portal-access__layout {
+        grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.72fr);
+        align-items: start;
+    }
+
+    .dps-portal-access__rail {
         grid-template-columns: minmax(0, 1fr);
+        position: sticky;
+        top: 1.5rem;
+    }
+}
+
+@media (max-width: 599px) {
+    .dps-portal-auth-card__tab {
+        min-height: 84px;
+        padding: 0.85rem 0.8rem;
+    }
+
+    .dps-portal-auth-card__tab-copy {
+        font-size: 0.76rem;
+    }
+
+    .dps-portal-access__password-toggle {
+        min-width: 3.7rem;
+        padding-inline: 0.45rem;
     }
 }
