@@ -1,0 +1,781 @@
+{
+  "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663",
+  "date": "2026-04-24",
+  "tag": "codex_dps_empty_signature_20260423-121941",
+  "user_id": 42,
+  "posts": {
+    "client": 1760,
+    "pet": 1761,
+    "service": 1762,
+    "appointments": [
+      1763,
+      1764
+    ]
+  },
+  "breakpoints": [
+    {
+      "width": 375,
+      "all": {
+        "label": "all",
+        "width": 375,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-375",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "all",
+        "rowTotal": 4,
+        "rowVisible": 2,
+        "rowHidden": 0,
+        "visibleAppointmentIds": [
+          "1763",
+          "1764"
+        ],
+        "visibleTaxidogIds": [
+          "1764"
+        ],
+        "visibleLateIds": [],
+        "emptyVisible": false,
+        "emptyKicker": "Recorte operacional",
+        "emptyTitle": "Filtro sem resultados.",
+        "emptyMessage": "Volte para Todos ou selecione outro recorte operacional.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": false,
+        "inspectorVisible": false,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "true",
+            "active": true
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "false",
+            "active": false
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 375,
+        "viewportWidth": 375
+      },
+      "taxidog": {
+        "label": "taxidog",
+        "width": 375,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-375",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "taxidog",
+        "rowTotal": 4,
+        "rowVisible": 1,
+        "rowHidden": 2,
+        "visibleAppointmentIds": [
+          "1764"
+        ],
+        "visibleTaxidogIds": [
+          "1764"
+        ],
+        "visibleLateIds": [],
+        "emptyVisible": false,
+        "emptyKicker": "Logística sem demanda",
+        "emptyTitle": "Nenhum TaxiDog neste recorte.",
+        "emptyMessage": "Não há logística TaxiDog vinculada ao período atual.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": false,
+        "inspectorVisible": false,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "true",
+            "active": true
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 375,
+        "viewportWidth": 375
+      },
+      "late": {
+        "label": "late",
+        "width": 375,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-375",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "late",
+        "rowTotal": 4,
+        "rowVisible": 0,
+        "rowHidden": 4,
+        "visibleAppointmentIds": [],
+        "visibleTaxidogIds": [],
+        "visibleLateIds": [],
+        "emptyVisible": true,
+        "emptyKicker": "Sem pendência crítica",
+        "emptyTitle": "Agenda sem atrasos neste recorte.",
+        "emptyMessage": "Nenhuma ação corretiva está pendente para o período selecionado. Volte para Todos para revisar a fila completa.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": true,
+        "inspectorVisible": false,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "true",
+            "active": true
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "false",
+            "active": false
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 375,
+        "viewportWidth": 375
+      }
+    },
+    {
+      "width": 600,
+      "all": {
+        "label": "all",
+        "width": 600,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-600",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "all",
+        "rowTotal": 4,
+        "rowVisible": 2,
+        "rowHidden": 0,
+        "visibleAppointmentIds": [
+          "1763",
+          "1764"
+        ],
+        "visibleTaxidogIds": [
+          "1764"
+        ],
+        "visibleLateIds": [],
+        "emptyVisible": false,
+        "emptyKicker": "Recorte operacional",
+        "emptyTitle": "Filtro sem resultados.",
+        "emptyMessage": "Volte para Todos ou selecione outro recorte operacional.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": false,
+        "inspectorVisible": false,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "true",
+            "active": true
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "false",
+            "active": false
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 600,
+        "viewportWidth": 600
+      },
+      "taxidog": {
+        "label": "taxidog",
+        "width": 600,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-600",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "taxidog",
+        "rowTotal": 4,
+        "rowVisible": 1,
+        "rowHidden": 2,
+        "visibleAppointmentIds": [
+          "1764"
+        ],
+        "visibleTaxidogIds": [
+          "1764"
+        ],
+        "visibleLateIds": [],
+        "emptyVisible": false,
+        "emptyKicker": "Logística sem demanda",
+        "emptyTitle": "Nenhum TaxiDog neste recorte.",
+        "emptyMessage": "Não há logística TaxiDog vinculada ao período atual.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": false,
+        "inspectorVisible": false,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "true",
+            "active": true
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 600,
+        "viewportWidth": 600
+      },
+      "late": {
+        "label": "late",
+        "width": 600,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-600",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "late",
+        "rowTotal": 4,
+        "rowVisible": 0,
+        "rowHidden": 4,
+        "visibleAppointmentIds": [],
+        "visibleTaxidogIds": [],
+        "visibleLateIds": [],
+        "emptyVisible": true,
+        "emptyKicker": "Sem pendência crítica",
+        "emptyTitle": "Agenda sem atrasos neste recorte.",
+        "emptyMessage": "Nenhuma ação corretiva está pendente para o período selecionado. Volte para Todos para revisar a fila completa.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": true,
+        "inspectorVisible": false,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "true",
+            "active": true
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "false",
+            "active": false
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 600,
+        "viewportWidth": 600
+      }
+    },
+    {
+      "width": 840,
+      "all": {
+        "label": "all",
+        "width": 840,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-840",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "all",
+        "rowTotal": 4,
+        "rowVisible": 2,
+        "rowHidden": 0,
+        "visibleAppointmentIds": [
+          "1763",
+          "1764"
+        ],
+        "visibleTaxidogIds": [
+          "1764"
+        ],
+        "visibleLateIds": [],
+        "emptyVisible": false,
+        "emptyKicker": "Recorte operacional",
+        "emptyTitle": "Filtro sem resultados.",
+        "emptyMessage": "Volte para Todos ou selecione outro recorte operacional.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": false,
+        "inspectorVisible": false,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "true",
+            "active": true
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "false",
+            "active": false
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 840,
+        "viewportWidth": 840
+      },
+      "taxidog": {
+        "label": "taxidog",
+        "width": 840,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-840",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "taxidog",
+        "rowTotal": 4,
+        "rowVisible": 1,
+        "rowHidden": 2,
+        "visibleAppointmentIds": [
+          "1764"
+        ],
+        "visibleTaxidogIds": [
+          "1764"
+        ],
+        "visibleLateIds": [],
+        "emptyVisible": false,
+        "emptyKicker": "Logística sem demanda",
+        "emptyTitle": "Nenhum TaxiDog neste recorte.",
+        "emptyMessage": "Não há logística TaxiDog vinculada ao período atual.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": false,
+        "inspectorVisible": false,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "true",
+            "active": true
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 840,
+        "viewportWidth": 840
+      },
+      "late": {
+        "label": "late",
+        "width": 840,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-840",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "late",
+        "rowTotal": 4,
+        "rowVisible": 0,
+        "rowHidden": 4,
+        "visibleAppointmentIds": [],
+        "visibleTaxidogIds": [],
+        "visibleLateIds": [],
+        "emptyVisible": true,
+        "emptyKicker": "Sem pendência crítica",
+        "emptyTitle": "Agenda sem atrasos neste recorte.",
+        "emptyMessage": "Nenhuma ação corretiva está pendente para o período selecionado. Volte para Todos para revisar a fila completa.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": true,
+        "inspectorVisible": false,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "true",
+            "active": true
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "false",
+            "active": false
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 840,
+        "viewportWidth": 840
+      }
+    },
+    {
+      "width": 1200,
+      "all": {
+        "label": "all",
+        "width": 1200,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-1200",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "all",
+        "rowTotal": 4,
+        "rowVisible": 2,
+        "rowHidden": 0,
+        "visibleAppointmentIds": [
+          "1763",
+          "1764"
+        ],
+        "visibleTaxidogIds": [
+          "1764"
+        ],
+        "visibleLateIds": [],
+        "emptyVisible": false,
+        "emptyKicker": "Recorte operacional",
+        "emptyTitle": "Filtro sem resultados.",
+        "emptyMessage": "Volte para Todos ou selecione outro recorte operacional.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": false,
+        "inspectorVisible": true,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "true",
+            "active": true
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "false",
+            "active": false
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 1200,
+        "viewportWidth": 1200
+      },
+      "taxidog": {
+        "label": "taxidog",
+        "width": 1200,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-1200",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "taxidog",
+        "rowTotal": 4,
+        "rowVisible": 1,
+        "rowHidden": 2,
+        "visibleAppointmentIds": [
+          "1764"
+        ],
+        "visibleTaxidogIds": [
+          "1764"
+        ],
+        "visibleLateIds": [],
+        "emptyVisible": false,
+        "emptyKicker": "Logística sem demanda",
+        "emptyTitle": "Nenhum TaxiDog neste recorte.",
+        "emptyMessage": "Não há logística TaxiDog vinculada ao período atual.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": false,
+        "inspectorVisible": true,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "true",
+            "active": true
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 1200,
+        "viewportWidth": 1200
+      },
+      "late": {
+        "label": "late",
+        "width": 1200,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-1200",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "late",
+        "rowTotal": 4,
+        "rowVisible": 0,
+        "rowHidden": 4,
+        "visibleAppointmentIds": [],
+        "visibleTaxidogIds": [],
+        "visibleLateIds": [],
+        "emptyVisible": true,
+        "emptyKicker": "Sem pendência crítica",
+        "emptyTitle": "Agenda sem atrasos neste recorte.",
+        "emptyMessage": "Nenhuma ação corretiva está pendente para o período selecionado. Volte para Todos para revisar a fila completa.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": true,
+        "inspectorVisible": false,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "true",
+            "active": true
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "false",
+            "active": false
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 1200,
+        "viewportWidth": 1200
+      }
+    },
+    {
+      "width": 1920,
+      "all": {
+        "label": "all",
+        "width": 1920,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-1920",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "all",
+        "rowTotal": 4,
+        "rowVisible": 2,
+        "rowHidden": 0,
+        "visibleAppointmentIds": [
+          "1763",
+          "1764"
+        ],
+        "visibleTaxidogIds": [
+          "1764"
+        ],
+        "visibleLateIds": [],
+        "emptyVisible": false,
+        "emptyKicker": "Recorte operacional",
+        "emptyTitle": "Filtro sem resultados.",
+        "emptyMessage": "Volte para Todos ou selecione outro recorte operacional.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": false,
+        "inspectorVisible": true,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "true",
+            "active": true
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "false",
+            "active": false
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 1920,
+        "viewportWidth": 1920
+      },
+      "taxidog": {
+        "label": "taxidog",
+        "width": 1920,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-1920",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "taxidog",
+        "rowTotal": 4,
+        "rowVisible": 1,
+        "rowHidden": 2,
+        "visibleAppointmentIds": [
+          "1764"
+        ],
+        "visibleTaxidogIds": [
+          "1764"
+        ],
+        "visibleLateIds": [],
+        "emptyVisible": false,
+        "emptyKicker": "Logística sem demanda",
+        "emptyTitle": "Nenhum TaxiDog neste recorte.",
+        "emptyMessage": "Não há logística TaxiDog vinculada ao período atual.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": false,
+        "inspectorVisible": true,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "true",
+            "active": true
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 1920,
+        "viewportWidth": 1920
+      },
+      "late": {
+        "label": "late",
+        "width": 1920,
+        "href": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day&codex=1776958723663-1920",
+        "title": "Agenda de atendimento – Desi Pet Shower",
+        "activeFilter": "late",
+        "rowTotal": 4,
+        "rowVisible": 0,
+        "rowHidden": 4,
+        "visibleAppointmentIds": [],
+        "visibleTaxidogIds": [],
+        "visibleLateIds": [],
+        "emptyVisible": true,
+        "emptyKicker": "Sem pendência crítica",
+        "emptyTitle": "Agenda sem atrasos neste recorte.",
+        "emptyMessage": "Nenhuma ação corretiva está pendente para o período selecionado. Volte para Todos para revisar a fila completa.",
+        "signatureText": "DPSAgenda",
+        "beforeContent": "\"\"",
+        "beforeBorderTop": "0px",
+        "containsOldCalendar": false,
+        "inspectorHidden": true,
+        "inspectorVisible": false,
+        "buttons": [
+          {
+            "filter": "all",
+            "text": "Todos",
+            "ariaPressed": "false",
+            "active": false
+          },
+          {
+            "filter": "late",
+            "text": "Atrasados",
+            "ariaPressed": "true",
+            "active": true
+          },
+          {
+            "filter": "taxidog",
+            "text": "TaxiDog",
+            "ariaPressed": "false",
+            "active": false
+          }
+        ],
+        "overflowX": 0,
+        "bodyScrollWidth": 1920,
+        "viewportWidth": 1920
+      }
+    }
+  ],
+  "console": {
+    "errors": [],
+    "warnings": []
+  },
+  "screenshots": [
+    "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-empty-signature-published-375.png",
+    "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-empty-signature-published-600.png",
+    "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-empty-signature-published-840.png",
+    "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-empty-signature-published-1200-all.png",
+    "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-empty-signature-published-1200-taxidog.png",
+    "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-empty-signature-published-1200.png",
+    "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-empty-signature-published-1920.png"
+  ],
+  "failures": []
+}

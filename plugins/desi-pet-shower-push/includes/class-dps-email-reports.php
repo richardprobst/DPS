@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Classe de RelatÃ³rios por Email para o DPS.
  *

@@ -1,0 +1,82 @@
+[
+  {
+    "file": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-empty-signature-375.png",
+    "width": 375,
+    "overflowX": 0,
+    "emptyRect": {
+      "x": 31,
+      "y": 173.609375,
+      "width": 313,
+      "height": 308.6875
+    },
+    "titleFontSize": "24.8px",
+    "titleLetterSpacing": "normal",
+    "signatureText": "DPSAgenda",
+    "beforeContent": "\"\"",
+    "beforeBorder": "0px"
+  },
+  {
+    "file": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-empty-signature-600.png",
+    "width": 600,
+    "overflowX": 0,
+    "emptyRect": {
+      "x": 31,
+      "y": 151.578125,
+      "width": 538,
+      "height": 232.828125
+    },
+    "titleFontSize": "24.8px",
+    "titleLetterSpacing": "normal",
+    "signatureText": "DPSAgenda",
+    "beforeContent": "\"\"",
+    "beforeBorder": "0px"
+  },
+  {
+    "file": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-empty-signature-840.png",
+    "width": 840,
+    "overflowX": 0,
+    "emptyRect": {
+      "x": 43,
+      "y": 151.703125,
+      "width": 754,
+      "height": 261.078125
+    },
+    "titleFontSize": "32px",
+    "titleLetterSpacing": "normal",
+    "signatureText": "DPSAgenda",
+    "beforeContent": "\"\"",
+    "beforeBorder": "0px"
+  },
+  {
+    "file": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-empty-signature-1200.png",
+    "width": 1200,
+    "overflowX": 0,
+    "emptyRect": {
+      "x": 73,
+      "y": 151.703125,
+      "width": 1054,
+      "height": 280
+    },
+    "titleFontSize": "40.8px",
+    "titleLetterSpacing": "normal",
+    "signatureText": "DPSAgenda",
+    "beforeContent": "\"\"",
+    "beforeBorder": "0px"
+  },
+  {
+    "file": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-empty-signature-1920.png",
+    "width": 1920,
+    "overflowX": 0,
+    "emptyRect": {
+      "x": 433,
+      "y": 151.703125,
+      "width": 1054,
+      "height": 280
+    },
+    "titleFontSize": "40.8px",
+    "titleLetterSpacing": "normal",
+    "signatureText": "DPSAgenda",
+    "beforeContent": "\"\"",
+    "beforeBorder": "0px"
+  }
+]

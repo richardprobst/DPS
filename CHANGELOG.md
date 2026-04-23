@@ -94,16 +94,22 @@ Antes de criar uma nova versÃ£o oficial:
 - Consolidada a Agenda publicada como superfície operacional única do DPS Signature, sem navegação funcional por abas legadas e com navegação preservando apenas visão e período.
 - Padronizado o modal de serviços no mesmo shell visual e comportamental dos demais diálogos da Agenda.
 - Refinado o mobile da fila operacional com stage badge dedicada no card, toolbar compacta e estados sincronizados entre linha desktop, card mobile e inspetor contextual.
+- Refinado o estado vazio dos filtros operacionais da Agenda com assinatura visual DPS Signature, marca tipográfica própria e microcopy contextual para recortes sem atrasos ou sem logística TaxiDog.
 - Reordenada a hierarquia mobile da Agenda em codigo para priorizar a fila operacional sobre os KPIs no shell DPS Signature.
 - Normalizados rotulos textuais da Agenda operacional e de views legadas para remover indicadores antigos e copy quebrada.
 
 #### Fixed (Corrigido)
 
-- Corrigido o bug de BOM em arquivos do plugin da Agenda que invalidava respostas JSON do AJAX publicado e impedia a abertura dos modais de serviços e fluxo operacional.
+- Corrigidos arquivos PHP do pacote DPS com BOM no ambiente publicado, eliminando contaminação de respostas JSON do AJAX e estabilizando modais, painéis e integrações que dependem de payload limpo.
 - Corrigida a telemetria de histórico para devolver `source` e `source_label`, permitindo badges coerentes para registros automáticos e ações manuais no modal de linha do tempo.
 - Validado no `desi.pet` que os modais de pet, serviços, operação, histórico e reagendamento abriram corretamente após a publicação final.
 - Removidos efeitos colaterais de persistencia no renderer operacional da Agenda, que antes ajustava metadados durante a montagem da UI.
 - Removido uso deprecated de `$.trim` nos scripts ativos da Agenda; a revalidacao publicada ficou sem erros e sem warnings no Playwright.
+
+#### Removed (Removido)
+
+- Removidos definitivamente da Agenda operacional os cards de resumo `Total`, `Pendentes`, `Finalizados`, `Cancelados`, `Atrasados`, `Pagamento pendente` e `TaxiDog`, mantendo a tela focada diretamente na fila operacional.
+- Removida da Agenda a iconografia genérica de calendário no pseudo-elemento de estado vazio, substituída por assinatura tipográfica DPS.
 
 #### Refactoring (Interno)
 

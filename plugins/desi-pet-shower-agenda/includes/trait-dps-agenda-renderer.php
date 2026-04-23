@@ -210,60 +210,6 @@ trait DPS_Agenda_Renderer {
         return sprintf( __( 'Dia %s', 'dps-agenda-addon' ), date_i18n( 'd/m/Y', $timestamp ) );
     }
     /**
-     * Summarize the filtered appointment set for the agenda overview.
-     *
-     * @param array $appointments Filtered appointments.
-     * @return array<string,int>
-     */
-    private function get_agenda_overview_stats( $appointments ) {
-        $stats = [
-            'total'           => 0,
-            'pending'         => 0,
-            'completed'       => 0,
-            'canceled'        => 0,
-            'late'            => 0,
-            'pending_payment' => 0,
-            'taxidog'         => 0,
-        ];
-
-        if ( empty( $appointments ) ) {
-            return $stats;
-        }
-
-        foreach ( $appointments as $appointment ) {
-            $stats['total']++;
-
-            $status = get_post_meta( $appointment->ID, 'appointment_status', true );
-            $status = $status ? $status : 'pendente';
-
-            if ( 'pendente' === $status ) {
-                $stats['pending']++;
-            } elseif ( 'cancelado' === $status ) {
-                $stats['canceled']++;
-            } else {
-                $stats['completed']++;
-            }
-
-            $date = get_post_meta( $appointment->ID, 'appointment_date', true );
-            $time = get_post_meta( $appointment->ID, 'appointment_time', true );
-            if ( $this->is_appointment_late( $date, $time, $status ) ) {
-                $stats['late']++;
-            }
-
-            if ( class_exists( 'DPS_Agenda_Payment_Helper' ) && DPS_Agenda_Payment_Helper::has_pending_payment( $appointment->ID ) ) {
-                $stats['pending_payment']++;
-            }
-
-            $taxidog = get_post_meta( $appointment->ID, 'appointment_taxidog', true );
-            $taxidog_status = get_post_meta( $appointment->ID, 'appointment_taxidog_status', true );
-            if ( '1' === $taxidog || ! empty( $taxidog_status ) ) {
-                $stats['taxidog']++;
-            }
-        }
-
-        return $stats;
-    }
-    /**
      * Separa agendamentos em pendentes e finalizados.
      *
      * @since 1.3.0
@@ -756,38 +702,6 @@ trait DPS_Agenda_Renderer {
     }
 
     /**
-     * CONF-1: Define o status de confirmação de um agendamento.
-     *
-     * @since 1.2.0
-     * @param int    $appointment_id ID do agendamento.
-     * @param string $status Status: 'not_sent', 'sent', 'confirmed', 'denied', 'no_answer'.
-     * @param int    $user_id ID do usuário que realizou a ação (opcional).
-     * @return bool True se atualizado com sucesso, false caso contrário.
-     */
-    private function set_confirmation_status( $appointment_id, $status, $user_id = 0 ) {
-        // Valida status
-        $valid_statuses = [ 'not_sent', 'sent', 'confirmed', 'denied', 'no_answer' ];
-        if ( ! in_array( $status, $valid_statuses, true ) ) {
-            return false;
-        }
-
-        // Atualiza status
-        update_post_meta( $appointment_id, 'appointment_confirmation_status', $status );
-
-        // Atualiza data/hora da última alteração
-        update_post_meta( $appointment_id, 'appointment_confirmation_date', current_time( 'mysql' ) );
-
-        // Atualiza usuário que realizou a ação
-        if ( $user_id > 0 ) {
-            update_post_meta( $appointment_id, 'appointment_confirmation_sent_by', $user_id );
-        } elseif ( is_user_logged_in() ) {
-            update_post_meta( $appointment_id, 'appointment_confirmation_sent_by', get_current_user_id() );
-        }
-
-        return true;
-    }
-
-    /**
      * CONF-3: Renderiza badge de confirmação para a interface.
      *
      * @since 1.2.0
@@ -1127,6 +1041,8 @@ trait DPS_Agenda_Renderer {
             'data-dps-logistics' => $data['address'] ? $data['address'] : ( $data['taxidog'] ? __( 'TaxiDog solicitado', 'dps-agenda-addon' ) : __( 'Sem endereço para logística', 'dps-agenda-addon' ) ),
             'data-dps-notes'     => $data['notes'] ? wp_strip_all_tags( $data['notes'] ) : __( 'Sem observações registradas.', 'dps-agenda-addon' ),
             'data-dps-progress'  => $data['progress'],
+            'data-dps-taxidog'   => $data['taxidog'] ? '1' : '0',
+            'data-dps-late'      => $data['is_late'] ? '1' : '0',
         ];
 
         $html = '';
@@ -1166,29 +1082,10 @@ trait DPS_Agenda_Renderer {
      * @return string
      */
     private function render_operational_payment_content( $data ) {
+        $label = $this->get_operational_payment_label( $data );
+
         if ( 'finalizado' === $data['status'] && ! $data['is_subscription'] ) {
-            $payment_link = get_post_meta( $data['id'], 'dps_payment_link', true );
-            $default_link = 'https://link.mercadopago.com.br/desipetshower';
-            $link_to_use  = $payment_link ? $payment_link : $default_link;
-            $message      = sprintf(
-                __( 'Olá %1$s! O atendimento do pet %2$s foi finalizado. Valor: R$ %3$s. Link para pagamento: %4$s', 'dps-agenda-addon' ),
-                $data['client_name'],
-                $data['pet_name'],
-                $data['total_fmt'],
-                $link_to_use
-            );
-
-            $html  = '<button type="button" class="dps-payment-popup-btn dps-agenda-primary-action dps-agenda-primary-action--payment" data-appt-id="' . esc_attr( $data['id'] ) . '"';
-            $html .= ' data-payment-link="' . esc_attr( $link_to_use ) . '"';
-            $html .= ' data-client-phone="' . esc_attr( $data['client_phone'] ) . '"';
-            $html .= ' data-whatsapp-msg="' . esc_attr( $message ) . '"';
-            $html .= ' data-client-name="' . esc_attr( $data['client_name'] ) . '"';
-            $html .= ' data-pet-name="' . esc_attr( $data['pet_name'] ) . '"';
-            $html .= ' data-total-value="' . esc_attr( $data['total_fmt'] ) . '">';
-            $html .= esc_html__( 'Cobrar cliente', 'dps-agenda-addon' );
-            $html .= '</button>';
-
-            return $html;
+            return '<span class="dps-payment-status dps-payment-status--pending">' . esc_html( $label ) . '</span>';
         }
 
         $class = 'pending';
@@ -1198,7 +1095,7 @@ trait DPS_Agenda_Renderer {
             $class = 'cancelled';
         }
 
-        return '<span class="dps-payment-status dps-payment-status--' . esc_attr( $class ) . '">' . esc_html( $this->get_operational_payment_label( $data ) ) . '</span>';
+        return '<span class="dps-payment-status dps-payment-status--' . esc_attr( $class ) . '">' . esc_html( $label ) . '</span>';
     }
 
     /**
@@ -1207,6 +1104,31 @@ trait DPS_Agenda_Renderer {
      * @param array $data Dados preparados do atendimento.
      * @return string
      */
+    private function render_operational_payment_action( $data ) {
+        $payment_link = get_post_meta( $data['id'], 'dps_payment_link', true );
+        $default_link = 'https://link.mercadopago.com.br/desipetshower';
+        $link_to_use  = $payment_link ? $payment_link : $default_link;
+        $message      = sprintf(
+            __( 'Olá %1$s! O atendimento do pet %2$s foi finalizado. Valor: R$ %3$s. Link para pagamento: %4$s', 'dps-agenda-addon' ),
+            $data['client_name'],
+            $data['pet_name'],
+            $data['total_fmt'],
+            $link_to_use
+        );
+
+        $html  = '<button type="button" class="dps-payment-popup-btn dps-agenda-primary-action dps-agenda-primary-action--payment" data-appt-id="' . esc_attr( $data['id'] ) . '"';
+        $html .= ' data-payment-link="' . esc_attr( $link_to_use ) . '"';
+        $html .= ' data-client-phone="' . esc_attr( $data['client_phone'] ) . '"';
+        $html .= ' data-whatsapp-msg="' . esc_attr( $message ) . '"';
+        $html .= ' data-client-name="' . esc_attr( $data['client_name'] ) . '"';
+        $html .= ' data-pet-name="' . esc_attr( $data['pet_name'] ) . '"';
+        $html .= ' data-total-value="' . esc_attr( $data['total_fmt'] ) . '">';
+        $html .= esc_html__( 'Cobrar cliente', 'dps-agenda-addon' );
+        $html .= '</button>';
+
+        return $html;
+    }
+
     private function render_operational_primary_action( $data ) {
         if ( 'cancelado' === $data['status'] ) {
             return $this->render_agenda_reschedule_cta( $data['id'], $data['date'], $data['time'] );
@@ -1225,7 +1147,7 @@ trait DPS_Agenda_Renderer {
         }
 
         if ( 'finalizado' === $data['status'] && ! $data['is_subscription'] ) {
-            return $this->render_operational_payment_content( $data );
+            return $this->render_operational_payment_action( $data );
         }
 
         return '<button type="button" class="dps-agenda-primary-action dps-operation-modal-btn dps-expand-panels-btn--done" data-appt-id="' . esc_attr( $data['id'] ) . '" data-operation-focus="checklist" aria-haspopup="dialog">' . esc_html__( 'Revisar operação', 'dps-agenda-addon' ) . '</button>';
@@ -1303,21 +1225,20 @@ trait DPS_Agenda_Renderer {
         echo '<div class="dps-operational-progress__bar"><span style="width:' . esc_attr( $data['progress'] ) . '%"></span></div>';
         echo '</div>';
         echo '<div class="dps-operational-summary">';
-        echo '<span class="dps-operational-metric dps-operational-metric--checkin"><span class="dps-operational-metric__label">' . esc_html__( 'Check-in', 'dps-agenda-addon' ) . '</span><strong class="dps-operational-metric__value">' . esc_html( $data['has_checkin'] ? mysql2date( 'H:i', $data['checkin_data']['time'] ) : __( 'Pendente', 'dps-agenda-addon' ) ) . '</strong></span>';
-        echo '<span class="dps-operational-metric dps-operational-metric--checkout"><span class="dps-operational-metric__label">' . esc_html__( 'Check-out', 'dps-agenda-addon' ) . '</span><strong class="dps-operational-metric__value">' . esc_html( $data['has_checkout'] ? mysql2date( 'H:i', $data['checkout_data']['time'] ) : __( 'Pendente', 'dps-agenda-addon' ) ) . '</strong></span>';
+        echo '<span class="dps-operational-inline-meta">' . esc_html( $data['has_checkin'] ? sprintf( __( 'Check-in %s', 'dps-agenda-addon' ), mysql2date( 'H:i', $data['checkin_data']['time'] ) ) : __( 'Check-in pendente', 'dps-agenda-addon' ) ) . '</span>';
+        echo '<span class="dps-operational-inline-meta">' . esc_html( $data['has_checkout'] ? sprintf( __( 'Check-out %s', 'dps-agenda-addon' ), mysql2date( 'H:i', $data['checkout_data']['time'] ) ) : __( 'Check-out pendente', 'dps-agenda-addon' ) ) . '</span>';
         if ( $data['rework_count'] > 0 ) {
-            echo '<span class="dps-operational-metric dps-operational-metric--rework"><span class="dps-operational-metric__label">' . esc_html__( 'Retrabalho', 'dps-agenda-addon' ) . '</span><strong class="dps-operational-metric__value">' . esc_html( $data['rework_count'] ) . '</strong></span>';
+            echo '<span class="dps-operational-inline-meta">' . esc_html( sprintf( _n( '%d retrabalho', '%d retrabalhos', $data['rework_count'], 'dps-agenda-addon' ), $data['rework_count'] ) ) . '</span>';
         }
         echo '</div>';
-        echo '<button type="button" class="dps-operation-action-btn dps-operation-action-btn--edit" data-appt-id="' . esc_attr( $data['id'] ) . '" data-operation-focus="checklist" aria-haspopup="dialog">' . esc_html__( 'Editar operação', 'dps-agenda-addon' ) . '</button>';
         echo '</div>';
         echo '</td>';
 
         echo '<td class="dps-agenda-cell dps-agenda-cell--logistics" data-label="' . esc_attr__( 'Logística', 'dps-agenda-addon' ) . '">';
         echo '<div class="dps-agenda-logistics">';
-        echo '<span class="dps-taxidog-label ' . ( $data['taxidog'] ? 'dps-taxidog-label--requested' : 'dps-taxidog-label--not-requested' ) . '">' . esc_html( $data['taxidog'] ? __( 'TaxiDog solicitado', 'dps-agenda-addon' ) : __( 'Sem TaxiDog', 'dps-agenda-addon' ) ) . '</span>';
+        echo '<span class="dps-taxidog-label ' . ( $data['taxidog'] ? 'dps-taxidog-label--requested' : 'dps-taxidog-label--not-requested' ) . '">' . esc_html( $data['taxidog'] ? __( 'TaxiDog', 'dps-agenda-addon' ) : __( 'Sem TaxiDog', 'dps-agenda-addon' ) ) . '</span>';
         if ( $data['address'] ) {
-            echo '<p class="dps-agenda-logistics__address">' . esc_html( $data['address'] ) . '</p>';
+            echo '<span class="dps-operational-inline-meta">' . esc_html__( 'Mapa e rota disponíveis', 'dps-agenda-addon' ) . '</span>';
             echo '<div class="dps-agenda-logistics__actions">';
             if ( $data['map_url'] ) {
                 echo '<a href="' . esc_url( $data['map_url'] ) . '" target="_blank" rel="noopener noreferrer" class="dps-agenda-logistics-link dps-agenda-logistics-link--map">' . esc_html__( 'Mapa', 'dps-agenda-addon' ) . '</a>';
@@ -1327,7 +1248,7 @@ trait DPS_Agenda_Renderer {
             }
             echo '</div>';
         } else {
-            echo '<span class="dps-agenda-logistics__empty">' . esc_html__( 'Sem endereço para logística', 'dps-agenda-addon' ) . '</span>';
+            echo '<span class="dps-agenda-logistics__empty">' . esc_html__( 'Sem logística', 'dps-agenda-addon' ) . '</span>';
         }
         echo '</div>';
         echo '</td>';
@@ -1373,9 +1294,9 @@ trait DPS_Agenda_Renderer {
         }
         echo '</div>';
         echo '<div class="dps-operational-card__meta">';
-        echo '<span>' . esc_html( $data['service_label'] ) . '</span>';
-        echo '<span>' . esc_html( $this->get_operational_payment_label( $data ) ) . '</span>';
-        echo '<span>' . esc_html( $data['taxidog'] ? __( 'TaxiDog solicitado', 'dps-agenda-addon' ) : __( 'Sem TaxiDog', 'dps-agenda-addon' ) ) . '</span>';
+        echo '<span class="dps-operational-card__meta-item"><small>' . esc_html__( 'Serviços', 'dps-agenda-addon' ) . '</small><strong>' . esc_html( $data['service_label'] ) . '</strong></span>';
+        echo '<span class="dps-operational-card__meta-item"><small>' . esc_html__( 'Financeiro', 'dps-agenda-addon' ) . '</small><strong>' . esc_html( $this->get_operational_payment_label( $data ) ) . '</strong></span>';
+        echo '<span class="dps-operational-card__meta-item"><small>' . esc_html__( 'Logística', 'dps-agenda-addon' ) . '</small><strong>' . esc_html( $data['taxidog'] ? __( 'TaxiDog solicitado', 'dps-agenda-addon' ) : __( 'Sem TaxiDog', 'dps-agenda-addon' ) ) . '</strong></span>';
         echo '</div>';
         echo '<div class="dps-operational-progress"><span>' . esc_html__( 'Checklist', 'dps-agenda-addon' ) . ' ' . esc_html( $data['progress'] ) . '%</span><div class="dps-operational-progress__bar"><span style="width:' . esc_attr( $data['progress'] ) . '%"></span></div></div>';
         echo '</div>';
@@ -1383,6 +1304,7 @@ trait DPS_Agenda_Renderer {
         echo '<footer class="dps-operational-card__actions">';
         echo $this->render_operational_primary_action( $data );
         echo '<button type="button" class="dps-operation-action-btn dps-operation-action-btn--edit" data-appt-id="' . esc_attr( $data['id'] ) . '" data-operation-focus="checklist" aria-haspopup="dialog">' . esc_html__( 'Operação', 'dps-agenda-addon' ) . '</button>';
+        echo '<button type="button" class="dps-agenda-action-link dps-agenda-action-link--secondary dps-agenda-secondary-actions" data-appt-id="' . esc_attr( $data['id'] ) . '" aria-haspopup="dialog">' . esc_html__( 'Mais', 'dps-agenda-addon' ) . '</button>';
         echo '</footer>';
         echo '</article>';
 

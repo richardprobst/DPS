@@ -1,0 +1,361 @@
+{
+  "url": "https://desi.pet/agenda-de-atendimentos/",
+  "breakpoints": [
+    {
+      "width": 375,
+      "height": 1600,
+      "innerWidth": 375,
+      "scrollWidth": 375,
+      "overflow": 0,
+      "hasOverflow": false,
+      "searchPresent": false,
+      "toolbarPresent": true,
+      "filterWrapPresent": true,
+      "gridTemplateColumns": "101.656px 101.672px 101.656px",
+      "toolbarColumns": "325px",
+      "filterCount": 3,
+      "filterUniqueYCount": 1,
+      "filterUniqueXCount": 3,
+      "rects": [
+        {
+          "label": "Todos",
+          "x": 25,
+          "y": 200,
+          "width": 102,
+          "height": 55,
+          "ariaPressed": "true",
+          "active": true
+        },
+        {
+          "label": "Atrasados",
+          "x": 137,
+          "y": 200,
+          "width": 102,
+          "height": 55,
+          "ariaPressed": "false",
+          "active": false
+        },
+        {
+          "label": "TaxiDog",
+          "x": 248,
+          "y": 200,
+          "width": 102,
+          "height": 55,
+          "ariaPressed": "false",
+          "active": false
+        }
+      ],
+      "visibleCardIds": [
+        "1716",
+        "1718",
+        "1717"
+      ],
+      "visibleCardCount": 3,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-operational-filters-horizontal-375.png"
+    },
+    {
+      "width": 600,
+      "height": 1600,
+      "innerWidth": 600,
+      "scrollWidth": 600,
+      "overflow": 0,
+      "hasOverflow": false,
+      "searchPresent": false,
+      "toolbarPresent": true,
+      "filterWrapPresent": true,
+      "gridTemplateColumns": "176.656px 176.672px 176.672px",
+      "toolbarColumns": "550px",
+      "filterCount": 3,
+      "filterUniqueYCount": 1,
+      "filterUniqueXCount": 3,
+      "rects": [
+        {
+          "label": "Todos",
+          "x": 25,
+          "y": 199,
+          "width": 177,
+          "height": 55,
+          "ariaPressed": "true",
+          "active": true
+        },
+        {
+          "label": "Atrasados",
+          "x": 212,
+          "y": 199,
+          "width": 177,
+          "height": 55,
+          "ariaPressed": "false",
+          "active": false
+        },
+        {
+          "label": "TaxiDog",
+          "x": 398,
+          "y": 199,
+          "width": 177,
+          "height": 55,
+          "ariaPressed": "false",
+          "active": false
+        }
+      ],
+      "visibleCardIds": [
+        "1716",
+        "1718",
+        "1717"
+      ],
+      "visibleCardCount": 3,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-operational-filters-horizontal-600.png"
+    },
+    {
+      "width": 840,
+      "height": 1800,
+      "innerWidth": 840,
+      "scrollWidth": 840,
+      "overflow": 0,
+      "hasOverflow": false,
+      "searchPresent": false,
+      "toolbarPresent": true,
+      "filterWrapPresent": true,
+      "gridTemplateColumns": "233.328px 233.328px 233.328px",
+      "toolbarColumns": "774px",
+      "filterCount": 3,
+      "filterUniqueYCount": 1,
+      "filterUniqueXCount": 3,
+      "rects": [
+        {
+          "label": "Todos",
+          "x": 33,
+          "y": 339,
+          "width": 233,
+          "height": 55,
+          "ariaPressed": "true",
+          "active": true
+        },
+        {
+          "label": "Atrasados",
+          "x": 276,
+          "y": 339,
+          "width": 233,
+          "height": 55,
+          "ariaPressed": "false",
+          "active": false
+        },
+        {
+          "label": "TaxiDog",
+          "x": 520,
+          "y": 339,
+          "width": 233,
+          "height": 55,
+          "ariaPressed": "false",
+          "active": false
+        }
+      ],
+      "visibleCardIds": [
+        "1716",
+        "1718",
+        "1717"
+      ],
+      "visibleCardCount": 3,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-operational-filters-horizontal-840.png"
+    },
+    {
+      "width": 1200,
+      "height": 1800,
+      "innerWidth": 1200,
+      "scrollWidth": 1200,
+      "overflow": 0,
+      "hasOverflow": false,
+      "searchPresent": false,
+      "toolbarPresent": true,
+      "filterWrapPresent": true,
+      "gridTemplateColumns": "233.328px 233.328px 233.328px",
+      "toolbarColumns": "1090px",
+      "filterCount": 3,
+      "filterUniqueYCount": 1,
+      "filterUniqueXCount": 3,
+      "rects": [
+        {
+          "label": "Todos",
+          "x": 240,
+          "y": 655,
+          "width": 233,
+          "height": 55,
+          "ariaPressed": "true",
+          "active": true
+        },
+        {
+          "label": "Atrasados",
+          "x": 483,
+          "y": 655,
+          "width": 233,
+          "height": 55,
+          "ariaPressed": "false",
+          "active": false
+        },
+        {
+          "label": "TaxiDog",
+          "x": 727,
+          "y": 655,
+          "width": 233,
+          "height": 55,
+          "ariaPressed": "false",
+          "active": false
+        }
+      ],
+      "visibleCardIds": [
+        "1716",
+        "1718",
+        "1717"
+      ],
+      "visibleCardCount": 3,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-operational-filters-horizontal-1200.png"
+    },
+    {
+      "width": 1920,
+      "height": 2200,
+      "innerWidth": 1920,
+      "scrollWidth": 1920,
+      "overflow": 0,
+      "hasOverflow": false,
+      "searchPresent": false,
+      "toolbarPresent": true,
+      "filterWrapPresent": true,
+      "gridTemplateColumns": "233.328px 233.328px 233.328px",
+      "toolbarColumns": "1090px",
+      "filterCount": 3,
+      "filterUniqueYCount": 1,
+      "filterUniqueXCount": 3,
+      "rects": [
+        {
+          "label": "Todos",
+          "x": 600,
+          "y": 689,
+          "width": 233,
+          "height": 55,
+          "ariaPressed": "true",
+          "active": true
+        },
+        {
+          "label": "Atrasados",
+          "x": 843,
+          "y": 689,
+          "width": 233,
+          "height": 55,
+          "ariaPressed": "false",
+          "active": false
+        },
+        {
+          "label": "TaxiDog",
+          "x": 1087,
+          "y": 689,
+          "width": 233,
+          "height": 55,
+          "ariaPressed": "false",
+          "active": false
+        }
+      ],
+      "visibleCardIds": [
+        "1716",
+        "1718",
+        "1717"
+      ],
+      "visibleCardCount": 3,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-operational-filters-horizontal-1920.png"
+    }
+  ],
+  "functionalDesktop": {
+    "all": {
+      "label": "Todos",
+      "visibleIds": [
+        "1716",
+        "1718",
+        "1717"
+      ],
+      "buttonState": {
+        "ariaPressed": "true",
+        "active": true
+      }
+    },
+    "late": {
+      "label": "Atrasados",
+      "visibleIds": [
+        "1716"
+      ],
+      "buttonState": {
+        "ariaPressed": "true",
+        "active": true
+      }
+    },
+    "taxidog": {
+      "label": "TaxiDog",
+      "visibleIds": [
+        "1717"
+      ],
+      "buttonState": {
+        "ariaPressed": "true",
+        "active": true
+      }
+    },
+    "backToAll": {
+      "label": "Todos",
+      "visibleIds": [
+        "1716",
+        "1718",
+        "1717"
+      ],
+      "buttonState": {
+        "ariaPressed": "true",
+        "active": true
+      }
+    }
+  },
+  "functionalMobile": {
+    "all": {
+      "label": "Todos",
+      "visibleIds": [
+        "1716",
+        "1718",
+        "1717"
+      ],
+      "buttonState": {
+        "ariaPressed": "true",
+        "active": true
+      }
+    },
+    "late": {
+      "label": "Atrasados",
+      "visibleIds": [
+        "1716"
+      ],
+      "buttonState": {
+        "ariaPressed": "true",
+        "active": true
+      }
+    },
+    "taxidog": {
+      "label": "TaxiDog",
+      "visibleIds": [
+        "1717"
+      ],
+      "buttonState": {
+        "ariaPressed": "true",
+        "active": true
+      }
+    },
+    "backToAll": {
+      "label": "Todos",
+      "visibleIds": [
+        "1716",
+        "1718",
+        "1717"
+      ],
+      "buttonState": {
+        "ariaPressed": "true",
+        "active": true
+      }
+    }
+  },
+  "consoleErrors": [],
+  "consoleWarnings": [],
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0
+}

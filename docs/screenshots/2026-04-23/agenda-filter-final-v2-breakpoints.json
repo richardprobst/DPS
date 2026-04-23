@@ -1,0 +1,943 @@
+{
+  "breakpoints": [
+    {
+      "width": 375,
+      "initial": {
+        "overflow": 0,
+        "active": [
+          "all"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          },
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "true",
+            "x": 25,
+            "y": 625,
+            "width": 102,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 137,
+            "y": 625,
+            "width": 102,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 248,
+            "y": 625,
+            "width": 102,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "late": {
+        "overflow": 0,
+        "active": [
+          "late"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento atrasado neste recorte.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "false",
+            "x": 25,
+            "y": 625,
+            "width": 102,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "true",
+            "x": 137,
+            "y": 625,
+            "width": 102,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 248,
+            "y": 625,
+            "width": 102,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "taxidog": {
+        "overflow": 0,
+        "active": [
+          "taxidog"
+        ],
+        "visible": [
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento com TaxiDog neste recorte.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "false",
+            "x": 25,
+            "y": 625,
+            "width": 102,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 137,
+            "y": 625,
+            "width": 102,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "true",
+            "x": 248,
+            "y": 625,
+            "width": 102,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "all": {
+        "overflow": 0,
+        "active": [
+          "all"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          },
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "true",
+            "x": 25,
+            "y": 625,
+            "width": 102,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 137,
+            "y": 625,
+            "width": 102,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 248,
+            "y": 625,
+            "width": 102,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      }
+    },
+    {
+      "width": 600,
+      "initial": {
+        "overflow": 0,
+        "active": [
+          "all"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          },
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "true",
+            "x": 25,
+            "y": 612,
+            "width": 177,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 212,
+            "y": 612,
+            "width": 177,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 398,
+            "y": 612,
+            "width": 177,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "late": {
+        "overflow": 0,
+        "active": [
+          "late"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento atrasado neste recorte.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "false",
+            "x": 25,
+            "y": 612,
+            "width": 177,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "true",
+            "x": 212,
+            "y": 612,
+            "width": 177,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 398,
+            "y": 612,
+            "width": 177,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "taxidog": {
+        "overflow": 0,
+        "active": [
+          "taxidog"
+        ],
+        "visible": [
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento com TaxiDog neste recorte.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "false",
+            "x": 25,
+            "y": 612,
+            "width": 177,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 212,
+            "y": 612,
+            "width": 177,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "true",
+            "x": 398,
+            "y": 612,
+            "width": 177,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "all": {
+        "overflow": 0,
+        "active": [
+          "all"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          },
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "true",
+            "x": 25,
+            "y": 612,
+            "width": 177,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 212,
+            "y": 612,
+            "width": 177,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 398,
+            "y": 612,
+            "width": 177,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      }
+    },
+    {
+      "width": 840,
+      "initial": {
+        "overflow": 0,
+        "active": [
+          "all"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          },
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "true",
+            "x": 33,
+            "y": 677,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 276,
+            "y": 677,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 520,
+            "y": 677,
+            "width": 233,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "late": {
+        "overflow": 0,
+        "active": [
+          "late"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento atrasado neste recorte.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "false",
+            "x": 33,
+            "y": 677,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "true",
+            "x": 276,
+            "y": 677,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 520,
+            "y": 677,
+            "width": 233,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "taxidog": {
+        "overflow": 0,
+        "active": [
+          "taxidog"
+        ],
+        "visible": [
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento com TaxiDog neste recorte.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "false",
+            "x": 33,
+            "y": 677,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 276,
+            "y": 677,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "true",
+            "x": 520,
+            "y": 677,
+            "width": 233,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "all": {
+        "overflow": 0,
+        "active": [
+          "all"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          },
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "true",
+            "x": 33,
+            "y": 677,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 276,
+            "y": 677,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 520,
+            "y": 677,
+            "width": 233,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      }
+    },
+    {
+      "width": 1200,
+      "initial": {
+        "overflow": 0,
+        "active": [
+          "all"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          },
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "true",
+            "x": 240,
+            "y": 655,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 483,
+            "y": 655,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 727,
+            "y": 655,
+            "width": 233,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "late": {
+        "overflow": 0,
+        "active": [
+          "late"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento atrasado neste recorte.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "false",
+            "x": 240,
+            "y": 655,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "true",
+            "x": 483,
+            "y": 655,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 727,
+            "y": 655,
+            "width": 233,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "taxidog": {
+        "overflow": 0,
+        "active": [
+          "taxidog"
+        ],
+        "visible": [
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento com TaxiDog neste recorte.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "false",
+            "x": 240,
+            "y": 655,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 483,
+            "y": 655,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "true",
+            "x": 727,
+            "y": 655,
+            "width": 233,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "all": {
+        "overflow": 0,
+        "active": [
+          "all"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          },
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "true",
+            "x": 240,
+            "y": 655,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 483,
+            "y": 655,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 727,
+            "y": 655,
+            "width": 233,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      }
+    },
+    {
+      "width": 1920,
+      "initial": {
+        "overflow": 0,
+        "active": [
+          "all"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          },
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "true",
+            "x": 600,
+            "y": 689,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 843,
+            "y": 689,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 1087,
+            "y": 689,
+            "width": 233,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "late": {
+        "overflow": 0,
+        "active": [
+          "late"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento atrasado neste recorte.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "false",
+            "x": 600,
+            "y": 689,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "true",
+            "x": 843,
+            "y": 689,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 1087,
+            "y": 689,
+            "width": 233,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "taxidog": {
+        "overflow": 0,
+        "active": [
+          "taxidog"
+        ],
+        "visible": [
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento com TaxiDog neste recorte.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "false",
+            "x": 600,
+            "y": 689,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 843,
+            "y": 689,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "true",
+            "x": 1087,
+            "y": 689,
+            "width": 233,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      },
+      "all": {
+        "overflow": 0,
+        "active": [
+          "all"
+        ],
+        "visible": [
+          {
+            "id": "1747",
+            "late": "1",
+            "taxidog": "0",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          },
+          {
+            "id": "1746",
+            "late": "0",
+            "taxidog": "1",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988"
+          }
+        ],
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+        "filters": [
+          {
+            "filter": "all",
+            "pressed": "true",
+            "x": 600,
+            "y": 689,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "late",
+            "pressed": "false",
+            "x": 843,
+            "y": 689,
+            "width": 233,
+            "height": 55
+          },
+          {
+            "filter": "taxidog",
+            "pressed": "false",
+            "x": 1087,
+            "y": 689,
+            "width": 233,
+            "height": 55
+          }
+        ],
+        "filterUniqueYCount": 1
+      }
+    }
+  ],
+  "consoleErrors": [],
+  "consoleWarnings": [],
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0
+}

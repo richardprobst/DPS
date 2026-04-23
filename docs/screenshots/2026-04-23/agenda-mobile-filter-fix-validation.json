@@ -1,0 +1,208 @@
+{
+  "desktop": {
+    "TaxiDog": {
+      "before": {
+        "activeButtons": [
+          "Todos"
+        ],
+        "buttonPressed": "false",
+        "visibleIds": [
+          "1741",
+          "1740"
+        ],
+        "visibleCount": 2,
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+        "emptyMessage": "Volte para Todos ou ajuste o filtro para continuar a operacao.",
+        "inspectorHidden": false,
+        "cards": [
+          {
+            "id": "1741",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_FIX_20260423_D",
+            "taxidog": "0",
+            "logistics": "Rua Fixture TaxiDog 123, Sao Paulo - SP"
+          },
+          {
+            "id": "1740",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_FIX_20260423_D",
+            "taxidog": "1",
+            "logistics": "Rua Fixture TaxiDog 123, Sao Paulo - SP"
+          }
+        ]
+      },
+      "after": {
+        "activeButtons": [
+          "TaxiDog"
+        ],
+        "buttonPressed": "true",
+        "visibleIds": [
+          "1740"
+        ],
+        "visibleCount": 1,
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento com TaxiDog neste recorte.",
+        "emptyMessage": "Nao ha atendimentos com TaxiDog para o periodo atual.",
+        "inspectorHidden": false,
+        "cards": [
+          {
+            "id": "1740",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_FIX_20260423_D",
+            "taxidog": "1",
+            "logistics": "Rua Fixture TaxiDog 123, Sao Paulo - SP"
+          }
+        ]
+      },
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-filter-fix-taxidog-1200.png"
+    },
+    "Atrasados": {
+      "before": {
+        "activeButtons": [
+          "Todos"
+        ],
+        "buttonPressed": "false",
+        "visibleIds": [
+          "1741",
+          "1740"
+        ],
+        "visibleCount": 2,
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+        "emptyMessage": "Volte para Todos ou ajuste o filtro para continuar a operacao.",
+        "inspectorHidden": false,
+        "cards": [
+          {
+            "id": "1741",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_FIX_20260423_D",
+            "taxidog": "0",
+            "logistics": "Rua Fixture TaxiDog 123, Sao Paulo - SP"
+          },
+          {
+            "id": "1740",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_FIX_20260423_D",
+            "taxidog": "1",
+            "logistics": "Rua Fixture TaxiDog 123, Sao Paulo - SP"
+          }
+        ]
+      },
+      "after": {
+        "activeButtons": [
+          "Atrasados"
+        ],
+        "buttonPressed": "true",
+        "visibleIds": [],
+        "visibleCount": 0,
+        "emptyVisible": true,
+        "emptyTitle": "Nenhum atendimento atrasado neste recorte.",
+        "emptyMessage": "Nao ha atendimentos atrasados para o periodo atual.",
+        "inspectorHidden": true,
+        "cards": []
+      },
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-filter-fix-late-1200.png"
+    }
+  },
+  "mobile": {
+    "TaxiDog": {
+      "before": {
+        "activeButtons": [
+          "Todos"
+        ],
+        "buttonPressed": "false",
+        "visibleIds": [
+          "1741",
+          "1740"
+        ],
+        "visibleCount": 2,
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+        "emptyMessage": "Volte para Todos ou ajuste o filtro para continuar a operacao.",
+        "inspectorHidden": true,
+        "cards": [
+          {
+            "id": "1741",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_FIX_20260423_D",
+            "taxidog": "0",
+            "logistics": "Rua Fixture TaxiDog 123, Sao Paulo - SP"
+          },
+          {
+            "id": "1740",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_FIX_20260423_D",
+            "taxidog": "1",
+            "logistics": "Rua Fixture TaxiDog 123, Sao Paulo - SP"
+          }
+        ]
+      },
+      "after": {
+        "activeButtons": [
+          "TaxiDog"
+        ],
+        "buttonPressed": "true",
+        "visibleIds": [
+          "1740"
+        ],
+        "visibleCount": 1,
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento com TaxiDog neste recorte.",
+        "emptyMessage": "Nao ha atendimentos com TaxiDog para o periodo atual.",
+        "inspectorHidden": true,
+        "cards": [
+          {
+            "id": "1740",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_FIX_20260423_D",
+            "taxidog": "1",
+            "logistics": "Rua Fixture TaxiDog 123, Sao Paulo - SP"
+          }
+        ]
+      },
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-filter-fix-taxidog-375.png"
+    },
+    "Atrasados": {
+      "before": {
+        "activeButtons": [
+          "Todos"
+        ],
+        "buttonPressed": "false",
+        "visibleIds": [
+          "1741",
+          "1740"
+        ],
+        "visibleCount": 2,
+        "emptyVisible": false,
+        "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+        "emptyMessage": "Volte para Todos ou ajuste o filtro para continuar a operacao.",
+        "inspectorHidden": true,
+        "cards": [
+          {
+            "id": "1741",
+            "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_FIX_20260423_D",
+            "taxidog": "0",
+            "logistics": "Rua Fixture TaxiDog 123, Sao Paulo - SP"
+          },
+          {
+            "id": "1740",
+            "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_FIX_20260423_D",
+            "taxidog": "1",
+            "logistics": "Rua Fixture TaxiDog 123, Sao Paulo - SP"
+          }
+        ]
+      },
+      "after": {
+        "activeButtons": [
+          "Atrasados"
+        ],
+        "buttonPressed": "true",
+        "visibleIds": [],
+        "visibleCount": 0,
+        "emptyVisible": true,
+        "emptyTitle": "Nenhum atendimento atrasado neste recorte.",
+        "emptyMessage": "Nao ha atendimentos atrasados para o periodo atual.",
+        "inspectorHidden": true,
+        "cards": []
+      },
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-filter-fix-late-375.png"
+    }
+  },
+  "consoleErrors": [],
+  "consoleWarnings": [],
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0
+}

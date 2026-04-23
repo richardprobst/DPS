@@ -1,0 +1,1530 @@
+{
+  "checks": [
+    {
+      "label": "375-initial",
+      "active": "all",
+      "viewport": {
+        "w": 375,
+        "h": 900
+      },
+      "overflow": 0,
+      "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day&qa_width=375",
+      "title": "Agenda de atendimento – Desi Pet Shower",
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1.6.0"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776952352"
+      ],
+      "buttonTexts": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": true,
+          "rect": {
+            "x": 25,
+            "y": 625,
+            "w": 102,
+            "h": 55
+          }
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "rect": {
+            "x": 137,
+            "y": 625,
+            "w": 102,
+            "h": 55
+          }
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "rect": {
+            "x": 248,
+            "y": 625,
+            "w": 102,
+            "h": 55
+          }
+        }
+      ],
+      "rowsCount": 3,
+      "cardsCount": 3,
+      "visibleRows": 0,
+      "visibleCards": 3,
+      "uniqueVisibleIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento encontrado para este filtro.Volte para Todos ou ajuste o filtro para continuar a operacao.",
+      "panels": [
+        {
+          "hidden": false,
+          "text": "Segunda-feira, 20/04\n\n3 atendimentos no periodo\n\n09:00\nAtrasado\nCHECK-IN\nFIXTURE PET ATRASADO DPS_QA_AGENDA_PAST_FILTER_267466\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_PAST_FILTER_267466\n\nServiçosSem serviços\nFinanceiroEm aberto R$ 80,00\nLogí",
+          "rows": 3,
+          "cards": 3,
+          "visibleRows": 0,
+          "visibleCards": 3
+        }
+      ],
+      "items": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "flex",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "flex",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "flex",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 329,
+            "h": 455
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 329,
+            "h": 455
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 329,
+            "h": 458
+          }
+        }
+      ]
+    },
+    {
+      "label": "375-late",
+      "active": "late",
+      "viewport": {
+        "w": 375,
+        "h": 900
+      },
+      "overflow": 0,
+      "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day&qa_width=375",
+      "title": "Agenda de atendimento – Desi Pet Shower",
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1.6.0"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776952352"
+      ],
+      "buttonTexts": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": false,
+          "rect": {
+            "x": 25,
+            "y": 625,
+            "w": 102,
+            "h": 55
+          }
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": true,
+          "rect": {
+            "x": 137,
+            "y": 625,
+            "w": 102,
+            "h": 55
+          }
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "rect": {
+            "x": 248,
+            "y": 625,
+            "w": 102,
+            "h": 55
+          }
+        }
+      ],
+      "rowsCount": 3,
+      "cardsCount": 3,
+      "visibleRows": 0,
+      "visibleCards": 2,
+      "uniqueVisibleIds": [
+        "1753",
+        "1754"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754"
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento atrasado neste recorte.Nao ha atendimentos atrasados para o periodo atual.",
+      "panels": [
+        {
+          "hidden": false,
+          "text": "Segunda-feira, 20/04\n\n3 atendimentos no periodo\n\n09:00\nAtrasado\nCHECK-IN\nFIXTURE PET ATRASADO DPS_QA_AGENDA_PAST_FILTER_267466\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_PAST_FILTER_267466\n\nServiçosSem serviços\nFinanceiroEm aberto R$ 80,00\nLogí",
+          "rows": 3,
+          "cards": 3,
+          "visibleRows": 0,
+          "visibleCards": 2
+        }
+      ],
+      "items": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "flex",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "flex",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "display": "none",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 329,
+            "h": 455
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 329,
+            "h": 455
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "display": "none",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        }
+      ]
+    },
+    {
+      "label": "375-taxidog",
+      "active": "taxidog",
+      "viewport": {
+        "w": 375,
+        "h": 900
+      },
+      "overflow": 0,
+      "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day&qa_width=375",
+      "title": "Agenda de atendimento – Desi Pet Shower",
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1.6.0"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776952352"
+      ],
+      "buttonTexts": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": false,
+          "rect": {
+            "x": 25,
+            "y": 625,
+            "w": 102,
+            "h": 55
+          }
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "rect": {
+            "x": 137,
+            "y": 625,
+            "w": 102,
+            "h": 55
+          }
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": true,
+          "rect": {
+            "x": 248,
+            "y": 625,
+            "w": 102,
+            "h": 55
+          }
+        }
+      ],
+      "rowsCount": 3,
+      "cardsCount": 3,
+      "visibleRows": 0,
+      "visibleCards": 2,
+      "uniqueVisibleIds": [
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1754",
+        "1667"
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento com TaxiDog neste recorte.Nao ha atendimentos com TaxiDog para o periodo atual.",
+      "panels": [
+        {
+          "hidden": false,
+          "text": "Segunda-feira, 20/04\n\n3 atendimentos no periodo\n\n10:00\nAtrasado\nCHECK-IN\nFIXTURE PET TAXIDOG DPS_QA_AGENDA_PAST_FILTER_267466\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_PAST_FILTER_267466\n\nServiçosSem serviços\nFinanceiroEm aberto R$ 80,00\nLogís",
+          "rows": 3,
+          "cards": 3,
+          "visibleRows": 0,
+          "visibleCards": 2
+        }
+      ],
+      "items": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "display": "none",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "flex",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "flex",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "display": "none",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 329,
+            "h": 455
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 329,
+            "h": 458
+          }
+        }
+      ]
+    },
+    {
+      "label": "375-all",
+      "active": "all",
+      "viewport": {
+        "w": 375,
+        "h": 900
+      },
+      "overflow": 0,
+      "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day&qa_width=375",
+      "title": "Agenda de atendimento – Desi Pet Shower",
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1.6.0"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776952352"
+      ],
+      "buttonTexts": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": true,
+          "rect": {
+            "x": 25,
+            "y": 625,
+            "w": 102,
+            "h": 55
+          }
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "rect": {
+            "x": 137,
+            "y": 625,
+            "w": 102,
+            "h": 55
+          }
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "rect": {
+            "x": 248,
+            "y": 625,
+            "w": 102,
+            "h": 55
+          }
+        }
+      ],
+      "rowsCount": 3,
+      "cardsCount": 3,
+      "visibleRows": 0,
+      "visibleCards": 3,
+      "uniqueVisibleIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento encontrado para este filtro.Volte para Todos ou ajuste o filtro para continuar a operacao.",
+      "panels": [
+        {
+          "hidden": false,
+          "text": "Segunda-feira, 20/04\n\n3 atendimentos no periodo\n\n09:00\nAtrasado\nCHECK-IN\nFIXTURE PET ATRASADO DPS_QA_AGENDA_PAST_FILTER_267466\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_PAST_FILTER_267466\n\nServiçosSem serviços\nFinanceiroEm aberto R$ 80,00\nLogí",
+          "rows": 3,
+          "cards": 3,
+          "visibleRows": 0,
+          "visibleCards": 3
+        }
+      ],
+      "items": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "flex",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "flex",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "flex",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 329,
+            "h": 455
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 329,
+            "h": 455
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 329,
+            "h": 458
+          }
+        }
+      ]
+    },
+    {
+      "label": "1200-initial",
+      "active": "all",
+      "viewport": {
+        "w": 1200,
+        "h": 1000
+      },
+      "overflow": 0,
+      "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day&qa_width=1200",
+      "title": "Agenda de atendimento – Desi Pet Shower",
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1.6.0"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776952352"
+      ],
+      "buttonTexts": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": true,
+          "rect": {
+            "x": 240,
+            "y": 655,
+            "w": 233,
+            "h": 55
+          }
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "rect": {
+            "x": 483,
+            "y": 655,
+            "w": 233,
+            "h": 55
+          }
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "rect": {
+            "x": 727,
+            "y": 655,
+            "w": 233,
+            "h": 55
+          }
+        }
+      ],
+      "rowsCount": 3,
+      "cardsCount": 3,
+      "visibleRows": 0,
+      "visibleCards": 3,
+      "uniqueVisibleIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento encontrado para este filtro.Volte para Todos ou ajuste o filtro para continuar a operacao.",
+      "panels": [
+        {
+          "hidden": false,
+          "text": "Segunda-feira, 20/04\n\n3 atendimentos no periodo\n\n09:00\nAtrasado\nCHECK-IN\nFIXTURE PET ATRASADO DPS_QA_AGENDA_PAST_FILTER_267466\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_PAST_FILTER_267466\n\nSERVIÇOS\nSem serviços\nFINANCEIRO\nEm aberto R$ 80,00\nLO",
+          "rows": 3,
+          "cards": 3,
+          "visibleRows": 0,
+          "visibleCards": 3
+        }
+      ],
+      "items": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "table-row",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "table-row",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "table-row",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 858,
+            "h": 295
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 858,
+            "h": 295
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 858,
+            "h": 301
+          }
+        }
+      ]
+    },
+    {
+      "label": "1200-late",
+      "active": "late",
+      "viewport": {
+        "w": 1200,
+        "h": 1000
+      },
+      "overflow": 0,
+      "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day&qa_width=1200",
+      "title": "Agenda de atendimento – Desi Pet Shower",
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1.6.0"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776952352"
+      ],
+      "buttonTexts": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": false,
+          "rect": {
+            "x": 240,
+            "y": 655,
+            "w": 233,
+            "h": 55
+          }
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": true,
+          "rect": {
+            "x": 483,
+            "y": 655,
+            "w": 233,
+            "h": 55
+          }
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "rect": {
+            "x": 727,
+            "y": 655,
+            "w": 233,
+            "h": 55
+          }
+        }
+      ],
+      "rowsCount": 3,
+      "cardsCount": 3,
+      "visibleRows": 0,
+      "visibleCards": 2,
+      "uniqueVisibleIds": [
+        "1753",
+        "1754"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754"
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento atrasado neste recorte.Nao ha atendimentos atrasados para o periodo atual.",
+      "panels": [
+        {
+          "hidden": false,
+          "text": "Segunda-feira, 20/04\n\n3 atendimentos no periodo\n\n09:00\nAtrasado\nCHECK-IN\nFIXTURE PET ATRASADO DPS_QA_AGENDA_PAST_FILTER_267466\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_PAST_FILTER_267466\n\nSERVIÇOS\nSem serviços\nFINANCEIRO\nEm aberto R$ 80,00\nLO",
+          "rows": 3,
+          "cards": 3,
+          "visibleRows": 0,
+          "visibleCards": 2
+        }
+      ],
+      "items": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "table-row",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "table-row",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "display": "none",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 858,
+            "h": 295
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 858,
+            "h": 295
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "display": "none",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        }
+      ]
+    },
+    {
+      "label": "1200-taxidog",
+      "active": "taxidog",
+      "viewport": {
+        "w": 1200,
+        "h": 1000
+      },
+      "overflow": 0,
+      "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day&qa_width=1200",
+      "title": "Agenda de atendimento – Desi Pet Shower",
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1.6.0"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776952352"
+      ],
+      "buttonTexts": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": false,
+          "rect": {
+            "x": 240,
+            "y": 655,
+            "w": 233,
+            "h": 55
+          }
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "rect": {
+            "x": 483,
+            "y": 655,
+            "w": 233,
+            "h": 55
+          }
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": true,
+          "rect": {
+            "x": 727,
+            "y": 655,
+            "w": 233,
+            "h": 55
+          }
+        }
+      ],
+      "rowsCount": 3,
+      "cardsCount": 3,
+      "visibleRows": 0,
+      "visibleCards": 2,
+      "uniqueVisibleIds": [
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1754",
+        "1667"
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento com TaxiDog neste recorte.Nao ha atendimentos com TaxiDog para o periodo atual.",
+      "panels": [
+        {
+          "hidden": false,
+          "text": "Segunda-feira, 20/04\n\n3 atendimentos no periodo\n\n10:00\nAtrasado\nCHECK-IN\nFIXTURE PET TAXIDOG DPS_QA_AGENDA_PAST_FILTER_267466\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_PAST_FILTER_267466\n\nSERVIÇOS\nSem serviços\nFINANCEIRO\nEm aberto R$ 80,00\nLOG",
+          "rows": 3,
+          "cards": 3,
+          "visibleRows": 0,
+          "visibleCards": 2
+        }
+      ],
+      "items": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "display": "none",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "table-row",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "table-row",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "display": "none",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 858,
+            "h": 295
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 858,
+            "h": 301
+          }
+        }
+      ]
+    },
+    {
+      "label": "1200-all",
+      "active": "all",
+      "viewport": {
+        "w": 1200,
+        "h": 1000
+      },
+      "overflow": 0,
+      "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day&qa_width=1200",
+      "title": "Agenda de atendimento – Desi Pet Shower",
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1.6.0"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776952352"
+      ],
+      "buttonTexts": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": true,
+          "rect": {
+            "x": 240,
+            "y": 655,
+            "w": 233,
+            "h": 55
+          }
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "rect": {
+            "x": 483,
+            "y": 655,
+            "w": 233,
+            "h": 55
+          }
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "rect": {
+            "x": 727,
+            "y": 655,
+            "w": 233,
+            "h": 55
+          }
+        }
+      ],
+      "rowsCount": 3,
+      "cardsCount": 3,
+      "visibleRows": 0,
+      "visibleCards": 3,
+      "uniqueVisibleIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento encontrado para este filtro.Volte para Todos ou ajuste o filtro para continuar a operacao.",
+      "panels": [
+        {
+          "hidden": false,
+          "text": "Segunda-feira, 20/04\n\n3 atendimentos no periodo\n\n09:00\nAtrasado\nCHECK-IN\nFIXTURE PET ATRASADO DPS_QA_AGENDA_PAST_FILTER_267466\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_PAST_FILTER_267466\n\nSERVIÇOS\nSem serviços\nFINANCEIRO\nEm aberto R$ 80,00\nLO",
+          "rows": 3,
+          "cards": 3,
+          "visibleRows": 0,
+          "visibleCards": 3
+        }
+      ],
+      "items": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "table-row",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "table-row",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "table-row",
+          "visibility": "visible",
+          "offsetParent": false,
+          "rect": {
+            "w": 0,
+            "h": 0
+          }
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "date": "2026-04-20",
+          "time": "09:00",
+          "pet": "Fixture Pet Atrasado DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 858,
+            "h": 295
+          }
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "10:00",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_PAST_FILTER_267466",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 858,
+            "h": 295
+          }
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "date": "2026-04-20",
+          "time": "23:30",
+          "pet": "QA Smoke Pet",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "display": "block",
+          "visibility": "visible",
+          "offsetParent": true,
+          "rect": {
+            "w": 858,
+            "h": 301
+          }
+        }
+      ]
+    }
+  ],
+  "console": [
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    }
+  ]
+}

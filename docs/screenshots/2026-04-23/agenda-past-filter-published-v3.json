@@ -1,0 +1,3291 @@
+{
+  "summary": [
+    {
+      "label": "375-0-all",
+      "active": "all",
+      "matching": 3,
+      "visible": 3,
+      "ids": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "countText": "3 atendimentos no periodo",
+      "overflow": 0,
+      "buttonHeights": [
+        42,
+        42,
+        42
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 615,
+        "w": 353,
+        "h": 75
+      }
+    },
+    {
+      "label": "375-1-late",
+      "active": "late",
+      "matching": 2,
+      "visible": 2,
+      "ids": [
+        "1753",
+        "1754"
+      ],
+      "countText": "2 atendimentos no filtro",
+      "overflow": 0,
+      "buttonHeights": [
+        42,
+        42,
+        42
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 615,
+        "w": 353,
+        "h": 75
+      }
+    },
+    {
+      "label": "375-2-taxidog",
+      "active": "taxidog",
+      "matching": 2,
+      "visible": 2,
+      "ids": [
+        "1754",
+        "1667"
+      ],
+      "countText": "2 atendimentos no filtro",
+      "overflow": 0,
+      "buttonHeights": [
+        42,
+        42,
+        42
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 615,
+        "w": 353,
+        "h": 75
+      }
+    },
+    {
+      "label": "375-3-all",
+      "active": "all",
+      "matching": 3,
+      "visible": 3,
+      "ids": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "countText": "3 atendimentos no periodo",
+      "overflow": 0,
+      "buttonHeights": [
+        42,
+        42,
+        42
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 615,
+        "w": 353,
+        "h": 75
+      }
+    },
+    {
+      "label": "600-0-all",
+      "active": "all",
+      "matching": 3,
+      "visible": 3,
+      "ids": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "countText": "3 atendimentos no periodo",
+      "overflow": 0,
+      "buttonHeights": [
+        42,
+        42,
+        42
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 602,
+        "w": 578,
+        "h": 75
+      }
+    },
+    {
+      "label": "600-1-late",
+      "active": "late",
+      "matching": 2,
+      "visible": 2,
+      "ids": [
+        "1753",
+        "1754"
+      ],
+      "countText": "2 atendimentos no filtro",
+      "overflow": 0,
+      "buttonHeights": [
+        42,
+        42,
+        42
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 602,
+        "w": 578,
+        "h": 75
+      }
+    },
+    {
+      "label": "600-2-taxidog",
+      "active": "taxidog",
+      "matching": 2,
+      "visible": 2,
+      "ids": [
+        "1754",
+        "1667"
+      ],
+      "countText": "2 atendimentos no filtro",
+      "overflow": 0,
+      "buttonHeights": [
+        42,
+        42,
+        42
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 602,
+        "w": 578,
+        "h": 75
+      }
+    },
+    {
+      "label": "600-3-all",
+      "active": "all",
+      "matching": 3,
+      "visible": 3,
+      "ids": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "countText": "3 atendimentos no periodo",
+      "overflow": 0,
+      "buttonHeights": [
+        42,
+        42,
+        42
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 602,
+        "w": 578,
+        "h": 75
+      }
+    },
+    {
+      "label": "840-0-all",
+      "active": "all",
+      "matching": 3,
+      "visible": 3,
+      "ids": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "countText": "3 atendimentos no periodo",
+      "overflow": 0,
+      "buttonHeights": [
+        44,
+        44,
+        44
+      ],
+      "filterArea": {
+        "x": 19,
+        "y": 649,
+        "w": 802,
+        "h": 80
+      }
+    },
+    {
+      "label": "840-1-late",
+      "active": "late",
+      "matching": 2,
+      "visible": 2,
+      "ids": [
+        "1753",
+        "1754"
+      ],
+      "countText": "2 atendimentos no filtro",
+      "overflow": 0,
+      "buttonHeights": [
+        44,
+        44,
+        44
+      ],
+      "filterArea": {
+        "x": 19,
+        "y": 649,
+        "w": 802,
+        "h": 80
+      }
+    },
+    {
+      "label": "840-2-taxidog",
+      "active": "taxidog",
+      "matching": 2,
+      "visible": 2,
+      "ids": [
+        "1754",
+        "1667"
+      ],
+      "countText": "2 atendimentos no filtro",
+      "overflow": 0,
+      "buttonHeights": [
+        44,
+        44,
+        44
+      ],
+      "filterArea": {
+        "x": 19,
+        "y": 649,
+        "w": 802,
+        "h": 80
+      }
+    },
+    {
+      "label": "840-3-all",
+      "active": "all",
+      "matching": 3,
+      "visible": 3,
+      "ids": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "countText": "3 atendimentos no periodo",
+      "overflow": 0,
+      "buttonHeights": [
+        44,
+        44,
+        44
+      ],
+      "filterArea": {
+        "x": 19,
+        "y": 649,
+        "w": 802,
+        "h": 80
+      }
+    },
+    {
+      "label": "1200-0-all",
+      "active": "all",
+      "matching": 3,
+      "visible": 3,
+      "ids": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "countText": "3 atendimentos no periodo",
+      "overflow": 0,
+      "buttonHeights": [
+        46,
+        46,
+        46
+      ],
+      "filterArea": {
+        "x": 31,
+        "y": 620,
+        "w": 1138,
+        "h": 86
+      }
+    },
+    {
+      "label": "1200-1-late",
+      "active": "late",
+      "matching": 2,
+      "visible": 2,
+      "ids": [
+        "1753",
+        "1754"
+      ],
+      "countText": "2 atendimentos no filtro",
+      "overflow": 0,
+      "buttonHeights": [
+        46,
+        46,
+        46
+      ],
+      "filterArea": {
+        "x": 31,
+        "y": 620,
+        "w": 1138,
+        "h": 86
+      }
+    },
+    {
+      "label": "1200-2-taxidog",
+      "active": "taxidog",
+      "matching": 2,
+      "visible": 2,
+      "ids": [
+        "1754",
+        "1667"
+      ],
+      "countText": "2 atendimentos no filtro",
+      "overflow": 0,
+      "buttonHeights": [
+        46,
+        46,
+        46
+      ],
+      "filterArea": {
+        "x": 31,
+        "y": 620,
+        "w": 1138,
+        "h": 86
+      }
+    },
+    {
+      "label": "1200-3-all",
+      "active": "all",
+      "matching": 3,
+      "visible": 3,
+      "ids": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "countText": "3 atendimentos no periodo",
+      "overflow": 0,
+      "buttonHeights": [
+        46,
+        46,
+        46
+      ],
+      "filterArea": {
+        "x": 31,
+        "y": 620,
+        "w": 1138,
+        "h": 86
+      }
+    },
+    {
+      "label": "1920-0-all",
+      "active": "all",
+      "matching": 3,
+      "visible": 3,
+      "ids": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "countText": "3 atendimentos no periodo",
+      "overflow": 0,
+      "buttonHeights": [
+        46,
+        46,
+        46
+      ],
+      "filterArea": {
+        "x": 391,
+        "y": 651,
+        "w": 1138,
+        "h": 86
+      }
+    },
+    {
+      "label": "1920-1-late",
+      "active": "late",
+      "matching": 2,
+      "visible": 2,
+      "ids": [
+        "1753",
+        "1754"
+      ],
+      "countText": "2 atendimentos no filtro",
+      "overflow": 0,
+      "buttonHeights": [
+        46,
+        46,
+        46
+      ],
+      "filterArea": {
+        "x": 391,
+        "y": 651,
+        "w": 1138,
+        "h": 86
+      }
+    },
+    {
+      "label": "1920-2-taxidog",
+      "active": "taxidog",
+      "matching": 2,
+      "visible": 2,
+      "ids": [
+        "1754",
+        "1667"
+      ],
+      "countText": "2 atendimentos no filtro",
+      "overflow": 0,
+      "buttonHeights": [
+        46,
+        46,
+        46
+      ],
+      "filterArea": {
+        "x": 391,
+        "y": 651,
+        "w": 1138,
+        "h": 86
+      }
+    },
+    {
+      "label": "1920-3-all",
+      "active": "all",
+      "matching": 3,
+      "visible": 3,
+      "ids": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "countText": "3 atendimentos no periodo",
+      "overflow": 0,
+      "buttonHeights": [
+        46,
+        46,
+        46
+      ],
+      "filterArea": {
+        "x": 391,
+        "y": 651,
+        "w": 1138,
+        "h": 86
+      }
+    }
+  ],
+  "checks": [
+    {
+      "label": "375-0-all",
+      "active": "all",
+      "viewport": {
+        "w": 375,
+        "h": 900
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": true,
+          "x": 25,
+          "y": 623,
+          "w": 104,
+          "h": 42
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 135,
+          "y": 623,
+          "w": 104,
+          "h": 42
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 246,
+          "y": 623,
+          "w": 104,
+          "h": 42
+        }
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 615,
+        "w": 353,
+        "h": 75
+      },
+      "shellTitle": {
+        "x": 25,
+        "y": 566,
+        "w": 325,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "3 atendimentos no periodo",
+          "matchingIds": [
+            "1753",
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento encontrado para este filtro.Volte para Todos ou ajuste o filtro para continuar a operacao.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "label": "375-1-late",
+      "active": "late",
+      "viewport": {
+        "w": 375,
+        "h": 900
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": false,
+          "x": 25,
+          "y": 623,
+          "w": 104,
+          "h": 42
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": true,
+          "x": 135,
+          "y": 623,
+          "w": 104,
+          "h": 42
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 246,
+          "y": 623,
+          "w": 104,
+          "h": 42
+        }
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 615,
+        "w": 353,
+        "h": 75
+      },
+      "shellTitle": {
+        "x": 25,
+        "y": 566,
+        "w": 325,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "2 atendimentos no filtro",
+          "matchingIds": [
+            "1753",
+            "1754"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento atrasado neste recorte.Nao ha atendimentos atrasados para o periodo atual.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        }
+      ]
+    },
+    {
+      "label": "375-2-taxidog",
+      "active": "taxidog",
+      "viewport": {
+        "w": 375,
+        "h": 900
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": false,
+          "x": 25,
+          "y": 623,
+          "w": 104,
+          "h": 42
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 135,
+          "y": 623,
+          "w": 104,
+          "h": 42
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": true,
+          "x": 246,
+          "y": 623,
+          "w": 104,
+          "h": 42
+        }
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 615,
+        "w": 353,
+        "h": 75
+      },
+      "shellTitle": {
+        "x": 25,
+        "y": 566,
+        "w": 325,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "2 atendimentos no filtro",
+          "matchingIds": [
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento com TaxiDog neste recorte.Nao ha atendimentos com TaxiDog para o periodo atual.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "label": "375-3-all",
+      "active": "all",
+      "viewport": {
+        "w": 375,
+        "h": 900
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": true,
+          "x": 25,
+          "y": 623,
+          "w": 104,
+          "h": 42
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 135,
+          "y": 623,
+          "w": 104,
+          "h": 42
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 246,
+          "y": 623,
+          "w": 104,
+          "h": 42
+        }
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 615,
+        "w": 353,
+        "h": 75
+      },
+      "shellTitle": {
+        "x": 25,
+        "y": 566,
+        "w": 325,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "3 atendimentos no periodo",
+          "matchingIds": [
+            "1753",
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento encontrado para este filtro.Volte para Todos ou ajuste o filtro para continuar a operacao.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "label": "600-0-all",
+      "active": "all",
+      "viewport": {
+        "w": 600,
+        "h": 960
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": true,
+          "x": 25,
+          "y": 610,
+          "w": 179,
+          "h": 42
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 210,
+          "y": 610,
+          "w": 179,
+          "h": 42
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 396,
+          "y": 610,
+          "w": 179,
+          "h": 42
+        }
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 602,
+        "w": 578,
+        "h": 75
+      },
+      "shellTitle": {
+        "x": 25,
+        "y": 553,
+        "w": 550,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "3 atendimentos no periodo",
+          "matchingIds": [
+            "1753",
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento encontrado para este filtro.Volte para Todos ou ajuste o filtro para continuar a operacao.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "label": "600-1-late",
+      "active": "late",
+      "viewport": {
+        "w": 600,
+        "h": 960
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": false,
+          "x": 25,
+          "y": 610,
+          "w": 179,
+          "h": 42
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": true,
+          "x": 210,
+          "y": 610,
+          "w": 179,
+          "h": 42
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 396,
+          "y": 610,
+          "w": 179,
+          "h": 42
+        }
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 602,
+        "w": 578,
+        "h": 75
+      },
+      "shellTitle": {
+        "x": 25,
+        "y": 553,
+        "w": 550,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "2 atendimentos no filtro",
+          "matchingIds": [
+            "1753",
+            "1754"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento atrasado neste recorte.Nao ha atendimentos atrasados para o periodo atual.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        }
+      ]
+    },
+    {
+      "label": "600-2-taxidog",
+      "active": "taxidog",
+      "viewport": {
+        "w": 600,
+        "h": 960
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": false,
+          "x": 25,
+          "y": 610,
+          "w": 179,
+          "h": 42
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 210,
+          "y": 610,
+          "w": 179,
+          "h": 42
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": true,
+          "x": 396,
+          "y": 610,
+          "w": 179,
+          "h": 42
+        }
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 602,
+        "w": 578,
+        "h": 75
+      },
+      "shellTitle": {
+        "x": 25,
+        "y": 553,
+        "w": 550,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "2 atendimentos no filtro",
+          "matchingIds": [
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento com TaxiDog neste recorte.Nao ha atendimentos com TaxiDog para o periodo atual.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "label": "600-3-all",
+      "active": "all",
+      "viewport": {
+        "w": 600,
+        "h": 960
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": true,
+          "x": 25,
+          "y": 610,
+          "w": 179,
+          "h": 42
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 210,
+          "y": 610,
+          "w": 179,
+          "h": 42
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 396,
+          "y": 610,
+          "w": 179,
+          "h": 42
+        }
+      ],
+      "filterArea": {
+        "x": 11,
+        "y": 602,
+        "w": 578,
+        "h": 75
+      },
+      "shellTitle": {
+        "x": 25,
+        "y": 553,
+        "w": 550,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "3 atendimentos no periodo",
+          "matchingIds": [
+            "1753",
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento encontrado para este filtro.Volte para Todos ou ajuste o filtro para continuar a operacao.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "label": "840-0-all",
+      "active": "all",
+      "viewport": {
+        "w": 840,
+        "h": 980
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": true,
+          "x": 33,
+          "y": 659,
+          "w": 201,
+          "h": 44
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 242,
+          "y": 659,
+          "w": 201,
+          "h": 44
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 452,
+          "y": 659,
+          "w": 201,
+          "h": 44
+        }
+      ],
+      "filterArea": {
+        "x": 19,
+        "y": 649,
+        "w": 802,
+        "h": 80
+      },
+      "shellTitle": {
+        "x": 33,
+        "y": 549,
+        "w": 774,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "3 atendimentos no periodo",
+          "matchingIds": [
+            "1753",
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento encontrado para este filtro.Volte para Todos ou ajuste o filtro para continuar a operacao.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "label": "840-1-late",
+      "active": "late",
+      "viewport": {
+        "w": 840,
+        "h": 980
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": false,
+          "x": 33,
+          "y": 659,
+          "w": 201,
+          "h": 44
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": true,
+          "x": 242,
+          "y": 659,
+          "w": 201,
+          "h": 44
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 452,
+          "y": 659,
+          "w": 201,
+          "h": 44
+        }
+      ],
+      "filterArea": {
+        "x": 19,
+        "y": 649,
+        "w": 802,
+        "h": 80
+      },
+      "shellTitle": {
+        "x": 33,
+        "y": 549,
+        "w": 774,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "2 atendimentos no filtro",
+          "matchingIds": [
+            "1753",
+            "1754"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento atrasado neste recorte.Nao ha atendimentos atrasados para o periodo atual.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        }
+      ]
+    },
+    {
+      "label": "840-2-taxidog",
+      "active": "taxidog",
+      "viewport": {
+        "w": 840,
+        "h": 980
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": false,
+          "x": 33,
+          "y": 659,
+          "w": 201,
+          "h": 44
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 242,
+          "y": 659,
+          "w": 201,
+          "h": 44
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": true,
+          "x": 452,
+          "y": 659,
+          "w": 201,
+          "h": 44
+        }
+      ],
+      "filterArea": {
+        "x": 19,
+        "y": 649,
+        "w": 802,
+        "h": 80
+      },
+      "shellTitle": {
+        "x": 33,
+        "y": 549,
+        "w": 774,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "2 atendimentos no filtro",
+          "matchingIds": [
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento com TaxiDog neste recorte.Nao ha atendimentos com TaxiDog para o periodo atual.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "label": "840-3-all",
+      "active": "all",
+      "viewport": {
+        "w": 840,
+        "h": 980
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": true,
+          "x": 33,
+          "y": 659,
+          "w": 201,
+          "h": 44
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 242,
+          "y": 659,
+          "w": 201,
+          "h": 44
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 452,
+          "y": 659,
+          "w": 201,
+          "h": 44
+        }
+      ],
+      "filterArea": {
+        "x": 19,
+        "y": 649,
+        "w": 802,
+        "h": 80
+      },
+      "shellTitle": {
+        "x": 33,
+        "y": 549,
+        "w": 774,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "3 atendimentos no periodo",
+          "matchingIds": [
+            "1753",
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento encontrado para este filtro.Volte para Todos ou ajuste o filtro para continuar a operacao.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "label": "1200-0-all",
+      "active": "all",
+      "viewport": {
+        "w": 1200,
+        "h": 1000
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": true,
+          "x": 290,
+          "y": 632,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 499,
+          "y": 632,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 709,
+          "y": 632,
+          "w": 201,
+          "h": 46
+        }
+      ],
+      "filterArea": {
+        "x": 31,
+        "y": 620,
+        "w": 1138,
+        "h": 86
+      },
+      "shellTitle": {
+        "x": 51,
+        "y": 519,
+        "w": 1098,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "3 atendimentos no periodo",
+          "matchingIds": [
+            "1753",
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento encontrado para este filtro.Volte para Todos ou ajuste o filtro para continuar a operacao.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "label": "1200-1-late",
+      "active": "late",
+      "viewport": {
+        "w": 1200,
+        "h": 1000
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": false,
+          "x": 290,
+          "y": 632,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": true,
+          "x": 499,
+          "y": 632,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 709,
+          "y": 632,
+          "w": 201,
+          "h": 46
+        }
+      ],
+      "filterArea": {
+        "x": 31,
+        "y": 620,
+        "w": 1138,
+        "h": 86
+      },
+      "shellTitle": {
+        "x": 51,
+        "y": 519,
+        "w": 1098,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "2 atendimentos no filtro",
+          "matchingIds": [
+            "1753",
+            "1754"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento atrasado neste recorte.Nao ha atendimentos atrasados para o periodo atual.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        }
+      ]
+    },
+    {
+      "label": "1200-2-taxidog",
+      "active": "taxidog",
+      "viewport": {
+        "w": 1200,
+        "h": 1000
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": false,
+          "x": 290,
+          "y": 632,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 499,
+          "y": 632,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": true,
+          "x": 709,
+          "y": 632,
+          "w": 201,
+          "h": 46
+        }
+      ],
+      "filterArea": {
+        "x": 31,
+        "y": 620,
+        "w": 1138,
+        "h": 86
+      },
+      "shellTitle": {
+        "x": 51,
+        "y": 519,
+        "w": 1098,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "2 atendimentos no filtro",
+          "matchingIds": [
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento com TaxiDog neste recorte.Nao ha atendimentos com TaxiDog para o periodo atual.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "label": "1200-3-all",
+      "active": "all",
+      "viewport": {
+        "w": 1200,
+        "h": 1000
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": true,
+          "x": 290,
+          "y": 632,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 499,
+          "y": 632,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 709,
+          "y": 632,
+          "w": 201,
+          "h": 46
+        }
+      ],
+      "filterArea": {
+        "x": 31,
+        "y": 620,
+        "w": 1138,
+        "h": 86
+      },
+      "shellTitle": {
+        "x": 51,
+        "y": 519,
+        "w": 1098,
+        "h": 26
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "3 atendimentos no periodo",
+          "matchingIds": [
+            "1753",
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento encontrado para este filtro.Volte para Todos ou ajuste o filtro para continuar a operacao.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "label": "1920-0-all",
+      "active": "all",
+      "viewport": {
+        "w": 1920,
+        "h": 1080
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": true,
+          "x": 650,
+          "y": 663,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 859,
+          "y": 663,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 1069,
+          "y": 663,
+          "w": 201,
+          "h": 46
+        }
+      ],
+      "filterArea": {
+        "x": 391,
+        "y": 651,
+        "w": 1138,
+        "h": 86
+      },
+      "shellTitle": {
+        "x": 411,
+        "y": 541,
+        "w": 1098,
+        "h": 34
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "3 atendimentos no periodo",
+          "matchingIds": [
+            "1753",
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento encontrado para este filtro.Volte para Todos ou ajuste o filtro para continuar a operacao.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "label": "1920-1-late",
+      "active": "late",
+      "viewport": {
+        "w": 1920,
+        "h": 1080
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": false,
+          "x": 650,
+          "y": 663,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": true,
+          "x": 859,
+          "y": 663,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 1069,
+          "y": 663,
+          "w": 201,
+          "h": 46
+        }
+      ],
+      "filterArea": {
+        "x": 391,
+        "y": 651,
+        "w": 1138,
+        "h": 86
+      },
+      "shellTitle": {
+        "x": 411,
+        "y": 541,
+        "w": 1098,
+        "h": 34
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "2 atendimentos no filtro",
+          "matchingIds": [
+            "1753",
+            "1754"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento atrasado neste recorte.Nao ha atendimentos atrasados para o periodo atual.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        }
+      ]
+    },
+    {
+      "label": "1920-2-taxidog",
+      "active": "taxidog",
+      "viewport": {
+        "w": 1920,
+        "h": 1080
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": false,
+          "x": 650,
+          "y": 663,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 859,
+          "y": 663,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": true,
+          "x": 1069,
+          "y": 663,
+          "w": 201,
+          "h": 46
+        }
+      ],
+      "filterArea": {
+        "x": 391,
+        "y": 651,
+        "w": 1138,
+        "h": 86
+      },
+      "shellTitle": {
+        "x": 411,
+        "y": 541,
+        "w": 1098,
+        "h": 34
+      },
+      "uniqueVisibleIds": [
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "2 atendimentos no filtro",
+          "matchingIds": [
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento com TaxiDog neste recorte.Nao ha atendimentos com TaxiDog para o periodo atual.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": true,
+          "ariaHidden": "true",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "label": "1920-3-all",
+      "active": "all",
+      "viewport": {
+        "w": 1920,
+        "h": 1080
+      },
+      "overflow": 0,
+      "script": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js?ver=1776953174"
+      ],
+      "style": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css?ver=1776953175"
+      ],
+      "buttons": [
+        {
+          "text": "Todos",
+          "filter": "all",
+          "active": true,
+          "x": 650,
+          "y": 663,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "Atrasados",
+          "filter": "late",
+          "active": false,
+          "x": 859,
+          "y": 663,
+          "w": 201,
+          "h": 46
+        },
+        {
+          "text": "TaxiDog",
+          "filter": "taxidog",
+          "active": false,
+          "x": 1069,
+          "y": 663,
+          "w": 201,
+          "h": 46
+        }
+      ],
+      "filterArea": {
+        "x": 391,
+        "y": 651,
+        "w": 1138,
+        "h": 86
+      },
+      "shellTitle": {
+        "x": 411,
+        "y": 541,
+        "w": 1098,
+        "h": 34
+      },
+      "uniqueVisibleIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "uniqueMatchingIds": [
+        "1753",
+        "1754",
+        "1667"
+      ],
+      "panels": [
+        {
+          "hidden": false,
+          "countText": "3 atendimentos no periodo",
+          "matchingIds": [
+            "1753",
+            "1754",
+            "1667"
+          ],
+          "visibleIds": [
+            "1753",
+            "1754",
+            "1667"
+          ]
+        }
+      ],
+      "emptyHidden": true,
+      "emptyText": "Nenhum atendimento encontrado para este filtro.Volte para Todos ou ajuste o filtro para continuar a operacao.",
+      "itemState": [
+        {
+          "id": "1753",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1754",
+          "tag": "TR",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1667",
+          "tag": "TR",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": false
+        },
+        {
+          "id": "1753",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1754",
+          "tag": "ARTICLE",
+          "late": "1",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        },
+        {
+          "id": "1667",
+          "tag": "ARTICLE",
+          "late": "0",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "ariaHidden": "false",
+          "visible": true
+        }
+      ]
+    }
+  ],
+  "console": [
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    }
+  ],
+  "consoleErrors": []
+}

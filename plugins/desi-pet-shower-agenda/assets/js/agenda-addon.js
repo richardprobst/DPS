@@ -789,49 +789,114 @@
     $('tr[data-appt-id="' + target.data('appt-id') + '"], .dps-operational-card[data-appt-id="' + target.data('appt-id') + '"]').addClass('is-selected');
   }
 
+  function updateOperationalPanelCount(panel, matchedCount, filter) {
+    var counter = panel.find('[data-dps-operational-day-count]').first();
+    if (!counter.length) {
+      return;
+    }
+
+    if (filter === 'all') {
+      counter.text(counter.attr('data-count-default') || counter.text());
+      return;
+    }
+
+    var template = matchedCount === 1 ? counter.attr('data-count-singular') : counter.attr('data-count-plural');
+    counter.text(String(template || '%d atendimentos no filtro').replace('%d', matchedCount));
+  }
+
   function filterOperationalList() {
-    var query = String($('.dps-agenda-operational-search__input').val() || '').toLowerCase();
     var filter = $('.dps-agenda-filter-btn--active').data('agenda-filter') || 'all';
+    var matchedIds = {};
 
     $('tr.dps-operational-row, .dps-operational-card').each(function(){
       var item = $(this);
-      var haystack = [
-        item.data('dps-pet'),
-        item.data('dps-tutor'),
-        item.data('dps-stage'),
-        item.data('dps-service'),
-        item.data('dps-payment'),
-        item.data('dps-logistics'),
-        item.data('dps-notes')
-      ].join(' ').toLowerCase();
-      var matchesQuery = !query || haystack.indexOf(query) !== -1;
+      var hasTaxidog = String(item.attr('data-dps-taxidog') || item.data('dps-taxidog') || '0') === '1';
+      var isLate = String(item.attr('data-dps-late') || item.data('dps-late') || (item.hasClass('is-late') ? '1' : '0')) === '1';
       var matchesFilter = filter === 'all' ||
-        (filter === 'late' && item.hasClass('is-late')) ||
-        (filter === 'taxidog' && haystack.indexOf('taxidog') !== -1);
+        (filter === 'late' && isLate) ||
+        (filter === 'taxidog' && hasTaxidog);
 
-      item.toggle(matchesQuery && matchesFilter);
+      item.toggleClass('is-filter-hidden', !matchesFilter);
+      item.attr('aria-hidden', matchesFilter ? 'false' : 'true');
+
+      if (matchesFilter && item.attr('data-appt-id')) {
+        matchedIds[item.attr('data-appt-id')] = true;
+      }
     });
 
     $('.dps-agenda-day-panel--operational').each(function(){
       var panel = $(this);
-      var visibleRows = panel.find('tr.dps-operational-row:visible, .dps-operational-card:visible').length;
-      panel.toggle(visibleRows > 0);
+      var matchedItems = panel.find('tr.dps-operational-row, .dps-operational-card').filter(function(){
+        return !$(this).hasClass('is-filter-hidden');
+      });
+      var panelMatchedIds = {};
+      matchedItems.each(function(){
+        var apptId = $(this).attr('data-appt-id');
+        if (apptId) {
+          panelMatchedIds[apptId] = true;
+        }
+      });
+      var panelMatchedCount = Object.keys(panelMatchedIds).length;
+      panel.prop('hidden', panelMatchedCount === 0);
+      updateOperationalPanelCount(panel, panelMatchedCount, filter);
     });
 
+    var hasVisibleItems = Object.keys(matchedIds).length > 0;
+    var emptyState = $('[data-dps-operational-filter-empty]');
+    if (emptyState.length) {
+      var defaultKicker = emptyState.attr('data-empty-default-kicker') || 'Recorte operacional';
+      var defaultTitle = emptyState.attr('data-empty-default-title') || 'Nenhum atendimento encontrado para este filtro.';
+      var defaultMessage = emptyState.attr('data-empty-default-message') || 'Volte para Todos ou ajuste o filtro para continuar a operação.';
+      var kicker = defaultKicker;
+      var title = defaultTitle;
+      var message = defaultMessage;
+
+      if (filter === 'late') {
+        kicker = emptyState.attr('data-empty-late-kicker') || kicker;
+        title = emptyState.attr('data-empty-late-title') || title;
+        message = emptyState.attr('data-empty-late-message') || message;
+      } else if (filter === 'taxidog') {
+        kicker = emptyState.attr('data-empty-taxidog-kicker') || kicker;
+        title = emptyState.attr('data-empty-taxidog-title') || title;
+        message = emptyState.attr('data-empty-taxidog-message') || message;
+      }
+
+      emptyState.find('[data-dps-operational-filter-empty-kicker]').text(kicker);
+      emptyState.find('[data-dps-operational-filter-empty-title]').text(title);
+      emptyState.find('[data-dps-operational-filter-empty-message]').text(message);
+      emptyState.prop('hidden', hasVisibleItems);
+    }
+
     if ( $('.dps-operational-inspector').length ) {
+      $('.dps-operational-inspector').prop('hidden', !hasVisibleItems);
+      if ( !hasVisibleItems ) {
+        return;
+      }
+
+      var visibleItems = $('tr.dps-operational-row, .dps-operational-card').filter(function(){
+        return !$(this).hasClass('is-filter-hidden') && $(this).is(':visible');
+      });
       var selectedVisible = $('tr.dps-operational-row.is-selected:visible, .dps-operational-card.is-selected:visible').first();
       if ( selectedVisible.length ) {
         return;
       }
 
-      var nextVisible = $('tr.dps-operational-row:visible, .dps-operational-card:visible').first();
+      var nextVisible = visibleItems.first();
       if ( nextVisible.length ) {
         syncOperationalInspector(nextVisible);
       }
     }
   }
 
+  function syncOperationalFilterState() {
+    $('.dps-agenda-filter-btn').each(function(){
+      var btn = $(this);
+      btn.attr('aria-pressed', btn.hasClass('dps-agenda-filter-btn--active') ? 'true' : 'false');
+    });
+  }
+
   if ( $('.dps-agenda-operational-workspace[data-dps-agenda-mode="operacional"]').length ) {
+    syncOperationalFilterState();
     filterOperationalList();
   }
 
@@ -842,11 +907,10 @@
     syncOperationalInspector($(this));
   });
 
-  $(document).on('input', '.dps-agenda-operational-search__input', filterOperationalList);
-
   $(document).on('click', '.dps-agenda-filter-btn', function(){
     $('.dps-agenda-filter-btn').removeClass('dps-agenda-filter-btn--active');
     $(this).addClass('dps-agenda-filter-btn--active');
+    syncOperationalFilterState();
     filterOperationalList();
   });
 
@@ -1490,40 +1554,47 @@
         petMeta.push(String(pet.weight) + ' kg');
       }
 
-      bodyHtml += '<div class="dps-services-pet-info">' +
-        '<span class="dps-services-pet-icon" aria-hidden="true">\uD83D\uDC15</span>' +
-        '<div class="dps-services-pet-details">' +
-          '<span class="dps-services-pet-name">' + escapeHtml(pet.name) + '</span>';
+      bodyHtml += '<section class="dps-services-dialog__section dps-services-dialog__section--summary">' +
+        '<div class="dps-services-dialog__hero">' +
+          '<span class="dps-services-dialog__eyebrow">Atendimento</span>' +
+          '<strong class="dps-services-dialog__pet">' + escapeHtml(pet.name) + '</strong>';
 
       if (petMeta.length > 0) {
-        bodyHtml += '<span class="dps-services-pet-meta">' + escapeHtml(petMeta.join(' \u2022 ')) + '</span>';
+        bodyHtml += '<span class="dps-services-dialog__pet-meta">' + escapeHtml(petMeta.join(' \u2022 ')) + '</span>';
       }
 
-      bodyHtml += '</div></div>';
+      bodyHtml += '</div>';
+    } else {
+      bodyHtml += '<section class="dps-services-dialog__section dps-services-dialog__section--summary">' +
+        '<div class="dps-services-dialog__hero">' +
+          '<span class="dps-services-dialog__eyebrow">Atendimento</span>' +
+          '<strong class="dps-services-dialog__pet">Servi\u00e7os do atendimento</strong>' +
+        '</div>';
     }
 
     if (services.length > 0 || durationText) {
-      bodyHtml += '<div class="dps-services-summary">';
-      bodyHtml += '<div class="dps-services-summary-item">' +
-        '<span class="dps-services-summary-icon" aria-hidden="true">\uD83D\uDCCB</span>' +
-        '<span class="dps-services-summary-value">' + services.length + '</span>' +
-        '<span class="dps-services-summary-label">servi\u00e7o' + (services.length !== 1 ? 's' : '') + '</span>' +
+      bodyHtml += '<div class="dps-services-dialog__stats">';
+      bodyHtml += '<div class="dps-services-dialog__stat">' +
+        '<span class="dps-services-dialog__stat-label">Servi\u00e7os</span>' +
+        '<strong class="dps-services-dialog__stat-value">' + services.length + '</strong>' +
       '</div>';
 
       if (durationText) {
-        bodyHtml += '<div class="dps-services-summary-item">' +
-          '<span class="dps-services-summary-icon" aria-hidden="true">\u23F1\uFE0F</span>' +
-          '<span class="dps-services-summary-value">' + escapeHtml(durationText) + '</span>' +
-          '<span class="dps-services-summary-label">tempo estimado</span>' +
+        bodyHtml += '<div class="dps-services-dialog__stat">' +
+          '<span class="dps-services-dialog__stat-label">Tempo estimado</span>' +
+          '<strong class="dps-services-dialog__stat-value">' + escapeHtml(durationText) + '</strong>' +
         '</div>';
       }
 
       bodyHtml += '</div>';
     }
 
+    bodyHtml += '</section>';
+
     if (services.length > 0) {
-      bodyHtml += '<div class="dps-services-checklist">';
-      bodyHtml += '<h4 class="dps-services-section-title">Servi\u00e7os a realizar</h4>';
+      bodyHtml += '<section class="dps-services-dialog__section">' +
+        '<span class="dps-services-dialog__section-label">Ordem de execu\u00e7\u00e3o</span>' +
+        '<div class="dps-services-dialog__list">';
 
       for (var i = 0; i < services.length; i++) {
         var srv = services[i] || {};
@@ -1534,54 +1605,55 @@
 
         total += price;
 
-        if (visualInfo.typeLabel && srv.type !== 'padrao') {
-          cardMeta.push(visualInfo.typeLabel);
-        }
         if (srv.duration && parseInt(srv.duration, 10) > 0) {
           cardMeta.push(String(srv.duration) + ' min');
         }
 
-        bodyHtml += '<div class="dps-service-card ' + visualInfo.typeClass + '">' +
-          '<div class="dps-service-card-header">' +
-            '<span class="dps-service-card-icon" aria-hidden="true">' + visualInfo.icon + '</span>' +
-            '<div class="dps-service-card-info">' +
-              '<span class="dps-service-card-name">' + escapeHtml(serviceName) + '</span>' +
-              '<span class="dps-service-card-meta">' + (cardMeta.length ? escapeHtml(cardMeta.join(' \u2022 ')) : '') + '</span>' +
-            '</div>' +
-            '<span class="dps-service-card-price">R$ ' + price.toFixed(2).replace('.', ',') + '</span>' +
-          '</div>';
+        bodyHtml += '<article class="dps-services-dialog__item ' + visualInfo.typeClass + '">' +
+          '<div class="dps-services-dialog__item-main">' +
+            '<span class="dps-services-dialog__item-type">Servi\u00e7o</span>' +
+            '<strong class="dps-services-dialog__item-name">' + escapeHtml(serviceName) + '</strong>';
 
-        if (srv.description && String(srv.description).trim()) {
-          bodyHtml += '<div class="dps-service-card-description">' +
-            '<span class="dps-service-card-desc-icon" aria-hidden="true">\uD83D\uDCA1</span>' +
-            '<span>' + escapeHtml(String(srv.description)).replace(/\n/g, '<br>') + '</span>' +
-          '</div>';
+        if (cardMeta.length) {
+          bodyHtml += '<span class="dps-services-dialog__item-meta">' + escapeHtml(cardMeta.join(' \u2022 ')) + '</span>';
         }
 
-        bodyHtml += '</div>';
+        if (srv.description && String(srv.description).trim()) {
+          bodyHtml += '<p class="dps-services-dialog__item-description">' + escapeHtml(String(srv.description)).replace(/\n/g, '<br>') + '</p>';
+        }
+
+        bodyHtml += '</div>' +
+          '<div class="dps-services-dialog__item-side">';
+
+        if (visualInfo.typeLabel && srv.type !== 'padrao') {
+          bodyHtml += '<span class="dps-services-dialog__item-tag">' + escapeHtml(visualInfo.typeLabel) + '</span>';
+        }
+
+        bodyHtml += '<strong class="dps-services-dialog__item-price">R$ ' + price.toFixed(2).replace('.', ',') + '</strong>' +
+          '</div>' +
+        '</article>';
       }
 
-      bodyHtml += '<div class="dps-services-total-row">' +
-        '<span class="dps-services-total-label">Total</span>' +
-        '<span class="dps-services-total-value">R$ ' + total.toFixed(2).replace('.', ',') + '</span>' +
-      '</div>';
-
-      bodyHtml += '</div>';
+      bodyHtml += '<div class="dps-services-dialog__total">' +
+        '<span class="dps-services-dialog__total-label">Total previsto</span>' +
+        '<strong class="dps-services-dialog__total-value">R$ ' + total.toFixed(2).replace('.', ',') + '</strong>' +
+      '</div>' +
+      '</div>' +
+      '</section>';
     } else {
-      bodyHtml += '<div class="dps-services-empty">' +
-        '<span class="dps-services-empty-icon" aria-hidden="true">\uD83D\uDCCB</span>' +
-        '<span>Nenhum servi\u00e7o registrado para este atendimento.</span>' +
-      '</div>';
+      bodyHtml += '<section class="dps-services-dialog__section dps-services-dialog__section--empty">' +
+        '<span class="dps-services-dialog__section-label">Ordem de execu\u00e7\u00e3o</span>' +
+        '<p class="dps-services-dialog__empty">Nenhum servi\u00e7o registrado para este atendimento.</p>' +
+      '</section>';
     }
 
     if (notes && String(notes).trim()) {
-      bodyHtml += '<div class="dps-services-notes dps-services-notes-highlight">' +
-        '<div class="dps-services-notes-title">' +
-          '<span class="dps-services-notes-icon" aria-hidden="true">\u26A0\uFE0F</span>' +
-          '<span>Observa\u00e7\u00f5es do cliente</span>' +
+      bodyHtml += '<section class="dps-services-dialog__section dps-services-dialog__section--notes">' +
+        '<span class="dps-services-dialog__section-label">Observa\u00e7\u00f5es do cliente</span>' +
+        '<div class="dps-services-dialog__notes">' +
+          '<p class="dps-services-dialog__notes-copy">' + escapeHtml(String(notes)).replace(/\n/g, '<br>') + '</p>' +
         '</div>' +
-        '<div class="dps-services-notes-content">' + escapeHtml(String(notes)).replace(/\n/g, '<br>') + '</div>' +
-      '</div>';
+      '</section>';
     }
 
     bodyHtml += '</div>';
@@ -1596,7 +1668,7 @@
 
     showAgendaContentDialog({
       title: 'Servi\u00e7os do atendimento',
-      subtitle: 'Resumo operacional e observa\u00e7\u00f5es associadas ao pet selecionado.',
+      subtitle: 'Mesmo shell operacional da Agenda, com servicos, tempo e observacoes do atendimento.',
       size: 'large',
       trigger: trigger,
       dialogClass: 'dps-agenda-dialog--services',

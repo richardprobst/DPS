@@ -1,0 +1,132 @@
+{
+  "source": "local-fixture-from-current-agenda-assets",
+  "visual_source_of_truth": [
+    "docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md",
+    "docs/visual/VISUAL_STYLE_GUIDE.md"
+  ],
+  "breakpoints": [
+    {
+      "width": 375,
+      "horizontalOverflow": false,
+      "prevTarget": {
+        "width": 48,
+        "height": 48
+      },
+      "nextTarget": {
+        "width": 48,
+        "height": 48
+      },
+      "todayTarget": {
+        "width": 195,
+        "height": 48
+      },
+      "servicesButton": {
+        "width": 331,
+        "height": 44
+      },
+      "shellRadius": "0px",
+      "modalRadius": "2px"
+    },
+    {
+      "width": 600,
+      "horizontalOverflow": false,
+      "prevTarget": {
+        "width": 48,
+        "height": 48
+      },
+      "nextTarget": {
+        "width": 48,
+        "height": 48
+      },
+      "todayTarget": {
+        "width": 420,
+        "height": 48
+      },
+      "servicesButton": {
+        "width": 556,
+        "height": 44
+      },
+      "shellRadius": "0px",
+      "modalRadius": "2px"
+    },
+    {
+      "width": 840,
+      "horizontalOverflow": false,
+      "prevTarget": {
+        "width": 48,
+        "height": 48
+      },
+      "nextTarget": {
+        "width": 48,
+        "height": 48
+      },
+      "todayTarget": {
+        "width": 216,
+        "height": 48
+      },
+      "servicesButton": {
+        "width": 772,
+        "height": 44
+      },
+      "shellRadius": "0px",
+      "modalRadius": "2px"
+    },
+    {
+      "width": 1200,
+      "horizontalOverflow": false,
+      "prevTarget": {
+        "width": 48,
+        "height": 48
+      },
+      "nextTarget": {
+        "width": 48,
+        "height": 48
+      },
+      "todayTarget": {
+        "width": 216,
+        "height": 48
+      },
+      "servicesButton": {
+        "width": 413,
+        "height": 44
+      },
+      "shellRadius": "0px",
+      "modalRadius": "2px"
+    },
+    {
+      "width": 1920,
+      "horizontalOverflow": false,
+      "prevTarget": {
+        "width": 48,
+        "height": 48
+      },
+      "nextTarget": {
+        "width": 48,
+        "height": 48
+      },
+      "todayTarget": {
+        "width": 216,
+        "height": 48
+      },
+      "servicesButton": {
+        "width": 412,
+        "height": 44
+      },
+      "shellRadius": "0px",
+      "modalRadius": "2px"
+    }
+  ],
+  "code_checks": {
+    "render_layer_confirmation_meta_writes": 0,
+    "renderer_set_confirmation_method_present": false,
+    "addon_set_confirmation_method_present": true,
+    "explicit_confirmation_sanitizer_present": true
+  },
+  "services_dialog": {
+    "present": true,
+    "borderRadius": "2px",
+    "bodyBackground": "none",
+    "sectionCount": 3,
+    "tagCount": 2
+  }
+}

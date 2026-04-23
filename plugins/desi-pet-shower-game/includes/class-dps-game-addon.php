@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Classe principal do add-on Space Groomers.
  *

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * PÃ¡gina administrativa do Push Add-on.
  *

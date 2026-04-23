@@ -1,0 +1,297 @@
+{
+  "loginUser": "dpsqa_agenda_090559",
+  "mobileBefore": {
+    "innerWidth": 375,
+    "scrollWidth": 375,
+    "hasOverflow": false,
+    "filterButtons": [
+      {
+        "text": "Todos",
+        "x": 25,
+        "y": 707,
+        "width": 325,
+        "height": 55,
+        "ariaPressed": "true"
+      },
+      {
+        "text": "Atrasados",
+        "x": 25,
+        "y": 784,
+        "width": 325,
+        "height": 55,
+        "ariaPressed": "false"
+      },
+      {
+        "text": "TaxiDog",
+        "x": 25,
+        "y": 861,
+        "width": 325,
+        "height": 55,
+        "ariaPressed": "false"
+      }
+    ],
+    "filterColumnCount": "325px",
+    "filterUniqueXCount": 1,
+    "toolbarColumns": "325px",
+    "visibleCards": 3
+  },
+  "mobileTaxiDog": {
+    "innerWidth": 375,
+    "scrollWidth": 375,
+    "hasOverflow": false,
+    "filterButtons": [
+      {
+        "text": "Todos",
+        "x": 25,
+        "y": 707,
+        "width": 325,
+        "height": 55,
+        "ariaPressed": "false"
+      },
+      {
+        "text": "Atrasados",
+        "x": 25,
+        "y": 784,
+        "width": 325,
+        "height": 55,
+        "ariaPressed": "false"
+      },
+      {
+        "text": "TaxiDog",
+        "x": 25,
+        "y": 861,
+        "width": 325,
+        "height": 55,
+        "ariaPressed": "true"
+      }
+    ],
+    "filterColumnCount": "325px",
+    "filterUniqueXCount": 1,
+    "toolbarColumns": "325px",
+    "visibleCards": 1
+  },
+  "mobileReset": {
+    "innerWidth": 375,
+    "scrollWidth": 375,
+    "hasOverflow": false,
+    "filterButtons": [
+      {
+        "text": "Todos",
+        "x": 25,
+        "y": 707,
+        "width": 325,
+        "height": 55,
+        "ariaPressed": "true"
+      },
+      {
+        "text": "Atrasados",
+        "x": 25,
+        "y": 784,
+        "width": 325,
+        "height": 55,
+        "ariaPressed": "false"
+      },
+      {
+        "text": "TaxiDog",
+        "x": 25,
+        "y": 861,
+        "width": 325,
+        "height": 55,
+        "ariaPressed": "false"
+      }
+    ],
+    "filterColumnCount": "325px",
+    "filterUniqueXCount": 1,
+    "toolbarColumns": "325px",
+    "visibleCards": 3
+  },
+  "breakpoints": [
+    {
+      "innerWidth": 375,
+      "scrollWidth": 375,
+      "hasOverflow": false,
+      "filterButtons": [
+        {
+          "text": "Todos",
+          "x": 25,
+          "y": 707,
+          "width": 325,
+          "height": 55,
+          "ariaPressed": "true"
+        },
+        {
+          "text": "Atrasados",
+          "x": 25,
+          "y": 784,
+          "width": 325,
+          "height": 55,
+          "ariaPressed": "false"
+        },
+        {
+          "text": "TaxiDog",
+          "x": 25,
+          "y": 861,
+          "width": 325,
+          "height": 55,
+          "ariaPressed": "false"
+        }
+      ],
+      "filterColumnCount": "325px",
+      "filterUniqueXCount": 1,
+      "toolbarColumns": "325px",
+      "visibleCards": 3,
+      "width": 375,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-operational-filters-375.png"
+    },
+    {
+      "innerWidth": 600,
+      "scrollWidth": 600,
+      "hasOverflow": false,
+      "filterButtons": [
+        {
+          "text": "Todos",
+          "x": 25,
+          "y": 695,
+          "width": 550,
+          "height": 55,
+          "ariaPressed": "true"
+        },
+        {
+          "text": "Atrasados",
+          "x": 25,
+          "y": 771,
+          "width": 550,
+          "height": 55,
+          "ariaPressed": "false"
+        },
+        {
+          "text": "TaxiDog",
+          "x": 25,
+          "y": 848,
+          "width": 550,
+          "height": 55,
+          "ariaPressed": "false"
+        }
+      ],
+      "filterColumnCount": "550px",
+      "filterUniqueXCount": 1,
+      "toolbarColumns": "550px",
+      "visibleCards": 3,
+      "width": 600,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-operational-filters-600.png"
+    },
+    {
+      "innerWidth": 840,
+      "scrollWidth": 840,
+      "hasOverflow": false,
+      "filterButtons": [
+        {
+          "text": "Todos",
+          "x": 33,
+          "y": 785,
+          "width": 774,
+          "height": 55,
+          "ariaPressed": "true"
+        },
+        {
+          "text": "Atrasados",
+          "x": 33,
+          "y": 862,
+          "width": 774,
+          "height": 55,
+          "ariaPressed": "false"
+        },
+        {
+          "text": "TaxiDog",
+          "x": 33,
+          "y": 939,
+          "width": 774,
+          "height": 55,
+          "ariaPressed": "false"
+        }
+      ],
+      "filterColumnCount": "774px",
+      "filterUniqueXCount": 1,
+      "toolbarColumns": "774px",
+      "visibleCards": 3,
+      "width": 840,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-operational-filters-840.png"
+    },
+    {
+      "innerWidth": 1200,
+      "scrollWidth": 1200,
+      "hasOverflow": false,
+      "filterButtons": [
+        {
+          "text": "Todos",
+          "x": 917,
+          "y": 655,
+          "width": 228,
+          "height": 55,
+          "ariaPressed": "true"
+        },
+        {
+          "text": "Atrasados",
+          "x": 917,
+          "y": 731,
+          "width": 228,
+          "height": 55,
+          "ariaPressed": "false"
+        },
+        {
+          "text": "TaxiDog",
+          "x": 917,
+          "y": 808,
+          "width": 228,
+          "height": 55,
+          "ariaPressed": "false"
+        }
+      ],
+      "filterColumnCount": "228px",
+      "filterUniqueXCount": 1,
+      "toolbarColumns": "838px 228px",
+      "visibleCards": 3,
+      "width": 1200,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-operational-filters-1200.png"
+    },
+    {
+      "innerWidth": 1920,
+      "scrollWidth": 1920,
+      "hasOverflow": false,
+      "filterButtons": [
+        {
+          "text": "Todos",
+          "x": 1277,
+          "y": 689,
+          "width": 228,
+          "height": 55,
+          "ariaPressed": "true"
+        },
+        {
+          "text": "Atrasados",
+          "x": 1277,
+          "y": 765,
+          "width": 228,
+          "height": 55,
+          "ariaPressed": "false"
+        },
+        {
+          "text": "TaxiDog",
+          "x": 1277,
+          "y": 842,
+          "width": 228,
+          "height": 55,
+          "ariaPressed": "false"
+        }
+      ],
+      "filterColumnCount": "228px",
+      "filterUniqueXCount": 1,
+      "toolbarColumns": "838px 228px",
+      "visibleCards": 3,
+      "width": 1920,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-operational-filters-1920.png"
+    }
+  ],
+  "consoleErrors": [],
+  "consoleWarnings": []
+}

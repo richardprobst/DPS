@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Plugin Name:       desi.pet by PRObst â€“ Booking Add-on
  * Plugin URI:        https://www.probst.pro

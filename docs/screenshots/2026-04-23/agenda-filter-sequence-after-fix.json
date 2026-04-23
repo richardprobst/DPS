@@ -1,0 +1,374 @@
+{
+  "desktop": {
+    "initial": {
+      "active": [
+        "Todos"
+      ],
+      "filters": [
+        {
+          "text": "Todos",
+          "pressed": "true",
+          "visible": true
+        },
+        {
+          "text": "Atrasados",
+          "pressed": "false",
+          "visible": true
+        },
+        {
+          "text": "TaxiDog",
+          "pressed": "false",
+          "visible": true
+        }
+      ],
+      "cardTotal": 2,
+      "cardVisible": [
+        {
+          "id": "1747",
+          "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "aria": "false"
+        },
+        {
+          "id": "1746",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "aria": "false"
+        }
+      ],
+      "rowTotal": 2,
+      "rowVisible": [],
+      "panelStates": [
+        {
+          "hidden": false,
+          "display": "block",
+          "visible": true
+        }
+      ],
+      "emptyVisible": false,
+      "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+      "bodySnippet": "Skip to content\nDESI PET SHOWER\nHOME\nAGENDA\nAGENDAMENTO\nCADASTRO\nADMINISTRATIVO\nDESI PET SHOWER\nPORTAL DO CLIENTE\nADMIN\nAgenda de Atendimentos\n\nPERIODO ATIVO\nDia 23/04/2026\n\nVER:\nDIA\nSEMANA\nMES\nCOMPLETA\n←\nHOJE\n→\nFila operacional\n\nUma fila unica por atendimento, com acao primaria definida pela etapa atual.\n\nTODOS\nATRASADOS\nTAXIDOG\nQuinta-feira, 23/04\n\n2 atendimentos no periodo\n\n23:30\nCHECK-IN\nFIXTURE PET NORMAL DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nSERVIÇOS\nSem serviços\nFINANCEIRO\nEm aberto R$ 70,00\nLOGÍSTICA\nSem TaxiDog\nChecklist 0%\nINICIAR CHECK-IN\nOPERAÇÃO\nMAIS\n23:59\nCHECK-IN\nFIXTURE PET TAXIDOG DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nSERVIÇOS\nSem serviços\nFINANCEIRO\nEm aberto R$ 70,00\nLOGÍSTICA\nTaxiDog solicitado\nChecklist 0%\nINICIAR CHECK-IN\nOPERAÇÃO\nMAIS\nATENDIMENTO SELECIONADO\nFixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nFixture Cliente DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nETAPA\nCheck-in\nSERVIÇOS\nSem serviços\nFINANCEIRO\nEm aberto R$ 70,00\nLOGÍSTICA\nRua Fixture TaxiDog 123, Sao Paulo - SP\nCHECKLIST\n0%\nOBSERVAÇÕES\n\nfixture normal DPS_QA_AGENDA_F"
+    },
+    "afterLate": {
+      "active": [
+        "Atrasados"
+      ],
+      "filters": [
+        {
+          "text": "Todos",
+          "pressed": "false",
+          "visible": true
+        },
+        {
+          "text": "Atrasados",
+          "pressed": "true",
+          "visible": true
+        },
+        {
+          "text": "TaxiDog",
+          "pressed": "false",
+          "visible": true
+        }
+      ],
+      "cardTotal": 2,
+      "cardVisible": [],
+      "rowTotal": 2,
+      "rowVisible": [],
+      "panelStates": [
+        {
+          "hidden": true,
+          "display": "none",
+          "visible": false
+        }
+      ],
+      "emptyVisible": true,
+      "emptyTitle": "Nenhum atendimento atrasado neste recorte.",
+      "bodySnippet": "Skip to content\nDESI PET SHOWER\nHOME\nAGENDA\nAGENDAMENTO\nCADASTRO\nADMINISTRATIVO\nDESI PET SHOWER\nPORTAL DO CLIENTE\nADMIN\nAgenda de Atendimentos\n\nPERIODO ATIVO\nDia 23/04/2026\n\nVER:\nDIA\nSEMANA\nMES\nCOMPLETA\n←\nHOJE\n→\nFila operacional\n\nUma fila unica por atendimento, com acao primaria definida pela etapa atual.\n\nTODOS\nATRASADOS\nTAXIDOG\nNenhum atendimento atrasado neste recorte.\n\nNao ha atendimentos atrasados para o periodo atual.\n\nCopyright 2026 © Desi.Pet By PROst"
+    },
+    "afterTaxiDog": {
+      "active": [
+        "TaxiDog"
+      ],
+      "filters": [
+        {
+          "text": "Todos",
+          "pressed": "false",
+          "visible": true
+        },
+        {
+          "text": "Atrasados",
+          "pressed": "false",
+          "visible": true
+        },
+        {
+          "text": "TaxiDog",
+          "pressed": "true",
+          "visible": true
+        }
+      ],
+      "cardTotal": 2,
+      "cardVisible": [
+        {
+          "id": "1746",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "aria": "false"
+        }
+      ],
+      "rowTotal": 2,
+      "rowVisible": [],
+      "panelStates": [
+        {
+          "hidden": false,
+          "display": "block",
+          "visible": true
+        }
+      ],
+      "emptyVisible": false,
+      "emptyTitle": "Nenhum atendimento com TaxiDog neste recorte.",
+      "bodySnippet": "Skip to content\nDESI PET SHOWER\nHOME\nAGENDA\nAGENDAMENTO\nCADASTRO\nADMINISTRATIVO\nDESI PET SHOWER\nPORTAL DO CLIENTE\nADMIN\nAgenda de Atendimentos\n\nPERIODO ATIVO\nDia 23/04/2026\n\nVER:\nDIA\nSEMANA\nMES\nCOMPLETA\n←\nHOJE\n→\nFila operacional\n\nUma fila unica por atendimento, com acao primaria definida pela etapa atual.\n\nTODOS\nATRASADOS\nTAXIDOG\nQuinta-feira, 23/04\n\n2 atendimentos no periodo\n\n23:59\nCHECK-IN\nFIXTURE PET TAXIDOG DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nSERVIÇOS\nSem serviços\nFINANCEIRO\nEm aberto R$ 70,00\nLOGÍSTICA\nTaxiDog solicitado\nChecklist 0%\nINICIAR CHECK-IN\nOPERAÇÃO\nMAIS\nATENDIMENTO SELECIONADO\nFixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nFixture Cliente DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nETAPA\nCheck-in\nSERVIÇOS\nSem serviços\nFINANCEIRO\nEm aberto R$ 70,00\nLOGÍSTICA\nRua Fixture TaxiDog 123, Sao Paulo - SP\nCHECKLIST\n0%\nOBSERVAÇÕES\n\nfixture taxidog DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nÚLTIMOS LOGS\n\nSem histórico operacional ainda.\n\nCopyright 2026 © Desi.Pet By PROst"
+    },
+    "afterTodos": {
+      "active": [
+        "Todos"
+      ],
+      "filters": [
+        {
+          "text": "Todos",
+          "pressed": "true",
+          "visible": true
+        },
+        {
+          "text": "Atrasados",
+          "pressed": "false",
+          "visible": true
+        },
+        {
+          "text": "TaxiDog",
+          "pressed": "false",
+          "visible": true
+        }
+      ],
+      "cardTotal": 2,
+      "cardVisible": [
+        {
+          "id": "1747",
+          "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "aria": "false"
+        },
+        {
+          "id": "1746",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "aria": "false"
+        }
+      ],
+      "rowTotal": 2,
+      "rowVisible": [],
+      "panelStates": [
+        {
+          "hidden": false,
+          "display": "block",
+          "visible": true
+        }
+      ],
+      "emptyVisible": false,
+      "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+      "bodySnippet": "Skip to content\nDESI PET SHOWER\nHOME\nAGENDA\nAGENDAMENTO\nCADASTRO\nADMINISTRATIVO\nDESI PET SHOWER\nPORTAL DO CLIENTE\nADMIN\nAgenda de Atendimentos\n\nPERIODO ATIVO\nDia 23/04/2026\n\nVER:\nDIA\nSEMANA\nMES\nCOMPLETA\n←\nHOJE\n→\nFila operacional\n\nUma fila unica por atendimento, com acao primaria definida pela etapa atual.\n\nTODOS\nATRASADOS\nTAXIDOG\nQuinta-feira, 23/04\n\n2 atendimentos no periodo\n\n23:30\nCHECK-IN\nFIXTURE PET NORMAL DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nSERVIÇOS\nSem serviços\nFINANCEIRO\nEm aberto R$ 70,00\nLOGÍSTICA\nSem TaxiDog\nChecklist 0%\nINICIAR CHECK-IN\nOPERAÇÃO\nMAIS\n23:59\nCHECK-IN\nFIXTURE PET TAXIDOG DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nSERVIÇOS\nSem serviços\nFINANCEIRO\nEm aberto R$ 70,00\nLOGÍSTICA\nTaxiDog solicitado\nChecklist 0%\nINICIAR CHECK-IN\nOPERAÇÃO\nMAIS\nATENDIMENTO SELECIONADO\nFixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nFixture Cliente DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nETAPA\nCheck-in\nSERVIÇOS\nSem serviços\nFINANCEIRO\nEm aberto R$ 70,00\nLOGÍSTICA\nRua Fixture TaxiDog 123, Sao Paulo - SP\nCHECKLIST\n0%\nOBSERVAÇÕES\n\nfixture taxidog DPS_QA_AGENDA"
+    }
+  },
+  "mobile": {
+    "initial": {
+      "active": [
+        "Todos"
+      ],
+      "filters": [
+        {
+          "text": "Todos",
+          "pressed": "true",
+          "visible": true
+        },
+        {
+          "text": "Atrasados",
+          "pressed": "false",
+          "visible": true
+        },
+        {
+          "text": "TaxiDog",
+          "pressed": "false",
+          "visible": true
+        }
+      ],
+      "cardTotal": 2,
+      "cardVisible": [
+        {
+          "id": "1747",
+          "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "aria": "false"
+        },
+        {
+          "id": "1746",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "aria": "false"
+        }
+      ],
+      "rowTotal": 2,
+      "rowVisible": [],
+      "panelStates": [
+        {
+          "hidden": false,
+          "display": "block",
+          "visible": true
+        }
+      ],
+      "emptyVisible": false,
+      "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+      "bodySnippet": "Skip to content\nDESI PET SHOWER\nADMIN\nAgenda de Atendimentos\n\nPERIODO ATIVO\nDia 23/04/2026\n\nVER:\nDIA\nSEMANA\nMES\nCOMPLETA\n←\nHOJE\n→\nFila operacional\nTODOS\nATRASADOS\nTAXIDOG\nQuinta-feira, 23/04\n\n2 atendimentos no periodo\n\n23:30\nCHECK-IN\nFIXTURE PET NORMAL DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nServiçosSem serviços\nFinanceiroEm aberto R$ 70,00\nLogísticaSem TaxiDog\nChecklist 0%\nINICIAR CHECK-IN\nOPERAÇÃO\nMAIS\n23:59\nCHECK-IN\nFIXTURE PET TAXIDOG DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nServiçosSem serviços\nFinanceiroEm aberto R$ 70,00\nLogísticaTaxiDog solicitado\nChecklist 0%\nINICIAR CHECK-IN\nOPERAÇÃO\nMAIS\nCopyright 2026 © Desi.Pet By PROst"
+    },
+    "afterLate": {
+      "active": [
+        "Atrasados"
+      ],
+      "filters": [
+        {
+          "text": "Todos",
+          "pressed": "false",
+          "visible": true
+        },
+        {
+          "text": "Atrasados",
+          "pressed": "true",
+          "visible": true
+        },
+        {
+          "text": "TaxiDog",
+          "pressed": "false",
+          "visible": true
+        }
+      ],
+      "cardTotal": 2,
+      "cardVisible": [],
+      "rowTotal": 2,
+      "rowVisible": [],
+      "panelStates": [
+        {
+          "hidden": true,
+          "display": "none",
+          "visible": false
+        }
+      ],
+      "emptyVisible": true,
+      "emptyTitle": "Nenhum atendimento atrasado neste recorte.",
+      "bodySnippet": "Skip to content\nDESI PET SHOWER\nADMIN\nAgenda de Atendimentos\n\nPERIODO ATIVO\nDia 23/04/2026\n\nVER:\nDIA\nSEMANA\nMES\nCOMPLETA\n←\nHOJE\n→\nFila operacional\nTODOS\nATRASADOS\nTAXIDOG\nNenhum atendimento atrasado neste recorte.\n\nNao ha atendimentos atrasados para o periodo atual.\n\nCopyright 2026 © Desi.Pet By PROst"
+    },
+    "afterTaxiDog": {
+      "active": [
+        "TaxiDog"
+      ],
+      "filters": [
+        {
+          "text": "Todos",
+          "pressed": "false",
+          "visible": true
+        },
+        {
+          "text": "Atrasados",
+          "pressed": "false",
+          "visible": true
+        },
+        {
+          "text": "TaxiDog",
+          "pressed": "true",
+          "visible": true
+        }
+      ],
+      "cardTotal": 2,
+      "cardVisible": [
+        {
+          "id": "1746",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "aria": "false"
+        }
+      ],
+      "rowTotal": 2,
+      "rowVisible": [],
+      "panelStates": [
+        {
+          "hidden": false,
+          "display": "block",
+          "visible": true
+        }
+      ],
+      "emptyVisible": false,
+      "emptyTitle": "Nenhum atendimento com TaxiDog neste recorte.",
+      "bodySnippet": "Skip to content\nDESI PET SHOWER\nADMIN\nAgenda de Atendimentos\n\nPERIODO ATIVO\nDia 23/04/2026\n\nVER:\nDIA\nSEMANA\nMES\nCOMPLETA\n←\nHOJE\n→\nFila operacional\nTODOS\nATRASADOS\nTAXIDOG\nQuinta-feira, 23/04\n\n2 atendimentos no periodo\n\n23:59\nCHECK-IN\nFIXTURE PET TAXIDOG DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nServiçosSem serviços\nFinanceiroEm aberto R$ 70,00\nLogísticaTaxiDog solicitado\nChecklist 0%\nINICIAR CHECK-IN\nOPERAÇÃO\nMAIS\nCopyright 2026 © Desi.Pet By PROst"
+    },
+    "afterTodos": {
+      "active": [
+        "Todos"
+      ],
+      "filters": [
+        {
+          "text": "Todos",
+          "pressed": "true",
+          "visible": true
+        },
+        {
+          "text": "Atrasados",
+          "pressed": "false",
+          "visible": true
+        },
+        {
+          "text": "TaxiDog",
+          "pressed": "false",
+          "visible": true
+        }
+      ],
+      "cardTotal": 2,
+      "cardVisible": [
+        {
+          "id": "1747",
+          "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "taxidog": "0",
+          "hiddenClass": false,
+          "aria": "false"
+        },
+        {
+          "id": "1746",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "taxidog": "1",
+          "hiddenClass": false,
+          "aria": "false"
+        }
+      ],
+      "rowTotal": 2,
+      "rowVisible": [],
+      "panelStates": [
+        {
+          "hidden": false,
+          "display": "block",
+          "visible": true
+        }
+      ],
+      "emptyVisible": false,
+      "emptyTitle": "Nenhum atendimento encontrado para este filtro.",
+      "bodySnippet": "Skip to content\nDESI PET SHOWER\nADMIN\nAgenda de Atendimentos\n\nPERIODO ATIVO\nDia 23/04/2026\n\nVER:\nDIA\nSEMANA\nMES\nCOMPLETA\n←\nHOJE\n→\nFila operacional\nTODOS\nATRASADOS\nTAXIDOG\nQuinta-feira, 23/04\n\n2 atendimentos no periodo\n\n23:30\nCHECK-IN\nFIXTURE PET NORMAL DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nServiçosSem serviços\nFinanceiroEm aberto R$ 70,00\nLogísticaSem TaxiDog\nChecklist 0%\nINICIAR CHECK-IN\nOPERAÇÃO\nMAIS\n23:59\nCHECK-IN\nFIXTURE PET TAXIDOG DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n>\n\nTUTOR\nFixture Cliente DPS_QA_AGENDA_FILTER_SEQUENCE_194988\n\nServiçosSem serviços\nFinanceiroEm aberto R$ 70,00\nLogísticaTaxiDog solicitado\nChecklist 0%\nINICIAR CHECK-IN\nOPERAÇÃO\nMAIS\nCopyright 2026 © Desi.Pet By PROst"
+    }
+  },
+  "consoleErrors": [],
+  "consoleWarnings": [],
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0
+}

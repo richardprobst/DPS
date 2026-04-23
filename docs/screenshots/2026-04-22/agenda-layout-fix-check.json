@@ -1,0 +1,74 @@
+{
+  "breakpoints": {
+    "375": {
+      "tableVisible": false,
+      "cardsVisible": true,
+      "inspectorVisible": false,
+      "horizontalOverflow": false,
+      "cardActions": [
+        "QA Smoke Pet>",
+        "Cobrar cliente",
+        "Operação",
+        "Mais"
+      ],
+      "cardActionCount": 4,
+      "workspaceColumns": "353px"
+    },
+    "600": {
+      "tableVisible": false,
+      "cardsVisible": true,
+      "inspectorVisible": false,
+      "horizontalOverflow": false,
+      "cardActions": [
+        "QA Smoke Pet>",
+        "Cobrar cliente",
+        "Operação",
+        "Mais"
+      ],
+      "cardActionCount": 4,
+      "workspaceColumns": "578px"
+    },
+    "840": {
+      "tableVisible": false,
+      "cardsVisible": true,
+      "inspectorVisible": false,
+      "horizontalOverflow": false,
+      "cardActions": [
+        "QA Smoke Pet>",
+        "Cobrar cliente",
+        "Operação",
+        "Mais"
+      ],
+      "cardActionCount": 4,
+      "workspaceColumns": "802px"
+    },
+    "1200": {
+      "tableVisible": false,
+      "cardsVisible": true,
+      "inspectorVisible": true,
+      "horizontalOverflow": false,
+      "cardActions": [
+        "QA Smoke Pet>",
+        "Cobrar cliente",
+        "Operação",
+        "Mais"
+      ],
+      "cardActionCount": 4,
+      "workspaceColumns": "858px 280px"
+    },
+    "1920": {
+      "tableVisible": false,
+      "cardsVisible": true,
+      "inspectorVisible": true,
+      "horizontalOverflow": false,
+      "cardActions": [
+        "QA Smoke Pet>",
+        "Cobrar cliente",
+        "Operação",
+        "Mais"
+      ],
+      "cardActionCount": 4,
+      "workspaceColumns": "858px 280px"
+    }
+  }
+}

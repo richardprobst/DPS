@@ -1,0 +1,22 @@
+{
+  "pet-dialog": {
+    "width": 1920,
+    "title": "Perfil rápido do pet"
+  },
+  "services-dialog": {
+    "width": 1920,
+    "title": "Serviços do atendimento"
+  },
+  "history-dialog": {
+    "width": 1920,
+    "title": "Linha do tempo do atendimento"
+  },
+  "reschedule-dialog": {
+    "width": 1920,
+    "title": "Reagendar atendimento"
+  },
+  "operation-dialog": {
+    "width": 1200,
+    "title": "Fluxo operacional do atendimento"
+  }
+}

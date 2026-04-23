@@ -1,0 +1,50 @@
+{
+  "375": {
+    "actions": [
+      {
+        "text": "Cobrar cliente",
+        "width": 303
+      },
+      {
+        "text": "Operação",
+        "width": 148
+      },
+      {
+        "text": "Mais",
+        "width": 148
+      }
+    ]
+  },
+  "1200": {
+    "actions": [
+      {
+        "text": "Cobrar cliente",
+        "width": 128
+      },
+      {
+        "text": "Operação",
+        "width": 89
+      },
+      {
+        "text": "Mais",
+        "width": 56
+      }
+    ]
+  },
+  "1920": {
+    "actions": [
+      {
+        "text": "Cobrar cliente",
+        "width": 128
+      },
+      {
+        "text": "Operação",
+        "width": 89
+      },
+      {
+        "text": "Mais",
+        "width": 56
+      }
+    ]
+  }
+}

@@ -1,0 +1,259 @@
+{
+  "breakpoints": {
+    "375": {
+      "shellCount": 1,
+      "workspaceCount": 1,
+      "overviewCount": 0,
+      "dayStatsCount": 0,
+      "filterCount": 3,
+      "rowCount": 1,
+      "cardCount": 1,
+      "tableVisible": false,
+      "cardVisible": true,
+      "inspectorVisible": false,
+      "workspaceColumns": "353px",
+      "horizontalOverflow": false,
+      "actionLabels": [
+        "QA Smoke Pet>",
+        "Cobrar cliente",
+        "Operação"
+      ],
+      "duplicateActionLabels": [],
+      "primaryActionCount": 1
+    },
+    "600": {
+      "shellCount": 1,
+      "workspaceCount": 1,
+      "overviewCount": 0,
+      "dayStatsCount": 0,
+      "filterCount": 3,
+      "rowCount": 1,
+      "cardCount": 1,
+      "tableVisible": false,
+      "cardVisible": true,
+      "inspectorVisible": false,
+      "workspaceColumns": "578px",
+      "horizontalOverflow": false,
+      "actionLabels": [
+        "QA Smoke Pet>",
+        "Cobrar cliente",
+        "Operação"
+      ],
+      "duplicateActionLabels": [],
+      "primaryActionCount": 1
+    },
+    "840": {
+      "shellCount": 1,
+      "workspaceCount": 1,
+      "overviewCount": 0,
+      "dayStatsCount": 0,
+      "filterCount": 3,
+      "rowCount": 1,
+      "cardCount": 1,
+      "tableVisible": false,
+      "cardVisible": true,
+      "inspectorVisible": false,
+      "workspaceColumns": "802px",
+      "horizontalOverflow": false,
+      "actionLabels": [
+        "QA Smoke Pet>",
+        "Cobrar cliente",
+        "Operação"
+      ],
+      "duplicateActionLabels": [],
+      "primaryActionCount": 1
+    },
+    "1200": {
+      "shellCount": 1,
+      "workspaceCount": 1,
+      "overviewCount": 0,
+      "dayStatsCount": 0,
+      "filterCount": 3,
+      "rowCount": 1,
+      "cardCount": 1,
+      "tableVisible": false,
+      "cardVisible": true,
+      "inspectorVisible": true,
+      "workspaceColumns": "858px 280px",
+      "horizontalOverflow": false,
+      "actionLabels": [
+        "QA Smoke Pet>",
+        "Cobrar cliente",
+        "Operação"
+      ],
+      "duplicateActionLabels": [],
+      "primaryActionCount": 1
+    },
+    "1920": {
+      "shellCount": 1,
+      "workspaceCount": 1,
+      "overviewCount": 0,
+      "dayStatsCount": 0,
+      "filterCount": 3,
+      "rowCount": 1,
+      "cardCount": 1,
+      "tableVisible": true,
+      "cardVisible": false,
+      "inspectorVisible": true,
+      "workspaceColumns": "858px 280px",
+      "horizontalOverflow": false,
+      "actionLabels": [
+        "QA Smoke Pet>",
+        "1 serviço",
+        "Cobrar cliente",
+        "Mais"
+      ],
+      "duplicateActionLabels": [],
+      "primaryActionCount": 1
+    }
+  },
+  "console": {
+    "totalCount": 35,
+    "errorCount": 22,
+    "warningCount": 0,
+    "agendaInternalCount": 0,
+    "agendaInternalMessages": [],
+    "sample": [
+      {
+        "type": "log",
+        "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+      },
+      {
+        "type": "log",
+        "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+      },
+      {
+        "type": "info",
+        "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+      },
+      {
+        "type": "error",
+        "text": "Access to fetch at 'https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3Af3ee5e9c-3f14-42a2-a07d-8295d39092c8%22%2C%22device_id%22%3A%22f3ee5e9c-3f14-42a2-a07d-8295d39092c8%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1' from origin 'https://desi.pet' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "type": "log",
+        "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+      },
+      {
+        "type": "info",
+        "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+      },
+      {
+        "type": "error",
+        "text": "Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "type": "error",
+        "text": "Access to fetch at 'https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3Af3ee5e9c-3f14-42a2-a07d-8295d39092c8%22%2C%22device_id%22%3A%22f3ee5e9c-3f14-42a2-a07d-8295d39092c8%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1' from origin 'https://desi.pet' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "type": "log",
+        "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+      },
+      {
+        "type": "info",
+        "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+      },
+      {
+        "type": "error",
+        "text": "Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "type": "error",
+        "text": "Access to fetch at 'https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3Af3ee5e9c-3f14-42a2-a07d-8295d39092c8%22%2C%22device_id%22%3A%22f3ee5e9c-3f14-42a2-a07d-8295d39092c8%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1' from origin 'https://desi.pet' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "type": "log",
+        "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+      },
+      {
+        "type": "info",
+        "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+      },
+      {
+        "type": "error",
+        "text": "Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "type": "error",
+        "text": "Access to fetch at 'https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3Af3ee5e9c-3f14-42a2-a07d-8295d39092c8%22%2C%22device_id%22%3A%22f3ee5e9c-3f14-42a2-a07d-8295d39092c8%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1' from origin 'https://desi.pet' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "type": "log",
+        "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+      },
+      {
+        "type": "info",
+        "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+      },
+      {
+        "type": "error",
+        "text": "Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "type": "error",
+        "text": "Access to fetch at 'https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3Af3ee5e9c-3f14-42a2-a07d-8295d39092c8%22%2C%22device_id%22%3A%22f3ee5e9c-3f14-42a2-a07d-8295d39092c8%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1' from origin 'https://desi.pet' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "type": "log",
+        "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+      },
+      {
+        "type": "info",
+        "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+      },
+      {
+        "type": "error",
+        "text": "Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "type": "error",
+        "text": "Access to fetch at 'https://api-eu.mixpanel.com/flags/?context=%7B%22distinct_id%22%3A%22%24device%3Af3ee5e9c-3f14-42a2-a07d-8295d39092c8%22%2C%22device_id%22%3A%22f3ee5e9c-3f14-42a2-a07d-8295d39092c8%22%7D&token=150605b3b9f979922f2ac5a52e2dcfe9&mp_lib=web&%24lib_version=2.71.1' from origin 'https://desi.pet' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      }
+    ]
+  }
+}

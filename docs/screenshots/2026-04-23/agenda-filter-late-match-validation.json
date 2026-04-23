@@ -1,0 +1,146 @@
+{
+  "desktop": {
+    "initial": {
+      "active": [
+        "Todos"
+      ],
+      "visible": [
+        {
+          "id": "1747",
+          "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "late": "1",
+          "taxidog": "0"
+        },
+        {
+          "id": "1746",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "late": "0",
+          "taxidog": "1"
+        }
+      ],
+      "emptyVisible": false
+    },
+    "afterLate": {
+      "active": [
+        "Atrasados"
+      ],
+      "visible": [
+        {
+          "id": "1747",
+          "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "late": "1",
+          "taxidog": "0"
+        }
+      ],
+      "emptyVisible": false
+    },
+    "afterTaxiDog": {
+      "active": [
+        "TaxiDog"
+      ],
+      "visible": [
+        {
+          "id": "1746",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "late": "0",
+          "taxidog": "1"
+        }
+      ],
+      "emptyVisible": false
+    },
+    "afterTodos": {
+      "active": [
+        "Todos"
+      ],
+      "visible": [
+        {
+          "id": "1747",
+          "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "late": "1",
+          "taxidog": "0"
+        },
+        {
+          "id": "1746",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "late": "0",
+          "taxidog": "1"
+        }
+      ],
+      "emptyVisible": false
+    }
+  },
+  "mobile": {
+    "initial": {
+      "active": [
+        "Todos"
+      ],
+      "visible": [
+        {
+          "id": "1747",
+          "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "late": "1",
+          "taxidog": "0"
+        },
+        {
+          "id": "1746",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "late": "0",
+          "taxidog": "1"
+        }
+      ],
+      "emptyVisible": false
+    },
+    "afterLate": {
+      "active": [
+        "Atrasados"
+      ],
+      "visible": [
+        {
+          "id": "1747",
+          "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "late": "1",
+          "taxidog": "0"
+        }
+      ],
+      "emptyVisible": false
+    },
+    "afterTaxiDog": {
+      "active": [
+        "TaxiDog"
+      ],
+      "visible": [
+        {
+          "id": "1746",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "late": "0",
+          "taxidog": "1"
+        }
+      ],
+      "emptyVisible": false
+    },
+    "afterTodos": {
+      "active": [
+        "Todos"
+      ],
+      "visible": [
+        {
+          "id": "1747",
+          "pet": "Fixture Pet Normal DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "late": "1",
+          "taxidog": "0"
+        },
+        {
+          "id": "1746",
+          "pet": "Fixture Pet TaxiDog DPS_QA_AGENDA_FILTER_SEQUENCE_194988",
+          "late": "0",
+          "taxidog": "1"
+        }
+      ],
+      "emptyVisible": false
+    }
+  },
+  "consoleErrors": [],
+  "consoleWarnings": [],
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0
+}

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * IntegraÃ§Ã£o do Assistente de IA com o Portal do Cliente.
  *

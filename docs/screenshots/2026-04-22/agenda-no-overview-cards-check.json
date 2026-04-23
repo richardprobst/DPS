@@ -1,0 +1,79 @@
+{
+  "agenda_url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day&dpsqa=no-overview-final-1776890597",
+  "temp_user_created": true,
+  "temp_user_deleted": true,
+  "breakpoints": {
+    "375": {
+      "overviewSectionCount": 0,
+      "overviewCardCount": 0,
+      "requestedLabelsInsideOverview": [],
+      "shellCount": 1,
+      "workspaceCount": 1,
+      "filterCount": 3,
+      "horizontalOverflow": false,
+      "shellTop": 509,
+      "toolbarTop": 582,
+      "bodyHasOverviewClass": false
+    },
+    "600": {
+      "overviewSectionCount": 0,
+      "overviewCardCount": 0,
+      "requestedLabelsInsideOverview": [],
+      "shellCount": 1,
+      "workspaceCount": 1,
+      "filterCount": 3,
+      "horizontalOverflow": false,
+      "shellTop": 499,
+      "toolbarTop": 572,
+      "bodyHasOverviewClass": false
+    },
+    "840": {
+      "overviewSectionCount": 0,
+      "overviewCardCount": 0,
+      "requestedLabelsInsideOverview": [],
+      "shellCount": 1,
+      "workspaceCount": 1,
+      "filterCount": 3,
+      "horizontalOverflow": false,
+      "shellTop": 416,
+      "toolbarTop": 544,
+      "bodyHasOverviewClass": false
+    },
+    "1200": {
+      "overviewSectionCount": 0,
+      "overviewCardCount": 0,
+      "requestedLabelsInsideOverview": [],
+      "shellCount": 1,
+      "workspaceCount": 1,
+      "filterCount": 3,
+      "horizontalOverflow": false,
+      "shellTop": 361,
+      "toolbarTop": 489,
+      "bodyHasOverviewClass": false
+    },
+    "1920": {
+      "overviewSectionCount": 0,
+      "overviewCardCount": 0,
+      "requestedLabelsInsideOverview": [],
+      "shellCount": 1,
+      "workspaceCount": 1,
+      "filterCount": 3,
+      "horizontalOverflow": false,
+      "shellTop": 378,
+      "toolbarTop": 513,
+      "bodyHasOverviewClass": false
+    }
+  },
+  "screenshots": {
+    "375": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-22\\agenda-no-overview-cards-375.png",
+    "600": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-22\\agenda-no-overview-cards-600.png",
+    "840": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-22\\agenda-no-overview-cards-840.png",
+    "1200": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-22\\agenda-no-overview-cards-1200.png",
+    "1920": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-22\\agenda-no-overview-cards-1920.png"
+  },
+  "console_messages": [],
+  "page_errors": [],
+  "remote_backup": "desi-pet-shower-agenda.__backup_20260422-174230",
+  "console_error_count": 0,
+  "console_warning_count": 0
+}

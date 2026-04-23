@@ -1,0 +1,202 @@
+{
+  "loginUser": "dpsqa_agenda_084626",
+  "siteUrl": "https://desi.pet/agenda-de-atendimentos/",
+  "completeToggle": {
+    "completeUrl": "https://desi.pet/agenda-de-atendimentos/?show_all=1",
+    "completeShowAll": [
+      "1"
+    ],
+    "scopeLabel": "Todos os atendimentos futuros",
+    "activeLabelsAfterComplete": [
+      "COMPLETA"
+    ],
+    "hasEmptyStateComplete": true,
+    "operationalCountComplete": 0,
+    "weekUrlAfterReturn": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-23&view=week",
+    "weekShowAll": []
+  },
+  "breakpoints": [
+    {
+      "width": 375,
+      "innerWidth": 375,
+      "scrollWidth": 375,
+      "hasOverflow": false,
+      "viewButtons": [
+        {
+          "text": "Dia",
+          "width": 140,
+          "height": 44
+        },
+        {
+          "text": "Semana",
+          "width": 140,
+          "height": 44
+        },
+        {
+          "text": "Mes",
+          "width": 140,
+          "height": 44
+        },
+        {
+          "text": "Completa",
+          "width": 140,
+          "height": 44
+        }
+      ],
+      "completeButtonText": "Completa",
+      "completeButtonWidth": 140,
+      "completeButtonHeight": 44,
+      "dateNavColumns": "44px 183px 44px",
+      "dateNavJustifySelf": "stretch",
+      "viewColumns": "139.5px 139.5px",
+      "overflowNodes": [],
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-completa-375.png"
+    },
+    {
+      "width": 600,
+      "innerWidth": 600,
+      "scrollWidth": 600,
+      "hasOverflow": false,
+      "viewButtons": [
+        {
+          "text": "Dia",
+          "width": 252,
+          "height": 44
+        },
+        {
+          "text": "Semana",
+          "width": 252,
+          "height": 44
+        },
+        {
+          "text": "Mes",
+          "width": 252,
+          "height": 44
+        },
+        {
+          "text": "Completa",
+          "width": 252,
+          "height": 44
+        }
+      ],
+      "completeButtonText": "Completa",
+      "completeButtonWidth": 252,
+      "completeButtonHeight": 44,
+      "dateNavColumns": "44px 408px 44px",
+      "dateNavJustifySelf": "stretch",
+      "viewColumns": "252px 252px",
+      "overflowNodes": [],
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-completa-600.png"
+    },
+    {
+      "width": 840,
+      "innerWidth": 840,
+      "scrollWidth": 840,
+      "hasOverflow": false,
+      "viewButtons": [
+        {
+          "text": "Dia",
+          "width": 360,
+          "height": 44
+        },
+        {
+          "text": "Semana",
+          "width": 360,
+          "height": 44
+        },
+        {
+          "text": "Mes",
+          "width": 360,
+          "height": 44
+        },
+        {
+          "text": "Completa",
+          "width": 360,
+          "height": 44
+        }
+      ],
+      "completeButtonText": "Completa",
+      "completeButtonWidth": 360,
+      "completeButtonHeight": 44,
+      "dateNavColumns": "44px 216px 44px",
+      "dateNavJustifySelf": "center",
+      "viewColumns": "360px 360px",
+      "overflowNodes": [],
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-completa-840.png"
+    },
+    {
+      "width": 1200,
+      "innerWidth": 1200,
+      "scrollWidth": 1200,
+      "hasOverflow": false,
+      "viewButtons": [
+        {
+          "text": "Dia",
+          "width": 256,
+          "height": 44
+        },
+        {
+          "text": "Semana",
+          "width": 256,
+          "height": 44
+        },
+        {
+          "text": "Mes",
+          "width": 256,
+          "height": 44
+        },
+        {
+          "text": "Completa",
+          "width": 256,
+          "height": 44
+        }
+      ],
+      "completeButtonText": "Completa",
+      "completeButtonWidth": 256,
+      "completeButtonHeight": 44,
+      "dateNavColumns": "44px 216px 44px",
+      "dateNavJustifySelf": "center",
+      "viewColumns": "256px 256px 256px 256px",
+      "overflowNodes": [],
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-completa-1200.png"
+    },
+    {
+      "width": 1920,
+      "innerWidth": 1920,
+      "scrollWidth": 1920,
+      "hasOverflow": false,
+      "viewButtons": [
+        {
+          "text": "Dia",
+          "width": 256,
+          "height": 44
+        },
+        {
+          "text": "Semana",
+          "width": 256,
+          "height": 44
+        },
+        {
+          "text": "Mes",
+          "width": 256,
+          "height": 44
+        },
+        {
+          "text": "Completa",
+          "width": 256,
+          "height": 44
+        }
+      ],
+      "completeButtonText": "Completa",
+      "completeButtonWidth": 256,
+      "completeButtonHeight": 44,
+      "dateNavColumns": "44px 216px 44px",
+      "dateNavJustifySelf": "center",
+      "viewColumns": "256px 256px 256px 256px",
+      "overflowNodes": [],
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\agenda-completa-1920.png"
+    }
+  ],
+  "consoleErrors": [],
+  "consoleWarnings": []
+}

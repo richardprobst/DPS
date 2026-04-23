@@ -317,3 +317,148 @@
 - Resultado: o Portal do Cliente ainda tem erro de runtime e o botao `CRIAR OU REDEFINIR SENHA` nao abre modal nem navega.
 - Resultado: o Cadastro ainda carrega Google Maps duas vezes, com callbacks `dpsSignatureGooglePlacesReady` e `dpsRegistrationGooglePlacesReady`.
 - Resultado: o Portal publicado ainda materializa geometria antiga com `28px`, `12px` e `9999px`, contrariando a regra DPS Signature de geometria reta por padrao.
+
+## Rodada Agenda - remocao definitiva dos cards de resumo
+- Objetivo desta etapa: remover definitivamente da Agenda os cards `Total`, `Pendentes`, `Finalizados`, `Cancelados`, `Atrasados`, `Pagamento pendente` e `TaxiDog`.
+- Fonte de verdade visual seguida explicitamente: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Ambiente validado: `https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day`, com usuario administrativo temporario criado por WP-CLI, removido ao final e confirmado por teste automatizado.
+- Deploy: substituicao completa de `wp-content/plugins/desi-pet-shower-agenda`, com backup remoto `desi-pet-shower-agenda.__backup_20260422-173858`.
+
+## Arquivos alterados - remocao dos cards de resumo
+- `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
+- `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+- `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+
+## Capturas - Agenda sem cards de resumo
+- `./agenda-no-overview-cards-375.png`
+- `./agenda-no-overview-cards-600.png`
+- `./agenda-no-overview-cards-840.png`
+- `./agenda-no-overview-cards-1200.png`
+- `./agenda-no-overview-cards-1920.png`
+- `./agenda-no-overview-cards-check.json`
+
+## Validacao - Agenda sem cards de resumo
+- `overviewSectionCount = 0` e `overviewCardCount = 0` nos breakpoints `375`, `600`, `840`, `1200` e `1920`.
+- `bodyHasOverviewClass = false`, confirmando ausencia de `dps-agenda-overview` no HTML publicado.
+- `requestedLabelsInsideOverview = []`, confirmando que os labels solicitados nao existem mais como cards de resumo.
+- `horizontalOverflow = false` em todos os breakpoints validados.
+- O pacote remoto ativo nao contem `dps-agenda-overview` nem `get_agenda_overview_stats` nos arquivos PHP, CSS e JS publicados.
+- O teste publicado retornou `console_error_count = 0` e `console_warning_count = 0`.
+
+## Rodada Agenda - convergencia visual final com o prototipo operacional
+- Objetivo desta etapa: aproximar a Agenda publicada do HTML `agenda-operacional-dps-signature-prototype.html`, mantendo explicitamente a tela sem os cards-resumo e seguindo `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do DPS Signature.
+- Resultado visual: o shell publicado ficou alinhado ao prototipo na composicao de cabecalho, filtros, fila operacional e inspetor contextual; o breakpoint medio passou a usar card operacional com inspetor, evitando a tabela comprimida que ainda degradava a leitura.
+- Resultado funcional: a superficie visivel da Agenda passou a expor uma unica acao primaria por atendimento, sem duplicidades de CTA no item ativo validado.
+
+## Arquivos alterados - convergencia visual final da Agenda
+- `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
+- `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+- `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+
+## Capturas - convergencia visual final da Agenda
+- `./agenda-operational-convergence-v4-375.png`
+- `./agenda-operational-convergence-v4-600.png`
+- `./agenda-operational-convergence-v4-840.png`
+- `./agenda-operational-convergence-v4-1200.png`
+- `./agenda-operational-convergence-v4-1920.png`
+- `./agenda-operational-convergence-v4-operation-dialog-1200.png`
+- `./agenda-operational-convergence-v4-pet-dialog-1920.png`
+- `./agenda-operational-convergence-v4-services-dialog-1920.png`
+- `./agenda-operational-convergence-v4-history-dialog-1920.png`
+- `./agenda-operational-convergence-v4-reschedule-dialog-1920.png`
+- `./agenda-operational-convergence-v4-check.json`
+- `./agenda-operational-convergence-v4-breakpoints.json`
+- `./agenda-operational-convergence-v4-dialogs.json`
+- `./agenda-operational-prototype-1440-live.png`
+
+## Validacao - convergencia visual final da Agenda
+- `shellCount = 1`, `workspaceCount = 1`, `overviewCount = 0` e `dayStatsCount = 0` em `375`, `600`, `840`, `1200` e `1920`.
+- `horizontalOverflow = false` em todos os breakpoints validados.
+- `duplicateActionLabels = []` no atendimento visivel auditado, com `primaryActionCount = 1` na superficie principal.
+- Em `375`, `600` e `840` a Agenda publicada respondeu em card operacional sem inspetor lateral.
+- Em `1200` a Agenda publicada respondeu em card operacional com inspetor contextual lateral, eliminando a leitura comprimida da tabela nesse breakpoint.
+- Em `1920` a Agenda publicada respondeu com tabela canonica e inspetor contextual, coerente com o prototipo operacional desktop.
+- Os dialogos publicados abriram corretamente na bateria autenticada: `Perfil rápido do pet`, `Serviços do atendimento`, `Fluxo operacional do atendimento`, `Linha do tempo do atendimento` e `Reagendar atendimento`.
+- O ruído restante de console nesta rodada veio de Mixpanel, Google Ads, React DevTools e jQuery Migrate; `agendaInternalCount = 0`, sem erro interno atribuido ao plugin da Agenda nesta validacao final.
+
+## Rodada Agenda - correcao do layout quebrado
+- Objetivo desta etapa: corrigir o estado publicado em que a Agenda ainda aparecia com tabela estourada, alinhamento quebrado e botoes grandes demais na superficie operacional.
+- Fonte de verdade visual seguida explicitamente: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Decisao aplicada: a tabela canonica rigida foi retirada do runtime operacional e a Agenda passou a usar o card operacional como superficie principal tambem no desktop, preservando o inspetor lateral.
+
+## Arquivos alterados - correcao do layout da Agenda
+- `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+- `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+
+## Capturas - correcao do layout da Agenda
+- `./agenda-layout-fix-375.png`
+- `./agenda-layout-fix-600.png`
+- `./agenda-layout-fix-840.png`
+- `./agenda-layout-fix-1200.png`
+- `./agenda-layout-fix-1920.png`
+- `./agenda-layout-fix-check.json`
+- `./agenda-layout-fix-v2-375.png`
+- `./agenda-layout-fix-v2-1200.png`
+- `./agenda-layout-fix-v2-1920.png`
+- `./agenda-layout-fix-v2.json`
+- `./agenda-layout-fix-dialogs.json`
+
+## Validacao - correcao do layout da Agenda
+- `tableVisible = false` e `cardsVisible = true` em `375`, `600`, `840`, `1200` e `1920`.
+- `horizontalOverflow = false` em todos os breakpoints validados.
+- O inspetor permaneceu visivel em `1200` e `1920`, sem colisao com a superficie principal.
+- Na validacao final dos CTAs, `Cobrar cliente` ficou com `128px` em `1200` e `1920`, `Operação` com `89px` e `Mais` com `56px`, eliminando os botoes-faixa do desktop.
+- No mobile `375`, o CTA primario ficou em linha propria e `Operação` + `Mais` passaram a compartilhar a linha inferior sem quebra visual.
+- Os fluxos do card operacional continuaram funcionais apos a correcao: `Fluxo operacional do atendimento`, `Linha do tempo do atendimento` e `Reagendar atendimento` abriram corretamente a partir do breakpoint `375`.
+
+## Rodada Agenda - correcao do warning no botao Operação
+- Objetivo desta etapa: remover os warnings `Undefined variable` exibidos ao abrir o modal `Operação` na Agenda publicada.
+- Causa corrigida: o metodo `render_checklist_panel()` ainda continha um bloco morto que calculava labels com `$has_checkout`, `$has_checkin` e `$rework_count` sem inicializacao local.
+
+## Arquivos alterados - warning no modal Operação
+- `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
+
+## Capturas - warning no modal Operação
+- `./agenda-operation-warning-fix-375.png`
+- `./agenda-operation-warning-fix.json`
+
+## Validacao - warning no modal Operação
+- O modal publicado abriu com o titulo `Fluxo operacional do atendimento`.
+- `hasUndefinedVariableWarning = false` e `warningMatches = []` na leitura autenticada do runtime publicado apos o deploy.
+
+## Rodada Agenda - fechamento dos tres pendentes do audit
+- Objetivo desta etapa: fechar os tres itens ainda pendentes do audit de `2026-04-22`, seguindo explicitamente `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` como fonte de verdade do DPS Signature.
+- Escopo fechado nesta rodada:
+  - aumentar a superficie operacional real dos botoes `anterior` e `proximo`;
+  - convergir o modal de servicos para o mesmo shell modal DPS Signature dos demais dialogos;
+  - remover da camada de render qualquer `update_post_meta()` ligado a confirmacao, movendo a persistencia para fluxo explicito com saneamento dedicado no add-on.
+- Metodo de validacao desta rodada: fixture local derivado dos assets atuais da Agenda, porque a rota publicada `agenda-de-atendimentos` exige login administrativo e esta workspace continua sem WordPress executavel nem sessao autenticada do runtime publicado.
+
+## Arquivos alterados - fechamento dos tres pendentes
+- `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
+- `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+- `plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js`
+- `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+
+## Capturas - fechamento dos tres pendentes
+- `./agenda-round-closure-375.png`
+- `./agenda-round-closure-600.png`
+- `./agenda-round-closure-840.png`
+- `./agenda-round-closure-1200.png`
+- `./agenda-round-closure-1920.png`
+- `./agenda-round-closure-services-dialog-1200.png`
+- `./agenda-round-closure-check.json`
+
+## Breakpoints validados - fechamento dos tres pendentes
+- `375`
+- `600`
+- `840`
+- `1200`
+- `1920`
+
+## Validacao - fechamento dos tres pendentes
+- `horizontalOverflow = false` em `375`, `600`, `840`, `1200` e `1920`.
+- `prevTarget = 48x48` e `nextTarget = 48x48` em todos os breakpoints validados, acima do piso operacional de `44x44`.
+- O modal de servicos passou a responder com `sectionCount = 3`, `bodyBackground = none` e `borderRadius = 2px`, usando o mesmo shell `dps-agenda-dialog` dos demais dialogos.
+- `render_layer_confirmation_meta_writes = 0` no trait de render, `renderer_set_confirmation_method_present = false` e `explicit_confirmation_sanitizer_present = true` no add-on, confirmando a remocao da mutacao da camada de render e a migracao para fluxo explicito com saneamento.
+- Status da rodada: codigo fechado e documentado localmente; a validacao final no runtime publicado continua dependente de deploy/autenticacao administrativa para repetir essa bateria sobre a Agenda real.
