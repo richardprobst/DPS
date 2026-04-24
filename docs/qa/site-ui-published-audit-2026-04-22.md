@@ -43,9 +43,9 @@ Nos breakpoints `375`, `600`, `840`, `1200` e `1920`, a maior parte das paginas 
    - O arquivo [dps-design-tokens.css](C:/Users/casaprobst/DPS/plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css:255) define raios grandes e pill shapes, incluindo [dps-design-tokens.css](C:/Users/casaprobst/DPS/plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css:257), [dps-design-tokens.css](C:/Users/casaprobst/DPS/plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css:260), [dps-design-tokens.css](C:/Users/casaprobst/DPS/plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css:263) e [dps-design-tokens.css](C:/Users/casaprobst/DPS/plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css:266).
    - Isso contradiz diretamente o padrao atual, que pede geometria reta por padrao e evita pills.
 
-5. O CSS base de formularios ainda materializa geometrias e composicoes que nao sao DPS Signature.
+5. O CSS base de formularios ainda expoe geometrias e composicoes que nao sao DPS Signature.
    - Em [dps-signature-forms.css](C:/Users/casaprobst/DPS/plugins/desi-pet-shower-base/assets/css/dps-signature-forms.css:53), [dps-signature-forms.css](C:/Users/casaprobst/DPS/plugins/desi-pet-shower-base/assets/css/dps-signature-forms.css:120) e [dps-signature-forms.css](C:/Users/casaprobst/DPS/plugins/desi-pet-shower-base/assets/css/dps-signature-forms.css:588), o sistema ainda aplica bordas totalmente arredondadas ou raios grandes em tags, paineis e botoes.
-   - Impacto visual: o portal e o banho e tosa continuam com aspecto M3/Material misturado ao DPS Signature.
+   - Impacto visual: o portal e o banho e tosa continuam com aspecto de padrao visual antigo misturado ao DPS Signature.
 
 6. Ainda existe resquicio funcional do fluxo antigo na Agenda.
    - O runtime continua registrando e dependendo do modal legado de servicos em [desi-pet-shower-agenda-addon.php](C:/Users/casaprobst/DPS/plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php:1962), [desi-pet-shower-agenda-addon.php](C:/Users/casaprobst/DPS/plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php:1964) e [desi-pet-shower-agenda-addon.php](C:/Users/casaprobst/DPS/plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php:1984).
@@ -136,4 +136,4 @@ Data: 2026-04-22
   - hero e paineis com `28px`
   - inputs com `12px`
   - botoes com `9999px`
-- Leitura: o Cadastro publicado esta menos afetado visualmente, mas o Portal ainda materializa fortemente a geometria antiga e precisa de convergencia para DPS Signature.
+- Leitura: o Cadastro publicado esta menos afetado visualmente, mas o Portal ainda expoe fortemente a geometria antiga e precisa de convergencia para DPS Signature.

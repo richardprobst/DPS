@@ -91,12 +91,14 @@ Antes de criar uma nova versÃ£o oficial:
 
 #### Changed (Alterado)
 
+- Reafirmados `desi-pet-shower-registration` e `desi-pet-shower-booking` como implementações canônicas dos fluxos públicos de cadastro e agendamento, encerrando o dual-run do add-on `desi-pet-shower-frontend`.
 - Consolidada a Agenda publicada como superfície operacional única do DPS Signature, sem navegação funcional por abas legadas e com navegação preservando apenas visão e período.
 - Padronizado o modal de serviços no mesmo shell visual e comportamental dos demais diálogos da Agenda.
 - Refinado o mobile da fila operacional com stage badge dedicada no card, toolbar compacta e estados sincronizados entre linha desktop, card mobile e inspetor contextual.
 - Refinado o estado vazio dos filtros operacionais da Agenda com assinatura visual DPS Signature, marca tipográfica própria e microcopy contextual para recortes sem atrasos ou sem logística TaxiDog.
 - Reordenada a hierarquia mobile da Agenda em codigo para priorizar a fila operacional sobre os KPIs no shell DPS Signature.
 - Normalizados rotulos textuais da Agenda operacional e de views legadas para remover indicadores antigos e copy quebrada.
+- Simplificado o card operacional da Agenda para focar em horário, status, pet, tutor e ações principais, mantendo os detalhes completos no inspetor lateral DPS Signature.
 
 #### Fixed (Corrigido)
 
@@ -108,8 +110,10 @@ Antes de criar uma nova versÃ£o oficial:
 
 #### Removed (Removido)
 
+- Removido o add-on `desi-pet-shower-frontend`, incluindo shortcodes V2, feature flags, telemetria própria, aba administrativa, assets, templates e documentação operacional de rollout/migração, preservando os contratos canônicos dos plugins separados.
 - Removidos definitivamente da Agenda operacional os cards de resumo `Total`, `Pendentes`, `Finalizados`, `Cancelados`, `Atrasados`, `Pagamento pendente` e `TaxiDog`, mantendo a tela focada diretamente na fila operacional.
 - Removida da Agenda a iconografia genérica de calendário no pseudo-elemento de estado vazio, substituída por assinatura tipográfica DPS.
+- Removidos do card operacional os blocos redundantes `Serviços`, `Financeiro`, `Logística` e `Checklist`, além do botão `Operação` no rodapé e no menu secundário.
 
 #### Refactoring (Interno)
 

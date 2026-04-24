@@ -299,10 +299,10 @@
 - `./signature-profile-update-clean-1920.png`
 
 ## Validacao
-- Cadastro: `#dps-registration-signature-form` renderizado, `#dps-reg-form` ausente, sem step rail, sem texto DPS Signature/Material, sem copy de manual e sem overflow nos cinco breakpoints.
+- Cadastro: `#dps-registration-signature-form` renderizado, `#dps-reg-form` ausente, sem step rail, sem texto de sistema visual no topo, sem copy de manual e sem overflow nos cinco breakpoints.
 - Cadastro complementar: sem texto visivel `DPS Signature` no topo, sem frase introdutoria redundante e sem os titulos antigos `Contato principal`, `Dados do pet` ou `Concluir cadastro`.
-- Portal de acesso: sem step rail, sem texto DPS Signature/Material, sem overflow, hero com acento primario e botoes com largura utilizavel.
-- Atualizacao de perfil: formulario com token real renderizado, sem step rail, sem texto DPS Signature/Material, sem copy de manual e sem overflow nos cinco breakpoints.
+- Portal de acesso: sem step rail, sem texto de sistema visual no topo, sem overflow, hero com acento primario e botoes com largura utilizavel.
+- Atualizacao de perfil: formulario com token real renderizado, sem step rail, sem texto de sistema visual no topo, sem copy de manual e sem overflow nos cinco breakpoints.
 
 # Ajuste complementar - Cadastro DPS Signature reto e sem herdanca antiga
 

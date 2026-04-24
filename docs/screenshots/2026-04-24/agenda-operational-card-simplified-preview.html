@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agenda - Card operacional simplificado</title>
+  <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css">
+  <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css">
+  <style>
+    body {
+      margin: 0;
+      background: #f7f2ea;
+      color: #11161c;
+      font-family: var(--dps-signature-font-body, "Manrope", Arial, sans-serif);
+    }
+
+    .dps-screenshot-fixture {
+      width: min(100%, 1180px);
+      margin: 0 auto;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .dps-fixture-pet-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid #b9c1c8;
+      border-radius: 2px;
+      background: #fffaf2;
+      color: #11161c;
+      padding: 11px 14px;
+      font: inherit;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .dps-fixture-pet-trigger span:last-child {
+      margin-left: auto;
+      color: #173042;
+      font-weight: 900;
+    }
+
+    @media (max-width: 600px) {
+      .dps-screenshot-fixture {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="dps-screenshot-fixture">
+    <section class="dps-agenda-operational-shell" aria-label="Fila operacional">
+      <header class="dps-agenda-operational-shell__header">
+        <div class="dps-agenda-operational-shell__header-copy">
+          <h2 class="dps-agenda-operational-shell__title">Fila operacional</h2>
+          <p class="dps-agenda-operational-shell__subtitle">Atendimentos do periodo ativo com leitura simplificada no card e detalhes no inspetor lateral.</p>
+        </div>
+      </header>
+
+      <div class="dps-agenda-operational-workspace">
+        <div class="dps-agenda-operational-main">
+          <div class="dps-operational-mobile-list">
+            <article class="dps-operational-card status-finalizado" data-appt-id="9001" data-dps-pet="QA SMOKE PET" data-dps-tutor="QA Smoke Cliente" data-dps-date="2026-04-24" data-dps-time="23:30" data-dps-stage="Finalizado" data-dps-service="1 servico" data-dps-payment="Cobrar R$ 89,90" data-dps-logistics="TaxiDog solicitado" data-dps-notes="Sem observacoes registradas." data-dps-progress="100" data-dps-taxidog="1" data-dps-late="0">
+              <header class="dps-operational-card__header">
+                <div class="dps-agenda-time-block">
+                  <strong class="dps-agenda-time-block__value">23:30</strong>
+                </div>
+                <span class="dps-operational-stage dps-operational-card__stage dps-operational-stage--done">Finalizado</span>
+              </header>
+
+              <div class="dps-operational-card__body">
+                <div class="dps-agenda-pet-stack">
+                  <button type="button" class="dps-fixture-pet-trigger">
+                    <span>QA SMOKE PET</span>
+                    <span aria-hidden="true">›</span>
+                  </button>
+                  <p class="dps-agenda-pet-owner">
+                    <span class="dps-agenda-pet-owner__label">Tutor</span>
+                    <span class="dps-agenda-pet-owner__value">QA Smoke Cliente</span>
+                  </p>
+                </div>
+              </div>
+
+              <footer class="dps-operational-card__actions">
+                <button type="button" class="dps-payment-popup-btn dps-agenda-primary-action dps-agenda-primary-action--payment">Cobrar cliente</button>
+                <button type="button" class="dps-agenda-action-link dps-agenda-action-link--secondary dps-agenda-secondary-actions">Mais</button>
+              </footer>
+            </article>
+          </div>
+        </div>
+
+        <aside class="dps-operational-inspector" aria-live="polite">
+          <header class="dps-operational-inspector__header">
+            <span>Atendimento selecionado</span>
+            <h3>QA SMOKE PET</h3>
+            <p>QA Smoke Cliente</p>
+          </header>
+          <div class="dps-operational-inspector__body">
+            <section class="dps-operational-inspector__section"><span>Etapa</span><strong>Finalizado</strong></section>
+            <section class="dps-operational-inspector__section"><span>Serviços</span><strong>1 serviço</strong></section>
+            <section class="dps-operational-inspector__section"><span>Financeiro</span><strong>Cobrar R$ 89,90</strong></section>
+            <section class="dps-operational-inspector__section"><span>Logística</span><strong>TaxiDog solicitado</strong></section>
+            <section class="dps-operational-inspector__section"><span>Checklist</span><div class="dps-operational-progress"><span>100%</span><div class="dps-operational-progress__bar"><span style="width:100%"></span></div></div></section>
+            <section class="dps-operational-inspector__section"><span>Observações</span><p>Sem observações registradas.</p></section>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

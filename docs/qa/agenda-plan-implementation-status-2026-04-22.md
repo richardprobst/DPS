@@ -56,7 +56,7 @@ Resultados:
 - `legacyTabsCount = 0`.
 - `legacyModalCount = 0`.
 - `operationalPillCount = 0`.
-- `hasLegacyStrings = false` para `DPSServicesModal`, `dps-services-modal`, `services-modal.js`, `agenda_tab`, `getCurrentAgendaTab`, `dps-operational-pill`, `--dps-shape-`, `M3` e `Material`.
+- `hasLegacyStrings = false` para `DPSServicesModal`, `dps-services-modal`, `services-modal.js`, `agenda_tab`, `getCurrentAgendaTab`, `dps-operational-pill`, `--dps-shape-` e marcadores visuais antigos.
 - Nao foram detectadas duplicacoes de acoes no escopo visivel de card, linha operacional ou inspetor.
 - Nao foram detectados alvos de toque abaixo dos limites testados no workspace operacional.
 

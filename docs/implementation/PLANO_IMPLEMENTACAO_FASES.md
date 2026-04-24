@@ -123,7 +123,7 @@ Eliminar todas as vulnerabilidades de seguranÃ§a conhecidas, com foco em SQL I
 > **Prioridade:** ðŸŸ  Alta
 > **EsforÃ§o estimado:** 3â€“5 sprints
 > **DependÃªncias:** Fase 1 concluÃ­da
-> **ReferÃªncia existente:** `docs/refactoring/FRONTEND_ADDON_PHASED_ROADMAP.md`, `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`
+> **ReferÃªncia existente:** `docs/refactoring/AGENT_ENGINEERING_PLAYBOOK.md`
 
 ### Objetivo
 

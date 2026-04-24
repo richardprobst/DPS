@@ -991,7 +991,6 @@
     var time = row.data('dps-time') || '';
     var bodyHtml = '<div class="dps-secondary-action-grid">' +
       '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-secondary-action="services">Serviços</button>' +
-      '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-secondary-action="operation">Operação</button>' +
       '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-secondary-action="reschedule">Reagendar</button>' +
       '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-secondary-action="history">Histórico</button>' +
       '</div>';
@@ -1010,8 +1009,6 @@
       closeAgendaDialog($(AGENDA_DIALOG_SELECTOR).last(), 'secondary-action');
       if (action === 'services') {
         row.find('.dps-services-popup-btn').trigger('click');
-      } else if (action === 'operation') {
-        openOperationPanel(apptId, { focusPanel: true, focusTarget: 'checklist' });
       } else if (action === 'history') {
         $('<button type="button" class="dps-history-indicator" data-appt-id="' + apptId + '"></button>').appendTo('body').trigger('click').remove();
       } else if (action === 'reschedule') {

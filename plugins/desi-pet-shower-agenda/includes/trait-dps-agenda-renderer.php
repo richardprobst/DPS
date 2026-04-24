@@ -1293,17 +1293,10 @@ trait DPS_Agenda_Renderer {
             echo '<p class="dps-agenda-pet-owner"><span class="dps-agenda-pet-owner__label">' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</span><span class="dps-agenda-pet-owner__value">' . esc_html( $data['client_name'] ) . '</span></p>';
         }
         echo '</div>';
-        echo '<div class="dps-operational-card__meta">';
-        echo '<span class="dps-operational-card__meta-item"><small>' . esc_html__( 'Serviços', 'dps-agenda-addon' ) . '</small><strong>' . esc_html( $data['service_label'] ) . '</strong></span>';
-        echo '<span class="dps-operational-card__meta-item"><small>' . esc_html__( 'Financeiro', 'dps-agenda-addon' ) . '</small><strong>' . esc_html( $this->get_operational_payment_label( $data ) ) . '</strong></span>';
-        echo '<span class="dps-operational-card__meta-item"><small>' . esc_html__( 'Logística', 'dps-agenda-addon' ) . '</small><strong>' . esc_html( $data['taxidog'] ? __( 'TaxiDog solicitado', 'dps-agenda-addon' ) : __( 'Sem TaxiDog', 'dps-agenda-addon' ) ) . '</strong></span>';
-        echo '</div>';
-        echo '<div class="dps-operational-progress"><span>' . esc_html__( 'Checklist', 'dps-agenda-addon' ) . ' ' . esc_html( $data['progress'] ) . '%</span><div class="dps-operational-progress__bar"><span style="width:' . esc_attr( $data['progress'] ) . '%"></span></div></div>';
         echo '</div>';
 
         echo '<footer class="dps-operational-card__actions">';
         echo $this->render_operational_primary_action( $data );
-        echo '<button type="button" class="dps-operation-action-btn dps-operation-action-btn--edit" data-appt-id="' . esc_attr( $data['id'] ) . '" data-operation-focus="checklist" aria-haspopup="dialog">' . esc_html__( 'Operação', 'dps-agenda-addon' ) . '</button>';
         echo '<button type="button" class="dps-agenda-action-link dps-agenda-action-link--secondary dps-agenda-secondary-actions" data-appt-id="' . esc_attr( $data['id'] ) . '" aria-haspopup="dialog">' . esc_html__( 'Mais', 'dps-agenda-addon' ) . '</button>';
         echo '</footer>';
         echo '</article>';

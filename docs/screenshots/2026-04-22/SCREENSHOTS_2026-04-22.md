@@ -302,7 +302,7 @@
 - Os fluxos `Servicos`, `Operacao`, `Perfil do pet`, `Historico` e `Mais > Reagendar` abriram no runtime publicado.
 - A API global `window.DPSServicesModal` ficou ausente e o shell unico `window.DPSAgendaDialog` ficou disponivel.
 - A segunda revalidacao publicada, apos remover `$.trim`, retornou `console_error_count = 0` e `console_warning_count = 0`.
-- O pacote remoto ativo tem `33` arquivos, sem `services-modal.js`, sem arquivos `.bak*` e sem residuos `agenda_tab`, `DPSServicesModal`, `dps-operational-pill`, `shape-*`, `M3` ou `Material` nos arquivos ativos da Agenda.
+- O pacote remoto ativo tem `33` arquivos, sem `services-modal.js`, sem arquivos `.bak*` e sem residuos `agenda_tab`, `DPSServicesModal`, `dps-operational-pill`, `shape-*` ou marcadores visuais antigos nos arquivos ativos da Agenda.
 - Limitacao de ambiente: o PHP CLI do servidor respondeu `PHP 8.2.30`, abaixo do requisito global `Requires PHP: 8.4`.
 
 ## Verificacao posterior - achados fora da Agenda
@@ -316,7 +316,7 @@
 - Resultado: as rotas `contato-e-localizacao` e `perguntas-frequentes` continuam retornando `404` e nao existem como paginas publicadas.
 - Resultado: o Portal do Cliente ainda tem erro de runtime e o botao `CRIAR OU REDEFINIR SENHA` nao abre modal nem navega.
 - Resultado: o Cadastro ainda carrega Google Maps duas vezes, com callbacks `dpsSignatureGooglePlacesReady` e `dpsRegistrationGooglePlacesReady`.
-- Resultado: o Portal publicado ainda materializa geometria antiga com `28px`, `12px` e `9999px`, contrariando a regra DPS Signature de geometria reta por padrao.
+- Resultado: o Portal publicado ainda exibe geometria antiga com `28px`, `12px` e `9999px`, contrariando a regra DPS Signature de geometria reta por padrao.
 
 ## Rodada Agenda - remocao definitiva dos cards de resumo
 - Objetivo desta etapa: remover definitivamente da Agenda os cards `Total`, `Pendentes`, `Finalizados`, `Cancelados`, `Atrasados`, `Pagamento pendente` e `TaxiDog`.

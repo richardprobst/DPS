@@ -1,0 +1,107 @@
+[
+  {
+    "viewport": {
+      "width": 375,
+      "height": 812
+    },
+    "file": "agenda-operational-card-simplified-375.png",
+    "metrics": {
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "horizontalOverflow": false,
+      "cardMetaCount": 0,
+      "cardProgressCount": 0,
+      "cardContainsForbiddenLabels": [],
+      "actionText": [
+        "COBRAR CLIENTE",
+        "MAIS"
+      ],
+      "inspectorVisible": false
+    },
+    "consoleMessages": []
+  },
+  {
+    "viewport": {
+      "width": 600,
+      "height": 900
+    },
+    "file": "agenda-operational-card-simplified-600.png",
+    "metrics": {
+      "clientWidth": 600,
+      "scrollWidth": 600,
+      "horizontalOverflow": false,
+      "cardMetaCount": 0,
+      "cardProgressCount": 0,
+      "cardContainsForbiddenLabels": [],
+      "actionText": [
+        "COBRAR CLIENTE",
+        "MAIS"
+      ],
+      "inspectorVisible": false
+    },
+    "consoleMessages": []
+  },
+  {
+    "viewport": {
+      "width": 840,
+      "height": 900
+    },
+    "file": "agenda-operational-card-simplified-840.png",
+    "metrics": {
+      "clientWidth": 840,
+      "scrollWidth": 840,
+      "horizontalOverflow": false,
+      "cardMetaCount": 0,
+      "cardProgressCount": 0,
+      "cardContainsForbiddenLabels": [],
+      "actionText": [
+        "COBRAR CLIENTE",
+        "MAIS"
+      ],
+      "inspectorVisible": false
+    },
+    "consoleMessages": []
+  },
+  {
+    "viewport": {
+      "width": 1200,
+      "height": 900
+    },
+    "file": "agenda-operational-card-simplified-1200.png",
+    "metrics": {
+      "clientWidth": 1200,
+      "scrollWidth": 1200,
+      "horizontalOverflow": false,
+      "cardMetaCount": 0,
+      "cardProgressCount": 0,
+      "cardContainsForbiddenLabels": [],
+      "actionText": [
+        "COBRAR CLIENTE",
+        "MAIS"
+      ],
+      "inspectorVisible": true
+    },
+    "consoleMessages": []
+  },
+  {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "file": "agenda-operational-card-simplified-1920.png",
+    "metrics": {
+      "clientWidth": 1920,
+      "scrollWidth": 1920,
+      "horizontalOverflow": false,
+      "cardMetaCount": 0,
+      "cardProgressCount": 0,
+      "cardContainsForbiddenLabels": [],
+      "actionText": [
+        "COBRAR CLIENTE",
+        "MAIS"
+      ],
+      "inspectorVisible": true
+    },
+    "consoleMessages": []
+  }
+]

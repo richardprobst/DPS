@@ -158,10 +158,7 @@ class DPS_Registration_Addon {
         add_action( 'init', [ $this, 'maybe_handle_registration' ] );
         // Confirmação de email
         add_action( 'init', [ $this, 'maybe_handle_email_confirmation' ] );
-        if ( ! $this->shouldUseSignatureFrontend() ) {
-            // Shortcode legado mantido apenas quando o motor Signature não está ativo.
-            add_shortcode( 'dps_registration_form', [ $this, 'render_registration_form' ] );
-        }
+        add_shortcode( 'dps_registration_form', [ $this, 'render_registration_form' ] );
         // Cria a página automaticamente ao ativar
         register_activation_hook( __FILE__, [ $this, 'activate' ] );
         register_deactivation_hook( __FILE__, [ 'DPS_Registration_Addon', 'deactivate' ] );
@@ -188,21 +185,6 @@ class DPS_Registration_Addon {
 
         // AJAX para verificar duplicatas (admins apenas)
         add_action( 'wp_ajax_dps_registration_check_duplicate', [ $this, 'ajax_check_duplicate' ] );
-    }
-
-    /**
-     * Verifica se o cadastro público deve ser renderizado pelo Frontend Signature.
-     *
-     * @return bool
-     */
-    private function shouldUseSignatureFrontend() {
-        if ( ! defined( 'DPS_FRONTEND_VERSION' ) ) {
-            return false;
-        }
-
-        $flags = get_option( 'dps_frontend_feature_flags', [] );
-
-        return is_array( $flags ) && ! empty( $flags['registration'] );
     }
 
     /**
@@ -714,10 +696,6 @@ class DPS_Registration_Addon {
      * @since 1.2.0 Adicionado JS externo com validação e máscaras.
      */
     public function enqueue_assets() {
-        if ( $this->shouldUseSignatureFrontend() ) {
-            return;
-        }
-
         // Carrega apenas na página de cadastro
         $registration_page_id = get_option( 'dps_registration_page_id' );
         $current_post = get_post();

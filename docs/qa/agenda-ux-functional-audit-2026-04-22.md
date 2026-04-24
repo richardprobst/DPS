@@ -4,7 +4,7 @@
 - Escopo: Agenda publicada em `https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-20&view=day`.
 - Objetivo: verificar funcionamento real, experiencia de uso, consistencia visual e melhor estrutura para uma Agenda moderna e usual.
 - Fonte visual obrigatoria: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
-- Padrao permitido: somente DPS Signature. Nenhuma recomendacao desta auditoria depende de M3, cards arredondados, chips soltos ou remendos visuais.
+- Padrao permitido: somente DPS Signature. Nenhuma recomendacao desta auditoria depende de padrao visual antigo, cards arredondados, chips soltos ou remendos visuais.
 - Metodo: sessao administrativa temporaria via WP-CLI, Selenium + Chrome headless autenticado, validacao em `375`, `600`, `840`, `1200` e `1920`.
 
 ## Resultado funcional
@@ -21,7 +21,7 @@
 ## Achados prioritarios
 - Alta - A arquitetura atual divide o mesmo atendimento em tres tabelas separadas. Isso resolve a organizacao tecnica, mas piora a operacao real: o usuario precisa reconstruir mentalmente o mesmo atendimento entre confirmacao, operacao e logistica. Evidencia: `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php:3376` descreve "tres leituras do mesmo fluxo operacional" e as tres renderizacoes ficam em `3414`, `3464` e `3514`.
 - Alta - No mobile, o trabalho real fica muito abaixo da primeira dobra. Em `375px`, a lista aparece depois de cabecalho, filtros, cards de resumo e tabs; o primeiro atendimento so fica acessivel apos muita rolagem. Isso deixa a Agenda correta visualmente, mas lenta para uso de loja.
-- Media - A renderizacao ainda tem efeitos colaterais de dados. `render_appointment_row_tab2_m3()` chama `update_post_meta()` durante a montagem da UI em `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php:1105` e `1125`. Renderizar nao deve normalizar estado; isso deve ir para camada de migracao, servico ou rotina explicita de saneamento.
+- Media - A renderizacao ainda tem efeitos colaterais de dados. O renderizador legado da aba Operacao chama `update_post_meta()` durante a montagem da UI em `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php:1105` e `1125`. Renderizar nao deve normalizar estado; isso deve ir para camada de migracao, servico ou rotina explicita de saneamento.
 - Media - Os botoes de navegacao anterior/proximo ficaram com alvo de toque estreito no desktop, perto de `35px x 36px`. Para uma superficie operacional, o minimo pratico deve ser `44px x 44px`, sem aumentar peso visual.
 - Media - O modal de servicos funciona, mas ainda precisa convergir para o mesmo shell modal DPS Signature dos outros modais. Hoje ele aparenta uma linguagem mais macia/arredondada do que a Agenda.
 - Media - Acoes repetidas em todas as abas tornam a prioridade operacional menos clara. `Reagendar` aparece em contextos diferentes, mas a acao primaria deveria mudar conforme o estagio do atendimento.

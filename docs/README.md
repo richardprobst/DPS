@@ -6,7 +6,6 @@ Este diretÃ³rio contÃ©m a documentaÃ§Ã£o detalhada de UX, layout, refato
 
 > **ðŸŒŸ [GUIA_SISTEMA_DPS.md](GUIA_SISTEMA_DPS.md)** - Guia completo de apresentaÃ§Ã£o, instalaÃ§Ã£o, configuraÃ§Ã£o e uso do sistema. Documento principal para usuÃ¡rios e administradores.
 
-> **ðŸš€ [FRONTEND_ADDON_GUIA_USUARIO.md](FRONTEND_ADDON_GUIA_USUARIO.md)** - **ðŸ†•** Guia completo do Frontend Add-on. InstalaÃ§Ã£o, configuraÃ§Ã£o, shortcodes, criaÃ§Ã£o de pÃ¡ginas e personalizaÃ§Ã£o visual. Documento essencial para usar o novo add-on modular de experiÃªncias frontend (cadastro, agendamento, configuraÃ§Ãµes).
 
 > **ðŸ”§ [FUNCTIONS_REFERENCE.md](FUNCTIONS_REFERENCE.md)** - ReferÃªncia completa de TODAS as funÃ§Ãµes e mÃ©todos do DPS. Guia definitivo para desenvolvedores trabalhando com o sistema (8.233 linhas, 385+ funÃ§Ãµes/mÃ©todos documentados, cobrindo plugin base + 16 add-ons).
 
@@ -98,8 +97,6 @@ Resumos de implementaÃ§Ã£o de features.
 - `SERVICES_AGENDA_INTEGRATION_SUMMARY.md` - IntegraÃ§Ã£o Services â‡„ Agenda
 - `UI_UX_IMPROVEMENTS_SUMMARY.md` - Resumo de melhorias de UI/UX
 - `WHATSAPP_IMPLEMENTATION_SUMMARY.md` - ImplementaÃ§Ã£o de integraÃ§Ã£o WhatsApp
-- `FRONTEND_ROLLOUT_GUIDE.md` - **ðŸ†•** Guia operacional de rollout do Frontend Add-on (ativaÃ§Ã£o por ambiente, verificaÃ§Ã£o, monitoramento)
-- `FRONTEND_RUNBOOK.md` - **ðŸ†•** Runbook de incidentes do Frontend Add-on (diagnÃ³stico, rollback, cenÃ¡rios)
 - `PLANO_IMPLEMENTACAO_FASES.md` - **ðŸ†•** Plano completo de implementaÃ§Ã£o em 8 fases (SeguranÃ§a â†’ RefatoraÃ§Ã£o â†’ Performance â†’ UX â†’ Features â†’ Auditoria â†’ Testes â†’ IntegraÃ§Ãµes)
 
 ### ðŸ“ /docs/improvements
@@ -155,8 +152,6 @@ Quality assurance e validaÃ§Ã£o funcional de add-ons.
 - `CLIENT_PORTAL_FUNCTIONAL_VALIDATION.md` - ValidaÃ§Ã£o funcional do Portal do Cliente
 - `FUNCTIONAL_VERIFICATION_REPORT.md` - RelatÃ³rio de verificaÃ§Ã£o funcional geral
 - `GROOMERS_FUNCTIONAL_QA.md` - QA funcional do Groomers Add-on
-- `FRONTEND_COMPATIBILITY_MATRIX.md` - **ðŸ†•** Matriz de compatibilidade do Frontend Add-on com todos os 18 add-ons
-- `FRONTEND_REMOVAL_READINESS.md` - **ðŸ†•** Checklist de prontidÃ£o para remoÃ§Ã£o futura de legado
 
 ### ðŸ“ /docs/refactoring
 
@@ -164,10 +159,6 @@ AnÃ¡lises e planos de refatoraÃ§Ã£o de cÃ³digo.
 
 **Arquivos:**
 - `AGENT_ENGINEERING_PLAYBOOK.md` - Playbook complementar para agentes com princÃ­pios, arquitetura e DoD de implementaÃ§Ã£o
-- `FRONTEND_ADDON_PHASED_ROADMAP.md` - Plano amplo e faseado para criaÃ§Ã£o do add-on FRONTEND com compatibilidade, rollout e preparaÃ§Ã£o para remoÃ§Ã£o futura de legado (Fase 1-6 concluÃ­das)
-- `FRONTEND_DEPRECATION_POLICY.md` - PolÃ­tica formal de depreciaÃ§Ã£o (janela mÃ­nima, comunicaÃ§Ã£o, critÃ©rios de aceite, procedimento)
-- `FRONTEND_REMOVAL_TARGETS.md` - Lista de alvos de remoÃ§Ã£o com dependÃªncias, risco, esforÃ§o e plano de reversÃ£o
-- `FRONTEND_NATIVE_IMPLEMENTATION_PLAN.md` - **ðŸ†• FASE 7:** Plano completo para implementaÃ§Ã£o nativa (from-scratch). Documento histÃ³rico de uma fase anterior; a orientaÃ§Ã£o visual vigente hoje estÃ¡ exclusivamente em `docs/visual/` e segue o padrÃ£o DPS Signature.
 
 ### ðŸ“ /docs/review
 

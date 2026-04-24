@@ -27,6 +27,7 @@ Este diretÃ³rio centraliza registros visuais padronizados do sistema DPS.
   - [2026-03-21 - Agenda (auditoria UX/UI por fases)](2026-03-21/SCREENSHOTS_2026-03-21.md)
   - [2026-03-23 - Agenda (Lista de Atendimentos redesign DPS Signature)](2026-03-23/SCREENSHOTS_2026-03-23.md)
   - [2026-04-23 - Agenda (views, filtros, layout regional e estados vazios)](2026-04-23/SCREENSHOTS_2026-04-23.md)
+  - [2026-04-24 - Agenda (card operacional simplificado)](2026-04-24/SCREENSHOTS_2026-04-24.md)
   - [2026-03-08 - Space Groomers Fase 3 e resumo sincronizado no portal](2026-03-08/SCREENSHOTS_2026-03-08.md)
 
 ## Regras obrigatÃ³rias para novas mudanÃ§as visuais

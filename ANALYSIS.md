@@ -1681,158 +1681,34 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 ---
 
-### Frontend (`desi-pet-shower-frontend`)
+### Frontend (`desi-pet-shower-frontend`) - removido
 
-**Status atual do cadastro publico**:
-- `[dps_registration_v2]` e `[dps_registration_form]` convergem para o mesmo renderer nativo DPS Signature; o shortcode legado passou a atuar apenas como alias de compatibilidade.
-- O fluxo de cadastro publico preserva hooks, nomes de campos, nonces e integracoes ja consumidas pelo ecossistema, mas deixou de depender do add-on legado de cadastro.
-- Anti-spam, duplicate warning, mensagens e confirmacao de e-mail operam sem transients, usando nonce, honeypot, timestamp e tokens persistidos.
-- O renderer nativo passou a cobrir o conjunto completo de dados do tutor e dos pets, incluindo mascaras, autocomplete, multiplos pets, reCAPTCHA e estados de confirmacao por e-mail.
+**Status atual**: add-on encerrado e removido do repositório. `desi-pet-shower-registration` e `desi-pet-shower-booking` permanecem como implementações canônicas dos fluxos públicos de cadastro e agendamento.
 
-**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-frontend`
+**Diretório anterior**: `plugins/desi-pet-shower-frontend` (removido)
 
-**PropÃƒÂ³sito e funcionalidades principais**:
-- Consolidar experiÃƒÂªncias frontend (cadastro, agendamento, configuraÃƒÂ§ÃƒÂµes) em add-on modular
-- Arquitetura com mÃƒÂ³dulos independentes, feature flags e camada de compatibilidade
-- Rollout controlado: cada mÃƒÂ³dulo pode ser habilitado/desabilitado individualmente
-- **[Fase 2]** MÃƒÂ³dulo Registration operacional em dual-run com o add-on legado
-- **[Fase 3]** MÃƒÂ³dulo Booking operacional em dual-run com o add-on legado
-- **[Fase 4]** MÃƒÂ³dulo Settings integrado ao sistema de abas de configuraÃƒÂ§ÃƒÂµes
-- **[Fase 7.1]** PreparaÃƒÂ§ÃƒÂ£o: abstracts, template engine, hook bridges, componentes DPS Signature, flags v2
-- **[Fase 7.2]** Registration V2: formulÃƒÂ¡rio nativo 100% independente do legado (cadastro + pets + reCAPTCHA + email confirmation)
-- **[Fase 7.3]** Booking V2: wizard nativo 5-step 100% independente do legado (cliente Ã¢â€ â€™ pets Ã¢â€ â€™ serviÃƒÂ§os Ã¢â€ â€™ data/hora Ã¢â€ â€™ confirmaÃƒÂ§ÃƒÂ£o + extras TaxiDog/Tosa)
+**Decisão de arquitetura**:
+- A migração para um add-on unificado de Frontend foi encerrada antes de substituir de forma suficiente os fluxos legados.
+- Cadastro e Booking voltam a ser a linha operacional suportada; não há dual-run ativo pelo add-on Frontend.
+- Os shortcodes canônicos preservados são os dos plugins separados: `[dps_registration_form]` e `[dps_booking_form]`.
+- Os shortcodes V2 do Frontend (`[dps_registration_v2]`, `[dps_booking_v2]`) foram removidos junto com o add-on e não devem ser usados em páginas publicadas.
 
-**Shortcodes expostos**:
-- `dps_registration_form` Ã¢â‚¬â€ quando flag `registration` ativada, o mÃƒÂ³dulo assume o shortcode (wrapper sobre o legado com surface DPS Signature)
-- `dps_booking_form` Ã¢â‚¬â€ quando flag `booking` ativada, o mÃƒÂ³dulo assume o shortcode (wrapper sobre o legado com surface DPS Signature)
-- `dps_registration_v2` Ã¢â‚¬â€ quando flag `registration_v2` ativada, formulÃƒÂ¡rio nativo DPS Signature (100% independente do legado)
-- `dps_booking_v2` Ã¢â‚¬â€ quando flag `booking_v2` ativada, wizard nativo DPS Signature de 5 steps (100% independente do legado)
+**Contratos preservados fora do Frontend**:
+- Cadastro público, criação de tutor/pets, validações, anti-spam, reCAPTCHA e confirmação de e-mail permanecem sob `desi-pet-shower-registration`.
+- Agendamento, wizard/steps, AJAX de booking e confirmação pós-agendamento permanecem sob `desi-pet-shower-booking` e integrações existentes do ecossistema DPS.
+- Hooks compartilhados como `dps_registration_after_client_created`, `dps_registration_after_fields`, `dps_registration_spam_check`, `dps_base_after_save_appointment`, `dps_base_appointment_fields` e `dps_base_appointment_assignment_fields` continuam pertencendo aos fluxos canônicos existentes e não devem ser removidos por causa da extinção do Frontend.
 
-**CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
-- Option: `dps_frontend_feature_flags` Ã¢â‚¬â€ controle de rollout por mÃƒÂ³dulo (flags: `registration`, `booking`, `settings`, `registration_v2`, `booking_v2`)
-- Option: `dps_frontend_usage_counters` Ã¢â‚¬â€ contadores de telemetria por mÃƒÂ³dulo
-- Transient: `dps_booking_confirmation_{user_id}` Ã¢â‚¬â€ confirmaÃƒÂ§ÃƒÂ£o de agendamento v2 (TTL 5min)
+**Itens removidos com o add-on**:
+- Bootstrap e classes `DPS_Frontend_*`.
+- Módulos nativos/bridge de Registration, Booking e Settings do Frontend.
+- Feature flags e telemetria próprias do Frontend (`dps_frontend_feature_flags`, `dps_frontend_usage_counters`).
+- Aba administrativa "Frontend" do sistema de configurações.
+- Assets, templates e shortcodes V2 do add-on.
+- Documentação operacional específica de rollout, migração, runbook, matriz de compatibilidade e readiness do Frontend.
 
-**Hooks consumidos** (Fase 2 Ã¢â‚¬â€ mÃƒÂ³dulo Registration v1 dual-run):
-- `dps_registration_after_fields` (preservado Ã¢â‚¬â€ consumido pelo Loyalty)
-- `dps_registration_after_client_created` (preservado Ã¢â‚¬â€ consumido pelo Loyalty)
-- `dps_registration_spam_check` (preservado)
-- `dps_registration_agenda_url` (preservado)
-
-**Hooks consumidos** (Fase 3 Ã¢â‚¬â€ mÃƒÂ³dulo Booking v1 dual-run):
-- `dps_base_after_save_appointment` (preservado Ã¢â‚¬â€ consumido por stock, payment, groomers, calendar, communications, push, services e booking)
-- `dps_base_appointment_fields` (preservado)
-- `dps_base_appointment_assignment_fields` (preservado)
-
-**Hooks consumidos** (Fase 4 Ã¢â‚¬â€ mÃƒÂ³dulo Settings):
-- `dps_settings_register_tabs` Ã¢â‚¬â€ registra aba "Frontend" via `DPS_Settings_Frontend::register_tab()`
-- `dps_settings_save_save_frontend` Ã¢â‚¬â€ processa salvamento das feature flags
-
-**Hooks disparados** (Fase 7 Ã¢â‚¬â€ mÃƒÂ³dulos nativos V2):
-- `dps_registration_v2_before_render` Ã¢â‚¬â€ antes de renderizar formulÃƒÂ¡rio de cadastro v2
-- `dps_registration_v2_after_render` Ã¢â‚¬â€ apÃƒÂ³s renderizar formulÃƒÂ¡rio de cadastro v2
-- `dps_registration_v2_client_created` Ã¢â‚¬â€ apÃƒÂ³s criar cliente via v2 (bridge: dispara hooks legados do Loyalty primeiro)
-- `dps_registration_v2_pet_created` Ã¢â‚¬â€ apÃƒÂ³s criar pet via v2
-- `dps_registration_spam_check` Ã¢â‚¬â€ filtro anti-spam (reusa hook legado via bridge)
-- `dps_booking_v2_before_render` Ã¢â‚¬â€ antes de renderizar wizard de booking v2
-- `dps_booking_v2_step_render` Ã¢â‚¬â€ ao renderizar step do wizard
-- `dps_booking_v2_step_validate` Ã¢â‚¬â€ filtro de validaÃƒÂ§ÃƒÂ£o por step
-- `dps_booking_v2_before_process` Ã¢â‚¬â€ antes de criar agendamento v2
-- `dps_booking_v2_after_process` Ã¢â‚¬â€ apÃƒÂ³s processar agendamento v2
-- `dps_booking_v2_appointment_created` Ã¢â‚¬â€ apÃƒÂ³s criar agendamento v2
-
-**Hooks de bridge** (Fase 7 Ã¢â‚¬â€ CRÃƒÂTICO: legado PRIMEIRO, v2 DEPOIS):
-- `dps_base_after_save_appointment` Ã¢â‚¬â€ 8 consumidores: Stock, Payment, Groomers, Calendar, Communications, Push, Services, Booking
-- `dps_base_appointment_fields` Ã¢â‚¬â€ Services: injeÃƒÂ§ÃƒÂ£o de campos
-- `dps_base_appointment_assignment_fields` Ã¢â‚¬â€ Groomers: campos de atribuiÃƒÂ§ÃƒÂ£o
-- `dps_registration_after_client_created` Ã¢â‚¬â€ Loyalty: cÃƒÂ³digo de indicaÃƒÂ§ÃƒÂ£o
-
-**AJAX endpoints** (Fase 7.3 Ã¢â‚¬â€ Booking V2):
-- `wp_ajax_dps_booking_search_client` Ã¢â‚¬â€ busca cliente por telefone (nonce + capability)
-- `wp_ajax_dps_booking_get_pets` Ã¢â‚¬â€ lista pets do cliente com paginaÃƒÂ§ÃƒÂ£o (nonce + capability)
-- `wp_ajax_dps_booking_get_services` Ã¢â‚¬â€ serviÃƒÂ§os ativos com preÃƒÂ§os por porte (nonce + capability)
-- `wp_ajax_dps_booking_get_slots` Ã¢â‚¬â€ horÃƒÂ¡rios livres 08:00-18:00/30min (nonce + capability)
-- `wp_ajax_dps_booking_validate_step` Ã¢â‚¬â€ validaÃƒÂ§ÃƒÂ£o server-side por step (nonce + capability)
-
-**DependÃƒÂªncias**:
-- Depende do plugin base (DPS_Base_Plugin + design tokens CSS)
-- MÃƒÂ³dulo Registration v1 depende de `DPS_Registration_Addon` (add-on legado) para dual-run
-- MÃƒÂ³dulo Booking v1 depende de `DPS_Booking_Addon` (add-on legado) para dual-run
-- MÃƒÂ³dulos V2 nativos (Registration V2, Booking V2) sÃƒÂ£o 100% independentes dos add-ons legados
-- MÃƒÂ³dulo Settings depende de `DPS_Settings_Frontend` (sistema de abas do base)
-
-**Arquitetura interna**:
-- `DPS_Frontend_Addon` Ã¢â‚¬â€ orquestrador com injeÃƒÂ§ÃƒÂ£o de dependÃƒÂªncias
-- `DPS_Frontend_Module_Registry` Ã¢â‚¬â€ registro e boot de mÃƒÂ³dulos
-- `DPS_Frontend_Feature_Flags` Ã¢â‚¬â€ controle de rollout persistido
-- `DPS_Frontend_Compatibility` Ã¢â‚¬â€ bridges para legado
-- `DPS_Frontend_Assets` Ã¢â‚¬â€ enqueue condicional DPS Signature
-- `DPS_Frontend_Logger` Ã¢â‚¬â€ observabilidade via error_log + telemetria batch
-- `DPS_Frontend_Request_Guard` Ã¢â‚¬â€ seguranÃƒÂ§a centralizada (nonce, capability, sanitizaÃƒÂ§ÃƒÂ£o)
-- `DPS_Template_Engine` Ã¢â‚¬â€ renderizaÃƒÂ§ÃƒÂ£o com suporte a override via tema (dps-templates/)
-- `DPS_Frontend_Registration_Module` Ã¢â‚¬â€ v1 dual-run: assume shortcode, delega lÃƒÂ³gica ao legado
-- `DPS_Frontend_Booking_Module` Ã¢â‚¬â€ v1 dual-run: assume shortcode, delega lÃƒÂ³gica ao legado
-- `DPS_Frontend_Settings_Module` Ã¢â‚¬â€ registra aba de configuraÃƒÂ§ÃƒÂµes com controles de feature flags
-- `DPS_Frontend_Registration_V2_Module` Ã¢â‚¬â€ v2 nativo: shortcode `[dps_registration_v2]`, handler, services
-- `DPS_Frontend_Booking_V2_Module` Ã¢â‚¬â€ v2 nativo: shortcode `[dps_booking_v2]`, handler, services, AJAX
-- `DPS_Registration_Hook_Bridge` Ã¢â‚¬â€ compatibilidade v1/v2 Registration (legado primeiro, v2 depois)
-- `DPS_Booking_Hook_Bridge` Ã¢â‚¬â€ compatibilidade v1/v2 Booking (legado primeiro, v2 depois)
-
-**Classes de negÃƒÂ³cio Ã¢â‚¬â€ Registration V2** (Fase 7.2):
-- `DPS_Registration_Handler` Ã¢â‚¬â€ pipeline: reCAPTCHA Ã¢â€ â€™ anti-spam Ã¢â€ â€™ validaÃƒÂ§ÃƒÂ£o Ã¢â€ â€™ duplicata Ã¢â€ â€™ criar cliente Ã¢â€ â€™ hooks Loyalty Ã¢â€ â€™ criar pets Ã¢â€ â€™ email confirmaÃƒÂ§ÃƒÂ£o
-- `DPS_Form_Validator` Ã¢â‚¬â€ validaÃƒÂ§ÃƒÂ£o de formulÃƒÂ¡rio (nome, email, telefone, CPF, pets)
-- `DPS_Cpf_Validator` Ã¢â‚¬â€ validaÃƒÂ§ÃƒÂ£o CPF mod-11
-- `DPS_Client_Service` Ã¢â‚¬â€ CRUD para `dps_cliente` (13+ metas)
-- `DPS_Pet_Service` Ã¢â‚¬â€ CRUD para `dps_pet`
-- `DPS_Breed_Provider` Ã¢â‚¬â€ dataset de raÃƒÂ§as por espÃƒÂ©cie (cÃƒÂ£o: 44, gato: 20)
-- `DPS_Duplicate_Detector` Ã¢â‚¬â€ detecÃƒÂ§ÃƒÂ£o por telefone com override admin
-- `DPS_Recaptcha_Service` Ã¢â‚¬â€ verificaÃƒÂ§ÃƒÂ£o reCAPTCHA v3
-- `DPS_Email_Confirmation_Service` Ã¢â‚¬â€ token UUID 48h + envio
-
-**Classes de negÃƒÂ³cio Ã¢â‚¬â€ Booking V2** (Fase 7.3):
-- `DPS_Booking_Handler` Ã¢â‚¬â€ pipeline: validaÃƒÂ§ÃƒÂ£o Ã¢â€ â€™ extras Ã¢â€ â€™ criar appointment Ã¢â€ â€™ confirmaÃƒÂ§ÃƒÂ£o transient Ã¢â€ â€™ hook bridge (8 add-ons)
-- `DPS_Booking_Validator` Ã¢â‚¬â€ validaÃƒÂ§ÃƒÂ£o multi-step (5 steps) + extras (TaxiDog/Tosa)
-- `DPS_Appointment_Service` Ã¢â‚¬â€ CRUD para `dps_agendamento` (16+ metas, conflitos, busca por cliente)
-- `DPS_Booking_Confirmation_Service` Ã¢â‚¬â€ transient de confirmaÃƒÂ§ÃƒÂ£o (5min TTL)
-- `DPS_Booking_Ajax` Ã¢â‚¬â€ 5 endpoints AJAX (busca cliente, pets, serviÃƒÂ§os, slots, validaÃƒÂ§ÃƒÂ£o)
-
-**EstratÃƒÂ©gia de compatibilidade (Fases 2Ã¢â‚¬â€œ4)**:
-- IntervenÃƒÂ§ÃƒÂ£o mÃƒÂ­nima: o legado continua processando formulÃƒÂ¡rio, emails, REST, AJAX, settings e cron
-- MÃƒÂ³dulos de shortcode assumem o shortcode (envolve output na `.dps-frontend` surface) e adicionam CSS extra
-- MÃƒÂ³dulo de settings registra aba via API moderna `register_tab()` sem alterar abas existentes
-- Rollback: desabilitar flag do mÃƒÂ³dulo restaura comportamento 100% legado
-
-**CoexistÃƒÂªncia v1/v2** (Fase 7):
-- Shortcodes v1 (`[dps_registration_form]`, `[dps_booking_form]`) e v2 (`[dps_registration_v2]`, `[dps_booking_v2]`) podem estar ativos simultaneamente
-- Feature flags independentes: `registration` (v1), `registration_v2` (v2), `booking` (v1), `booking_v2` (v2)
-- Hook bridge garante compatibilidade: hooks legados disparam PRIMEIRO, hooks v2 DEPOIS
-- Rollback instantÃƒÂ¢neo via toggle de flag Ã¢â‚¬â€ sem perda de dados
-
-**Introduzido em**: v1.0.0 (Fases 1Ã¢â‚¬â€œ6), v2.0.0 (Fase 7.1), v2.1.0 (Fase 7.2), v2.2.0 (Fase 7.3), v2.3.0 (Fase 7.4), v2.4.0 (Fase 7.5)
-
-**DocumentaÃƒÂ§ÃƒÂ£o operacional (Fase 5)**:
-- `docs/implementation/FRONTEND_ROLLOUT_GUIDE.md` Ã¢â‚¬â€ guia de ativaÃƒÂ§ÃƒÂ£o por ambiente
-- `docs/implementation/FRONTEND_RUNBOOK.md` Ã¢â‚¬â€ diagnÃƒÂ³stico e rollback de incidentes
-- `docs/qa/FRONTEND_COMPATIBILITY_MATRIX.md` Ã¢â‚¬â€ matriz de compatibilidade com todos os add-ons
-- `docs/qa/FRONTEND_REMOVAL_READINESS.md` Ã¢â‚¬â€ checklist de prontidÃƒÂ£o para remoÃƒÂ§ÃƒÂ£o futura
-
-**DocumentaÃƒÂ§ÃƒÂ£o de governanÃƒÂ§a (Fase 6)**:
-- `docs/refactoring/FRONTEND_DEPRECATION_POLICY.md` Ã¢â‚¬â€ polÃƒÂ­tica de depreciaÃƒÂ§ÃƒÂ£o (janela mÃƒÂ­nima 180 dias, processo de comunicaÃƒÂ§ÃƒÂ£o, critÃƒÂ©rios de aceite)
-- `docs/refactoring/FRONTEND_REMOVAL_TARGETS.md` Ã¢â‚¬â€ lista de alvos com risco, dependÃƒÂªncias e esforÃƒÂ§o (booking Ã°Å¸Å¸Â¢ baixo; registration Ã°Å¸Å¸Â¡ mÃƒÂ©dio)
-- Telemetria de uso: contadores por mÃƒÂ³dulo via `dps_frontend_usage_counters`, exibidos na aba Settings
-
-**DocumentaÃƒÂ§ÃƒÂ£o de implementaÃƒÂ§ÃƒÂ£o nativa (Fase 7)**:
-- `docs/refactoring/FRONTEND_NATIVE_IMPLEMENTATION_PLAN.md` Ã¢â‚¬â€ plano completo com inventÃƒÂ¡rio legado, hook bridge, templates, estratÃƒÂ©gia de migraÃƒÂ§ÃƒÂ£o
-
-**DocumentaÃƒÂ§ÃƒÂ£o de coexistÃƒÂªncia e migraÃƒÂ§ÃƒÂ£o (Fase 7.4)**:
-- `docs/implementation/FRONTEND_V2_MIGRATION_GUIDE.md` Ã¢â‚¬â€ guia passo a passo de migraÃƒÂ§ÃƒÂ£o v1Ã¢â€ â€™v2 (7 etapas, comparaÃƒÂ§ÃƒÂ£o de features, checklist, rollback, troubleshooting, WP-CLI)
-- SeÃƒÂ§ÃƒÂ£o "Status de CoexistÃƒÂªncia v1/v2" na aba Settings com indicadores visuais por mÃƒÂ³dulo
-
-**ObservaÃƒÂ§ÃƒÂµes**:
-- PHP 8.4 moderno: constructor promotion, readonly properties, typed properties, return types
-- Sem singletons: objetos montados por composiÃƒÂ§ÃƒÂ£o no bootstrap
-- Assets carregados somente quando ao menos um mÃƒÂ³dulo estÃƒÂ¡ habilitado (feature flag)
-- Roadmap completo em `docs/refactoring/FRONTEND_ADDON_PHASED_ROADMAP.md`
+**Observações operacionais**:
+- A remoção do Frontend não valida automaticamente o runtime publicado. Antes de publicar a alteração, páginas publicadas devem ser revisadas para garantir que não usam `[dps_registration_v2]`, `[dps_booking_v2]` ou telas dependentes do add-on removido.
+- Qualquer retomada futura de unificação de frontend deve começar como nova proposta de arquitetura, com preservação explícita dos contratos externos dos plugins Registration e Booking.
 
 ---
 
