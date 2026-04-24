@@ -1,5 +1,83 @@
 # Screenshots 2026-04-23
 
+## Portal do Cliente: Fase 3 forca de senha no reset
+
+Fonte de verdade visual seguida nesta Fase 3: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` (padrao DPS Signature).
+
+### Objetivo
+
+Executar somente a Fase 3 do plano pos-auditoria do login do Portal do Cliente: adicionar indicacao de forca de senha e dicas de composicao na tela de reset valido, preservando contratos externos, campos, nonces, action, redirects e a regra backend ja publicada.
+
+### Verificacao previa dos riscos residuais
+
+- `play.google.com/log` abortado foi classificado como ruido externo de rede, sem `pageErrors` e sem acao necessaria no add-on.
+- o notice de WP-CLI do `all-in-one-wp-migration` foi confirmado como externo: ele aparece com plugins padrao e desaparece ao executar WP-CLI com `--skip-plugins=all-in-one-wp-migration`.
+- a verificacao foi salva em `client-portal-phase-3-password-strength/residual-risk-verification.json`.
+
+### Ajustes implementados
+
+- a tela de reset valido ganhou medidor de forca da senha com estados `Senha fraca`, `Senha em construcao`, `Senha boa` e `Senha forte`;
+- adicionada lista de dicas de composicao com progresso inline: minimo de 8 caracteres, letras maiusculas/minusculas, numero e simbolo ou frase mais longa;
+- adicionada mensagem inline para confirmar se os dois campos de senha conferem;
+- o runtime publico `client-portal-access.js` passou a controlar apenas essa interacao de UI, sem tocar no fluxo autenticado;
+- o CSS do shell publico passou a quebrar e-mails/identificadores longos dentro do reset, corrigindo overflow horizontal em `375px`.
+
+### Publicado e validado
+
+- validado no reset publicado emitido pelo proprio add-on em `https://desi.pet/portal-do-cliente/`;
+- fixture temporario final:
+  - tag: `codex_portal_phase3_20260423_230107`;
+  - usuarios/posts temporarios removidos ao final;
+  - script WP-CLI temporario remoto removido ao final;
+- backup remoto:
+  - `/home/u944637195/backups/dps-client-portal-phase3-password-strength-20260423-225737`;
+  - `/home/u944637195/backups/dps-client-portal-phase3-password-strength-overflow-20260423-230022`.
+
+### Validacao funcional
+
+- `pageErrors = []`;
+- `consoleErrors = []`;
+- estados fraco, intermediario, mismatch e forte validados no runtime publicado;
+- `Senha forte` exibida em todos os breakpoints com `4/4` dicas atendidas;
+- mensagem `As senhas conferem.` exibida em todos os breakpoints;
+- painel com geometria reta (`borderRadius = 0px`);
+- envio final do reset continuou autenticando e abriu o portal.
+
+### Breakpoints validados
+
+- `375`: `overflowX = 0`, `Senha forte`, `tips = 4/4`;
+- `600`: `overflowX = 0`, `Senha forte`, `tips = 4/4`;
+- `840`: `overflowX = 0`, `Senha forte`, `tips = 4/4`;
+- `1200`: `overflowX = 0`, `Senha forte`, `tips = 4/4`;
+- `1920`: `overflowX = 0`, `Senha forte`, `tips = 4/4`.
+
+### Artefatos
+
+- [residual-risk-verification.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-3-password-strength/residual-risk-verification.json)
+- [password-strength-validation.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-3-password-strength/password-strength-validation.json)
+- [password-strength-fixture.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-3-password-strength/password-strength-fixture.json)
+- [password-strength-cleanup.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-3-password-strength/password-strength-cleanup.json)
+- [password-strength-cleanup-consumed-fixture.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-3-password-strength/password-strength-cleanup-consumed-fixture.json)
+- [deploy-sftp-result.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-3-password-strength/deploy-sftp-result.json)
+- [deploy-sftp-overflow-fix-result.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-3-password-strength/deploy-sftp-overflow-fix-result.json)
+- [portal-reset-password-strength-375.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-3-password-strength/portal-reset-password-strength-375.png)
+- [portal-reset-password-strength-600.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-3-password-strength/portal-reset-password-strength-600.png)
+- [portal-reset-password-strength-840.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-3-password-strength/portal-reset-password-strength-840.png)
+- [portal-reset-password-strength-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-3-password-strength/portal-reset-password-strength-1200.png)
+- [portal-reset-password-strength-1920.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-3-password-strength/portal-reset-password-strength-1920.png)
+- [portal-reset-password-strength-weak-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-3-password-strength/portal-reset-password-strength-weak-1200.png)
+- [portal-reset-password-strength-mismatch-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-3-password-strength/portal-reset-password-strength-mismatch-1200.png)
+
+### Comandos executados
+
+- `php -l plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php`
+- `node --check plugins/desi-pet-shower-client-portal/assets/js/client-portal-access.js`
+- upload por SSH/SFTP com backup remoto dos arquivos alterados
+- `php -l` remoto no template publicado
+- fixture temporario via WP-CLI com `tools/client-portal/client-portal-smoke-fixture.php`
+- validacao publicada com Playwright em `375`, `600`, `840`, `1200` e `1920`
+- limpeza dos clientes/usuarios temporarios e scripts WP-CLI remotos
+
 ## Portal do Cliente: Fase 2 suporte ao throttling publico
 
 Fonte de verdade visual seguida nesta Fase 2: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` (padrao DPS Signature).

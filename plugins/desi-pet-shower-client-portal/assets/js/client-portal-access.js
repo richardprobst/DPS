@@ -191,6 +191,115 @@
         });
     }
 
+    function getPasswordStrengthState(value) {
+        var password = value || '';
+        var checks = {
+            length: password.length >= 8,
+            case: /[a-z]/.test(password) && /[A-Z]/.test(password),
+            number: /\d/.test(password),
+            symbol: /[^A-Za-z0-9]/.test(password) || password.length >= 14
+        };
+        var score = Object.keys(checks).reduce(function(total, key) {
+            return total + (checks[key] ? 1 : 0);
+        }, 0);
+        var level = 'empty';
+
+        if (password.length > 0) {
+            if (score <= 1) {
+                level = 'weak';
+            } else if (score === 2) {
+                level = 'fair';
+            } else if (score === 3) {
+                level = 'good';
+            } else {
+                level = 'strong';
+            }
+        }
+
+        return {
+            checks: checks,
+            level: level,
+            score: score
+        };
+    }
+
+    function updatePasswordStrength(panel, input, confirmInput) {
+        if (!panel || !input) {
+            return;
+        }
+
+        var valueTarget = panel.querySelector('[data-dps-password-strength-value]');
+        var bar = panel.querySelector('[data-dps-password-strength-bar]');
+        var matchTarget = panel.querySelector('[data-dps-password-match]');
+        var state = getPasswordStrengthState(input.value);
+        var labels = {
+            empty: panel.getAttribute('data-label-empty') || 'Digite a nova senha para ver a forca.',
+            weak: panel.getAttribute('data-label-weak') || 'Senha fraca',
+            fair: panel.getAttribute('data-label-fair') || 'Senha em construcao',
+            good: panel.getAttribute('data-label-good') || 'Senha boa',
+            strong: panel.getAttribute('data-label-strong') || 'Senha forte'
+        };
+
+        ['empty', 'weak', 'fair', 'good', 'strong'].forEach(function(level) {
+            panel.classList.toggle('is-' + level, state.level === level);
+        });
+
+        if (valueTarget) {
+            valueTarget.textContent = labels[state.level] || labels.empty;
+        }
+
+        if (bar) {
+            bar.style.width = state.level === 'empty' ? '0%' : String(Math.max(25, state.score * 25)) + '%';
+        }
+
+        toArray(panel.querySelectorAll('[data-dps-password-tip]')).forEach(function(tip) {
+            var key = tip.getAttribute('data-dps-password-tip');
+            tip.classList.toggle('is-met', !!state.checks[key]);
+        });
+
+        if (!matchTarget || !confirmInput) {
+            return;
+        }
+
+        if (!confirmInput.value) {
+            matchTarget.textContent = '';
+            matchTarget.classList.remove('is-match', 'is-mismatch');
+            return;
+        }
+
+        var matches = input.value === confirmInput.value;
+        matchTarget.textContent = matches
+            ? (panel.getAttribute('data-label-match') || 'As senhas conferem.')
+            : (panel.getAttribute('data-label-mismatch') || 'As senhas ainda nao conferem.');
+        matchTarget.classList.toggle('is-match', matches);
+        matchTarget.classList.toggle('is-mismatch', !matches);
+    }
+
+    function bindPasswordStrength(root) {
+        toArray(root.querySelectorAll('[data-dps-password-strength]')).forEach(function(panel) {
+            var inputId = panel.getAttribute('data-input');
+            var confirmId = panel.getAttribute('data-confirm');
+            var input = inputId ? document.getElementById(inputId) : null;
+            var confirmInput = confirmId ? document.getElementById(confirmId) : null;
+
+            if (!input) {
+                return;
+            }
+
+            input.addEventListener('input', function() {
+                updatePasswordStrength(panel, input, confirmInput);
+            });
+
+            if (confirmInput) {
+                confirmInput.addEventListener('input', function() {
+                    updatePasswordStrength(panel, input, confirmInput);
+                });
+            }
+
+            updatePasswordStrength(panel, input, confirmInput);
+        });
+    }
+
     function requestAccess(actionName, nonce, payload, feedbackTarget, triggerButton, supportCard) {
         if (!config.ajaxUrl || !actionName || !nonce) {
             setFeedback(
@@ -356,6 +465,7 @@
         bindModeSwitch(root);
         bindEmailSync(root);
         bindPasswordToggles(root);
+        bindPasswordStrength(root);
         bindMagicLinkForm(root);
         bindPasswordAccessButtons(root);
     }

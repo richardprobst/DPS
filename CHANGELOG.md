@@ -93,6 +93,10 @@ Antes de criar uma nova versÃ£o oficial:
 - Adicionado resumo administrativo de throttling publico na aba Logins do Portal, com janelas ativas, bloqueios, escopo por e-mail/IP e proxima liberacao.
 - Adicionada resolucao segura de e-mails conhecidos contra clientes publicados, mantendo IPs anonimizados como fingerprint no admin.
 
+**Portal do Cliente - forca de senha no reset**
+
+- Adicionado medidor inline de forca da senha e dicas de composicao na tela publica de reset valido, preservando action, nonces, nomes de campos e regra backend ja publicados.
+
 **Agenda Add-on - fila operacional DPS Signature**
 
 - Implementada a primeira versão da fila operacional canônica da Agenda, substituindo a leitura em três tabelas por um eixo único com horário, pet/tutor, serviços, etapa, financeiro, operação, logística e ações.
@@ -120,6 +124,7 @@ Antes de criar uma nova versÃ£o oficial:
 - Removidos efeitos colaterais de persistencia no renderer operacional da Agenda, que antes ajustava metadados durante a montagem da UI.
 - Removido uso deprecated de `$.trim` nos scripts ativos da Agenda; a revalidacao publicada ficou sem erros e sem warnings no Playwright.
 - Corrigida a URL base da aba Logins do hub do Portal para manter buscas em `admin.php?page=dps-portal-hub&tab=logins`, evitando retorno ao submenu legado oculto.
+- Corrigida quebra de linha de identificadores longos no reset publico do Portal, eliminando overflow horizontal em telas de `375px`.
 
 #### Removed (Removido)
 

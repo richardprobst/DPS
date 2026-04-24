@@ -101,7 +101,7 @@ $reset_intro      = $is_expired_reset
                                 <div class="dps-signature-field">
                                     <label class="dps-signature-field__label" for="dps-portal-new-password"><?php esc_html_e( 'Nova senha', 'dps-client-portal' ); ?></label>
                                     <div class="dps-portal-access__password-wrap">
-                                        <input id="dps-portal-new-password" type="password" name="dps_portal_new_password" autocomplete="new-password" required />
+                                        <input id="dps-portal-new-password" type="password" name="dps_portal_new_password" autocomplete="new-password" aria-describedby="dps-portal-password-strength-value dps-portal-password-strength-tips" required />
                                         <button type="button" class="dps-portal-access__password-toggle" data-dps-password-toggle aria-controls="dps-portal-new-password" aria-pressed="false"><?php esc_html_e( 'Mostrar', 'dps-client-portal' ); ?></button>
                                     </div>
                                 </div>
@@ -109,9 +109,38 @@ $reset_intro      = $is_expired_reset
                                 <div class="dps-signature-field">
                                     <label class="dps-signature-field__label" for="dps-portal-confirm-password"><?php esc_html_e( 'Confirmar senha', 'dps-client-portal' ); ?></label>
                                     <div class="dps-portal-access__password-wrap">
-                                        <input id="dps-portal-confirm-password" type="password" name="dps_portal_confirm_password" autocomplete="new-password" required />
+                                        <input id="dps-portal-confirm-password" type="password" name="dps_portal_confirm_password" autocomplete="new-password" aria-describedby="dps-portal-password-match" required />
                                         <button type="button" class="dps-portal-access__password-toggle" data-dps-password-toggle aria-controls="dps-portal-confirm-password" aria-pressed="false"><?php esc_html_e( 'Mostrar', 'dps-client-portal' ); ?></button>
                                     </div>
+                                </div>
+
+                                <div
+                                    class="dps-signature-field dps-signature-field--full dps-portal-password-strength"
+                                    data-dps-password-strength
+                                    data-input="dps-portal-new-password"
+                                    data-confirm="dps-portal-confirm-password"
+                                    data-label-empty="<?php echo esc_attr__( 'Digite a nova senha para ver a forca.', 'dps-client-portal' ); ?>"
+                                    data-label-weak="<?php echo esc_attr__( 'Senha fraca', 'dps-client-portal' ); ?>"
+                                    data-label-fair="<?php echo esc_attr__( 'Senha em construcao', 'dps-client-portal' ); ?>"
+                                    data-label-good="<?php echo esc_attr__( 'Senha boa', 'dps-client-portal' ); ?>"
+                                    data-label-strong="<?php echo esc_attr__( 'Senha forte', 'dps-client-portal' ); ?>"
+                                    data-label-match="<?php echo esc_attr__( 'As senhas conferem.', 'dps-client-portal' ); ?>"
+                                    data-label-mismatch="<?php echo esc_attr__( 'As senhas ainda nao conferem.', 'dps-client-portal' ); ?>"
+                                >
+                                    <div class="dps-portal-password-strength__header">
+                                        <span><?php esc_html_e( 'Forca da senha', 'dps-client-portal' ); ?></span>
+                                        <strong id="dps-portal-password-strength-value" data-dps-password-strength-value aria-live="polite"><?php esc_html_e( 'Digite a nova senha para ver a forca.', 'dps-client-portal' ); ?></strong>
+                                    </div>
+                                    <div class="dps-portal-password-strength__meter" aria-hidden="true">
+                                        <span data-dps-password-strength-bar></span>
+                                    </div>
+                                    <ul id="dps-portal-password-strength-tips" class="dps-portal-password-strength__tips" aria-label="<?php esc_attr_e( 'Dicas de composicao da senha', 'dps-client-portal' ); ?>">
+                                        <li data-dps-password-tip="length"><?php esc_html_e( 'Use pelo menos 8 caracteres.', 'dps-client-portal' ); ?></li>
+                                        <li data-dps-password-tip="case"><?php esc_html_e( 'Misture letras maiusculas e minusculas.', 'dps-client-portal' ); ?></li>
+                                        <li data-dps-password-tip="number"><?php esc_html_e( 'Inclua ao menos um numero.', 'dps-client-portal' ); ?></li>
+                                        <li data-dps-password-tip="symbol"><?php esc_html_e( 'Adicione um simbolo ou use uma frase mais longa.', 'dps-client-portal' ); ?></li>
+                                    </ul>
+                                    <p id="dps-portal-password-match" class="dps-portal-password-strength__match" data-dps-password-match aria-live="polite"></p>
                                 </div>
 
                                 <div class="dps-signature-field dps-signature-field--full">

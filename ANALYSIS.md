@@ -1241,6 +1241,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - O smoke publicado do acesso publico passou a ser reexecutavel por `tools/client-portal/client-portal-smoke-fixture.php` (fixture temporario via WP-CLI) e `tools/client-portal/client-portal-public-smoke.mjs` (Playwright contra `https://desi.pet/portal-do-cliente/`).
 - A Fase 2 pos-auditoria expos no admin do Portal um resumo operacional do throttling publico persistido em `dps_portal_rate_limits`. A aba Logins do hub mostra janelas ativas, bloqueios, escopos por e-mail/IP e proxima liberacao; e-mails conhecidos sao resolvidos contra clientes publicados e IPs aparecem apenas como fingerprint, sem expor endereco bruto.
 - A aba Logins renderizada pelo hub do Portal usa `admin.php?page=dps-portal-hub&tab=logins` como URL base de operacoes de busca, mantendo a navegacao na pagina acessivel consolidada e preservando o submenu legado oculto como detalhe interno de compatibilidade.
+- A Fase 3 pos-auditoria adicionou indicacao inline de forca de senha e dicas de composicao ao reset valido no shell publico. A interacao fica restrita a `client-portal-access.js`, e informativa, nao altera a regra backend de senha nem os contratos externos do formulario; identificadores longos do reset agora quebram linha para evitar overflow mobile.
 
 **Diretório**: `plugins/desi-pet-shower-client-portal`
 

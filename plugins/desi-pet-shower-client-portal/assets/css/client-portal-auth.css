@@ -254,6 +254,133 @@
     box-shadow: none;
 }
 
+.dps-portal-password-strength {
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    background: color-mix(in srgb, var(--dps-color-surface-container-lowest) 88%, #ffffff);
+}
+
+.dps-portal-password-strength__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.dps-portal-password-strength__header span {
+    color: var(--dps-color-on-surface);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.dps-portal-password-strength__header strong {
+    color: var(--dps-color-on-surface-variant);
+    font-size: 0.92rem;
+    line-height: 1.35;
+    text-align: right;
+}
+
+.dps-portal-password-strength__meter {
+    height: 0.5rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    background: var(--dps-color-surface-container-low);
+}
+
+.dps-portal-password-strength__meter span {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: var(--dps-color-outline);
+    transition:
+        width 160ms ease,
+        background-color 160ms ease;
+}
+
+.dps-portal-password-strength.is-weak .dps-portal-password-strength__meter span,
+.dps-portal-password-strength__match.is-mismatch {
+    background: var(--dps-color-error);
+}
+
+.dps-portal-password-strength.is-fair .dps-portal-password-strength__meter span {
+    background: var(--dps-color-warning);
+}
+
+.dps-portal-password-strength.is-good .dps-portal-password-strength__meter span,
+.dps-portal-password-strength.is-strong .dps-portal-password-strength__meter span,
+.dps-portal-password-strength__match.is-match {
+    background: var(--dps-color-success);
+}
+
+.dps-portal-password-strength.is-strong .dps-portal-password-strength__header strong {
+    color: var(--dps-color-success);
+}
+
+.dps-portal-password-strength__tips {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dps-portal-password-strength__tips li {
+    position: relative;
+    min-width: 0;
+    padding-left: 1.25rem;
+    color: var(--dps-color-on-surface-variant);
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+
+.dps-portal-password-strength__tips li::before {
+    content: '';
+    position: absolute;
+    top: 0.52em;
+    left: 0;
+    width: 0.48rem;
+    height: 0.48rem;
+    border: 1px solid var(--dps-color-outline);
+    background: transparent;
+}
+
+.dps-portal-password-strength__tips li.is-met {
+    color: var(--dps-color-on-surface);
+}
+
+.dps-portal-password-strength__tips li.is-met::before {
+    border-color: var(--dps-color-success);
+    background: var(--dps-color-success);
+}
+
+.dps-portal-password-strength__match {
+    min-height: 1.4em;
+    margin: 0;
+    color: var(--dps-color-on-surface-variant);
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.dps-portal-password-strength__match.is-match,
+.dps-portal-password-strength__match.is-mismatch {
+    padding-left: 0.75rem;
+    border-left: 3px solid currentColor;
+    background: transparent;
+}
+
+.dps-portal-password-strength__match.is-match {
+    color: var(--dps-color-success);
+}
+
+.dps-portal-password-strength__match.is-mismatch {
+    color: var(--dps-color-error);
+}
+
 .dps-portal-signature .dps-signature-button--secondary {
     background: var(--dps-color-surface-container-low);
     color: var(--dps-color-on-surface);
@@ -477,6 +604,7 @@
     color: var(--dps-color-on-surface);
     font-size: 1rem;
     line-height: 1.35;
+    overflow-wrap: anywhere;
 }
 
 .dps-client-portal-access-page--reset .dps-portal-access__hero {
@@ -531,5 +659,17 @@
     .dps-portal-access__password-toggle {
         min-width: 3.7rem;
         padding-inline: 0.45rem;
+    }
+
+    .dps-portal-password-strength__header {
+        display: grid;
+    }
+
+    .dps-portal-password-strength__header strong {
+        text-align: left;
+    }
+
+    .dps-portal-password-strength__tips {
+        grid-template-columns: 1fr;
     }
 }

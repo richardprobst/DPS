@@ -1,0 +1,59 @@
+{
+  "verified_at": "2026-04-24T01:54:16.967931+00:00",
+  "browser_check": {
+    "url": "https://desi.pet/portal-do-cliente/",
+    "pageErrors": [],
+    "consoleErrors": [],
+    "networkFailures": [
+      {
+        "url": "https://www.google-analytics.com/g/collect?v=2&tid=G-TE40KZM44M&gtm=45Pe64m2v9239895396za200zd9239895396&_p=1776995649096&gcd=13l3l3l3l1l1&npa=0&dma=0&gdid=dZTNiMT&are=1&cid=663779721.1776995650&frm=0&pscdl=noapi&rcb=4&sr=1200x1200&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=19.0.0&uaw=0&ul=pt-br&_s=1&tag_exp=0~115938465~115938469~117266401~117512543~117884344&sid=1776995649&sct=1&seg=0&dl=https%3A%2F%2Fdesi.pet%2Fportal-do-cliente%2F&dt=Portal%20do%20Cliente%20%E2%80%93%20Desi%20Pet%20Shower&en=page_view&_fv=1&_nsi=1&_ss=1&_ee=1&tfd=1904",
+        "failure": "net::ERR_ABORTED"
+      }
+    ],
+    "classification": [
+      {
+        "url": "https://www.google-analytics.com/g/collect?v=2&tid=G-TE40KZM44M&gtm=45Pe64m2v9239895396za200zd9239895396&_p=1776995649096&gcd=13l3l3l3l1l1&npa=0&dma=0&gdid=dZTNiMT&are=1&cid=663779721.1776995650&frm=0&pscdl=noapi&rcb=4&sr=1200x1200&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=19.0.0&uaw=0&ul=pt-br&_s=1&tag_exp=0~115938465~115938469~117266401~117512543~117884344&sid=1776995649&sct=1&seg=0&dl=https%3A%2F%2Fdesi.pet%2Fportal-do-cliente%2F&dt=Portal%20do%20Cliente%20%E2%80%93%20Desi%20Pet%20Shower&en=page_view&_fv=1&_nsi=1&_ss=1&_ee=1&tfd=1904",
+        "failure": "net::ERR_ABORTED",
+        "is_external_google_play_log": false
+      }
+    ]
+  },
+  "phase2_admin_network_failures": [
+    {
+      "url": "https://play.google.com/log?hasfast=true&authuser=0&format=json",
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "wp_cli_check": {
+    "default_has_all_in_one_notice": true,
+    "skip_ai1wm_has_all_in_one_notice": false,
+    "commands": [
+      {
+        "label": "wp_cli_default_plugins",
+        "command": "cd /home/u944637195/domains/desi.pet/public_html && wp option get blogname",
+        "exit_code": 0,
+        "stdout": "\nNotice: Function _load_textdomain_just_in_time was called <strong>incorrectly</strong>. Translation loading for the <code>all-in-one-wp-migration</code> domain was triggered too early. This is usually an indicator for some code in the plugin or theme running too early. Translations should be loaded at the <code>init</code> action or later. Please see <a href=\"https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/\">Debugging in WordPress</a> for more information. (This message was added in version 6.7.0.) in /home/u944637195/domains/desi.pet/public_html/wp-includes/functions.php on line 6131\nDesi Pet Shower\n",
+        "stderr": ""
+      },
+      {
+        "label": "wp_cli_skip_all_in_one_wp_migration",
+        "command": "cd /home/u944637195/domains/desi.pet/public_html && wp --skip-plugins=all-in-one-wp-migration option get blogname",
+        "exit_code": 0,
+        "stdout": "Desi Pet Shower\n",
+        "stderr": ""
+      },
+      {
+        "label": "wp_cli_all_in_one_status",
+        "command": "cd /home/u944637195/domains/desi.pet/public_html && wp plugin status all-in-one-wp-migration",
+        "exit_code": 0,
+        "stdout": "\nNotice: Function _load_textdomain_just_in_time was called <strong>incorrectly</strong>. Translation loading for the <code>all-in-one-wp-migration</code> domain was triggered too early. This is usually an indicator for some code in the plugin or theme running too early. Translations should be loaded at the <code>init</code> action or later. Please see <a href=\"https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/\">Debugging in WordPress</a> for more information. (This message was added in version 6.7.0.) in /home/u944637195/domains/desi.pet/public_html/wp-includes/functions.php on line 6131\nPlugin all-in-one-wp-migration details:\n    Name: All-in-One WP Migration and Backup\n    Status: Active\n    Version: 7.105\n    Author: ServMask\n    Description: All-in-One WP Migration makes moving your entire WordPress site simple. Export or import your database, media, plugins, and themes with just a few clicks.\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "conclusion": {
+    "play_google_log": "external_network_noise",
+    "wp_cli_notice": "external_plugin_notice_confirmed",
+    "dps_addon_action_required": false
+  }
+}
