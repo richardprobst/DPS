@@ -81,6 +81,7 @@ function buildFixture(rawFixture) {
         portalUrl: requireString(rawFixture.portalUrl, 'portalUrl'),
         email: requireString(rawFixture.email, 'email'),
         resetEmail: typeof rawFixture.resetEmail === 'string' ? rawFixture.resetEmail.trim() : '',
+        expiredEmail: typeof rawFixture.expiredEmail === 'string' ? rawFixture.expiredEmail.trim() : '',
         antiEnumEmail: requireString(rawFixture.antiEnumEmail, 'antiEnumEmail'),
         password: requireString(rawFixture.password, 'password'),
         newPassword: requireString(rawFixture.newPassword, 'newPassword'),
@@ -96,9 +97,50 @@ function publicFixtureSummary(fixture) {
         tag: fixture.tag,
         email: fixture.email,
         resetEmail: fixture.resetEmail,
+        expiredEmail: fixture.expiredEmail,
         antiEnumEmail: fixture.antiEnumEmail,
         portalUrl: fixture.portalUrl,
     };
+}
+
+function redactSensitiveUrl(value) {
+    if (typeof value !== 'string' || !/[?&](key|login|dps_token|token)=/i.test(value)) {
+        return value;
+    }
+
+    try {
+        const url = new URL(value);
+        ['key', 'login', 'dps_token', 'token'].forEach((key) => {
+            if (url.searchParams.has(key)) {
+                url.searchParams.set(key, '[redacted]');
+            }
+        });
+
+        return url.toString();
+    } catch (error) {
+        return value.replace(/([?&](?:key|login|dps_token|token)=)[^&#]+/gi, '$1[redacted]');
+    }
+}
+
+function redactForPersistence(value, key = '') {
+    if (Array.isArray(value)) {
+        return value.map((item) => redactForPersistence(item));
+    }
+
+    if (value && typeof value === 'object') {
+        return Object.fromEntries(
+            Object.entries(value).map(([entryKey, entryValue]) => [
+                entryKey,
+                redactForPersistence(entryValue, entryKey),
+            ])
+        );
+    }
+
+    if (typeof value === 'string' && (/url/i.test(key) || /[?&](key|login|dps_token|token)=/i.test(value))) {
+        return redactSensitiveUrl(value);
+    }
+
+    return value;
 }
 
 function createRunState(label) {
@@ -441,6 +483,120 @@ async function validateResetState(browser, label, url, outputDir, expected) {
     };
 }
 
+async function validateExpiredResetResend(browser, fixture, outputDir) {
+    const { context, page, state } = await newInstrumentedPage(browser, 'reset-expired-resend');
+    await page.goto(fixture.expiredResetUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await waitForPortalPublicShell(page);
+
+    const before = await page.evaluate(() => {
+        const panel = document.querySelector('.dps-portal-reset-card__resend');
+        const button = panel ? panel.querySelector('[data-dps-password-access-trigger]') : null;
+        const backButton = Array.from(document.querySelectorAll('.dps-portal-reset-card .dps-signature-button'))
+            .find((item) => /voltar para a tela de acesso/i.test(item.textContent || ''));
+
+        return {
+            overflowX: Math.max(
+                0,
+                document.documentElement.scrollWidth - document.documentElement.clientWidth,
+                document.body ? document.body.scrollWidth - document.body.clientWidth : 0
+            ),
+            hasResendPanel: Boolean(panel),
+            resendVisible: panel ? !panel.hidden && window.getComputedStyle(panel).display !== 'none' : false,
+            buttonText: button ? (button.textContent || '').trim().replace(/\s+/g, ' ') : '',
+            emailText: panel ? (panel.querySelector('strong')?.textContent || '').trim() : '',
+            backButtonIsSecondary: backButton ? backButton.classList.contains('dps-signature-button--secondary') : false,
+        };
+    });
+
+    assertNoPageErrors(state);
+    assertCondition(before.overflowX === 0, `reset-expired-resend: overflowX=${before.overflowX}`);
+    assertCondition(before.hasResendPanel, 'reset-expired-resend: painel de reenvio nao encontrado.');
+    assertCondition(before.resendVisible, 'reset-expired-resend: painel de reenvio esta oculto.');
+    assertCondition(/reenviar e-mail de senha/i.test(before.buttonText), 'reset-expired-resend: CTA de reenvio nao encontrado.');
+    assertCondition(before.backButtonIsSecondary, 'reset-expired-resend: voltar deveria ficar como acao secundaria.');
+
+    const responsePromise = page.waitForResponse(adminAjaxAction('dps_request_portal_password_access'), { timeout: 20000 });
+    await page.locator('.dps-portal-reset-card__resend [data-dps-password-access-trigger]').click();
+    const response = await responsePromise;
+    const responseJson = await response.json();
+    await page.waitForSelector('.dps-portal-reset-card__resend [data-dps-password-feedback]:not([hidden])', { timeout: 10000 });
+    const feedback = await page.locator('.dps-portal-reset-card__resend [data-dps-password-feedback]').innerText();
+    const screenshot = path.join(outputDir, 'portal-reset-expired-resend-1200.png');
+    await page.screenshot({ path: screenshot, fullPage: true });
+
+    assertCondition(response.status() === 200, `reset-expired-resend: status=${response.status()}`);
+    assertCondition(Boolean(responseJson.success), 'reset-expired-resend: resposta nao retornou success=true.');
+    assertCondition(/se este e-mail estiver cadastrado/i.test(feedback), 'reset-expired-resend: feedback anti-enumeration inesperado.');
+
+    await context.close();
+
+    return {
+        before,
+        status: response.status(),
+        ok: response.ok(),
+        response: responseJson,
+        feedback,
+        pageErrors: state.pageErrors,
+        consoleErrors: state.consoleErrors,
+        consoleWarnings: state.consoleWarnings,
+        screenshot,
+    };
+}
+
+async function validateExpiredResetResendBreakpoints(browser, fixture, outputDir) {
+    const results = {};
+
+    for (const width of breakpoints) {
+        const { context, page, state } = await newInstrumentedPage(browser, `reset-expired-resend-${width}`, width);
+        await page.goto(fixture.expiredResetUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await waitForPortalPublicShell(page);
+
+        const metrics = await page.evaluate(() => {
+            const panel = document.querySelector('.dps-portal-reset-card__resend');
+            const button = panel ? panel.querySelector('[data-dps-password-access-trigger]') : null;
+            const buttonRect = button ? button.getBoundingClientRect() : null;
+
+            return {
+                overflowX: Math.max(
+                    0,
+                    document.documentElement.scrollWidth - document.documentElement.clientWidth,
+                    document.body ? document.body.scrollWidth - document.body.clientWidth : 0
+                ),
+                hasResendPanel: Boolean(panel),
+                resendVisible: panel ? !panel.hidden && window.getComputedStyle(panel).display !== 'none' : false,
+                buttonText: button ? (button.textContent || '').trim().replace(/\s+/g, ' ') : '',
+                button: buttonRect
+                    ? {
+                        width: Math.round(buttonRect.width),
+                        height: Math.round(buttonRect.height),
+                    }
+                    : null,
+            };
+        });
+        const screenshot = path.join(outputDir, `portal-reset-expired-resend-${width}.png`);
+        await page.screenshot({ path: screenshot, fullPage: true });
+
+        assertNoPageErrors(state);
+        assertCondition(metrics.overflowX === 0, `reset-expired-resend-${width}: overflowX=${metrics.overflowX}`);
+        assertCondition(metrics.hasResendPanel, `reset-expired-resend-${width}: painel de reenvio nao encontrado.`);
+        assertCondition(metrics.resendVisible, `reset-expired-resend-${width}: painel de reenvio esta oculto.`);
+        assertCondition(/reenviar e-mail de senha/i.test(metrics.buttonText), `reset-expired-resend-${width}: CTA de reenvio nao encontrado.`);
+        assertCondition(metrics.button && metrics.button.height >= 44, `reset-expired-resend-${width}: altura do CTA insuficiente.`);
+
+        results[String(width)] = {
+            metrics,
+            pageErrors: state.pageErrors,
+            consoleErrors: state.consoleErrors,
+            consoleWarnings: state.consoleWarnings,
+            screenshot,
+        };
+
+        await context.close();
+    }
+
+    return results;
+}
+
 async function validateValidResetSubmit(browser, fixture, outputDir) {
     const { context, page, state } = await newInstrumentedPage(browser, 'reset-valid-submit');
     await page.goto(fixture.validResetUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -509,6 +665,8 @@ async function main() {
         result.flows.magicLogin = await validateMagicLogin(browser, fixture, outputDir);
         result.flows.resetInvalid = await validateResetState(browser, 'reset-invalid', fixture.invalidResetUrl, outputDir, 'invalid');
         result.flows.resetExpired = await validateResetState(browser, 'reset-expired', fixture.expiredResetUrl, outputDir, 'expired');
+        result.flows.resetExpiredResendBreakpoints = await validateExpiredResetResendBreakpoints(browser, fixture, outputDir);
+        result.flows.resetExpiredResend = await validateExpiredResetResend(browser, fixture, outputDir);
         result.flows.resetValidScreen = await validateResetState(browser, 'reset-valid-screen', fixture.validResetUrl, outputDir, 'valid');
         result.flows.resetValidSubmit = await validateValidResetSubmit(browser, fixture, outputDir);
         result.status = 'passed';
@@ -520,7 +678,7 @@ async function main() {
         await browser.close();
         const resultPath = path.join(outputDir, 'portal-client-public-smoke-result.json');
         result.resultPath = resultPath;
-        await writeFile(resultPath, `${JSON.stringify(result, null, 2)}\n`, 'utf8');
+        await writeFile(resultPath, `${JSON.stringify(redactForPersistence(result), null, 2)}\n`, 'utf8');
         process.stdout.write(`${JSON.stringify({ status: result.status, resultPath }, null, 2)}\n`);
     }
 }

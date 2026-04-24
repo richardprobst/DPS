@@ -1,0 +1,34 @@
+{
+    "deployed_at":  "2026-04-24T02:18:26.1792623Z",
+    "backup_root":  "/home/u944637195/backups/dps-client-portal-phase4-expired-reset-cta-fix-20260423-231824",
+    "uploaded":  [
+                     {
+                         "file":  "plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php",
+                         "remote":  "/home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php",
+                         "backup":  "/home/u944637195/backups/dps-client-portal-phase4-expired-reset-cta-fix-20260423-231824/templates/portal-password-reset.php"
+                     }
+                 ],
+    "commands":  [
+                     {
+                         "label":  "create_backup_dir",
+                         "command":  "mkdir -p /home/u944637195/backups/dps-client-portal-phase4-expired-reset-cta-fix-20260423-231824/templates",
+                         "exit_code":  0,
+                         "stdout":  "",
+                         "stderr":  ""
+                     },
+                     {
+                         "label":  "backup_portal-password-reset.php",
+                         "command":  "if [ -f /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php ]; then cp /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php /home/u944637195/backups/dps-client-portal-phase4-expired-reset-cta-fix-20260423-231824/templates/portal-password-reset.php; fi",
+                         "exit_code":  0,
+                         "stdout":  "",
+                         "stderr":  ""
+                     },
+                     {
+                         "label":  "remote_php_lint",
+                         "command":  "php -l /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php",
+                         "exit_code":  0,
+                         "stdout":  "No syntax errors detected in /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php",
+                         "stderr":  ""
+                     }
+                 ]
+}

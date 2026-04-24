@@ -1,0 +1,36 @@
+{
+    "ok":  true,
+    "action":  "create",
+    "tag":  "codex_portal_phase4_20260423_232301",
+    "portalUrl":  "https://desi.pet/portal-do-cliente/",
+    "email":  "codex.portal.smoke.20260424022308@example.com",
+    "resetEmail":  "codex.portal.smoke.reset.20260424022308@example.com",
+    "expiredEmail":  "codex.portal.smoke.expired.20260424022308@example.com",
+    "antiEnumEmail":  "codex.portal.smoke.unknown.20260424022308@example.com",
+    "clientId":  1807,
+    "resetClientId":  1808,
+    "expiredClientId":  1809,
+    "hasMagicUrl":  true,
+    "hasValidResetUrl":  true,
+    "hasExpiredResetUrl":  true,
+    "hasInvalidResetUrl":  true,
+    "requestIpCleared":  "187.180.164.243",
+    "remoteFixture":  "/tmp/client-portal-smoke-fixture.php",
+    "privateFixturePath":  "C:\\Users\\casaprobst\\AppData\\Local\\Temp\\codex_portal_phase4_20260423_232301-fixture-secret.json",
+    "commands":  [
+                     {
+                         "label":  "cleanup_rate_limited_fixture",
+                         "command":  "cd /home/u944637195/domains/desi.pet/public_html \u0026\u0026 wp --skip-plugins=all-in-one-wp-migration eval-file /tmp/client-portal-smoke-fixture.php cleanup tag=codex_portal_phase4_20260423_232152 email=codex.portal.smoke.20260424022154@example.com expired-email=codex.portal.smoke.expired.20260424022154@example.com anti-enum-email=codex.portal.smoke.unknown.20260424022154@example.com request-ip=187.180.164.243",
+                         "exit_code":  0,
+                         "stdout":  "{\n    \"ok\": true,\n    \"action\": \"cleanup\",\n    \"tag\": \"codex_portal_phase4_20260423_232152\",\n    \"cleanup\": {\n        \"deleted_posts\": 3,\n        \"deleted_users\": 3,\n        \"rate_limits_removed\": 0\n    }\n}",
+                         "stderr":  ""
+                     },
+                     {
+                         "label":  "create_fixture",
+                         "command":  "cd /home/u944637195/domains/desi.pet/public_html \u0026\u0026 wp --skip-plugins=all-in-one-wp-migration eval-file /tmp/client-portal-smoke-fixture.php create tag=codex_portal_phase4_20260423_232301",
+                         "exit_code":  0,
+                         "stdout":  "[redacted fixture payload: contains temporary passwords and reset URLs]",
+                         "stderr":  ""
+                     }
+                 ]
+}

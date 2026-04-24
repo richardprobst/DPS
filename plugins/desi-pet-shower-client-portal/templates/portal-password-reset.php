@@ -9,18 +9,20 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-$messages         = isset( $portal_access_context['messages'] ) && is_array( $portal_access_context['messages'] ) ? $portal_access_context['messages'] : [];
-$portal_url       = isset( $portal_access_context['portal_url'] ) && is_string( $portal_access_context['portal_url'] ) ? $portal_access_context['portal_url'] : home_url( '/portal-cliente/' );
-$reset_user_mail  = $portal_reset_valid && $portal_reset_user instanceof WP_User ? $portal_reset_user->user_email : $portal_password_login;
-$is_expired_reset = isset( $portal_reset_error_code ) && 'expired_key' === $portal_reset_error_code;
-$reset_tag        = $is_expired_reset
+$messages           = isset( $portal_access_context['messages'] ) && is_array( $portal_access_context['messages'] ) ? $portal_access_context['messages'] : [];
+$portal_url         = isset( $portal_access_context['portal_url'] ) && is_string( $portal_access_context['portal_url'] ) ? $portal_access_context['portal_url'] : home_url( '/portal-cliente/' );
+$reset_user_mail    = $portal_reset_valid && $portal_reset_user instanceof WP_User ? $portal_reset_user->user_email : $portal_password_login;
+$is_expired_reset   = isset( $portal_reset_error_code ) && 'expired_key' === $portal_reset_error_code;
+$expired_reset_user = $is_expired_reset && ! empty( $portal_password_login ) ? get_user_by( 'login', $portal_password_login ) : false;
+$expired_reset_mail = $expired_reset_user instanceof WP_User && is_email( $expired_reset_user->user_email ) ? $expired_reset_user->user_email : '';
+$reset_tag          = $is_expired_reset
     ? __( 'Link expirado', 'dps-client-portal' )
     : __( 'Link invalido', 'dps-client-portal' );
-$reset_title      = $is_expired_reset
+$reset_title        = $is_expired_reset
     ? __( 'Solicite um novo e-mail para continuar', 'dps-client-portal' )
     : __( 'Solicite um novo link para continuar', 'dps-client-portal' );
-$reset_intro      = $is_expired_reset
-    ? __( 'Este link passou do prazo de uso. Volte para a tela inicial do portal e gere um novo acesso.', 'dps-client-portal' )
+$reset_intro        = $is_expired_reset
+    ? __( 'Este link passou do prazo de uso. Solicite um novo e-mail sem sair desta tela.', 'dps-client-portal' )
     : __( 'Este link nao esta mais disponivel. Volte para a tela inicial do portal e gere um novo acesso.', 'dps-client-portal' );
 ?>
 
@@ -164,8 +166,23 @@ $reset_intro      = $is_expired_reset
                             <p class="dps-signature-panel__intro"><?php echo esc_html( $reset_intro ); ?></p>
                         </div>
 
+                        <?php if ( $is_expired_reset && '' !== $expired_reset_mail ) : ?>
+                            <div class="dps-portal-reset-card__resend">
+                                <div class="dps-portal-reset-card__resend-copy">
+                                    <span><?php esc_html_e( 'Reenvio contextual', 'dps-client-portal' ); ?></span>
+                                    <strong><?php echo esc_html( $expired_reset_mail ); ?></strong>
+                                    <p><?php esc_html_e( 'Vamos enviar novas instrucoes para o mesmo e-mail deste reset.', 'dps-client-portal' ); ?></p>
+                                </div>
+                                <input type="hidden" value="<?php echo esc_attr( $expired_reset_mail ); ?>" data-dps-access-email />
+                                <button type="button" class="dps-signature-button" data-dps-password-access-trigger data-loading-label="<?php echo esc_attr__( 'Enviando instrucoes...', 'dps-client-portal' ); ?>">
+                                    <span class="dps-signature-button__text"><?php esc_html_e( 'Reenviar e-mail de senha', 'dps-client-portal' ); ?></span>
+                                </button>
+                                <div class="dps-portal-entry__feedback dps-portal-signature__feedback" data-dps-password-feedback aria-live="polite" hidden></div>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="dps-portal-auth-card__actions">
-                            <a class="dps-signature-button" href="<?php echo esc_url( $portal_url ); ?>">
+                            <a class="dps-signature-button<?php echo $is_expired_reset && '' !== $expired_reset_mail ? ' dps-signature-button--secondary' : ''; ?>" href="<?php echo esc_url( $portal_url ); ?>">
                                 <span class="dps-signature-button__text"><?php esc_html_e( 'Voltar para a tela de acesso', 'dps-client-portal' ); ?></span>
                             </a>
                         </div>

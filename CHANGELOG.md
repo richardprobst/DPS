@@ -97,6 +97,11 @@ Antes de criar uma nova versÃ£o oficial:
 
 - Adicionado medidor inline de forca da senha e dicas de composicao na tela publica de reset valido, preservando action, nonces, nomes de campos e regra backend ja publicados.
 
+**Portal do Cliente - reenvio no reset expirado**
+
+- Adicionado CTA contextual para reenviar o e-mail de criacao/redefinicao de senha diretamente no estado de reset expirado, sem exigir retorno manual para a tela inicial.
+- Ampliado o smoke publicado do Portal para validar o CTA de reset expirado e redigir tokens, reset keys e logins nas evidencias persistidas.
+
 **Agenda Add-on - fila operacional DPS Signature**
 
 - Implementada a primeira versão da fila operacional canônica da Agenda, substituindo a leitura em três tabelas por um eixo único com horário, pet/tutor, serviços, etapa, financeiro, operação, logística e ações.

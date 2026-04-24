@@ -1,5 +1,74 @@
 # Screenshots 2026-04-23
 
+## Portal do Cliente: Fase 4 CTA contextual no reset expirado
+
+Fonte de verdade visual seguida nesta Fase 4: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` (padrao DPS Signature).
+
+### Objetivo
+
+Executar somente a Fase 4 do plano pos-auditoria do login do Portal do Cliente: adicionar um CTA contextual para reenviar o e-mail de criacao/redefinicao quando o link de reset expirar, sem obrigar o cliente a voltar manualmente para a tela inicial.
+
+### Ajustes implementados
+
+- o estado `Link expirado` passou a exibir um bloco de reenvio com o e-mail do reset e o CTA `Reenviar e-mail de senha`;
+- o CTA reaproveita o endpoint publico `dps_request_portal_password_access`, o nonce `dps_request_password_access` e o runtime publico `client-portal-access.js`;
+- o link `Voltar para a tela de acesso` vira acao secundaria quando o reenvio contextual esta disponivel;
+- o smoke publicado `tools/client-portal/client-portal-public-smoke.mjs` passou a validar o CTA de reset expirado e redigir `key`, `login`, `token` e `dps_token` antes de persistir evidencias;
+- durante a validacao foi corrigido um acoplamento local: o bloco de reenvio nao usa `data-dps-auth-panel`, pois esse atributo pertence aos paineis de tab da tela inicial.
+
+### Publicado e validado
+
+- validado no runtime publicado em `https://desi.pet/portal-do-cliente/`;
+- fixture temporario final:
+  - tag: `codex_portal_phase4_20260423_232301`;
+  - usuarios/posts temporarios removidos ao final;
+  - script WP-CLI temporario remoto removido ao final;
+- backups remotos:
+  - `/home/u944637195/backups/dps-client-portal-phase4-expired-reset-cta-20260423-231245`;
+  - `/home/u944637195/backups/dps-client-portal-phase4-expired-reset-cta-fix-20260423-231824`.
+
+### Validacao funcional
+
+- smoke publicado final: `status = passed`;
+- `pageErrors = []`;
+- `consoleErrors = []`;
+- reset expirado sem formulario de senha e com notice `Link de senha expirado`;
+- CTA `Reenviar e-mail de senha` visivel e com altura minima de toque nos cinco breakpoints;
+- clique no CTA respondeu `200` com `success = true` e feedback anti-enumeration esperado;
+- URLs sensiveis do smoke foram persistidas com `key` e `login` redigidos.
+
+### Breakpoints validados
+
+- `375`: `overflowX = 0`, CTA visivel, largura `261`, altura >= `44`;
+- `600`: `overflowX = 0`, CTA visivel, largura `480`, altura >= `44`;
+- `840`: `overflowX = 0`, CTA visivel, largura `717`, altura >= `44`;
+- `1200`: `overflowX = 0`, CTA visivel, largura `583`, altura >= `44`;
+- `1920`: `overflowX = 0`, CTA visivel, largura `583`, altura >= `44`.
+
+### Artefatos
+
+- [portal-client-public-smoke-result.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-4-expired-reset-cta/portal-client-public-smoke-result.json)
+- [expired-reset-cta-fixture.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-4-expired-reset-cta/expired-reset-cta-fixture.json)
+- [expired-reset-cta-cleanup.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-4-expired-reset-cta/expired-reset-cta-cleanup.json)
+- [deploy-sftp-result.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-4-expired-reset-cta/deploy-sftp-result.json)
+- [deploy-sftp-fix-result.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-4-expired-reset-cta/deploy-sftp-fix-result.json)
+- [portal-reset-expired-resend-375.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-4-expired-reset-cta/portal-reset-expired-resend-375.png)
+- [portal-reset-expired-resend-600.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-4-expired-reset-cta/portal-reset-expired-resend-600.png)
+- [portal-reset-expired-resend-840.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-4-expired-reset-cta/portal-reset-expired-resend-840.png)
+- [portal-reset-expired-resend-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-4-expired-reset-cta/portal-reset-expired-resend-1200.png)
+- [portal-reset-expired-resend-1920.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-phase-4-expired-reset-cta/portal-reset-expired-resend-1920.png)
+
+### Comandos executados
+
+- `php -l plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php`
+- `node --check plugins/desi-pet-shower-client-portal/assets/js/client-portal-access.js`
+- `node --check tools/client-portal/client-portal-public-smoke.mjs`
+- upload por SSH/SFTP com backup remoto dos arquivos publicados
+- `php -l` remoto no template publicado
+- fixture temporario via WP-CLI com `tools/client-portal/client-portal-smoke-fixture.php`
+- smoke publicado com Playwright em `375`, `600`, `840`, `1200` e `1920`
+- limpeza dos clientes/usuarios temporarios, script WP-CLI remoto e bucket de IP criado pelo proprio smoke
+
 ## Portal do Cliente: Fase 3 forca de senha no reset
 
 Fonte de verdade visual seguida nesta Fase 3: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` (padrao DPS Signature).

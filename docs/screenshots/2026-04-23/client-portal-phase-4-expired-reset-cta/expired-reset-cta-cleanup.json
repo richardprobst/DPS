@@ -1,0 +1,29 @@
+{
+    "cleaned_at":  "2026-04-24T02:26:30.0723163Z",
+    "tag":  "codex_portal_phase4_20260423_232301",
+    "private_fixture_removed":  true,
+    "remote_fixture":  "/tmp/client-portal-smoke-fixture.php",
+    "commands":  [
+                     {
+                         "label":  "cleanup_fixture",
+                         "command":  "cd /home/u944637195/domains/desi.pet/public_html \u0026\u0026 wp --skip-plugins=all-in-one-wp-migration eval-file /tmp/client-portal-smoke-fixture.php cleanup tag=codex_portal_phase4_20260423_232301 email=codex.portal.smoke.20260424022308@example.com expired-email=codex.portal.smoke.expired.20260424022308@example.com anti-enum-email=codex.portal.smoke.unknown.20260424022308@example.com",
+                         "exit_code":  0,
+                         "stdout":  "{\n    \"ok\": true,\n    \"action\": \"cleanup\",\n    \"tag\": \"codex_portal_phase4_20260423_232301\",\n    \"cleanup\": {\n        \"deleted_posts\": 3,\n        \"deleted_users\": 3,\n        \"rate_limits_removed\": 3\n    }\n}",
+                         "stderr":  ""
+                     },
+                     {
+                         "label":  "clear_password_access_ip_buckets",
+                         "command":  "cd /home/u944637195/domains/desi.pet/public_html \u0026\u0026 wp --skip-plugins=all-in-one-wp-migration eval \u0027eval(base64_decode(\"JHN0YXRlID0gKGFycmF5KSBnZXRfb3B0aW9uKCdkcHNfcG9ydGFsX3JhdGVfbGltaXRzJywgW10pOwokcmVtb3ZlZCA9IFtdOwpmb3JlYWNoIChhcnJheV9rZXlzKCRzdGF0ZSkgYXMgJGtleSkgewogICAgaWYgKDAgPT09IHN0cnBvcygoc3RyaW5nKSAka2V5LCAncG9ydGFsX3Bhc3N3b3JkX2FjY2Vzc19pcDonKSkgewogICAgICAgICRyZW1vdmVkW10gPSAka2V5OwogICAgICAgIHVuc2V0KCRzdGF0ZVska2V5XSk7CiAgICB9Cn0KdXBkYXRlX29wdGlvbignZHBzX3BvcnRhbF9yYXRlX2xpbWl0cycsICRzdGF0ZSwgZmFsc2UpOwplY2hvIHdwX2pzb25fZW5jb2RlKFsncmVtb3ZlZCcgPT4gJHJlbW92ZWRdKTs=\"));\u0027",
+                         "exit_code":  0,
+                         "stdout":  "{\"removed\":[\"portal_password_access_ip:594cfa2a10d10468a6d4cd06c0799b94\"]}",
+                         "stderr":  ""
+                     },
+                     {
+                         "label":  "remove_remote_fixture",
+                         "command":  "rm -f /tmp/client-portal-smoke-fixture.php",
+                         "exit_code":  0,
+                         "stdout":  "",
+                         "stderr":  ""
+                     }
+                 ]
+}

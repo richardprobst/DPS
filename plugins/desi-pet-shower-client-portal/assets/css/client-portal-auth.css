@@ -381,6 +381,43 @@
     color: var(--dps-color-error);
 }
 
+.dps-portal-reset-card__resend {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.25rem;
+    padding: 1rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    background: color-mix(in srgb, var(--dps-color-primary-container) 42%, var(--dps-color-surface-container-lowest));
+}
+
+.dps-portal-reset-card__resend-copy {
+    display: grid;
+    gap: 0.32rem;
+    min-width: 0;
+}
+
+.dps-portal-reset-card__resend-copy span {
+    color: var(--dps-color-on-surface-variant);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.dps-portal-reset-card__resend-copy strong {
+    color: var(--dps-color-on-surface);
+    font-size: 1rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.dps-portal-reset-card__resend-copy p {
+    margin: 0;
+    color: var(--dps-color-on-surface-variant);
+    line-height: 1.5;
+}
+
 .dps-portal-signature .dps-signature-button--secondary {
     background: var(--dps-color-surface-container-low);
     color: var(--dps-color-on-surface);
