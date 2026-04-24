@@ -89,6 +89,7 @@ class DPS_Booking_Addon {
     private function __construct() {
         // Registra shortcode
         add_shortcode( 'dps_booking_form', [ $this, 'render_booking_form' ] );
+        add_shortcode( 'dps_booking_v2', [ $this, 'render_booking_form' ] );
 
         // Enfileira assets
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
@@ -137,7 +138,11 @@ class DPS_Booking_Addon {
         $current_post = get_post();
         $post_content = $current_post ? (string) $current_post->post_content : '';
 
-        if ( ! is_page( $booking_page_id ) && ! has_shortcode( $post_content, 'dps_booking_form' ) ) {
+        if (
+            ! is_page( $booking_page_id )
+            && ! has_shortcode( $post_content, 'dps_booking_form' )
+            && ! has_shortcode( $post_content, 'dps_booking_v2' )
+        ) {
             return;
         }
 

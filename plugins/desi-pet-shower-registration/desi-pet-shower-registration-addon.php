@@ -159,6 +159,7 @@ class DPS_Registration_Addon {
         // Confirmação de email
         add_action( 'init', [ $this, 'maybe_handle_email_confirmation' ] );
         add_shortcode( 'dps_registration_form', [ $this, 'render_registration_form' ] );
+        add_shortcode( 'dps_registration_v2', [ $this, 'render_registration_form' ] );
         // Cria a página automaticamente ao ativar
         register_activation_hook( __FILE__, [ $this, 'activate' ] );
         register_deactivation_hook( __FILE__, [ 'DPS_Registration_Addon', 'deactivate' ] );
@@ -701,7 +702,11 @@ class DPS_Registration_Addon {
         $current_post = get_post();
         $post_content = $current_post ? (string) $current_post->post_content : '';
         
-        if ( ! is_page( $registration_page_id ) && ! has_shortcode( $post_content, 'dps_registration_form' ) ) {
+        if (
+            ! is_page( $registration_page_id )
+            && ! has_shortcode( $post_content, 'dps_registration_form' )
+            && ! has_shortcode( $post_content, 'dps_registration_v2' )
+        ) {
             return;
         }
 

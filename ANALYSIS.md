@@ -1691,7 +1691,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - A migração para um add-on unificado de Frontend foi encerrada antes de substituir de forma suficiente os fluxos legados.
 - Cadastro e Booking voltam a ser a linha operacional suportada; não há dual-run ativo pelo add-on Frontend.
 - Os shortcodes canônicos preservados são os dos plugins separados: `[dps_registration_form]` e `[dps_booking_form]`.
-- Os shortcodes V2 do Frontend (`[dps_registration_v2]`, `[dps_booking_v2]`) foram removidos junto com o add-on e não devem ser usados em páginas publicadas.
+- Os shortcodes V2 do Frontend (`[dps_registration_v2]`, `[dps_booking_v2]`) não têm implementação própria; permanecem apenas como aliases de compatibilidade nos plugins canônicos para evitar quebra de páginas publicadas.
 
 **Contratos preservados fora do Frontend**:
 - Cadastro público, criação de tutor/pets, validações, anti-spam, reCAPTCHA e confirmação de e-mail permanecem sob `desi-pet-shower-registration`.
@@ -1707,7 +1707,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Documentação operacional específica de rollout, migração, runbook, matriz de compatibilidade e readiness do Frontend.
 
 **Observações operacionais**:
-- A remoção do Frontend não valida automaticamente o runtime publicado. Antes de publicar a alteração, páginas publicadas devem ser revisadas para garantir que não usam `[dps_registration_v2]`, `[dps_booking_v2]` ou telas dependentes do add-on removido.
+- A remoção do Frontend não deve depender de páginas publicadas já migradas; enquanto houver conteúdo com `[dps_registration_v2]` ou `[dps_booking_v2]`, os aliases canônicos preservam renderização sem reativar o add-on removido.
 - Qualquer retomada futura de unificação de frontend deve começar como nova proposta de arquitetura, com preservação explícita dos contratos externos dos plugins Registration e Booking.
 
 ---
