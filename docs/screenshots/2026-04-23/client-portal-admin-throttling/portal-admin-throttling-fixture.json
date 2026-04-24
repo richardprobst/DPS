@@ -1,0 +1,124 @@
+{
+  "created_at": "2026-04-24T01:20:18.605821+00:00",
+  "tag": "codex_phase2_throttling_20260423222010",
+  "admin_user_id": "52",
+  "client_id": "1780",
+  "client_email": "codex.portal.throttle.20260423222010@example.com",
+  "client_title": "Codex Portal Throttle 20260423222010",
+  "seeded_flow": [
+    {
+      "bucket": "portal_password_access_email",
+      "identifier": "fixture client email",
+      "hits": 3
+    },
+    {
+      "bucket": "portal_password_access_ip",
+      "identifier": "reserved documentation IP fingerprint only",
+      "hits": 3
+    },
+    {
+      "bucket": "portal_access_link_email",
+      "identifier": "fixture client email",
+      "hits": 1
+    }
+  ],
+  "seeded_summary": {
+    "active_entries": 5,
+    "limited_entries": 2,
+    "email_entries": 2,
+    "ip_entries": 3,
+    "rows": [
+      {
+        "bucket": "portal_password_access_email",
+        "scope": "email",
+        "identifier_label": "codex.portal.throttle.20260423222010@example.com",
+        "count": 3,
+        "limit": 3,
+        "is_limited": true
+      },
+      {
+        "bucket": "portal_password_access_ip",
+        "scope": "ip",
+        "identifier_label": "IP fingerprint #82B31A17",
+        "count": 3,
+        "limit": 3,
+        "is_limited": true
+      },
+      {
+        "bucket": "portal_password_access_ip",
+        "scope": "ip",
+        "identifier_label": "IP fingerprint #594CFA2A",
+        "count": 2,
+        "limit": 3,
+        "is_limited": false
+      },
+      {
+        "bucket": "portal_access_link_ip",
+        "scope": "ip",
+        "identifier_label": "IP fingerprint #594CFA2A",
+        "count": 2,
+        "limit": 3,
+        "is_limited": false
+      },
+      {
+        "bucket": "portal_access_link_email",
+        "scope": "email",
+        "identifier_label": "codex.portal.throttle.20260423222010@example.com",
+        "count": 1,
+        "limit": 3,
+        "is_limited": false
+      }
+    ]
+  },
+  "commands": [
+    {
+      "label": "create_admin_user",
+      "command": "cd /home/u944637195/domains/desi.pet/public_html && wp user create codex_admin_20260423222010 codex.admin.20260423222010@example.com --role=administrator --user_pass='[redacted]' --display_name='Codex Portal Admin Phase 2' --porcelain",
+      "exit_code": 0,
+      "stdout": "\nNotice: Function _load_textdomain_just_in_time was called <strong>incorrectly</strong>. Translation loading for the <code>all-in-one-wp-migration</code> domain was triggered too early. This is usually an indicator for some code in the plugin or theme running too early. Translations should be loaded at the <code>init</code> action or later. Please see <a href=\"https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/\">Debugging in WordPress</a> for more information. (This message was added in version 6.7.0.) in /home/u944637195/domains/desi.pet/public_html/wp-includes/functions.php on line 6131\n52\n",
+      "stderr": ""
+    },
+    {
+      "label": "create_client_post",
+      "command": "cd /home/u944637195/domains/desi.pet/public_html && wp post create --post_type=dps_cliente --post_status=publish --post_title='Codex Portal Throttle 20260423222010' --porcelain",
+      "exit_code": 0,
+      "stdout": "\nNotice: Function _load_textdomain_just_in_time was called <strong>incorrectly</strong>. Translation loading for the <code>all-in-one-wp-migration</code> domain was triggered too early. This is usually an indicator for some code in the plugin or theme running too early. Translations should be loaded at the <code>init</code> action or later. Please see <a href=\"https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/\">Debugging in WordPress</a> for more information. (This message was added in version 6.7.0.) in /home/u944637195/domains/desi.pet/public_html/wp-includes/functions.php on line 6131\n1780\n",
+      "stderr": ""
+    },
+    {
+      "label": "set_client_email",
+      "command": "cd /home/u944637195/domains/desi.pet/public_html && wp post meta update 1780 client_email codex.portal.throttle.20260423222010@example.com",
+      "exit_code": 0,
+      "stdout": "\nNotice: Function _load_textdomain_just_in_time was called <strong>incorrectly</strong>. Translation loading for the <code>all-in-one-wp-migration</code> domain was triggered too early. This is usually an indicator for some code in the plugin or theme running too early. Translations should be loaded at the <code>init</code> action or later. Please see <a href=\"https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/\">Debugging in WordPress</a> for more information. (This message was added in version 6.7.0.) in /home/u944637195/domains/desi.pet/public_html/wp-includes/functions.php on line 6131\nSuccess: Updated custom field 'client_email'.\n",
+      "stderr": ""
+    },
+    {
+      "label": "set_client_phone",
+      "command": "cd /home/u944637195/domains/desi.pet/public_html && wp post meta update 1780 client_phone '(11) 99999-0000'",
+      "exit_code": 0,
+      "stdout": "\nNotice: Function _load_textdomain_just_in_time was called <strong>incorrectly</strong>. Translation loading for the <code>all-in-one-wp-migration</code> domain was triggered too early. This is usually an indicator for some code in the plugin or theme running too early. Translations should be loaded at the <code>init</code> action or later. Please see <a href=\"https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/\">Debugging in WordPress</a> for more information. (This message was added in version 6.7.0.) in /home/u944637195/domains/desi.pet/public_html/wp-includes/functions.php on line 6131\nSuccess: Updated custom field 'client_phone'.\n",
+      "stderr": ""
+    },
+    {
+      "label": "set_fixture_tag",
+      "command": "cd /home/u944637195/domains/desi.pet/public_html && wp post meta update 1780 dps_codex_smoke_tag codex_phase2_throttling_20260423222010",
+      "exit_code": 0,
+      "stdout": "\nNotice: Function _load_textdomain_just_in_time was called <strong>incorrectly</strong>. Translation loading for the <code>all-in-one-wp-migration</code> domain was triggered too early. This is usually an indicator for some code in the plugin or theme running too early. Translations should be loaded at the <code>init</code> action or later. Please see <a href=\"https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/\">Debugging in WordPress</a> for more information. (This message was added in version 6.7.0.) in /home/u944637195/domains/desi.pet/public_html/wp-includes/functions.php on line 6131\nSuccess: Updated custom field 'dps_codex_smoke_tag'.\n",
+      "stderr": ""
+    },
+    {
+      "label": "seed_rate_limits",
+      "command": "cd /home/u944637195/domains/desi.pet/public_html && wp eval-file /tmp/codex_phase2_throttling_20260423222010-seed.php",
+      "exit_code": 0,
+      "stdout": "\nNotice: Function _load_textdomain_just_in_time was called <strong>incorrectly</strong>. Translation loading for the <code>all-in-one-wp-migration</code> domain was triggered too early. This is usually an indicator for some code in the plugin or theme running too early. Translations should be loaded at the <code>init</code> action or later. Please see <a href=\"https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/\">Debugging in WordPress</a> for more information. (This message was added in version 6.7.0.) in /home/u944637195/domains/desi.pet/public_html/wp-includes/functions.php on line 6131\n{\"active_entries\":5,\"limited_entries\":2,\"email_entries\":2,\"ip_entries\":3,\"rows\":[{\"bucket\":\"portal_password_access_email\",\"scope\":\"email\",\"identifier_label\":\"codex.portal.throttle.20260423222010@example.com\",\"count\":3,\"limit\":3,\"is_limited\":true},{\"bucket\":\"portal_password_access_ip\",\"scope\":\"ip\",\"identifier_label\":\"IP fingerprint #82B31A17\",\"count\":3,\"limit\":3,\"is_limited\":true},{\"bucket\":\"portal_password_access_ip\",\"scope\":\"ip\",\"identifier_label\":\"IP fingerprint #594CFA2A\",\"count\":2,\"limit\":3,\"is_limited\":false},{\"bucket\":\"portal_access_link_ip\",\"scope\":\"ip\",\"identifier_label\":\"IP fingerprint #594CFA2A\",\"count\":2,\"limit\":3,\"is_limited\":false},{\"bucket\":\"portal_access_link_email\",\"scope\":\"email\",\"identifier_label\":\"codex.portal.throttle.20260423222010@example.com\",\"count\":1,\"limit\":3,\"is_limited\":false}]}",
+      "stderr": ""
+    },
+    {
+      "label": "remove_seed_file",
+      "command": "rm -f /tmp/codex_phase2_throttling_20260423222010-seed.php",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "deployed_at": "2026-04-24T01:19:45.817610+00:00",
+  "backup_root": "/home/u944637195/backups/dps-client-portal-phase2-throttling-css-20260423-221944",
+  "uploaded": [
+    {
+      "file": "assets/css/portal-admin.css",
+      "remote": "/home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/assets/css/portal-admin.css",
+      "backup": "/home/u944637195/backups/dps-client-portal-phase2-throttling-css-20260423-221944/assets/css/portal-admin.css"
+    }
+  ],
+  "commands": [
+    {
+      "label": "create_backup_dir",
+      "command": "mkdir -p /home/u944637195/backups/dps-client-portal-phase2-throttling-css-20260423-221944",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "label": "backup_parent_assets/css/portal-admin.css",
+      "command": "mkdir -p /home/u944637195/backups/dps-client-portal-phase2-throttling-css-20260423-221944/assets/css",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "label": "backup_assets/css/portal-admin.css",
+      "command": "if [ -f /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/assets/css/portal-admin.css ]; then cp /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/assets/css/portal-admin.css /home/u944637195/backups/dps-client-portal-phase2-throttling-css-20260423-221944/assets/css/portal-admin.css; fi",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

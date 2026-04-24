@@ -1,0 +1,61 @@
+{
+  "cleaned_at": "2026-04-24T01:21:29.340149+00:00",
+  "tag": "codex_phase2_throttling_20260423222010",
+  "cleanup": {
+    "cleared": [
+      {
+        "bucket": "portal_access_request_ip",
+        "identifier": "fixture ip"
+      },
+      {
+        "bucket": "portal_access_link_ip",
+        "identifier": "fixture ip"
+      },
+      {
+        "bucket": "portal_access_link_email",
+        "identifier": "fixture email"
+      },
+      {
+        "bucket": "portal_password_access_ip",
+        "identifier": "fixture ip"
+      },
+      {
+        "bucket": "portal_password_access_email",
+        "identifier": "fixture email"
+      },
+      {
+        "bucket": "portal_password_login_ip",
+        "identifier": "fixture ip"
+      },
+      {
+        "bucket": "portal_password_login_email",
+        "identifier": "fixture email"
+      },
+      {
+        "bucket": "portal_token_validation_ip",
+        "identifier": "fixture ip"
+      }
+    ],
+    "post_deleted": true,
+    "user_deleted": true,
+    "client_id": 1780,
+    "admin_id": 52
+  },
+  "local_secret_removed": true,
+  "commands": [
+    {
+      "label": "cleanup_fixture",
+      "command": "cd /home/u944637195/domains/desi.pet/public_html && wp eval-file /tmp/codex_phase2_throttling_20260423222010-cleanup.php",
+      "exit_code": 0,
+      "stdout": "\nNotice: Function _load_textdomain_just_in_time was called <strong>incorrectly</strong>. Translation loading for the <code>all-in-one-wp-migration</code> domain was triggered too early. This is usually an indicator for some code in the plugin or theme running too early. Translations should be loaded at the <code>init</code> action or later. Please see <a href=\"https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/\">Debugging in WordPress</a> for more information. (This message was added in version 6.7.0.) in /home/u944637195/domains/desi.pet/public_html/wp-includes/functions.php on line 6131\n{\"cleared\":[{\"bucket\":\"portal_access_request_ip\",\"identifier\":\"fixture ip\"},{\"bucket\":\"portal_access_link_ip\",\"identifier\":\"fixture ip\"},{\"bucket\":\"portal_access_link_email\",\"identifier\":\"fixture email\"},{\"bucket\":\"portal_password_access_ip\",\"identifier\":\"fixture ip\"},{\"bucket\":\"portal_password_access_email\",\"identifier\":\"fixture email\"},{\"bucket\":\"portal_password_login_ip\",\"identifier\":\"fixture ip\"},{\"bucket\":\"portal_password_login_email\",\"identifier\":\"fixture email\"},{\"bucket\":\"portal_token_validation_ip\",\"identifier\":\"fixture ip\"}],\"post_deleted\":true,\"user_deleted\":true,\"client_id\":1780,\"admin_id\":52}",
+      "stderr": ""
+    },
+    {
+      "label": "remove_cleanup_file",
+      "command": "rm -f /tmp/codex_phase2_throttling_20260423222010-cleanup.php",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

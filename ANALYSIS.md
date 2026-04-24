@@ -1239,6 +1239,8 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - A Fase 1 pos-auditoria consolidou a fronteira entre runtime publico e autenticado: estilos residuais de login/reset/2FA foram removidos de `client-portal.css`, a casca publica/2FA fica em `client-portal-auth.css` e o bundle autenticado continua exclusivo do portal logado.
 - O reset de senha agora diferencia links invalidos de links expirados no shell publico, preservando a acao `portal_password_reset`, os nomes de campos, nonces e redirects ja publicados.
 - O smoke publicado do acesso publico passou a ser reexecutavel por `tools/client-portal/client-portal-smoke-fixture.php` (fixture temporario via WP-CLI) e `tools/client-portal/client-portal-public-smoke.mjs` (Playwright contra `https://desi.pet/portal-do-cliente/`).
+- A Fase 2 pos-auditoria expos no admin do Portal um resumo operacional do throttling publico persistido em `dps_portal_rate_limits`. A aba Logins do hub mostra janelas ativas, bloqueios, escopos por e-mail/IP e proxima liberacao; e-mails conhecidos sao resolvidos contra clientes publicados e IPs aparecem apenas como fingerprint, sem expor endereco bruto.
+- A aba Logins renderizada pelo hub do Portal usa `admin.php?page=dps-portal-hub&tab=logins` como URL base de operacoes de busca, mantendo a navegacao na pagina acessivel consolidada e preservando o submenu legado oculto como detalhe interno de compatibilidade.
 
 **Diretório**: `plugins/desi-pet-shower-client-portal`
 

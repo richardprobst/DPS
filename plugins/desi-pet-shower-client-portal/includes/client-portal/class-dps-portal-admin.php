@@ -544,6 +544,7 @@ class DPS_Portal_Admin {
         $search            = isset( $_GET['dps_search'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_search'] ) ) : '';
         $clients           = $this->get_clients_with_token_stats( $search );
         $login_summary     = $this->get_login_dashboard_summary( $clients );
+        $throttle_summary  = $this->get_public_throttle_summary();
 
         $template_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'templates/admin-logins.php';
 
@@ -656,6 +657,59 @@ class DPS_Portal_Admin {
         }
 
         return $summary;
+    }
+
+    /**
+     * Consolida o resumo de throttling publico para suporte.
+     *
+     * @return array<string, mixed>
+     */
+    private function get_public_throttle_summary() {
+        if ( ! class_exists( 'DPS_Portal_Rate_Limiter' ) ) {
+            return [
+                'active_entries'    => 0,
+                'limited_entries'   => 0,
+                'email_entries'     => 0,
+                'ip_entries'        => 0,
+                'next_release_at'   => 0,
+                'next_release_text' => '',
+                'rows'              => [],
+            ];
+        }
+
+        return DPS_Portal_Rate_Limiter::get_instance()->get_public_access_summary( $this->get_known_client_email_index() );
+    }
+
+    /**
+     * Mapeia e-mails de clientes para resolver hashes do rate limiter sem alterar o contrato de armazenamento.
+     *
+     * @return array<string, array<string, string>>
+     */
+    private function get_known_client_email_index() {
+        $index   = [];
+        $clients = $this->client_repository->get_clients(
+            [
+                'per_page' => -1,
+                'search'   => '',
+            ]
+        );
+
+        foreach ( $clients as $client ) {
+            $client_id = (int) $client->ID;
+            $email     = sanitize_email( get_post_meta( $client_id, 'client_email', true ) );
+
+            if ( ! is_email( $email ) ) {
+                continue;
+            }
+
+            $index[ md5( strtolower( trim( $email ) ) ) ] = [
+                'email'  => $email,
+                'client' => get_the_title( $client_id ),
+                'url'    => (string) get_edit_post_link( $client_id ),
+            ];
+        }
+
+        return $index;
     }
 
     /**

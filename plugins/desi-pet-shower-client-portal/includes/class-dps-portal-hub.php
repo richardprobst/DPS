@@ -141,9 +141,17 @@ class DPS_Portal_Hub {
      */
     public function render_logins_tab() {
         if ( class_exists( 'DPS_Portal_Admin' ) ) {
-            $admin = DPS_Portal_Admin::get_instance();
+            $admin    = DPS_Portal_Admin::get_instance();
+            $base_url = add_query_arg(
+                [
+                    'page' => 'dps-portal-hub',
+                    'tab'  => 'logins',
+                ],
+                admin_url( 'admin.php' )
+            );
+
             ob_start();
-            $admin->render_client_logins_admin_page();
+            $admin->render_client_logins_page( 'admin', $base_url );
             $content = ob_get_clean();
             
             // Remove o wrapper e H1 duplicado

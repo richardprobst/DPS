@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $title_tag    = ( 'admin' === $context ) ? 'h1' : 'h2';
 $search_value = isset( $search ) ? (string) $search : '';
+$throttle_rows = isset( $throttle_summary['rows'] ) && is_array( $throttle_summary['rows'] ) ? $throttle_summary['rows'] : [];
 
 if ( 'admin' === $context ) {
     echo '<div class="wrap">';
@@ -57,6 +58,95 @@ if ( 'admin' === $context ) {
             <span class="dps-admin-summary-card__label"><?php esc_html_e( 'Conflitos de e-mail', 'dps-client-portal' ); ?></span>
             <strong class="dps-admin-summary-card__value"><?php echo esc_html( number_format_i18n( (int) $login_summary['email_conflicts'] ) ); ?></strong>
         </article>
+    </section>
+
+    <section class="dps-portal-throttle-panel" aria-labelledby="dps-portal-throttle-title">
+        <header class="dps-portal-throttle-panel__header">
+            <div>
+                <h2 id="dps-portal-throttle-title"><?php esc_html_e( 'Throttling publico', 'dps-client-portal' ); ?></h2>
+                <p><?php esc_html_e( 'Resumo em tempo real dos limites de acesso publico por e-mail/IP para suporte de login, magic link e senha.', 'dps-client-portal' ); ?></p>
+            </div>
+            <span class="dps-status-pill dps-status-pill--<?php echo ! empty( $throttle_summary['limited_entries'] ) ? 'danger' : ( ! empty( $throttle_summary['active_entries'] ) ? 'warning' : 'success' ); ?>">
+                <?php
+                echo ! empty( $throttle_summary['limited_entries'] )
+                    ? esc_html__( 'Bloqueios ativos', 'dps-client-portal' )
+                    : ( ! empty( $throttle_summary['active_entries'] ) ? esc_html__( 'Monitorando janela', 'dps-client-portal' ) : esc_html__( 'Sem throttling ativo', 'dps-client-portal' ) );
+                ?>
+            </span>
+        </header>
+
+        <div class="dps-portal-throttle-panel__metrics" aria-label="<?php esc_attr_e( 'Resumo do throttling publico', 'dps-client-portal' ); ?>">
+            <div class="dps-portal-throttle-metric">
+                <span><?php esc_html_e( 'Janelas ativas', 'dps-client-portal' ); ?></span>
+                <strong><?php echo esc_html( number_format_i18n( (int) $throttle_summary['active_entries'] ) ); ?></strong>
+            </div>
+            <div class="dps-portal-throttle-metric">
+                <span><?php esc_html_e( 'Bloqueios agora', 'dps-client-portal' ); ?></span>
+                <strong><?php echo esc_html( number_format_i18n( (int) $throttle_summary['limited_entries'] ) ); ?></strong>
+            </div>
+            <div class="dps-portal-throttle-metric">
+                <span><?php esc_html_e( 'E-mails', 'dps-client-portal' ); ?></span>
+                <strong><?php echo esc_html( number_format_i18n( (int) $throttle_summary['email_entries'] ) ); ?></strong>
+            </div>
+            <div class="dps-portal-throttle-metric">
+                <span><?php esc_html_e( 'IPs', 'dps-client-portal' ); ?></span>
+                <strong><?php echo esc_html( number_format_i18n( (int) $throttle_summary['ip_entries'] ) ); ?></strong>
+            </div>
+            <div class="dps-portal-throttle-metric dps-portal-throttle-metric--wide">
+                <span><?php esc_html_e( 'Proxima liberacao', 'dps-client-portal' ); ?></span>
+                <strong><?php echo ! empty( $throttle_summary['next_release_text'] ) ? esc_html( sprintf( __( 'em %s', 'dps-client-portal' ), $throttle_summary['next_release_text'] ) ) : esc_html__( 'nenhuma janela ativa', 'dps-client-portal' ); ?></strong>
+            </div>
+        </div>
+
+        <?php if ( ! empty( $throttle_rows ) ) : ?>
+            <div class="dps-portal-throttle-table-wrap">
+                <table class="widefat dps-portal-throttle-table">
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e( 'Fluxo', 'dps-client-portal' ); ?></th>
+                            <th><?php esc_html_e( 'Escopo', 'dps-client-portal' ); ?></th>
+                            <th><?php esc_html_e( 'Identificador', 'dps-client-portal' ); ?></th>
+                            <th><?php esc_html_e( 'Tentativas', 'dps-client-portal' ); ?></th>
+                            <th><?php esc_html_e( 'Status', 'dps-client-portal' ); ?></th>
+                            <th><?php esc_html_e( 'Libera em', 'dps-client-portal' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ( $throttle_rows as $row ) : ?>
+                            <tr>
+                                <td data-label="<?php echo esc_attr__( 'Fluxo', 'dps-client-portal' ); ?>"><?php echo esc_html( $row['bucket_label'] ); ?></td>
+                                <td data-label="<?php echo esc_attr__( 'Escopo', 'dps-client-portal' ); ?>"><?php echo esc_html( $row['scope_label'] ); ?></td>
+                                <td data-label="<?php echo esc_attr__( 'Identificador', 'dps-client-portal' ); ?>">
+                                    <?php if ( ! empty( $row['identifier_url'] ) ) : ?>
+                                        <a href="<?php echo esc_url( $row['identifier_url'] ); ?>"><?php echo esc_html( $row['identifier_label'] ); ?></a>
+                                    <?php else : ?>
+                                        <span><?php echo esc_html( $row['identifier_label'] ); ?></span>
+                                    <?php endif; ?>
+                                    <?php if ( ! empty( $row['identifier_meta'] ) ) : ?>
+                                        <small><?php echo esc_html( $row['identifier_meta'] ); ?></small>
+                                    <?php endif; ?>
+                                </td>
+                                <td data-label="<?php echo esc_attr__( 'Tentativas', 'dps-client-portal' ); ?>">
+                                    <?php echo esc_html( sprintf( __( '%1$d de %2$d', 'dps-client-portal' ), (int) $row['count'], (int) $row['limit'] ) ); ?>
+                                </td>
+                                <td data-label="<?php echo esc_attr__( 'Status', 'dps-client-portal' ); ?>">
+                                    <span class="dps-status-pill dps-status-pill--<?php echo ! empty( $row['is_limited'] ) ? 'danger' : 'warning'; ?>">
+                                        <?php echo ! empty( $row['is_limited'] ) ? esc_html__( 'Limitado', 'dps-client-portal' ) : esc_html__( 'Em janela', 'dps-client-portal' ); ?>
+                                    </span>
+                                </td>
+                                <td data-label="<?php echo esc_attr__( 'Libera em', 'dps-client-portal' ); ?>">
+                                    <strong><?php echo esc_html( sprintf( _n( '%d minuto', '%d minutos', (int) $row['expires_in_minutes'], 'dps-client-portal' ), (int) $row['expires_in_minutes'] ) ); ?></strong>
+                                    <small><?php echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $row['expires_at'] ) ); ?></small>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <p class="dps-portal-throttle-panel__note"><?php esc_html_e( 'IPs aparecem como fingerprint para suporte sem expor o endereco bruto. E-mails conhecidos sao resolvidos contra clientes publicados.', 'dps-client-portal' ); ?></p>
+        <?php else : ?>
+            <div class="dps-portal-throttle-panel__empty"><?php esc_html_e( 'Nenhuma janela publica de throttling ativa neste momento.', 'dps-client-portal' ); ?></div>
+        <?php endif; ?>
     </section>
 
     <form method="get" action="<?php echo esc_url( $base_url ); ?>" class="dps-portal-admin-shell__filters">

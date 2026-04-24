@@ -26,6 +26,7 @@
 .dps-portal-admin-shell__header,
 .dps-portal-admin-shell__summary,
 .dps-portal-admin-shell__filters,
+.dps-portal-throttle-panel,
 .dps-portal-table-wrap,
 .dps-portal-admin-shell__empty,
 .dps-portal-settings-card,
@@ -134,6 +135,115 @@
 .dps-admin-summary-card__value--small {
     font-size: 0.98rem;
     line-height: 1.5;
+}
+
+.dps-portal-throttle-panel {
+    display: grid;
+    gap: 18px;
+    padding: 22px;
+    background: var(--dps-admin-surface);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.dps-portal-throttle-panel__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.dps-portal-throttle-panel__header h2 {
+    margin: 0 0 6px;
+    font-size: 1.15rem;
+    color: var(--dps-admin-text);
+}
+
+.dps-portal-throttle-panel__header p,
+.dps-portal-throttle-panel__note,
+.dps-portal-throttle-table small {
+    margin: 0;
+    color: var(--dps-admin-muted);
+    line-height: 1.6;
+}
+
+.dps-portal-throttle-panel__metrics {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.dps-portal-throttle-metric {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    padding: 14px;
+    background: var(--dps-admin-surface-soft);
+    border: 1px solid rgba(23, 50, 44, 0.08);
+    border-radius: 0;
+}
+
+.dps-portal-throttle-metric span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dps-admin-muted);
+}
+
+.dps-portal-throttle-metric strong {
+    color: var(--dps-admin-text);
+    font-size: 1.1rem;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+.dps-portal-throttle-table-wrap {
+    overflow-x: auto;
+    border: 1px solid rgba(23, 50, 44, 0.08);
+    border-radius: 0;
+}
+
+.dps-portal-throttle-table {
+    min-width: 860px;
+    border: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.dps-portal-throttle-table th,
+.dps-portal-throttle-table td {
+    padding: 14px 16px;
+    vertical-align: top;
+    border-bottom: 1px solid rgba(23, 50, 44, 0.08);
+}
+
+.dps-portal-throttle-table thead th {
+    background: var(--dps-admin-surface-soft);
+    color: var(--dps-admin-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.dps-portal-throttle-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.dps-portal-throttle-table td:nth-child(3),
+.dps-portal-throttle-table td:nth-child(6) {
+    display: grid;
+    gap: 4px;
+}
+
+.dps-portal-throttle-panel__empty {
+    padding: 18px;
+    background: var(--dps-admin-surface-soft);
+    border: 1px dashed var(--dps-admin-border);
+    border-radius: 0;
+    color: var(--dps-admin-muted);
+    font-weight: 600;
 }
 
 .dps-portal-admin-shell__filters {
@@ -510,10 +620,22 @@ body.dps-admin-modal-open {
     .dps-portal-admin-shell__summary {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
+
+    .dps-portal-throttle-panel__metrics {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 900px) {
     .dps-portal-admin-shell__summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dps-portal-throttle-panel__header {
+        display: grid;
+    }
+
+    .dps-portal-throttle-panel__metrics {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -586,6 +708,14 @@ body.dps-admin-modal-open {
     .dps-portal-admin-shell__summary {
         grid-template-columns: 1fr;
         padding: 14px;
+    }
+
+    .dps-portal-throttle-panel {
+        padding: 18px;
+    }
+
+    .dps-portal-throttle-panel__metrics {
+        grid-template-columns: 1fr;
     }
 
     .dps-portal-logins-table__actions,

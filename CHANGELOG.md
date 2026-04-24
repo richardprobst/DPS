@@ -88,6 +88,11 @@ Antes de criar uma nova versÃ£o oficial:
 - Adicionado fixture WP-CLI temporario para criar clientes/usuarios autenticaveis do Portal do Cliente e limpar os dados de teste ao final.
 - Adicionado smoke test Playwright reexecutavel para validar o acesso publico publicado, cobrindo login por senha, magic link, CTA `Criar ou redefinir senha`, reset valido, reset invalido, reset expirado e feedback inline anti-enumeration.
 
+**Portal do Cliente - suporte ao throttling publico**
+
+- Adicionado resumo administrativo de throttling publico na aba Logins do Portal, com janelas ativas, bloqueios, escopo por e-mail/IP e proxima liberacao.
+- Adicionada resolucao segura de e-mails conhecidos contra clientes publicados, mantendo IPs anonimizados como fingerprint no admin.
+
 **Agenda Add-on - fila operacional DPS Signature**
 
 - Implementada a primeira versão da fila operacional canônica da Agenda, substituindo a leitura em três tabelas por um eixo único com horário, pet/tutor, serviços, etapa, financeiro, operação, logística e ações.
@@ -114,6 +119,7 @@ Antes de criar uma nova versÃ£o oficial:
 - Validado no `desi.pet` que os modais de pet, serviços, operação, histórico e reagendamento abriram corretamente após a publicação final.
 - Removidos efeitos colaterais de persistencia no renderer operacional da Agenda, que antes ajustava metadados durante a montagem da UI.
 - Removido uso deprecated de `$.trim` nos scripts ativos da Agenda; a revalidacao publicada ficou sem erros e sem warnings no Playwright.
+- Corrigida a URL base da aba Logins do hub do Portal para manter buscas em `admin.php?page=dps-portal-hub&tab=logins`, evitando retorno ao submenu legado oculto.
 
 #### Removed (Removido)
 

@@ -1,5 +1,80 @@
 # Screenshots 2026-04-23
 
+## Portal do Cliente: Fase 2 suporte ao throttling publico
+
+Fonte de verdade visual seguida nesta Fase 2: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` (padrao DPS Signature).
+
+### Objetivo
+
+Executar somente a Fase 2 do plano pos-auditoria do login do Portal do Cliente: expor no admin um resumo operacional de throttling publico por e-mail/IP para suporte quando clientes relatarem dificuldade no acesso, sem alterar shortcodes, hooks, endpoints, nonces, nomes de campos ou fluxos publicados.
+
+### Ajustes implementados
+
+- o `DPS_Portal_Rate_Limiter` passou a expor um resumo seguro e em tempo real dos buckets publicos persistidos em `dps_portal_rate_limits`;
+- a tela administrativa de Logins passou a mostrar metricas, status e linhas por fluxo (`login por senha`, `magic link`, `criar/redefinir senha`, pedido geral e validacao de token);
+- e-mails conhecidos sao resolvidos contra clientes publicados; IPs aparecem apenas como fingerprint, sem expor endereco bruto;
+- o painel segue a superficie operacional DPS Signature: geometria reta, densidade controlada, status objetivos e tabela com rolagem interna no mobile;
+- corrigida a base URL da aba Logins dentro do hub do Portal para manter a busca em `admin.php?page=dps-portal-hub&tab=logins`, em vez do submenu legado oculto `dps-client-logins`.
+
+### Publicado e validado
+
+- validado no admin publicado em `https://desi.pet/wp-admin/admin.php?page=dps-portal-hub&tab=logins`;
+- fixture temporario:
+  - tag: `codex_phase2_throttling_20260423222010`;
+  - usuario admin temporario removido ao final;
+  - cliente temporario removido ao final;
+  - contadores semeados limpos ao final;
+- backups remotos:
+  - `/home/u944637195/backups/dps-client-portal-phase2-throttling-20260423-220848`;
+  - `/home/u944637195/backups/dps-client-portal-phase2-throttling-hub-20260423-221632`;
+  - `/home/u944637195/backups/dps-client-portal-phase2-throttling-css-20260423-221944`.
+
+### Validacao funcional
+
+- `pageErrors = []`;
+- `consoleErrors = []`;
+- `overflowX = 0` em todos os breakpoints;
+- painel `Throttling publico` presente em todos os breakpoints;
+- `2` bloqueios ativos exibidos durante a fixture;
+- e-mail do cliente temporario resolvido na tabela;
+- fingerprint de IP exibido sem mostrar o IP bruto;
+- formulario de busca da aba Logins permaneceu apontando para o hub acessivel.
+- painel de throttling publicado com geometria reta (`borderRadius = 0px`) nos cinco breakpoints.
+
+### Breakpoints validados
+
+- `375`: `overflowX = 0`, `rowCount = 5`, `limited = 2`;
+- `600`: `overflowX = 0`, `rowCount = 5`, `limited = 2`;
+- `840`: `overflowX = 0`, `rowCount = 5`, `limited = 2`;
+- `1200`: `overflowX = 0`, `rowCount = 5`, `limited = 2`;
+- `1920`: `overflowX = 0`, `rowCount = 5`, `limited = 2`.
+
+### Artefatos
+
+- [portal-admin-throttling-validation.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-admin-throttling/portal-admin-throttling-validation.json)
+- [portal-admin-throttling-fixture.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-admin-throttling/portal-admin-throttling-fixture.json)
+- [portal-admin-throttling-cleanup.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-admin-throttling/portal-admin-throttling-cleanup.json)
+- [deploy-sftp-result.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-admin-throttling/deploy-sftp-result.json)
+- [deploy-sftp-hub-fix-result.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-admin-throttling/deploy-sftp-hub-fix-result.json)
+- [deploy-sftp-css-fix-result.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-admin-throttling/deploy-sftp-css-fix-result.json)
+- [portal-admin-throttling-375.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-admin-throttling/portal-admin-throttling-375.png)
+- [portal-admin-throttling-600.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-admin-throttling/portal-admin-throttling-600.png)
+- [portal-admin-throttling-840.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-admin-throttling/portal-admin-throttling-840.png)
+- [portal-admin-throttling-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-admin-throttling/portal-admin-throttling-1200.png)
+- [portal-admin-throttling-1920.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-admin-throttling/portal-admin-throttling-1920.png)
+
+### Comandos executados
+
+- `php -l plugins/desi-pet-shower-client-portal/includes/class-dps-portal-rate-limiter.php`
+- `php -l plugins/desi-pet-shower-client-portal/includes/client-portal/class-dps-portal-admin.php`
+- `php -l plugins/desi-pet-shower-client-portal/includes/class-dps-portal-hub.php`
+- `php -l plugins/desi-pet-shower-client-portal/templates/admin-logins.php`
+- upload por SSH/SFTP com backup remoto dos arquivos alterados
+- `php -l` remoto nos arquivos PHP publicados
+- fixture temporario via WP-CLI com usuario admin, cliente publicado e janelas reais de `DPS_Portal_Rate_Limiter`
+- validacao publicada com Playwright autenticado em `375`, `600`, `840`, `1200` e `1920`
+- limpeza dos contadores, cliente, usuario temporario e scripts WP-CLI remotos
+
 ## Portal do Cliente: Fase 1 pos-auditoria do acesso publico
 
 Fonte de verdade visual seguida nesta Fase 1: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` (padrao DPS Signature).

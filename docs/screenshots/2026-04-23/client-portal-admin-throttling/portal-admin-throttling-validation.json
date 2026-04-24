@@ -1,0 +1,273 @@
+{
+  "validated_at": "2026-04-24T01:21:06.919174+00:00",
+  "fixture_tag": "codex_phase2_throttling_20260423222010",
+  "url": "https://desi.pet/wp-admin/admin.php?page=dps-portal-hub&tab=logins",
+  "breakpoints": [
+    375,
+    600,
+    840,
+    1200,
+    1920
+  ],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "networkFailures": [
+    {
+      "url": "https://play.google.com/log?hasfast=true&authuser=0&format=json",
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "results": [
+    {
+      "width": 375,
+      "title": "Throttling publico",
+      "status": "BLOQUEIOS ATIVOS",
+      "rowCount": 5,
+      "metrics": [
+        {
+          "label": "JANELAS ATIVAS",
+          "value": "5"
+        },
+        {
+          "label": "BLOQUEIOS AGORA",
+          "value": "2"
+        },
+        {
+          "label": "E-MAILS",
+          "value": "2"
+        },
+        {
+          "label": "IPS",
+          "value": "3"
+        },
+        {
+          "label": "PROXIMA LIBERACAO",
+          "value": "em 29 minutos"
+        }
+      ],
+      "hasClientEmail": true,
+      "hasClientTitle": true,
+      "hasRawIp": false,
+      "hasIpFingerprint": true,
+      "pageOverflowX": 0,
+      "shellOverflowX": 0,
+      "panelOverflowX": 0,
+      "throttleTableWrapperHasInternalScroll": true,
+      "filterAction": "https://desi.pet/wp-admin/admin.php?page=dps-portal-hub&tab=logins",
+      "panelBorderRadius": "0px",
+      "bodyClass": "wp-admin wp-core-ui js hostinger-hide-main-menu-item desi-pet-by-probst_page_dps-portal-hub auto-fold admin-bar branch-6-9 version-6-9-4 admin-color-fresh locale-pt-br svg wp-theme-flatsome customize-support dialog-body dialog-buttons-body dialog-container dialog-buttons-container e--ua-blink e--ua-webkit",
+      "activeEntriesText": "5",
+      "limitedEntriesText": "2",
+      "emailEntriesText": "2",
+      "ipEntriesText": "3",
+      "activeEntries": 5,
+      "limitedEntries": 2,
+      "emailEntries": 2,
+      "ipEntries": 3,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\client-portal-admin-throttling\\portal-admin-throttling-375.png"
+    },
+    {
+      "width": 600,
+      "title": "Throttling publico",
+      "status": "BLOQUEIOS ATIVOS",
+      "rowCount": 5,
+      "metrics": [
+        {
+          "label": "JANELAS ATIVAS",
+          "value": "5"
+        },
+        {
+          "label": "BLOQUEIOS AGORA",
+          "value": "2"
+        },
+        {
+          "label": "E-MAILS",
+          "value": "2"
+        },
+        {
+          "label": "IPS",
+          "value": "3"
+        },
+        {
+          "label": "PROXIMA LIBERACAO",
+          "value": "em 29 minutos"
+        }
+      ],
+      "hasClientEmail": true,
+      "hasClientTitle": true,
+      "hasRawIp": false,
+      "hasIpFingerprint": true,
+      "pageOverflowX": 0,
+      "shellOverflowX": 0,
+      "panelOverflowX": 0,
+      "throttleTableWrapperHasInternalScroll": true,
+      "filterAction": "https://desi.pet/wp-admin/admin.php?page=dps-portal-hub&tab=logins",
+      "panelBorderRadius": "0px",
+      "bodyClass": "wp-admin wp-core-ui js hostinger-hide-main-menu-item desi-pet-by-probst_page_dps-portal-hub auto-fold admin-bar branch-6-9 version-6-9-4 admin-color-fresh locale-pt-br svg wp-theme-flatsome customize-support dialog-body dialog-buttons-body dialog-container dialog-buttons-container e--ua-blink e--ua-webkit",
+      "activeEntriesText": "5",
+      "limitedEntriesText": "2",
+      "emailEntriesText": "2",
+      "ipEntriesText": "3",
+      "activeEntries": 5,
+      "limitedEntries": 2,
+      "emailEntries": 2,
+      "ipEntries": 3,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\client-portal-admin-throttling\\portal-admin-throttling-600.png"
+    },
+    {
+      "width": 840,
+      "title": "Throttling publico",
+      "status": "BLOQUEIOS ATIVOS",
+      "rowCount": 5,
+      "metrics": [
+        {
+          "label": "JANELAS ATIVAS",
+          "value": "5"
+        },
+        {
+          "label": "BLOQUEIOS AGORA",
+          "value": "2"
+        },
+        {
+          "label": "E-MAILS",
+          "value": "2"
+        },
+        {
+          "label": "IPS",
+          "value": "3"
+        },
+        {
+          "label": "PROXIMA LIBERACAO",
+          "value": "em 29 minutos"
+        }
+      ],
+      "hasClientEmail": true,
+      "hasClientTitle": true,
+      "hasRawIp": false,
+      "hasIpFingerprint": true,
+      "pageOverflowX": 0,
+      "shellOverflowX": 0,
+      "panelOverflowX": 0,
+      "throttleTableWrapperHasInternalScroll": true,
+      "filterAction": "https://desi.pet/wp-admin/admin.php?page=dps-portal-hub&tab=logins",
+      "panelBorderRadius": "0px",
+      "bodyClass": "wp-admin wp-core-ui js hostinger-hide-main-menu-item desi-pet-by-probst_page_dps-portal-hub auto-fold admin-bar branch-6-9 version-6-9-4 admin-color-fresh locale-pt-br svg wp-theme-flatsome customize-support dialog-body dialog-buttons-body dialog-container dialog-buttons-container sticky-menu e--ua-blink e--ua-webkit",
+      "activeEntriesText": "5",
+      "limitedEntriesText": "2",
+      "emailEntriesText": "2",
+      "ipEntriesText": "3",
+      "activeEntries": 5,
+      "limitedEntries": 2,
+      "emailEntries": 2,
+      "ipEntries": 3,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\client-portal-admin-throttling\\portal-admin-throttling-840.png"
+    },
+    {
+      "width": 1200,
+      "title": "Throttling publico",
+      "status": "BLOQUEIOS ATIVOS",
+      "rowCount": 5,
+      "metrics": [
+        {
+          "label": "JANELAS ATIVAS",
+          "value": "5"
+        },
+        {
+          "label": "BLOQUEIOS AGORA",
+          "value": "2"
+        },
+        {
+          "label": "E-MAILS",
+          "value": "2"
+        },
+        {
+          "label": "IPS",
+          "value": "3"
+        },
+        {
+          "label": "PROXIMA LIBERACAO",
+          "value": "em 29 minutos"
+        }
+      ],
+      "hasClientEmail": true,
+      "hasClientTitle": true,
+      "hasRawIp": false,
+      "hasIpFingerprint": true,
+      "pageOverflowX": 0,
+      "shellOverflowX": 0,
+      "panelOverflowX": 0,
+      "throttleTableWrapperHasInternalScroll": false,
+      "filterAction": "https://desi.pet/wp-admin/admin.php?page=dps-portal-hub&tab=logins",
+      "panelBorderRadius": "0px",
+      "bodyClass": "wp-admin wp-core-ui js hostinger-hide-main-menu-item desi-pet-by-probst_page_dps-portal-hub auto-fold admin-bar branch-6-9 version-6-9-4 admin-color-fresh locale-pt-br svg wp-theme-flatsome customize-support dialog-body dialog-buttons-body dialog-container dialog-buttons-container sticky-menu e--ua-blink e--ua-webkit",
+      "activeEntriesText": "5",
+      "limitedEntriesText": "2",
+      "emailEntriesText": "2",
+      "ipEntriesText": "3",
+      "activeEntries": 5,
+      "limitedEntries": 2,
+      "emailEntries": 2,
+      "ipEntries": 3,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\client-portal-admin-throttling\\portal-admin-throttling-1200.png"
+    },
+    {
+      "width": 1920,
+      "title": "Throttling publico",
+      "status": "BLOQUEIOS ATIVOS",
+      "rowCount": 5,
+      "metrics": [
+        {
+          "label": "JANELAS ATIVAS",
+          "value": "5"
+        },
+        {
+          "label": "BLOQUEIOS AGORA",
+          "value": "2"
+        },
+        {
+          "label": "E-MAILS",
+          "value": "2"
+        },
+        {
+          "label": "IPS",
+          "value": "3"
+        },
+        {
+          "label": "PROXIMA LIBERACAO",
+          "value": "em 29 minutos"
+        }
+      ],
+      "hasClientEmail": true,
+      "hasClientTitle": true,
+      "hasRawIp": false,
+      "hasIpFingerprint": true,
+      "pageOverflowX": 0,
+      "shellOverflowX": 0,
+      "panelOverflowX": 0,
+      "throttleTableWrapperHasInternalScroll": false,
+      "filterAction": "https://desi.pet/wp-admin/admin.php?page=dps-portal-hub&tab=logins",
+      "panelBorderRadius": "0px",
+      "bodyClass": "wp-admin wp-core-ui js hostinger-hide-main-menu-item desi-pet-by-probst_page_dps-portal-hub auto-fold admin-bar branch-6-9 version-6-9-4 admin-color-fresh locale-pt-br svg wp-theme-flatsome customize-support dialog-body dialog-buttons-body dialog-container dialog-buttons-container sticky-menu e--ua-blink e--ua-webkit",
+      "activeEntriesText": "5",
+      "limitedEntriesText": "2",
+      "emailEntriesText": "2",
+      "ipEntriesText": "3",
+      "activeEntries": 5,
+      "limitedEntries": 2,
+      "emailEntries": 2,
+      "ipEntries": 3,
+      "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\client-portal-admin-throttling\\portal-admin-throttling-1920.png"
+    }
+  ],
+  "acceptance": {
+    "pageErrorsEmpty": true,
+    "overflowXZeroAllBreakpoints": true,
+    "throttlePanelPresentAllBreakpoints": true,
+    "limitedEntriesVisibleAllBreakpoints": true,
+    "clientEmailResolvedAllBreakpoints": true,
+    "ipFingerprintVisibleAllBreakpoints": true,
+    "rawIpHiddenAllBreakpoints": true,
+    "hubFilterActionAllBreakpoints": true,
+    "panelBorderRadiusZeroAllBreakpoints": true
+  }
+}

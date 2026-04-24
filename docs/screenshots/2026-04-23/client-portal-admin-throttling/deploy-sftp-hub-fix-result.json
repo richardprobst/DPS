@@ -1,0 +1,42 @@
+{
+  "deployed_at": "2026-04-24T01:16:34.109671+00:00",
+  "backup_root": "/home/u944637195/backups/dps-client-portal-phase2-throttling-hub-20260423-221632",
+  "uploaded": [
+    {
+      "file": "includes/class-dps-portal-hub.php",
+      "remote": "/home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/includes/class-dps-portal-hub.php",
+      "backup": "/home/u944637195/backups/dps-client-portal-phase2-throttling-hub-20260423-221632/includes/class-dps-portal-hub.php",
+      "php_lint": "No syntax errors detected in /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/includes/class-dps-portal-hub.php\n"
+    }
+  ],
+  "commands": [
+    {
+      "label": "create_backup_dir",
+      "command": "mkdir -p /home/u944637195/backups/dps-client-portal-phase2-throttling-hub-20260423-221632",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "label": "backup_parent_includes/class-dps-portal-hub.php",
+      "command": "mkdir -p /home/u944637195/backups/dps-client-portal-phase2-throttling-hub-20260423-221632/includes",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "label": "backup_includes/class-dps-portal-hub.php",
+      "command": "if [ -f /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/includes/class-dps-portal-hub.php ]; then cp /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/includes/class-dps-portal-hub.php /home/u944637195/backups/dps-client-portal-phase2-throttling-hub-20260423-221632/includes/class-dps-portal-hub.php; fi",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "label": "php_lint_remote_includes/class-dps-portal-hub.php",
+      "command": "php -l /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/includes/class-dps-portal-hub.php",
+      "exit_code": 0,
+      "stdout": "No syntax errors detected in /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/includes/class-dps-portal-hub.php\n",
+      "stderr": ""
+    }
+  ]
+}
