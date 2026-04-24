@@ -552,7 +552,10 @@ final class DPS_Client_Portal {
 
         $user = check_password_reset_key( $key, $login );
         if ( is_wp_error( $user ) || ! $user instanceof WP_User ) {
-            wp_safe_redirect( add_query_arg( 'portal_auth_error', 'reset_link_invalid', $portal_url ) );
+            $reset_error = is_wp_error( $user ) && 'expired_key' === $user->get_error_code()
+                ? 'reset_link_expired'
+                : 'reset_link_invalid';
+            wp_safe_redirect( add_query_arg( 'portal_auth_error', $reset_error, $portal_url ) );
             exit;
         }
 
@@ -1242,6 +1245,7 @@ final class DPS_Client_Portal {
                 'too_many_attempts'   => [ 'type' => 'warning', 'title' => __( 'Muitas tentativas', 'dps-client-portal' ), 'description' => __( 'Aguarde alguns minutos antes de tentar novamente.', 'dps-client-portal' ) ],
                 'session_expired'     => [ 'type' => 'warning', 'title' => __( 'Sessao expirada', 'dps-client-portal' ), 'description' => __( 'Atualize a pagina e tente novamente.', 'dps-client-portal' ) ],
                 'reset_link_invalid'  => [ 'type' => 'error', 'title' => __( 'Link de senha invalido', 'dps-client-portal' ), 'description' => __( 'Solicite um novo link para criar ou redefinir sua senha.', 'dps-client-portal' ) ],
+                'reset_link_expired'  => [ 'type' => 'warning', 'title' => __( 'Link de senha expirado', 'dps-client-portal' ), 'description' => __( 'Solicite um novo e-mail para criar ou redefinir sua senha.', 'dps-client-portal' ) ],
                 'password_required'   => [ 'type' => 'warning', 'title' => __( 'Informe uma senha', 'dps-client-portal' ), 'description' => __( 'Preencha a nova senha e a confirmacao para continuar.', 'dps-client-portal' ) ],
                 'password_mismatch'   => [ 'type' => 'warning', 'title' => __( 'As senhas nao conferem', 'dps-client-portal' ), 'description' => __( 'Digite a mesma senha nos dois campos.', 'dps-client-portal' ) ],
                 'password_short'      => [ 'type' => 'warning', 'title' => __( 'Senha muito curta', 'dps-client-portal' ), 'description' => __( 'Use pelo menos 8 caracteres na nova senha.', 'dps-client-portal' ) ],
@@ -1309,13 +1313,15 @@ final class DPS_Client_Portal {
         $portal_password_login = isset( $_GET['login'] ) ? sanitize_text_field( wp_unslash( $_GET['login'] ) ) : '';
         $portal_password_key   = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
         $portal_reset_user     = ( $portal_password_login && $portal_password_key ) ? check_password_reset_key( $portal_password_key, $portal_password_login ) : new WP_Error( 'invalid_key', __( 'Link invalido.', 'dps-client-portal' ) );
-        $portal_reset_valid    = $portal_reset_user instanceof WP_User && ! is_wp_error( $portal_reset_user );
+        $portal_reset_valid      = $portal_reset_user instanceof WP_User && ! is_wp_error( $portal_reset_user );
+        $portal_reset_error_code = is_wp_error( $portal_reset_user ) ? $portal_reset_user->get_error_code() : '';
 
         if ( ! $portal_reset_valid ) {
+            $is_expired_reset = 'expired_key' === $portal_reset_error_code;
             $portal_access_context['messages'][] = [
-                'type'        => 'error',
-                'title'       => __( 'Link de senha invalido', 'dps-client-portal' ),
-                'description' => __( 'Solicite um novo e-mail para criar ou redefinir sua senha.', 'dps-client-portal' ),
+                'type'        => $is_expired_reset ? 'warning' : 'error',
+                'title'       => $is_expired_reset ? __( 'Link de senha expirado', 'dps-client-portal' ) : __( 'Link de senha invalido', 'dps-client-portal' ),
+                'description' => $is_expired_reset ? __( 'Este link passou do prazo de uso. Solicite um novo e-mail para criar ou redefinir sua senha.', 'dps-client-portal' ) : __( 'Solicite um novo e-mail para criar ou redefinir sua senha.', 'dps-client-portal' ),
             ];
         }
 

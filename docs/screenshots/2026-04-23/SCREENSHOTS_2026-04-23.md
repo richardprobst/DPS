@@ -1,5 +1,88 @@
 # Screenshots 2026-04-23
 
+## Portal do Cliente: Fase 1 pos-auditoria do acesso publico
+
+Fonte de verdade visual seguida nesta Fase 1: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` (padrao DPS Signature).
+
+### Objetivo
+
+Executar somente a Fase 1 do plano pos-auditoria do login do Portal do Cliente: consolidar a separacao entre runtime publico e autenticado, criar smoke test reexecutavel para o publicado, validar fluxos reais com fixture temporario WP-CLI e registrar evidencias funcionais/visuais.
+
+### Ajustes implementados
+
+- residuos de CSS da landing publica, reset e 2FA foram removidos do bundle autenticado `client-portal.css`;
+- estilos publicos/2FA ficaram concentrados em `client-portal-auth.css`, mantendo a casca DPS Signature usada fora da area logada;
+- a tela de 2FA passou a usar o mesmo shell publico DPS Signature, sem alterar endpoint AJAX ou fluxo de verificacao;
+- links de reset expirados agora recebem feedback proprio (`Link de senha expirado`) em vez de cair no mesmo estado de link invalido;
+- criado fixture temporario WP-CLI em `tools/client-portal/client-portal-smoke-fixture.php`;
+- criado smoke test Playwright reexecutavel em `tools/client-portal/client-portal-public-smoke.mjs`.
+
+### Publicado e validado
+
+- publicado em `https://desi.pet/portal-do-cliente/`;
+- backup remoto:
+  - `/home/u944637195/backups/dps-client-portal-phase1-20260423-214752`;
+- fixture temporario final:
+  - tag: `codex_portal_phase1_20260423_215219`;
+  - usuarios/posts temporarios removidos ao final;
+  - scripts temporarios WP-CLI removidos do home remoto.
+
+### Validacao funcional
+
+- `pageErrors = []` em todos os fluxos do smoke publicado;
+- `consoleErrors = []` e `consoleWarnings = []` no smoke final;
+- o runtime publico carregou `client-portal-access.js` e nao carregou `client-portal.js`;
+- login por e-mail e senha autenticou e abriu o portal com `9` tabs;
+- magic link autenticou e abriu o portal com `9` tabs;
+- CTA `Criar ou redefinir senha` respondeu `200` com feedback inline anti-enumeration;
+- solicitacao de magic link respondeu `200` com feedback inline;
+- reset invalido mostrou estado de link invalido sem formulario;
+- reset expirado mostrou estado de link expirado sem formulario;
+- reset valido exibiu formulario com `toggleCount = 2`;
+- envio do reset valido autenticou e abriu o portal com `9` tabs.
+
+### Breakpoints validados
+
+- `375`: `overflowX = 0`, `pageErrors = []`, CTA `295x56`;
+- `600`: `overflowX = 0`, `pageErrors = []`, CTA `514x56`;
+- `840`: `overflowX = 0`, `pageErrors = []`, CTA `751x56`;
+- `1200`: `overflowX = 0`, `pageErrors = []`, CTA `617x56`;
+- `1920`: `overflowX = 0`, `pageErrors = []`, CTA `617x56`.
+
+### Artefatos
+
+- [portal-client-public-smoke-result.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/portal-client-public-smoke-result.json)
+- [deploy-sftp-result.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/deploy-sftp-result.json)
+- [fixture-cleanup-result.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/fixture-cleanup-result.json)
+- [portal-public-shell-375.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/portal-public-shell-375.png)
+- [portal-public-shell-600.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/portal-public-shell-600.png)
+- [portal-public-shell-840.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/portal-public-shell-840.png)
+- [portal-public-shell-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/portal-public-shell-1200.png)
+- [portal-public-shell-1920.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/portal-public-shell-1920.png)
+- [portal-password-access-anti-enumeration-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/portal-password-access-anti-enumeration-1200.png)
+- [portal-magic-link-request-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/portal-magic-link-request-1200.png)
+- [portal-password-login-success-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/portal-password-login-success-1200.png)
+- [portal-magic-login-success-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/portal-magic-login-success-1200.png)
+- [portal-reset-invalid-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/portal-reset-invalid-1200.png)
+- [portal-reset-expired-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/portal-reset-expired-1200.png)
+- [portal-reset-valid-screen-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/portal-reset-valid-screen-1200.png)
+- [portal-reset-valid-success-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/client-portal-public-smoke/portal-reset-valid-success-1200.png)
+
+### Comandos executados
+
+- `php -l plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
+- `php -l plugins/desi-pet-shower-client-portal/includes/class-dps-portal-2fa.php`
+- `php -l plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php`
+- `php -l tools/client-portal/client-portal-smoke-fixture.php`
+- `node --check tools/client-portal/client-portal-public-smoke.mjs`
+- `node --check plugins/desi-pet-shower-client-portal/assets/js/client-portal-access.js`
+- `node --check plugins/desi-pet-shower-client-portal/assets/js/client-portal.js`
+- `git diff --check`
+- upload por SSH/SFTP com backup remoto dos arquivos alterados
+- fixture temporario com `wp eval-file tools/client-portal/client-portal-smoke-fixture.php`
+- smoke publicado com Playwright em `375`, `600`, `840`, `1200` e `1920`
+- limpeza dos clientes/usuarios temporarios e scripts WP-CLI remotos
+
 ## Agenda: botao `COMPLETA` e navegacao de views
 
 Fonte de verdade visual seguida nesta correcao: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` (padrao DPS Signature).

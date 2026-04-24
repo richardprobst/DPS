@@ -1,0 +1,56 @@
+{
+  "deployedAt": "2026-04-24T00:47:53Z",
+  "backupRoot": "/home/u944637195/backups/dps-client-portal-phase1-20260423-214752",
+  "files": [
+    {
+      "local": "C:\\Users\\casaprobst\\DPS\\plugins\\desi-pet-shower-client-portal\\assets\\css\\client-portal-auth.css",
+      "remote": "/home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css",
+      "backup": "/home/u944637195/backups/dps-client-portal-phase1-20260423-214752/plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css",
+      "bytes": 14772
+    },
+    {
+      "local": "C:\\Users\\casaprobst\\DPS\\plugins\\desi-pet-shower-client-portal\\assets\\css\\client-portal.css",
+      "remote": "/home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/assets/css/client-portal.css",
+      "backup": "/home/u944637195/backups/dps-client-portal-phase1-20260423-214752/plugins/desi-pet-shower-client-portal/assets/css/client-portal.css",
+      "bytes": 213897
+    },
+    {
+      "local": "C:\\Users\\casaprobst\\DPS\\plugins\\desi-pet-shower-client-portal\\includes\\class-dps-client-portal.php",
+      "remote": "/home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php",
+      "backup": "/home/u944637195/backups/dps-client-portal-phase1-20260423-214752/plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php",
+      "bytes": 173423
+    },
+    {
+      "local": "C:\\Users\\casaprobst\\DPS\\plugins\\desi-pet-shower-client-portal\\includes\\class-dps-portal-2fa.php",
+      "remote": "/home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/includes/class-dps-portal-2fa.php",
+      "backup": "/home/u944637195/backups/dps-client-portal-phase1-20260423-214752/plugins/desi-pet-shower-client-portal/includes/class-dps-portal-2fa.php",
+      "bytes": 27725
+    },
+    {
+      "local": "C:\\Users\\casaprobst\\DPS\\plugins\\desi-pet-shower-client-portal\\templates\\portal-password-reset.php",
+      "remote": "/home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php",
+      "backup": "/home/u944637195/backups/dps-client-portal-phase1-20260423-214752/plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php",
+      "bytes": 13791
+    }
+  ],
+  "remoteLint": [
+    {
+      "command": "php -l /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php",
+      "status": 0,
+      "stdout": "No syntax errors detected in /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php",
+      "stderr": ""
+    },
+    {
+      "command": "php -l /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/includes/class-dps-portal-2fa.php",
+      "status": 0,
+      "stdout": "No syntax errors detected in /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/includes/class-dps-portal-2fa.php",
+      "stderr": ""
+    },
+    {
+      "command": "php -l /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php",
+      "status": 0,
+      "stdout": "No syntax errors detected in /home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-client-portal/templates/portal-password-reset.php",
+      "stderr": ""
+    }
+  ]
+}

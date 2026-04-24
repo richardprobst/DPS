@@ -1236,6 +1236,9 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - A casca publica de acesso/reset passou a sobrepor a fundacao compartilhada com geometria reta (`0px` e `2px`) e paleta `ink`/`petrol`/`paper`/`bone`, alinhando o Portal do Cliente ao DPS Signature sem alterar shortcodes, hooks ou endpoints do add-on.
 - O shell publico deixou de carregar o bundle autenticado do portal: `client-portal-access.js` passou a concentrar tabs de acesso, sincronizacao de e-mail, toggles de senha e AJAX da landing/reset, enquanto `client-portal.js` fica restrito ao portal autenticado.
 - O fluxo de redefinicao de senha deixou de duplamente codificar `login` e `key` nos links emitidos e nos redirects internos; com isso, `check_password_reset_key()` volta a aceitar as URLs geradas pelo proprio add-on no runtime publicado.
+- A Fase 1 pos-auditoria consolidou a fronteira entre runtime publico e autenticado: estilos residuais de login/reset/2FA foram removidos de `client-portal.css`, a casca publica/2FA fica em `client-portal-auth.css` e o bundle autenticado continua exclusivo do portal logado.
+- O reset de senha agora diferencia links invalidos de links expirados no shell publico, preservando a acao `portal_password_reset`, os nomes de campos, nonces e redirects ja publicados.
+- O smoke publicado do acesso publico passou a ser reexecutavel por `tools/client-portal/client-portal-smoke-fixture.php` (fixture temporario via WP-CLI) e `tools/client-portal/client-portal-public-smoke.mjs` (Playwright contra `https://desi.pet/portal-do-cliente/`).
 
 **Diretório**: `plugins/desi-pet-shower-client-portal`
 

@@ -1,0 +1,391 @@
+{
+  "auditedAt": "2026-04-24T00:52:42.443Z",
+  "sourceOfTruth": [
+    "docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md",
+    "docs/visual/VISUAL_STYLE_GUIDE.md"
+  ],
+  "fixture": {
+    "tag": "codex_portal_phase1_20260423_215219",
+    "email": "codex.portal.smoke.20260424005221@example.com",
+    "resetEmail": "codex.portal.smoke.reset.20260424005221@example.com",
+    "antiEnumEmail": "codex.portal.smoke.unknown.20260424005221@example.com",
+    "portalUrl": "https://desi.pet/portal-do-cliente/"
+  },
+  "breakpoints": {
+    "375": {
+      "metrics": {
+        "url": "https://desi.pet/portal-do-cliente/",
+        "title": "Portal do Cliente – Desi Pet Shower",
+        "overflowX": 0,
+        "accessRoot": true,
+        "accessScript": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal-access.js?ver=1776984600"
+        ],
+        "authenticatedScript": [],
+        "authCss": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css?ver=1776991674"
+        ],
+        "cta": {
+          "text": "Criar ou redefinir senha",
+          "width": 295,
+          "height": 56
+        }
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "screenshot": "docs\\screenshots\\2026-04-23\\client-portal-public-smoke\\portal-public-shell-375.png"
+    },
+    "600": {
+      "metrics": {
+        "url": "https://desi.pet/portal-do-cliente/",
+        "title": "Portal do Cliente – Desi Pet Shower",
+        "overflowX": 0,
+        "accessRoot": true,
+        "accessScript": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal-access.js?ver=1776984600"
+        ],
+        "authenticatedScript": [],
+        "authCss": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css?ver=1776991674"
+        ],
+        "cta": {
+          "text": "Criar ou redefinir senha",
+          "width": 514,
+          "height": 56
+        }
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "screenshot": "docs\\screenshots\\2026-04-23\\client-portal-public-smoke\\portal-public-shell-600.png"
+    },
+    "840": {
+      "metrics": {
+        "url": "https://desi.pet/portal-do-cliente/",
+        "title": "Portal do Cliente – Desi Pet Shower",
+        "overflowX": 0,
+        "accessRoot": true,
+        "accessScript": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal-access.js?ver=1776984600"
+        ],
+        "authenticatedScript": [],
+        "authCss": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css?ver=1776991674"
+        ],
+        "cta": {
+          "text": "Criar ou redefinir senha",
+          "width": 751,
+          "height": 56
+        }
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "screenshot": "docs\\screenshots\\2026-04-23\\client-portal-public-smoke\\portal-public-shell-840.png"
+    },
+    "1200": {
+      "metrics": {
+        "url": "https://desi.pet/portal-do-cliente/",
+        "title": "Portal do Cliente – Desi Pet Shower",
+        "overflowX": 0,
+        "accessRoot": true,
+        "accessScript": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal-access.js?ver=1776984600"
+        ],
+        "authenticatedScript": [],
+        "authCss": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css?ver=1776991674"
+        ],
+        "cta": {
+          "text": "Criar ou redefinir senha",
+          "width": 617,
+          "height": 56
+        }
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "screenshot": "docs\\screenshots\\2026-04-23\\client-portal-public-smoke\\portal-public-shell-1200.png"
+    },
+    "1920": {
+      "metrics": {
+        "url": "https://desi.pet/portal-do-cliente/",
+        "title": "Portal do Cliente – Desi Pet Shower",
+        "overflowX": 0,
+        "accessRoot": true,
+        "accessScript": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal-access.js?ver=1776984600"
+        ],
+        "authenticatedScript": [],
+        "authCss": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css?ver=1776991674"
+        ],
+        "cta": {
+          "text": "Criar ou redefinir senha",
+          "width": 617,
+          "height": 56
+        }
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "screenshot": "docs\\screenshots\\2026-04-23\\client-portal-public-smoke\\portal-public-shell-1920.png"
+    }
+  },
+  "flows": {
+    "publicRequests": {
+      "passwordAccess": {
+        "status": 200,
+        "ok": true,
+        "response": {
+          "success": true,
+          "data": {
+            "message": "Se este e-mail estiver cadastrado no portal, voce recebera as instrucoes para criar ou redefinir a senha."
+          }
+        },
+        "feedback": "Se este e-mail estiver cadastrado no portal, voce recebera as instrucoes para criar ou redefinir a senha.",
+        "screenshot": "docs\\screenshots\\2026-04-23\\client-portal-public-smoke\\portal-password-access-anti-enumeration-1200.png"
+      },
+      "magicRequest": {
+        "status": 200,
+        "ok": true,
+        "response": {
+          "success": true,
+          "data": {
+            "message": "Link enviado com sucesso. Verifique sua caixa de entrada e spam."
+          }
+        },
+        "feedback": "Link enviado com sucesso. Verifique sua caixa de entrada e spam.",
+        "screenshot": "docs\\screenshots\\2026-04-23\\client-portal-public-smoke\\portal-magic-link-request-1200.png"
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "consoleWarnings": []
+    },
+    "passwordLogin": {
+      "metrics": {
+        "url": "https://desi.pet/portal-do-cliente/",
+        "overflowX": 0,
+        "portalPresent": true,
+        "tabsCount": 9,
+        "tabs": [
+          {
+            "tab": "inicio",
+            "label": "Inicio"
+          },
+          {
+            "tab": "fidelidade",
+            "label": "Fidelidade"
+          },
+          {
+            "tab": "avaliacoes",
+            "label": "Avaliacoes"
+          },
+          {
+            "tab": "mensagens",
+            "label": "Mensagens"
+          },
+          {
+            "tab": "agendamentos",
+            "label": "Agendamentos"
+          },
+          {
+            "tab": "pagamentos",
+            "label": "Pagamentos"
+          },
+          {
+            "tab": "historico-pets",
+            "label": "Historico dos Pets"
+          },
+          {
+            "tab": "galeria",
+            "label": "Galeria"
+          },
+          {
+            "tab": "dados",
+            "label": "Meus Dados"
+          }
+        ],
+        "activeTab": "inicio",
+        "heading": "Ola, Codex Portal Smoke 20260424005221",
+        "accessScript": [],
+        "authenticatedScript": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal.js?ver=1776984600"
+        ]
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "screenshot": "docs\\screenshots\\2026-04-23\\client-portal-public-smoke\\portal-password-login-success-1200.png"
+    },
+    "magicLogin": {
+      "metrics": {
+        "url": "https://desi.pet/portal-do-cliente/",
+        "overflowX": 0,
+        "portalPresent": true,
+        "tabsCount": 9,
+        "tabs": [
+          {
+            "tab": "inicio",
+            "label": "Inicio"
+          },
+          {
+            "tab": "fidelidade",
+            "label": "Fidelidade"
+          },
+          {
+            "tab": "avaliacoes",
+            "label": "Avaliacoes"
+          },
+          {
+            "tab": "mensagens",
+            "label": "Mensagens"
+          },
+          {
+            "tab": "agendamentos",
+            "label": "Agendamentos"
+          },
+          {
+            "tab": "pagamentos",
+            "label": "Pagamentos"
+          },
+          {
+            "tab": "historico-pets",
+            "label": "Historico dos Pets"
+          },
+          {
+            "tab": "galeria",
+            "label": "Galeria"
+          },
+          {
+            "tab": "dados",
+            "label": "Meus Dados"
+          }
+        ],
+        "activeTab": "inicio",
+        "heading": "Ola, Codex Portal Smoke 20260424005221",
+        "accessScript": [],
+        "authenticatedScript": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal.js?ver=1776984600"
+        ]
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "screenshot": "docs\\screenshots\\2026-04-23\\client-portal-public-smoke\\portal-magic-login-success-1200.png"
+    },
+    "resetInvalid": {
+      "metrics": {
+        "url": "https://desi.pet/portal-do-cliente/?dps_action=portal_password_reset&key=invalid-smoke-key&login=codex.portal.smoke.20260424005221@example.com",
+        "overflowX": 0,
+        "notices": [
+          {
+            "className": "dps-signature-notice dps-signature-notice--error",
+            "title": "Link de senha invalido",
+            "text": "Solicite um novo e-mail para criar ou redefinir sua senha."
+          }
+        ],
+        "panelTitle": "Solicite um novo link para continuar",
+        "hasResetForm": false,
+        "toggleCount": 0
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "screenshot": "docs\\screenshots\\2026-04-23\\client-portal-public-smoke\\portal-reset-invalid-1200.png"
+    },
+    "resetExpired": {
+      "metrics": {
+        "url": "https://desi.pet/portal-do-cliente/?dps_action=portal_password_reset&key=fdJQHlAX5dcWsfBw9ERc&login=codex.portal.smoke.expired.20260424005221@example.com",
+        "overflowX": 0,
+        "notices": [
+          {
+            "className": "dps-signature-notice dps-signature-notice--warning",
+            "title": "Link de senha expirado",
+            "text": "Este link passou do prazo de uso. Solicite um novo e-mail para criar ou redefinir sua senha."
+          }
+        ],
+        "panelTitle": "Solicite um novo e-mail para continuar",
+        "hasResetForm": false,
+        "toggleCount": 0
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "screenshot": "docs\\screenshots\\2026-04-23\\client-portal-public-smoke\\portal-reset-expired-1200.png"
+    },
+    "resetValidScreen": {
+      "metrics": {
+        "url": "https://desi.pet/portal-do-cliente/?dps_action=portal_password_reset&key=IziV2z5GCOeXskC65jSi&login=codex.portal.smoke.reset.20260424005221@example.com",
+        "overflowX": 0,
+        "notices": [],
+        "panelTitle": "Defina sua nova credencial de acesso",
+        "hasResetForm": true,
+        "toggleCount": 2
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "screenshot": "docs\\screenshots\\2026-04-23\\client-portal-public-smoke\\portal-reset-valid-screen-1200.png"
+    },
+    "resetValidSubmit": {
+      "metrics": {
+        "url": "https://desi.pet/portal-do-cliente/?portal_notice=password_reset_success",
+        "overflowX": 0,
+        "portalPresent": true,
+        "tabsCount": 9,
+        "tabs": [
+          {
+            "tab": "inicio",
+            "label": "Inicio"
+          },
+          {
+            "tab": "fidelidade",
+            "label": "Fidelidade"
+          },
+          {
+            "tab": "avaliacoes",
+            "label": "Avaliacoes"
+          },
+          {
+            "tab": "mensagens",
+            "label": "Mensagens"
+          },
+          {
+            "tab": "agendamentos",
+            "label": "Agendamentos"
+          },
+          {
+            "tab": "pagamentos",
+            "label": "Pagamentos"
+          },
+          {
+            "tab": "historico-pets",
+            "label": "Historico dos Pets"
+          },
+          {
+            "tab": "galeria",
+            "label": "Galeria"
+          },
+          {
+            "tab": "dados",
+            "label": "Meus Dados"
+          }
+        ],
+        "activeTab": "inicio",
+        "heading": "Ola, Codex Portal Smoke Reset 20260424005221",
+        "accessScript": [],
+        "authenticatedScript": [
+          "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal.js?ver=1776984600"
+        ]
+      },
+      "pageErrors": [],
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "screenshot": "docs\\screenshots\\2026-04-23\\client-portal-public-smoke\\portal-reset-valid-success-1200.png"
+    }
+  },
+  "status": "passed",
+  "resultPath": "docs\\screenshots\\2026-04-23\\client-portal-public-smoke\\portal-client-public-smoke-result.json"
+}

@@ -1,0 +1,24 @@
+{
+  "cleanedAt": "codex_portal_phase1_20260423_215219",
+  "cleanupResults": [
+    {
+      "tag": "codex_portal_phase1_20260423_214900",
+      "status": 0,
+      "stdout": "Notice: Function _load_textdomain_just_in_time was called <strong>incorrectly</strong>. Translation loading for the <code>all-in-one-wp-migration</code> domain was triggered too early. This is usually an indicator for some code in the plugin or theme running too early. Translations should be loaded at the <code>init</code> action or later. Please see <a href=\"https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/\">Debugging in WordPress</a> for more information. (This message was added in version 6.7.0.) in /home/u944637195/domains/desi.pet/public_html/wp-includes/functions.php on line 6131\n{\n    \"ok\": true,\n    \"action\": \"cleanup\",\n    \"tag\": \"codex_portal_phase1_20260423_214900\",\n    \"cleanup\": {\n        \"deleted_posts\": 2,\n        \"deleted_users\": 2,\n        \"rate_limits_removed\": 2\n    }\n}",
+      "stderr": "",
+      "script": "/home/u944637195/client-portal-smoke-fixture-codex_portal_phase1_20260423_214900.php"
+    },
+    {
+      "tag": "codex_portal_phase1_20260423_215219",
+      "status": 0,
+      "stdout": "Notice: Function _load_textdomain_just_in_time was called <strong>incorrectly</strong>. Translation loading for the <code>all-in-one-wp-migration</code> domain was triggered too early. This is usually an indicator for some code in the plugin or theme running too early. Translations should be loaded at the <code>init</code> action or later. Please see <a href=\"https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/\">Debugging in WordPress</a> for more information. (This message was added in version 6.7.0.) in /home/u944637195/domains/desi.pet/public_html/wp-includes/functions.php on line 6131\n{\n    \"ok\": true,\n    \"action\": \"cleanup\",\n    \"tag\": \"codex_portal_phase1_20260423_215219\",\n    \"cleanup\": {\n        \"deleted_posts\": 3,\n        \"deleted_users\": 3,\n        \"rate_limits_removed\": 2\n    }\n}",
+      "stderr": "",
+      "script": "/home/u944637195/client-portal-smoke-fixture-codex_portal_phase1_20260423_215219.php"
+    }
+  ],
+  "removedRemoteScripts": [
+    "/home/u944637195/client-portal-smoke-fixture-codex_portal_phase1_20260423_215219.php",
+    "/home/u944637195/client-portal-smoke-fixture-codex_portal_phase1_20260423_214819.php",
+    "/home/u944637195/client-portal-smoke-fixture-codex_portal_phase1_20260423_214900.php"
+  ]
+}

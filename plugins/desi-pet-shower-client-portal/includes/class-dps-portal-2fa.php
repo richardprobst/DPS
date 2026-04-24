@@ -382,10 +382,10 @@ class DPS_Portal_2FA {
 
         ob_start();
         ?>
-        <div class="dps-client-portal-access-page">
+        <div class="dps-signature-shell dps-signature-shell--auth dps-portal-signature dps-client-portal-access-page">
             <div class="dps-portal-access">
                 <div class="dps-portal-access__card">
-                    <div class="dps-portal-access__logo">🔐</div>
+                    <div class="dps-portal-access__logo" aria-hidden="true">DPS</div>
                     <h1 class="dps-portal-access__title">
                         <?php echo esc_html__( 'Verificação de Segurança', 'dps-client-portal' ); ?>
                     </h1>

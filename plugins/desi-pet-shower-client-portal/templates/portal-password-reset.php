@@ -9,9 +9,19 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-$messages        = isset( $portal_access_context['messages'] ) && is_array( $portal_access_context['messages'] ) ? $portal_access_context['messages'] : [];
-$portal_url      = isset( $portal_access_context['portal_url'] ) && is_string( $portal_access_context['portal_url'] ) ? $portal_access_context['portal_url'] : home_url( '/portal-cliente/' );
-$reset_user_mail = $portal_reset_valid && $portal_reset_user instanceof WP_User ? $portal_reset_user->user_email : $portal_password_login;
+$messages         = isset( $portal_access_context['messages'] ) && is_array( $portal_access_context['messages'] ) ? $portal_access_context['messages'] : [];
+$portal_url       = isset( $portal_access_context['portal_url'] ) && is_string( $portal_access_context['portal_url'] ) ? $portal_access_context['portal_url'] : home_url( '/portal-cliente/' );
+$reset_user_mail  = $portal_reset_valid && $portal_reset_user instanceof WP_User ? $portal_reset_user->user_email : $portal_password_login;
+$is_expired_reset = isset( $portal_reset_error_code ) && 'expired_key' === $portal_reset_error_code;
+$reset_tag        = $is_expired_reset
+    ? __( 'Link expirado', 'dps-client-portal' )
+    : __( 'Link invalido', 'dps-client-portal' );
+$reset_title      = $is_expired_reset
+    ? __( 'Solicite um novo e-mail para continuar', 'dps-client-portal' )
+    : __( 'Solicite um novo link para continuar', 'dps-client-portal' );
+$reset_intro      = $is_expired_reset
+    ? __( 'Este link passou do prazo de uso. Volte para a tela inicial do portal e gere um novo acesso.', 'dps-client-portal' )
+    : __( 'Este link nao esta mais disponivel. Volte para a tela inicial do portal e gere um novo acesso.', 'dps-client-portal' );
 ?>
 
 <div class="dps-signature-shell dps-signature-shell--auth dps-portal-signature dps-client-portal-access-page dps-client-portal-access-page--reset" data-dps-access-root>
@@ -120,9 +130,9 @@ $reset_user_mail = $portal_reset_valid && $portal_reset_user instanceof WP_User 
                         </form>
                     <?php else : ?>
                         <div class="dps-signature-panel__header">
-                            <span class="dps-signature-hero__tag"><?php esc_html_e( 'Link invalido', 'dps-client-portal' ); ?></span>
-                            <h2 class="dps-signature-panel__title"><?php esc_html_e( 'Solicite um novo e-mail para continuar', 'dps-client-portal' ); ?></h2>
-                            <p class="dps-signature-panel__intro"><?php esc_html_e( 'Este link nao esta mais disponivel. Volte para a tela inicial do portal e gere um novo acesso.', 'dps-client-portal' ); ?></p>
+                            <span class="dps-signature-hero__tag"><?php echo esc_html( $reset_tag ); ?></span>
+                            <h2 class="dps-signature-panel__title"><?php echo esc_html( $reset_title ); ?></h2>
+                            <p class="dps-signature-panel__intro"><?php echo esc_html( $reset_intro ); ?></p>
                         </div>
 
                         <div class="dps-portal-auth-card__actions">

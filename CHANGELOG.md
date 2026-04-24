@@ -83,6 +83,11 @@ Antes de criar uma nova versÃ£o oficial:
 
 #### Added (Adicionado)
 
+**Portal do Cliente - smoke publico publicado**
+
+- Adicionado fixture WP-CLI temporario para criar clientes/usuarios autenticaveis do Portal do Cliente e limpar os dados de teste ao final.
+- Adicionado smoke test Playwright reexecutavel para validar o acesso publico publicado, cobrindo login por senha, magic link, CTA `Criar ou redefinir senha`, reset valido, reset invalido, reset expirado e feedback inline anti-enumeration.
+
 **Agenda Add-on - fila operacional DPS Signature**
 
 - Implementada a primeira versão da fila operacional canônica da Agenda, substituindo a leitura em três tabelas por um eixo único com horário, pet/tutor, serviços, etapa, financeiro, operação, logística e ações.
@@ -91,6 +96,7 @@ Antes de criar uma nova versÃ£o oficial:
 
 #### Changed (Alterado)
 
+- Consolidada a separacao entre runtime publico e autenticado do Portal do Cliente: `client-portal-access.js` e `client-portal-auth.css` ficam responsaveis pela landing/reset/2FA, enquanto `client-portal.js` e `client-portal.css` permanecem restritos ao portal logado.
 - Consolidada a Agenda publicada como superfície operacional única do DPS Signature, sem navegação funcional por abas legadas e com navegação preservando apenas visão e período.
 - Padronizado o modal de serviços no mesmo shell visual e comportamental dos demais diálogos da Agenda.
 - Refinado o mobile da fila operacional com stage badge dedicada no card, toolbar compacta e estados sincronizados entre linha desktop, card mobile e inspetor contextual.
@@ -101,6 +107,7 @@ Antes de criar uma nova versÃ£o oficial:
 
 #### Fixed (Corrigido)
 
+- Diferenciado o feedback publico de reset de senha expirado em relacao a link invalido, mantendo a acao `portal_password_reset`, nonces, nomes de campos e URLs ja publicados.
 - Corrigidos arquivos PHP do pacote DPS com BOM no ambiente publicado, eliminando contaminação de respostas JSON do AJAX e estabilizando modais, painéis e integrações que dependem de payload limpo.
 - Corrigida a telemetria de histórico para devolver `source` e `source_label`, permitindo badges coerentes para registros automáticos e ações manuais no modal de linha do tempo.
 - Corrigido o histórico operacional da Agenda para exibir diffs humanos de checklist, check-in e check-out com campo alterado, valor anterior e novo valor, preservando os eventos automáticos como registros separados.
@@ -115,6 +122,7 @@ Antes de criar uma nova versÃ£o oficial:
 
 #### Refactoring (Interno)
 
+- Removidos residuos de layout publico do bundle autenticado do Portal do Cliente, reduzindo acoplamento entre a landing publica e a area autenticada sem alterar contratos externos do add-on.
 - Removidos resíduos de CSS/JS/layout das antigas tabelas concorrentes da Agenda, mantendo o runtime ativo concentrado na fila operacional canônica do DPS Signature.
 - Simplificada a semântica do frontend para tratar a Agenda como modo operacional único, reduzindo dependências de `agenda_tab` no runtime publicado.
 - Consolidado o fluxo de servicos da Agenda no `agenda-addon.js`, removendo o arquivo legado `services-modal.js` e a dependencia de `agenda_tab` no frontend operacional.

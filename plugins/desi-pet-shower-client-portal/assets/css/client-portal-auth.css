@@ -324,6 +324,115 @@
     min-height: 100%;
 }
 
+.dps-portal-access__card {
+    display: grid;
+    gap: 1rem;
+    width: min(100%, 32rem);
+    margin: 0 auto;
+    padding: 1.5rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    background: color-mix(in srgb, var(--dps-color-surface-container-lowest) 90%, #ffffff);
+    box-shadow: none;
+}
+
+.dps-portal-access__logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    min-width: 3rem;
+    min-height: 3rem;
+    border: 1px solid var(--dps-color-outline-variant);
+    background: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+    font-weight: 800;
+    line-height: 1;
+}
+
+.dps-portal-access__title,
+.dps-portal-access__description,
+.dps-portal-access__note {
+    margin: 0;
+}
+
+.dps-portal-access__title {
+    color: var(--dps-color-on-surface);
+    font-size: 1.55rem;
+    line-height: 1.15;
+}
+
+.dps-portal-access__description,
+.dps-portal-access__note {
+    color: var(--dps-color-on-surface-variant);
+    line-height: 1.55;
+}
+
+.dps-2fa-form,
+.dps-2fa-code-inputs {
+    display: grid;
+    gap: 1rem;
+}
+
+.dps-2fa-code-inputs {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.dps-2fa-digit {
+    width: 100%;
+    min-width: 0;
+    min-height: 3.25rem;
+    border: 1px solid var(--dps-color-outline);
+    background: color-mix(in srgb, var(--dps-color-surface-container-lowest) 94%, #ffffff);
+    color: var(--dps-color-on-surface);
+    font-size: 1.35rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.dps-2fa-digit:focus-visible {
+    outline: 2px solid var(--dps-color-primary);
+    outline-offset: 2px;
+}
+
+.dps-portal-access__email-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 3.25rem;
+    border: 1px solid var(--dps-color-primary);
+    background: var(--dps-color-primary);
+    color: var(--dps-color-on-primary);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.dps-portal-access__email-button:disabled {
+    cursor: wait;
+    opacity: 0.72;
+}
+
+.dps-portal-access__feedback {
+    display: none;
+    padding: 0.95rem 1rem;
+    border: 1px solid transparent;
+    line-height: 1.55;
+}
+
+.dps-portal-access__feedback--success {
+    display: block;
+    background: var(--dps-color-success-container);
+    border-color: color-mix(in srgb, var(--dps-color-success) 18%, transparent);
+    color: var(--dps-color-on-success-container);
+}
+
+.dps-portal-access__feedback--error {
+    display: block;
+    background: var(--dps-color-error-container);
+    border-color: color-mix(in srgb, var(--dps-color-error) 18%, transparent);
+    color: var(--dps-color-on-error-container);
+}
+
 .dps-portal-signature .dps-signature-support-list {
     gap: 0.9rem;
 }
