@@ -1173,11 +1173,37 @@
   // FASE 5: Histórico de Alterações
   // =========================================================================
 
+  function buildHistoryDiff(entry) {
+    if (!entry || !entry.details || !entry.details.field_label) {
+      return '';
+    }
+
+    var oldValue = entry.details.old_value || '';
+    var newValue = entry.details.new_value || '';
+
+    return '<div class="dps-agenda-history-item__diff">' +
+      '<div class="dps-agenda-history-item__diff-row">' +
+        '<span class="dps-agenda-history-item__diff-label">' + escapeHtml(getMessage('historyField', 'Campo')) + '</span>' +
+        '<strong class="dps-agenda-history-item__diff-value">' + escapeHtml(entry.details.field_label) + '</strong>' +
+      '</div>' +
+      '<div class="dps-agenda-history-item__diff-grid">' +
+        '<div class="dps-agenda-history-item__diff-card">' +
+          '<span class="dps-agenda-history-item__diff-card-label">' + escapeHtml(getMessage('historyPrevious', 'Valor anterior')) + '</span>' +
+          '<strong class="dps-agenda-history-item__diff-card-value">' + escapeHtml(oldValue) + '</strong>' +
+        '</div>' +
+        '<div class="dps-agenda-history-item__diff-card dps-agenda-history-item__diff-card--new">' +
+          '<span class="dps-agenda-history-item__diff-card-label">' + escapeHtml(getMessage('historyNew', 'Novo valor')) + '</span>' +
+          '<strong class="dps-agenda-history-item__diff-card-value">' + escapeHtml(newValue) + '</strong>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
   function buildHistoryDialogBody(history) {
     var html = '<div class="dps-agenda-history-list">';
 
     history.forEach(function(entry){
-      var actionLabel = getActionLabel(entry.action);
+      var actionLabel = entry.action_label || getActionLabel(entry.action);
       html += '<article class="dps-agenda-history-item">' +
         '<div class="dps-agenda-history-item__head">' +
           '<strong>' + escapeHtml(actionLabel) + '</strong>' +
@@ -1188,7 +1214,11 @@
           (entry.source_label ? '<span class="dps-agenda-history-item__source dps-agenda-history-item__source--' + escapeHtml(entry.source || 'system') + '">' + escapeHtml(entry.source_label) + '</span>' : '') +
         '</div>';
 
-      if ( entry.details ) {
+      if ( entry.details && entry.details.field_label ) {
+        html += buildHistoryDiff(entry);
+      }
+
+      if ( entry.details && !entry.details.field_label ) {
         if ( entry.details.old_status && entry.details.new_status ) {
           html += '<div class="dps-agenda-history-item__detail">De ' + escapeHtml(entry.details.old_status) + ' para ' + escapeHtml(entry.details.new_status) + '</div>';
         }
@@ -1250,7 +1280,8 @@
       'checkin_created': getMessage('action_checkin_created', 'Check-in registrado'),
       'checkin_updated': getMessage('action_checkin_updated', 'Check-in atualizado'),
       'checkout_created': getMessage('action_checkout_created', 'Check-out registrado'),
-      'checkout_updated': getMessage('action_checkout_updated', 'Check-out atualizado')
+      'checkout_updated': getMessage('action_checkout_updated', 'Check-out atualizado'),
+      'manual_edit': getMessage('action_manual_edit', 'Edicao manual')
     };
     return labels[action] || action;
   }

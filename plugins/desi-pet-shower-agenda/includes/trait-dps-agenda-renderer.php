@@ -1343,9 +1343,18 @@ trait DPS_Agenda_Renderer {
         if ( ! empty( $data['history'] ) ) {
             echo '<ul class="dps-operational-log">';
             foreach ( $data['history'] as $entry ) {
-                $label = isset( $entry['action'] ) ? $entry['action'] : __( 'Registro', 'dps-agenda-addon' );
-                $time  = isset( $entry['timestamp'] ) ? $entry['timestamp'] : '';
-                echo '<li>' . esc_html( trim( $label . ' ' . $time ) ) . '</li>';
+                $details = isset( $entry['details'] ) && is_array( $entry['details'] ) ? $entry['details'] : [];
+                $label   = $this->get_history_action_label(
+                    isset( $entry['action'] ) ? $entry['action'] : '',
+                    $details
+                );
+                $time    = ! empty( $entry['date'] ) ? mysql2date( 'H:i', $entry['date'] ) : '';
+
+                if ( ! empty( $details['field_label'] ) ) {
+                    $label = sprintf( __( '%1$s: %2$s', 'dps-agenda-addon' ), $label, $details['field_label'] );
+                }
+
+                echo '<li>' . esc_html( trim( $label . ( $time ? ' ' . $time : '' ) ) ) . '</li>';
             }
             echo '</ul>';
         } else {

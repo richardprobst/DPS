@@ -462,3 +462,37 @@
 - O modal de servicos passou a responder com `sectionCount = 3`, `bodyBackground = none` e `borderRadius = 2px`, usando o mesmo shell `dps-agenda-dialog` dos demais dialogos.
 - `render_layer_confirmation_meta_writes = 0` no trait de render, `renderer_set_confirmation_method_present = false` e `explicit_confirmation_sanitizer_present = true` no add-on, confirmando a remocao da mutacao da camada de render e a migracao para fluxo explicito com saneamento.
 - Status da rodada: codigo fechado e documentado localmente; a validacao final no runtime publicado continua dependente de deploy/autenticacao administrativa para repetir essa bateria sobre a Agenda real.
+
+## Rodada Agenda - trilha humana no historico operacional
+- Objetivo desta etapa: manter checklist, check-in e check-out editaveis no modal operacional, mas separar visualmente na linha do tempo os eventos automaticos de persistencia e as edicoes humanas por campo.
+- Fonte de verdade visual seguida explicitamente: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Estrategia visual aplicada: o dialogo de historico preserva o shell DPS Signature existente e ganhou blocos de diff retos com `Campo`, `Valor anterior` e `Novo valor`, mantendo badges distintos para `Evento automatico` e `Edicao humana`.
+- Limitacao desta rodada: a workspace continua sem WordPress executavel e sem sessao autenticada do runtime publicado; por isso a evidencia visual foi gerada por fixture local carregando os assets atuais do add-on em `./agenda-human-history-dialog-fixture.html`.
+
+## Arquivos alterados - trilha humana no historico operacional
+- `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
+- `plugins/desi-pet-shower-agenda/includes/class-dps-agenda-checklist-service.php`
+- `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+- `plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js`
+- `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+- `./agenda-human-history-dialog-fixture.html`
+
+## Capturas - trilha humana no historico operacional
+- `./agenda-human-history-dialog-375.png`
+- `./agenda-human-history-dialog-600.png`
+- `./agenda-human-history-dialog-840.png`
+- `./agenda-human-history-dialog-1200.png`
+- `./agenda-human-history-dialog-1920.png`
+
+## Breakpoints validados - trilha humana no historico operacional
+- `375`
+- `600`
+- `840`
+- `1200`
+- `1920`
+
+## Validacao - trilha humana no historico operacional
+- A fixture local abriu o mesmo shell `dps-agenda-dialog` usado pela Agenda, com o badge `Evento automatico` aplicado ao resumo sistemico e o badge `Edicao humana` aplicado aos diffs por campo.
+- Os novos blocos de diff mantiveram geometria reta, borda fina e contraste controlado do DPS Signature, com o card de `Novo valor` em superficie tonal de destaque.
+- Em `375`, `600` e `840`, a comparacao empilhou os cards de `Valor anterior` e `Novo valor` em uma coluna unica; em `1200` e `1920`, o diff permaneceu em duas colunas sem colisoes visuais.
+- O documento e as capturas desta rodada ficaram salvos em `docs/screenshots/2026-04-22/`, usando a fixture local como evidencia visual enquanto o deploy do plugin nao e repetido no runtime publicado.

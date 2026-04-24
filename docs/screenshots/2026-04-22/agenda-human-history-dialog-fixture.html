@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Agenda Human History Dialog Fixture</title>
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-signature-fonts.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css">
+    <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/checklist-checkin.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 24px;
+            background:
+                radial-gradient(circle at top right, color-mix(in srgb, var(--dps-color-primary-container) 22%, transparent) 0%, transparent 34%),
+                linear-gradient(180deg, var(--dps-color-surface) 0%, var(--dps-color-surface-container-low) 100%);
+            color: var(--dps-color-on-surface);
+            font-family: var(--dps-signature-font-body, var(--dps-font-body, sans-serif));
+        }
+
+        .fixture-shell {
+            max-width: 1080px;
+            margin: 0 auto;
+            display: grid;
+            gap: 16px;
+        }
+
+        .fixture-header {
+            display: grid;
+            gap: 6px;
+        }
+
+        .fixture-header span {
+            color: var(--dps-color-on-surface-variant);
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .fixture-header h1 {
+            margin: 0;
+            font-family: var(--dps-signature-font-display, var(--dps-font-display, sans-serif));
+            font-size: clamp(1.7rem, 2.8vw, 2.4rem);
+            line-height: 1.02;
+            letter-spacing: -0.03em;
+        }
+
+        .fixture-header p {
+            margin: 0;
+            max-width: 66ch;
+            color: var(--dps-color-on-surface-variant);
+        }
+
+        .fixture-dialog {
+            position: static;
+            inset: auto;
+            display: block;
+            padding: 0;
+            background: transparent;
+        }
+
+        .fixture-dialog .dps-agenda-dialog {
+            width: 100%;
+            max-height: none;
+        }
+    </style>
+</head>
+<body>
+    <main class="fixture-shell">
+        <header class="fixture-header">
+            <span>DPS Signature fixture local</span>
+            <h1>Linha do tempo do atendimento</h1>
+            <p>Mock do dialogo de historico usado para validar a nova separacao entre eventos automaticos e edicoes humanas no fluxo operacional da Agenda.</p>
+        </header>
+
+        <div class="dps-agenda-dialog-overlay fixture-dialog">
+            <section class="dps-agenda-dialog dps-agenda-dialog--content" aria-labelledby="fixture-history-title">
+                <header class="dps-agenda-dialog__header">
+                    <div>
+                        <h2 id="fixture-history-title" class="dps-agenda-dialog__title">Linha do tempo do atendimento</h2>
+                        <p class="dps-agenda-dialog__subtitle">Checklist, check-in e check-out continuam editaveis no modal operacional; cada ajuste humano agora aparece com diff completo.</p>
+                    </div>
+                    <button type="button" class="dps-agenda-dialog__close" aria-label="Fechar fixture">×</button>
+                </header>
+
+                <div class="dps-agenda-dialog__body">
+                    <div class="dps-agenda-history-list">
+                        <article class="dps-agenda-history-item">
+                            <div class="dps-agenda-history-item__head">
+                                <strong>Check-in atualizado</strong>
+                                <span>23/04/2026 14:32</span>
+                            </div>
+                            <div class="dps-agenda-history-item__meta">
+                                <span>Equipe Agenda</span>
+                                <span class="dps-agenda-history-item__source dps-agenda-history-item__source--system">Evento automatico</span>
+                            </div>
+                            <div class="dps-agenda-history-item__detail">Check-in atualizado as 14:32. Itens observados: Pulgas, Agressivo / Ansioso.</div>
+                        </article>
+
+                        <article class="dps-agenda-history-item">
+                            <div class="dps-agenda-history-item__head">
+                                <strong>Edicao manual</strong>
+                                <span>23/04/2026 14:32</span>
+                            </div>
+                            <div class="dps-agenda-history-item__meta">
+                                <span>Equipe Agenda</span>
+                                <span class="dps-agenda-history-item__source dps-agenda-history-item__source--manual">Edicao humana</span>
+                            </div>
+                            <div class="dps-agenda-history-item__diff">
+                                <div class="dps-agenda-history-item__diff-row">
+                                    <span class="dps-agenda-history-item__diff-label">Campo</span>
+                                    <strong class="dps-agenda-history-item__diff-value">Check-in &gt; Observacoes gerais</strong>
+                                </div>
+                                <div class="dps-agenda-history-item__diff-grid">
+                                    <div class="dps-agenda-history-item__diff-card">
+                                        <span class="dps-agenda-history-item__diff-card-label">Valor anterior</span>
+                                        <strong class="dps-agenda-history-item__diff-card-value">Sem observacoes</strong>
+                                    </div>
+                                    <div class="dps-agenda-history-item__diff-card dps-agenda-history-item__diff-card--new">
+                                        <span class="dps-agenda-history-item__diff-card-label">Novo valor</span>
+                                        <strong class="dps-agenda-history-item__diff-card-value">Pet chegou mais sensivel na regiao das patas traseiras.</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="dps-agenda-history-item">
+                            <div class="dps-agenda-history-item__head">
+                                <strong>Edicao manual</strong>
+                                <span>23/04/2026 14:33</span>
+                            </div>
+                            <div class="dps-agenda-history-item__meta">
+                                <span>Equipe Agenda</span>
+                                <span class="dps-agenda-history-item__source dps-agenda-history-item__source--manual">Edicao humana</span>
+                            </div>
+                            <div class="dps-agenda-history-item__diff">
+                                <div class="dps-agenda-history-item__diff-row">
+                                    <span class="dps-agenda-history-item__diff-label">Campo</span>
+                                    <strong class="dps-agenda-history-item__diff-value">Checklist &gt; Banho</strong>
+                                </div>
+                                <div class="dps-agenda-history-item__diff-grid">
+                                    <div class="dps-agenda-history-item__diff-card">
+                                        <span class="dps-agenda-history-item__diff-card-label">Valor anterior</span>
+                                        <strong class="dps-agenda-history-item__diff-card-value">pendente</strong>
+                                    </div>
+                                    <div class="dps-agenda-history-item__diff-card dps-agenda-history-item__diff-card--new">
+                                        <span class="dps-agenda-history-item__diff-card-label">Novo valor</span>
+                                        <strong class="dps-agenda-history-item__diff-card-value">concluida</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <footer class="dps-agenda-dialog__footer">
+                    <button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary">Fechar historico</button>
+                </footer>
+            </section>
+        </div>
+    </main>
+</body>
+</html>

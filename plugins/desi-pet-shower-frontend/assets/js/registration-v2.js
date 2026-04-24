@@ -2,6 +2,8 @@
     'use strict';
 
     var googlePlacesPromise = null;
+    var GOOGLE_PLACES_CALLBACK = 'dpsSignatureGooglePlacesReady';
+    var GOOGLE_PLACES_WAIT_TIMEOUT = 12000;
 
     function toArray( nodeList ) {
         return Array.prototype.slice.call( nodeList || [] );
@@ -258,28 +260,131 @@
         } );
     }
 
+    function getGooglePlacesInstance() {
+        return window.google && window.google.maps && window.google.maps.places
+            ? window.google.maps.places
+            : null;
+    }
+
+    function getExistingGooglePlacesScript() {
+        return document.querySelector(
+            'script[src*="maps.googleapis.com/maps/api/js"][src*="callback=' + GOOGLE_PLACES_CALLBACK + '"]'
+        );
+    }
+
+    function waitForSharedGooglePlaces() {
+        var existingCallback = window[ GOOGLE_PLACES_CALLBACK ];
+        var existingScript = getExistingGooglePlacesScript();
+
+        if ( 'function' !== typeof existingCallback && ! existingScript ) {
+            return null;
+        }
+
+        googlePlacesPromise = new Promise( function( resolve, reject ) {
+            var intervalId = null;
+            var timeoutId = null;
+            var hasSettled = false;
+            var handleScriptError = function() {
+                cleanup();
+                reject( new Error( 'Failed to load shared Google Places script.' ) );
+            };
+
+            function cleanup() {
+                if ( intervalId ) {
+                    window.clearInterval( intervalId );
+                }
+
+                if ( timeoutId ) {
+                    window.clearTimeout( timeoutId );
+                }
+
+                if ( existingScript ) {
+                    existingScript.removeEventListener( 'error', handleScriptError );
+                }
+            }
+
+            function resolveIfReady() {
+                var places = getGooglePlacesInstance();
+
+                if ( hasSettled || ! places ) {
+                    return false;
+                }
+
+                hasSettled = true;
+                cleanup();
+                resolve( places );
+
+                return true;
+            }
+
+            if ( resolveIfReady() ) {
+                return;
+            }
+
+            if ( 'function' === typeof existingCallback ) {
+                window[ GOOGLE_PLACES_CALLBACK ] = function() {
+                    var result = existingCallback.apply( this, arguments );
+
+                    resolveIfReady();
+
+                    return result;
+                };
+            }
+
+            if ( existingScript ) {
+                existingScript.addEventListener( 'error', handleScriptError );
+            }
+
+            intervalId = window.setInterval( resolveIfReady, 50 );
+            timeoutId = window.setTimeout( function() {
+                if ( hasSettled ) {
+                    return;
+                }
+
+                cleanup();
+                reject( new Error( 'Timed out waiting for shared Google Places script.' ) );
+            }, GOOGLE_PLACES_WAIT_TIMEOUT );
+        } );
+
+        return googlePlacesPromise;
+    }
+
     function loadGooglePlaces( apiKey ) {
+        var sharedLoader = window.DPSSignatureForms && 'function' === typeof window.DPSSignatureForms.loadGooglePlaces
+            ? window.DPSSignatureForms.loadGooglePlaces
+            : null;
+
         if ( ! apiKey ) {
             return Promise.reject( new Error( 'Google Places API key not provided.' ) );
         }
 
-        if ( window.google && window.google.maps && window.google.maps.places ) {
-            return Promise.resolve( window.google.maps.places );
+        if ( getGooglePlacesInstance() ) {
+            return Promise.resolve( getGooglePlacesInstance() );
         }
 
         if ( googlePlacesPromise ) {
             return googlePlacesPromise;
         }
 
+        if ( sharedLoader ) {
+            googlePlacesPromise = sharedLoader( apiKey );
+            return googlePlacesPromise;
+        }
+
+        googlePlacesPromise = waitForSharedGooglePlaces();
+
+        if ( googlePlacesPromise ) {
+            return googlePlacesPromise;
+        }
+
         googlePlacesPromise = new Promise( function( resolve, reject ) {
-            var callbackName = 'dpsRegistrationGooglePlacesReady';
             var script = document.createElement( 'script' );
 
-            window[ callbackName ] = function() {
+            window[ GOOGLE_PLACES_CALLBACK ] = function() {
                 resolve( window.google.maps.places );
             };
 
-            script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent( apiKey ) + '&libraries=places&callback=' + callbackName;
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent( apiKey ) + '&libraries=places&callback=' + GOOGLE_PLACES_CALLBACK;
             script.async = true;
             script.defer = true;
             script.onerror = function() {

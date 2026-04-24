@@ -880,15 +880,17 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - `_dps_checklist`: checklist operacional com status por etapa (prÃƒÂ©-banho, banho, secagem, tosa, orelhas/unhas, acabamento) e histÃƒÂ³rico de retrabalho
 - `_dps_checkin`: dados de check-in (horÃƒÂ¡rio, observaÃƒÂ§ÃƒÂµes, itens de seguranÃƒÂ§a com severidade)
 - `_dps_checkout`: dados de check-out (horÃƒÂ¡rio, observaÃƒÂ§ÃƒÂµes, itens de seguranÃƒÂ§a)
+- `_dps_appointment_history`: linha do tempo do atendimento com eventos automÃƒÂ¡ticos e diffs de ediÃƒÂ§ÃƒÂ£o humana; checklist, check-in e check-out agora registram campo alterado, valor anterior e novo valor sem trocar os contratos AJAX existentes
 
 **Hooks consumidos**:
 - Nenhum hook especÃƒÂ­fico do nÃƒÂºcleo (opera diretamente sobre CPTs)
 
 **Hooks disparados**:
 - `dps_agenda_send_reminders`: cron job diÃƒÂ¡rio para envio de lembretes
-- `dps_checklist_rework_registered( $appointment_id, $step_key, $reason )`: quando uma etapa do checklist precisa de retrabalho
-- `dps_appointment_checked_in( $appointment_id, $data )`: apÃƒÂ³s check-in registrado
-- `dps_appointment_checked_out( $appointment_id, $data )`: apÃƒÂ³s check-out registrado
+- `dps_checklist_step_updated( $appointment_id, $step_key, $current_item, $previous_item )`: apÃƒÂ³s uma etapa do checklist operacional ser salva
+- `dps_checklist_rework_registered( $appointment_id, $step_key, $reason, $previous_item, $current_item )`: quando uma etapa do checklist precisa de retrabalho
+- `dps_appointment_checked_in( $appointment_id, $data, $previous_data )`: apÃƒÂ³s check-in registrado
+- `dps_appointment_checked_out( $appointment_id, $data, $previous_data )`: apÃƒÂ³s check-out registrado
 
 **Filtros**:
 - `dps_checklist_default_steps`: permite add-ons adicionarem etapas ao checklist operacional (ex.: hidrataÃƒÂ§ÃƒÂ£o, ozÃƒÂ´nio)
@@ -930,6 +932,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - **[2026-03-23] Operacao inline unificada**: checklist operacional e check-in/check-out passam a compartilhar o mesmo painel expansivel da aba Operacao.
 - **[2026-03-23] Dialog system da Agenda**: historico, cobranca, reagendamento, confirmacoes sensiveis e retrabalho convergem para o mesmo shell modal.
 - **[2026-04-22] Publicacao final da Agenda operacional**: runtime publicado validado sem `services-modal.js`, sem `window.DPSServicesModal`, sem `agenda_tab` no frontend operacional e sem tokens/classes de geometria antiga nos assets ativos da Agenda. Servicos, operacao, perfil do pet, historico e `Mais > Reagendar` usam o shell unificado DPS Signature.
+- **[2026-04-23] Trilha humana do fluxo operacional**: o modal operacional continua editando checklist, check-in e check-out pelos mesmos endpoints (`dps_checklist_update`, `dps_checklist_rework`, `dps_appointment_checkin`, `dps_appointment_checkout`), mas cada alteracao humana agora gera entradas por campo na `_dps_appointment_history`, enquanto os eventos de persistencia seguem separados como registros automaticos na timeline.
 
 ---
 
@@ -3480,6 +3483,7 @@ A integraÃƒÂ§ÃƒÂ£o do sistema DPS com Google Tasks API permite sincroniz
 **Fluxos preservados:**
 - `dps_update_status` continua sendo o endpoint de status e mantém versionamento `_dps_appointment_version`.
 - Alterar/finalizar status segue abrindo o modal operacional para checklist, check-in e check-out.
+- Checklist, check-in e check-out continuam editaveis no modal operacional; a diferenca e que a timeline do atendimento agora separa eventos automaticos de edicoes humanas por campo.
 - `dps_get_operation_panel`, `dps_get_services_details`, `dps_quick_reschedule` e `dps_get_appointment_history` seguem como contratos AJAX existentes.
 - A renderização canônica não grava metadados durante o render; normalizações permanecem nos endpoints/serviços apropriados.
 - O frontend da fila canônica usa `refreshAgendaMarkup()` para sincronizar tabela, card mobile e inspetor sem reload completo da página.

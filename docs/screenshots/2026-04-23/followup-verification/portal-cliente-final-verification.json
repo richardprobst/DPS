@@ -1,0 +1,274 @@
+{
+  "url": "https://desi.pet/portal-do-cliente/?codex_probe=20260423-1856",
+  "title": "Portal do Cliente – Desi Pet Shower",
+  "executablePath": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+  "runtime": {
+    "title": "Portal do Cliente – Desi Pet Shower",
+    "readyState": "complete",
+    "hasPortalShell": true,
+    "heroRadius": "0px",
+    "panelRadius": "0px",
+    "inputRadius": "0px",
+    "buttonRadius": "0px",
+    "feedbackRadius": "0px",
+    "portalScriptSrc": "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/js/client-portal.js?ver=1776981326",
+    "authCssHref": "https://desi.pet/wp-content/plugins/desi-pet-shower-client-portal/assets/css/client-portal-auth.css?ver=1776980914",
+    "buttonText": "Criar ou redefinir senha"
+  },
+  "layout": [
+    {
+      "width": 375,
+      "overflowX": 0,
+      "shellWidth": 355,
+      "hero": {
+        "width": 328,
+        "height": 157,
+        "x": 24,
+        "y": 149
+      },
+      "panel": {
+        "width": 328,
+        "height": 401,
+        "x": 24,
+        "y": 326
+      },
+      "button": {
+        "width": 295,
+        "height": 56,
+        "x": 40,
+        "y": 1243
+      },
+      "email": {
+        "width": 295,
+        "height": 48,
+        "x": 40,
+        "y": 880
+      },
+      "heroRadius": "0px",
+      "panelRadius": "0px",
+      "buttonRadius": "0px",
+      "inputRadius": "0px"
+    },
+    {
+      "width": 600,
+      "overflowX": 0,
+      "shellWidth": 580,
+      "hero": {
+        "width": 548,
+        "height": 157,
+        "x": 26,
+        "y": 169
+      },
+      "panel": {
+        "width": 548,
+        "height": 401,
+        "x": 26,
+        "y": 346
+      },
+      "button": {
+        "width": 498,
+        "height": 56,
+        "x": 43,
+        "y": 1263
+      },
+      "email": {
+        "width": 514,
+        "height": 48,
+        "x": 43,
+        "y": 900
+      },
+      "heroRadius": "0px",
+      "panelRadius": "0px",
+      "buttonRadius": "0px",
+      "inputRadius": "0px"
+    },
+    {
+      "width": 840,
+      "overflowX": 0,
+      "shellWidth": 820,
+      "hero": {
+        "width": 786,
+        "height": 165,
+        "x": 27,
+        "y": 174
+      },
+      "panel": {
+        "width": 251,
+        "height": 690,
+        "x": 27,
+        "y": 360
+      },
+      "button": {
+        "width": 200,
+        "height": 82,
+        "x": 312,
+        "y": 913
+      },
+      "email": {
+        "width": 216,
+        "height": 48,
+        "x": 312,
+        "y": 524
+      },
+      "heroRadius": "0px",
+      "panelRadius": "0px",
+      "buttonRadius": "0px",
+      "inputRadius": "0px"
+    },
+    {
+      "width": 1200,
+      "overflowX": 0,
+      "shellWidth": 1140,
+      "hero": {
+        "width": 1092,
+        "height": 191,
+        "x": 54,
+        "y": 176
+      },
+      "panel": {
+        "width": 353,
+        "height": 625,
+        "x": 54,
+        "y": 387
+      },
+      "button": {
+        "width": 292,
+        "height": 56,
+        "x": 446,
+        "y": 896
+      },
+      "email": {
+        "width": 308,
+        "height": 48,
+        "x": 446,
+        "y": 534
+      },
+      "heroRadius": "0px",
+      "panelRadius": "0px",
+      "buttonRadius": "0px",
+      "inputRadius": "0px"
+    },
+    {
+      "width": 1920,
+      "overflowX": 0,
+      "shellWidth": 1140,
+      "hero": {
+        "width": 1092,
+        "height": 192,
+        "x": 414,
+        "y": 180
+      },
+      "panel": {
+        "width": 353,
+        "height": 625,
+        "x": 414,
+        "y": 393
+      },
+      "button": {
+        "width": 292,
+        "height": 56,
+        "x": 806,
+        "y": 902
+      },
+      "email": {
+        "width": 308,
+        "height": 48,
+        "x": 806,
+        "y": 539
+      },
+      "heroRadius": "0px",
+      "panelRadius": "0px",
+      "buttonRadius": "0px",
+      "inputRadius": "0px"
+    }
+  ],
+  "button": {
+    "found_text": "Criar ou redefinir senha",
+    "clicked": true,
+    "before_url": "https://desi.pet/portal-do-cliente/?codex_probe=20260423-1856&flow=password-reset",
+    "after_url": "https://desi.pet/portal-do-cliente/?codex_probe=20260423-1856&flow=password-reset",
+    "before_dialogs": 0,
+    "after_dialogs": 0,
+    "opened_dialog": false,
+    "navigated": false,
+    "feedback_hidden": false,
+    "feedback_text": "Se este e-mail estiver cadastrado no portal, voce recebera as instrucoes para criar ou redefinir a senha.",
+    "feedback_class": "dps-portal-entry__feedback dps-portal-signature__feedback is-success",
+    "button_text_after": "Criar ou redefinir senha",
+    "email_used": "codex.portal.20260423-1856@example.com",
+    "ajax_status": 200,
+    "ajax_ok": true,
+    "ajax_payload": {
+      "success": true,
+      "data": {
+        "message": "Se este e-mail estiver cadastrado no portal, voce recebera as instrucoes para criar ou redefinir a senha."
+      }
+    }
+  },
+  "console": [
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1",
+      "location": {
+        "url": "https://desi.pet/wp-includes/js/jquery/jquery-migrate.js?ver=3.4.1",
+        "lineNumber": 103,
+        "columnNumber": 16
+      }
+    },
+    {
+      "type": "error",
+      "text": "Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+      "location": {
+        "url": "https://desi.pet/portal-do-cliente/?codex_probe=20260423-1856",
+        "lineNumber": 3476,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED",
+      "location": {
+        "url": "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1",
+      "location": {
+        "url": "https://desi.pet/wp-includes/js/jquery/jquery-migrate.js?ver=3.4.1",
+        "lineNumber": 103,
+        "columnNumber": 16
+      }
+    },
+    {
+      "type": "error",
+      "text": "Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+      "location": {
+        "url": "https://desi.pet/portal-do-cliente/?codex_probe=20260423-1856&flow=password-reset",
+        "lineNumber": 3113,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED",
+      "location": {
+        "url": "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    }
+  ],
+  "page_errors": [],
+  "dialogs": [],
+  "screenshots": {
+    "375": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-final-verification-375.png",
+    "600": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-final-verification-600.png",
+    "840": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-final-verification-840.png",
+    "1200": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-final-verification-1200.png",
+    "1920": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-final-verification-1920.png"
+  },
+  "feedback_screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\portal-cliente-final-verification-1200-feedback.png"
+}

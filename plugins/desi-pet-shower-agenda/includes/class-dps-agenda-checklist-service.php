@@ -130,6 +130,8 @@ class DPS_Agenda_Checklist_Service {
             $checklist[ $step_key ] = self::make_step_entry();
         }
 
+        $previous_item = is_array( $checklist[ $step_key ] ) ? $checklist[ $step_key ] : self::make_step_entry();
+
         $checklist[ $step_key ]['status'] = $new_status;
 
         if ( 'done' === $new_status ) {
@@ -140,7 +142,22 @@ class DPS_Agenda_Checklist_Service {
             $checklist[ $step_key ]['done_by'] = 0;
         }
 
-        return (bool) update_post_meta( $appointment_id, self::META_KEY, $checklist );
+        $updated = (bool) update_post_meta( $appointment_id, self::META_KEY, $checklist );
+
+        if ( $updated ) {
+            /**
+             * Dispara quando uma etapa do checklist operacional e atualizada.
+             *
+             * @since 1.6.0
+             * @param int   $appointment_id ID do agendamento.
+             * @param string $step_key      Chave da etapa.
+             * @param array $current_item   Estado atual da etapa.
+             * @param array $previous_item  Estado anterior da etapa.
+             */
+            do_action( 'dps_checklist_step_updated', $appointment_id, $step_key, $checklist[ $step_key ], $previous_item );
+        }
+
+        return $updated;
     }
 
     /**
@@ -174,6 +191,8 @@ class DPS_Agenda_Checklist_Service {
             $checklist[ $step_key ] = self::make_step_entry();
         }
 
+        $previous_item = is_array( $checklist[ $step_key ] ) ? $checklist[ $step_key ] : self::make_step_entry();
+
         // Volta status para pending
         $checklist[ $step_key ]['status'] = 'pending';
         $checklist[ $step_key ]['done_at'] = '';
@@ -197,7 +216,7 @@ class DPS_Agenda_Checklist_Service {
              * @param string $step_key       Chave da etapa.
              * @param string $reason         Motivo.
              */
-            do_action( 'dps_checklist_rework_registered', $appointment_id, $step_key, $reason );
+            do_action( 'dps_checklist_rework_registered', $appointment_id, $step_key, $reason, $previous_item, $checklist[ $step_key ] );
         }
 
         return $updated;

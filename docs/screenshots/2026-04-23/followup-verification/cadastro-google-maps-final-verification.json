@@ -1,0 +1,81 @@
+{
+  "url": "https://desi.pet/cadastro-de-clientes-e-pets/?codex_probe=20260423-1638",
+  "title": "Cadastro de clientes e pets – Desi Pet Shower",
+  "executablePath": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+  "maps_requests": [
+    "https://maps.googleapis.com/maps/api/js?key=AIzaSyD2FMuLeeg1m3bdpZjglUlav0wSOOCDS9s&libraries=places&callback=dpsSignatureGooglePlacesReady"
+  ],
+  "request_count": 1,
+  "api_js_count": 1,
+  "unique_api_js": [
+    "https://maps.googleapis.com/maps/api/js?key=AIzaSyD2FMuLeeg1m3bdpZjglUlav0wSOOCDS9s&libraries=places&callback=dpsSignatureGooglePlacesReady"
+  ],
+  "runtime_state": {
+    "readyState": "complete",
+    "placesReady": "1",
+    "hasPacTargetInput": true,
+    "googleReady": true,
+    "registrationScriptSrc": "https://desi.pet/wp-content/plugins/desi-pet-shower-frontend/assets/js/registration-v2.js?ver=1776972670",
+    "signatureScriptSrc": "https://desi.pet/wp-content/plugins/desi-pet-shower-base/assets/js/dps-signature-forms.js?ver=1776807968",
+    "submitLabel": "Cadastrar e continuar"
+  },
+  "validation_errors": [
+    "Informe o nome completo do tutor.",
+    "Informe o telefone ou WhatsApp do tutor.",
+    "Informe um e-mail válido para o cadastro.",
+    "Pet 1: Informe o nome do pet.",
+    "Pet 1: Selecione a espécie do pet.",
+    "Pet 1: Selecione o porte do pet."
+  ],
+  "runtime_notice": null,
+  "submit_interaction_error": null,
+  "console": [
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1",
+      "location": {
+        "url": "https://desi.pet/wp-includes/js/jquery/jquery-migrate.js?ver=3.4.1",
+        "lineNumber": 103,
+        "columnNumber": 16
+      }
+    },
+    {
+      "type": "error",
+      "text": "Access to script at 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236' from origin 'https://desi.pet' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+      "location": {
+        "url": "https://desi.pet/cadastro-de-clientes-e-pets/?codex_probe=20260423-1638",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED",
+      "location": {
+        "url": "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7636685651342410&host=ca-host-pub-2644536267352236",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "warning",
+      "text": "Google Maps JavaScript API has been loaded directly without loading=async. This can result in suboptimal performance. For best-practice loading patterns please see https://goo.gle/js-api-loading",
+      "location": {
+        "url": "https://maps.googleapis.com/maps/api/js?key=AIzaSyD2FMuLeeg1m3bdpZjglUlav0wSOOCDS9s&libraries=places&callback=dpsSignatureGooglePlacesReady",
+        "lineNumber": 1435,
+        "columnNumber": 256
+      }
+    },
+    {
+      "type": "warning",
+      "text": "As of March 1st, 2025, google.maps.places.Autocomplete is not available to new customers. Please use google.maps.places.PlaceAutocompleteElement instead. At this time, google.maps.places.Autocomplete is not scheduled to be discontinued, but google.maps.places.PlaceAutocompleteElement is recommended over google.maps.places.Autocomplete. While google.maps.places.Autocomplete will continue to receive bug fixes for any major regressions, existing bugs in google.maps.places.Autocomplete will not be addressed. At least 12 months notice will be given before support is discontinued. Please see https://developers.google.com/maps/legacy for additional details and https://developers.google.com/maps/documentation/javascript/places-migration-overview for the migration guide.",
+      "location": {
+        "url": "https://maps.googleapis.com/maps/api/js?key=AIzaSyD2FMuLeeg1m3bdpZjglUlav0wSOOCDS9s&libraries=places&callback=dpsSignatureGooglePlacesReady",
+        "lineNumber": 59,
+        "columnNumber": 206
+      }
+    }
+  ],
+  "page_errors": [],
+  "screenshot": "C:\\Users\\casaprobst\\DPS\\docs\\screenshots\\2026-04-23\\followup-verification\\cadastro-google-maps-final-verification-1200.png"
+}

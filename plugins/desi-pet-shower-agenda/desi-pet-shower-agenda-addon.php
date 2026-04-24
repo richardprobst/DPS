@@ -660,6 +660,10 @@ class DPS_Agenda_Addon {
         // FASE 5: Registra alterações de status no histórico
 
         add_action( 'dps_appointment_status_changed', [ $this, 'log_status_change' ], 10, 4 );
+        add_action( 'dps_checklist_step_updated', [ $this, 'log_checklist_step_history' ], 10, 4 );
+        add_action( 'dps_checklist_rework_registered', [ $this, 'log_checklist_rework_history' ], 10, 5 );
+        add_action( 'dps_appointment_checked_in', [ $this, 'log_checkin_history' ], 10, 3 );
+        add_action( 'dps_appointment_checked_out', [ $this, 'log_checkout_history' ], 10, 3 );
 
 
 
@@ -2224,6 +2228,7 @@ class DPS_Agenda_Addon {
                     'action_checkin_updated'  => __( 'Check-in atualizado', 'dps-agenda-addon' ),
                     'action_checkout_created' => __( 'Check-out registrado', 'dps-agenda-addon' ),
                     'action_checkout_updated' => __( 'Check-out atualizado', 'dps-agenda-addon' ),
+                    'action_manual_edit'      => __( 'Edicao manual', 'dps-agenda-addon' ),
 
                     'close'           => __( 'Fechar', 'dps-agenda-addon' ),
 
@@ -2238,6 +2243,9 @@ class DPS_Agenda_Addon {
                     'historyEmptyTitle'  => __( 'Histórico indisponível', 'dps-agenda-addon' ),
 
                     'historyClose'       => __( 'Fechar histórico', 'dps-agenda-addon' ),
+                    'historyField'       => __( 'Campo', 'dps-agenda-addon' ),
+                    'historyPrevious'    => __( 'Valor anterior', 'dps-agenda-addon' ),
+                    'historyNew'         => __( 'Novo valor', 'dps-agenda-addon' ),
 
                     'confirmAction'      => __( 'Confirmar ação', 'dps-agenda-addon' ),
 
@@ -7160,20 +7168,27 @@ class DPS_Agenda_Addon {
         foreach ( $history as $entry ) {
 
             $user = get_userdata( isset( $entry['user_id'] ) ? (int) $entry['user_id'] : 0 );
+            $details = isset( $entry['details'] ) && is_array( $entry['details'] ) ? $entry['details'] : [];
+            $source  = isset( $entry['source'] ) ? sanitize_key( (string) $entry['source'] ) : 'system';
 
             $formatted[] = [
 
                 'action'       => isset( $entry['action'] ) ? $entry['action'] : '',
 
+                'action_label' => $this->get_history_action_label(
+                    isset( $entry['action'] ) ? $entry['action'] : '',
+                    $details
+                ),
+
                 'date'         => isset( $entry['date'] ) ? date_i18n( 'd/m/Y H:i', strtotime( $entry['date'] ) ) : '',
 
                 'user'         => $user ? $user->display_name : __( 'Sistema', 'dps-agenda-addon' ),
 
-                'details'      => isset( $entry['details'] ) && is_array( $entry['details'] ) ? $entry['details'] : [],
+                'details'      => $details,
 
-                'source'       => isset( $entry['source'] ) ? sanitize_key( (string) $entry['source'] ) : 'system',
+                'source'       => $source,
 
-                'source_label' => ( isset( $entry['source'] ) && 'manual' === sanitize_key( (string) $entry['source'] ) ) ? __( 'Ação manual', 'dps-agenda-addon' ) : __( 'Registro automático', 'dps-agenda-addon' ),
+                'source_label' => $this->get_history_source_label( $source ),
 
             ];
 
@@ -7607,6 +7622,390 @@ class DPS_Agenda_Addon {
 
     }
 
+    /**
+     * Retorna o rotulo humano de uma origem de historico.
+     *
+     * @param string $source Origem registrada.
+     * @return string
+     */
+    private function get_history_source_label( $source ) {
+        return 'manual' === sanitize_key( (string) $source )
+            ? __( 'Edicao humana', 'dps-agenda-addon' )
+            : __( 'Evento automatico', 'dps-agenda-addon' );
+    }
+
+    /**
+     * Retorna o rotulo humano de uma acao do historico.
+     *
+     * @param string $action  Acao registrada.
+     * @param array  $details Detalhes adicionais.
+     * @return string
+     */
+    private function get_history_action_label( $action, $details = [] ) {
+        $labels = [
+            'created'          => __( 'Criado', 'dps-agenda-addon' ),
+            'status_change'    => __( 'Status alterado', 'dps-agenda-addon' ),
+            'rescheduled'      => __( 'Reagendado', 'dps-agenda-addon' ),
+            'checklist_update' => __( 'Checklist atualizado', 'dps-agenda-addon' ),
+            'checklist_rework' => __( 'Retrabalho registrado', 'dps-agenda-addon' ),
+            'checkin_created'  => __( 'Check-in registrado', 'dps-agenda-addon' ),
+            'checkin_updated'  => __( 'Check-in atualizado', 'dps-agenda-addon' ),
+            'checkout_created' => __( 'Check-out registrado', 'dps-agenda-addon' ),
+            'checkout_updated' => __( 'Check-out atualizado', 'dps-agenda-addon' ),
+            'manual_edit'      => __( 'Edicao manual', 'dps-agenda-addon' ),
+        ];
+
+        if ( isset( $labels[ $action ] ) ) {
+            return $labels[ $action ];
+        }
+
+        if ( ! empty( $details['field_label'] ) ) {
+            return __( 'Edicao manual', 'dps-agenda-addon' );
+        }
+
+        return $action;
+    }
+
+    /**
+     * Retorna o rotulo humano de uma etapa operacional.
+     *
+     * @param string $stage_key Identificador da etapa.
+     * @return string
+     */
+    private function get_operational_stage_label( $stage_key ) {
+        return 'checkout' === sanitize_key( $stage_key )
+            ? __( 'Check-out', 'dps-agenda-addon' )
+            : __( 'Check-in', 'dps-agenda-addon' );
+    }
+
+    /**
+     * Normaliza um valor para exibicao no historico.
+     *
+     * @param mixed  $value       Valor cru.
+     * @param string $empty_label Rotulo para valor vazio.
+     * @return string
+     */
+    private function format_history_value( $value, $empty_label ) {
+        if ( is_array( $value ) ) {
+            $value = wp_json_encode( $value );
+        } elseif ( is_bool( $value ) ) {
+            $value = $value ? __( 'Sim', 'dps-agenda-addon' ) : __( 'Nao', 'dps-agenda-addon' );
+        } elseif ( null === $value ) {
+            $value = '';
+        }
+
+        $value = is_string( $value ) ? preg_replace( '/\s+/', ' ', trim( $value ) ) : trim( (string) $value );
+
+        return '' === $value ? $empty_label : $value;
+    }
+
+    /**
+     * Registra uma alteracao manual de campo no historico.
+     *
+     * @param int    $appointment_id ID do agendamento.
+     * @param string $field_group    Grupo do campo.
+     * @param string $field_key      Chave do campo.
+     * @param string $field_label    Rotulo legivel.
+     * @param mixed  $old_value      Valor anterior.
+     * @param mixed  $new_value      Novo valor.
+     * @param string $empty_label    Rotulo para valores vazios.
+     * @return void
+     */
+    private function log_manual_field_change( $appointment_id, $field_group, $field_key, $field_label, $old_value, $new_value, $empty_label ) {
+        $old_value = $this->format_history_value( $old_value, $empty_label );
+        $new_value = $this->format_history_value( $new_value, $empty_label );
+
+        if ( $old_value === $new_value ) {
+            return;
+        }
+
+        $this->add_to_appointment_history(
+            $appointment_id,
+            'manual_edit',
+            [
+                'field_group' => sanitize_key( $field_group ),
+                'field_key'   => sanitize_key( $field_key ),
+                'field_label' => sanitize_text_field( $field_label ),
+                'old_value'   => $old_value,
+                'new_value'   => $new_value,
+            ],
+            'manual'
+        );
+    }
+
+    /**
+     * Retorna o ultimo motivo de retrabalho registrado em uma etapa.
+     *
+     * @param array $item Dados da etapa.
+     * @return string
+     */
+    private function get_latest_rework_reason( $item ) {
+        if ( empty( $item['rework'] ) || ! is_array( $item['rework'] ) ) {
+            return '';
+        }
+
+        $last_entry = end( $item['rework'] );
+        reset( $item['rework'] );
+
+        return is_array( $last_entry ) && ! empty( $last_entry['reason'] ) ? (string) $last_entry['reason'] : '';
+    }
+
+    /**
+     * Registra as diferencas humanas de uma etapa do checklist.
+     *
+     * @param int    $appointment_id ID do agendamento.
+     * @param string $step_key       Chave da etapa.
+     * @param array  $previous_item  Estado anterior.
+     * @param array  $current_item   Estado atual.
+     * @param string $reason         Motivo de retrabalho, quando houver.
+     * @return void
+     */
+    private function log_manual_checklist_changes( $appointment_id, $step_key, $previous_item, $current_item, $reason = '' ) {
+        if ( get_current_user_id() <= 0 ) {
+            return;
+        }
+
+        $step_label   = DPS_Agenda_Checklist_Service::get_step_label( $step_key );
+        $field_label  = sprintf( __( 'Checklist > %s', 'dps-agenda-addon' ), $step_label );
+        $old_status   = isset( $previous_item['status'] ) ? $this->get_checklist_status_label( $previous_item['status'] ) : $this->get_checklist_status_label( 'pending' );
+        $new_status   = isset( $current_item['status'] ) ? $this->get_checklist_status_label( $current_item['status'] ) : $this->get_checklist_status_label( 'pending' );
+        $reason_label = sprintf( __( 'Checklist > %1$s > Motivo do retrabalho', 'dps-agenda-addon' ), $step_label );
+        $old_reason   = $this->get_latest_rework_reason( is_array( $previous_item ) ? $previous_item : [] );
+        $new_reason   = $reason ? $reason : $this->get_latest_rework_reason( is_array( $current_item ) ? $current_item : [] );
+
+        $this->log_manual_field_change(
+            $appointment_id,
+            'checklist',
+            'status_' . $step_key,
+            $field_label,
+            $old_status,
+            $new_status,
+            __( 'Sem valor', 'dps-agenda-addon' )
+        );
+
+        if ( '' !== $new_reason || '' !== $old_reason ) {
+            $this->log_manual_field_change(
+                $appointment_id,
+                'checklist',
+                'rework_reason_' . $step_key,
+                $reason_label,
+                $old_reason,
+                $new_reason,
+                __( 'Sem motivo', 'dps-agenda-addon' )
+            );
+        }
+    }
+
+    /**
+     * Registra as diferencas humanas de check-in/check-out.
+     *
+     * @param int         $appointment_id ID do agendamento.
+     * @param string      $stage_key      Etapa: checkin ou checkout.
+     * @param array|false $previous       Dados anteriores.
+     * @param array|false $current        Dados atuais.
+     * @return void
+     */
+    private function log_manual_stage_changes( $appointment_id, $stage_key, $previous, $current ) {
+        if ( get_current_user_id() <= 0 ) {
+            return;
+        }
+
+        $previous         = is_array( $previous ) ? $previous : [];
+        $current          = is_array( $current ) ? $current : [];
+        $stage_label      = $this->get_operational_stage_label( $stage_key );
+        $observations_key = sprintf( __( '%1$s > Observacoes gerais', 'dps-agenda-addon' ), $stage_label );
+        $empty_notes      = __( 'Sem observacoes', 'dps-agenda-addon' );
+        $checked_label    = __( 'Marcado', 'dps-agenda-addon' );
+        $unchecked_label  = __( 'Nao marcado', 'dps-agenda-addon' );
+        $empty_detail     = __( 'Sem detalhes', 'dps-agenda-addon' );
+        $safety_items     = DPS_Agenda_Checkin_Service::get_safety_items();
+
+        $this->log_manual_field_change(
+            $appointment_id,
+            $stage_key,
+            $stage_key . '_observations',
+            $observations_key,
+            isset( $previous['observations'] ) ? $previous['observations'] : '',
+            isset( $current['observations'] ) ? $current['observations'] : '',
+            $empty_notes
+        );
+
+        foreach ( $safety_items as $slug => $item ) {
+            $previous_item = isset( $previous['safety_items'][ $slug ] ) && is_array( $previous['safety_items'][ $slug ] ) ? $previous['safety_items'][ $slug ] : [];
+            $current_item  = isset( $current['safety_items'][ $slug ] ) && is_array( $current['safety_items'][ $slug ] ) ? $current['safety_items'][ $slug ] : [];
+            $item_label    = isset( $item['label'] ) ? $item['label'] : $slug;
+
+            $this->log_manual_field_change(
+                $appointment_id,
+                $stage_key,
+                $stage_key . '_flag_' . $slug,
+                sprintf( __( '%1$s > %2$s', 'dps-agenda-addon' ), $stage_label, $item_label ),
+                ! empty( $previous_item['checked'] ) ? $checked_label : $unchecked_label,
+                ! empty( $current_item['checked'] ) ? $checked_label : $unchecked_label,
+                $unchecked_label
+            );
+
+            $this->log_manual_field_change(
+                $appointment_id,
+                $stage_key,
+                $stage_key . '_notes_' . $slug,
+                sprintf( __( '%1$s > %2$s > Observacoes', 'dps-agenda-addon' ), $stage_label, $item_label ),
+                isset( $previous_item['notes'] ) ? $previous_item['notes'] : '',
+                isset( $current_item['notes'] ) ? $current_item['notes'] : '',
+                $empty_detail
+            );
+        }
+    }
+
+    /**
+     * Monta a mensagem de atualizacao do checklist.
+     *
+     * @param string $step_key Chave da etapa.
+     * @param string $status   Novo status.
+     * @return string
+     */
+    private function build_checklist_update_message( $step_key, $status ) {
+        return sprintf(
+            __( 'Checklist atualizado: %1$s marcada como %2$s.', 'dps-agenda-addon' ),
+            DPS_Agenda_Checklist_Service::get_step_label( $step_key ),
+            $this->get_checklist_status_label( $status )
+        );
+    }
+
+    /**
+     * Monta a mensagem de retrabalho do checklist.
+     *
+     * @param string $step_key Chave da etapa.
+     * @param string $reason   Motivo informado.
+     * @return string
+     */
+    private function build_checklist_rework_message( $step_key, $reason ) {
+        return sprintf(
+            __( 'Retrabalho registrado em %1$s.%2$s', 'dps-agenda-addon' ),
+            DPS_Agenda_Checklist_Service::get_step_label( $step_key ),
+            $reason ? ' ' . sprintf( __( 'Motivo: %s', 'dps-agenda-addon' ), $reason ) : ''
+        );
+    }
+
+    /**
+     * Monta a mensagem resumida de uma etapa operacional.
+     *
+     * @param string      $stage_key Etapa: checkin ou checkout.
+     * @param array|false $previous  Estado anterior.
+     * @param array|false $current   Estado atual.
+     * @return string
+     */
+    private function build_stage_history_message( $stage_key, $previous, $current ) {
+        $stage_label     = $this->get_operational_stage_label( $stage_key );
+        $current         = is_array( $current ) ? $current : [];
+        $selected_labels = $current ? $this->summarize_stage_safety_items( $current ) : '';
+        $time            = ! empty( $current['time'] ) ? mysql2date( 'H:i', $current['time'] ) : '';
+        $message         = $previous
+            ? sprintf( __( '%1$s atualizado as %2$s.', 'dps-agenda-addon' ), $stage_label, $time )
+            : sprintf( __( '%1$s registrado as %2$s.', 'dps-agenda-addon' ), $stage_label, $time );
+
+        if ( $selected_labels ) {
+            $message .= ' ' . sprintf( __( 'Itens observados: %s.', 'dps-agenda-addon' ), $selected_labels );
+        }
+
+        return $message;
+    }
+
+    /**
+     * Registra o historico sistemico e humano da atualizacao do checklist.
+     *
+     * @param int    $appointment_id ID do agendamento.
+     * @param string $step_key       Chave da etapa.
+     * @param array  $current_item   Estado atual.
+     * @param array  $previous_item  Estado anterior.
+     * @return void
+     */
+    public function log_checklist_step_history( $appointment_id, $step_key, $current_item, $previous_item ) {
+        $current_item = is_array( $current_item ) ? $current_item : [];
+        $status       = isset( $current_item['status'] ) ? $current_item['status'] : 'pending';
+        $message      = $this->build_checklist_update_message( $step_key, $status );
+
+        $this->log_manual_checklist_changes( $appointment_id, $step_key, $previous_item, $current_item );
+        $this->add_to_appointment_history(
+            $appointment_id,
+            'checklist_update',
+            [
+                'step_key' => $step_key,
+                'message'  => $message,
+            ],
+            'system'
+        );
+    }
+
+    /**
+     * Registra o historico sistemico e humano de retrabalho do checklist.
+     *
+     * @param int    $appointment_id ID do agendamento.
+     * @param string $step_key       Chave da etapa.
+     * @param string $reason         Motivo informado.
+     * @param array  $previous_item  Estado anterior.
+     * @param array  $current_item   Estado atual.
+     * @return void
+     */
+    public function log_checklist_rework_history( $appointment_id, $step_key, $reason, $previous_item = [], $current_item = [] ) {
+        $message = $this->build_checklist_rework_message( $step_key, $reason );
+
+        $this->log_manual_checklist_changes( $appointment_id, $step_key, $previous_item, $current_item, $reason );
+        $this->add_to_appointment_history(
+            $appointment_id,
+            'checklist_rework',
+            [
+                'step_key' => $step_key,
+                'message'  => $message,
+            ],
+            'system'
+        );
+    }
+
+    /**
+     * Registra o historico sistemico e humano do check-in.
+     *
+     * @param int        $appointment_id ID do agendamento.
+     * @param array      $data           Estado atual.
+     * @param array|bool $previous       Estado anterior.
+     * @return void
+     */
+    public function log_checkin_history( $appointment_id, $data, $previous = [] ) {
+        $message = $this->build_stage_history_message( 'checkin', $previous, $data );
+
+        $this->log_manual_stage_changes( $appointment_id, 'checkin', $previous, $data );
+        $this->add_to_appointment_history(
+            $appointment_id,
+            ! empty( $previous ) ? 'checkin_updated' : 'checkin_created',
+            [
+                'message' => $message,
+            ],
+            'system'
+        );
+    }
+
+    /**
+     * Registra o historico sistemico e humano do check-out.
+     *
+     * @param int        $appointment_id ID do agendamento.
+     * @param array      $data           Estado atual.
+     * @param array|bool $previous       Estado anterior.
+     * @return void
+     */
+    public function log_checkout_history( $appointment_id, $data, $previous = [] ) {
+        $message = $this->build_stage_history_message( 'checkout', $previous, $data );
+
+        $this->log_manual_stage_changes( $appointment_id, 'checkout', $previous, $data );
+        $this->add_to_appointment_history(
+            $appointment_id,
+            ! empty( $previous ) ? 'checkout_updated' : 'checkout_created',
+            [
+                'message' => $message,
+            ],
+            'system'
+        );
+    }
+
 
 
     /**
@@ -7867,21 +8266,7 @@ class DPS_Agenda_Addon {
 
 
 
-        $step_label = DPS_Agenda_Checklist_Service::get_step_label( $step_key );
-        $message    = sprintf(
-            __( 'Checklist atualizado: %1$s marcada como %2$s.', 'dps-agenda-addon' ),
-            $step_label,
-            $this->get_checklist_status_label( $status )
-        );
-
-        $this->add_to_appointment_history(
-            $appointment_id,
-            'checklist_update',
-            [
-                'step_key' => $step_key,
-                'message'  => $message,
-            ]
-        );
+        $message = $this->build_checklist_update_message( $step_key, $status );
 
         wp_send_json_success(
             $this->build_operation_ajax_payload(
@@ -7994,21 +8379,7 @@ class DPS_Agenda_Addon {
 
 
 
-        $step_label = DPS_Agenda_Checklist_Service::get_step_label( $step_key );
-        $message    = sprintf(
-            __( 'Retrabalho registrado em %1$s.%2$s', 'dps-agenda-addon' ),
-            $step_label,
-            $reason ? ' ' . sprintf( __( 'Motivo: %s', 'dps-agenda-addon' ), $reason ) : ''
-        );
-
-        $this->add_to_appointment_history(
-            $appointment_id,
-            'checklist_rework',
-            [
-                'step_key' => $step_key,
-                'message'  => $message,
-            ]
-        );
+        $message = $this->build_checklist_rework_message( $step_key, $reason );
 
         wp_send_json_success(
             $this->build_operation_ajax_payload(
@@ -8210,23 +8581,8 @@ class DPS_Agenda_Addon {
 
 
 
-        $current         = DPS_Agenda_Checkin_Service::get_checkin( $appointment_id );
-        $selected_labels = $current ? $this->summarize_stage_safety_items( $current ) : '';
-        $message         = $previous
-            ? sprintf( __( 'Check-in atualizado às %s.', 'dps-agenda-addon' ), mysql2date( 'H:i', $current['time'] ) )
-            : sprintf( __( 'Check-in registrado às %s.', 'dps-agenda-addon' ), mysql2date( 'H:i', $current['time'] ) );
-
-        if ( $selected_labels ) {
-            $message .= ' ' . sprintf( __( 'Itens observados: %s.', 'dps-agenda-addon' ), $selected_labels );
-        }
-
-        $this->add_to_appointment_history(
-            $appointment_id,
-            $previous ? 'checkin_updated' : 'checkin_created',
-            [
-                'message' => $message,
-            ]
-        );
+        $current = DPS_Agenda_Checkin_Service::get_checkin( $appointment_id );
+        $message = $this->build_stage_history_message( 'checkin', $previous, $current );
 
         $response            = $this->build_checkin_response( $appointment_id );
         $response['message'] = $message;
@@ -8343,23 +8699,8 @@ class DPS_Agenda_Addon {
 
 
 
-        $current         = DPS_Agenda_Checkin_Service::get_checkout( $appointment_id );
-        $selected_labels = $current ? $this->summarize_stage_safety_items( $current ) : '';
-        $message         = $previous
-            ? sprintf( __( 'Check-out atualizado às %s.', 'dps-agenda-addon' ), mysql2date( 'H:i', $current['time'] ) )
-            : sprintf( __( 'Check-out registrado às %s.', 'dps-agenda-addon' ), mysql2date( 'H:i', $current['time'] ) );
-
-        if ( $selected_labels ) {
-            $message .= ' ' . sprintf( __( 'Itens observados: %s.', 'dps-agenda-addon' ), $selected_labels );
-        }
-
-        $this->add_to_appointment_history(
-            $appointment_id,
-            $previous ? 'checkout_updated' : 'checkout_created',
-            [
-                'message' => $message,
-            ]
-        );
+        $current = DPS_Agenda_Checkin_Service::get_checkout( $appointment_id );
+        $message = $this->build_stage_history_message( 'checkout', $previous, $current );
 
         $response            = $this->build_checkin_response( $appointment_id );
         $response['message'] = $message;

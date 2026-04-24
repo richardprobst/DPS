@@ -97,11 +97,13 @@ Antes de criar uma nova versÃ£o oficial:
 - Refinado o estado vazio dos filtros operacionais da Agenda com assinatura visual DPS Signature, marca tipográfica própria e microcopy contextual para recortes sem atrasos ou sem logística TaxiDog.
 - Reordenada a hierarquia mobile da Agenda em codigo para priorizar a fila operacional sobre os KPIs no shell DPS Signature.
 - Normalizados rotulos textuais da Agenda operacional e de views legadas para remover indicadores antigos e copy quebrada.
+- Mantido o modal operacional editavel para checklist, check-in e check-out, agora com trilha humana detalhada no historico do atendimento sem trocar os endpoints AJAX existentes.
 
 #### Fixed (Corrigido)
 
 - Corrigidos arquivos PHP do pacote DPS com BOM no ambiente publicado, eliminando contaminação de respostas JSON do AJAX e estabilizando modais, painéis e integrações que dependem de payload limpo.
 - Corrigida a telemetria de histórico para devolver `source` e `source_label`, permitindo badges coerentes para registros automáticos e ações manuais no modal de linha do tempo.
+- Corrigido o histórico operacional da Agenda para exibir diffs humanos de checklist, check-in e check-out com campo alterado, valor anterior e novo valor, preservando os eventos automáticos como registros separados.
 - Validado no `desi.pet` que os modais de pet, serviços, operação, histórico e reagendamento abriram corretamente após a publicação final.
 - Removidos efeitos colaterais de persistencia no renderer operacional da Agenda, que antes ajustava metadados durante a montagem da UI.
 - Removido uso deprecated de `$.trim` nos scripts ativos da Agenda; a revalidacao publicada ficou sem erros e sem warnings no Playwright.
@@ -116,6 +118,7 @@ Antes de criar uma nova versÃ£o oficial:
 - Removidos resíduos de CSS/JS/layout das antigas tabelas concorrentes da Agenda, mantendo o runtime ativo concentrado na fila operacional canônica do DPS Signature.
 - Simplificada a semântica do frontend para tratar a Agenda como modo operacional único, reduzindo dependências de `agenda_tab` no runtime publicado.
 - Consolidado o fluxo de servicos da Agenda no `agenda-addon.js`, removendo o arquivo legado `services-modal.js` e a dependencia de `agenda_tab` no frontend operacional.
+- Adicionado o hook `dps_checklist_step_updated` e ampliado o contexto dos hooks operacionais existentes com estado anterior/atual, sem quebrar os contratos atuais do add-on da Agenda.
 
 **Client Portal ? Login h?brido e acesso recorrente**
 

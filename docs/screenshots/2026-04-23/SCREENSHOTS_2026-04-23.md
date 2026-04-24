@@ -544,6 +544,51 @@ Substituir o empty state generico visto no filtro `Atrasados` por uma composicao
 - Playwright autenticado no ambiente publicado em `375`, `600`, `840`, `1200` e `1920`
 - `wp post list`, `wp post delete`, `wp user get` e `wp user delete` para limpeza do fixture temporario
 
+## Cadastro publico: consolidacao do Google Places
+
+Fonte de verdade visual seguida nesta correcao: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` (padrao DPS Signature).
+
+### Objetivo
+
+Fechar o achado aberto em `2026-04-22` no cadastro publico, removendo a carga duplicada do Google Maps Places entre a trilha compartilhada `dpsSignatureGooglePlacesReady` e a trilha local `dpsRegistrationGooglePlacesReady`, sem quebrar autocomplete, validacao ou a UX funcional do formulario.
+
+### Ajuste implementado
+
+- o bootstrap de Google Places do `registration-v2.js` passou a aderir primeiro a uma carga compartilhada ja existente na pagina;
+- quando a trilha compartilhada ainda nao existe, o add-on deixa de criar uma callback paralela e sobe a propria carga usando a mesma callback canonica `dpsSignatureGooglePlacesReady`;
+- a correcao ficou restrita ao frontend do cadastro, sem reabrir o layout nem a hierarquia visual do shell DPS Signature.
+
+### Publicado e validado
+
+- publicado em `https://desi.pet/cadastro-de-clientes-e-pets/`;
+- backup remoto do arquivo substituido:
+  - `/home/u944637195/domains/desi.pet/public_html/wp-content/plugins/desi-pet-shower-frontend/assets/js/registration-v2.js.__backup_20260423-163110`
+- runtime publicado confirmou:
+  - `api_js_count = 1`;
+  - unica callback carregada: `dpsSignatureGooglePlacesReady`;
+  - `runtime_state.placesReady = 1`;
+  - `runtime_state.hasPacTargetInput = true`;
+  - `runtime_state.googleReady = true`;
+  - `registration-v2.js` publicado serviu com `?ver=1776972670`;
+- a submissao vazia continuou bloqueada no cliente com os erros esperados para tutor e pet, confirmando que a validacao local permaneceu ativa;
+- nao houve `page_errors` nem erro de duplicidade do Google Maps no probe final;
+- residuos fora do escopo desta pendencia:
+  - warning do Google sobre `loading=async` na carga direta da API;
+  - warning da API legada `google.maps.places.Autocomplete`;
+  - erro CORS de `adsbygoogle.js`, alheio ao cadastro.
+
+### Artefatos
+
+- [cadastro-google-maps-final-verification.json](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/cadastro-google-maps-final-verification.json)
+- [cadastro-google-maps-final-verification-1200.png](/C:/Users/casaprobst/DPS/docs/screenshots/2026-04-23/followup-verification/cadastro-google-maps-final-verification-1200.png)
+
+### Comandos executados
+
+- `node --check plugins/desi-pet-shower-frontend/assets/js/registration-v2.js`
+- `git diff --check -- plugins/desi-pet-shower-frontend/assets/js/registration-v2.js`
+- upload por FTP/SFTP do `registration-v2.js` publicado com backup remoto previo
+- validacao publicada com Chrome headless via `playwright-core`, gerando screenshot e JSON em `docs/screenshots/2026-04-23/followup-verification/`
+
 ## Portal do Cliente: bootstrap publicado e CTA `CRIAR OU REDEFINIR SENHA`
 
 Fonte de verdade visual seguida nesta correcao: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md` (padrao DPS Signature).
