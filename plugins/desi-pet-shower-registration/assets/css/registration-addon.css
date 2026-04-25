@@ -358,6 +358,7 @@
 .dps-registration-form input[type="tel"],
 .dps-registration-form input[type="date"],
 .dps-registration-form input[type="number"],
+.dps-registration-form input[type="file"],
 .dps-registration-form select,
 .dps-registration-form textarea {
     display: block;
@@ -426,6 +427,31 @@
     accent-color: var(--dps-reg-petrol);
 }
 
+.dps-registration-form input[type="file"] {
+    min-height: 0;
+    padding: 8px;
+    font-size: 13px;
+}
+
+.dps-registration-form input[type="file"]::file-selector-button {
+    min-height: 34px;
+    margin-right: 10px;
+    padding: 7px 12px;
+    border: 1px solid var(--dps-reg-petrol);
+    border-radius: 0;
+    background: var(--dps-reg-petrol);
+    color: #ffffff;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.dps-registration-form input[type="file"]::file-selector-button:hover {
+    border-color: var(--dps-reg-ink);
+    background: var(--dps-reg-ink);
+}
+
 .dps-registration-form label:has(input[type="checkbox"]) {
     display: flex;
     align-items: flex-start;
@@ -464,6 +490,58 @@
 #dps-pets-wrapper {
     display: grid;
     gap: var(--dps-reg-gap-lg);
+}
+
+.dps-pet-photo-field {
+    gap: var(--dps-reg-gap-sm);
+}
+
+.dps-pet-photo-control {
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr);
+    gap: var(--dps-reg-gap-lg);
+    align-items: start;
+    margin-top: var(--dps-reg-gap-sm);
+}
+
+.dps-pet-photo-preview {
+    display: grid;
+    place-items: center;
+    width: 104px;
+    aspect-ratio: 1;
+    border: 1px solid var(--dps-reg-line);
+    border-radius: 0;
+    background: var(--dps-reg-paper);
+    color: var(--dps-reg-muted);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.25;
+    text-align: center;
+    overflow: hidden;
+}
+
+.dps-pet-photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dps-pet-photo-copy {
+    display: grid;
+    gap: var(--dps-reg-gap-sm);
+    min-width: 0;
+}
+
+.dps-pet-photo-status {
+    min-height: 18px;
+    color: var(--dps-reg-muted);
+    font-size: 12px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.dps-pet-photo-status.is-error {
+    color: var(--dps-reg-danger);
 }
 
 .dps-step-actions {
@@ -958,9 +1036,18 @@
 
     .dps-progress-top,
     .dps-step-actions,
+    .dps-pet-photo-control,
     .dps-modal-footer {
         align-items: stretch;
         flex-direction: column;
+    }
+
+    .dps-pet-photo-control {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-pet-photo-preview {
+        width: min(100%, 180px);
     }
 
     .dps-button-next,

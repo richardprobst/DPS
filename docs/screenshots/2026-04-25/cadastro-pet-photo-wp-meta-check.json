@@ -1,0 +1,39 @@
+﻿{
+    "generatedAt": "2026-04-25T20:12:48+00:00",
+    "suffix": "20260425PETPHOTO171126",
+    "rows": [
+        {
+            "id": 1834,
+            "type": "dps_cliente",
+            "title": "Cliente Codex Real Cadastro 20260425PETPHOTO171126",
+            "photo_id": 0,
+            "thumbnail_id": 0,
+            "pet_photos_count": 0,
+            "photo_mime": "",
+            "photo_parent": 0,
+            "photo_url_exists": false
+        },
+        {
+            "id": 1835,
+            "type": "dps_pet",
+            "title": "Luna Codex 20260425PETPHOTO171126",
+            "photo_id": 1836,
+            "thumbnail_id": 1836,
+            "pet_photos_count": 1,
+            "photo_mime": "image/png",
+            "photo_parent": 1835,
+            "photo_url_exists": true
+        },
+        {
+            "id": 1837,
+            "type": "dps_pet",
+            "title": "Thor Codex 20260425PETPHOTO171126",
+            "photo_id": 0,
+            "thumbnail_id": 0,
+            "pet_photos_count": 0,
+            "photo_mime": "",
+            "photo_parent": 0,
+            "photo_url_exists": false
+        }
+    ]
+}

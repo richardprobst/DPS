@@ -1654,6 +1654,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 **PropÃƒÂ³sito e funcionalidades principais**:
 - Permitir cadastro pÃƒÂºblico de clientes e pets via formulÃƒÂ¡rio web
+- Permitir foto opcional por pet no cadastro público, salvando o anexo no perfil do pet via `pet_photo_id`, `pet_photos` e `_thumbnail_id`
 - Integrar com Google Places via camada compartilhada `dps-signature-forms.js`, usando `PlaceAutocompleteElement` quando disponivel e fallback para `google.maps.places.Autocomplete`
 - Disparar hook para outros add-ons apÃƒÂ³s criaÃƒÂ§ÃƒÂ£o de cliente
 - Aplicar rate limiting, feedback curto e rascunho opt-in por armazenamento persistente proprio, sem transients/cache nem browser storage
@@ -1670,6 +1671,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
   - armazena eventos de rate limit, mensagens de feedback e rascunhos opt-in com `created_at`, `expires_at` e `consumed_at`;
   - substitui os antigos transients `dps_reg_rate_*`, `dps_reg_msg_*` e `dps_reg_api_*`.
 - Options principais: `dps_registration_page_id`, `dps_google_api_key`, chaves de reCAPTCHA, templates de email e limites da API REST.
+- Upload opcional de pet: campo `pet_photo[]`, aceitando JPG/PNG/WebP até 5 MB; a imagem é salva na Media Library com `post_parent` do `dps_pet`.
 - Cron proprio: `dps_registration_events_cleanup`, agendado diariamente por `DPS_Registration_Maintenance`, remove linhas expiradas da tabela persistente sem executar limpeza em todo request.
 
 **Hooks consumidos**:
@@ -1691,6 +1693,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Sanitiza todas as entradas antes de criar posts
 - O CSS publico e o controlador JS do formulario foram reescritos em 2026-04-25 para DPS Signature, preservando shortcodes, actions, nomes de campos, nonces, hooks e endpoint REST.
 - A entrega das 10 melhorias de 2026-04-25 adicionou `DPS_Registration_UX`, `DPS_Registration_Draft_Service` e `DPS_Registration_Maintenance`, agrupando campos, rascunho persistente opt-in, live region, foco acessivel e limpeza diaria de eventos.
+- A foto opcional do pet foi adicionada em 2026-04-25 com validação de MIME/extensão, limite de 5 MB, preview DPS Signature, gravação em `pet_photo_id`/`pet_photos`/`_thumbnail_id` e rollback de posts/anexos em falha tardia.
 - O toggle administrativo `dps_admin_send_welcome` passou a controlar efetivamente o envio de boas-vindas quando `dps_admin_skip_confirmation` esta ativo, evitando disparos em cadastros operacionais ou de QA.
 - `uninstall.php` remove a tabela `dps_registration_events` e tambem limpa residuos de transients de versoes antigas.
 

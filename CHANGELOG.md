@@ -88,6 +88,7 @@ Antes de criar uma nova versÃ£o oficial:
 - Adicionada a tabela persistente `dps_registration_events` para rate limiting e mensagens temporarias do Cadastro sem uso de transients/cache.
 - Adicionado carregamento compartilhado de `dps-signature-forms.css` e `dps-signature-forms.js` no formulario publico de cadastro.
 - Adicionados `DPS_Registration_UX`, `DPS_Registration_Draft_Service` e `DPS_Registration_Maintenance` para blocos de UI, rascunho persistente opt-in e limpeza diaria de eventos expirados.
+- Adicionado upload opcional de foto por pet no Cadastro, salvando a imagem no perfil via `pet_photo_id`, `pet_photos` e `_thumbnail_id`.
 - Adicionado script Playwright de QA publicado para validar Cadastro autenticado/admin nos breakpoints DPS Signature e envio real controlado.
 
 **Agenda Add-on - fila operacional DPS Signature**
@@ -104,6 +105,7 @@ Antes de criar uma nova versÃ£o oficial:
 - Atualizado o Cadastro para usar `PlaceAutocompleteElement` quando disponivel, mantendo fallback legado e sincronizacao do input canonico `client_address`.
 - Reorganizada a etapa do tutor em grupos de dados essenciais, endereco/origem e complementares, com rascunho opt-in e live region acessivel.
 - Reorganizada a etapa de pets para manter campos obrigatorios em primeiro plano e mover detalhes/cuidado para disclosures opcionais.
+- Reorganizada a foto do pet como campo opcional dentro dos detalhes do pet, com preview quadrado, borda fina e validação client-side alinhados ao DPS Signature.
 - Reafirmados `desi-pet-shower-registration` e `desi-pet-shower-booking` como implementações canônicas dos fluxos públicos de cadastro e agendamento, encerrando o dual-run do add-on `desi-pet-shower-frontend`.
 - Preservados `[dps_registration_v2]` e `[dps_booking_v2]` como aliases de compatibilidade nos plugins canônicos, evitando quebra de páginas publicadas após a remoção do add-on Frontend.
 - Consolidada a Agenda publicada como superfície operacional única do DPS Signature, sem navegação funcional por abas legadas e com navegação preservando apenas visão e período.
@@ -327,6 +329,8 @@ Antes de criar uma nova versÃ£o oficial:
 - **Agenda Add-on**: removido definitivamente o bloco operacional legado da Agenda no frontend, backend, estilos e artefatos estaticos de apoio.
 
 #### Security (SeguranÃ§a)
+
+- **Cadastro Add-on - foto do pet**: upload público validado com nonce existente, limite de 5 MB, tipos JPG/PNG/WebP, verificação por `wp_check_filetype_and_ext()` antes e depois do upload e rollback de posts/anexos em falha tardia.
 
 **Fase 1 â€” SeguranÃ§a CrÃ­tica (Plano de ImplementaÃ§Ã£o)**
 

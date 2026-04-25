@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
@@ -13,12 +14,15 @@ const wpPass = process.env.DPS_WP_PASS || '';
 const runRealSubmit = process.env.DPS_REG_REAL_SUBMIT === '1';
 const suffix = process.env.DPS_QA_SUFFIX || String(Date.now());
 const resultPath = path.join(outputDir, 'cadastro-10melhorias-runtime-check.json');
+const petPhotoPath = path.join(os.tmpdir(), `dps-pet-photo-${suffix}.png`);
+const petPhotoBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAABMXPacAAAAfklEQVR4nO3YwQnAIBAEQef+65yVBIMtkQ94QGbWwqxz2gq4j1k9AOA/EIBCAQoFKBSgUIBCAQoFKBSgUIBCAQoFKBSgUIBCAQoFKBSgUIBCAQoFKBSgUIBCAQoFKBSgUIBCAQoFKBSgUIBCAQoFKBSgUIBCAQoFKBQ49QANZQH7B1Wd4QAAAABJRU5ErkJggg==';
 
 if (!wpUser || !wpPass) {
     throw new Error('DPS_WP_USER and DPS_WP_PASS are required');
 }
 
 fs.mkdirSync(outputDir, { recursive: true });
+fs.writeFileSync(petPhotoPath, Buffer.from(petPhotoBase64, 'base64'));
 
 const testData = {
     suffix,
@@ -164,6 +168,12 @@ async function runFlow(page) {
     await firstPet.locator('select[name="pet_species[]"]').selectOption(testData.pets[0].species);
     await firstPet.locator('select[name="pet_size[]"]').selectOption(testData.pets[0].size);
     await firstPet.locator('select[name="pet_sex[]"]').selectOption(testData.pets[0].sex);
+    await firstPet.locator('.dps-optional-details').evaluate((node) => {
+        node.open = true;
+    });
+    await firstPet.locator('input[name="pet_photo[]"]').setInputFiles(petPhotoPath);
+    await page.waitForTimeout(250);
+    await page.screenshot({ path: path.join(outputDir, 'cadastro-pet-photo-step-1200.png'), fullPage: true });
 
     await page.click('#dps-add-pet');
     await page.waitForFunction(() => document.querySelectorAll('#dps-pets-wrapper .dps-pet-fieldset').length === 2);
@@ -186,6 +196,9 @@ async function runFlow(page) {
         aggressiveNames: [...document.querySelectorAll('input[name^="pet_aggressive"]')].map((input) => input.getAttribute('name')),
         productPrefBlocks: document.querySelectorAll('#dps-product-prefs-wrapper .dps-product-prefs-pet').length,
         summaryHasClient: (document.querySelector('#dps-summary-content')?.textContent || '').includes('Cliente Codex Real Cadastro'),
+        summaryHasPetPhoto: (document.querySelector('#dps-summary-content')?.textContent || '').includes('dps-pet-photo-'),
+        petPhotoInputs: document.querySelectorAll('input[name="pet_photo[]"]').length,
+        petPhotoPreviewFilled: document.querySelectorAll('.dps-pet-photo-preview.is-filled').length,
         submitDisabled: document.querySelector('button[type="submit"]')?.disabled ?? null,
     }));
 
@@ -275,4 +288,5 @@ try {
     }
 } finally {
     await browser.close();
+    fs.rmSync(petPhotoPath, { force: true });
 }

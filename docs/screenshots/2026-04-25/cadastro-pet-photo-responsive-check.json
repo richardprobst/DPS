@@ -1,0 +1,218 @@
+﻿{
+    "generatedAt":  "2026-04-25T22:10:30.479Z",
+    "registrationUrl":  "https://desi.pet/cadastro-de-clientes-e-pets/",
+    "submitted":  false,
+    "suffix":  "VISUAL1777155010488",
+    "breakpoints":  [
+                        {
+                            "breakpoint":  375,
+                            "screenshot":  "cadastro-pet-photo-admin-375.png",
+                            "formExists":  true,
+                            "currentStep":  "Passo 2 de 3",
+                            "optionalDetailsOpen":  true,
+                            "photoFieldExists":  true,
+                            "photoInputExists":  true,
+                            "photoInputId":  "dps-pet-photo-1",
+                            "photoLabelMatchesInput":  true,
+                            "photoPreviewFilled":  true,
+                            "photoPreviewRadius":  "0px",
+                            "photoControlRadius":  "0px",
+                            "formFontFamily":  "Manrope, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif",
+                            "statusText":  "dps-pet-photo-visual-VISUAL1777155010488.png",
+                            "previewWidth":  180,
+                            "previewHeight":  180,
+                            "fieldWidth":  281,
+                            "controlWidth":  281,
+                            "scrollWidth":  375,
+                            "viewportWidth":  375,
+                            "hasHorizontalOverflow":  false,
+                            "overflowingNodes":  [
+                                                     "dps-hp-field",
+                                                     "LABEL",
+                                                     "dps_hp_field"
+                                                 ]
+                        },
+                        {
+                            "breakpoint":  600,
+                            "screenshot":  "cadastro-pet-photo-admin-600.png",
+                            "formExists":  true,
+                            "currentStep":  "Passo 2 de 3",
+                            "optionalDetailsOpen":  true,
+                            "photoFieldExists":  true,
+                            "photoInputExists":  true,
+                            "photoInputId":  "dps-pet-photo-1",
+                            "photoLabelMatchesInput":  true,
+                            "photoPreviewFilled":  true,
+                            "photoPreviewRadius":  "0px",
+                            "photoControlRadius":  "0px",
+                            "formFontFamily":  "Manrope, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif",
+                            "statusText":  "dps-pet-photo-visual-VISUAL1777155010488.png",
+                            "previewWidth":  180,
+                            "previewHeight":  180,
+                            "fieldWidth":  482,
+                            "controlWidth":  482,
+                            "scrollWidth":  600,
+                            "viewportWidth":  600,
+                            "hasHorizontalOverflow":  false,
+                            "overflowingNodes":  [
+                                                     "dps-hp-field",
+                                                     "LABEL",
+                                                     "dps_hp_field"
+                                                 ]
+                        },
+                        {
+                            "breakpoint":  840,
+                            "screenshot":  "cadastro-pet-photo-admin-840.png",
+                            "formExists":  true,
+                            "currentStep":  "Passo 2 de 3",
+                            "optionalDetailsOpen":  true,
+                            "photoFieldExists":  true,
+                            "photoInputExists":  true,
+                            "photoInputId":  "dps-pet-photo-1",
+                            "photoLabelMatchesInput":  true,
+                            "photoPreviewFilled":  true,
+                            "photoPreviewRadius":  "0px",
+                            "photoControlRadius":  "0px",
+                            "formFontFamily":  "Manrope, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif",
+                            "statusText":  "dps-pet-photo-visual-VISUAL1777155010488.png",
+                            "previewWidth":  104,
+                            "previewHeight":  104,
+                            "fieldWidth":  694,
+                            "controlWidth":  694,
+                            "scrollWidth":  840,
+                            "viewportWidth":  840,
+                            "hasHorizontalOverflow":  false,
+                            "overflowingNodes":  [
+                                                     "dps-hp-field",
+                                                     "LABEL",
+                                                     "dps_hp_field"
+                                                 ]
+                        },
+                        {
+                            "breakpoint":  1200,
+                            "screenshot":  "cadastro-pet-photo-admin-1200.png",
+                            "formExists":  true,
+                            "currentStep":  "Passo 2 de 3",
+                            "optionalDetailsOpen":  true,
+                            "photoFieldExists":  true,
+                            "photoInputExists":  true,
+                            "photoInputId":  "dps-pet-photo-1",
+                            "photoLabelMatchesInput":  true,
+                            "photoPreviewFilled":  true,
+                            "photoPreviewRadius":  "0px",
+                            "photoControlRadius":  "0px",
+                            "formFontFamily":  "Manrope, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif",
+                            "statusText":  "dps-pet-photo-visual-VISUAL1777155010488.png",
+                            "previewWidth":  104,
+                            "previewHeight":  104,
+                            "fieldWidth":  838,
+                            "controlWidth":  838,
+                            "scrollWidth":  1200,
+                            "viewportWidth":  1200,
+                            "hasHorizontalOverflow":  false,
+                            "overflowingNodes":  [
+                                                     "dps-hp-field",
+                                                     "LABEL",
+                                                     "dps_hp_field"
+                                                 ]
+                        },
+                        {
+                            "breakpoint":  1920,
+                            "screenshot":  "cadastro-pet-photo-admin-1920.png",
+                            "formExists":  true,
+                            "currentStep":  "Passo 2 de 3",
+                            "optionalDetailsOpen":  true,
+                            "photoFieldExists":  true,
+                            "photoInputExists":  true,
+                            "photoInputId":  "dps-pet-photo-1",
+                            "photoLabelMatchesInput":  true,
+                            "photoPreviewFilled":  true,
+                            "photoPreviewRadius":  "0px",
+                            "photoControlRadius":  "0px",
+                            "formFontFamily":  "Manrope, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif",
+                            "statusText":  "dps-pet-photo-visual-VISUAL1777155010488.png",
+                            "previewWidth":  104,
+                            "previewHeight":  104,
+                            "fieldWidth":  918,
+                            "controlWidth":  918,
+                            "scrollWidth":  1920,
+                            "viewportWidth":  1920,
+                            "hasHorizontalOverflow":  false,
+                            "overflowingNodes":  [
+                                                     "dps-hp-field",
+                                                     "LABEL",
+                                                     "dps_hp_field"
+                                                 ]
+                        }
+                    ],
+    "consoleMessages":  [
+                            {
+                                "type":  "log",
+                                "text":  "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+                            },
+                            {
+                                "type":  "log",
+                                "text":  "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+                            },
+                            {
+                                "type":  "info",
+                                "text":  "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+                            },
+                            {
+                                "type":  "log",
+                                "text":  "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+                            },
+                            {
+                                "type":  "info",
+                                "text":  "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+                            },
+                            {
+                                "type":  "log",
+                                "text":  "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+                            },
+                            {
+                                "type":  "info",
+                                "text":  "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+                            },
+                            {
+                                "type":  "log",
+                                "text":  "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+                            },
+                            {
+                                "type":  "info",
+                                "text":  "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+                            },
+                            {
+                                "type":  "log",
+                                "text":  "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+                            },
+                            {
+                                "type":  "info",
+                                "text":  "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+                            },
+                            {
+                                "type":  "log",
+                                "text":  "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+                            },
+                            {
+                                "type":  "info",
+                                "text":  "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+                            }
+                        ],
+    "networkRequests":  [
+                            "https://desi.pet/wp-login.php",
+                            "https://desi.pet/wp-admin/admin-ajax.php?action=fluent_smtp_get_dashboard_html",
+                            "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=pet_photo_visual_VISUAL1777155010488_375",
+                            "https://maps.googleapis.com/maps/api/js?key=[redacted]\u0026libraries=places\u0026loading=async\u0026callback=dpsSignatureGooglePlacesReady",
+                            "https://maps.googleapis.com/maps-api-v3/api/js/64/9c/places.js",
+                            "https://maps.googleapis.com/maps-api-v3/api/js/64/9c/main.js",
+                            "https://maps.googleapis.com/maps/api/mapsjs/gen_204?csp_test=true",
+                            "https://maps.googleapis.com/maps-api-v3/api/js/64/9c/common.js",
+                            "https://maps.googleapis.com/maps-api-v3/api/js/64/9c/util.js",
+                            "https://maps.gstatic.com/mapfiles/api-3/images/autocomplete-icons.png",
+                            "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=pet_photo_visual_VISUAL1777155010488_600",
+                            "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=pet_photo_visual_VISUAL1777155010488_840",
+                            "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=pet_photo_visual_VISUAL1777155010488_1200",
+                            "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=pet_photo_visual_VISUAL1777155010488_1920"
+                        ]
+}

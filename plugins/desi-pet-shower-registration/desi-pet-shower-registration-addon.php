@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Cadastro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página pública de cadastro para clientes e pets. Envie o link e deixe o cliente preencher seus dados.
- * Version:           1.3.0
+ * Version:           1.3.1
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-registration-addon
@@ -103,6 +103,27 @@ class DPS_Registration_Addon {
      * @var string
      */
     const REMINDER_SENT_META = 'dps_reg_reminder_sent';
+
+    /**
+     * Tamanho máximo para foto pública do pet (5 MB).
+     *
+     * @since 1.3.1
+     * @var int
+     */
+    const PET_PHOTO_MAX_BYTES = 5242880;
+
+    /**
+     * Tipos de imagem permitidos para foto pública do pet.
+     *
+     * @since 1.3.1
+     * @var array
+     */
+    const PET_PHOTO_ALLOWED_MIMES = [
+        'jpg'  => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'png'  => 'image/png',
+        'webp' => 'image/webp',
+    ];
 
     /**
      * Registra eventos com DPS_Logger quando disponível ou error_log como fallback.
@@ -476,6 +497,326 @@ class DPS_Registration_Addon {
         return true;
     }
 
+    /**
+     * Retorna um item normalizado de $_FILES['pet_photo'] para o índice do pet.
+     *
+     * @since 1.3.1
+     *
+     * @param int $index Índice zero-based do pet.
+     * @return array|null
+     */
+    private function get_pet_photo_upload_file( $index ) {
+        // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Arquivo validado por MIME real antes do uso.
+        if ( empty( $_FILES['pet_photo'] ) || ! is_array( $_FILES['pet_photo'] ) ) {
+            return null;
+        }
+
+        $files = $_FILES['pet_photo'];
+
+        if ( isset( $files['name'] ) && is_array( $files['name'] ) ) {
+            if ( ! array_key_exists( $index, $files['name'] ) ) {
+                return null;
+            }
+
+            return array(
+                'name'     => isset( $files['name'][ $index ] ) ? sanitize_file_name( wp_unslash( $files['name'][ $index ] ) ) : '',
+                'type'     => isset( $files['type'][ $index ] ) ? sanitize_text_field( wp_unslash( $files['type'][ $index ] ) ) : '',
+                'tmp_name' => isset( $files['tmp_name'][ $index ] ) ? $files['tmp_name'][ $index ] : '',
+                'error'    => isset( $files['error'][ $index ] ) ? (int) $files['error'][ $index ] : UPLOAD_ERR_NO_FILE,
+                'size'     => isset( $files['size'][ $index ] ) ? (int) $files['size'][ $index ] : 0,
+            );
+        }
+
+        if ( 0 !== (int) $index ) {
+            return null;
+        }
+
+        return array(
+            'name'     => isset( $files['name'] ) ? sanitize_file_name( wp_unslash( $files['name'] ) ) : '',
+            'type'     => isset( $files['type'] ) ? sanitize_text_field( wp_unslash( $files['type'] ) ) : '',
+            'tmp_name' => isset( $files['tmp_name'] ) ? $files['tmp_name'] : '',
+            'error'    => isset( $files['error'] ) ? (int) $files['error'] : UPLOAD_ERR_NO_FILE,
+            'size'     => isset( $files['size'] ) ? (int) $files['size'] : 0,
+        );
+        // phpcs:enable
+    }
+
+    /**
+     * Conta quantos slots de upload de foto foram submetidos.
+     *
+     * @since 1.3.1
+     *
+     * @return int
+     */
+    private function get_pet_photo_upload_count() {
+        // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Apenas conta a estrutura de upload.
+        if ( empty( $_FILES['pet_photo'] ) || ! is_array( $_FILES['pet_photo'] ) || ! isset( $_FILES['pet_photo']['name'] ) ) {
+            return 0;
+        }
+
+        return is_array( $_FILES['pet_photo']['name'] ) ? count( $_FILES['pet_photo']['name'] ) : 1;
+        // phpcs:enable
+    }
+
+    /**
+     * Indica se o slot contém um arquivo enviado.
+     *
+     * @since 1.3.1
+     *
+     * @param array|null $file Arquivo normalizado.
+     * @return bool
+     */
+    private function pet_photo_upload_has_file( $file ) {
+        if ( ! is_array( $file ) ) {
+            return false;
+        }
+
+        $error = isset( $file['error'] ) ? (int) $file['error'] : UPLOAD_ERR_NO_FILE;
+
+        return UPLOAD_ERR_NO_FILE !== $error && ! empty( $file['name'] );
+    }
+
+    /**
+     * Mensagem legível para erros nativos de upload.
+     *
+     * @since 1.3.1
+     *
+     * @param int $code Código UPLOAD_ERR_*.
+     * @return string
+     */
+    private function get_pet_photo_upload_error_message( $code ) {
+        switch ( (int) $code ) {
+            case UPLOAD_ERR_INI_SIZE:
+            case UPLOAD_ERR_FORM_SIZE:
+                return __( 'A foto excede o tamanho permitido.', 'dps-registration-addon' );
+            case UPLOAD_ERR_PARTIAL:
+                return __( 'A foto foi enviada apenas parcialmente. Tente novamente.', 'dps-registration-addon' );
+            case UPLOAD_ERR_NO_TMP_DIR:
+            case UPLOAD_ERR_CANT_WRITE:
+            case UPLOAD_ERR_EXTENSION:
+                return __( 'Não foi possível receber a foto. Tente novamente mais tarde.', 'dps-registration-addon' );
+            default:
+                return __( 'Não foi possível processar a foto enviada.', 'dps-registration-addon' );
+        }
+    }
+
+    /**
+     * Valida um arquivo de foto antes de criar posts.
+     *
+     * @since 1.3.1
+     *
+     * @param array  $file      Arquivo normalizado.
+     * @param string $pet_label Nome ou rótulo do pet.
+     * @return true|WP_Error
+     */
+    private function validate_single_pet_photo_upload( $file, $pet_label ) {
+        $error = isset( $file['error'] ) ? (int) $file['error'] : UPLOAD_ERR_NO_FILE;
+
+        if ( UPLOAD_ERR_OK !== $error ) {
+            return new WP_Error(
+                'pet_photo_upload_error',
+                sprintf(
+                    /* translators: %1$s: pet name, %2$s: upload error message. */
+                    __( 'Revise a foto de %1$s: %2$s', 'dps-registration-addon' ),
+                    $pet_label,
+                    $this->get_pet_photo_upload_error_message( $error )
+                )
+            );
+        }
+
+        if ( empty( $file['tmp_name'] ) || ! is_uploaded_file( $file['tmp_name'] ) ) {
+            return new WP_Error(
+                'pet_photo_upload_invalid',
+                sprintf(
+                    /* translators: %s: pet name. */
+                    __( 'Revise a foto de %s: o arquivo não foi recebido corretamente.', 'dps-registration-addon' ),
+                    $pet_label
+                )
+            );
+        }
+
+        if ( (int) $file['size'] > self::PET_PHOTO_MAX_BYTES ) {
+            return new WP_Error(
+                'pet_photo_upload_size',
+                sprintf(
+                    /* translators: %1$s: pet name, %2$s: maximum size. */
+                    __( 'Revise a foto de %1$s: o tamanho máximo é %2$s.', 'dps-registration-addon' ),
+                    $pet_label,
+                    size_format( self::PET_PHOTO_MAX_BYTES, 0 )
+                )
+            );
+        }
+
+        $checked = wp_check_filetype_and_ext( $file['tmp_name'], $file['name'], self::PET_PHOTO_ALLOWED_MIMES );
+        if ( empty( $checked['type'] ) || ! in_array( $checked['type'], self::PET_PHOTO_ALLOWED_MIMES, true ) ) {
+            return new WP_Error(
+                'pet_photo_upload_type',
+                sprintf(
+                    /* translators: %s: pet name. */
+                    __( 'Revise a foto de %s: use apenas JPG, PNG ou WebP.', 'dps-registration-addon' ),
+                    $pet_label
+                )
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Valida todos os uploads de foto antes de persistir o cadastro.
+     *
+     * @since 1.3.1
+     *
+     * @param array $pet_names Nomes enviados em pet_name[].
+     * @return array Lista de mensagens de erro.
+     */
+    private function validate_pet_photo_uploads( $pet_names ) {
+        $errors = array();
+        $slots  = max( count( (array) $pet_names ), $this->get_pet_photo_upload_count() );
+
+        for ( $index = 0; $index < $slots; $index++ ) {
+            $file = $this->get_pet_photo_upload_file( $index );
+            if ( ! $this->pet_photo_upload_has_file( $file ) ) {
+                continue;
+            }
+
+            $pet_name  = isset( $pet_names[ $index ] ) ? sanitize_text_field( $pet_names[ $index ] ) : '';
+            $pet_label = $pet_name ? $pet_name : sprintf( __( 'Pet %d', 'dps-registration-addon' ), $index + 1 );
+
+            if ( '' === $pet_name ) {
+                $errors[] = sprintf(
+                    /* translators: %s: pet label. */
+                    __( 'Informe o nome de %s para enviar a foto do perfil.', 'dps-registration-addon' ),
+                    $pet_label
+                );
+                continue;
+            }
+
+            $validated = $this->validate_single_pet_photo_upload( $file, $pet_label );
+            if ( is_wp_error( $validated ) ) {
+                $errors[] = $validated->get_error_message();
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Salva a foto do pet como anexo do WordPress e associa ao perfil.
+     *
+     * @since 1.3.1
+     *
+     * @param int    $index                  Índice zero-based do pet.
+     * @param int    $pet_id                 ID do pet.
+     * @param string $pet_name               Nome do pet.
+     * @param array  $created_attachment_ids IDs de anexos criados nesta transação.
+     * @return int|WP_Error ID do anexo, zero quando não há foto, ou erro.
+     */
+    private function save_pet_photo_upload( $index, $pet_id, $pet_name, &$created_attachment_ids ) {
+        $file = $this->get_pet_photo_upload_file( $index );
+        if ( ! $this->pet_photo_upload_has_file( $file ) ) {
+            return 0;
+        }
+
+        $validated = $this->validate_single_pet_photo_upload( $file, $pet_name );
+        if ( is_wp_error( $validated ) ) {
+            return $validated;
+        }
+
+        if ( ! function_exists( 'wp_handle_upload' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+        }
+
+        $uploaded = wp_handle_upload(
+            $file,
+            array(
+                'test_form' => false,
+                'mimes'     => self::PET_PHOTO_ALLOWED_MIMES,
+            )
+        );
+
+        if ( empty( $uploaded['file'] ) || ! empty( $uploaded['error'] ) ) {
+            return new WP_Error(
+                'pet_photo_upload_failed',
+                ! empty( $uploaded['error'] ) ? $uploaded['error'] : __( 'Não foi possível salvar a foto do pet.', 'dps-registration-addon' )
+            );
+        }
+
+        $checked = wp_check_filetype_and_ext( $uploaded['file'], $file['name'], self::PET_PHOTO_ALLOWED_MIMES );
+        if ( empty( $checked['type'] ) || ! in_array( $checked['type'], self::PET_PHOTO_ALLOWED_MIMES, true ) ) {
+            wp_delete_file( $uploaded['file'] );
+            return new WP_Error( 'pet_photo_uploaded_type', __( 'A foto enviada não passou na validação final de imagem.', 'dps-registration-addon' ) );
+        }
+
+        $attachment = array(
+            'post_mime_type' => $checked['type'],
+            'post_title'     => sanitize_text_field( sprintf( __( 'Foto de %s', 'dps-registration-addon' ), $pet_name ) ),
+            'post_content'   => '',
+            'post_status'    => 'inherit',
+            'post_parent'    => $pet_id,
+        );
+
+        $attachment_id = wp_insert_attachment( $attachment, $uploaded['file'], $pet_id, true );
+        if ( is_wp_error( $attachment_id ) || ! $attachment_id ) {
+            wp_delete_file( $uploaded['file'] );
+            return is_wp_error( $attachment_id ) ? $attachment_id : new WP_Error( 'pet_photo_attachment_failed', __( 'Não foi possível registrar a foto do pet.', 'dps-registration-addon' ) );
+        }
+
+        $created_attachment_ids[] = (int) $attachment_id;
+
+        if ( ! function_exists( 'wp_generate_attachment_metadata' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/image.php';
+        }
+
+        $attachment_meta = wp_generate_attachment_metadata( $attachment_id, $uploaded['file'] );
+        if ( ! is_wp_error( $attachment_meta ) && is_array( $attachment_meta ) ) {
+            wp_update_attachment_metadata( $attachment_id, $attachment_meta );
+        }
+
+        update_post_meta( $attachment_id, '_wp_attachment_image_alt', sprintf( __( 'Foto de %s', 'dps-registration-addon' ), $pet_name ) );
+        update_post_meta( $pet_id, 'pet_photo_id', (int) $attachment_id );
+        update_post_meta( $pet_id, '_thumbnail_id', (int) $attachment_id );
+
+        $photos = get_post_meta( $pet_id, 'pet_photos', true );
+        if ( ! is_array( $photos ) ) {
+            $photos = array();
+        }
+
+        $photos[] = (int) $attachment_id;
+        $photos   = array_values( array_unique( array_filter( array_map( 'absint', $photos ) ) ) );
+        update_post_meta( $pet_id, 'pet_photos', $photos );
+
+        return (int) $attachment_id;
+    }
+
+    /**
+     * Remove posts/anexos criados quando uma etapa tardia do cadastro falha.
+     *
+     * @since 1.3.1
+     *
+     * @param int   $client_id              ID do cliente criado.
+     * @param array $created_pet_ids        IDs de pets criados.
+     * @param array $created_attachment_ids IDs de anexos criados.
+     * @return void
+     */
+    private function rollback_failed_registration( $client_id, $created_pet_ids, $created_attachment_ids ) {
+        foreach ( array_reverse( array_map( 'absint', $created_attachment_ids ) ) as $attachment_id ) {
+            if ( $attachment_id ) {
+                wp_delete_attachment( $attachment_id, true );
+            }
+        }
+
+        foreach ( array_reverse( array_map( 'absint', $created_pet_ids ) ) as $pet_id ) {
+            if ( $pet_id ) {
+                wp_delete_post( $pet_id, true );
+            }
+        }
+
+        if ( $client_id ) {
+            wp_delete_post( absint( $client_id ), true );
+        }
+    }
+
     // =========================================================================
     // F1.5 - Duplicate Detection
     // =========================================================================
@@ -677,7 +1018,7 @@ class DPS_Registration_Addon {
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.3.0';
+        $version   = '1.3.1';
 
         $recaptcha_settings = $this->get_recaptcha_settings();
         $should_load_recaptcha = $recaptcha_settings['enabled'] && ! empty( $recaptcha_settings['site_key'] );
@@ -737,6 +1078,18 @@ class DPS_Registration_Addon {
         $localize_data = array(
             'breeds'   => $this->get_breed_dataset(),
             'draft'    => DPS_Registration_Draft_Service::get_localized_config(),
+            'petPhoto' => array(
+                'maxBytes'          => self::PET_PHOTO_MAX_BYTES,
+                'maxSizeLabel'      => size_format( self::PET_PHOTO_MAX_BYTES, 0 ),
+                'allowedTypes'      => array_values( self::PET_PHOTO_ALLOWED_MIMES ),
+                'allowedExtensions' => array_keys( self::PET_PHOTO_ALLOWED_MIMES ),
+                'i18n'              => array(
+                    'empty'       => __( 'Sem foto', 'dps-registration-addon' ),
+                    'selected'    => __( 'Foto selecionada', 'dps-registration-addon' ),
+                    'invalidType' => __( 'Use uma imagem em JPG, PNG ou WebP.', 'dps-registration-addon' ),
+                    'tooLarge'    => __( 'A foto deve ter no máximo 5 MB.', 'dps-registration-addon' ),
+                ),
+            ),
             'googlePlaces' => array(
                 'enabled' => ! empty( $google_api_key ),
                 'apiKey'  => $google_api_key,
@@ -1056,7 +1409,10 @@ class DPS_Registration_Addon {
 
         do_action( 'dps_registration_after_client_created', '', $client_id, $validation['client_email'], $validation['client_phone'] );
 
-        $pets_created = 0;
+        $pets_created           = 0;
+        $pet_photos_created     = 0;
+        $created_pet_ids        = array();
+        $created_attachment_ids = array();
         $pets_payload = array();
         if ( isset( $params['pets'] ) && is_array( $params['pets'] ) ) {
             $pets_payload = $params['pets'];
@@ -1937,6 +2293,19 @@ class DPS_Registration_Addon {
         // - Para não-admins: bloqueia duplicatas de telefone
         // - Para admins: permite continuar se confirmou via modal (dps_confirm_duplicate=1)
         // =====================================================================
+        // Lê nomes de pets antes de criar posts para validar uploads públicos de foto.
+        // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitização aplicada individualmente.
+        $submitted_pet_names = isset( $_POST['pet_name'] ) && is_array( $_POST['pet_name'] ) ? array_map( 'wp_unslash', $_POST['pet_name'] ) : [];
+        // phpcs:enable
+
+        $pet_photo_errors = $this->validate_pet_photo_uploads( $submitted_pet_names );
+        if ( ! empty( $pet_photo_errors ) ) {
+            foreach ( $pet_photo_errors as $error ) {
+                $this->add_error( $error );
+            }
+            $this->redirect_with_error();
+        }
+
         $duplicate_id = $this->find_duplicate_client( '', $client_phone, '' );
         $admin_confirmed_duplicate = isset( $_POST['dps_confirm_duplicate'] ) && '1' === $_POST['dps_confirm_duplicate'];
         
@@ -2024,11 +2393,14 @@ class DPS_Registration_Addon {
 
         do_action( 'dps_registration_after_client_created', $referral_code, $client_id, $client_email, $client_phone );
 
-        $pets_created = 0;
+        $pets_created           = 0;
+        $pet_photos_created     = 0;
+        $created_pet_ids        = array();
+        $created_attachment_ids = array();
 
         // Lê pets submetidos (campos em arrays) - aplica wp_unslash em arrays
         // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitização aplicada individualmente
-        $pet_names      = isset( $_POST['pet_name'] ) && is_array( $_POST['pet_name'] ) ? array_map( 'wp_unslash', $_POST['pet_name'] ) : [];
+        $pet_names      = isset( $submitted_pet_names ) ? $submitted_pet_names : ( isset( $_POST['pet_name'] ) && is_array( $_POST['pet_name'] ) ? array_map( 'wp_unslash', $_POST['pet_name'] ) : [] );
         $pet_species    = isset( $_POST['pet_species'] ) && is_array( $_POST['pet_species'] ) ? array_map( 'wp_unslash', $_POST['pet_species'] ) : [];
         $pet_breeds     = isset( $_POST['pet_breed'] ) && is_array( $_POST['pet_breed'] ) ? array_map( 'wp_unslash', $_POST['pet_breed'] ) : [];
         $pet_sizes      = isset( $_POST['pet_size'] ) && is_array( $_POST['pet_size'] ) ? array_map( 'wp_unslash', $_POST['pet_size'] ) : [];
@@ -2115,6 +2487,7 @@ class DPS_Registration_Addon {
                     'post_status' => 'publish',
                 ] );
                 if ( $pet_id ) {
+                    $created_pet_ids[] = (int) $pet_id;
                     $pets_created++;
                     update_post_meta( $pet_id, 'owner_id', $client_id );
                     update_post_meta( $pet_id, 'pet_species', $species );
@@ -2132,6 +2505,22 @@ class DPS_Registration_Addon {
                     update_post_meta( $pet_id, 'pet_perfume_pref', $perfume_pref );
                     update_post_meta( $pet_id, 'pet_accessories_pref', $accessories_pref );
                     update_post_meta( $pet_id, 'pet_product_restrictions', $product_restrictions );
+
+                    $photo_id = $this->save_pet_photo_upload( $index, (int) $pet_id, $pname, $created_attachment_ids );
+                    if ( is_wp_error( $photo_id ) ) {
+                        $this->rollback_failed_registration( (int) $client_id, $created_pet_ids, $created_attachment_ids );
+                        $this->log_event( 'warning', 'Cadastro revertido por falha na foto do pet', array(
+                            'error_code' => $photo_id->get_error_code(),
+                            'pet_index'  => $index,
+                            'ip_hash'    => $this->get_client_ip_hash(),
+                        ) );
+                        $this->add_error( $photo_id->get_error_message() );
+                        $this->redirect_with_error();
+                    }
+
+                    if ( $photo_id ) {
+                        $pet_photos_created++;
+                    }
                 }
             }
         }
@@ -2144,6 +2533,7 @@ class DPS_Registration_Addon {
         $this->log_event( 'info', 'Cadastro criado com sucesso', array(
             'client_id' => $client_id,
             'pets'      => $pets_created,
+            'pet_photos' => $pet_photos_created,
             'has_email' => ! empty( $client_email ),
             'has_cpf'   => ! empty( $client_cpf ),
             'ip_hash'   => $this->get_client_ip_hash(),
@@ -2453,7 +2843,7 @@ class DPS_Registration_Addon {
             echo '<p class="dps-reg-success__text">' . esc_html__( 'Seu cadastro está ativo. Agora você pode agendar banho e tosa para seus pets e receber novidades por email.', 'dps-registration-addon' ) . '</p>';
             echo '</div>';
         }
-        echo '<form method="post" id="dps-reg-form" class="dps-registration-wizard dps-signature-form" novalidate>';
+        echo '<form method="post" id="dps-reg-form" class="dps-registration-wizard dps-signature-form" enctype="multipart/form-data" novalidate>';
         echo '<input type="hidden" name="dps_reg_action" value="save_registration">';
         echo '<input type="hidden" name="dps_registration_draft_token" value="' . esc_attr( DPS_Registration_Draft_Service::get_current_token() ) . '" data-dps-draft-token>';
         wp_nonce_field( 'dps_reg_action', 'dps_reg_nonce' );
@@ -3258,10 +3648,52 @@ class DPS_Registration_Addon {
         echo '<p><label>' . esc_html__( 'Pelagem', 'dps-registration-addon' ) . '<br><input type="text" name="pet_coat[]"></label></p>';
         echo '<p><label>' . esc_html__( 'Cor', 'dps-registration-addon' ) . '<br><input type="text" name="pet_color[]"></label></p>';
         echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="pet_birth[]"></label></p>';
+        echo $this->get_pet_photo_field_html( $i );
         echo '<p><label>' . esc_html__( 'Algum cuidado especial ou restrição?', 'dps-registration-addon' ) . '<br><textarea name="pet_care[]" rows="2"></textarea></label></p>';
         echo '<p><label><input type="checkbox" name="pet_aggressive[' . ( $i - 1 ) . ']" value="1"> ' . esc_html__( 'Cão agressivo', 'dps-registration-addon' ) . '</label></p>';
         echo DPS_Registration_UX::close_optional_details();
         echo '</fieldset>';
+        return ob_get_clean();
+    }
+
+    /**
+     * Gera o campo opcional de foto do pet.
+     *
+     * @since 1.3.1
+     *
+     * @param int|string $index Índice renderizado ou placeholder do pet.
+     * @return string HTML escapado.
+     */
+    private function get_pet_photo_field_html( $index ) {
+        $suffix   = sanitize_html_class( (string) $index );
+        $input_id = 'dps-pet-photo-' . $suffix;
+        $hint_id  = 'dps-pet-photo-hint-' . $suffix;
+
+        ob_start();
+        ?>
+        <p class="dps-pet-photo-field dps-field-full">
+            <label for="<?php echo esc_attr( $input_id ); ?>" data-dps-pet-photo-label><?php esc_html_e( 'Foto do pet', 'dps-registration-addon' ); ?></label>
+            <span class="dps-pet-photo-control" data-dps-pet-photo-control>
+                <span class="dps-pet-photo-preview" data-dps-pet-photo-preview aria-hidden="true">
+                    <span><?php esc_html_e( 'Sem foto', 'dps-registration-addon' ); ?></span>
+                </span>
+                <span class="dps-pet-photo-copy">
+                    <input
+                        type="file"
+                        name="pet_photo[]"
+                        id="<?php echo esc_attr( $input_id ); ?>"
+                        accept="image/jpeg,image/png,image/webp"
+                        aria-describedby="<?php echo esc_attr( $hint_id ); ?>"
+                        data-dps-pet-photo
+                    >
+                    <span id="<?php echo esc_attr( $hint_id ); ?>" class="dps-field-hint" data-dps-pet-photo-hint>
+                        <?php esc_html_e( 'JPG, PNG ou WebP, até 5 MB. A foto será salva no perfil do pet após o envio.', 'dps-registration-addon' ); ?>
+                    </span>
+                    <span class="dps-pet-photo-status" data-dps-pet-photo-status aria-live="polite"></span>
+                </span>
+            </span>
+        </p>
+        <?php
         return ob_get_clean();
     }
 
@@ -3306,6 +3738,7 @@ class DPS_Registration_Addon {
         echo '<p><label>' . esc_html__( 'Pelagem', 'dps-registration-addon' ) . '<br><input type="text" name="pet_coat[]"></label></p>';
         echo '<p><label>' . esc_html__( 'Cor', 'dps-registration-addon' ) . '<br><input type="text" name="pet_color[]"></label></p>';
         echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="pet_birth[]"></label></p>';
+        echo $this->get_pet_photo_field_html( '__PET_NUMBER__' );
         echo '<p><label>' . esc_html__( 'Algum cuidado especial ou restrição?', 'dps-registration-addon' ) . '<br><textarea name="pet_care[]" rows="2"></textarea></label></p>';
         echo '<p><label><input type="checkbox" name="pet_aggressive[__PET_INDEX__]" value="1"> ' . esc_html__( 'Cão agressivo', 'dps-registration-addon' ) . '</label></p>';
         echo DPS_Registration_UX::close_optional_details();

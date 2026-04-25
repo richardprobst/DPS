@@ -10,7 +10,7 @@
 ## Antes/Depois
 
 - Antes: CSS legado, radius/elevacao fora do gate DPS Signature, callback proprio de Google Maps, campo de endereco como `textarea`, transients no rate limit/mensagens e indice incorreto em `pet_aggressive` clonado.
-- Depois: shell/formulario refeito em DPS Signature, endereco como `input`, loader compartilhado `DPSSignatureForms`, persistencia propria sem transients, rascunho opt-in, `PlaceAutocompleteElement` com fallback legado, controlador JS reescrito e formulario publicado validado nos breakpoints oficiais.
+- Depois: shell/formulario refeito em DPS Signature, endereco como `input`, loader compartilhado `DPSSignatureForms`, persistencia propria sem transients, rascunho opt-in, `PlaceAutocompleteElement` com fallback legado, controlador JS reescrito, foto opcional do pet com preview reto e formulario publicado validado nos breakpoints oficiais.
 
 Arquivos de codigo alterados:
 - `plugins/desi-pet-shower-registration/desi-pet-shower-registration-addon.php`
@@ -52,11 +52,24 @@ Arquivos de codigo alterados:
 - `./cadastro-10melhorias-admin-1920.png` - Cadastro autenticado/admin em 1920px.
 - `./cadastro-10melhorias-flow-1200.png` - Fluxo preenchido ate etapa 3 com dois pets, resumo e confirmacao.
 
+## Capturas da foto do pet
+
+- `./cadastro-pet-photo-admin-375.png` - Etapa 2 com upload e preview da foto do pet em 375px.
+- `./cadastro-pet-photo-admin-600.png` - Etapa 2 com upload e preview da foto do pet em 600px.
+- `./cadastro-pet-photo-admin-840.png` - Etapa 2 com upload e preview da foto do pet em 840px.
+- `./cadastro-pet-photo-admin-1200.png` - Etapa 2 com upload e preview da foto do pet em 1200px.
+- `./cadastro-pet-photo-admin-1920.png` - Etapa 2 com upload e preview da foto do pet em 1920px.
+- `./cadastro-pet-photo-step-1200.png` - Captura do smoke funcional real com a foto selecionada antes do envio.
+- `./cadastro-pet-photo-responsive-check.json` - Auditoria visual responsiva da foto do pet sem envio do formulario.
+- `./cadastro-pet-photo-wp-meta-check.json` - Verificacao WP-CLI dos metadados da foto salva no pet.
+
 ## Evidencia funcional final
 
 - `./cadastro-implementation-runtime-check.json`
 - `./cadastro-10melhorias-runtime-check.json`
 - `./cadastro-ui-audit-runtime-check.json`
+- `./cadastro-pet-photo-responsive-check.json`
+- `./cadastro-pet-photo-wp-meta-check.json`
 
 Resumo:
 - formulario renderizou nos cinco breakpoints;
@@ -75,7 +88,11 @@ Resumo:
 - submit ficou desabilitado antes da confirmacao e habilitado apos marcar a confirmacao;
 - envio real controlado retornou sucesso em `https://desi.pet/cadastro-de-clientes-e-pets/?registered=1`;
 - os posts reais de QA criados pelo smoke final `20260425162825` foram removidos por titulo exato via WP-CLI e a verificacao retornou `remaining: 0`;
-- campo de indicacao do Loyalty apareceu como `Código de indicação`/`Seu código, se tiver` no runtime, sem mojibake visual.
+- campo de indicacao do Loyalty apareceu como `Código de indicação`/`Seu código, se tiver` no runtime, sem mojibake visual;
+- foto opcional do pet apareceu na etapa 2, dentro de `Detalhes e cuidados opcionais`, com preview quadrado, borda fina e cantos `0px`;
+- a auditoria visual da foto passou em `375`, `600`, `840`, `1200` e `1920`, sem overflow horizontal e com label associado ao input;
+- o smoke real `20260425PETPHOTO171126` enviou uma foto PNG para o primeiro pet, manteve o segundo pet sem foto e confirmou `pet_photo_id`, `pet_photos` e `_thumbnail_id` apontando para o attachment `1836`;
+- os posts reais do smoke de foto `[1834, 1835, 1837]` e o attachment `[1836]` foram removidos por WP-CLI; a verificacao final retornou `remaining: 0`.
 
 ## Observacoes
 

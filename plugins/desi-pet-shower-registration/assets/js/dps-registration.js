@@ -12,6 +12,8 @@
         PHONE_MASK_10: '(##) ####-####',
         PHONE_MASK_11: '(##) #####-####',
         MIN_NAME_LENGTH: 2,
+        PET_PHOTO_MAX_BYTES: 5242880,
+        PET_PHOTO_ALLOWED_TYPES: [ 'image/jpeg', 'image/png', 'image/webp' ],
         LOADING_TEXT: 'Enviando...',
         SUBMIT_TEXT: 'Enviar cadastro',
         MESSAGES: {
@@ -23,7 +25,9 @@
             petRequired: 'Adicione pelo menos um pet.',
             tutorReview: 'Revise os dados do tutor.',
             petsReview: 'Revise os dados dos pets.',
-            confirmRequired: 'Confirme que os dados estao corretos antes de enviar.'
+            confirmRequired: 'Confirme que os dados estao corretos antes de enviar.',
+            petPhotoInvalid: 'Use uma imagem em JPG, PNG ou WebP.',
+            petPhotoTooLarge: 'A foto deve ter no maximo 5 MB.'
         }
     };
 
@@ -116,6 +120,24 @@
 
     function getRegistrationData() {
         return window.dpsRegistrationData || {};
+    }
+
+    function getPetPhotoConfig() {
+        var data = getRegistrationData();
+        var photo = data.petPhoto || {};
+
+        return {
+            maxBytes: parseInt(photo.maxBytes || CONFIG.PET_PHOTO_MAX_BYTES, 10),
+            maxSizeLabel: photo.maxSizeLabel || '5 MB',
+            allowedTypes: photo.allowedTypes || CONFIG.PET_PHOTO_ALLOWED_TYPES,
+            i18n: photo.i18n || {}
+        };
+    }
+
+    function getPetPhotoMessage(key) {
+        var config = getPetPhotoConfig();
+
+        return config.i18n[key] || CONFIG.MESSAGES[key] || '';
     }
 
     function announce(form, message) {
@@ -376,6 +398,121 @@
         field.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
+    function getPetPhotoValidationError(input) {
+        var config = getPetPhotoConfig();
+        var file = input && input.files && input.files.length ? input.files[0] : null;
+        var allowedTypes = config.allowedTypes || CONFIG.PET_PHOTO_ALLOWED_TYPES;
+
+        if (!file) {
+            return '';
+        }
+
+        if (file.size > config.maxBytes) {
+            return (config.i18n.tooLarge || CONFIG.MESSAGES.petPhotoTooLarge).replace('5 MB', config.maxSizeLabel);
+        }
+
+        if (allowedTypes.indexOf(file.type) === -1) {
+            return config.i18n.invalidType || CONFIG.MESSAGES.petPhotoInvalid;
+        }
+
+        return '';
+    }
+
+    function resetPetPhotoPreview(input) {
+        var fieldset = input ? input.closest('.dps-pet-fieldset') : null;
+        var preview = fieldset ? fieldset.querySelector('[data-dps-pet-photo-preview]') : null;
+        var status = fieldset ? fieldset.querySelector('[data-dps-pet-photo-status]') : null;
+        var objectUrl = preview ? preview.dataset.dpsObjectUrl : '';
+
+        if (objectUrl && window.URL && window.URL.revokeObjectURL) {
+            window.URL.revokeObjectURL(objectUrl);
+        }
+
+        if (preview) {
+            preview.dataset.dpsObjectUrl = '';
+            preview.classList.remove('is-filled');
+            preview.innerHTML = '<span>' + (getPetPhotoMessage('empty') || 'Sem foto') + '</span>';
+        }
+
+        if (status) {
+            status.textContent = '';
+            status.classList.remove('is-error');
+        }
+    }
+
+    function updatePetPhotoPreview(input) {
+        var fieldset = input ? input.closest('.dps-pet-fieldset') : null;
+        var preview = fieldset ? fieldset.querySelector('[data-dps-pet-photo-preview]') : null;
+        var status = fieldset ? fieldset.querySelector('[data-dps-pet-photo-status]') : null;
+        var file = input && input.files && input.files.length ? input.files[0] : null;
+        var error = getPetPhotoValidationError(input);
+        var img;
+        var url;
+
+        resetPetPhotoPreview(input);
+
+        if (!file) {
+            if (input) {
+                input.removeAttribute('aria-invalid');
+            }
+            return true;
+        }
+
+        if (error) {
+            input.value = '';
+            if (status) {
+                status.textContent = error;
+                status.classList.add('is-error');
+            }
+            markField(input);
+            announce(fieldset ? fieldset.closest('form') : null, error);
+            return false;
+        }
+
+        if (preview && window.URL && window.URL.createObjectURL) {
+            url = window.URL.createObjectURL(file);
+            img = document.createElement('img');
+            img.src = url;
+            img.alt = getPetPhotoMessage('selected') || 'Foto selecionada';
+            preview.dataset.dpsObjectUrl = url;
+            preview.innerHTML = '';
+            preview.appendChild(img);
+            preview.classList.add('is-filled');
+        }
+
+        if (status) {
+            status.textContent = file.name;
+            status.classList.remove('is-error');
+        }
+        if (input) {
+            input.removeAttribute('aria-invalid');
+        }
+
+        return true;
+    }
+
+    function bindPetPhotoInput(input) {
+        if (!input || input.dataset.dpsPetPhotoReady === '1') {
+            return;
+        }
+
+        input.dataset.dpsPetPhotoReady = '1';
+        input.addEventListener('change', function() {
+            updatePetPhotoPreview(input);
+            if (state.currentStep === 3) {
+                buildSummary(input.closest('form'));
+            }
+        });
+    }
+
+    function initPetPhotoInputs(root) {
+        toArray((root || document).querySelectorAll('input[name="pet_photo[]"]')).forEach(bindPetPhotoInput);
+    }
+
+    function cleanupPetPhotoPreviews(root) {
+        toArray((root || document).querySelectorAll('input[name="pet_photo[]"]')).forEach(resetPetPhotoPreview);
+    }
+
     function validateStepOne(form, silent) {
         var errors = [];
         var nameInput = form.querySelector('input[name="client_name"]');
@@ -432,6 +569,8 @@
             var speciesSelect = fieldset.querySelector('select[name="pet_species[]"]');
             var sizeSelect = fieldset.querySelector('select[name="pet_size[]"]');
             var sexSelect = fieldset.querySelector('select[name="pet_sex[]"]');
+            var photoInput = fieldset.querySelector('input[name="pet_photo[]"]');
+            var photoError = getPetPhotoValidationError(photoInput);
 
             if (getTrimmedValue(nameInput).length < CONFIG.MIN_NAME_LENGTH) {
                 errors.push('Informe o nome do Pet ' + number + '.');
@@ -451,6 +590,11 @@
             if (!getTrimmedValue(sexSelect)) {
                 errors.push('Selecione o sexo do Pet ' + number + '.');
                 markField(sexSelect);
+            }
+
+            if (photoError) {
+                errors.push('Revise a foto do Pet ' + number + ': ' + photoError);
+                markField(photoInput);
             }
         });
 
@@ -555,6 +699,9 @@
             var aggressive = fieldset.querySelector('input[name^="pet_aggressive"]');
             var breedInput = fieldset.querySelector('input[name="pet_breed[]"]');
             var datalist = fieldset.querySelector('datalist[id^="dps-breed-list"]');
+            var photoInput = fieldset.querySelector('input[name="pet_photo[]"]');
+            var photoLabel = fieldset.querySelector('[data-dps-pet-photo-label]');
+            var photoHint = fieldset.querySelector('[data-dps-pet-photo-hint]');
 
             if (legend) {
                 legend.textContent = 'Pet ' + number;
@@ -567,6 +714,16 @@
             }
             if (datalist) {
                 datalist.id = 'dps-breed-list-' + number;
+            }
+            if (photoInput) {
+                photoInput.id = 'dps-pet-photo-' + number;
+                photoInput.setAttribute('aria-describedby', 'dps-pet-photo-hint-' + number);
+            }
+            if (photoLabel) {
+                photoLabel.setAttribute('for', 'dps-pet-photo-' + number);
+            }
+            if (photoHint) {
+                photoHint.id = 'dps-pet-photo-hint-' + number;
             }
 
             ensureRemovePetButton(fieldset, index > 0);
@@ -640,6 +797,7 @@
             reindexPetFieldsets(wrapper);
             updateOwnerFields(form);
             initBreedSelectors(wrapper);
+            initPetPhotoInputs(wrapper);
 
             if (typeof onChange === 'function') {
                 onChange();
@@ -654,9 +812,11 @@
 
             var fieldset = button.closest('.dps-pet-fieldset');
             if (fieldset && wrapper.querySelectorAll('.dps-pet-fieldset').length > 1) {
+                cleanupPetPhotoPreviews(fieldset);
                 fieldset.parentNode.removeChild(fieldset);
                 reindexPetFieldsets(wrapper);
                 initBreedSelectors(wrapper);
+                initPetPhotoInputs(wrapper);
                 if (typeof onChange === 'function') {
                     onChange();
                 }
@@ -863,10 +1023,13 @@
         pets.forEach(function(fieldset, index) {
             var list = document.createElement('ul');
             var aggressive = fieldset.querySelector('input[name^="pet_aggressive"]');
+            var photoInput = fieldset.querySelector('input[name="pet_photo[]"]');
+            var photoFile = photoInput && photoInput.files && photoInput.files.length ? photoInput.files[0] : null;
 
             addSummaryItem(list, 'Nome', getTrimmedValue(fieldset.querySelector('input[name="pet_name[]"]')));
             addSummaryItem(list, 'Espécie', getSelectText(fieldset.querySelector('select[name="pet_species[]"]')));
             addSummaryItem(list, 'Raça', getTrimmedValue(fieldset.querySelector('input[name="pet_breed[]"]')));
+            addSummaryItem(list, 'Foto do perfil', photoFile ? photoFile.name : '');
             addSummaryItem(list, 'Porte', getSelectText(fieldset.querySelector('select[name="pet_size[]"]')));
             addSummaryItem(list, 'Peso', getTrimmedValue(fieldset.querySelector('input[name="pet_weight[]"]')));
             addSummaryItem(list, 'Pelagem', getTrimmedValue(fieldset.querySelector('input[name="pet_coat[]"]')));
@@ -1509,6 +1672,7 @@
         bindMaskedInput(form.querySelector('input[name="client_cpf"]'), 'cpf');
         bindMaskedInput(form.querySelector('input[name="client_phone"]'), 'phone');
         initBreedSelectors(form);
+        initPetPhotoInputs(form);
         bindWizard(form);
         bindSubmit(form);
 
@@ -1516,6 +1680,7 @@
         if (template) {
             initPetClone(template.textContent, function() {
                 initBreedSelectors(form);
+                initPetPhotoInputs(form);
                 if (state.currentStep === 3) {
                     renderProductPrefsStep(form);
                     buildSummary(form);
