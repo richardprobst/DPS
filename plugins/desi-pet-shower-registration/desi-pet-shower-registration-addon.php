@@ -20,6 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once __DIR__ . '/includes/class-dps-registration-storage.php';
+require_once __DIR__ . '/includes/class-dps-registration-draft-service.php';
+require_once __DIR__ . '/includes/class-dps-registration-maintenance.php';
+require_once __DIR__ . '/includes/class-dps-registration-ux.php';
 
 /**
  * Verifica se o plugin base desi.pet by PRObst está ativo.
@@ -157,6 +160,7 @@ class DPS_Registration_Addon {
      */
     private function __construct() {
         DPS_Registration_Storage::maybe_create_tables();
+        DPS_Registration_Maintenance::register();
 
         // Processa o envio do formulário
         add_action( 'init', [ $this, 'maybe_handle_registration' ] );
@@ -190,6 +194,11 @@ class DPS_Registration_Addon {
 
         // AJAX para verificar duplicatas (admins apenas)
         add_action( 'wp_ajax_dps_registration_check_duplicate', [ $this, 'ajax_check_duplicate' ] );
+
+        add_action( 'wp_ajax_dps_registration_save_draft', array( 'DPS_Registration_Draft_Service', 'ajax_save' ) );
+        add_action( 'wp_ajax_nopriv_dps_registration_save_draft', array( 'DPS_Registration_Draft_Service', 'ajax_save' ) );
+        add_action( 'wp_ajax_dps_registration_clear_draft', array( 'DPS_Registration_Draft_Service', 'ajax_clear' ) );
+        add_action( 'wp_ajax_nopriv_dps_registration_clear_draft', array( 'DPS_Registration_Draft_Service', 'ajax_clear' ) );
     }
 
     /**
@@ -727,6 +736,7 @@ class DPS_Registration_Addon {
         $google_api_key = sanitize_text_field( get_option( 'dps_google_api_key', '' ) );
         $localize_data = array(
             'breeds'   => $this->get_breed_dataset(),
+            'draft'    => DPS_Registration_Draft_Service::get_localized_config(),
             'googlePlaces' => array(
                 'enabled' => ! empty( $google_api_key ),
                 'apiKey'  => $google_api_key,
@@ -771,6 +781,7 @@ class DPS_Registration_Addon {
      */
     public function activate() {
         DPS_Registration_Storage::maybe_create_tables();
+        DPS_Registration_Maintenance::maybe_schedule_cleanup();
 
         $title = __( 'Cadastro de Clientes e Pets', 'dps-registration-addon' );
         $slug  = sanitize_title( $title );
@@ -798,6 +809,7 @@ class DPS_Registration_Addon {
      */
     public static function deactivate() {
         wp_clear_scheduled_hook( self::CONFIRMATION_REMINDER_CRON );
+        DPS_Registration_Maintenance::deactivate();
     }
 
     /**
@@ -2010,11 +2022,6 @@ class DPS_Registration_Addon {
             $this->send_confirmation_email( $client_id, $client_email );
         }
 
-        // F3: Se admin optou por enviar boas-vindas mesmo com ativação imediata
-        if ( $admin_skip_confirmation && $admin_send_welcome ) {
-            $this->send_welcome_messages( $client_phone, $client_email, $client_name );
-        }
-
         do_action( 'dps_registration_after_client_created', $referral_code, $client_id, $client_email, $client_phone );
 
         $pets_created = 0;
@@ -2130,7 +2137,9 @@ class DPS_Registration_Addon {
         }
 
         $this->send_admin_notification( $client_id, $client_name, $client_phone_raw );
-        $this->send_welcome_messages( $client_phone, $client_email, $client_name );
+        if ( ! $admin_skip_confirmation || $admin_send_welcome ) {
+            $this->send_welcome_messages( $client_phone, $client_email, $client_name );
+        }
 
         $this->log_event( 'info', 'Cadastro criado com sucesso', array(
             'client_id' => $client_id,
@@ -2139,6 +2148,11 @@ class DPS_Registration_Addon {
             'has_cpf'   => ! empty( $client_cpf ),
             'ip_hash'   => $this->get_client_ip_hash(),
         ) );
+
+        $draft_token = isset( $_POST['dps_registration_draft_token'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_registration_draft_token'] ) ) : '';
+        if ( $draft_token ) {
+            DPS_Registration_Draft_Service::clear_draft( $draft_token );
+        }
 
         // Redireciona e indica sucesso - usa wp_safe_redirect para segurança
         wp_safe_redirect( add_query_arg( 'registered', '1', $this->get_registration_page_url() ) );
@@ -2405,6 +2419,7 @@ class DPS_Registration_Addon {
         $placeholder_json = wp_json_encode( $placeholder_html );
         ob_start();
         echo '<div class="dps-registration-form dps-signature-shell dps-signature-shell--registration">';
+        echo DPS_Registration_UX::render_intro();
         
         // F1.8: Exibe mensagens de erro/sucesso armazenadas
         $messages_html = $this->display_messages();
@@ -2440,6 +2455,7 @@ class DPS_Registration_Addon {
         }
         echo '<form method="post" id="dps-reg-form" class="dps-registration-wizard dps-signature-form" novalidate>';
         echo '<input type="hidden" name="dps_reg_action" value="save_registration">';
+        echo '<input type="hidden" name="dps_registration_draft_token" value="' . esc_attr( DPS_Registration_Draft_Service::get_current_token() ) . '" data-dps-draft-token>';
         wp_nonce_field( 'dps_reg_action', 'dps_reg_nonce' );
         $recaptcha = $this->get_recaptcha_settings();
         if ( $recaptcha['enabled'] && ! empty( $recaptcha['site_key'] ) ) {
@@ -2472,25 +2488,34 @@ class DPS_Registration_Addon {
             $address_autocomplete_attrs .= ' data-dps-address-autocomplete data-dps-google-api-key="' . esc_attr( $google_api_key ) . '" data-dps-lat-target="dps-client-lat" data-dps-lng-target="dps-client-lng"';
         }
 
-        // Legenda de campos obrigatórios
-        echo '<p class="dps-required-legend"><span class="dps-required">*</span> ' . esc_html__( 'Campos obrigatórios', 'dps-registration-addon' ) . '</p>';
+        echo DPS_Registration_UX::render_live_region();
+        echo DPS_Registration_UX::render_draft_panel( ! empty( DPS_Registration_Draft_Service::load_current_draft() ) );
+        echo DPS_Registration_UX::render_required_legend();
 
         echo '<div class="dps-steps">';
         echo '<div class="dps-step dps-step-active" data-step="1">';
         echo '<h4>' . esc_html__( 'Dados do Cliente', 'dps-registration-addon' ) . '</h4>';
-        // Campos do cliente agrupados para melhor distribuição
-        echo '<div class="dps-client-fields">';
+        echo '<p class="dps-step-description">' . esc_html__( 'Comece pelos dados que permitem localizar o tutor e fazer contato. Os dados complementares podem ser preenchidos se fizerem sentido para o primeiro atendimento.', 'dps-registration-addon' ) . '</p>';
+        echo '<div class="dps-client-fields dps-client-fields--grouped">';
+        echo DPS_Registration_UX::open_field_group( __( 'Essenciais', 'dps-registration-addon' ), __( 'Nome e WhatsApp sustentam o contato inicial e a verificacao de duplicidade.', 'dps-registration-addon' ), 'essential' );
         echo '<p><label>' . esc_html__( 'Nome', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><input type="text" name="client_name" id="dps-client-name" required></label></p>';
-        echo '<p><label>CPF<br><input type="text" name="client_cpf" id="dps-client-cpf" placeholder="000.000.000-00"></label></p>';
         echo '<p><label for="dps-client-phone">' . esc_html__( 'Telefone / WhatsApp', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><input type="tel" name="client_phone" id="dps-client-phone" placeholder="(11) 98765-4321" autocomplete="tel" required aria-describedby="dps-phone-hint"></label><span id="dps-phone-hint" class="dps-field-hint">' . esc_html__( 'Formato: (DDD) número com 8 ou 9 dígitos', 'dps-registration-addon' ) . '</span></p>';
         echo '<p><label>Email<br><input type="email" name="client_email" id="dps-client-email" autocomplete="email"></label></p>';
+        echo DPS_Registration_UX::close_field_group();
+
+        echo DPS_Registration_UX::open_field_group( __( 'Endereco e origem', 'dps-registration-addon' ), __( 'Ajuda a equipe a planejar atendimento, deslocamento e contexto do primeiro contato.', 'dps-registration-addon' ), 'address' );
+        // Endereço completo com id específico para ativar autocomplete do Google
+        echo '<p class="dps-field-full"><label for="dps-client-address">' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><input type="text" name="client_address" id="dps-client-address" placeholder="' . esc_attr__( 'Rua, número, bairro e cidade', 'dps-registration-addon' ) . '" ' . $address_autocomplete_attrs . '></label></p>';
+        echo '<p class="dps-field-full"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral" id="dps-client-referral"></label></p>';
+        echo DPS_Registration_UX::close_field_group();
+
+        echo DPS_Registration_UX::open_optional_details( 'dps-client-optional-details', __( 'Dados complementares do tutor', 'dps-registration-addon' ), __( 'CPF, data de nascimento, redes sociais e autorizacao de foto.', 'dps-registration-addon' ) );
+        echo '<p><label>CPF<br><input type="text" name="client_cpf" id="dps-client-cpf" placeholder="000.000.000-00"></label></p>';
         echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="client_birth" id="dps-client-birth"></label></p>';
         echo '<p><label>Instagram<br><input type="text" name="client_instagram" id="dps-client-instagram" placeholder="@usuario"></label></p>';
         echo '<p><label>Facebook<br><input type="text" name="client_facebook" id="dps-client-facebook"></label></p>';
         echo '<p><label><input type="checkbox" name="client_photo_auth" value="1"> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do DESI PET SHOWER', 'dps-registration-addon' ) . '</label></p>';
-        // Endereço completo com id específico para ativar autocomplete do Google
-        echo '<p class="dps-field-full"><label for="dps-client-address">' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><input type="text" name="client_address" id="dps-client-address" placeholder="' . esc_attr__( 'Rua, número, bairro e cidade', 'dps-registration-addon' ) . '" ' . $address_autocomplete_attrs . '></label></p>';
-        echo '<p class="dps-field-full"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral" id="dps-client-referral"></label></p>';
+        echo DPS_Registration_UX::close_optional_details();
         echo '</div>';
 
         // F3.2: Opções administrativas para cadastro rápido
@@ -3203,50 +3228,39 @@ class DPS_Registration_Addon {
         ob_start();
         echo '<fieldset class="dps-pet-fieldset">';
         echo '<legend>' . sprintf( __( 'Pet %d', 'dps-registration-addon' ), $i ) . '</legend>';
-        // Nome do pet
         echo '<p><label>' . esc_html__( 'Nome do Pet', 'dps-registration-addon' ) . '<br><input type="text" name="pet_name[]" class="dps-pet-name"></label></p>';
-        // Nome do cliente (readonly)
-        echo '<p><label>' . esc_html__( 'Cliente', 'dps-registration-addon' ) . '<br><input type="text" class="dps-owner-name" readonly></label></p>';
-        // Espécie
         echo '<p><label>' . esc_html__( 'Espécie', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><select name="pet_species[]" required>';
         $species_opts = [ '' => __( 'Selecione...', 'dps-registration-addon' ), 'cao' => __( 'Cachorro', 'dps-registration-addon' ), 'gato' => __( 'Gato', 'dps-registration-addon' ), 'outro' => __( 'Outro', 'dps-registration-addon' ) ];
         foreach ( $species_opts as $val => $label ) {
             echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $label ) . '</option>';
         }
         echo '</select></label></p>';
-        // Raça com datalist
-        echo '<p><label>' . esc_html__( 'Raça', 'dps-registration-addon' ) . '<br><input type="text" name="pet_breed[]" list="' . esc_attr( $datalist_id ) . '"></label></p>';
-        echo '<datalist id="' . esc_attr( $datalist_id ) . '">';
-        foreach ( $breed_options as $breed ) {
-            echo '<option value="' . esc_attr( $breed ) . '"></option>';
-        }
-        echo '</datalist>';
-        // Porte
         echo '<p><label>' . esc_html__( 'Porte', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><select name="pet_size[]" required>';
         $sizes = [ '' => __( 'Selecione...', 'dps-registration-addon' ), 'pequeno' => __( 'Pequeno', 'dps-registration-addon' ), 'medio' => __( 'Médio', 'dps-registration-addon' ), 'grande' => __( 'Grande', 'dps-registration-addon' ) ];
         foreach ( $sizes as $val => $lab ) {
             echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $lab ) . '</option>';
         }
         echo '</select></label></p>';
-        // Peso
-        echo '<p><label>' . esc_html__( 'Peso (kg)', 'dps-registration-addon' ) . '<br><input type="number" step="0.01" name="pet_weight[]"></label></p>';
-        // Pelagem
-        echo '<p><label>' . esc_html__( 'Pelagem', 'dps-registration-addon' ) . '<br><input type="text" name="pet_coat[]"></label></p>';
-        // Cor
-        echo '<p><label>' . esc_html__( 'Cor', 'dps-registration-addon' ) . '<br><input type="text" name="pet_color[]"></label></p>';
-        // Data de nascimento
-        echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="pet_birth[]"></label></p>';
-        // Sexo
         echo '<p><label>' . esc_html__( 'Sexo', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><select name="pet_sex[]" required>';
         $sexes = [ '' => __( 'Selecione...', 'dps-registration-addon' ), 'macho' => __( 'Macho', 'dps-registration-addon' ), 'femea' => __( 'Fêmea', 'dps-registration-addon' ) ];
         foreach ( $sexes as $val => $lab ) {
             echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $lab ) . '</option>';
         }
         echo '</select></label></p>';
-        // Cuidados especiais
+        echo DPS_Registration_UX::open_optional_details( 'dps-pet-details-' . $i, __( 'Detalhes e cuidados opcionais', 'dps-registration-addon' ), __( 'Raca, peso, pelagem, nascimento e cuidados que ajudam no atendimento.', 'dps-registration-addon' ) );
+        echo '<p><label>' . esc_html__( 'Raça', 'dps-registration-addon' ) . '<br><input type="text" name="pet_breed[]" list="' . esc_attr( $datalist_id ) . '"></label></p>';
+        echo '<datalist id="' . esc_attr( $datalist_id ) . '">';
+        foreach ( $breed_options as $breed ) {
+            echo '<option value="' . esc_attr( $breed ) . '"></option>';
+        }
+        echo '</datalist>';
+        echo '<p><label>' . esc_html__( 'Peso (kg)', 'dps-registration-addon' ) . '<br><input type="number" step="0.01" name="pet_weight[]"></label></p>';
+        echo '<p><label>' . esc_html__( 'Pelagem', 'dps-registration-addon' ) . '<br><input type="text" name="pet_coat[]"></label></p>';
+        echo '<p><label>' . esc_html__( 'Cor', 'dps-registration-addon' ) . '<br><input type="text" name="pet_color[]"></label></p>';
+        echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="pet_birth[]"></label></p>';
         echo '<p><label>' . esc_html__( 'Algum cuidado especial ou restrição?', 'dps-registration-addon' ) . '<br><textarea name="pet_care[]" rows="2"></textarea></label></p>';
-        // Agressivo
         echo '<p><label><input type="checkbox" name="pet_aggressive[' . ( $i - 1 ) . ']" value="1"> ' . esc_html__( 'Cão agressivo', 'dps-registration-addon' ) . '</label></p>';
+        echo DPS_Registration_UX::close_optional_details();
         echo '</fieldset>';
         return ob_get_clean();
     }
@@ -3262,15 +3276,25 @@ class DPS_Registration_Addon {
         echo '<fieldset class="dps-pet-fieldset">';
         echo '<legend>' . __( 'Pet __PET_NUMBER__', 'dps-registration-addon' ) . '</legend>';
         echo '<p><label>' . esc_html__( 'Nome do Pet', 'dps-registration-addon' ) . '<br><input type="text" name="pet_name[]" class="dps-pet-name"></label></p>';
-        echo '<p><label>' . esc_html__( 'Cliente', 'dps-registration-addon' ) . '<br><input type="text" class="dps-owner-name" readonly></label></p>';
-        // Espécie
         echo '<p><label>' . esc_html__( 'Espécie', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><select name="pet_species[]" required>';
         $species_opts = [ '' => __( 'Selecione...', 'dps-registration-addon' ), 'cao' => __( 'Cachorro', 'dps-registration-addon' ), 'gato' => __( 'Gato', 'dps-registration-addon' ), 'outro' => __( 'Outro', 'dps-registration-addon' ) ];
         foreach ( $species_opts as $val => $label ) {
             echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $label ) . '</option>';
         }
         echo '</select></label></p>';
-        // Raça
+        echo '<p><label>' . esc_html__( 'Porte', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><select name="pet_size[]" required>';
+        $sizes = [ '' => __( 'Selecione...', 'dps-registration-addon' ), 'pequeno' => __( 'Pequeno', 'dps-registration-addon' ), 'medio' => __( 'Médio', 'dps-registration-addon' ), 'grande' => __( 'Grande', 'dps-registration-addon' ) ];
+        foreach ( $sizes as $val => $lab ) {
+            echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $lab ) . '</option>';
+        }
+        echo '</select></label></p>';
+        echo '<p><label>' . esc_html__( 'Sexo', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><select name="pet_sex[]" required>';
+        $sexes = [ '' => __( 'Selecione...', 'dps-registration-addon' ), 'macho' => __( 'Macho', 'dps-registration-addon' ), 'femea' => __( 'Fêmea', 'dps-registration-addon' ) ];
+        foreach ( $sexes as $val => $lab ) {
+            echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $lab ) . '</option>';
+        }
+        echo '</select></label></p>';
+        echo DPS_Registration_UX::open_optional_details( 'dps-pet-details-__PET_NUMBER__', __( 'Detalhes e cuidados opcionais', 'dps-registration-addon' ), __( 'Raca, peso, pelagem, nascimento e cuidados que ajudam no atendimento.', 'dps-registration-addon' ) );
         echo '<p><label>' . esc_html__( 'Raça', 'dps-registration-addon' ) . '<br><input type="text" name="pet_breed[]" list="dps-breed-list-__PET_NUMBER__"></label></p>';
         echo '<datalist id="dps-breed-list-__PET_NUMBER__">';
         $breed_options = $this->get_breed_options_for_species( '' );
@@ -3278,32 +3302,13 @@ class DPS_Registration_Addon {
             echo '<option value="' . esc_attr( $breed ) . '"></option>';
         }
         echo '</datalist>';
-        // Porte
-        echo '<p><label>' . esc_html__( 'Porte', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><select name="pet_size[]" required>';
-        $sizes = [ '' => __( 'Selecione...', 'dps-registration-addon' ), 'pequeno' => __( 'Pequeno', 'dps-registration-addon' ), 'medio' => __( 'Médio', 'dps-registration-addon' ), 'grande' => __( 'Grande', 'dps-registration-addon' ) ];
-        foreach ( $sizes as $val => $lab ) {
-            echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $lab ) . '</option>';
-        }
-        echo '</select></label></p>';
-        // Peso
         echo '<p><label>' . esc_html__( 'Peso (kg)', 'dps-registration-addon' ) . '<br><input type="number" step="0.01" name="pet_weight[]"></label></p>';
-        // Pelagem
         echo '<p><label>' . esc_html__( 'Pelagem', 'dps-registration-addon' ) . '<br><input type="text" name="pet_coat[]"></label></p>';
-        // Cor
         echo '<p><label>' . esc_html__( 'Cor', 'dps-registration-addon' ) . '<br><input type="text" name="pet_color[]"></label></p>';
-        // Data de nascimento
         echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="pet_birth[]"></label></p>';
-        // Sexo
-        echo '<p><label>' . esc_html__( 'Sexo', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><select name="pet_sex[]" required>';
-        $sexes = [ '' => __( 'Selecione...', 'dps-registration-addon' ), 'macho' => __( 'Macho', 'dps-registration-addon' ), 'femea' => __( 'Fêmea', 'dps-registration-addon' ) ];
-        foreach ( $sexes as $val => $lab ) {
-            echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $lab ) . '</option>';
-        }
-        echo '</select></label></p>';
-        // Cuidados especiais
         echo '<p><label>' . esc_html__( 'Algum cuidado especial ou restrição?', 'dps-registration-addon' ) . '<br><textarea name="pet_care[]" rows="2"></textarea></label></p>';
-        // Agressivo
         echo '<p><label><input type="checkbox" name="pet_aggressive[__PET_INDEX__]" value="1"> ' . esc_html__( 'Cão agressivo', 'dps-registration-addon' ) . '</label></p>';
+        echo DPS_Registration_UX::close_optional_details();
         echo '</fieldset>';
         return ob_get_clean();
     }

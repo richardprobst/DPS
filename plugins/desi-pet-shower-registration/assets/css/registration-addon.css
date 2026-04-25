@@ -89,6 +89,90 @@
     font-size: 13px;
 }
 
+.dps-registration-live-region {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.dps-registration-intro {
+    display: grid;
+    gap: var(--dps-reg-gap-sm);
+    margin: 0 0 var(--dps-reg-gap-xl);
+    padding: 0 0 var(--dps-reg-gap-lg);
+    border-bottom: 1px solid var(--dps-reg-line);
+}
+
+.dps-registration-intro__eyebrow {
+    margin: 0;
+    color: var(--dps-reg-petrol);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.dps-registration-intro h3 {
+    margin: 0;
+    color: var(--dps-reg-ink);
+    font-family: var(--dps-signature-font-display, var(--dps-font-display, system-ui, sans-serif));
+    font-size: 34px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.08;
+}
+
+.dps-registration-intro p:not(.dps-registration-intro__eyebrow) {
+    max-width: 720px;
+    margin: 0;
+    color: var(--dps-reg-muted);
+    font-size: 15px;
+    line-height: 1.55;
+}
+
+.dps-registration-draft {
+    display: grid;
+    gap: var(--dps-reg-gap-md);
+    padding: 14px;
+    border: 1px solid var(--dps-reg-line);
+    border-left: 3px solid var(--dps-reg-petrol);
+    background: var(--dps-reg-paper);
+}
+
+.dps-registration-draft__restore {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dps-reg-gap-md);
+}
+
+.dps-registration-draft__restore p,
+.dps-registration-draft__status {
+    margin: 0;
+    color: var(--dps-reg-muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.dps-registration-draft__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dps-reg-gap-sm);
+}
+
+.dps-registration-draft__optin {
+    width: fit-content;
+    margin: 0;
+}
+
 .dps-progress {
     display: grid;
     gap: var(--dps-reg-gap-md);
@@ -158,8 +242,49 @@
     gap: var(--dps-reg-gap-lg);
 }
 
+.dps-client-fields--grouped {
+    grid-template-columns: 1fr;
+}
+
+.dps-field-group,
+.dps-optional-details {
+    grid-column: 1 / -1;
+    min-width: 0;
+}
+
+.dps-field-group {
+    display: grid;
+    gap: var(--dps-reg-gap-md);
+    padding: 16px;
+    border: 1px solid var(--dps-reg-line);
+    background: #ffffff;
+}
+
+.dps-field-group__header {
+    display: grid;
+    gap: var(--dps-reg-gap-xs);
+    padding-bottom: var(--dps-reg-gap-sm);
+    border-bottom: 1px solid rgba(217, 204, 186, 0.75);
+}
+
+.dps-field-group__header p {
+    margin: 0;
+    color: var(--dps-reg-muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.dps-field-group__body,
+.dps-optional-details__body {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--dps-reg-gap-lg);
+}
+
 .dps-client-fields p,
 .dps-pet-fieldset p,
+.dps-field-group__body p,
+.dps-optional-details__body p,
 .dps-product-pref-field,
 .dps-admin-options p {
     display: grid;
@@ -169,9 +294,42 @@
 }
 
 .dps-field-full,
+.dps-field-group__body .dps-field-full,
+.dps-optional-details__body .dps-field-full,
 .dps-pet-fieldset p:has(textarea),
 .dps-product-pref-field:has(textarea) {
     grid-column: 1 / -1;
+}
+
+.dps-optional-details {
+    border: 1px solid var(--dps-reg-line);
+    background: #ffffff;
+}
+
+.dps-optional-details summary {
+    display: grid;
+    gap: var(--dps-reg-gap-xs);
+    min-height: 44px;
+    padding: 14px 16px;
+    color: var(--dps-reg-petrol);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.dps-optional-details summary small {
+    color: var(--dps-reg-muted);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.dps-optional-details[open] summary {
+    border-bottom: 1px solid var(--dps-reg-line);
+    background: var(--dps-reg-paper);
+}
+
+.dps-optional-details__body {
+    padding: 16px;
 }
 
 .dps-registration-form label {
@@ -575,6 +733,35 @@
     z-index: 999999;
 }
 
+.dps-address-source-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+}
+
+.dps-place-autocomplete-element,
+.dps-registration-form gmp-place-autocomplete {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    margin-top: var(--dps-reg-gap-sm);
+    color: var(--dps-reg-ink);
+    font-family: var(--dps-signature-font-body, var(--dps-font-body, system-ui, sans-serif));
+}
+
+.dps-place-autocomplete-element:focus-within,
+.dps-registration-form gmp-place-autocomplete:focus-within {
+    outline: 3px solid var(--dps-reg-focus);
+    outline-offset: 2px;
+}
+
 .pac-item {
     padding: 9px 12px;
     border-top: 1px solid var(--dps-reg-line);
@@ -739,11 +926,20 @@
     .dps-summary-content {
         grid-template-columns: 1fr;
     }
+
+    .dps-registration-draft__restore {
+        align-items: stretch;
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 600px) {
     .dps-registration-form {
         padding: 12px;
+    }
+
+    .dps-registration-intro h3 {
+        font-size: 28px;
     }
 
     .dps-registration-wizard,
@@ -754,7 +950,9 @@
     }
 
     .dps-client-fields,
-    .dps-pet-fieldset {
+    .dps-pet-fieldset,
+    .dps-field-group__body,
+    .dps-optional-details__body {
         grid-template-columns: 1fr;
     }
 
@@ -769,9 +967,15 @@
     .dps-button-secondary,
     #dps-add-pet,
     .dps-remove-pet,
+    .dps-registration-draft__actions,
+    .dps-registration-draft__optin,
     .dps-modal-footer button,
     .dps-modal-footer a {
         width: 100%;
+    }
+
+    .dps-registration-draft__actions {
+        flex-direction: column;
     }
 
     .dps-summary-section li {
@@ -796,6 +1000,9 @@
 
     .dps-registration-wizard,
     .dps-progress,
+    .dps-registration-draft,
+    .dps-field-group,
+    .dps-optional-details__body,
     .dps-pet-fieldset,
     .dps-product-prefs-pet,
     .dps-summary-box,
@@ -807,6 +1014,10 @@
 
     .dps-registration-form h4 {
         font-size: 19px;
+    }
+
+    .dps-registration-intro h3 {
+        font-size: 24px;
     }
 
     .dps-registration-form input[type="text"],

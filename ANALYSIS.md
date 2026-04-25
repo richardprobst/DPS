@@ -1654,9 +1654,9 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 **PropÃƒÂ³sito e funcionalidades principais**:
 - Permitir cadastro pÃƒÂºblico de clientes e pets via formulÃƒÂ¡rio web
-- Integrar com Google Places via camada compartilhada `dps-signature-forms.js`, usando `data-dps-address-autocomplete` no campo `client_address`
+- Integrar com Google Places via camada compartilhada `dps-signature-forms.js`, usando `PlaceAutocompleteElement` quando disponivel e fallback para `google.maps.places.Autocomplete`
 - Disparar hook para outros add-ons apÃƒÂ³s criaÃƒÂ§ÃƒÂ£o de cliente
-- Aplicar rate limiting e feedback curto por armazenamento persistente proprio, sem transients/cache
+- Aplicar rate limiting, feedback curto e rascunho opt-in por armazenamento persistente proprio, sem transients/cache nem browser storage
 
 **Shortcodes expostos**:
 - `[dps_registration_form]`: renderiza formulÃƒÂ¡rio de cadastro pÃƒÂºblico
@@ -1667,9 +1667,10 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Tabela propria: `{$wpdb->prefix}dps_registration_events`
   - criada por `DPS_Registration_Storage::maybe_create_tables()`;
   - versionada pela option `dps_registration_events_db_version`;
-  - armazena eventos de rate limit e mensagens de feedback com `created_at`, `expires_at` e `consumed_at`;
+  - armazena eventos de rate limit, mensagens de feedback e rascunhos opt-in com `created_at`, `expires_at` e `consumed_at`;
   - substitui os antigos transients `dps_reg_rate_*`, `dps_reg_msg_*` e `dps_reg_api_*`.
 - Options principais: `dps_registration_page_id`, `dps_google_api_key`, chaves de reCAPTCHA, templates de email e limites da API REST.
+- Cron proprio: `dps_registration_events_cleanup`, agendado diariamente por `DPS_Registration_Maintenance`, remove linhas expiradas da tabela persistente sem executar limpeza em todo request.
 
 **Hooks consumidos**:
 - `dps_registration_spam_check`: permite bloquear cadastro publico apos nonce/honeypot e antes da gravacao.
@@ -1689,6 +1690,8 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 **ObservaÃƒÂ§ÃƒÂµes**:
 - Sanitiza todas as entradas antes de criar posts
 - O CSS publico e o controlador JS do formulario foram reescritos em 2026-04-25 para DPS Signature, preservando shortcodes, actions, nomes de campos, nonces, hooks e endpoint REST.
+- A entrega das 10 melhorias de 2026-04-25 adicionou `DPS_Registration_UX`, `DPS_Registration_Draft_Service` e `DPS_Registration_Maintenance`, agrupando campos, rascunho persistente opt-in, live region, foco acessivel e limpeza diaria de eventos.
+- O toggle administrativo `dps_admin_send_welcome` passou a controlar efetivamente o envio de boas-vindas quando `dps_admin_skip_confirmation` esta ativo, evitando disparos em cadastros operacionais ou de QA.
 - `uninstall.php` remove a tabela `dps_registration_events` e tambem limpa residuos de transients de versoes antigas.
 
 ---

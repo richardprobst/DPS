@@ -48,7 +48,6 @@ class DPS_Registration_Storage {
         $installed = get_option( self::OPTION_DB_VERSION, '' );
 
         if ( self::DB_VERSION === $installed && self::table_exists() ) {
-            self::delete_expired_records();
             return;
         }
 
@@ -249,6 +248,99 @@ class DPS_Registration_Storage {
         }
 
         return $messages;
+    }
+
+    /**
+     * Stores one persistent payload for a bucket, replacing previous open rows.
+     *
+     * @param string $event_type  Event type.
+     * @param string $bucket_hash Bucket identifier.
+     * @param array  $payload     Payload to persist.
+     * @param int    $ttl         Retention in seconds.
+     * @return bool
+     */
+    public static function set_payload( $event_type, $bucket_hash, array $payload, $ttl ) {
+        global $wpdb;
+
+        self::maybe_create_tables();
+
+        $event_type  = sanitize_key( $event_type );
+        $bucket_hash = self::normalize_hash( $bucket_hash );
+        $now         = time();
+
+        self::delete_bucket_events( $event_type, $bucket_hash );
+
+        return (bool) $wpdb->insert(
+            self::table_name(),
+            array(
+                'event_type'  => $event_type,
+                'bucket_hash' => $bucket_hash,
+                'payload'     => wp_json_encode( $payload ),
+                'created_at'  => gmdate( 'Y-m-d H:i:s', $now ),
+                'expires_at'  => gmdate( 'Y-m-d H:i:s', $now + max( 60, absint( $ttl ) ) ),
+                'consumed_at' => null,
+            ),
+            array( '%s', '%s', '%s', '%s', '%s', '%s' )
+        );
+    }
+
+    /**
+     * Returns the latest open payload for a bucket without consuming it.
+     *
+     * @param string $event_type  Event type.
+     * @param string $bucket_hash Bucket identifier.
+     * @return array
+     */
+    public static function get_latest_payload( $event_type, $bucket_hash ) {
+        global $wpdb;
+
+        self::maybe_create_tables();
+
+        $row = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT payload FROM " . self::table_name() . "
+                 WHERE event_type = %s
+                   AND bucket_hash = %s
+                   AND consumed_at IS NULL
+                   AND expires_at > %s
+                 ORDER BY id DESC
+                 LIMIT 1",
+                sanitize_key( $event_type ),
+                self::normalize_hash( $bucket_hash ),
+                gmdate( 'Y-m-d H:i:s' )
+            )
+        );
+
+        if ( ! $row ) {
+            return array();
+        }
+
+        $payload = json_decode( (string) $row, true );
+
+        return is_array( $payload ) ? $payload : array();
+    }
+
+    /**
+     * Deletes open rows for one event bucket.
+     *
+     * @param string $event_type  Event type.
+     * @param string $bucket_hash Bucket identifier.
+     * @return void
+     */
+    public static function delete_bucket_events( $event_type, $bucket_hash ) {
+        global $wpdb;
+
+        self::maybe_create_tables();
+
+        $wpdb->delete(
+            self::table_name(),
+            array(
+                'event_type'  => sanitize_key( $event_type ),
+                'bucket_hash' => self::normalize_hash( $bucket_hash ),
+                'consumed_at' => null,
+            ),
+            array( '%s', '%s', '%s' )
+        );
     }
 
     /**

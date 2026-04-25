@@ -87,6 +87,8 @@ Antes de criar uma nova versÃ£o oficial:
 
 - Adicionada a tabela persistente `dps_registration_events` para rate limiting e mensagens temporarias do Cadastro sem uso de transients/cache.
 - Adicionado carregamento compartilhado de `dps-signature-forms.css` e `dps-signature-forms.js` no formulario publico de cadastro.
+- Adicionados `DPS_Registration_UX`, `DPS_Registration_Draft_Service` e `DPS_Registration_Maintenance` para blocos de UI, rascunho persistente opt-in e limpeza diaria de eventos expirados.
+- Adicionado script Playwright de QA publicado para validar Cadastro autenticado/admin nos breakpoints DPS Signature e envio real controlado.
 
 **Agenda Add-on - fila operacional DPS Signature**
 
@@ -99,6 +101,9 @@ Antes de criar uma nova versÃ£o oficial:
 - Reescrito o CSS e o controlador JS do formulario publico de Cadastro para o padrao DPS Signature, com geometria reta, bordas finas, wizard responsivo e estados visuais sem estilos inline.
 - Mantidos os contratos externos `[dps_registration_form]`, `[dps_registration_v2]`, actions, nonces, nomes de campos e hooks do Cadastro durante a reescrita.
 - Atualizado o loader compartilhado de Google Places para usar `loading=async` junto de `dpsSignatureGooglePlacesReady`.
+- Atualizado o Cadastro para usar `PlaceAutocompleteElement` quando disponivel, mantendo fallback legado e sincronizacao do input canonico `client_address`.
+- Reorganizada a etapa do tutor em grupos de dados essenciais, endereco/origem e complementares, com rascunho opt-in e live region acessivel.
+- Reorganizada a etapa de pets para manter campos obrigatorios em primeiro plano e mover detalhes/cuidado para disclosures opcionais.
 - Reafirmados `desi-pet-shower-registration` e `desi-pet-shower-booking` como implementações canônicas dos fluxos públicos de cadastro e agendamento, encerrando o dual-run do add-on `desi-pet-shower-frontend`.
 - Preservados `[dps_registration_v2]` e `[dps_booking_v2]` como aliases de compatibilidade nos plugins canônicos, evitando quebra de páginas publicadas após a remoção do add-on Frontend.
 - Consolidada a Agenda publicada como superfície operacional única do DPS Signature, sem navegação funcional por abas legadas e com navegação preservando apenas visão e período.
@@ -114,6 +119,8 @@ Antes de criar uma nova versÃ£o oficial:
 - Corrigido o autocomplete do Google Places no Cadastro, trocando o campo de endereco para `input` e usando o loader compartilhado `dpsSignatureGooglePlacesReady`/`DPSSignatureForms` em vez do callback paralelo antigo.
 - Corrigido o indice do checkbox `pet_aggressive` em pets adicionados dinamicamente, evitando desalinhamento entre o pet clonado e os metadados salvos.
 - Corrigido o texto do campo de indicacao injetado pelo add-on Loyalty no Cadastro, removendo mojibake visivel no formulario publicado.
+- Corrigida corrida assíncrona que podia inicializar mais de um widget visual de Google Places no mesmo campo de endereco.
+- Corrigido o backend para honrar `dps_admin_send_welcome` quando o admin ativa `dps_admin_skip_confirmation`, evitando envio de boas-vindas em cadastros operacionais desmarcados.
 - Corrigidos arquivos PHP do pacote DPS com BOM no ambiente publicado, eliminando contaminação de respostas JSON do AJAX e estabilizando modais, painéis e integrações que dependem de payload limpo.
 - Corrigida a telemetria de histórico para devolver `source` e `source_label`, permitindo badges coerentes para registros automáticos e ações manuais no modal de linha do tempo.
 - Validado no `desi.pet` que os modais de pet, serviços, operação, histórico e reagendamento abriram corretamente após a publicação final.

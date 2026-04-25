@@ -13,14 +13,27 @@
         PHONE_MASK_11: '(##) #####-####',
         MIN_NAME_LENGTH: 2,
         LOADING_TEXT: 'Enviando...',
-        SUBMIT_TEXT: 'Enviar cadastro'
+        SUBMIT_TEXT: 'Enviar cadastro',
+        MESSAGES: {
+            nameRequired: 'Informe o nome do tutor.',
+            phoneRequired: 'Informe o telefone ou WhatsApp.',
+            phoneInvalid: 'Revise o telefone. Use DDD e 8 ou 9 digitos.',
+            cpfInvalid: 'Revise o CPF informado.',
+            emailInvalid: 'Revise o email informado.',
+            petRequired: 'Adicione pelo menos um pet.',
+            tutorReview: 'Revise os dados do tutor.',
+            petsReview: 'Revise os dados dos pets.',
+            confirmRequired: 'Confirme que os dados estao corretos antes de enviar.'
+        }
     };
 
     var state = {
         currentStep: 1,
         totalSteps: 3,
         duplicateConfirmed: false,
-        recaptchaValidated: false
+        recaptchaValidated: false,
+        restoredPreferences: [],
+        restoredPreferencesApplied: false
     };
 
     function toArray(list) {
@@ -103,6 +116,18 @@
 
     function getRegistrationData() {
         return window.dpsRegistrationData || {};
+    }
+
+    function announce(form, message) {
+        var region = form ? form.querySelector('#dps-registration-live-region') : document.getElementById('dps-registration-live-region');
+        if (!region || !message) {
+            return;
+        }
+
+        region.textContent = '';
+        window.setTimeout(function() {
+            region.textContent = message;
+        }, 20);
     }
 
     function getBreedOptions(species) {
@@ -320,8 +345,35 @@
         }
     }
 
+    function focusFirstInvalid(form) {
+        var field = form ? form.querySelector('[aria-invalid="true"]') : null;
+
+        if (!field || typeof field.focus !== 'function') {
+            return;
+        }
+
+        window.setTimeout(function() {
+            field.focus({ preventScroll: true });
+        }, 120);
+    }
+
     function getTrimmedValue(field) {
         return field ? (field.value || '').trim() : '';
+    }
+
+    function setFieldValue(field, value) {
+        if (!field) {
+            return;
+        }
+
+        if (field.type === 'checkbox') {
+            field.checked = value === true || value === '1' || value === 1;
+        } else {
+            field.value = value || '';
+        }
+
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+        field.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     function validateStepOne(form, silent) {
@@ -336,25 +388,25 @@
         var email = getTrimmedValue(emailInput);
 
         if (!name || name.length < CONFIG.MIN_NAME_LENGTH) {
-            errors.push('Informe o nome do tutor.');
+            errors.push(CONFIG.MESSAGES.nameRequired);
             markField(nameInput);
         }
 
         if (!onlyDigits(phone)) {
-            errors.push('Informe o telefone ou WhatsApp.');
+            errors.push(CONFIG.MESSAGES.phoneRequired);
             markField(phoneInput);
         } else if (!validatePhone(phone)) {
-            errors.push('Revise o telefone. Use DDD e 8 ou 9 dígitos.');
+            errors.push(CONFIG.MESSAGES.phoneInvalid);
             markField(phoneInput);
         }
 
         if (cpf && !validateCPF(cpf)) {
-            errors.push('Revise o CPF informado.');
+            errors.push(CONFIG.MESSAGES.cpfInvalid);
             markField(cpfInput);
         }
 
         if (email && !validateEmail(email)) {
-            errors.push('Revise o email informado.');
+            errors.push(CONFIG.MESSAGES.emailInvalid);
             markField(emailInput);
         }
 
@@ -371,7 +423,7 @@
         var petFieldsets = petsWrapper ? toArray(petsWrapper.querySelectorAll('.dps-pet-fieldset')) : [];
 
         if (!petFieldsets.length) {
-            errors.push('Adicione pelo menos um pet.');
+            errors.push(CONFIG.MESSAGES.petRequired);
         }
 
         petFieldsets.forEach(function(fieldset, index) {
@@ -417,7 +469,9 @@
             showError(container, message);
         });
 
+        announce(form, errors.join(' '));
         scrollToErrors(container);
+        focusFirstInvalid(form);
     }
 
     function validateForm(form) {
@@ -429,15 +483,15 @@
         var confirmCheckbox = form.querySelector('#dps-summary-confirm');
 
         if (!stepOneOk) {
-            errors.push('Revise os dados do tutor.');
+            errors.push(CONFIG.MESSAGES.tutorReview);
         }
 
         if (!stepTwoOk) {
-            errors.push('Revise os dados dos pets.');
+            errors.push(CONFIG.MESSAGES.petsReview);
         }
 
         if (confirmCheckbox && !confirmCheckbox.checked) {
-            errors.push('Confirme que os dados estão corretos antes de enviar.');
+            errors.push(CONFIG.MESSAGES.confirmRequired);
             markField(confirmCheckbox);
         }
 
@@ -452,6 +506,7 @@
     function updateProgress(step, progress) {
         if (progress.label) {
             progress.label.textContent = 'Passo ' + step + ' de ' + state.totalSteps;
+            progress.label.setAttribute('aria-current', 'step');
         }
         if (progress.counter) {
             progress.counter.textContent = step + '/' + state.totalSteps;
@@ -460,11 +515,12 @@
             progress.bar.style.width = Math.round((step / state.totalSteps) * 100) + '%';
             if (progress.bar.parentElement) {
                 progress.bar.parentElement.setAttribute('aria-valuenow', String(step));
+                progress.bar.parentElement.setAttribute('aria-valuetext', 'Passo ' + step + ' de ' + state.totalSteps);
             }
         }
     }
 
-    function showStep(form, step, progress) {
+    function showStep(form, step, progress, shouldFocus) {
         toArray(form.querySelectorAll('.dps-step')).forEach(function(stepEl) {
             var isCurrent = parseInt(stepEl.getAttribute('data-step'), 10) === step;
             stepEl.classList.toggle('dps-step-active', isCurrent);
@@ -474,10 +530,19 @@
 
         state.currentStep = step;
         updateProgress(step, progress);
+        announce(form, 'Passo ' + step + ' de ' + state.totalSteps);
 
         if (step === 3) {
             renderProductPrefsStep(form);
             buildSummary(form);
+        }
+
+        if (shouldFocus) {
+            var heading = form.querySelector('.dps-step-active h4');
+            if (heading && typeof heading.focus === 'function') {
+                heading.setAttribute('tabindex', '-1');
+                heading.focus({ preventScroll: true });
+            }
         }
     }
 
@@ -631,6 +696,31 @@
         return select;
     }
 
+    function applyProductPreferences(form, preferences) {
+        if (!preferences || !preferences.length || state.restoredPreferencesApplied) {
+            return;
+        }
+
+        var wrapper = form.querySelector('#dps-product-prefs-wrapper');
+        if (!wrapper) {
+            return;
+        }
+
+        var shampoo = toArray(wrapper.querySelectorAll('select[name="pet_shampoo_pref[]"]'));
+        var perfume = toArray(wrapper.querySelectorAll('select[name="pet_perfume_pref[]"]'));
+        var accessories = toArray(wrapper.querySelectorAll('select[name="pet_accessories_pref[]"]'));
+        var restrictions = toArray(wrapper.querySelectorAll('textarea[name="pet_product_restrictions[]"]'));
+
+        preferences.forEach(function(pref, index) {
+            setFieldValue(shampoo[index], pref.pet_shampoo_pref || '');
+            setFieldValue(perfume[index], pref.pet_perfume_pref || '');
+            setFieldValue(accessories[index], pref.pet_accessories_pref || '');
+            setFieldValue(restrictions[index], pref.pet_product_restrictions || '');
+        });
+
+        state.restoredPreferencesApplied = true;
+    }
+
     function renderProductPrefsStep(form) {
         var wrapper = form.querySelector('#dps-product-prefs-wrapper');
         var petsWrapper = form.querySelector('#dps-pets-wrapper');
@@ -692,6 +782,8 @@
             box.appendChild(createField('Restrições ou observações', restrictions));
             wrapper.appendChild(box);
         });
+
+        applyProductPreferences(form, state.restoredPreferences);
     }
 
     function addSummaryItem(list, label, value) {
@@ -833,6 +925,7 @@
 
     function showDuplicateModal(data, i18n, onContinue, onCancel) {
         var existing = document.getElementById('dps-duplicate-modal');
+        var previousFocus = document.activeElement;
         if (existing && existing.parentNode) {
             existing.parentNode.removeChild(existing);
         }
@@ -901,6 +994,9 @@
             if (overlay.parentNode) {
                 overlay.parentNode.removeChild(overlay);
             }
+            if (previousFocus && typeof previousFocus.focus === 'function') {
+                previousFocus.focus({ preventScroll: true });
+            }
         }
 
         function handleCancel() {
@@ -913,6 +1009,25 @@
         function handleKeydown(event) {
             if (event.key === 'Escape') {
                 handleCancel();
+                return;
+            }
+
+            if (event.key === 'Tab') {
+                var focusable = toArray(modal.querySelectorAll('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'));
+                var first = focusable[0];
+                var last = focusable[focusable.length - 1];
+
+                if (!first || !last) {
+                    return;
+                }
+
+                if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
             }
         }
 
@@ -1002,13 +1117,13 @@
         var submitButton = form.querySelector('button[type="submit"]');
         var confirmCheckbox = document.getElementById('dps-summary-confirm');
 
-        showStep(form, 1, progress);
+        showStep(form, 1, progress, false);
 
         if (nextButton) {
             nextButton.addEventListener('click', function() {
                 clearJSErrors(form);
                 if (validateStepOne(form, false)) {
-                    showStep(form, 2, progress);
+                    showStep(form, 2, progress, true);
                 }
             });
         }
@@ -1023,20 +1138,20 @@
                     if (submitButton) {
                         submitButton.disabled = true;
                     }
-                    showStep(form, 3, progress);
+                    showStep(form, 3, progress, true);
                 }
             });
         }
 
         if (backButton) {
             backButton.addEventListener('click', function() {
-                showStep(form, 1, progress);
+                showStep(form, 1, progress, true);
             });
         }
 
         if (backButton2) {
             backButton2.addEventListener('click', function() {
-                showStep(form, 2, progress);
+                showStep(form, 2, progress, true);
             });
         }
 
@@ -1150,6 +1265,235 @@
         });
     }
 
+    function getDraftConfig() {
+        var data = getRegistrationData();
+        return data.draft || null;
+    }
+
+    function setDraftStatus(form, text) {
+        var status = form.querySelector('[data-dps-draft-status]');
+        if (status) {
+            status.textContent = text || '';
+        }
+    }
+
+    function collectDraftPayload(form) {
+        var pets = toArray(form.querySelectorAll('#dps-pets-wrapper .dps-pet-fieldset')).map(function(fieldset) {
+            return {
+                pet_name: getTrimmedValue(fieldset.querySelector('input[name="pet_name[]"]')),
+                pet_species: getTrimmedValue(fieldset.querySelector('select[name="pet_species[]"]')),
+                pet_breed: getTrimmedValue(fieldset.querySelector('input[name="pet_breed[]"]')),
+                pet_size: getTrimmedValue(fieldset.querySelector('select[name="pet_size[]"]')),
+                pet_weight: getTrimmedValue(fieldset.querySelector('input[name="pet_weight[]"]')),
+                pet_coat: getTrimmedValue(fieldset.querySelector('input[name="pet_coat[]"]')),
+                pet_color: getTrimmedValue(fieldset.querySelector('input[name="pet_color[]"]')),
+                pet_birth: getTrimmedValue(fieldset.querySelector('input[name="pet_birth[]"]')),
+                pet_sex: getTrimmedValue(fieldset.querySelector('select[name="pet_sex[]"]')),
+                pet_care: getTrimmedValue(fieldset.querySelector('textarea[name="pet_care[]"]')),
+                pet_aggressive: !!fieldset.querySelector('input[name^="pet_aggressive"]:checked')
+            };
+        });
+        var prefsWrapper = form.querySelector('#dps-product-prefs-wrapper');
+        var shampoo = prefsWrapper ? toArray(prefsWrapper.querySelectorAll('select[name="pet_shampoo_pref[]"]')) : [];
+        var perfume = prefsWrapper ? toArray(prefsWrapper.querySelectorAll('select[name="pet_perfume_pref[]"]')) : [];
+        var accessories = prefsWrapper ? toArray(prefsWrapper.querySelectorAll('select[name="pet_accessories_pref[]"]')) : [];
+        var restrictions = prefsWrapper ? toArray(prefsWrapper.querySelectorAll('textarea[name="pet_product_restrictions[]"]')) : [];
+
+        return {
+            client: {
+                client_name: getTrimmedValue(form.querySelector('input[name="client_name"]')),
+                client_cpf: getTrimmedValue(form.querySelector('input[name="client_cpf"]')),
+                client_phone: getTrimmedValue(form.querySelector('input[name="client_phone"]')),
+                client_email: getTrimmedValue(form.querySelector('input[name="client_email"]')),
+                client_birth: getTrimmedValue(form.querySelector('input[name="client_birth"]')),
+                client_instagram: getTrimmedValue(form.querySelector('input[name="client_instagram"]')),
+                client_facebook: getTrimmedValue(form.querySelector('input[name="client_facebook"]')),
+                client_photo_auth: !!form.querySelector('input[name="client_photo_auth"]:checked'),
+                client_address: getTrimmedValue(form.querySelector('input[name="client_address"]')),
+                client_referral: getTrimmedValue(form.querySelector('input[name="client_referral"]'))
+            },
+            pets: pets,
+            productPreferences: pets.map(function(_, index) {
+                return {
+                    pet_shampoo_pref: getTrimmedValue(shampoo[index]),
+                    pet_perfume_pref: getTrimmedValue(perfume[index]),
+                    pet_accessories_pref: getTrimmedValue(accessories[index]),
+                    pet_product_restrictions: getTrimmedValue(restrictions[index])
+                };
+            })
+        };
+    }
+
+    function hasDraftPayload(payload) {
+        if (!payload) {
+            return false;
+        }
+
+        return JSON.stringify(payload).replace(/[\{\}\[\]":,]/g, '').trim().length > 0;
+    }
+
+    function sendDraftRequest(form, action, payload, callback) {
+        var config = getDraftConfig();
+        var tokenInput = form.querySelector('[data-dps-draft-token]');
+        var formData = new FormData();
+        var xhr = new XMLHttpRequest();
+
+        if (!config || !config.enabled || !config.ajaxUrl) {
+            return;
+        }
+
+        formData.append('action', action);
+        formData.append('nonce', config.nonce);
+        formData.append('draft_token', tokenInput ? tokenInput.value : (config.token || ''));
+        if (payload) {
+            formData.append('payload', JSON.stringify(payload));
+        }
+
+        xhr.open('POST', config.ajaxUrl, true);
+        xhr.onload = function() {
+            var response = null;
+            try {
+                response = JSON.parse(xhr.responseText);
+            } catch (e) {
+                response = null;
+            }
+
+            if (response && response.success && response.data && response.data.token && tokenInput) {
+                tokenInput.value = response.data.token;
+                config.token = response.data.token;
+            }
+
+            if (typeof callback === 'function') {
+                callback(!!(response && response.success), response);
+            }
+        };
+        xhr.onerror = function() {
+            if (typeof callback === 'function') {
+                callback(false, null);
+            }
+        };
+        xhr.send(formData);
+    }
+
+    function restoreDraftPayload(form, payload) {
+        var client = payload && payload.client ? payload.client : {};
+        var pets = payload && payload.pets ? payload.pets : [];
+        var addButton = document.getElementById('dps-add-pet');
+        var fields;
+
+        Object.keys(client).forEach(function(name) {
+            setFieldValue(form.querySelector('[name="' + name + '"]'), client[name]);
+        });
+
+        while (addButton && form.querySelectorAll('#dps-pets-wrapper .dps-pet-fieldset').length < pets.length) {
+            addButton.click();
+        }
+
+        fields = toArray(form.querySelectorAll('#dps-pets-wrapper .dps-pet-fieldset'));
+        pets.forEach(function(pet, index) {
+            var fieldset = fields[index];
+            if (!fieldset) {
+                return;
+            }
+
+            setFieldValue(fieldset.querySelector('input[name="pet_name[]"]'), pet.pet_name);
+            setFieldValue(fieldset.querySelector('select[name="pet_species[]"]'), pet.pet_species);
+            setFieldValue(fieldset.querySelector('input[name="pet_breed[]"]'), pet.pet_breed);
+            setFieldValue(fieldset.querySelector('select[name="pet_size[]"]'), pet.pet_size);
+            setFieldValue(fieldset.querySelector('input[name="pet_weight[]"]'), pet.pet_weight);
+            setFieldValue(fieldset.querySelector('input[name="pet_coat[]"]'), pet.pet_coat);
+            setFieldValue(fieldset.querySelector('input[name="pet_color[]"]'), pet.pet_color);
+            setFieldValue(fieldset.querySelector('input[name="pet_birth[]"]'), pet.pet_birth);
+            setFieldValue(fieldset.querySelector('select[name="pet_sex[]"]'), pet.pet_sex);
+            setFieldValue(fieldset.querySelector('textarea[name="pet_care[]"]'), pet.pet_care);
+            setFieldValue(fieldset.querySelector('input[name^="pet_aggressive"]'), pet.pet_aggressive);
+
+            if (fieldset.querySelector('.dps-optional-details') && (pet.pet_breed || pet.pet_weight || pet.pet_coat || pet.pet_color || pet.pet_birth || pet.pet_care || pet.pet_aggressive)) {
+                fieldset.querySelector('.dps-optional-details').open = true;
+            }
+        });
+
+        state.restoredPreferences = payload.productPreferences || [];
+        state.restoredPreferencesApplied = false;
+        updateOwnerFields(form);
+        initBreedSelectors(form);
+        if (state.currentStep === 3) {
+            renderProductPrefsStep(form);
+            buildSummary(form);
+        }
+    }
+
+    function bindDraft(form) {
+        var config = getDraftConfig();
+        var optin = form.querySelector('[data-dps-draft-optin]');
+        var restoreButton = form.querySelector('[data-dps-draft-restore]');
+        var discardButton = form.querySelector('[data-dps-draft-discard]');
+        var restorePanel = form.querySelector('[data-dps-draft-restore-panel]');
+        var saveTimer = null;
+
+        if (!config || !config.enabled || !optin || form.dataset.dpsDraftReady === '1') {
+            return;
+        }
+
+        form.dataset.dpsDraftReady = '1';
+
+        function scheduleSave() {
+            if (!optin.checked) {
+                return;
+            }
+
+            window.clearTimeout(saveTimer);
+            saveTimer = window.setTimeout(function() {
+                var payload = collectDraftPayload(form);
+                if (!hasDraftPayload(payload)) {
+                    return;
+                }
+
+                setDraftStatus(form, config.i18n.saving);
+                sendDraftRequest(form, config.saveAction, payload, function(success) {
+                    setDraftStatus(form, success ? config.i18n.saved : config.i18n.error);
+                });
+            }, config.saveDelay || 900);
+        }
+
+        optin.addEventListener('change', function() {
+            if (optin.checked) {
+                scheduleSave();
+                return;
+            }
+
+            sendDraftRequest(form, config.clearAction, null, function(success) {
+                setDraftStatus(form, success ? config.i18n.cleared : config.i18n.error);
+            });
+        });
+
+        form.addEventListener('input', scheduleSave);
+        form.addEventListener('change', scheduleSave);
+
+        if (restoreButton && config.payload) {
+            restoreButton.addEventListener('click', function() {
+                restoreDraftPayload(form, config.payload);
+                optin.checked = true;
+                if (restorePanel) {
+                    restorePanel.hidden = true;
+                }
+                setDraftStatus(form, config.i18n.restored);
+                announce(form, config.i18n.restored);
+            });
+        }
+
+        if (discardButton) {
+            discardButton.addEventListener('click', function() {
+                sendDraftRequest(form, config.clearAction, null, function(success) {
+                    if (success && restorePanel) {
+                        restorePanel.hidden = true;
+                    }
+                    setDraftStatus(form, success ? config.i18n.cleared : config.i18n.error);
+                });
+            });
+        }
+    }
+
     function init(root) {
         var scope = root || document;
         var form = scope.querySelector ? scope.querySelector('#dps-reg-form') : document.getElementById('dps-reg-form');
@@ -1178,6 +1522,8 @@
                 }
             });
         }
+
+        bindDraft(form);
     }
 
     window.DPSRegistration = {

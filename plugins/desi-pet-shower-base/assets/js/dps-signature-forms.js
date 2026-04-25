@@ -206,7 +206,9 @@
 
     function initAddressAutocomplete( root ) {
         var scope = root || document;
-        var fields = toArray( scope.querySelectorAll( '[data-dps-address-autocomplete]' ) );
+        var fields = toArray( scope.querySelectorAll( '[data-dps-address-autocomplete]' ) ).filter( function( field ) {
+            return field.dataset.dpsPlacesReady !== '1' && field.dataset.dpsPlacesInitializing !== '1';
+        } );
 
         if ( ! fields.length ) {
             return;
@@ -222,42 +224,111 @@
             return;
         }
 
+        fields.forEach( function( field ) {
+            field.dataset.dpsPlacesInitializing = '1';
+        } );
+
         loadGooglePlaces( apiKey ).then( function() {
             fields.forEach( function( field ) {
                 if ( field.dataset.dpsPlacesReady === '1' ) {
+                    delete field.dataset.dpsPlacesInitializing;
                     return;
                 }
 
-                field.dataset.dpsPlacesReady = '1';
-                var autocomplete = new window.google.maps.places.Autocomplete( field, {
-                    fields: [ 'formatted_address', 'geometry' ],
-                    types: [ 'geocode' ],
-                } );
-
-                autocomplete.addListener( 'place_changed', function() {
-                    var place = autocomplete.getPlace();
-                    if ( place && place.formatted_address ) {
-                        field.value = place.formatted_address;
+                initPlaceAutocompleteElement( field ).then( function( initialized ) {
+                    if ( ! initialized && field.dataset.dpsPlacesReady !== '1' ) {
+                        initLegacyAddressAutocomplete( field );
                     }
-
-                    var latTargetId = field.getAttribute( 'data-dps-lat-target' );
-                    var lngTargetId = field.getAttribute( 'data-dps-lng-target' );
-                    var latField = latTargetId ? document.getElementById( latTargetId ) : null;
-                    var lngField = lngTargetId ? document.getElementById( lngTargetId ) : null;
-
-                    if ( place && place.geometry && place.geometry.location ) {
-                        if ( latField ) {
-                            latField.value = String( place.geometry.location.lat() );
-                        }
-
-                        if ( lngField ) {
-                            lngField.value = String( place.geometry.location.lng() );
-                        }
-                    }
+                    delete field.dataset.dpsPlacesInitializing;
+                } ).catch( function() {
+                    delete field.dataset.dpsPlacesInitializing;
                 } );
             } );
         } ).catch( function() {
+            fields.forEach( function( field ) {
+                delete field.dataset.dpsPlacesInitializing;
+            } );
             // Falha silenciosa: o campo continua funcionando como texto livre.
+        } );
+    }
+
+    function syncAddressField( field, place ) {
+        var formattedAddress = place && ( place.formattedAddress || place.formatted_address || place.displayName ) ? ( place.formattedAddress || place.formatted_address || place.displayName ) : '';
+        var location = place && ( place.location || ( place.geometry && place.geometry.location ) ) ? ( place.location || place.geometry.location ) : null;
+        var latTargetId = field.getAttribute( 'data-dps-lat-target' );
+        var lngTargetId = field.getAttribute( 'data-dps-lng-target' );
+        var latField = latTargetId ? document.getElementById( latTargetId ) : null;
+        var lngField = lngTargetId ? document.getElementById( lngTargetId ) : null;
+
+        if ( formattedAddress ) {
+            field.value = formattedAddress;
+            field.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+            field.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+        }
+
+        if ( location ) {
+            if ( latField ) {
+                latField.value = String( typeof location.lat === 'function' ? location.lat() : location.lat );
+            }
+
+            if ( lngField ) {
+                lngField.value = String( typeof location.lng === 'function' ? location.lng() : location.lng );
+            }
+        }
+    }
+
+    function initPlaceAutocompleteElement( field ) {
+        if ( ! window.google || ! window.google.maps || typeof window.google.maps.importLibrary !== 'function' ) {
+            return Promise.resolve( false );
+        }
+
+        return window.google.maps.importLibrary( 'places' ).then( function( places ) {
+            var ElementCtor = places.PlaceAutocompleteElement || ( window.google.maps.places && window.google.maps.places.PlaceAutocompleteElement );
+            if ( ! ElementCtor ) {
+                return false;
+            }
+
+            var widget = new ElementCtor();
+            var label = field.closest ? field.closest( 'label' ) : null;
+            widget.className = 'dps-place-autocomplete-element';
+            widget.setAttribute( 'aria-label', label ? label.textContent.replace( /\s+/g, ' ' ).trim() : 'Endereco completo' );
+
+            field.classList.add( 'dps-address-source-hidden' );
+            field.setAttribute( 'aria-hidden', 'true' );
+            field.tabIndex = -1;
+            field.insertAdjacentElement( 'afterend', widget );
+            field.dataset.dpsPlacesReady = '1';
+            field.dataset.dpsPlacesMode = 'place-autocomplete-element';
+
+            widget.addEventListener( 'gmp-select', function( event ) {
+                var prediction = event.placePrediction || ( event.detail && event.detail.placePrediction );
+                if ( ! prediction || typeof prediction.toPlace !== 'function' ) {
+                    return;
+                }
+
+                var place = prediction.toPlace();
+                place.fetchFields( { fields: [ 'displayName', 'formattedAddress', 'location' ] } ).then( function() {
+                    syncAddressField( field, place );
+                } );
+            } );
+
+            return true;
+        } ).catch( function() {
+            return false;
+        } );
+    }
+
+    function initLegacyAddressAutocomplete( field ) {
+        field.dataset.dpsPlacesReady = '1';
+        field.dataset.dpsPlacesMode = 'legacy-autocomplete';
+
+        var autocomplete = new window.google.maps.places.Autocomplete( field, {
+            fields: [ 'formatted_address', 'geometry' ],
+            types: [ 'geocode' ],
+        } );
+
+        autocomplete.addListener( 'place_changed', function() {
+            syncAddressField( field, autocomplete.getPlace() );
         } );
     }
 

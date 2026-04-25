@@ -14,6 +14,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 global $wpdb;
 
 require_once __DIR__ . '/includes/class-dps-registration-storage.php';
+require_once __DIR__ . '/includes/class-dps-registration-maintenance.php';
 
 // Remove page criada pelo plugin (opcional - comentado para preservar)
 // $page_id = get_option( 'dps_registration_page_id' );
@@ -70,3 +71,4 @@ DPS_Registration_Storage::drop_tables();
 
 // Limpa scheduled events (cron)
 wp_clear_scheduled_hook( 'dps_registration_confirmation_reminder' );
+DPS_Registration_Maintenance::deactivate();
