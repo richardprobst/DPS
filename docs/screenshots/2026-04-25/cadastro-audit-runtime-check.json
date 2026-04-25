@@ -1,0 +1,123 @@
+{
+  "date": "2026-04-25",
+  "site": "https://desi.pet",
+  "surface": "Cadastro Add-on",
+  "runtime": {
+    "wp_cli": "2.12.0",
+    "server_php": "8.2.30",
+    "plugin_requires_php": "8.4"
+  },
+  "published_pages": [
+    {
+      "id": 971,
+      "slug": "cadastro-de-clientes-e-pets",
+      "shortcode": "[dps_registration_v2]"
+    },
+    {
+      "id": 1555,
+      "slug": "1555-2",
+      "shortcode": "[dps_registration_form]"
+    },
+    {
+      "id": 1560,
+      "slug": "cadastro",
+      "shortcode": "[dps_registration_v2]"
+    }
+  ],
+  "authenticated_session": {
+    "created_via_wp_cli": true,
+    "role": "administrator",
+    "removed_after_validation": true
+  },
+  "responsive_metrics": [
+    {
+      "width": 375,
+      "hasForm": true,
+      "currentStep": "1",
+      "adminOptions": true,
+      "duplicateConfig": true,
+      "hasDpsRegistration": true,
+      "addressTag": "TEXTAREA",
+      "pacTargetInput": true,
+      "bodyScrollWidth": 360,
+      "viewportWidth": 375,
+      "horizontalOverflow": false,
+      "formWidth": 324
+    },
+    {
+      "width": 600,
+      "hasForm": true,
+      "currentStep": "1",
+      "adminOptions": true,
+      "duplicateConfig": true,
+      "hasDpsRegistration": true,
+      "addressTag": "TEXTAREA",
+      "pacTargetInput": true,
+      "bodyScrollWidth": 585,
+      "viewportWidth": 600,
+      "horizontalOverflow": false,
+      "formWidth": 541
+    },
+    {
+      "width": 840,
+      "hasForm": true,
+      "currentStep": "1",
+      "adminOptions": true,
+      "duplicateConfig": true,
+      "hasDpsRegistration": true,
+      "addressTag": "TEXTAREA",
+      "pacTargetInput": true,
+      "bodyScrollWidth": 825,
+      "viewportWidth": 840,
+      "horizontalOverflow": false,
+      "formWidth": 680
+    },
+    {
+      "width": 1200,
+      "hasForm": true,
+      "currentStep": "1",
+      "adminOptions": true,
+      "duplicateConfig": true,
+      "hasDpsRegistration": true,
+      "addressTag": "TEXTAREA",
+      "pacTargetInput": true,
+      "bodyScrollWidth": 1185,
+      "viewportWidth": 1200,
+      "horizontalOverflow": false,
+      "formWidth": 840
+    },
+    {
+      "width": 1920,
+      "hasForm": true,
+      "currentStep": "1",
+      "adminOptions": true,
+      "duplicateConfig": true,
+      "hasDpsRegistration": true,
+      "addressTag": "TEXTAREA",
+      "pacTargetInput": true,
+      "bodyScrollWidth": 1905,
+      "viewportWidth": 1920,
+      "horizontalOverflow": false,
+      "formWidth": 920
+    }
+  ],
+  "functional_smoke": {
+    "blank_step_one_errors": [
+      "O campo Nome e obrigatorio.",
+      "O campo Telefone / WhatsApp e obrigatorio."
+    ],
+    "filled_flow_without_submit": {
+      "afterStep1": "2",
+      "currentStep": "3",
+      "productPrefsCount": 1,
+      "submitDisabledBeforeConfirm": true,
+      "submitDisabledAfterConfirm": false
+    }
+  },
+  "known_runtime_issue": {
+    "component": "Google Places",
+    "addressFieldTag": "TEXTAREA",
+    "error": "InvalidValueError: not an instance of HTMLInputElement",
+    "apiKeyRedacted": true
+  }
+}
