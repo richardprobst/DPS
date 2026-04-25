@@ -51,6 +51,8 @@ Arquivos de codigo alterados:
 - `./cadastro-10melhorias-admin-1200.png` - Cadastro autenticado/admin em 1200px.
 - `./cadastro-10melhorias-admin-1920.png` - Cadastro autenticado/admin em 1920px.
 - `./cadastro-10melhorias-flow-1200.png` - Fluxo preenchido ate etapa 3 com dois pets, resumo, autorizacao de foto refletida e confirmacao.
+- `./cadastro-address-contrast-field-1200.png` - Campo Endereco completo com texto digitado e contraste corrigido em 1200px.
+- `./cadastro-address-contrast-typed-1200.png` - Captura full-page do campo Endereco completo em foco com texto digitado e sugestoes do Google Places.
 
 ## Capturas da foto do pet
 
@@ -88,6 +90,8 @@ Resumo:
 - validacao em branco passou a bloquear avanco tambem com `Informe se autoriza ou nao autoriza a publicacao da foto do pet.`;
 - runtime publicado confirmou `photoAuthFieldExists: true`, `photoAuthOptions: 2`, `photoAuthRequired: true` e `summaryHasPhotoAuth: true`;
 - campo Telefone/WhatsApp validado sem o texto fixo `Formato: (DDD) numero com 8 ou 9 digitos`; `phoneHintExists: false` nos cinco breakpoints e grid essencial com menor espaco vertical entre linhas;
+- campo Endereco completo validado com `PlaceAutocompleteElement` em superficie clara: `placeElementColor: rgb(17, 22, 28)`, `placeElementBackground: rgb(255, 255, 255)` e `placeElementColorScheme: light` nos cinco breakpoints;
+- captura dedicada confirmou endereco digitado legivel no componente Google Places, sem fundo escuro e sem texto apagado;
 - rascunho opt-in salvou, exibiu `Rascunho salvo.`, restaurou o nome do tutor e foi limpo apos envio real;
 - clone de pet gerou dois fieldsets, legends `Pet 1` e `Pet 2`, e nomes `pet_aggressive[0]` / `pet_aggressive[1]`;
 - etapa 3 gerou preferencias e resumo para dois pets;

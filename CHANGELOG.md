@@ -107,6 +107,7 @@ Antes de criar uma nova versÃ£o oficial:
 - Transformada a autorização de publicação da foto do pet em escolha obrigatória `Autorizo`/`Não autorizo`, destacada acima do botão Próximo.
 - Adicionado indicador `Expandir`/`Recolher` aos disclosures opcionais do Cadastro para deixar a área expansível explícita.
 - Removida a dica fixa de formato do campo Telefone/WhatsApp e compactado o espaçamento vertical dos campos essenciais.
+- Corrigido contraste do componente Google Places no campo Endereço completo, forçando superfície clara e texto legível no padrão DPS Signature.
 - Reorganizada a etapa de pets para manter campos obrigatorios em primeiro plano e mover detalhes/cuidado para disclosures opcionais.
 - Reorganizada a foto do pet como campo opcional dentro dos detalhes do pet, com preview quadrado, borda fina e validação client-side alinhados ao DPS Signature.
 - Reafirmados `desi-pet-shower-registration` e `desi-pet-shower-booking` como implementações canônicas dos fluxos públicos de cadastro e agendamento, encerrando o dual-run do add-on `desi-pet-shower-frontend`.

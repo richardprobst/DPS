@@ -79,6 +79,10 @@ async function inspectCurrentPage(page, width) {
         const address = document.querySelector('#dps-client-address');
         const submit = document.querySelector('button[type="submit"]');
         const photoAuthInputs = [...document.querySelectorAll('input[name="client_photo_auth"]')];
+        const placeElement = document.querySelector('gmp-place-autocomplete, .dps-place-autocomplete-element');
+        const placeStyles = placeElement ? window.getComputedStyle(placeElement) : null;
+        const shadowInput = placeElement && placeElement.shadowRoot ? placeElement.shadowRoot.querySelector('input') : null;
+        const shadowInputStyles = shadowInput ? window.getComputedStyle(shadowInput) : null;
         const getText = (selector) => {
             const node = document.querySelector(selector);
             return node ? node.textContent.trim() : '';
@@ -103,6 +107,11 @@ async function inspectCurrentPage(page, width) {
             placesReady: address ? address.dataset.dpsPlacesReady || '' : '',
             placesMode: address ? address.dataset.dpsPlacesMode || '' : '',
             hasPlaceElement: !!document.querySelector('gmp-place-autocomplete, .dps-place-autocomplete-element'),
+            placeElementColor: placeStyles ? placeStyles.color : '',
+            placeElementBackground: placeStyles ? placeStyles.backgroundColor : '',
+            placeElementColorScheme: placeStyles ? placeStyles.colorScheme : '',
+            placeShadowInputColor: shadowInputStyles ? shadowInputStyles.color : '',
+            placeShadowInputBackground: shadowInputStyles ? shadowInputStyles.backgroundColor : '',
             hasPacTargetInput: address ? address.classList.contains('pac-target-input') : false,
             hasHiddenAddressSource: address ? address.classList.contains('dps-address-source-hidden') : false,
             duplicateCheckEnabled: !!(window.dpsRegistrationData && window.dpsRegistrationData.duplicateCheck && window.dpsRegistrationData.duplicateCheck.enabled),

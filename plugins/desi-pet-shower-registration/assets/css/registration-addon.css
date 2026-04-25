@@ -962,8 +962,27 @@
     width: 100%;
     min-height: 44px;
     margin-top: var(--dps-reg-gap-sm);
+    border: 1px solid var(--dps-reg-line);
+    border-radius: 2px;
+    background: var(--dps-reg-control);
     color: var(--dps-reg-ink);
+    color-scheme: light;
     font-family: var(--dps-signature-font-body, var(--dps-font-body, system-ui, sans-serif));
+    --gmp-mat-color-surface: var(--dps-reg-control);
+    --gmp-mat-color-surface-container: var(--dps-reg-control);
+    --gmp-mat-color-surface-container-high: var(--dps-reg-paper);
+    --gmp-mat-color-on-surface: var(--dps-reg-ink);
+    --gmp-mat-color-on-surface-variant: var(--dps-reg-muted);
+    --gmp-mat-color-primary: var(--dps-reg-petrol);
+    --gmp-mat-color-outline: var(--dps-reg-line);
+    --gmp-mat-color-outline-variant: var(--dps-reg-line);
+    --gmp-mat-font-family: var(--dps-signature-font-body, var(--dps-font-body, system-ui, sans-serif));
+    --gmpx-color-surface: var(--dps-reg-control);
+    --gmpx-color-on-surface: var(--dps-reg-ink);
+    --gmpx-color-on-surface-variant: var(--dps-reg-muted);
+    --gmpx-color-primary: var(--dps-reg-petrol);
+    --gmpx-color-outline: var(--dps-reg-line);
+    --gmpx-font-family-base: var(--dps-signature-font-body, var(--dps-font-body, system-ui, sans-serif));
 }
 
 .dps-place-autocomplete-element:focus-within,
