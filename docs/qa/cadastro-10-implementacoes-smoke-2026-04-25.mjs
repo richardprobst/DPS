@@ -103,6 +103,8 @@ async function inspectCurrentPage(page, width) {
             draftConfigEnabled: !!(window.dpsRegistrationData && window.dpsRegistrationData.draft && window.dpsRegistrationData.draft.enabled),
             submitDisabled: submit ? submit.disabled : null,
             stepLabel: getText('#dps-step-label'),
+            stepCounterExists: !!document.querySelector('#dps-step-counter'),
+            progressTopText: getText('.dps-progress-top'),
             scrollWidth: Math.max(doc.scrollWidth, body ? body.scrollWidth : 0),
             viewportWidth: window.innerWidth,
             hasHorizontalOverflow: Math.max(doc.scrollWidth, body ? body.scrollWidth : 0) > window.innerWidth + 1,

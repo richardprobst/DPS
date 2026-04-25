@@ -1,22 +1,22 @@
 {
-  "generatedAt": "2026-04-25T20:12:00.081Z",
+  "generatedAt": "2026-04-25T22:39:24.492Z",
   "registrationUrl": "https://desi.pet/cadastro-de-clientes-e-pets/",
-  "runRealSubmit": true,
+  "runRealSubmit": false,
   "testData": {
-    "suffix": "20260425PETPHOTO171126",
-    "clientName": "Cliente Codex Real Cadastro 20260425PETPHOTO171126",
-    "phone": "(11) 94788-7238",
+    "suffix": "STEPCOUNTER20260425193852",
+    "clientName": "Cliente Codex Real Cadastro STEPCOUNTER20260425193852",
+    "phone": "(11) 95673-3427",
     "address": "Rua Codex QA, 123, Sao Paulo",
-    "referral": "QA Codex 20260425PETPHOTO171126",
+    "referral": "QA Codex STEPCOUNTER20260425193852",
     "pets": [
       {
-        "name": "Luna Codex 20260425PETPHOTO171126",
+        "name": "Luna Codex STEPCOUNTER20260425193852",
         "species": "cao",
         "size": "pequeno",
         "sex": "femea"
       },
       {
-        "name": "Thor Codex 20260425PETPHOTO171126",
+        "name": "Thor Codex STEPCOUNTER20260425193852",
         "species": "gato",
         "size": "medio",
         "sex": "macho"
@@ -45,6 +45,8 @@
       "draftConfigEnabled": true,
       "submitDisabled": true,
       "stepLabel": "Passo 1 de 3",
+      "stepCounterExists": false,
+      "progressTopText": "Passo 1 de 3",
       "scrollWidth": 375,
       "viewportWidth": 375,
       "hasHorizontalOverflow": false
@@ -70,6 +72,8 @@
       "draftConfigEnabled": true,
       "submitDisabled": true,
       "stepLabel": "Passo 1 de 3",
+      "stepCounterExists": false,
+      "progressTopText": "Passo 1 de 3",
       "scrollWidth": 600,
       "viewportWidth": 600,
       "hasHorizontalOverflow": false
@@ -95,6 +99,8 @@
       "draftConfigEnabled": true,
       "submitDisabled": true,
       "stepLabel": "Passo 1 de 3",
+      "stepCounterExists": false,
+      "progressTopText": "Passo 1 de 3",
       "scrollWidth": 840,
       "viewportWidth": 840,
       "hasHorizontalOverflow": false
@@ -120,6 +126,8 @@
       "draftConfigEnabled": true,
       "submitDisabled": true,
       "stepLabel": "Passo 1 de 3",
+      "stepCounterExists": false,
+      "progressTopText": "Passo 1 de 3",
       "scrollWidth": 1200,
       "viewportWidth": 1200,
       "hasHorizontalOverflow": false
@@ -145,6 +153,8 @@
       "draftConfigEnabled": true,
       "submitDisabled": true,
       "stepLabel": "Passo 1 de 3",
+      "stepCounterExists": false,
+      "progressTopText": "Passo 1 de 3",
       "scrollWidth": 1920,
       "viewportWidth": 1920,
       "hasHorizontalOverflow": false
@@ -158,7 +168,7 @@
     "firstInvalidName": "client_name",
     "draftStatusAfterSave": "Rascunho salvo.",
     "restoreAvailable": true,
-    "restoredName": "Cliente Codex Real Cadastro 20260425PETPHOTO171126",
+    "restoredName": "Cliente Codex Real Cadastro STEPCOUNTER20260425193852",
     "flowState": {
       "stepLabel": "Passo 3 de 3",
       "petFieldsets": 2,
@@ -174,10 +184,7 @@
       "submitDisabled": false
     },
     "submitState": {
-      "attempted": true,
-      "url": "https://desi.pet/cadastro-de-clientes-e-pets/?registered=1",
-      "successVisible": true,
-      "successText": "Cadastro realizado com sucessoSeus dados foram recebidos. Você já pode agendar banho e tosa para seus pets!Próximo passo: Entre em contato conosco por WhatsApp ou telefone para agendar o primeiro atendimento.Se você informou um email, verifique sua caixa de entrada para confirmar o cadastro e receber novidades.Agendar meu primeiro atendimento"
+      "attempted": false
     }
   },
   "consoleMessages": [
@@ -248,42 +255,32 @@
     {
       "type": "info",
       "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
-    },
-    {
-      "type": "log",
-      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
-    },
-    {
-      "type": "info",
-      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
     }
   ],
   "networkRequests": [
     "https://desi.pet/wp-login.php",
     "https://desi.pet/wp-admin/admin-ajax.php?action=fluent_smtp_get_dashboard_html",
-    "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=20260425PETPHOTO171126&bp=375",
+    "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=STEPCOUNTER20260425193852&bp=375",
     "https://maps.googleapis.com/maps/api/js?key=[redacted]&libraries=places&loading=async&callback=dpsSignatureGooglePlacesReady",
     "https://maps.googleapis.com/maps-api-v3/api/js/64/9c/places.js",
     "https://maps.googleapis.com/maps-api-v3/api/js/64/9c/main.js",
-    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777147892&plat=3%3A65536%2C4%3A65536%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3D20260425PETPHOTO171126%26bp%3D375&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777147892649&bpp=7&bdt=483&idt=173&shv=r20260423&mjsv=m202604220101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=7515020893178&frm=20&pv=2&u_tz=-180&u_his=4&u_h=900&u_w=375&u_ah=900&u_aw=375&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=375&bih=900&scr_x=0&scr_y=0&eid=31097955%2C42532524%2C95389146%2C31098047%2C95388298%2C95387778%2C95340253%2C95340255&oid=2&pvsid=3330903417464812&tmod=1025244578&uas=3&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C375%2C0%2C375%2C900%2C375%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=215",
+    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777156739&plat=3%3A65536%2C4%3A65536%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3DSTEPCOUNTER20260425193852%26bp%3D375&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777156739025&bpp=6&bdt=484&idt=185&shv=r20260423&mjsv=m202604210101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=3395214458262&frm=20&pv=2&u_tz=-180&u_his=4&u_h=900&u_w=375&u_ah=900&u_aw=375&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=375&bih=900&scr_x=0&scr_y=0&eid=95386813%2C95388270%2C95387778&oid=2&pvsid=2168214476763421&tmod=2088452161&uas=3&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C375%2C0%2C375%2C900%2C375%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=241",
     "https://maps.googleapis.com/maps/api/mapsjs/gen_204?csp_test=true",
     "https://maps.googleapis.com/maps-api-v3/api/js/64/9c/common.js",
     "https://maps.googleapis.com/maps-api-v3/api/js/64/9c/util.js",
     "https://maps.gstatic.com/mapfiles/api-3/images/autocomplete-icons.png",
     "https://www.google.com/recaptcha/api2/aframe",
-    "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=20260425PETPHOTO171126&bp=600",
-    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777147895&plat=3%3A65536%2C4%3A65536%2C9%3A32768%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3D20260425PETPHOTO171126%26bp%3D600&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777147895512&bpp=1&bdt=244&idt=30&shv=r20260423&mjsv=m202604220101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=7065816702486&frm=20&pv=2&u_tz=-180&u_his=5&u_h=900&u_w=600&u_ah=900&u_aw=600&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=600&bih=900&scr_x=0&scr_y=0&eid=95382262%2C95386814%2C31098047%2C42533294%2C95387778&oid=2&pvsid=7842409110003344&tmod=1025244578&uas=3&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C600%2C0%2C600%2C900%2C600%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=50",
-    "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=20260425PETPHOTO171126&bp=840",
-    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777147898&plat=3%3A65536%2C4%3A65536%2C9%3A32768%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3D20260425PETPHOTO171126%26bp%3D840&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777147898478&bpp=1&bdt=136&idt=13&shv=r20260423&mjsv=m202604220101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=7494517000568&frm=20&pv=2&u_tz=-180&u_his=6&u_h=900&u_w=840&u_ah=900&u_aw=840&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=840&bih=900&scr_x=0&scr_y=0&eid=95382263%2C95386950%2C31098047%2C42533293%2C95386338%2C95388297%2C95387778&oid=2&pvsid=3512771485655287&tmod=1025244578&uas=0&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C840%2C0%2C840%2C900%2C840%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=25",
-    "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=20260425PETPHOTO171126&bp=1200",
-    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777147901&plat=3%3A16%2C4%3A16%2C9%3A32776%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3D20260425PETPHOTO171126%26bp%3D1200&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777147901457&bpp=1&bdt=152&idt=13&shv=r20260423&mjsv=m202604220101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=1687694128430&frm=20&pv=2&u_tz=-180&u_his=7&u_h=900&u_w=1200&u_ah=900&u_aw=1200&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=1200&bih=900&scr_x=0&scr_y=0&eid=31098047%2C42533293%2C95388269%2C95386195%2C95387777&oid=2&pvsid=3629834438229053&tmod=1025244578&uas=3&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C900%2C1200%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=33",
-    "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=20260425PETPHOTO171126&bp=1920",
-    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777147904&plat=9%3A32776%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1081344%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3D20260425PETPHOTO171126%26bp%3D1920&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777147904378&bpp=1&bdt=143&idt=13&shv=r20260423&mjsv=m202604220101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=6723568449132&frm=20&pv=2&u_tz=-180&u_his=8&u_h=900&u_w=1920&u_ah=900&u_aw=1920&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=1920&bih=900&scr_x=0&scr_y=0&eid=31097956%2C42532523%2C31098047%2C95387777&oid=2&pvsid=2507844291891072&tmod=1025244578&uas=0&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C1920%2C0%2C1920%2C900%2C1920%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&plas=366x707_l%7C366x707_r&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=34",
-    "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=20260425PETPHOTO171126&flow=1",
-    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777147907&plat=3%3A16%2C4%3A16%2C9%3A32776%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3D20260425PETPHOTO171126%26flow%3D1&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777147907318&bpp=1&bdt=129&idt=9&shv=r20260423&mjsv=m202604220101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=4463146433795&frm=20&pv=2&u_tz=-180&u_his=9&u_h=900&u_w=1200&u_ah=900&u_aw=1200&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=1200&bih=900&scr_x=0&scr_y=0&eid=95387509%2C31098047%2C95344791%2C95386338%2C95388297%2C95386194%2C95387778&oid=2&pvsid=6002619439690832&tmod=1025244578&uas=0&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C900%2C1200%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=29",
+    "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=STEPCOUNTER20260425193852&bp=600",
+    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777156742&plat=3%3A65536%2C4%3A65536%2C9%3A32768%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3DSTEPCOUNTER20260425193852%26bp%3D600&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777156741998&bpp=1&bdt=182&idt=19&shv=r20260423&mjsv=m202604210101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=406474771990&frm=20&pv=2&u_tz=-180&u_his=5&u_h=900&u_w=600&u_ah=900&u_aw=600&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=600&bih=900&scr_x=0&scr_y=0&eid=31097955%2C95386362%2C95387779&oid=2&pvsid=7441881226611301&tmod=2088452161&uas=3&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C600%2C0%2C600%2C900%2C600%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=34",
+    "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=STEPCOUNTER20260425193852&bp=840",
+    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777156744&plat=3%3A65536%2C4%3A65536%2C9%3A32768%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3DSTEPCOUNTER20260425193852%26bp%3D840&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777156744814&bpp=1&bdt=157&idt=13&shv=r20260423&mjsv=m202604210101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=3761767163080&frm=20&pv=2&u_tz=-180&u_his=6&u_h=900&u_w=840&u_ah=900&u_aw=840&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=840&bih=900&scr_x=0&scr_y=0&eid=31097955%2C95389145%2C95372615%2C95387779&oid=2&pvsid=4661406336415329&tmod=2088452161&uas=0&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C840%2C0%2C840%2C900%2C840%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=25",
+    "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=STEPCOUNTER20260425193852&bp=1200",
+    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777156747&plat=3%3A16%2C4%3A16%2C9%3A32776%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3DSTEPCOUNTER20260425193852%26bp%3D1200&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777156747724&bpp=2&bdt=160&idt=15&shv=r20260423&mjsv=m202604210101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=3434753380623&frm=20&pv=2&u_tz=-180&u_his=7&u_h=900&u_w=1200&u_ah=900&u_aw=1200&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=1200&bih=900&scr_x=0&scr_y=0&eid=31097955%2C42532524%2C95387779&oid=2&pvsid=4709699399887372&tmod=2088452161&uas=0&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C900%2C1200%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=46",
+    "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=STEPCOUNTER20260425193852&bp=1920",
+    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777156750&plat=9%3A32776%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1081344%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3DSTEPCOUNTER20260425193852%26bp%3D1920&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777156750657&bpp=1&bdt=166&idt=18&shv=r20260423&mjsv=m202604210101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=2852933316519&frm=20&pv=2&u_tz=-180&u_his=8&u_h=900&u_w=1920&u_ah=900&u_aw=1920&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=1920&bih=900&scr_x=0&scr_y=0&eid=31097955%2C95366176%2C95382262%2C95386950%2C42533294%2C95388269%2C95386195%2C95387777&oid=2&pvsid=4423007497865386&tmod=2088452161&uas=3&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C1920%2C0%2C1920%2C900%2C1920%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&plas=366x707_l%7C366x707_r&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=41",
+    "https://desi.pet/cadastro-de-clientes-e-pets/?codex_qa=STEPCOUNTER20260425193852&flow=1",
+    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777156754&plat=3%3A16%2C4%3A16%2C9%3A32776%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3DSTEPCOUNTER20260425193852%26flow%3D1&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777156754816&bpp=1&bdt=132&idt=15&shv=r20260423&mjsv=m202604210101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=5617940924325&frm=20&pv=2&u_tz=-180&u_his=9&u_h=900&u_w=1200&u_ah=900&u_aw=1200&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=1200&bih=900&scr_x=0&scr_y=0&eid=95382262%2C95386814%2C95389145%2C42533293%2C95387778&oid=2&pvsid=7423879293124711&tmod=2088452161&uas=3&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C900%2C1200%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=34",
     "https://desi.pet/wp-admin/admin-ajax.php",
-    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777147912&plat=3%3A16%2C4%3A16%2C9%3A32776%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3D20260425PETPHOTO171126%26flow%3D1&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777147912283&bpp=1&bdt=64&idt=41&shv=r20260423&mjsv=m202604220101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=691071631894&frm=20&pv=2&u_tz=-180&u_his=9&u_h=900&u_w=1200&u_ah=900&u_aw=1200&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=1200&bih=900&scr_x=0&scr_y=178&eid=31098047%2C42533294%2C95387779&oid=2&pvsid=1890883376382492&tmod=1025244578&uas=0&nvt=2&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C900%2C1200%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=67",
-    "https://desi.pet/cadastro-de-clientes-e-pets/?registered=1",
-    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777147919&plat=3%3A16%2C4%3A16%2C9%3A32776%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fregistered%3D1&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777147919895&bpp=2&bdt=186&idt=10&shv=r20260423&mjsv=m202604220101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=8392409166480&frm=20&pv=2&u_tz=-180&u_his=10&u_h=900&u_w=1200&u_ah=900&u_aw=1200&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=1200&bih=900&scr_x=0&scr_y=0&eid=95382262%2C95386814%2C31098047%2C95388298%2C95387779&oid=2&pvsid=6738591649194855&tmod=1025244578&uas=1&nvt=1&fsapi=1&ref=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3D20260425PETPHOTO171126%26flow%3D1&fc=1920&brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C900%2C1200%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=38"
+    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777156760&plat=3%3A16%2C4%3A16%2C9%3A32776%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro-de-clientes-e-pets%2F%3Fcodex_qa%3DSTEPCOUNTER20260425193852%26flow%3D1&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777156760041&bpp=2&bdt=81&idt=55&shv=r20260423&mjsv=m202604210101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=7124694964176&frm=20&pv=2&u_tz=-180&u_his=9&u_h=900&u_w=1200&u_ah=900&u_aw=1200&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=1200&bih=900&scr_x=0&scr_y=170&eid=31097956%2C95387509%2C95388269%2C95387779&oid=2&pvsid=481110647748993&tmod=2088452161&uas=0&nvt=2&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C900%2C1200%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=88"
   ]
 }

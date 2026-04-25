@@ -82,6 +82,7 @@ Resumo:
 - foco acessivel apos erro foi para `client_name`;
 - microcopy final validada em portugues: `Tutor e pets em um único cadastro`, `Campos obrigatórios`, `Endereço e origem`;
 - auditoria computada confirmou `Sora` nos titulos, `Manrope` no corpo/UI, wizard/botoes/disclosures com `0px` de raio e inputs com `2px`;
+- topo do wizard validado sem contador visual duplicado: `stepCounterExists: false` e `progressTopText: Passo 1 de 3` nos cinco breakpoints;
 - rascunho opt-in salvou, exibiu `Rascunho salvo.`, restaurou o nome do tutor e foi limpo apos envio real;
 - clone de pet gerou dois fieldsets, legends `Pet 1` e `Pet 2`, e nomes `pet_aggressive[0]` / `pet_aggressive[1]`;
 - etapa 3 gerou preferencias e resumo para dois pets;

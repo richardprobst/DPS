@@ -652,9 +652,6 @@
             progress.label.textContent = 'Passo ' + step + ' de ' + state.totalSteps;
             progress.label.setAttribute('aria-current', 'step');
         }
-        if (progress.counter) {
-            progress.counter.textContent = step + '/' + state.totalSteps;
-        }
         if (progress.bar) {
             progress.bar.style.width = Math.round((step / state.totalSteps) * 100) + '%';
             if (progress.bar.parentElement) {
@@ -1270,7 +1267,6 @@
     function bindWizard(form) {
         var progress = {
             label: document.getElementById('dps-step-label'),
-            counter: document.getElementById('dps-step-counter'),
             bar: document.getElementById('dps-progress-bar-fill')
         };
         var nextButton = document.getElementById('dps-next-step');

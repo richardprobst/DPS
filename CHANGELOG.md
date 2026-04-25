@@ -121,6 +121,7 @@ Antes de criar uma nova versÃ£o oficial:
 - Corrigido o autocomplete do Google Places no Cadastro, trocando o campo de endereco para `input` e usando o loader compartilhado `dpsSignatureGooglePlacesReady`/`DPSSignatureForms` em vez do callback paralelo antigo.
 - Corrigido o indice do checkbox `pet_aggressive` em pets adicionados dinamicamente, evitando desalinhamento entre o pet clonado e os metadados salvos.
 - Corrigido o texto do campo de indicacao injetado pelo add-on Loyalty no Cadastro, removendo mojibake visivel no formulario publicado.
+- Removido o contador visual duplicado `1/3` do topo do wizard de Cadastro, mantendo apenas `Passo X de 3` e a barra de progresso.
 - Corrigida corrida assíncrona que podia inicializar mais de um widget visual de Google Places no mesmo campo de endereco.
 - Corrigido o backend para honrar `dps_admin_send_welcome` quando o admin ativa `dps_admin_skip_confirmation`, evitando envio de boas-vindas em cadastros operacionais desmarcados.
 - Corrigidos arquivos PHP do pacote DPS com BOM no ambiente publicado, eliminando contaminação de respostas JSON do AJAX e estabilizando modais, painéis e integrações que dependem de payload limpo.

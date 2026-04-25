@@ -2863,7 +2863,6 @@ class DPS_Registration_Addon {
         echo '<div class="dps-progress" aria-live="polite">';
         echo '<div class="dps-progress-top">';
         echo '<span id="dps-step-label">' . esc_html__( 'Passo 1 de 3', 'dps-registration-addon' ) . '</span>';
-        echo '<span id="dps-step-counter">1/3</span>';
         echo '</div>';
         echo '<div class="dps-progress-bar" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1">';
         echo '<span id="dps-progress-bar-fill"></span>';

@@ -185,21 +185,12 @@
 .dps-progress-top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: var(--dps-reg-gap-md);
     color: var(--dps-reg-ink);
     font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
-}
-
-#dps-step-counter {
-    min-width: 44px;
-    padding: 3px 8px;
-    border: 1px solid var(--dps-reg-petrol);
-    background: var(--dps-reg-paper);
-    color: var(--dps-reg-petrol);
-    text-align: center;
 }
 
 .dps-progress-bar {
