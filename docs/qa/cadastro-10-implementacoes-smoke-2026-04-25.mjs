@@ -97,6 +97,7 @@ async function inspectCurrentPage(page, width) {
             photoAuthFieldExists: !!document.querySelector('[data-dps-photo-auth-field]'),
             photoAuthOptions: photoAuthInputs.length,
             photoAuthRequired: photoAuthInputs.length === 2 && photoAuthInputs.every((input) => input.required),
+            phoneHintExists: !!document.querySelector('#dps-phone-hint'),
             publicReadonlyOwnerFields: [...document.querySelectorAll('input[readonly]')].filter((input) => /cliente|owner/i.test(input.name || input.id || '')).length,
             addressTag: address ? address.tagName : '',
             placesReady: address ? address.dataset.dpsPlacesReady || '' : '',

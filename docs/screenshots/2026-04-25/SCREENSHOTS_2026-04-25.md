@@ -87,6 +87,7 @@ Resumo:
 - autorizacao de publicacao de foto movida para um fieldset obrigatorio acima do botao `Proximo`, com opcoes destacadas `Autorizo` e `Nao autorizo`;
 - validacao em branco passou a bloquear avanco tambem com `Informe se autoriza ou nao autoriza a publicacao da foto do pet.`;
 - runtime publicado confirmou `photoAuthFieldExists: true`, `photoAuthOptions: 2`, `photoAuthRequired: true` e `summaryHasPhotoAuth: true`;
+- campo Telefone/WhatsApp validado sem o texto fixo `Formato: (DDD) numero com 8 ou 9 digitos`; `phoneHintExists: false` nos cinco breakpoints e grid essencial com menor espaco vertical entre linhas;
 - rascunho opt-in salvou, exibiu `Rascunho salvo.`, restaurou o nome do tutor e foi limpo apos envio real;
 - clone de pet gerou dois fieldsets, legends `Pet 1` e `Pet 2`, e nomes `pet_aggressive[0]` / `pet_aggressive[1]`;
 - etapa 3 gerou preferencias e resumo para dois pets;

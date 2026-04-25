@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Cadastro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página pública de cadastro para clientes e pets. Envie o link e deixe o cliente preencher seus dados.
- * Version:           1.3.2
+ * Version:           1.3.3
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-registration-addon
@@ -1018,7 +1018,7 @@ class DPS_Registration_Addon {
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.3.2';
+        $version   = '1.3.3';
 
         $recaptcha_settings = $this->get_recaptcha_settings();
         $should_load_recaptcha = $recaptcha_settings['enabled'] && ! empty( $recaptcha_settings['site_key'] );
@@ -2893,7 +2893,7 @@ class DPS_Registration_Addon {
         echo '<div class="dps-client-fields dps-client-fields--grouped">';
         echo DPS_Registration_UX::open_field_group( __( 'Essenciais', 'dps-registration-addon' ), __( 'Nome e WhatsApp sustentam o contato inicial e a verificação de duplicidade.', 'dps-registration-addon' ), 'essential' );
         echo '<p><label>' . esc_html__( 'Nome', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><input type="text" name="client_name" id="dps-client-name" required></label></p>';
-        echo '<p><label for="dps-client-phone">' . esc_html__( 'Telefone / WhatsApp', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><input type="tel" name="client_phone" id="dps-client-phone" placeholder="(11) 98765-4321" autocomplete="tel" required aria-describedby="dps-phone-hint"></label><span id="dps-phone-hint" class="dps-field-hint">' . esc_html__( 'Formato: (DDD) número com 8 ou 9 dígitos', 'dps-registration-addon' ) . '</span></p>';
+        echo '<p><label for="dps-client-phone">' . esc_html__( 'Telefone / WhatsApp', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><input type="tel" name="client_phone" id="dps-client-phone" placeholder="(11) 98765-4321" autocomplete="tel" required></label></p>';
         echo '<p><label>Email<br><input type="email" name="client_email" id="dps-client-email" autocomplete="email"></label></p>';
         echo DPS_Registration_UX::close_field_group();
 
