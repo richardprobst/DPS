@@ -105,6 +105,7 @@ Antes de criar uma nova versÃ£o oficial:
 - Atualizado o Cadastro para usar `PlaceAutocompleteElement` quando disponivel, mantendo fallback legado e sincronizacao do input canonico `client_address`.
 - Reorganizada a etapa do tutor em grupos de dados essenciais, endereco/origem e complementares, com rascunho opt-in e live region acessivel.
 - Transformada a autorização de publicação da foto do pet em escolha obrigatória `Autorizo`/`Não autorizo`, destacada acima do botão Próximo.
+- Redesenhadas as áreas de opções administrativas e autorização de foto do Cadastro com hierarquia, microcopy e cards de decisão no padrão DPS Signature.
 - Adicionado indicador `Expandir`/`Recolher` aos disclosures opcionais do Cadastro para deixar a área expansível explícita.
 - Removida a dica fixa de formato do campo Telefone/WhatsApp e compactado o espaçamento vertical dos campos essenciais.
 - Corrigido contraste do componente Google Places no campo Endereço completo, forçando superfície clara e texto legível no padrão DPS Signature.

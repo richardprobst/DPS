@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Cadastro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página pública de cadastro para clientes e pets. Envie o link e deixe o cliente preencher seus dados.
- * Version:           1.3.4
+ * Version:           1.3.5
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-registration-addon
@@ -1018,7 +1018,7 @@ class DPS_Registration_Addon {
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.3.4';
+        $version   = '1.3.5';
 
         $recaptcha_settings = $this->get_recaptcha_settings();
         $should_load_recaptcha = $recaptcha_settings['enabled'] && ! empty( $recaptcha_settings['site_key'] );
@@ -2914,11 +2914,17 @@ class DPS_Registration_Addon {
 
         // F3.2: Opções administrativas para cadastro rápido
         if ( $is_admin ) {
-            echo '<div class="dps-admin-options">';
-            echo '<h5 class="dps-admin-options__title">' . esc_html__( 'Opções administrativas', 'dps-registration-addon' ) . '</h5>';
-            echo '<p><label><input type="checkbox" name="dps_admin_skip_confirmation" value="1"> ' . esc_html__( 'Ativar cadastro imediatamente (pular confirmação de email)', 'dps-registration-addon' ) . '</label></p>';
-            echo '<p><label><input type="checkbox" name="dps_admin_send_welcome" value="1" checked> ' . esc_html__( 'Enviar email de boas-vindas', 'dps-registration-addon' ) . '</label></p>';
+            echo '<section class="dps-admin-options" aria-labelledby="dps-admin-options-title">';
+            echo '<div class="dps-admin-options__header">';
+            echo '<p class="dps-admin-options__eyebrow">' . esc_html__( 'Apenas administradores', 'dps-registration-addon' ) . '</p>';
+            echo '<h5 id="dps-admin-options-title" class="dps-admin-options__title">' . esc_html__( 'Opções administrativas', 'dps-registration-addon' ) . '</h5>';
+            echo '<p class="dps-admin-options__description">' . esc_html__( 'Use somente quando a equipe estiver conferindo o cadastro durante o atendimento.', 'dps-registration-addon' ) . '</p>';
             echo '</div>';
+            echo '<div class="dps-admin-options__grid">';
+            echo '<label class="dps-admin-option dps-admin-option--activation"><input type="checkbox" name="dps_admin_skip_confirmation" value="1"><span class="dps-admin-option__body"><span class="dps-admin-option__label">' . esc_html__( 'Ativar imediatamente', 'dps-registration-addon' ) . '</span><span class="dps-admin-option__hint">' . esc_html__( 'Pula a confirmação de email e libera o cadastro para uso operacional.', 'dps-registration-addon' ) . '</span></span></label>';
+            echo '<label class="dps-admin-option dps-admin-option--welcome"><input type="checkbox" name="dps_admin_send_welcome" value="1" checked><span class="dps-admin-option__body"><span class="dps-admin-option__label">' . esc_html__( 'Enviar boas-vindas', 'dps-registration-addon' ) . '</span><span class="dps-admin-option__hint">' . esc_html__( 'Mantém o tutor informado após o cadastro ser concluído.', 'dps-registration-addon' ) . '</span></span></label>';
+            echo '</div>';
+            echo '</section>';
         }
 
         echo $this->get_photo_authorization_field_html();
@@ -3673,31 +3679,34 @@ class DPS_Registration_Addon {
     private function get_photo_authorization_field_html() {
         ob_start();
         ?>
-        <fieldset class="dps-photo-auth-choice" data-dps-photo-auth-field>
-            <legend>
-                <?php esc_html_e( 'Autorizo publicação da foto do pet nas redes sociais do DESI PET SHOWER', 'dps-registration-addon' ); ?>
-                <span class="dps-required">*</span>
-            </legend>
-            <p class="dps-field-hint" id="dps-client-photo-auth-hint">
-                <?php esc_html_e( 'Escolha uma resposta para seguir com o cadastro.', 'dps-registration-addon' ); ?>
-            </p>
-            <div class="dps-photo-auth-options">
-                <label class="dps-photo-auth-option">
+        <section class="dps-photo-auth-choice" data-dps-photo-auth-field aria-labelledby="dps-photo-auth-title">
+            <div class="dps-photo-auth-choice__header">
+                <p class="dps-photo-auth-choice__eyebrow"><?php esc_html_e( 'Uso de imagem', 'dps-registration-addon' ); ?></p>
+                <h5 class="dps-photo-auth-choice__title" id="dps-photo-auth-title">
+                    <?php esc_html_e( 'Publicação da foto do pet', 'dps-registration-addon' ); ?>
+                    <span class="dps-required">*</span>
+                </h5>
+                <p class="dps-field-hint" id="dps-client-photo-auth-hint">
+                    <?php esc_html_e( 'Autorização obrigatória para registrar a preferência do tutor sobre redes sociais do DESI PET SHOWER.', 'dps-registration-addon' ); ?>
+                </p>
+            </div>
+            <div class="dps-photo-auth-options" role="radiogroup" aria-labelledby="dps-photo-auth-title" aria-describedby="dps-client-photo-auth-hint">
+                <label class="dps-photo-auth-option dps-photo-auth-option--allow">
                     <input type="radio" name="client_photo_auth" value="1" required aria-describedby="dps-client-photo-auth-hint">
                     <span class="dps-photo-auth-option__text">
-                        <strong><?php esc_html_e( 'Autorizo', 'dps-registration-addon' ); ?></strong>
+                        <strong><?php esc_html_e( 'Autorizo a publicação', 'dps-registration-addon' ); ?></strong>
                         <small><?php esc_html_e( 'A equipe pode publicar fotos do pet nas redes sociais do DESI PET SHOWER.', 'dps-registration-addon' ); ?></small>
                     </span>
                 </label>
-                <label class="dps-photo-auth-option">
+                <label class="dps-photo-auth-option dps-photo-auth-option--deny">
                     <input type="radio" name="client_photo_auth" value="0" required aria-describedby="dps-client-photo-auth-hint">
                     <span class="dps-photo-auth-option__text">
                         <strong><?php esc_html_e( 'Não autorizo', 'dps-registration-addon' ); ?></strong>
-                        <small><?php esc_html_e( 'As fotos do pet não devem ser publicadas nas redes sociais.', 'dps-registration-addon' ); ?></small>
+                        <small><?php esc_html_e( 'A foto fica restrita ao cadastro e à identificação interna do pet.', 'dps-registration-addon' ); ?></small>
                     </span>
                 </label>
             </div>
-        </fieldset>
+        </section>
         <?php
         return ob_get_clean();
     }
