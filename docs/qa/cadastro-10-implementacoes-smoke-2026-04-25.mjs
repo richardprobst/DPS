@@ -78,6 +78,7 @@ async function inspectCurrentPage(page, width) {
         const form = document.querySelector('#dps-reg-form');
         const address = document.querySelector('#dps-client-address');
         const submit = document.querySelector('button[type="submit"]');
+        const photoAuthInputs = [...document.querySelectorAll('input[name="client_photo_auth"]')];
         const getText = (selector) => {
             const node = document.querySelector(selector);
             return node ? node.textContent.trim() : '';
@@ -91,7 +92,11 @@ async function inspectCurrentPage(page, width) {
             restorePanelExists: !!document.querySelector('[data-dps-draft-restore-panel]'),
             fieldGroupCount: document.querySelectorAll('.dps-field-group').length,
             optionalDetailsCount: document.querySelectorAll('.dps-optional-details').length,
+            optionalDetailsIndicatorText: getText('.dps-optional-details__indicator'),
             petFieldsets: document.querySelectorAll('#dps-pets-wrapper .dps-pet-fieldset').length,
+            photoAuthFieldExists: !!document.querySelector('[data-dps-photo-auth-field]'),
+            photoAuthOptions: photoAuthInputs.length,
+            photoAuthRequired: photoAuthInputs.length === 2 && photoAuthInputs.every((input) => input.required),
             publicReadonlyOwnerFields: [...document.querySelectorAll('input[readonly]')].filter((input) => /cliente|owner/i.test(input.name || input.id || '')).length,
             addressTag: address ? address.tagName : '',
             placesReady: address ? address.dataset.dpsPlacesReady || '' : '',
@@ -144,6 +149,7 @@ async function runFlow(page) {
     await page.fill('input[name="client_phone"]', testData.phone);
     await page.fill('input[name="client_address"]', testData.address);
     await page.fill('input[name="client_referral"]', testData.referral);
+    await page.check('input[name="client_photo_auth"][value="1"]', { force: true });
     await setCheckbox(page, 'input[name="dps_admin_skip_confirmation"]', true);
     await setCheckbox(page, 'input[name="dps_admin_send_welcome"]', false);
     await setCheckbox(page, '[data-dps-draft-optin]', true);
@@ -192,17 +198,22 @@ async function runFlow(page) {
     await page.waitForTimeout(250);
     await page.screenshot({ path: path.join(outputDir, 'cadastro-10melhorias-flow-1200.png'), fullPage: true });
 
-    const flowState = await page.evaluate(() => ({
-        stepLabel: document.querySelector('#dps-step-label')?.textContent.trim() || '',
-        petFieldsets: document.querySelectorAll('#dps-pets-wrapper .dps-pet-fieldset').length,
-        aggressiveNames: [...document.querySelectorAll('input[name^="pet_aggressive"]')].map((input) => input.getAttribute('name')),
-        productPrefBlocks: document.querySelectorAll('#dps-product-prefs-wrapper .dps-product-prefs-pet').length,
-        summaryHasClient: (document.querySelector('#dps-summary-content')?.textContent || '').includes('Cliente Codex Real Cadastro'),
-        summaryHasPetPhoto: (document.querySelector('#dps-summary-content')?.textContent || '').includes('dps-pet-photo-'),
-        petPhotoInputs: document.querySelectorAll('input[name="pet_photo[]"]').length,
-        petPhotoPreviewFilled: document.querySelectorAll('.dps-pet-photo-preview.is-filled').length,
-        submitDisabled: document.querySelector('button[type="submit"]')?.disabled ?? null,
-    }));
+    const flowState = await page.evaluate(() => {
+        const summaryContent = document.querySelector('#dps-summary-content')?.textContent || '';
+
+        return {
+            stepLabel: document.querySelector('#dps-step-label')?.textContent.trim() || '',
+            petFieldsets: document.querySelectorAll('#dps-pets-wrapper .dps-pet-fieldset').length,
+            aggressiveNames: [...document.querySelectorAll('input[name^="pet_aggressive"]')].map((input) => input.getAttribute('name')),
+            productPrefBlocks: document.querySelectorAll('#dps-product-prefs-wrapper .dps-product-prefs-pet').length,
+            summaryHasClient: summaryContent.includes('Cliente Codex Real Cadastro'),
+            summaryHasPetPhoto: summaryContent.includes('dps-pet-photo-'),
+            summaryHasPhotoAuth: summaryContent.includes('Fotos nas redes sociais') && summaryContent.includes('Autorizado'),
+            petPhotoInputs: document.querySelectorAll('input[name="pet_photo[]"]').length,
+            petPhotoPreviewFilled: document.querySelectorAll('.dps-pet-photo-preview.is-filled').length,
+            submitDisabled: document.querySelector('button[type="submit"]')?.disabled ?? null,
+        };
+    });
 
     let submitState = { attempted: false };
     if (runRealSubmit) {

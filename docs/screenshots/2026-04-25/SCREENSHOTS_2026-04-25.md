@@ -10,7 +10,7 @@
 ## Antes/Depois
 
 - Antes: CSS legado, radius/elevacao fora do gate DPS Signature, callback proprio de Google Maps, campo de endereco como `textarea`, transients no rate limit/mensagens e indice incorreto em `pet_aggressive` clonado.
-- Depois: shell/formulario refeito em DPS Signature, endereco como `input`, loader compartilhado `DPSSignatureForms`, persistencia propria sem transients, rascunho opt-in, `PlaceAutocompleteElement` com fallback legado, controlador JS reescrito, foto opcional do pet com preview reto e formulario publicado validado nos breakpoints oficiais.
+- Depois: shell/formulario refeito em DPS Signature, endereco como `input`, loader compartilhado `DPSSignatureForms`, persistencia propria sem transients, rascunho opt-in, `PlaceAutocompleteElement` com fallback legado, controlador JS reescrito, foto opcional do pet com preview reto, autorizacao obrigatoria de publicacao de foto em destaque antes do botao Proximo e formulario publicado validado nos breakpoints oficiais.
 
 Arquivos de codigo alterados:
 - `plugins/desi-pet-shower-registration/desi-pet-shower-registration-addon.php`
@@ -45,12 +45,12 @@ Arquivos de codigo alterados:
 
 ## Capturas das 10 melhorias finais
 
-- `./cadastro-10melhorias-admin-375.png` - Cadastro autenticado/admin em 375px com rascunho e grupos DPS Signature.
+- `./cadastro-10melhorias-admin-375.png` - Cadastro autenticado/admin em 375px com rascunho, grupos DPS Signature, indicador de expansao e autorizacao obrigatoria em coluna unica.
 - `./cadastro-10melhorias-admin-600.png` - Cadastro autenticado/admin em 600px.
 - `./cadastro-10melhorias-admin-840.png` - Cadastro autenticado/admin em 840px.
 - `./cadastro-10melhorias-admin-1200.png` - Cadastro autenticado/admin em 1200px.
 - `./cadastro-10melhorias-admin-1920.png` - Cadastro autenticado/admin em 1920px.
-- `./cadastro-10melhorias-flow-1200.png` - Fluxo preenchido ate etapa 3 com dois pets, resumo e confirmacao.
+- `./cadastro-10melhorias-flow-1200.png` - Fluxo preenchido ate etapa 3 com dois pets, resumo, autorizacao de foto refletida e confirmacao.
 
 ## Capturas da foto do pet
 
@@ -83,6 +83,10 @@ Resumo:
 - microcopy final validada em portugues: `Tutor e pets em um único cadastro`, `Campos obrigatórios`, `Endereço e origem`;
 - auditoria computada confirmou `Sora` nos titulos, `Manrope` no corpo/UI, wizard/botoes/disclosures com `0px` de raio e inputs com `2px`;
 - topo do wizard validado sem contador visual duplicado: `stepCounterExists: false` e `progressTopText: Passo 1 de 3` nos cinco breakpoints;
+- area `Dados complementares do tutor` validada com indicador explicito `Expandir`/`Recolher` e sem contador redundante;
+- autorizacao de publicacao de foto movida para um fieldset obrigatorio acima do botao `Proximo`, com opcoes destacadas `Autorizo` e `Nao autorizo`;
+- validacao em branco passou a bloquear avanco tambem com `Informe se autoriza ou nao autoriza a publicacao da foto do pet.`;
+- runtime publicado confirmou `photoAuthFieldExists: true`, `photoAuthOptions: 2`, `photoAuthRequired: true` e `summaryHasPhotoAuth: true`;
 - rascunho opt-in salvou, exibiu `Rascunho salvo.`, restaurou o nome do tutor e foi limpo apos envio real;
 - clone de pet gerou dois fieldsets, legends `Pet 1` e `Pet 2`, e nomes `pet_aggressive[0]` / `pet_aggressive[1]`;
 - etapa 3 gerou preferencias e resumo para dois pets;

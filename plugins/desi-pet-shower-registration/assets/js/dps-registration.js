@@ -26,6 +26,7 @@
             tutorReview: 'Revise os dados do tutor.',
             petsReview: 'Revise os dados dos pets.',
             confirmRequired: 'Confirme que os dados estao corretos antes de enviar.',
+            photoAuthorizationRequired: 'Informe se autoriza ou nao autoriza a publicacao da foto do pet.',
             petPhotoInvalid: 'Use uma imagem em JPG, PNG ou WebP.',
             petPhotoTooLarge: 'A foto deve ter no maximo 5 MB.'
         }
@@ -383,6 +384,21 @@
         return field ? (field.value || '').trim() : '';
     }
 
+    function getCheckedRadioValue(form, name) {
+        var checked = form ? form.querySelector('input[type="radio"][name="' + name + '"]:checked') : null;
+        return checked ? checked.value : '';
+    }
+
+    function normalizeRadioValue(value) {
+        if (value === true || value === 1 || value === '1') {
+            return '1';
+        }
+        if (value === 0 || value === '0') {
+            return '0';
+        }
+        return '';
+    }
+
     function setFieldValue(field, value) {
         if (!field) {
             return;
@@ -390,6 +406,12 @@
 
         if (field.type === 'checkbox') {
             field.checked = value === true || value === '1' || value === 1;
+        } else if (field.type === 'radio') {
+            var radioValue = normalizeRadioValue(value);
+            var radioRoot = field.form || document;
+            toArray(radioRoot.querySelectorAll('input[type="radio"][name="' + field.name + '"]')).forEach(function(radio) {
+                radio.checked = !!radioValue && radio.value === radioValue;
+            });
         } else {
             field.value = value || '';
         }
@@ -519,10 +541,12 @@
         var phoneInput = form.querySelector('input[name="client_phone"]');
         var cpfInput = form.querySelector('input[name="client_cpf"]');
         var emailInput = form.querySelector('input[name="client_email"]');
+        var photoAuthInput = form.querySelector('input[name="client_photo_auth"]');
         var name = getTrimmedValue(nameInput);
         var phone = getTrimmedValue(phoneInput);
         var cpf = getTrimmedValue(cpfInput);
         var email = getTrimmedValue(emailInput);
+        var photoAuth = getCheckedRadioValue(form, 'client_photo_auth');
 
         if (!name || name.length < CONFIG.MIN_NAME_LENGTH) {
             errors.push(CONFIG.MESSAGES.nameRequired);
@@ -545,6 +569,11 @@
         if (email && !validateEmail(email)) {
             errors.push(CONFIG.MESSAGES.emailInvalid);
             markField(emailInput);
+        }
+
+        if (!photoAuth) {
+            errors.push(CONFIG.MESSAGES.photoAuthorizationRequired);
+            markField(photoAuthInput);
         }
 
         if (errors.length && !silent) {
@@ -993,6 +1022,7 @@
         container.innerHTML = '';
 
         var tutorList = document.createElement('ul');
+        var photoAuth = getCheckedRadioValue(form, 'client_photo_auth');
         addSummaryItem(tutorList, 'Nome', getTrimmedValue(form.querySelector('input[name="client_name"]')));
         addSummaryItem(tutorList, 'CPF', getTrimmedValue(form.querySelector('input[name="client_cpf"]')));
         addSummaryItem(tutorList, 'Telefone', getTrimmedValue(form.querySelector('input[name="client_phone"]')));
@@ -1003,9 +1033,7 @@
         addSummaryItem(tutorList, 'Endereço', getTrimmedValue(form.querySelector('[name="client_address"]')));
         addSummaryItem(tutorList, 'Como conheceu', getTrimmedValue(form.querySelector('input[name="client_referral"]')));
 
-        if (form.querySelector('input[name="client_photo_auth"]') && form.querySelector('input[name="client_photo_auth"]').checked) {
-            addSummaryItem(tutorList, 'Fotos nas redes sociais', 'Autorizado');
-        }
+        addSummaryItem(tutorList, 'Fotos nas redes sociais', photoAuth === '1' ? 'Autorizado' : (photoAuth === '0' ? 'Não autorizado' : ''));
 
         appendSummarySection(container, 'Tutor', tutorList);
 
@@ -1467,7 +1495,7 @@
                 client_birth: getTrimmedValue(form.querySelector('input[name="client_birth"]')),
                 client_instagram: getTrimmedValue(form.querySelector('input[name="client_instagram"]')),
                 client_facebook: getTrimmedValue(form.querySelector('input[name="client_facebook"]')),
-                client_photo_auth: !!form.querySelector('input[name="client_photo_auth"]:checked'),
+                client_photo_auth: getCheckedRadioValue(form, 'client_photo_auth'),
                 client_address: getTrimmedValue(form.querySelector('input[name="client_address"]')),
                 client_referral: getTrimmedValue(form.querySelector('input[name="client_referral"]'))
             },

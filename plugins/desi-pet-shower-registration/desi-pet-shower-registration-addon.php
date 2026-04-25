@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Cadastro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página pública de cadastro para clientes e pets. Envie o link e deixe o cliente preencher seus dados.
- * Version:           1.3.1
+ * Version:           1.3.2
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-registration-addon
@@ -1018,7 +1018,7 @@ class DPS_Registration_Addon {
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.3.1';
+        $version   = '1.3.2';
 
         $recaptcha_settings = $this->get_recaptcha_settings();
         $should_load_recaptcha = $recaptcha_settings['enabled'] && ! empty( $recaptcha_settings['site_key'] );
@@ -2215,9 +2215,10 @@ class DPS_Registration_Addon {
         $client_phone_raw = isset( $_POST['client_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['client_phone'] ) ) : '';
         $client_email    = isset( $_POST['client_email'] ) ? sanitize_email( wp_unslash( $_POST['client_email'] ) ) : '';
         $client_birth    = isset( $_POST['client_birth'] ) ? sanitize_text_field( wp_unslash( $_POST['client_birth'] ) ) : '';
-        $client_instagram = isset( $_POST['client_instagram'] ) ? sanitize_text_field( wp_unslash( $_POST['client_instagram'] ) ) : '';
-        $client_facebook = isset( $_POST['client_facebook'] ) ? sanitize_text_field( wp_unslash( $_POST['client_facebook'] ) ) : '';
-        $client_photo_auth = isset( $_POST['client_photo_auth'] ) ? 1 : 0;
+        $client_instagram      = isset( $_POST['client_instagram'] ) ? sanitize_text_field( wp_unslash( $_POST['client_instagram'] ) ) : '';
+        $client_facebook       = isset( $_POST['client_facebook'] ) ? sanitize_text_field( wp_unslash( $_POST['client_facebook'] ) ) : '';
+        $client_photo_auth_raw = isset( $_POST['client_photo_auth'] ) ? sanitize_text_field( wp_unslash( $_POST['client_photo_auth'] ) ) : '';
+        $client_photo_auth     = '1' === $client_photo_auth_raw ? 1 : 0;
         $client_address  = isset( $_POST['client_address'] ) ? sanitize_textarea_field( wp_unslash( $_POST['client_address'] ) ) : '';
         $client_referral = isset( $_POST['client_referral'] ) ? sanitize_text_field( wp_unslash( $_POST['client_referral'] ) ) : '';
         $referral_code   = isset( $_POST['dps_referral_code'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_referral_code'] ) ) : '';
@@ -2245,6 +2246,10 @@ class DPS_Registration_Addon {
         // F1.1: Validação de campos obrigatórios no backend
         // =====================================================================
         $validation_errors = [];
+
+        if ( ! in_array( $client_photo_auth_raw, array( '0', '1' ), true ) ) {
+            $validation_errors[] = __( 'Informe se autoriza ou não autoriza a publicação da foto do pet.', 'dps-registration-addon' );
+        }
 
         if ( empty( $client_name ) ) {
             $validation_errors[] = __( 'O campo Nome é obrigatório.', 'dps-registration-addon' );
@@ -2898,14 +2903,14 @@ class DPS_Registration_Addon {
         echo '<p class="dps-field-full"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral" id="dps-client-referral"></label></p>';
         echo DPS_Registration_UX::close_field_group();
 
-        echo DPS_Registration_UX::open_optional_details( 'dps-client-optional-details', __( 'Dados complementares do tutor', 'dps-registration-addon' ), __( 'CPF, data de nascimento, redes sociais e autorização de foto.', 'dps-registration-addon' ) );
+        echo DPS_Registration_UX::open_optional_details( 'dps-client-optional-details', __( 'Dados complementares do tutor', 'dps-registration-addon' ), __( 'CPF, data de nascimento e redes sociais.', 'dps-registration-addon' ) );
         echo '<p><label>CPF<br><input type="text" name="client_cpf" id="dps-client-cpf" placeholder="000.000.000-00"></label></p>';
         echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="client_birth" id="dps-client-birth"></label></p>';
         echo '<p><label>Instagram<br><input type="text" name="client_instagram" id="dps-client-instagram" placeholder="@usuario"></label></p>';
         echo '<p><label>Facebook<br><input type="text" name="client_facebook" id="dps-client-facebook"></label></p>';
-        echo '<p><label><input type="checkbox" name="client_photo_auth" value="1"> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do DESI PET SHOWER', 'dps-registration-addon' ) . '</label></p>';
         echo DPS_Registration_UX::close_optional_details();
         echo '</div>';
+
 
         // F3.2: Opções administrativas para cadastro rápido
         if ( $is_admin ) {
@@ -2915,6 +2920,9 @@ class DPS_Registration_Addon {
             echo '<p><label><input type="checkbox" name="dps_admin_send_welcome" value="1" checked> ' . esc_html__( 'Enviar email de boas-vindas', 'dps-registration-addon' ) . '</label></p>';
             echo '</div>';
         }
+
+        echo $this->get_photo_authorization_field_html();
+
         echo '<div class="dps-step-actions">';
         echo '<button type="button" id="dps-next-step" class="dps-button-next">' . esc_html__( 'Próximo', 'dps-registration-addon' ) . '</button>';
         echo '</div>';
@@ -3652,6 +3660,45 @@ class DPS_Registration_Addon {
         echo '<p><label><input type="checkbox" name="pet_aggressive[' . ( $i - 1 ) . ']" value="1"> ' . esc_html__( 'Cão agressivo', 'dps-registration-addon' ) . '</label></p>';
         echo DPS_Registration_UX::close_optional_details();
         echo '</fieldset>';
+        return ob_get_clean();
+    }
+
+    /**
+     * Gera a escolha obrigatória de autorização de foto para redes sociais.
+     *
+     * @since 1.3.2
+     *
+     * @return string HTML escapado.
+     */
+    private function get_photo_authorization_field_html() {
+        ob_start();
+        ?>
+        <fieldset class="dps-photo-auth-choice" data-dps-photo-auth-field>
+            <legend>
+                <?php esc_html_e( 'Autorizo publicação da foto do pet nas redes sociais do DESI PET SHOWER', 'dps-registration-addon' ); ?>
+                <span class="dps-required">*</span>
+            </legend>
+            <p class="dps-field-hint" id="dps-client-photo-auth-hint">
+                <?php esc_html_e( 'Escolha uma resposta para seguir com o cadastro.', 'dps-registration-addon' ); ?>
+            </p>
+            <div class="dps-photo-auth-options">
+                <label class="dps-photo-auth-option">
+                    <input type="radio" name="client_photo_auth" value="1" required aria-describedby="dps-client-photo-auth-hint">
+                    <span class="dps-photo-auth-option__text">
+                        <strong><?php esc_html_e( 'Autorizo', 'dps-registration-addon' ); ?></strong>
+                        <small><?php esc_html_e( 'A equipe pode publicar fotos do pet nas redes sociais do DESI PET SHOWER.', 'dps-registration-addon' ); ?></small>
+                    </span>
+                </label>
+                <label class="dps-photo-auth-option">
+                    <input type="radio" name="client_photo_auth" value="0" required aria-describedby="dps-client-photo-auth-hint">
+                    <span class="dps-photo-auth-option__text">
+                        <strong><?php esc_html_e( 'Não autorizo', 'dps-registration-addon' ); ?></strong>
+                        <small><?php esc_html_e( 'As fotos do pet não devem ser publicadas nas redes sociais.', 'dps-registration-addon' ); ?></small>
+                    </span>
+                </label>
+            </div>
+        </fieldset>
+        <?php
         return ob_get_clean();
     }
 

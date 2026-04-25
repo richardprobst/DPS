@@ -99,10 +99,16 @@ class DPS_Registration_UX {
         ?>
         <details class="dps-optional-details" id="<?php echo esc_attr( $id ); ?>">
             <summary>
-                <span><?php echo esc_html( $title ); ?></span>
-                <?php if ( $description ) : ?>
-                    <small><?php echo esc_html( $description ); ?></small>
-                <?php endif; ?>
+                <span class="dps-optional-details__summary-text">
+                    <span><?php echo esc_html( $title ); ?></span>
+                    <?php if ( $description ) : ?>
+                        <small><?php echo esc_html( $description ); ?></small>
+                    <?php endif; ?>
+                </span>
+                <span class="dps-optional-details__indicator" aria-hidden="true">
+                    <span class="dps-optional-details__indicator-closed"><?php esc_html_e( 'Expandir', 'dps-registration-addon' ); ?></span>
+                    <span class="dps-optional-details__indicator-open"><?php esc_html_e( 'Recolher', 'dps-registration-addon' ); ?></span>
+                </span>
             </summary>
             <div class="dps-optional-details__body">
         <?php
