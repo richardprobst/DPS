@@ -24,7 +24,7 @@ class DPS_Registration_UX {
         ?>
         <section class="dps-registration-intro" aria-labelledby="dps-registration-intro-title">
             <p class="dps-registration-intro__eyebrow"><?php esc_html_e( 'Cadastro DESI PET SHOWER', 'dps-registration-addon' ); ?></p>
-            <h3 id="dps-registration-intro-title"><?php esc_html_e( 'Tutor e pets em um unico cadastro', 'dps-registration-addon' ); ?></h3>
+            <h3 id="dps-registration-intro-title"><?php esc_html_e( 'Tutor e pets em um único cadastro', 'dps-registration-addon' ); ?></h3>
             <p><?php esc_html_e( 'Informe os dados principais para que a equipe encontre seu cadastro, entenda os cuidados de cada pet e agilize o primeiro atendimento.', 'dps-registration-addon' ); ?></p>
         </section>
         <?php
@@ -37,7 +37,7 @@ class DPS_Registration_UX {
      * @return string
      */
     public static function render_required_legend() {
-        return '<p class="dps-required-legend"><span class="dps-required">*</span> ' . esc_html__( 'Campos obrigatorios', 'dps-registration-addon' ) . '</p>';
+        return '<p class="dps-required-legend"><span class="dps-required">*</span> ' . esc_html__( 'Campos obrigatórios', 'dps-registration-addon' ) . '</p>';
     }
 
     /**

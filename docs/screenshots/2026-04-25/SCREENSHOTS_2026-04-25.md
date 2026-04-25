@@ -56,6 +56,7 @@ Arquivos de codigo alterados:
 
 - `./cadastro-implementation-runtime-check.json`
 - `./cadastro-10melhorias-runtime-check.json`
+- `./cadastro-ui-audit-runtime-check.json`
 
 Resumo:
 - formulario renderizou nos cinco breakpoints;
@@ -66,12 +67,14 @@ Resumo:
 - `duplicateCheck` ficou ativo na sessao admin temporaria;
 - validacao em branco permaneceu na etapa 1 e exibiu `Informe o nome do tutor.` e `Informe o telefone ou WhatsApp.`;
 - foco acessivel apos erro foi para `client_name`;
+- microcopy final validada em portugues: `Tutor e pets em um único cadastro`, `Campos obrigatórios`, `Endereço e origem`;
+- auditoria computada confirmou `Sora` nos titulos, `Manrope` no corpo/UI, wizard/botoes/disclosures com `0px` de raio e inputs com `2px`;
 - rascunho opt-in salvou, exibiu `Rascunho salvo.`, restaurou o nome do tutor e foi limpo apos envio real;
 - clone de pet gerou dois fieldsets, legends `Pet 1` e `Pet 2`, e nomes `pet_aggressive[0]` / `pet_aggressive[1]`;
 - etapa 3 gerou preferencias e resumo para dois pets;
 - submit ficou desabilitado antes da confirmacao e habilitado apos marcar a confirmacao;
 - envio real controlado retornou sucesso em `https://desi.pet/cadastro-de-clientes-e-pets/?registered=1`;
-- os posts reais de QA criados pelos smokes finais foram removidos por titulo exato via WP-CLI e a verificacao retornou `remaining: 0`;
+- os posts reais de QA criados pelo smoke final `20260425162825` foram removidos por titulo exato via WP-CLI e a verificacao retornou `remaining: 0`;
 - campo de indicacao do Loyalty apareceu como `Código de indicação`/`Seu código, se tiver` no runtime, sem mojibake visual.
 
 ## Observacoes

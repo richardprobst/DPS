@@ -41,7 +41,7 @@ class DPS_Registration_Draft_Service {
             'i18n'         => array(
                 'saving'   => __( 'Salvando rascunho...', 'dps-registration-addon' ),
                 'saved'    => __( 'Rascunho salvo.', 'dps-registration-addon' ),
-                'error'    => __( 'Nao foi possivel salvar o rascunho agora.', 'dps-registration-addon' ),
+                'error'    => __( 'Não foi possível salvar o rascunho agora.', 'dps-registration-addon' ),
                 'restored' => __( 'Rascunho restaurado.', 'dps-registration-addon' ),
                 'cleared'  => __( 'Rascunho descartado.', 'dps-registration-addon' ),
             ),
@@ -82,7 +82,7 @@ class DPS_Registration_Draft_Service {
         $saved = self::save_draft( $token, $payload );
 
         if ( ! $saved ) {
-            wp_send_json_error( array( 'message' => __( 'Nao foi possivel salvar o rascunho.', 'dps-registration-addon' ) ), 500 );
+            wp_send_json_error( array( 'message' => __( 'Não foi possível salvar o rascunho.', 'dps-registration-addon' ) ), 500 );
         }
 
         wp_send_json_success(

@@ -2497,19 +2497,19 @@ class DPS_Registration_Addon {
         echo '<h4>' . esc_html__( 'Dados do Cliente', 'dps-registration-addon' ) . '</h4>';
         echo '<p class="dps-step-description">' . esc_html__( 'Comece pelos dados que permitem localizar o tutor e fazer contato. Os dados complementares podem ser preenchidos se fizerem sentido para o primeiro atendimento.', 'dps-registration-addon' ) . '</p>';
         echo '<div class="dps-client-fields dps-client-fields--grouped">';
-        echo DPS_Registration_UX::open_field_group( __( 'Essenciais', 'dps-registration-addon' ), __( 'Nome e WhatsApp sustentam o contato inicial e a verificacao de duplicidade.', 'dps-registration-addon' ), 'essential' );
+        echo DPS_Registration_UX::open_field_group( __( 'Essenciais', 'dps-registration-addon' ), __( 'Nome e WhatsApp sustentam o contato inicial e a verificação de duplicidade.', 'dps-registration-addon' ), 'essential' );
         echo '<p><label>' . esc_html__( 'Nome', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><input type="text" name="client_name" id="dps-client-name" required></label></p>';
         echo '<p><label for="dps-client-phone">' . esc_html__( 'Telefone / WhatsApp', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><input type="tel" name="client_phone" id="dps-client-phone" placeholder="(11) 98765-4321" autocomplete="tel" required aria-describedby="dps-phone-hint"></label><span id="dps-phone-hint" class="dps-field-hint">' . esc_html__( 'Formato: (DDD) número com 8 ou 9 dígitos', 'dps-registration-addon' ) . '</span></p>';
         echo '<p><label>Email<br><input type="email" name="client_email" id="dps-client-email" autocomplete="email"></label></p>';
         echo DPS_Registration_UX::close_field_group();
 
-        echo DPS_Registration_UX::open_field_group( __( 'Endereco e origem', 'dps-registration-addon' ), __( 'Ajuda a equipe a planejar atendimento, deslocamento e contexto do primeiro contato.', 'dps-registration-addon' ), 'address' );
+        echo DPS_Registration_UX::open_field_group( __( 'Endereço e origem', 'dps-registration-addon' ), __( 'Ajuda a equipe a planejar atendimento, deslocamento e contexto do primeiro contato.', 'dps-registration-addon' ), 'address' );
         // Endereço completo com id específico para ativar autocomplete do Google
         echo '<p class="dps-field-full"><label for="dps-client-address">' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><input type="text" name="client_address" id="dps-client-address" placeholder="' . esc_attr__( 'Rua, número, bairro e cidade', 'dps-registration-addon' ) . '" ' . $address_autocomplete_attrs . '></label></p>';
         echo '<p class="dps-field-full"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral" id="dps-client-referral"></label></p>';
         echo DPS_Registration_UX::close_field_group();
 
-        echo DPS_Registration_UX::open_optional_details( 'dps-client-optional-details', __( 'Dados complementares do tutor', 'dps-registration-addon' ), __( 'CPF, data de nascimento, redes sociais e autorizacao de foto.', 'dps-registration-addon' ) );
+        echo DPS_Registration_UX::open_optional_details( 'dps-client-optional-details', __( 'Dados complementares do tutor', 'dps-registration-addon' ), __( 'CPF, data de nascimento, redes sociais e autorização de foto.', 'dps-registration-addon' ) );
         echo '<p><label>CPF<br><input type="text" name="client_cpf" id="dps-client-cpf" placeholder="000.000.000-00"></label></p>';
         echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="client_birth" id="dps-client-birth"></label></p>';
         echo '<p><label>Instagram<br><input type="text" name="client_instagram" id="dps-client-instagram" placeholder="@usuario"></label></p>';
@@ -3247,7 +3247,7 @@ class DPS_Registration_Addon {
             echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $lab ) . '</option>';
         }
         echo '</select></label></p>';
-        echo DPS_Registration_UX::open_optional_details( 'dps-pet-details-' . $i, __( 'Detalhes e cuidados opcionais', 'dps-registration-addon' ), __( 'Raca, peso, pelagem, nascimento e cuidados que ajudam no atendimento.', 'dps-registration-addon' ) );
+        echo DPS_Registration_UX::open_optional_details( 'dps-pet-details-' . $i, __( 'Detalhes e cuidados opcionais', 'dps-registration-addon' ), __( 'Raça, peso, pelagem, nascimento e cuidados que ajudam no atendimento.', 'dps-registration-addon' ) );
         echo '<p><label>' . esc_html__( 'Raça', 'dps-registration-addon' ) . '<br><input type="text" name="pet_breed[]" list="' . esc_attr( $datalist_id ) . '"></label></p>';
         echo '<datalist id="' . esc_attr( $datalist_id ) . '">';
         foreach ( $breed_options as $breed ) {
@@ -3294,7 +3294,7 @@ class DPS_Registration_Addon {
             echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $lab ) . '</option>';
         }
         echo '</select></label></p>';
-        echo DPS_Registration_UX::open_optional_details( 'dps-pet-details-__PET_NUMBER__', __( 'Detalhes e cuidados opcionais', 'dps-registration-addon' ), __( 'Raca, peso, pelagem, nascimento e cuidados que ajudam no atendimento.', 'dps-registration-addon' ) );
+        echo DPS_Registration_UX::open_optional_details( 'dps-pet-details-__PET_NUMBER__', __( 'Detalhes e cuidados opcionais', 'dps-registration-addon' ), __( 'Raça, peso, pelagem, nascimento e cuidados que ajudam no atendimento.', 'dps-registration-addon' ) );
         echo '<p><label>' . esc_html__( 'Raça', 'dps-registration-addon' ) . '<br><input type="text" name="pet_breed[]" list="dps-breed-list-__PET_NUMBER__"></label></p>';
         echo '<datalist id="dps-breed-list-__PET_NUMBER__">';
         $breed_options = $this->get_breed_options_for_species( '' );
