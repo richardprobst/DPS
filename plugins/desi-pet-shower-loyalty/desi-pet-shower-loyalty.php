@@ -2632,7 +2632,7 @@ class DPS_Loyalty_Referrals {
     }
 
     public function render_registration_field() {
-        // NÃ£o exibe campo de indicaÃ§Ã£o se a campanha estÃ¡ desativada.
+        // Nao exibe campo de indicacao se a campanha esta desativada.
         if ( ! DPS_Loyalty_Addon::is_campaign_enabled( 'referrals' ) ) {
             return;
         }
@@ -2641,7 +2641,7 @@ class DPS_Loyalty_Referrals {
         ?>
         <div class="dps-registration-field dps-registration-field--full dps-referral-field">
             <label class="dps-registration-field__label" for="dps-registration-referral-code">
-                <?php esc_html_e( 'CÃ³digo de indicaÃ§Ã£o', 'dps-loyalty-addon' ); ?>
+                <?php esc_html_e( 'Código de indicação', 'dps-loyalty-addon' ); ?>
             </label>
             <input
                 id="dps-registration-referral-code"
@@ -2650,7 +2650,7 @@ class DPS_Loyalty_Referrals {
                 value="<?php echo esc_attr( $referral_param ); ?>"
                 maxlength="20"
                 autocomplete="off"
-                placeholder="<?php echo esc_attr__( 'Seu cÃ³digo, se tiver', 'dps-loyalty-addon' ); ?>"
+                placeholder="<?php echo esc_attr__( 'Seu código, se tiver', 'dps-loyalty-addon' ); ?>"
             />
         </div>
         <?php

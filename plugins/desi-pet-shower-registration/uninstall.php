@@ -13,6 +13,8 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 global $wpdb;
 
+require_once __DIR__ . '/includes/class-dps-registration-storage.php';
+
 // Remove page criada pelo plugin (opcional - comentado para preservar)
 // $page_id = get_option( 'dps_registration_page_id' );
 // if ( $page_id ) {
@@ -35,13 +37,14 @@ $options = array(
     'dps_registration_api_key_hash',
     'dps_registration_api_rate_key_per_hour',
     'dps_registration_api_rate_ip_per_hour',
+    DPS_Registration_Storage::OPTION_DB_VERSION,
 );
 
 foreach ( $options as $option ) {
     delete_option( $option );
 }
 
-// Remove transients do formulário e rate limiting
+// Remove resíduos de transient de versões antigas do add-on.
 $transient_prefixes = array(
     '_transient_dps_registration',
     '_transient_timeout_dps_registration',
@@ -62,6 +65,8 @@ foreach ( $transient_prefixes as $prefix ) {
         )
     );
 }
+
+DPS_Registration_Storage::drop_tables();
 
 // Limpa scheduled events (cron)
 wp_clear_scheduled_hook( 'dps_registration_confirmation_reminder' );

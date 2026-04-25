@@ -19,6 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+require_once __DIR__ . '/includes/class-dps-registration-storage.php';
+
 /**
  * Verifica se o plugin base desi.pet by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
@@ -154,6 +156,8 @@ class DPS_Registration_Addon {
      * @since 1.0.1
      */
     private function __construct() {
+        DPS_Registration_Storage::maybe_create_tables();
+
         // Processa o envio do formulário
         add_action( 'init', [ $this, 'maybe_handle_registration' ] );
         // Confirmação de email
@@ -342,44 +346,12 @@ class DPS_Registration_Addon {
      * @return bool True se permitido, false se bloqueado
      */
     private function check_rate_limit() {
-        $ip_hash = $this->get_client_ip_hash();
-        $transient_key = 'dps_reg_rate_' . substr( $ip_hash, 0, 32 ); // Limita tamanho da chave
-        
-        $data = get_transient( $transient_key );
-        
-        if ( false === $data ) {
-            // Primeira tentativa - salva count e timestamp de início
-            set_transient( $transient_key, [
-                'count' => 1,
-                'start' => time(),
-            ], HOUR_IN_SECONDS );
-            return true;
-        }
-        
-        // Verifica formato antigo (apenas count) ou novo (array)
-        if ( is_array( $data ) ) {
-            $count = (int) $data['count'];
-            $start = (int) $data['start'];
-        } else {
-            $count = (int) $data;
-            $start = time();
-        }
-
-        if ( $count >= 3 ) {
-            // Limite atingido
-            return false;
-        }
-        
-        // Incrementa contador mantendo expiração original (calcula tempo restante)
-        $elapsed = time() - $start;
-        $remaining = max( HOUR_IN_SECONDS - $elapsed, 60 ); // Mínimo 60 segundos
-        
-        set_transient( $transient_key, [
-            'count' => $count + 1,
-            'start' => $start,
-        ], $remaining );
-        
-        return true;
+        return DPS_Registration_Storage::bump_rate_limit(
+            'public_registration',
+            $this->get_client_ip_hash(),
+            3,
+            HOUR_IN_SECONDS
+        );
     }
 
     // =========================================================================
@@ -622,22 +594,13 @@ class DPS_Registration_Addon {
             DPS_Message_Helper::add_error( $message );
             return;
         }
-        
-        // Fallback: usa transient baseado em IP
-        $ip_hash = $this->get_client_ip_hash();
-        $transient_key = 'dps_reg_msg_' . $ip_hash;
-        
-        $messages = get_transient( $transient_key );
-        if ( ! is_array( $messages ) ) {
-            $messages = [];
-        }
-        
-        $messages[] = [
-            'type' => 'error',
-            'text' => $message,
-        ];
-        
-        set_transient( $transient_key, $messages, self::ERROR_MESSAGE_TTL );
+
+        DPS_Registration_Storage::add_message(
+            $this->get_client_ip_hash(),
+            'error',
+            $message,
+            self::ERROR_MESSAGE_TTL
+        );
     }
 
     /**
@@ -650,33 +613,27 @@ class DPS_Registration_Addon {
         if ( class_exists( 'DPS_Message_Helper' ) ) {
             return DPS_Message_Helper::display_messages();
         }
-        
-        // Fallback: usa transient baseado em IP
-        $ip_hash = $this->get_client_ip_hash();
-        $transient_key = 'dps_reg_msg_' . $ip_hash;
-        
-        $messages = get_transient( $transient_key );
+
+        $messages = DPS_Registration_Storage::consume_messages( $this->get_client_ip_hash() );
         if ( ! is_array( $messages ) || empty( $messages ) ) {
             return '';
         }
-        
+
         $html = '';
         foreach ( $messages as $msg ) {
             $class = 'dps-reg-message';
-            
+
             if ( $msg['type'] === 'error' ) {
                 $class .= ' dps-reg-message--error';
             } elseif ( $msg['type'] === 'success' ) {
                 $class .= ' dps-reg-message--success';
             }
-            
+
             $html .= '<div class="' . esc_attr( $class ) . '" role="alert">';
             $html .= esc_html( $msg['text'] );
             $html .= '</div>';
         }
-        
-        delete_transient( $transient_key );
-        
+
         return $html;
     }
 
@@ -734,26 +691,46 @@ class DPS_Registration_Addon {
             DPS_BASE_VERSION
         );
 
-        // CSS responsivo legado, usado somente quando o motor Signature não assume o shortcode.
+        wp_enqueue_style(
+            'dps-signature-forms',
+            DPS_BASE_URL . 'assets/css/dps-signature-forms.css',
+            [ 'dps-design-tokens' ],
+            DPS_BASE_VERSION
+        );
+
+        // CSS específico do Cadastro no padrão DPS Signature.
         wp_enqueue_style(
             'dps-registration-addon',
             $addon_url . 'assets/css/registration-addon.css',
-            [ 'dps-design-tokens' ],
+            [ 'dps-design-tokens', 'dps-signature-forms' ],
             $version
         );
 
-        // F2.5: JS externo com validação client-side e máscaras
+        wp_enqueue_script(
+            'dps-signature-forms',
+            DPS_BASE_URL . 'assets/js/dps-signature-forms.js',
+            [],
+            DPS_BASE_VERSION,
+            true
+        );
+
+        // F2.5: JS externo com validação client-side, máscaras e wizard.
         wp_enqueue_script(
             'dps-registration',
             $addon_url . 'assets/js/dps-registration.js',
-            [],
+            [ 'dps-signature-forms' ],
             $version,
             true // Load in footer
         );
 
         // Dados para JavaScript
+        $google_api_key = sanitize_text_field( get_option( 'dps_google_api_key', '' ) );
         $localize_data = array(
             'breeds'   => $this->get_breed_dataset(),
+            'googlePlaces' => array(
+                'enabled' => ! empty( $google_api_key ),
+                'apiKey'  => $google_api_key,
+            ),
             'recaptcha' => array(
                 'enabled'            => $should_load_recaptcha,
                 'siteKey'            => $recaptcha_settings['site_key'],
@@ -793,6 +770,8 @@ class DPS_Registration_Addon {
      * Executado na ativação do plugin. Cria a página de cadastro, se ainda não existir, contendo o shortcode.
      */
     public function activate() {
+        DPS_Registration_Storage::maybe_create_tables();
+
         $title = __( 'Cadastro de Clientes e Pets', 'dps-registration-addon' );
         $slug  = sanitize_title( $title );
         $page  = get_page_by_path( $slug );
@@ -909,37 +888,17 @@ class DPS_Registration_Addon {
      *
      * @since 1.6.0
      *
-     * @param string $transient_key Chave do transient.
-     * @param int    $limit         Limite máximo permitido.
+     * @param string $rate_key Chave persistida do contador.
+     * @param int    $limit    Limite máximo permitido.
      * @return bool True se permitido, false se bloqueado.
      */
-    private function bump_api_rate_counter( $transient_key, $limit ) {
-        $data = get_transient( $transient_key );
-
-        if ( false === $data ) {
-            set_transient( $transient_key, array(
-                'count' => 1,
-                'start' => time(),
-            ), HOUR_IN_SECONDS );
-            return true;
-        }
-
-        $count = isset( $data['count'] ) ? (int) $data['count'] : (int) $data;
-        $start = isset( $data['start'] ) ? (int) $data['start'] : time();
-
-        if ( $count >= $limit ) {
-            return false;
-        }
-
-        $elapsed   = time() - $start;
-        $remaining = max( HOUR_IN_SECONDS - $elapsed, 60 );
-
-        set_transient( $transient_key, array(
-            'count' => $count + 1,
-            'start' => $start,
-        ), $remaining );
-
-        return true;
+    private function bump_api_rate_counter( $rate_key, $limit ) {
+        return DPS_Registration_Storage::bump_rate_limit(
+            'api',
+            $rate_key,
+            $limit,
+            HOUR_IN_SECONDS
+        );
     }
 
     /**
@@ -2427,12 +2386,12 @@ class DPS_Registration_Addon {
      * @since 1.2.0 Removido session_start (F2.9), melhoradas mensagens de sucesso (F2.3/F2.8).
      */
     public function render_registration_form() {
-        // Desabilita cache da página para garantir dados sempre atualizados
+        // Envia headers de no-store para manter o cadastro sempre em tempo real.
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();
         }
 
-        // F2.9: Removido session_start() - não é mais necessário pois usamos transients/cookies
+        // F2.9: Removido session_start(); feedback e rate limit usam armazenamento persistente do add-on.
         
         $success = false;
         if ( isset( $_GET['registered'] ) && '1' === $_GET['registered'] ) {
@@ -2445,7 +2404,7 @@ class DPS_Registration_Addon {
         // Codifica o HTML do template em JSON para uso seguro em JavaScript (preserva < >)
         $placeholder_json = wp_json_encode( $placeholder_html );
         ob_start();
-        echo '<div class="dps-registration-form">';
+        echo '<div class="dps-registration-form dps-signature-shell dps-signature-shell--registration">';
         
         // F1.8: Exibe mensagens de erro/sucesso armazenadas
         $messages_html = $this->display_messages();
@@ -2457,7 +2416,7 @@ class DPS_Registration_Addon {
         // F2.3/F2.8: Mensagem de sucesso melhorada com próximo passo
         if ( $success ) {
             echo '<div class="dps-success-box dps-reg-success" role="status">';
-            echo '<h4 class="dps-reg-success__title">' . esc_html__( '✓ Cadastro realizado com sucesso!', 'dps-registration-addon' ) . '</h4>';
+            echo '<h4 class="dps-reg-success__title">' . esc_html__( 'Cadastro realizado com sucesso', 'dps-registration-addon' ) . '</h4>';
             echo '<p class="dps-reg-success__text">' . esc_html__( 'Seus dados foram recebidos. Você já pode agendar banho e tosa para seus pets!', 'dps-registration-addon' ) . '</p>';
             echo '<p class="dps-reg-success__text"><strong>' . esc_html__( 'Próximo passo:', 'dps-registration-addon' ) . '</strong> ';
             echo esc_html__( 'Entre em contato conosco por WhatsApp ou telefone para agendar o primeiro atendimento.', 'dps-registration-addon' ) . '</p>';
@@ -2475,11 +2434,11 @@ class DPS_Registration_Addon {
         }
         if ( isset( $_GET['dps_email_confirmed'] ) && '1' === $_GET['dps_email_confirmed'] ) {
             echo '<div class="dps-success-box dps-reg-success" role="status">';
-            echo '<h4 class="dps-reg-success__title">' . esc_html__( '✓ Email confirmado com sucesso!', 'dps-registration-addon' ) . '</h4>';
+            echo '<h4 class="dps-reg-success__title">' . esc_html__( 'Email confirmado com sucesso', 'dps-registration-addon' ) . '</h4>';
             echo '<p class="dps-reg-success__text">' . esc_html__( 'Seu cadastro está ativo. Agora você pode agendar banho e tosa para seus pets e receber novidades por email.', 'dps-registration-addon' ) . '</p>';
             echo '</div>';
         }
-        echo '<form method="post" id="dps-reg-form">';
+        echo '<form method="post" id="dps-reg-form" class="dps-registration-wizard dps-signature-form" novalidate>';
         echo '<input type="hidden" name="dps_reg_action" value="save_registration">';
         wp_nonce_field( 'dps_reg_action', 'dps_reg_nonce' );
         $recaptcha = $this->get_recaptcha_settings();
@@ -2507,6 +2466,11 @@ class DPS_Registration_Addon {
 
         // F3: Funcionalidades para Administradores Logados
         $is_admin = current_user_can( 'manage_options' );
+        $google_api_key = sanitize_text_field( get_option( 'dps_google_api_key', '' ) );
+        $address_autocomplete_attrs = 'autocomplete="street-address"';
+        if ( ! empty( $google_api_key ) ) {
+            $address_autocomplete_attrs .= ' data-dps-address-autocomplete data-dps-google-api-key="' . esc_attr( $google_api_key ) . '" data-dps-lat-target="dps-client-lat" data-dps-lng-target="dps-client-lng"';
+        }
 
         // Legenda de campos obrigatórios
         echo '<p class="dps-required-legend"><span class="dps-required">*</span> ' . esc_html__( 'Campos obrigatórios', 'dps-registration-addon' ) . '</p>';
@@ -2525,14 +2489,14 @@ class DPS_Registration_Addon {
         echo '<p><label>Facebook<br><input type="text" name="client_facebook" id="dps-client-facebook"></label></p>';
         echo '<p><label><input type="checkbox" name="client_photo_auth" value="1"> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do DESI PET SHOWER', 'dps-registration-addon' ) . '</label></p>';
         // Endereço completo com id específico para ativar autocomplete do Google
-        echo '<p class="dps-field-full"><label>' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><textarea name="client_address" id="dps-client-address" rows="2"></textarea></label></p>';
+        echo '<p class="dps-field-full"><label for="dps-client-address">' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><input type="text" name="client_address" id="dps-client-address" placeholder="' . esc_attr__( 'Rua, número, bairro e cidade', 'dps-registration-addon' ) . '" ' . $address_autocomplete_attrs . '></label></p>';
         echo '<p class="dps-field-full"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral" id="dps-client-referral"></label></p>';
         echo '</div>';
 
         // F3.2: Opções administrativas para cadastro rápido
         if ( $is_admin ) {
             echo '<div class="dps-admin-options">';
-            echo '<h5 class="dps-admin-options__title">' . esc_html__( '🔧 Opções Administrativas', 'dps-registration-addon' ) . '</h5>';
+            echo '<h5 class="dps-admin-options__title">' . esc_html__( 'Opções administrativas', 'dps-registration-addon' ) . '</h5>';
             echo '<p><label><input type="checkbox" name="dps_admin_skip_confirmation" value="1"> ' . esc_html__( 'Ativar cadastro imediatamente (pular confirmação de email)', 'dps-registration-addon' ) . '</label></p>';
             echo '<p><label><input type="checkbox" name="dps_admin_send_welcome" value="1" checked> ' . esc_html__( 'Enviar email de boas-vindas', 'dps-registration-addon' ) . '</label></p>';
             echo '</div>';
@@ -2588,19 +2552,6 @@ class DPS_Registration_Addon {
         // F2.5: Template de pet para JS externo (via elemento script type="text/template")
         echo '<script type="text/template" id="dps-pet-template">' . $placeholder_json . '</script>';
 
-        // Se houver uma API key do Google Maps configurada, inclui o script de Places
-        // O callback dpsGoogleMapsReady é uma função global que aguarda o DPSRegistration estar disponível
-        $api_key = get_option( 'dps_google_api_key', '' );
-        if ( $api_key ) {
-            echo '<script type="text/javascript">';
-            echo 'function dpsGoogleMapsReady() {';
-            echo '  if (typeof DPSRegistration !== "undefined" && DPSRegistration.initGooglePlaces) {';
-            echo '    DPSRegistration.initGooglePlaces();';
-            echo '  }';
-            echo '}';
-            echo '</script>';
-            echo '<script src="https://maps.googleapis.com/maps/api/js?key=' . esc_attr( $api_key ) . '&libraries=places&callback=dpsGoogleMapsReady" async defer></script>';
-        }
         echo '</div>';
         return ob_get_clean();
     }
@@ -3301,15 +3252,15 @@ class DPS_Registration_Addon {
     }
 
     /**
-     * Retorna um conjunto de campos de pet com marcadores de substituição de índice. Usado para clonagem via JS.
-     * O texto '__INDEX__' será substituído por JS com o número real do pet.
+     * Retorna um conjunto de campos de pet com marcadores de substituição. Usado para clonagem via JS.
+     * Os textos '__PET_NUMBER__' e '__PET_INDEX__' são substituídos no navegador.
      *
      * @return string
      */
     public function get_pet_fieldset_html_placeholder() {
         ob_start();
         echo '<fieldset class="dps-pet-fieldset">';
-        echo '<legend>' . __( 'Pet __INDEX__', 'dps-registration-addon' ) . '</legend>';
+        echo '<legend>' . __( 'Pet __PET_NUMBER__', 'dps-registration-addon' ) . '</legend>';
         echo '<p><label>' . esc_html__( 'Nome do Pet', 'dps-registration-addon' ) . '<br><input type="text" name="pet_name[]" class="dps-pet-name"></label></p>';
         echo '<p><label>' . esc_html__( 'Cliente', 'dps-registration-addon' ) . '<br><input type="text" class="dps-owner-name" readonly></label></p>';
         // Espécie
@@ -3320,8 +3271,8 @@ class DPS_Registration_Addon {
         }
         echo '</select></label></p>';
         // Raça
-        echo '<p><label>' . esc_html__( 'Raça', 'dps-registration-addon' ) . '<br><input type="text" name="pet_breed[]" list="dps-breed-list-__INDEX__"></label></p>';
-        echo '<datalist id="dps-breed-list-__INDEX__">';
+        echo '<p><label>' . esc_html__( 'Raça', 'dps-registration-addon' ) . '<br><input type="text" name="pet_breed[]" list="dps-breed-list-__PET_NUMBER__"></label></p>';
+        echo '<datalist id="dps-breed-list-__PET_NUMBER__">';
         $breed_options = $this->get_breed_options_for_species( '' );
         foreach ( $breed_options as $breed ) {
             echo '<option value="' . esc_attr( $breed ) . '"></option>';
@@ -3352,7 +3303,7 @@ class DPS_Registration_Addon {
         // Cuidados especiais
         echo '<p><label>' . esc_html__( 'Algum cuidado especial ou restrição?', 'dps-registration-addon' ) . '<br><textarea name="pet_care[]" rows="2"></textarea></label></p>';
         // Agressivo
-        echo '<p><label><input type="checkbox" name="pet_aggressive[__INDEX__]" value="1"> ' . esc_html__( 'Cão agressivo', 'dps-registration-addon' ) . '</label></p>';
+        echo '<p><label><input type="checkbox" name="pet_aggressive[__PET_INDEX__]" value="1"> ' . esc_html__( 'Cão agressivo', 'dps-registration-addon' ) . '</label></p>';
         echo '</fieldset>';
         return ob_get_clean();
     }

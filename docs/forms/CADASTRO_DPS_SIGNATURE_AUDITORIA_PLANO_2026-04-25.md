@@ -391,9 +391,42 @@ Resultados:
 - Breakpoints `375`, `600`, `840`, `1200` e `1920` nao apresentaram overflow horizontal na coleta.
 - Google Places apresentou erro funcional por `textarea` no campo de endereco.
 
-## Decisoes pendentes antes da implementacao
+## Execucao da implementacao - 2026-04-25
 
-1. Confirmar se a reescrita pode criar uma tabela propria persistente para rate limit/eventos de seguranca.
-2. Confirmar se a etapa de preferencias de produto deve continuar obrigatoria antes do primeiro cadastro ou virar bloco opcional/progressivo.
-3. Confirmar se a migracao de Google Places deve ficar no `Autocomplete` legado corrigido ou ja seguir para `PlaceAutocompleteElement`.
-4. Confirmar se o servidor `desi.pet` sera atualizado para PHP 8.4 antes da publicacao da reescrita, ou se a entrega deve ser validada tambem em PHP 8.2.30 por compatibilidade operacional temporaria.
+A primeira entrega de reescrita integral foi executada com preservacao dos contratos externos. O modulo ainda pode evoluir para separacao completa em renderers/handlers/services, mas a superficie critica do formulario publicado deixou de depender de remendos visuais e de transients.
+
+Arquivos centrais alterados:
+- `plugins/desi-pet-shower-registration/desi-pet-shower-registration-addon.php`
+- `plugins/desi-pet-shower-registration/includes/class-dps-registration-storage.php`
+- `plugins/desi-pet-shower-registration/assets/css/registration-addon.css`
+- `plugins/desi-pet-shower-registration/assets/js/dps-registration.js`
+- `plugins/desi-pet-shower-registration/uninstall.php`
+- `plugins/desi-pet-shower-base/assets/js/dps-signature-forms.js`
+- `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php`
+
+Decisoes tomadas:
+1. A persistencia propria foi implementada em `dps_registration_events`, porque o Cadastro precisava manter rate limit e mensagens de feedback sem `get_transient`/`set_transient`.
+2. A etapa de preferencias de produtos foi mantida como coleta progressiva e opcional; o bloqueio do submit permanece vinculado apenas a revisao/confirmacao final.
+3. O Google Places ficou no `Autocomplete` legado corrigido por compatibilidade operacional, mas agora usa o loader compartilhado `DPSSignatureForms` com `loading=async`. A migracao para `PlaceAutocompleteElement` segue como melhoria futura controlada.
+4. A publicacao foi validada no PHP real do servidor (`8.2.30`) por compatibilidade operacional temporaria, sem alterar o requisito declarado do projeto.
+5. O campo de indicacao renderizado pelo Loyalty no hook `dps_registration_after_fields` foi corrigido porque o erro de encoding era visivel dentro do Cadastro publicado.
+
+Evidencia final:
+- `docs/screenshots/2026-04-25/cadastro-implementation-admin-375.png`
+- `docs/screenshots/2026-04-25/cadastro-implementation-admin-600.png`
+- `docs/screenshots/2026-04-25/cadastro-implementation-admin-840.png`
+- `docs/screenshots/2026-04-25/cadastro-implementation-admin-1200.png`
+- `docs/screenshots/2026-04-25/cadastro-implementation-admin-1920.png`
+- `docs/screenshots/2026-04-25/cadastro-implementation-admin-flow-1200.png`
+- `docs/screenshots/2026-04-25/cadastro-implementation-runtime-check.json`
+
+Resultados:
+- zero `get_transient`/`set_transient` no Cadastro;
+- endereco publicado renderizado como `INPUT`;
+- `DPSSignatureForms` e `DPSRegistration` presentes no runtime;
+- `duplicateCheck` ativo na sessao admin temporaria;
+- validacao em branco permaneceu na etapa 1 e exibiu erros esperados;
+- clone de pet preservou indices `pet_aggressive[0]` e `pet_aggressive[1]`;
+- etapa 3 gerou preferencias/resumo para dois pets e liberou submit somente apos confirmacao;
+- breakpoints `375`, `600`, `840`, `1200` e `1920` sem overflow horizontal;
+- aviso residual do Google sobre `Autocomplete` legado foi registrado como deprecacao de fornecedor, sem `InvalidValueError` DPS.

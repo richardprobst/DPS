@@ -1,18 +1,11 @@
 /**
- * DPS Registration Add-on - Frontend JavaScript
- *
- * Handles form validation, input masks, pet cloning, and Google Places autocomplete.
+ * DPS Registration Add-on - public form controller.
  *
  * @package DPS_Registration_Addon
- * @since 1.2.0
  */
 
 (function() {
     'use strict';
-
-    // =========================================================================
-    // Configuration
-    // =========================================================================
 
     var CONFIG = {
         CPF_MASK: '###.###.###-##',
@@ -23,27 +16,21 @@
         SUBMIT_TEXT: 'Enviar cadastro'
     };
 
-    // =========================================================================
-    // Utility Functions
-    // =========================================================================
+    var state = {
+        currentStep: 1,
+        totalSteps: 3,
+        duplicateConfirmed: false,
+        recaptchaValidated: false
+    };
 
-    /**
-     * Remove all non-digit characters from a string.
-     *
-     * @param {string} value - Input string.
-     * @return {string} Digits only.
-     */
+    function toArray(list) {
+        return Array.prototype.slice.call(list || []);
+    }
+
     function onlyDigits(value) {
         return (value || '').replace(/\D/g, '');
     }
 
-    /**
-     * Apply a mask to a value.
-     *
-     * @param {string} value - Raw value (digits only expected).
-     * @param {string} mask  - Mask pattern (# = digit placeholder).
-     * @return {string} Masked value.
-     */
     function applyMask(value, mask) {
         var digits = onlyDigits(value);
         var result = '';
@@ -61,29 +48,18 @@
         return result;
     }
 
-    /**
-     * Validate CPF using mod 11 algorithm.
-     *
-     * @param {string} cpf - CPF (can contain punctuation).
-     * @return {boolean} True if valid.
-     */
     function validateCPF(cpf) {
         var digits = onlyDigits(cpf);
 
-        if (digits.length !== 11) {
+        if (digits.length !== 11 || /^(\d)\1{10}$/.test(digits)) {
             return false;
         }
 
-        // Reject known invalid sequences (all same digit)
-        if (/^(\d)\1{10}$/.test(digits)) {
-            return false;
-        }
-
-        // Calculate first verification digit
         var sum = 0;
         for (var i = 0; i < 9; i++) {
             sum += parseInt(digits[i], 10) * (10 - i);
         }
+
         var remainder = sum % 11;
         var digit1 = remainder < 2 ? 0 : 11 - remainder;
 
@@ -91,66 +67,48 @@
             return false;
         }
 
-        // Calculate second verification digit
         sum = 0;
         for (var j = 0; j < 10; j++) {
             sum += parseInt(digits[j], 10) * (11 - j);
         }
+
         remainder = sum % 11;
         var digit2 = remainder < 2 ? 0 : 11 - remainder;
 
         return parseInt(digits[10], 10) === digit2;
     }
 
-    /**
-     * Validate Brazilian phone (10 or 11 digits).
-     *
-     * @param {string} phone - Phone (can contain punctuation).
-     * @return {boolean} True if valid.
-     */
     function validatePhone(phone) {
         var digits = onlyDigits(phone);
 
-        // Remove country code if present (55)
-        if (digits.length === 12 || digits.length === 13) {
-            if (digits.substring(0, 2) === '55') {
-                digits = digits.substring(2);
-            }
+        if ((digits.length === 12 || digits.length === 13) && digits.substring(0, 2) === '55') {
+            digits = digits.substring(2);
         }
 
-        // Must be 10 (landline) or 11 (mobile) digits
         if (digits.length !== 10 && digits.length !== 11) {
             return false;
         }
 
-        // DDD must be between 11 and 99
         var ddd = parseInt(digits.substring(0, 2), 10);
         return ddd >= 11 && ddd <= 99;
     }
 
-    /**
-     * Validate email format (simple check).
-     *
-     * @param {string} email - Email address.
-     * @return {boolean} True if valid format.
-     */
     function validateEmail(email) {
         if (!email) {
-            return true; // Optional field
+            return true;
         }
-        // Simple regex: something@something.something
-        var regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return regex.test(email);
+
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
-    /**
-     * Retorna a lista de raças para a espécie informada com populares primeiro.
-     *
-     * @param {string} species - Código da espécie.
-     * @return {Array<string>} Lista de raças.
-     */
+    function getRegistrationData() {
+        return window.dpsRegistrationData || {};
+    }
+
     function getBreedOptions(species) {
-        var dataset = (window.dpsRegistrationData && window.dpsRegistrationData.breeds) ? window.dpsRegistrationData.breeds : null;
+        var data = getRegistrationData();
+        var dataset = data.breeds || null;
+
         if (!dataset) {
             return [];
         }
@@ -165,6 +123,7 @@
             if (!value || seen[value]) {
                 continue;
             }
+
             seen[value] = true;
             result.push(value);
         }
@@ -172,30 +131,21 @@
         return result;
     }
 
-    /**
-     * Popula o datalist de raças de acordo com a espécie selecionada.
-     *
-     * @param {HTMLSelectElement} selectEl - Select de espécie.
-     */
     function populateBreedDatalist(selectEl) {
-        if (!selectEl || !(window.dpsRegistrationData && window.dpsRegistrationData.breeds)) {
+        if (!selectEl) {
             return;
         }
 
         var fieldset = selectEl.closest('.dps-pet-fieldset');
-        if (!fieldset) {
-            return;
-        }
-
-        var breedInput = fieldset.querySelector('input[name="pet_breed[]"]');
+        var breedInput = fieldset ? fieldset.querySelector('input[name="pet_breed[]"]') : null;
         var listId = breedInput ? breedInput.getAttribute('list') : null;
         var datalist = listId ? document.getElementById(listId) : null;
+
         if (!datalist) {
             return;
         }
 
-        var species = selectEl.value || '';
-        var options = getBreedOptions(species);
+        var options = getBreedOptions(selectEl.value || '');
         if (!options.length) {
             options = getBreedOptions('all');
         }
@@ -208,1163 +158,790 @@
         }
     }
 
-    /**
-     * Habilita autocomplete de raças em um select de espécie.
-     *
-     * @param {HTMLSelectElement} selectEl - Select de espécie.
-     */
     function bindBreedSelector(selectEl) {
-        if (!selectEl || selectEl.dataset.breedBound === '1' || !(window.dpsRegistrationData && window.dpsRegistrationData.breeds)) {
+        if (!selectEl || selectEl.dataset.dpsBreedReady === '1') {
             return;
         }
 
-        selectEl.dataset.breedBound = '1';
+        selectEl.dataset.dpsBreedReady = '1';
         populateBreedDatalist(selectEl);
 
         selectEl.addEventListener('change', function() {
-            populateBreedDatalist(selectEl);
             var fieldset = selectEl.closest('.dps-pet-fieldset');
             var breedInput = fieldset ? fieldset.querySelector('input[name="pet_breed[]"]') : null;
+
+            populateBreedDatalist(selectEl);
             if (breedInput) {
                 breedInput.value = '';
             }
         });
     }
 
-    /**
-     * Inicializa selects de espécie para manter o datalist sincronizado.
-     */
-    function initBreedSelectors() {
-        if (!(window.dpsRegistrationData && window.dpsRegistrationData.breeds)) {
+    function initBreedSelectors(root) {
+        toArray((root || document).querySelectorAll('select[name="pet_species[]"]')).forEach(bindBreedSelector);
+    }
+
+    function bindMaskedInput(input, type) {
+        if (!input || input.dataset.dpsMaskReady === type) {
             return;
         }
 
-        var selects = document.querySelectorAll('select[name="pet_species[]"]');
-        for (var i = 0; i < selects.length; i++) {
-            bindBreedSelector(selects[i]);
-        }
-    }
-
-    // =========================================================================
-    // Input Masks (F2.1)
-    // =========================================================================
-
-    /**
-     * Apply CPF mask to input.
-     *
-     * @param {HTMLInputElement} input - The input element.
-     */
-    function applyCPFMask(input) {
-        if (!input) return;
-
-        input.addEventListener('input', function(e) {
-            var cursorPos = input.selectionStart;
-            var oldValue = input.value;
-            var oldLength = oldValue.length;
-            
+        input.dataset.dpsMaskReady = type;
+        input.addEventListener('input', function() {
             var digits = onlyDigits(input.value);
-            // Limit to 11 digits
-            digits = digits.substring(0, 11);
-            
-            var masked = applyMask(digits, CONFIG.CPF_MASK);
-            input.value = masked;
-            
-            // Try to maintain cursor position
-            var newLength = masked.length;
-            var diff = newLength - oldLength;
-            var newPos = cursorPos + diff;
-            if (newPos < 0) newPos = 0;
-            if (newPos > newLength) newPos = newLength;
-            
-            // Only set if focused
-            if (document.activeElement === input) {
-                try {
-                    input.setSelectionRange(newPos, newPos);
-                } catch (ex) {
-                    // Ignore if not supported
-                }
+            var mask = CONFIG.CPF_MASK;
+
+            if (type === 'phone') {
+                digits = digits.substring(0, 11);
+                mask = digits.length <= 10 ? CONFIG.PHONE_MASK_10 : CONFIG.PHONE_MASK_11;
+            } else {
+                digits = digits.substring(0, 11);
             }
+
+            input.value = applyMask(digits, mask);
         });
 
-        // Handle paste
-        input.addEventListener('paste', function(e) {
-            setTimeout(function() {
-                var digits = onlyDigits(input.value).substring(0, 11);
-                input.value = applyMask(digits, CONFIG.CPF_MASK);
+        input.addEventListener('paste', function() {
+            window.setTimeout(function() {
+                input.dispatchEvent(new Event('input', { bubbles: true }));
             }, 0);
         });
     }
 
-    /**
-     * Apply phone mask to input.
-     *
-     * @param {HTMLInputElement} input - The input element.
-     */
-    function applyPhoneMask(input) {
-        if (!input) return;
+    function initSignatureForms(root) {
+        if (window.DPSSignatureForms && typeof window.DPSSignatureForms.init === 'function') {
+            window.DPSSignatureForms.init(root || document);
+        }
+    }
 
-        input.addEventListener('input', function(e) {
-            var cursorPos = input.selectionStart;
-            var oldValue = input.value;
-            var oldLength = oldValue.length;
-            
-            var digits = onlyDigits(input.value);
-            // Limit to 11 digits
-            digits = digits.substring(0, 11);
-            
-            // Use appropriate mask based on digit count
-            var mask = digits.length <= 10 ? CONFIG.PHONE_MASK_10 : CONFIG.PHONE_MASK_11;
-            var masked = applyMask(digits, mask);
-            input.value = masked;
-            
-            // Try to maintain cursor position
-            var newLength = masked.length;
-            var diff = newLength - oldLength;
-            var newPos = cursorPos + diff;
-            if (newPos < 0) newPos = 0;
-            if (newPos > newLength) newPos = newLength;
-            
-            // Only set if focused
-            if (document.activeElement === input) {
-                try {
-                    input.setSelectionRange(newPos, newPos);
-                } catch (ex) {
-                    // Ignore if not supported
+    function initGooglePlaces(root) {
+        var scope = root || document;
+
+        if (window.DPSSignatureForms && typeof window.DPSSignatureForms.initAddressAutocomplete === 'function') {
+            window.DPSSignatureForms.initAddressAutocomplete(scope);
+            return;
+        }
+
+        var input = scope.querySelector ? scope.querySelector('#dps-client-address') : document.getElementById('dps-client-address');
+        if (!input || input.dataset.dpsPlacesReady === '1') {
+            return;
+        }
+
+        if (typeof window.google === 'undefined' || !window.google.maps || !window.google.maps.places) {
+            return;
+        }
+
+        input.dataset.dpsPlacesReady = '1';
+        var autocomplete = new window.google.maps.places.Autocomplete(input, {
+            fields: [ 'formatted_address', 'geometry' ],
+            types: [ 'geocode' ]
+        });
+
+        autocomplete.addListener('place_changed', function() {
+            var place = autocomplete.getPlace();
+            var latField = document.getElementById('dps-client-lat');
+            var lngField = document.getElementById('dps-client-lng');
+
+            if (place && place.formatted_address) {
+                input.value = place.formatted_address;
+            }
+
+            if (place && place.geometry && place.geometry.location) {
+                if (latField) {
+                    latField.value = String(place.geometry.location.lat());
+                }
+                if (lngField) {
+                    lngField.value = String(place.geometry.location.lng());
                 }
             }
         });
-
-        // Handle paste
-        input.addEventListener('paste', function(e) {
-            setTimeout(function() {
-                var digits = onlyDigits(input.value).substring(0, 11);
-                var mask = digits.length <= 10 ? CONFIG.PHONE_MASK_10 : CONFIG.PHONE_MASK_11;
-                input.value = applyMask(digits, mask);
-            }, 0);
-        });
     }
 
-    // =========================================================================
-    // Form Validation (F2.2)
-    // =========================================================================
-
-    /**
-     * Display error message in container.
-     *
-     * @param {HTMLElement} container - Error container element.
-     * @param {string} message        - Error message.
-     */
-    function showError(container, message) {
-        if (!container) return;
-        
-        var errorDiv = document.createElement('div');
-        errorDiv.className = 'dps-js-error';
-        errorDiv.style.cssText = 'padding: 8px 12px; margin-bottom: 8px; border-radius: 4px; background-color: #fef2f2; border: 1px solid #ef4444; color: #991b1b; font-size: 14px;';
-        errorDiv.textContent = message;
-        container.appendChild(errorDiv);
-    }
-
-    /**
-     * Clear all JS-generated errors.
-     *
-     * @param {HTMLFormElement} form - The form element.
-     */
-    function clearJSErrors(form) {
-        var errors = form.querySelectorAll('.dps-js-error');
-        for (var i = 0; i < errors.length; i++) {
-            errors[i].parentNode.removeChild(errors[i]);
-        }
-
-        var wrapper = form.querySelector('.dps-js-errors');
-        if (wrapper) {
-            wrapper.innerHTML = '';
-        }
-    }
-
-    /**
-     * Returns the error container element, creating it if necessary.
-     *
-     * @param {HTMLFormElement} form - The form element.
-     * @return {HTMLElement} Error container.
-     */
     function getErrorContainer(form) {
-        var errorContainer = form.querySelector('.dps-js-errors');
-        if (!errorContainer) {
-            errorContainer = document.createElement('div');
-            errorContainer.className = 'dps-js-errors';
-            errorContainer.setAttribute('role', 'alert');
-            errorContainer.setAttribute('aria-live', 'polite');
-            form.insertBefore(errorContainer, form.firstChild);
+        var container = form.querySelector('.dps-js-errors');
+
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'dps-js-errors';
+            container.setAttribute('role', 'alert');
+            container.setAttribute('aria-live', 'polite');
+            form.insertBefore(container, form.firstChild);
         }
 
-        return errorContainer;
+        return container;
     }
 
-    /**
-     * Validate form before submission.
-     *
-     * @param {HTMLFormElement} form - The form element.
-     * @return {boolean} True if valid.
-     */
+    function clearJSErrors(form) {
+        toArray(form.querySelectorAll('.dps-js-error')).forEach(function(error) {
+            if (error.parentNode) {
+                error.parentNode.removeChild(error);
+            }
+        });
+
+        toArray(form.querySelectorAll('[aria-invalid="true"]')).forEach(function(field) {
+            field.removeAttribute('aria-invalid');
+        });
+    }
+
+    function clearErrorMessages(form) {
+        toArray(form.querySelectorAll('.dps-js-error')).forEach(function(error) {
+            if (error.parentNode) {
+                error.parentNode.removeChild(error);
+            }
+        });
+    }
+
+    function markField(field) {
+        if (field) {
+            field.setAttribute('aria-invalid', 'true');
+        }
+    }
+
+    function showError(container, message) {
+        if (!container || !message) {
+            return;
+        }
+
+        var error = document.createElement('div');
+        error.className = 'dps-js-error';
+        error.textContent = message;
+        container.appendChild(error);
+    }
+
+    function scrollToErrors(container) {
+        if (!container || !container.scrollIntoView) {
+            return;
+        }
+
+        try {
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (e) {
+            container.scrollIntoView(true);
+        }
+    }
+
+    function getTrimmedValue(field) {
+        return field ? (field.value || '').trim() : '';
+    }
+
+    function validateStepOne(form, silent) {
+        var errors = [];
+        var nameInput = form.querySelector('input[name="client_name"]');
+        var phoneInput = form.querySelector('input[name="client_phone"]');
+        var cpfInput = form.querySelector('input[name="client_cpf"]');
+        var emailInput = form.querySelector('input[name="client_email"]');
+        var name = getTrimmedValue(nameInput);
+        var phone = getTrimmedValue(phoneInput);
+        var cpf = getTrimmedValue(cpfInput);
+        var email = getTrimmedValue(emailInput);
+
+        if (!name || name.length < CONFIG.MIN_NAME_LENGTH) {
+            errors.push('Informe o nome do tutor.');
+            markField(nameInput);
+        }
+
+        if (!onlyDigits(phone)) {
+            errors.push('Informe o telefone ou WhatsApp.');
+            markField(phoneInput);
+        } else if (!validatePhone(phone)) {
+            errors.push('Revise o telefone. Use DDD e 8 ou 9 dígitos.');
+            markField(phoneInput);
+        }
+
+        if (cpf && !validateCPF(cpf)) {
+            errors.push('Revise o CPF informado.');
+            markField(cpfInput);
+        }
+
+        if (email && !validateEmail(email)) {
+            errors.push('Revise o email informado.');
+            markField(emailInput);
+        }
+
+        if (errors.length && !silent) {
+            renderErrors(form, errors);
+        }
+
+        return !errors.length;
+    }
+
+    function validateStepTwo(form, silent) {
+        var errors = [];
+        var petsWrapper = form.querySelector('#dps-pets-wrapper');
+        var petFieldsets = petsWrapper ? toArray(petsWrapper.querySelectorAll('.dps-pet-fieldset')) : [];
+
+        if (!petFieldsets.length) {
+            errors.push('Adicione pelo menos um pet.');
+        }
+
+        petFieldsets.forEach(function(fieldset, index) {
+            var number = index + 1;
+            var nameInput = fieldset.querySelector('input[name="pet_name[]"]');
+            var speciesSelect = fieldset.querySelector('select[name="pet_species[]"]');
+            var sizeSelect = fieldset.querySelector('select[name="pet_size[]"]');
+            var sexSelect = fieldset.querySelector('select[name="pet_sex[]"]');
+
+            if (getTrimmedValue(nameInput).length < CONFIG.MIN_NAME_LENGTH) {
+                errors.push('Informe o nome do Pet ' + number + '.');
+                markField(nameInput);
+            }
+
+            if (!getTrimmedValue(speciesSelect)) {
+                errors.push('Selecione a espécie do Pet ' + number + '.');
+                markField(speciesSelect);
+            }
+
+            if (!getTrimmedValue(sizeSelect)) {
+                errors.push('Selecione o porte do Pet ' + number + '.');
+                markField(sizeSelect);
+            }
+
+            if (!getTrimmedValue(sexSelect)) {
+                errors.push('Selecione o sexo do Pet ' + number + '.');
+                markField(sexSelect);
+            }
+        });
+
+        if (errors.length && !silent) {
+            renderErrors(form, errors);
+        }
+
+        return !errors.length;
+    }
+
+    function renderErrors(form, errors) {
+        var container = getErrorContainer(form);
+        clearErrorMessages(form);
+
+        errors.forEach(function(message) {
+            showError(container, message);
+        });
+
+        scrollToErrors(container);
+    }
+
     function validateForm(form) {
         clearJSErrors(form);
 
         var errors = [];
+        var stepOneOk = validateStepOne(form, true);
+        var stepTwoOk = validateStepTwo(form, true);
+        var confirmCheckbox = form.querySelector('#dps-summary-confirm');
 
-        // Get error container (create if not exists)
-        var errorContainer = getErrorContainer(form);
-        
-        // Required: Name
-        var nameInput = form.querySelector('input[name="client_name"]');
-        if (nameInput) {
-            var name = (nameInput.value || '').trim();
-            if (!name || name.length < CONFIG.MIN_NAME_LENGTH) {
-                errors.push('O campo Nome é obrigatório.');
-            }
-        }
-        
-        // Required: Phone
-        var phoneInput = form.querySelector('input[name="client_phone"]');
-        if (phoneInput) {
-            var phone = phoneInput.value || '';
-            var phoneDigits = onlyDigits(phone);
-            if (!phoneDigits) {
-                errors.push('O campo Telefone / WhatsApp é obrigatório.');
-            } else if (!validatePhone(phone)) {
-                errors.push('O telefone informado não é válido. Use o formato (11) 98765-4321.');
-            }
-        }
-        
-        // Optional but must be valid if filled: CPF
-        var cpfInput = form.querySelector('input[name="client_cpf"]');
-        if (cpfInput) {
-            var cpf = cpfInput.value || '';
-            var cpfDigits = onlyDigits(cpf);
-            if (cpfDigits && !validateCPF(cpf)) {
-                errors.push('O CPF informado não é válido. Verifique os dígitos.');
-            }
-        }
-        
-        // Optional but must be valid if filled: Email
-        var emailInput = form.querySelector('input[name="client_email"]');
-        if (emailInput) {
-            var email = (emailInput.value || '').trim();
-            if (email && !validateEmail(email)) {
-                errors.push('O email informado não é válido.');
-            }
-        }
-        
-        // Show errors
-        if (errors.length > 0) {
-            for (var i = 0; i < errors.length; i++) {
-                showError(errorContainer, errors[i]);
-            }
-            // Scroll to errors (with fallback for older browsers)
-            try {
-                if (errorContainer.scrollIntoView) {
-                    errorContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            } catch (e) {
-                // Fallback for browsers that don't support smooth scrolling
-                if (errorContainer.scrollIntoView) {
-                    errorContainer.scrollIntoView(true);
-                }
-            }
-            return false;
-        }
-        
-        return true;
-    }
-
-    /**
-     * Validate step 1 fields before advancing in the wizard.
-     *
-     * @param {HTMLFormElement} form - The form element.
-     * @return {boolean} True if valid.
-     */
-    function validateStepOne(form) {
-        clearJSErrors(form);
-
-        var errors = [];
-        var errorContainer = getErrorContainer(form);
-
-        var nameInput = form.querySelector('input[name="client_name"]');
-        if (nameInput) {
-            var name = (nameInput.value || '').trim();
-            if (!name || name.length < CONFIG.MIN_NAME_LENGTH) {
-                errors.push('O campo Nome é obrigatório.');
-            }
+        if (!stepOneOk) {
+            errors.push('Revise os dados do tutor.');
         }
 
-        var phoneInput = form.querySelector('input[name="client_phone"]');
-        if (phoneInput) {
-            var phone = phoneInput.value || '';
-            var phoneDigits = onlyDigits(phone);
-            if (!phoneDigits) {
-                errors.push('O campo Telefone / WhatsApp é obrigatório.');
-            } else if (!validatePhone(phone)) {
-                errors.push('O telefone informado não é válido. Use o formato (11) 98765-4321.');
-            }
+        if (!stepTwoOk) {
+            errors.push('Revise os dados dos pets.');
         }
 
-        var emailInput = form.querySelector('input[name="client_email"]');
-        if (emailInput) {
-            var email = (emailInput.value || '').trim();
-            if (email && !validateEmail(email)) {
-                errors.push('O email informado não é válido.');
-            }
+        if (confirmCheckbox && !confirmCheckbox.checked) {
+            errors.push('Confirme que os dados estão corretos antes de enviar.');
+            markField(confirmCheckbox);
         }
 
-        if (errors.length > 0) {
-            for (var i = 0; i < errors.length; i++) {
-                showError(errorContainer, errors[i]);
-            }
+        if (errors.length) {
+            renderErrors(form, errors);
             return false;
         }
 
         return true;
     }
 
-    /**
-     * Validate step two (pet data) before proceeding.
-     *
-     * @param {HTMLFormElement} form - The form.
-     * @return {boolean} True if valid.
-     */
-    function validateStepTwo(form) {
-        clearJSErrors(form);
-
-        var errors = [];
-        var errorContainer = getErrorContainer(form);
-
-        // Verifica se há pelo menos um pet com nome
-        var petsWrapper = document.getElementById('dps-pets-wrapper');
-        var petFieldsets = petsWrapper ? petsWrapper.querySelectorAll('.dps-pet-fieldset') : [];
-        
-        if (!petFieldsets || !petFieldsets.length) {
-            errors.push('Adicione pelo menos um pet para continuar.');
-        } else {
-            var hasValidPet = false;
-            for (var i = 0; i < petFieldsets.length; i++) {
-                var petNameInput = petFieldsets[i].querySelector('input[name="pet_name[]"]');
-                if (petNameInput && petNameInput.value.trim().length >= 2) {
-                    hasValidPet = true;
-                    break;
-                }
-            }
-            
-            if (!hasValidPet) {
-                errors.push('Informe o nome do pet para continuar.');
+    function updateProgress(step, progress) {
+        if (progress.label) {
+            progress.label.textContent = 'Passo ' + step + ' de ' + state.totalSteps;
+        }
+        if (progress.counter) {
+            progress.counter.textContent = step + '/' + state.totalSteps;
+        }
+        if (progress.bar) {
+            progress.bar.style.width = Math.round((step / state.totalSteps) * 100) + '%';
+            if (progress.bar.parentElement) {
+                progress.bar.parentElement.setAttribute('aria-valuenow', String(step));
             }
         }
+    }
 
-        if (errors.length > 0) {
-            for (var i = 0; i < errors.length; i++) {
-                showError(errorContainer, errors[i]);
-            }
-            return false;
+    function showStep(form, step, progress) {
+        toArray(form.querySelectorAll('.dps-step')).forEach(function(stepEl) {
+            var isCurrent = parseInt(stepEl.getAttribute('data-step'), 10) === step;
+            stepEl.classList.toggle('dps-step-active', isCurrent);
+            stepEl.hidden = !isCurrent;
+            stepEl.setAttribute('aria-hidden', isCurrent ? 'false' : 'true');
+        });
+
+        state.currentStep = step;
+        updateProgress(step, progress);
+
+        if (step === 3) {
+            renderProductPrefsStep(form);
+            buildSummary(form);
         }
-
-        return true;
     }
 
-    // =========================================================================
-    // Loading Indicator (F2.4)
-    // =========================================================================
+    function reindexPetFieldsets(wrapper) {
+        var fieldsets = toArray(wrapper.querySelectorAll('.dps-pet-fieldset'));
 
-    /**
-     * Show loading state on submit button.
-     *
-     * @param {HTMLButtonElement} button - The submit button.
-     */
-    function showLoading(button) {
-        if (!button) return;
-        
-        button.disabled = true;
-        button.setAttribute('data-original-text', button.textContent);
-        button.textContent = CONFIG.LOADING_TEXT;
-        button.style.opacity = '0.7';
-        button.style.cursor = 'wait';
+        fieldsets.forEach(function(fieldset, index) {
+            var number = index + 1;
+            var legend = fieldset.querySelector('legend');
+            var aggressive = fieldset.querySelector('input[name^="pet_aggressive"]');
+            var breedInput = fieldset.querySelector('input[name="pet_breed[]"]');
+            var datalist = fieldset.querySelector('datalist[id^="dps-breed-list"]');
+
+            if (legend) {
+                legend.textContent = 'Pet ' + number;
+            }
+            if (aggressive) {
+                aggressive.name = 'pet_aggressive[' + index + ']';
+            }
+            if (breedInput) {
+                breedInput.setAttribute('list', 'dps-breed-list-' + number);
+            }
+            if (datalist) {
+                datalist.id = 'dps-breed-list-' + number;
+            }
+
+            ensureRemovePetButton(fieldset, index > 0);
+        });
     }
 
-    /**
-     * Hide loading state on submit button.
-     *
-     * @param {HTMLButtonElement} button - The submit button.
-     */
-    function hideLoading(button) {
-        if (!button) return;
-        
-        var originalText = button.getAttribute('data-original-text');
-        button.disabled = false;
-        button.textContent = originalText || CONFIG.SUBMIT_TEXT;
-        button.style.opacity = '';
-        button.style.cursor = '';
-    }
+    function ensureRemovePetButton(fieldset, shouldShow) {
+        var existing = fieldset.querySelector('.dps-remove-pet-wrap');
 
-    // =========================================================================
-    // Pet Clone Functionality (moved from inline)
-    // =========================================================================
-
-    /**
-     * Initialize pet clone functionality.
-     *
-     * @param {string} templateJson - JSON-encoded HTML template.
-     */
-    function initPetClone(templateJson, onAddPet) {
-        var petCount = 1;
-        var wrapper = document.getElementById('dps-pets-wrapper');
-        var addBtn = document.getElementById('dps-add-pet');
-        var clientNameInput = document.getElementById('dps-client-name');
-        
-        if (!wrapper || !addBtn || !templateJson) {
+        if (!shouldShow) {
+            if (existing && existing.parentNode) {
+                existing.parentNode.removeChild(existing);
+            }
             return;
         }
-        
-        var template;
+
+        if (existing) {
+            return;
+        }
+
+        var wrap = document.createElement('p');
+        var button = document.createElement('button');
+        wrap.className = 'dps-remove-pet-wrap';
+        button.type = 'button';
+        button.className = 'dps-remove-pet dps-button-secondary';
+        button.textContent = 'Remover pet';
+        wrap.appendChild(button);
+        fieldset.appendChild(wrap);
+    }
+
+    function updateOwnerFields(form) {
+        var ownerName = getTrimmedValue(form.querySelector('#dps-client-name'));
+        toArray(form.querySelectorAll('.dps-owner-name')).forEach(function(input) {
+            input.value = ownerName;
+        });
+    }
+
+    function initPetClone(templateJson, onChange) {
+        var form = document.getElementById('dps-reg-form');
+        var wrapper = document.getElementById('dps-pets-wrapper');
+        var addBtn = document.getElementById('dps-add-pet');
+
+        if (!form || !wrapper || !addBtn || !templateJson || addBtn.dataset.dpsPetCloneReady === '1') {
+            return;
+        }
+
+        var template = '';
         try {
             template = JSON.parse(templateJson);
         } catch (e) {
-            console.error('DPS Registration: Failed to parse pet template');
             return;
         }
-        
-        // Function to update owner name fields
-        function updateOwnerFields() {
-            var ownerFields = document.querySelectorAll('.dps-owner-name');
-            var ownerName = clientNameInput ? clientNameInput.value : '';
-            for (var i = 0; i < ownerFields.length; i++) {
-                ownerFields[i].value = ownerName;
-            }
-        }
-        
-        // Listen for name input changes
-        if (clientNameInput) {
-            clientNameInput.addEventListener('input', updateOwnerFields);
-        }
-        
-        // Add pet button click
+
+        addBtn.dataset.dpsPetCloneReady = '1';
+        reindexPetFieldsets(wrapper);
+
         addBtn.addEventListener('click', function() {
-            petCount++;
-            var html = template.replace(/__INDEX__/g, petCount);
-            var div = document.createElement('div');
-            div.innerHTML = html;
-            wrapper.appendChild(div);
-            updateOwnerFields();
+            var count = wrapper.querySelectorAll('.dps-pet-fieldset').length + 1;
+            var index = count - 1;
+            var html = template
+                .replace(/__PET_NUMBER__/g, String(count))
+                .replace(/__PET_INDEX__/g, String(index))
+                .replace(/__INDEX__/g, String(count));
+            var container = document.createElement('div');
+            container.innerHTML = html;
 
-            if (typeof onAddPet === 'function') {
-                onAddPet();
+            while (container.firstChild) {
+                wrapper.appendChild(container.firstChild);
+            }
+
+            reindexPetFieldsets(wrapper);
+            updateOwnerFields(form);
+            initBreedSelectors(wrapper);
+
+            if (typeof onChange === 'function') {
+                onChange();
             }
         });
-        
-        // Initial update
-        updateOwnerFields();
-    }
 
-    // =========================================================================
-    // Google Places Autocomplete (moved from inline)
-    // =========================================================================
+        wrapper.addEventListener('click', function(event) {
+            var button = event.target.closest ? event.target.closest('.dps-remove-pet') : null;
+            if (!button) {
+                return;
+            }
 
-    /**
-     * Initialize Google Places autocomplete.
-     */
-    function initGooglePlaces() {
-        var input = document.getElementById('dps-client-address');
-        
-        if (!input || typeof google === 'undefined' || !google.maps || !google.maps.places) {
-            return;
-        }
-        
-        var autocomplete = new google.maps.places.Autocomplete(input, {
-            types: ['geocode']
-        });
-        
-        autocomplete.addListener('place_changed', function() {
-            var place = autocomplete.getPlace();
-            if (place && place.geometry) {
-                var lat = place.geometry.location.lat();
-                var lng = place.geometry.location.lng();
-                var latField = document.getElementById('dps-client-lat');
-                var lngField = document.getElementById('dps-client-lng');
-                
-                if (latField && lngField) {
-                    latField.value = lat;
-                    lngField.value = lng;
+            var fieldset = button.closest('.dps-pet-fieldset');
+            if (fieldset && wrapper.querySelectorAll('.dps-pet-fieldset').length > 1) {
+                fieldset.parentNode.removeChild(fieldset);
+                reindexPetFieldsets(wrapper);
+                initBreedSelectors(wrapper);
+                if (typeof onChange === 'function') {
+                    onChange();
                 }
             }
         });
-    }
 
-    // =========================================================================
-    // Wizard Navigation and Summary (F2.6 / F2.7)
-    // =========================================================================
-
-    var currentStep = 1;
-    var totalSteps = 3;
-
-    function updateProgress(step, progressElements) {
-        if (!progressElements) return;
-
-        var label = progressElements.label;
-        var counter = progressElements.counter;
-        var bar = progressElements.bar;
-
-        if (label) {
-            label.textContent = 'Passo ' + step + ' de ' + totalSteps;
-        }
-
-        if (counter) {
-            counter.textContent = step + '/' + totalSteps;
-        }
-
-        if (bar) {
-            var width = Math.round((step / totalSteps) * 100) + '%';
-            bar.style.width = width;
-            bar.parentElement.setAttribute('aria-valuenow', step);
+        var clientNameInput = form.querySelector('#dps-client-name');
+        if (clientNameInput) {
+            clientNameInput.addEventListener('input', function() {
+                updateOwnerFields(form);
+            });
+            updateOwnerFields(form);
         }
     }
 
-    function showStep(step, form, steps, progressElements, buttons) {
-        if (!steps || !steps.length) return;
-
-        for (var i = 0; i < steps.length; i++) {
-            var isCurrent = parseInt(steps[i].getAttribute('data-step'), 10) === step;
-            steps[i].classList.toggle('dps-step-active', isCurrent);
-            steps[i].setAttribute('aria-hidden', !isCurrent);
-        }
-
-        currentStep = step;
-        updateProgress(step, progressElements);
-
-        // Atualiza visibilidade dos botões de navegação
-        if (buttons) {
-            // Botão "Próximo" da etapa 1 → etapa 2
-            if (buttons.next) {
-                buttons.next.style.display = step === 1 ? 'inline-flex' : 'none';
-            }
-            // Botão "Próximo" da etapa 2 → etapa 3
-            if (buttons.next2) {
-                buttons.next2.style.display = step === 2 ? 'inline-flex' : 'none';
-            }
-            // Botão "Voltar" da etapa 2 → etapa 1
-            if (buttons.back) {
-                buttons.back.style.display = step === 2 ? 'inline-flex' : 'none';
-            }
-            // Botão "Voltar" da etapa 3 → etapa 2
-            if (buttons.back2) {
-                buttons.back2.style.display = step === 3 ? 'inline-flex' : 'none';
-            }
-            // Botão "Enviar" só aparece na etapa 3
-            if (buttons.submit) {
-                buttons.submit.style.display = step === 3 ? 'inline-flex' : 'none';
-            }
-        }
-        
-        // Na etapa 3, renderiza os campos de preferências para cada pet
-        if (step === 3) {
-            renderProductPrefsStep(form);
-        }
+    function createField(labelText, control) {
+        var field = document.createElement('div');
+        var label = document.createElement('label');
+        field.className = 'dps-product-pref-field';
+        label.textContent = labelText;
+        label.appendChild(control);
+        field.appendChild(label);
+        return field;
     }
 
-    /**
-     * Renderiza os campos de preferências de produtos para cada pet na etapa 3.
-     *
-     * @param {HTMLFormElement} form - Formulário de cadastro.
-     */
+    function createSelect(name, options) {
+        var select = document.createElement('select');
+        select.name = name;
+
+        options.forEach(function(item) {
+            var option = document.createElement('option');
+            option.value = item.value;
+            option.textContent = item.label;
+            select.appendChild(option);
+        });
+
+        return select;
+    }
+
     function renderProductPrefsStep(form) {
-        var prefsWrapper = document.getElementById('dps-product-prefs-wrapper');
-        if (!prefsWrapper) return;
-        
-        prefsWrapper.innerHTML = '';
-        
-        var petsWrapper = document.getElementById('dps-pets-wrapper');
-        var petFieldsets = petsWrapper ? petsWrapper.querySelectorAll('.dps-pet-fieldset') : [];
-        
-        if (!petFieldsets || !petFieldsets.length) {
-            prefsWrapper.innerHTML = '<p class="dps-empty-message">Nenhum pet cadastrado. Volte para a etapa anterior para adicionar pets.</p>';
+        var wrapper = form.querySelector('#dps-product-prefs-wrapper');
+        var petsWrapper = form.querySelector('#dps-pets-wrapper');
+        var petFieldsets = petsWrapper ? toArray(petsWrapper.querySelectorAll('.dps-pet-fieldset')) : [];
+
+        if (!wrapper) {
             return;
         }
-        
-        for (var i = 0; i < petFieldsets.length; i++) {
-            var fieldset = petFieldsets[i];
-            var petNameInput = fieldset.querySelector('input[name="pet_name[]"]');
-            var petSpeciesSelect = fieldset.querySelector('select[name="pet_species[]"]');
-            
-            var petName = petNameInput ? petNameInput.value.trim() : ('Pet ' + (i + 1));
-            var speciesValue = petSpeciesSelect ? petSpeciesSelect.value : '';
-            var speciesIcon = speciesValue === 'cao' ? '🐶' : (speciesValue === 'gato' ? '🐱' : '🐾');
-            
-            // Cria fieldset para este pet
-            var petPrefsBox = document.createElement('div');
-            petPrefsBox.className = 'dps-product-prefs-pet';
-            
-            var petTitle = document.createElement('h5');
-            petTitle.className = 'dps-product-prefs-pet__title';
-            petTitle.textContent = speciesIcon + ' ' + (petName || 'Pet ' + (i + 1));
-            petPrefsBox.appendChild(petTitle);
-            
-            // Campo: Preferência de Shampoo
-            var shampooField = document.createElement('div');
-            shampooField.className = 'dps-product-pref-field';
-            shampooField.innerHTML = '<label>🧴 Preferência de Shampoo<br>' +
-                '<select name="pet_shampoo_pref[]">' +
-                '<option value="">Sem preferência específica</option>' +
-                '<option value="hipoalergenico">Hipoalergênico</option>' +
-                '<option value="antisseptico">Antisséptico</option>' +
-                '<option value="pelagem_branca">Para pelagem branca</option>' +
-                '<option value="pelagem_escura">Para pelagem escura</option>' +
-                '<option value="antipulgas">Antipulgas</option>' +
-                '<option value="hidratante">Hidratante</option>' +
-                '<option value="outro">Outro (especificar abaixo)</option>' +
-                '</select></label>';
-            petPrefsBox.appendChild(shampooField);
-            
-            // Campo: Preferência de Perfume
-            var perfumeField = document.createElement('div');
-            perfumeField.className = 'dps-product-pref-field';
-            perfumeField.innerHTML = '<label>✨ Preferência de Perfume<br>' +
-                '<select name="pet_perfume_pref[]">' +
-                '<option value="">Sem preferência</option>' +
-                '<option value="suave">Perfume suave</option>' +
-                '<option value="intenso">Perfume intenso</option>' +
-                '<option value="sem_perfume">Sem perfume (proibido)</option>' +
-                '<option value="hipoalergenico">Hipoalergênico apenas</option>' +
-                '</select></label>';
-            petPrefsBox.appendChild(perfumeField);
-            
-            // Campo: Preferência de Adereços
-            var accessoriesField = document.createElement('div');
-            accessoriesField.className = 'dps-product-pref-field';
-            accessoriesField.innerHTML = '<label>🎀 Adereços<br>' +
-                '<select name="pet_accessories_pref[]">' +
-                '<option value="">Sem preferência</option>' +
-                '<option value="lacinho">Lacinho</option>' +
-                '<option value="gravata">Gravata</option>' +
-                '<option value="lenco">Lenço</option>' +
-                '<option value="bandana">Bandana</option>' +
-                '<option value="sem_aderecos">Não usar adereços</option>' +
-                '</select></label>';
-            petPrefsBox.appendChild(accessoriesField);
-            
-            // Campo: Outras restrições/observações
-            var restrictionsField = document.createElement('div');
-            restrictionsField.className = 'dps-product-pref-field dps-product-pref-field--full';
-            restrictionsField.innerHTML = '<label>📝 Outras restrições ou observações sobre produtos<br>' +
-                '<textarea name="pet_product_restrictions[]" rows="2" ' +
-                'placeholder="Ex.: Alérgico a produto X, usar apenas produtos naturais, etc."></textarea></label>';
-            petPrefsBox.appendChild(restrictionsField);
-            
-            prefsWrapper.appendChild(petPrefsBox);
+
+        wrapper.innerHTML = '';
+        if (!petFieldsets.length) {
+            var empty = document.createElement('p');
+            empty.className = 'dps-empty-message';
+            empty.textContent = 'Volte para adicionar pelo menos um pet.';
+            wrapper.appendChild(empty);
+            return;
         }
+
+        petFieldsets.forEach(function(fieldset, index) {
+            var petName = getTrimmedValue(fieldset.querySelector('input[name="pet_name[]"]')) || 'Pet ' + (index + 1);
+            var box = document.createElement('div');
+            var title = document.createElement('h5');
+            var restrictions = document.createElement('textarea');
+
+            box.className = 'dps-product-prefs-pet';
+            title.className = 'dps-product-prefs-pet__title';
+            title.textContent = petName;
+
+            box.appendChild(title);
+            box.appendChild(createField('Preferência de shampoo', createSelect('pet_shampoo_pref[]', [
+                { value: '', label: 'Sem preferência específica' },
+                { value: 'hipoalergenico', label: 'Hipoalergênico' },
+                { value: 'antisseptico', label: 'Antisséptico' },
+                { value: 'pelagem_branca', label: 'Para pelagem branca' },
+                { value: 'pelagem_escura', label: 'Para pelagem escura' },
+                { value: 'antipulgas', label: 'Antipulgas' },
+                { value: 'hidratante', label: 'Hidratante' },
+                { value: 'outro', label: 'Outro' }
+            ])));
+            box.appendChild(createField('Preferência de perfume', createSelect('pet_perfume_pref[]', [
+                { value: '', label: 'Sem preferência' },
+                { value: 'suave', label: 'Perfume suave' },
+                { value: 'intenso', label: 'Perfume intenso' },
+                { value: 'sem_perfume', label: 'Sem perfume' },
+                { value: 'hipoalergenico', label: 'Hipoalergênico apenas' }
+            ])));
+            box.appendChild(createField('Adereços', createSelect('pet_accessories_pref[]', [
+                { value: '', label: 'Sem preferência' },
+                { value: 'lacinho', label: 'Lacinho' },
+                { value: 'gravata', label: 'Gravata' },
+                { value: 'lenco', label: 'Lenço' },
+                { value: 'bandana', label: 'Bandana' },
+                { value: 'sem_aderecos', label: 'Não usar adereços' }
+            ])));
+
+            restrictions.name = 'pet_product_restrictions[]';
+            restrictions.rows = 2;
+            restrictions.placeholder = 'Alergias, restrições ou orientações de produtos';
+            box.appendChild(createField('Restrições ou observações', restrictions));
+            wrapper.appendChild(box);
+        });
     }
 
     function addSummaryItem(list, label, value) {
-        if (!value) return;
-
-        var li = document.createElement('li');
-        var strong = document.createElement('strong');
-        strong.textContent = label + ':';
-        li.appendChild(strong);
-        li.appendChild(document.createTextNode(' ' + value));
-        list.appendChild(li);
-    }
-
-    /**
-     * Helper to get selected text from a select element.
-     *
-     * @param {HTMLSelectElement} select - Select element.
-     * @return {string} Selected option text or empty string.
-     */
-    function getSelectText(select) {
-        if (!select || !select.options) return '';
-        var selectedOption = select.options[select.selectedIndex];
-        return selectedOption ? selectedOption.text.trim() : (select.value ? select.value.trim() : '');
-    }
-
-    /**
-     * Build summary of all form data before submission.
-     * Displays tutor and pet information in the summary box.
-     *
-     * @param {HTMLFormElement} form - The registration form.
-     */
-    function buildSummary(form) {
-        var summaryContent = document.getElementById('dps-summary-content');
-
-        if (!summaryContent) {
+        if (!value) {
             return;
         }
 
-        summaryContent.innerHTML = '';
+        var item = document.createElement('li');
+        var strong = document.createElement('strong');
+        strong.textContent = label + ':';
+        item.appendChild(strong);
+        item.appendChild(document.createTextNode(' ' + value));
+        list.appendChild(item);
+    }
 
-        // =====================================================================
-        // Tutor Section - All client fields
-        // =====================================================================
-        var tutorSection = document.createElement('div');
-        tutorSection.className = 'dps-summary-section';
-        var tutorTitle = document.createElement('h5');
-        tutorTitle.textContent = '👤 Tutor';
-        tutorSection.appendChild(tutorTitle);
+    function getSelectText(select) {
+        if (!select || !select.options) {
+            return '';
+        }
+
+        var option = select.options[select.selectedIndex];
+        return option ? option.text.trim() : '';
+    }
+
+    function formatDate(value) {
+        var parts = value ? value.split('-') : [];
+        return parts.length === 3 ? parts[2] + '/' + parts[1] + '/' + parts[0] : value;
+    }
+
+    function appendSummarySection(container, titleText, list) {
+        if (!list.children.length) {
+            return;
+        }
+
+        var section = document.createElement('div');
+        var title = document.createElement('h5');
+        title.textContent = titleText;
+        section.className = 'dps-summary-section';
+        section.appendChild(title);
+        section.appendChild(list);
+        container.appendChild(section);
+    }
+
+    function buildSummary(form) {
+        var container = form.querySelector('#dps-summary-content');
+        if (!container) {
+            return;
+        }
+
+        container.innerHTML = '';
+
         var tutorList = document.createElement('ul');
+        addSummaryItem(tutorList, 'Nome', getTrimmedValue(form.querySelector('input[name="client_name"]')));
+        addSummaryItem(tutorList, 'CPF', getTrimmedValue(form.querySelector('input[name="client_cpf"]')));
+        addSummaryItem(tutorList, 'Telefone', getTrimmedValue(form.querySelector('input[name="client_phone"]')));
+        addSummaryItem(tutorList, 'Email', getTrimmedValue(form.querySelector('input[name="client_email"]')));
+        addSummaryItem(tutorList, 'Nascimento', formatDate(getTrimmedValue(form.querySelector('input[name="client_birth"]'))));
+        addSummaryItem(tutorList, 'Instagram', getTrimmedValue(form.querySelector('input[name="client_instagram"]')));
+        addSummaryItem(tutorList, 'Facebook', getTrimmedValue(form.querySelector('input[name="client_facebook"]')));
+        addSummaryItem(tutorList, 'Endereço', getTrimmedValue(form.querySelector('[name="client_address"]')));
+        addSummaryItem(tutorList, 'Como conheceu', getTrimmedValue(form.querySelector('input[name="client_referral"]')));
 
-        // Client fields
-        var nameInput = form.querySelector('input[name="client_name"]');
-        var cpfInput = form.querySelector('input[name="client_cpf"]');
-        var phoneInput = form.querySelector('input[name="client_phone"]');
-        var emailInput = form.querySelector('input[name="client_email"]');
-        var birthInput = form.querySelector('input[name="client_birth"]');
-        var instagramInput = form.querySelector('input[name="client_instagram"]');
-        var facebookInput = form.querySelector('input[name="client_facebook"]');
-        var photoAuthInput = form.querySelector('input[name="client_photo_auth"]');
-        var addressInput = form.querySelector('textarea[name="client_address"]');
-        var referralInput = form.querySelector('input[name="client_referral"]');
-
-        addSummaryItem(tutorList, 'Nome', nameInput ? nameInput.value.trim() : '');
-        addSummaryItem(tutorList, 'CPF', cpfInput ? cpfInput.value.trim() : '');
-        addSummaryItem(tutorList, 'Telefone', phoneInput ? phoneInput.value.trim() : '');
-        addSummaryItem(tutorList, 'Email', emailInput ? emailInput.value.trim() : '');
-        
-        // Format birth date for display
-        if (birthInput && birthInput.value) {
-            var birthParts = birthInput.value.split('-');
-            if (birthParts.length === 3) {
-                var formattedBirth = birthParts[2] + '/' + birthParts[1] + '/' + birthParts[0];
-                addSummaryItem(tutorList, 'Data de nascimento', formattedBirth);
-            }
-        }
-        
-        addSummaryItem(tutorList, 'Instagram', instagramInput ? instagramInput.value.trim() : '');
-        addSummaryItem(tutorList, 'Facebook', facebookInput ? facebookInput.value.trim() : '');
-        
-        if (photoAuthInput && photoAuthInput.checked) {
-            addSummaryItem(tutorList, 'Autorização de foto', '✓ Autorizado');
-        }
-        
-        addSummaryItem(tutorList, 'Endereço', addressInput ? addressInput.value.trim() : '');
-        addSummaryItem(tutorList, 'Como conheceu', referralInput ? referralInput.value.trim() : '');
-
-        if (tutorList.children.length) {
-            tutorSection.appendChild(tutorList);
-            summaryContent.appendChild(tutorSection);
+        if (form.querySelector('input[name="client_photo_auth"]') && form.querySelector('input[name="client_photo_auth"]').checked) {
+            addSummaryItem(tutorList, 'Fotos nas redes sociais', 'Autorizado');
         }
 
-        // =====================================================================
-        // Pets Section - All pet fields
-        // =====================================================================
-        var petsWrapper = document.getElementById('dps-pets-wrapper');
-        var petFieldsets = petsWrapper ? petsWrapper.querySelectorAll('.dps-pet-fieldset') : [];
+        appendSummarySection(container, 'Tutor', tutorList);
 
-        if (petFieldsets && petFieldsets.length) {
-            var petsContainer = document.createElement('div');
-            petsContainer.className = 'dps-summary-section';
-            var petsTitle = document.createElement('h5');
-            petsTitle.textContent = '🐾 Pets';
-            petsContainer.appendChild(petsTitle);
+        var petsWrapper = form.querySelector('#dps-pets-wrapper');
+        var pets = petsWrapper ? toArray(petsWrapper.querySelectorAll('.dps-pet-fieldset')) : [];
+        var prefsWrapper = form.querySelector('#dps-product-prefs-wrapper');
+        var shampooPrefs = prefsWrapper ? toArray(prefsWrapper.querySelectorAll('select[name="pet_shampoo_pref[]"]')) : [];
+        var perfumePrefs = prefsWrapper ? toArray(prefsWrapper.querySelectorAll('select[name="pet_perfume_pref[]"]')) : [];
+        var accessoriesPrefs = prefsWrapper ? toArray(prefsWrapper.querySelectorAll('select[name="pet_accessories_pref[]"]')) : [];
+        var restrictions = prefsWrapper ? toArray(prefsWrapper.querySelectorAll('textarea[name="pet_product_restrictions[]"]')) : [];
 
-            for (var i = 0; i < petFieldsets.length; i++) {
-                var fieldset = petFieldsets[i];
-                var petBox = document.createElement('div');
-                petBox.className = 'dps-summary-pet';
-                
-                // Get species for pet icon
-                var petSpecies = fieldset.querySelector('select[name="pet_species[]"]');
-                var speciesValue = petSpecies ? petSpecies.value : '';
-                var speciesIcon = speciesValue === 'cao' ? '🐶' : (speciesValue === 'gato' ? '🐱' : '🐾');
-                
-                var petTitle = document.createElement('h6');
-                petTitle.textContent = speciesIcon + ' Pet ' + (i + 1);
-                petBox.appendChild(petTitle);
+        pets.forEach(function(fieldset, index) {
+            var list = document.createElement('ul');
+            var aggressive = fieldset.querySelector('input[name^="pet_aggressive"]');
 
-                var petList = document.createElement('ul');
-                
-                // Pet fields
-                var petName = fieldset.querySelector('input[name="pet_name[]"]');
-                var petBreed = fieldset.querySelector('input[name="pet_breed[]"]');
-                var petSize = fieldset.querySelector('select[name="pet_size[]"]');
-                var petWeight = fieldset.querySelector('input[name="pet_weight[]"]');
-                var petCoat = fieldset.querySelector('input[name="pet_coat[]"]');
-                var petColor = fieldset.querySelector('input[name="pet_color[]"]');
-                var petBirth = fieldset.querySelector('input[name="pet_birth[]"]');
-                var petSex = fieldset.querySelector('select[name="pet_sex[]"]');
-                var petNotes = fieldset.querySelector('textarea[name="pet_care[]"]');
-                var petAggressive = fieldset.querySelector('input[name^="pet_aggressive"]');
+            addSummaryItem(list, 'Nome', getTrimmedValue(fieldset.querySelector('input[name="pet_name[]"]')));
+            addSummaryItem(list, 'Espécie', getSelectText(fieldset.querySelector('select[name="pet_species[]"]')));
+            addSummaryItem(list, 'Raça', getTrimmedValue(fieldset.querySelector('input[name="pet_breed[]"]')));
+            addSummaryItem(list, 'Porte', getSelectText(fieldset.querySelector('select[name="pet_size[]"]')));
+            addSummaryItem(list, 'Peso', getTrimmedValue(fieldset.querySelector('input[name="pet_weight[]"]')));
+            addSummaryItem(list, 'Pelagem', getTrimmedValue(fieldset.querySelector('input[name="pet_coat[]"]')));
+            addSummaryItem(list, 'Cor', getTrimmedValue(fieldset.querySelector('input[name="pet_color[]"]')));
+            addSummaryItem(list, 'Nascimento', formatDate(getTrimmedValue(fieldset.querySelector('input[name="pet_birth[]"]'))));
+            addSummaryItem(list, 'Sexo', getSelectText(fieldset.querySelector('select[name="pet_sex[]"]')));
+            addSummaryItem(list, 'Cuidados especiais', getTrimmedValue(fieldset.querySelector('textarea[name="pet_care[]"]')));
 
-                addSummaryItem(petList, 'Nome', petName ? petName.value.trim() : '');
-                addSummaryItem(petList, 'Espécie', getSelectText(petSpecies));
-                addSummaryItem(petList, 'Raça', petBreed ? petBreed.value.trim() : '');
-                addSummaryItem(petList, 'Porte', getSelectText(petSize));
-                
-                if (petWeight && petWeight.value) {
-                    addSummaryItem(petList, 'Peso', petWeight.value.trim() + ' kg');
-                }
-                
-                addSummaryItem(petList, 'Pelagem', petCoat ? petCoat.value.trim() : '');
-                addSummaryItem(petList, 'Cor', petColor ? petColor.value.trim() : '');
-                
-                // Format pet birth date
-                if (petBirth && petBirth.value) {
-                    var petBirthParts = petBirth.value.split('-');
-                    if (petBirthParts.length === 3) {
-                        var formattedPetBirth = petBirthParts[2] + '/' + petBirthParts[1] + '/' + petBirthParts[0];
-                        addSummaryItem(petList, 'Nascimento', formattedPetBirth);
-                    }
-                }
-                
-                addSummaryItem(petList, 'Sexo', getSelectText(petSex));
-                addSummaryItem(petList, 'Cuidados especiais', petNotes ? petNotes.value.trim() : '');
-                
-                if (petAggressive && petAggressive.checked) {
-                    addSummaryItem(petList, 'Alerta', '⚠️ Pet agressivo');
-                }
-                
-                // Preferências de produtos (Etapa 3)
-                var prefsWrapper = document.getElementById('dps-product-prefs-wrapper');
-                if (prefsWrapper) {
-                    var allShampooPrefs = prefsWrapper.querySelectorAll('select[name="pet_shampoo_pref[]"]');
-                    var allPerfumePrefs = prefsWrapper.querySelectorAll('select[name="pet_perfume_pref[]"]');
-                    var allAccessoriesPrefs = prefsWrapper.querySelectorAll('select[name="pet_accessories_pref[]"]');
-                    var allRestrictions = prefsWrapper.querySelectorAll('textarea[name="pet_product_restrictions[]"]');
-                    
-                    if (allShampooPrefs[i]) {
-                        addSummaryItem(petList, 'Shampoo', getSelectText(allShampooPrefs[i]));
-                    }
-                    if (allPerfumePrefs[i]) {
-                        addSummaryItem(petList, 'Perfume', getSelectText(allPerfumePrefs[i]));
-                    }
-                    if (allAccessoriesPrefs[i]) {
-                        addSummaryItem(petList, 'Adereços', getSelectText(allAccessoriesPrefs[i]));
-                    }
-                    if (allRestrictions[i] && allRestrictions[i].value.trim()) {
-                        addSummaryItem(petList, 'Restrições', allRestrictions[i].value.trim());
-                    }
-                }
-
-                if (petList.children.length) {
-                    petBox.appendChild(petList);
-                    petsContainer.appendChild(petBox);
-                }
+            if (aggressive && aggressive.checked) {
+                addSummaryItem(list, 'Atenção', 'Pet agressivo');
             }
 
-            summaryContent.appendChild(petsContainer);
-        }
+            addSummaryItem(list, 'Shampoo', getSelectText(shampooPrefs[index]));
+            addSummaryItem(list, 'Perfume', getSelectText(perfumePrefs[index]));
+            addSummaryItem(list, 'Adereços', getSelectText(accessoriesPrefs[index]));
+            addSummaryItem(list, 'Restrições de produtos', getTrimmedValue(restrictions[index]));
+            appendSummarySection(container, 'Pet ' + (index + 1), list);
+        });
 
-        if (!summaryContent.children.length) {
+        if (!container.children.length) {
             var empty = document.createElement('p');
             empty.className = 'dps-summary-empty';
             empty.textContent = 'Preencha os campos para visualizar o resumo.';
-            summaryContent.appendChild(empty);
+            container.appendChild(empty);
         }
     }
 
-    // =========================================================================
-    // Duplicate Check Modal (Admin Only)
-    // =========================================================================
-
-    /**
-     * Create and inject modal styles if not already present.
-     */
-    function ensureModalStyles() {
-        if (document.getElementById('dps-duplicate-modal-styles')) {
+    function showLoading(button) {
+        if (!button) {
             return;
         }
 
-        var styles = document.createElement('style');
-        styles.id = 'dps-duplicate-modal-styles';
-        styles.textContent = [
-            '.dps-modal-overlay {',
-            '  position: fixed;',
-            '  top: 0;',
-            '  left: 0;',
-            '  right: 0;',
-            '  bottom: 0;',
-            '  background: rgba(0, 0, 0, 0.6);',
-            '  display: flex;',
-            '  align-items: center;',
-            '  justify-content: center;',
-            '  z-index: 999999;',
-            '  padding: 20px;',
-            '}',
-            '.dps-modal {',
-            '  background: #fff;',
-            '  border-radius: 8px;',
-            '  max-width: 500px;',
-            '  width: 100%;',
-            '  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);',
-            '  animation: dps-modal-appear 0.2s ease-out;',
-            '}',
-            '@keyframes dps-modal-appear {',
-            '  from { opacity: 0; transform: scale(0.95); }',
-            '  to { opacity: 1; transform: scale(1); }',
-            '}',
-            '.dps-modal-header {',
-            '  padding: 20px 24px;',
-            '  border-bottom: 1px solid #e5e7eb;',
-            '  display: flex;',
-            '  align-items: center;',
-            '  gap: 12px;',
-            '}',
-            '.dps-modal-header .dps-modal-icon {',
-            '  font-size: 24px;',
-            '}',
-            '.dps-modal-header h3 {',
-            '  margin: 0;',
-            '  font-size: 18px;',
-            '  font-weight: 600;',
-            '  color: #374151;',
-            '}',
-            '.dps-modal-body {',
-            '  padding: 20px 24px;',
-            '}',
-            '.dps-modal-body p {',
-            '  margin: 0 0 16px;',
-            '  color: #4b5563;',
-            '  line-height: 1.5;',
-            '}',
-            '.dps-modal-duplicate-fields {',
-            '  display: flex;',
-            '  flex-wrap: wrap;',
-            '  gap: 8px;',
-            '  margin-bottom: 16px;',
-            '}',
-            '.dps-modal-duplicate-fields .dps-duplicate-badge {',
-            '  background: #fef3c7;',
-            '  color: #92400e;',
-            '  padding: 4px 12px;',
-            '  border-radius: 9999px;',
-            '  font-size: 13px;',
-            '  font-weight: 500;',
-            '}',
-            '.dps-modal-client-info {',
-            '  background: #f9fafb;',
-            '  border: 1px solid #e5e7eb;',
-            '  border-radius: 6px;',
-            '  padding: 12px 16px;',
-            '  margin-top: 12px;',
-            '}',
-            '.dps-modal-client-info .dps-client-label {',
-            '  font-size: 12px;',
-            '  color: #6b7280;',
-            '  margin-bottom: 4px;',
-            '}',
-            '.dps-modal-client-info .dps-client-name {',
-            '  font-weight: 600;',
-            '  color: #111827;',
-            '}',
-            '.dps-modal-footer {',
-            '  padding: 16px 24px;',
-            '  border-top: 1px solid #e5e7eb;',
-            '  display: flex;',
-            '  flex-wrap: wrap;',
-            '  gap: 12px;',
-            '  justify-content: flex-end;',
-            '}',
-            '.dps-modal-footer button, .dps-modal-footer a {',
-            '  padding: 10px 20px;',
-            '  border-radius: 6px;',
-            '  font-size: 14px;',
-            '  font-weight: 500;',
-            '  cursor: pointer;',
-            '  text-decoration: none;',
-            '  display: inline-flex;',
-            '  align-items: center;',
-            '  justify-content: center;',
-            '  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;',
-            '}',
-            '.dps-modal-btn-cancel {',
-            '  background: #f3f4f6;',
-            '  border: 1px solid #d1d5db;',
-            '  color: #374151;',
-            '}',
-            '.dps-modal-btn-cancel:hover {',
-            '  background: #e5e7eb;',
-            '}',
-            '.dps-modal-btn-view {',
-            '  background: #0ea5e9;',
-            '  border: 1px solid #0ea5e9;',
-            '  color: #fff;',
-            '}',
-            '.dps-modal-btn-view:hover {',
-            '  background: #0284c7;',
-            '  border-color: #0284c7;',
-            '}',
-            '.dps-modal-btn-continue {',
-            '  background: #f59e0b;',
-            '  border: 1px solid #f59e0b;',
-            '  color: #fff;',
-            '}',
-            '.dps-modal-btn-continue:hover {',
-            '  background: #d97706;',
-            '  border-color: #d97706;',
-            '}',
-            '@media (max-width: 480px) {',
-            '  .dps-modal-footer {',
-            '    flex-direction: column;',
-            '  }',
-            '  .dps-modal-footer button, .dps-modal-footer a {',
-            '    width: 100%;',
-            '  }',
-            '}'
-        ].join('\n');
-
-        document.head.appendChild(styles);
+        button.dataset.originalText = button.textContent;
+        button.textContent = CONFIG.LOADING_TEXT;
+        button.classList.add('dps-loading');
+        button.disabled = true;
     }
 
-    /**
-     * Show duplicate client modal.
-     *
-     * @param {Object} data - Duplicate data from server.
-     * @param {Object} i18n - Internationalized strings.
-     * @param {Function} onContinue - Callback when user chooses to continue.
-     * @param {Function} onCancel - Callback when user cancels.
-     */
+    function hideLoading(button) {
+        if (!button) {
+            return;
+        }
+
+        button.textContent = button.dataset.originalText || CONFIG.SUBMIT_TEXT;
+        button.classList.remove('dps-loading');
+        button.disabled = false;
+    }
+
+    function createModalButton(className, text) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = className;
+        button.textContent = text;
+        return button;
+    }
+
     function showDuplicateModal(data, i18n, onContinue, onCancel) {
-        ensureModalStyles();
-
-        // Remove existing modal if any
-        var existingModal = document.getElementById('dps-duplicate-modal');
-        if (existingModal) {
-            existingModal.remove();
+        var existing = document.getElementById('dps-duplicate-modal');
+        if (existing && existing.parentNode) {
+            existing.parentNode.removeChild(existing);
         }
 
-        // Build duplicate fields badges
-        var fieldsHtml = '';
-        if (data.duplicated_fields && data.duplicated_fields.length) {
-            for (var i = 0; i < data.duplicated_fields.length; i++) {
-                fieldsHtml += '<span class="dps-duplicate-badge">' + escapeHtml(data.duplicated_fields[i]) + '</span>';
+        var overlay = document.createElement('div');
+        var modal = document.createElement('div');
+        var header = document.createElement('div');
+        var title = document.createElement('h3');
+        var body = document.createElement('div');
+        var message = document.createElement('p');
+        var badges = document.createElement('div');
+        var clientInfo = document.createElement('div');
+        var clientLabel = document.createElement('div');
+        var clientName = document.createElement('div');
+        var footer = document.createElement('div');
+        var cancelBtn = createModalButton('dps-modal-btn-cancel', i18n.cancelButton || 'Cancelar');
+        var continueBtn = createModalButton('dps-modal-btn-continue', i18n.continueButton || 'Continuar');
+        var viewBtn = document.createElement('a');
+
+        overlay.id = 'dps-duplicate-modal';
+        overlay.className = 'dps-modal-overlay';
+        modal.className = 'dps-modal';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'dps-modal-title');
+        header.className = 'dps-modal-header';
+        title.id = 'dps-modal-title';
+        title.textContent = i18n.modalTitle || 'Cliente já cadastrado';
+        body.className = 'dps-modal-body';
+        message.textContent = i18n.modalMessage || 'Já existe um cliente cadastrado com dados iguais.';
+        badges.className = 'dps-modal-duplicate-fields';
+        clientInfo.className = 'dps-modal-client-info';
+        clientLabel.className = 'dps-client-label';
+        clientLabel.textContent = i18n.clientLabel || 'Cliente existente';
+        clientName.className = 'dps-client-name';
+        clientName.textContent = data.client_name || ('ID: ' + data.client_id);
+        footer.className = 'dps-modal-footer';
+        viewBtn.className = 'dps-modal-btn-view';
+        viewBtn.textContent = i18n.viewClientButton || 'Ver cadastro';
+        viewBtn.href = data.view_url || '#';
+
+        toArray(data.duplicated_fields || []).forEach(function(field) {
+            var badge = document.createElement('span');
+            badge.className = 'dps-duplicate-badge';
+            badge.textContent = field;
+            badges.appendChild(badge);
+        });
+
+        header.appendChild(title);
+        body.appendChild(message);
+        body.appendChild(badges);
+        clientInfo.appendChild(clientLabel);
+        clientInfo.appendChild(clientName);
+        body.appendChild(clientInfo);
+        footer.appendChild(cancelBtn);
+        footer.appendChild(viewBtn);
+        footer.appendChild(continueBtn);
+        modal.appendChild(header);
+        modal.appendChild(body);
+        modal.appendChild(footer);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        function close() {
+            document.removeEventListener('keydown', handleKeydown);
+            if (overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
             }
         }
 
-        // Create modal HTML
-        var modalHtml = [
-            '<div class="dps-modal-overlay" id="dps-duplicate-modal">',
-            '  <div class="dps-modal" role="dialog" aria-modal="true" aria-labelledby="dps-modal-title">',
-            '    <div class="dps-modal-header">',
-            '      <span class="dps-modal-icon" aria-hidden="true">⚠️</span>',
-            '      <h3 id="dps-modal-title">' + escapeHtml(i18n.modalTitle) + '</h3>',
-            '    </div>',
-            '    <div class="dps-modal-body">',
-            '      <p>' + escapeHtml(i18n.modalMessage) + '</p>',
-            '      <div class="dps-modal-duplicate-fields">' + fieldsHtml + '</div>',
-            '      <div class="dps-modal-client-info">',
-            '        <div class="dps-client-label">' + escapeHtml(i18n.clientLabel) + '</div>',
-            '        <div class="dps-client-name">' + escapeHtml(data.client_name || 'ID: ' + data.client_id) + '</div>',
-            '      </div>',
-            '    </div>',
-            '    <div class="dps-modal-footer">',
-            '      <button type="button" class="dps-modal-btn-cancel" id="dps-modal-cancel">' + escapeHtml(i18n.cancelButton) + '</button>',
-            '      <a href="#" class="dps-modal-btn-view" id="dps-modal-view">' + escapeHtml(i18n.viewClientButton) + '</a>',
-            '      <button type="button" class="dps-modal-btn-continue" id="dps-modal-continue">' + escapeHtml(i18n.continueButton) + '</button>',
-            '    </div>',
-            '  </div>',
-            '</div>'
-        ].join('\n');
-
-        // Inject modal
-        var container = document.createElement('div');
-        container.innerHTML = modalHtml;
-        document.body.appendChild(container.firstElementChild);
-
-        // Get modal elements
-        var modal = document.getElementById('dps-duplicate-modal');
-        var cancelBtn = document.getElementById('dps-modal-cancel');
-        var continueBtn = document.getElementById('dps-modal-continue');
-        var viewBtn = document.getElementById('dps-modal-view');
-
-        // Set URL safely via DOM API (prevents XSS via href attribute)
-        if (viewBtn && data.view_url) {
-            viewBtn.href = data.view_url;
-        }
-
-        // Event handlers
-        function closeModal() {
-            if (modal) {
-                modal.remove();
-            }
-        }
-
-        // Named function for keydown handler
-        function handleEscapeKey(e) {
-            if (e.key === 'Escape' && document.getElementById('dps-duplicate-modal')) {
-                closeModalWithCleanup();
-                if (typeof onCancel === 'function') {
-                    onCancel();
-                }
-            }
-        }
-
-        // Cleanup function to remove event listener
-        function closeModalWithCleanup() {
-            document.removeEventListener('keydown', handleEscapeKey);
-            closeModal();
-        }
-
-        cancelBtn.addEventListener('click', function() {
-            closeModalWithCleanup();
+        function handleCancel() {
+            close();
             if (typeof onCancel === 'function') {
                 onCancel();
             }
-        });
+        }
 
+        function handleKeydown(event) {
+            if (event.key === 'Escape') {
+                handleCancel();
+            }
+        }
+
+        cancelBtn.addEventListener('click', handleCancel);
+        overlay.addEventListener('click', function(event) {
+            if (event.target === overlay) {
+                handleCancel();
+            }
+        });
         continueBtn.addEventListener('click', function() {
-            closeModalWithCleanup();
+            close();
             if (typeof onContinue === 'function') {
                 onContinue();
             }
         });
-
-        // Close on overlay click
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeModalWithCleanup();
-                if (typeof onCancel === 'function') {
-                    onCancel();
-                }
-            }
-        });
-
-        // Close on Escape key
-        document.addEventListener('keydown', handleEscapeKey);
-
-        // Focus the cancel button
+        document.addEventListener('keydown', handleKeydown);
         cancelBtn.focus();
     }
 
-    /**
-     * Escape HTML to prevent XSS.
-     *
-     * @param {string} str - String to escape.
-     * @return {string} Escaped string.
-     */
-    function escapeHtml(str) {
-        if (!str) return '';
-        var div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
-
-    /**
-     * Check for duplicate client via AJAX.
-     *
-     * @param {HTMLFormElement} form - The form.
-     * @param {HTMLButtonElement} submitButton - Submit button.
-     * @param {string} email - Client email.
-     * @param {string} phone - Client phone.
-     * @param {string} cpf - Client CPF.
-     * @param {Object} config - Duplicate check config.
-     * @param {Function} callback - Callback(shouldContinue, wasDuplicate).
-     */
     function checkDuplicate(form, submitButton, email, phone, cpf, config, callback) {
-        // If no data to check, continue
         if (!email && !phone && !cpf) {
             callback(true, false);
             return;
         }
 
-        // Show checking message
         if (submitButton) {
             submitButton.textContent = config.i18n.checkingMessage || 'Verificando...';
         }
 
-        // Build form data
         var formData = new FormData();
         formData.append('action', config.action);
         formData.append('nonce', config.nonce);
@@ -1372,149 +949,94 @@
         formData.append('phone', phone);
         formData.append('cpf', cpf);
 
-        // AJAX request
         var xhr = new XMLHttpRequest();
         xhr.open('POST', config.ajaxUrl, true);
-
         xhr.onload = function() {
-            if (xhr.status >= 200 && xhr.status < 400) {
-                try {
-                    var response = JSON.parse(xhr.responseText);
-                    if (response.success && response.data && response.data.is_duplicate) {
-                        // Show modal
-                        showDuplicateModal(response.data, config.i18n, function() {
-                            // User chose to continue
-                            callback(true, true);
-                        }, function() {
-                            // User cancelled
-                            callback(false, true);
-                        });
-                    } else {
-                        // No duplicate, continue
-                        callback(true, false);
-                    }
-                } catch (e) {
-                    // Parse error, continue anyway
-                    callback(true, false);
-                }
-            } else {
-                // HTTP error, continue anyway (don't block registration)
+            if (xhr.status < 200 || xhr.status >= 400) {
                 callback(true, false);
+                return;
             }
-        };
 
-        xhr.onerror = function() {
-            // Network error, continue anyway
+            try {
+                var response = JSON.parse(xhr.responseText);
+                if (response.success && response.data && response.data.is_duplicate) {
+                    showDuplicateModal(response.data, config.i18n || {}, function() {
+                        callback(true, true);
+                    }, function() {
+                        callback(false, true);
+                    });
+                    return;
+                }
+            } catch (e) {
+                callback(true, false);
+                return;
+            }
+
             callback(true, false);
         };
-
+        xhr.onerror = function() {
+            callback(true, false);
+        };
         xhr.send(formData);
     }
 
-    // =========================================================================
-    // Main Initialization
-    // =========================================================================
-
-    /**
-     * Initialize all registration form functionality.
-     */
-    function init() {
-        var form = document.getElementById('dps-reg-form');
-
-        if (!form) {
+    function requestSubmit(form) {
+        if (typeof form.requestSubmit === 'function') {
+            form.requestSubmit();
             return;
         }
 
-        // F2.1: Apply input masks
-        var cpfInput = form.querySelector('input[name="client_cpf"]');
-        var phoneInput = form.querySelector('input[name="client_phone"]');
+        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    }
 
-        var recaptchaConfig = (window.dpsRegistrationData && window.dpsRegistrationData.recaptcha) ? window.dpsRegistrationData.recaptcha : null;
-        var recaptchaValidated = false;
-
-        // Duplicate check config for admins
-        var duplicateConfig = (window.dpsRegistrationData && window.dpsRegistrationData.duplicateCheck) ? window.dpsRegistrationData.duplicateCheck : null;
-        var duplicateConfirmed = false;
-
-        applyCPFMask(cpfInput);
-        applyPhoneMask(phoneInput);
-
-        // Wizard elements
-        var steps = form.querySelectorAll('.dps-step');
+    function bindWizard(form) {
+        var progress = {
+            label: document.getElementById('dps-step-label'),
+            counter: document.getElementById('dps-step-counter'),
+            bar: document.getElementById('dps-progress-bar-fill')
+        };
         var nextButton = document.getElementById('dps-next-step');
         var nextButton2 = document.getElementById('dps-next-step-2');
         var backButton = document.getElementById('dps-back-step');
         var backButton2 = document.getElementById('dps-back-step-2');
         var submitButton = form.querySelector('button[type="submit"]');
         var confirmCheckbox = document.getElementById('dps-summary-confirm');
-        var progressElements = {
-            label: document.getElementById('dps-step-label'),
-            counter: document.getElementById('dps-step-counter'),
-            bar: document.getElementById('dps-progress-bar-fill')
-        };
-        
-        var wizardButtons = {
-            next: nextButton,
-            next2: nextButton2,
-            back: backButton,
-            back2: backButton2,
-            submit: submitButton
-        };
 
-        showStep(1, form, steps, progressElements, wizardButtons);
+        showStep(form, 1, progress);
 
-        initBreedSelectors();
-
-        // Etapa 1 → Etapa 2
         if (nextButton) {
             nextButton.addEventListener('click', function() {
-                if (!validateStepOne(form)) {
-                    return;
+                clearJSErrors(form);
+                if (validateStepOne(form, false)) {
+                    showStep(form, 2, progress);
                 }
-
-                if (confirmCheckbox) {
-                    confirmCheckbox.checked = false;
-                }
-
-                if (submitButton) {
-                    submitButton.disabled = true;
-                }
-
-                showStep(2, form, steps, progressElements, wizardButtons);
             });
         }
-        
-        // Etapa 2 → Etapa 3
+
         if (nextButton2) {
             nextButton2.addEventListener('click', function() {
-                if (!validateStepTwo(form)) {
-                    return;
+                clearJSErrors(form);
+                if (validateStepTwo(form, false)) {
+                    if (confirmCheckbox) {
+                        confirmCheckbox.checked = false;
+                    }
+                    if (submitButton) {
+                        submitButton.disabled = true;
+                    }
+                    showStep(form, 3, progress);
                 }
-
-                if (confirmCheckbox) {
-                    confirmCheckbox.checked = false;
-                }
-
-                if (submitButton) {
-                    submitButton.disabled = true;
-                }
-
-                showStep(3, form, steps, progressElements, wizardButtons);
-                buildSummary(form);
             });
         }
 
-        // Etapa 2 → Etapa 1 (voltar)
         if (backButton) {
             backButton.addEventListener('click', function() {
-                showStep(1, form, steps, progressElements, wizardButtons);
+                showStep(form, 1, progress);
             });
         }
-        
-        // Etapa 3 → Etapa 2 (voltar)
+
         if (backButton2) {
             backButton2.addEventListener('click', function() {
-                showStep(2, form, steps, progressElements, wizardButtons);
+                showStep(form, 2, progress);
             });
         }
 
@@ -1526,46 +1048,78 @@
         }
 
         form.addEventListener('input', function() {
-            if (currentStep === 3) {
+            if (state.currentStep === 3) {
                 buildSummary(form);
             }
         });
+    }
 
-        // F2.2 & F2.4: Form validation and loading on submit
-        form.addEventListener('submit', function(e) {
+    function handleRecaptcha(form, submitButton, config) {
+        var tokenInput = form.querySelector('input[name="dps_recaptcha_token"]');
+        var actionInput = form.querySelector('input[name="dps_recaptcha_action"]');
+
+        if (!config || !config.enabled || state.recaptchaValidated) {
+            return true;
+        }
+
+        if (typeof window.grecaptcha === 'undefined' || !window.grecaptcha.execute) {
+            hideLoading(submitButton);
+            renderErrors(form, [ config.unavailableMessage || 'Não foi possível carregar o verificador anti-spam.' ]);
+            return false;
+        }
+
+        if (actionInput && config.action) {
+            actionInput.value = config.action;
+        }
+
+        window.grecaptcha.ready(function() {
+            window.grecaptcha.execute(config.siteKey, { action: config.action }).then(function(token) {
+                if (tokenInput) {
+                    tokenInput.value = token;
+                }
+                state.recaptchaValidated = true;
+                form.submit();
+            }).catch(function() {
+                hideLoading(submitButton);
+                renderErrors(form, [ config.errorMessage || 'Não foi possível validar o anti-spam.' ]);
+            });
+        });
+
+        return false;
+    }
+
+    function bindSubmit(form) {
+        var submitButton = form.querySelector('button[type="submit"]');
+        var data = getRegistrationData();
+        var recaptchaConfig = data.recaptcha || null;
+        var duplicateConfig = data.duplicateCheck || null;
+
+        form.addEventListener('submit', function(event) {
             if (!validateForm(form)) {
-                e.preventDefault();
+                event.preventDefault();
                 hideLoading(submitButton);
                 return false;
             }
 
-            if (confirmCheckbox && !confirmCheckbox.checked) {
-                e.preventDefault();
-                hideLoading(submitButton);
-                showError(getErrorContainer(form), 'Confirme que os dados estão corretos antes de enviar.');
-                return false;
-            }
-
-            // Show loading
             showLoading(submitButton);
 
-            // Check for duplicates (admin only) before reCAPTCHA
-            if (duplicateConfig && duplicateConfig.enabled && !duplicateConfirmed) {
-                e.preventDefault();
+            if (duplicateConfig && duplicateConfig.enabled && !state.duplicateConfirmed) {
+                event.preventDefault();
 
-                var emailInput = form.querySelector('input[name="client_email"]');
-                var phoneInput = form.querySelector('input[name="client_phone"]');
-                var cpfInput = form.querySelector('input[name="client_cpf"]');
+                checkDuplicate(
+                    form,
+                    submitButton,
+                    getTrimmedValue(form.querySelector('input[name="client_email"]')),
+                    getTrimmedValue(form.querySelector('input[name="client_phone"]')),
+                    getTrimmedValue(form.querySelector('input[name="client_cpf"]')),
+                    duplicateConfig,
+                    function(shouldContinue, wasDuplicate) {
+                        if (!shouldContinue) {
+                            hideLoading(submitButton);
+                            return;
+                        }
 
-                var email = emailInput ? emailInput.value.trim() : '';
-                var phone = phoneInput ? phoneInput.value.trim() : '';
-                var cpf = cpfInput ? cpfInput.value.trim() : '';
-
-                // Call AJAX to check for duplicates
-                checkDuplicate(form, submitButton, email, phone, cpf, duplicateConfig, function(shouldContinue, wasDuplicate) {
-                    if (shouldContinue) {
-                        duplicateConfirmed = true;
-                        // Add hidden field only if there was a duplicate and user confirmed
+                        state.duplicateConfirmed = true;
                         if (wasDuplicate) {
                             var confirmInput = form.querySelector('input[name="dps_confirm_duplicate"]');
                             if (!confirmInput) {
@@ -1576,83 +1130,55 @@
                             }
                             confirmInput.value = '1';
                         }
-                        // Re-trigger submit - requestSubmit() respects form validation/events, form.submit() bypasses them
-                        // For browsers without requestSubmit (older), we still need the duplicateConfirmed flag to prevent re-checking
-                        if (typeof form.requestSubmit === 'function') {
-                            form.requestSubmit();
-                        } else {
-                            // Legacy fallback: dispatch event which will trigger our listener again
-                            // The duplicateConfirmed flag ensures we skip the duplicate check
-                            form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-                        }
-                    } else {
+
                         hideLoading(submitButton);
+                        requestSubmit(form);
                     }
-                });
+                );
 
                 return false;
             }
 
-            if (recaptchaConfig && recaptchaConfig.enabled) {
-                if (recaptchaValidated) {
-                    return true;
-                }
-
-                e.preventDefault();
-
-                if (typeof grecaptcha === 'undefined' || !grecaptcha.execute) {
-                    hideLoading(submitButton);
-                    showError(getErrorContainer(form), recaptchaConfig.unavailableMessage || 'Não foi possível validar o anti-spam. Tente novamente.');
+            if (recaptchaConfig && recaptchaConfig.enabled && !state.recaptchaValidated) {
+                event.preventDefault();
+                if (!handleRecaptcha(form, submitButton, recaptchaConfig)) {
                     return false;
                 }
-
-                var tokenInput = form.querySelector('input[name="dps_recaptcha_token"]');
-                var actionInput = form.querySelector('input[name="dps_recaptcha_action"]');
-
-                if (actionInput && recaptchaConfig.action) {
-                    actionInput.value = recaptchaConfig.action;
-                }
-
-                grecaptcha.ready(function() {
-                    grecaptcha.execute(recaptchaConfig.siteKey, { action: recaptchaConfig.action }).then(function(token) {
-                        if (tokenInput) {
-                            tokenInput.value = token;
-                        }
-                        recaptchaValidated = true;
-                        form.submit();
-                    }).catch(function() {
-                        hideLoading(submitButton);
-                        showError(getErrorContainer(form), recaptchaConfig.errorMessage || 'Não foi possível validar o anti-spam. Tente novamente.');
-                    });
-                });
-
-                return false;
             }
 
-            // Allow form to submit
             return true;
         });
-        
-        // Initialize pet clone if template is available
-        var templateElement = document.getElementById('dps-pet-template');
-        if (templateElement) {
-            initPetClone(templateElement.textContent, function() {
-                initBreedSelectors();
-                if (currentStep === 2) {
+    }
+
+    function init(root) {
+        var scope = root || document;
+        var form = scope.querySelector ? scope.querySelector('#dps-reg-form') : document.getElementById('dps-reg-form');
+
+        initSignatureForms(scope);
+        initGooglePlaces(scope);
+
+        if (!form || form.dataset.dpsRegistrationReady === '1') {
+            return;
+        }
+
+        form.dataset.dpsRegistrationReady = '1';
+        bindMaskedInput(form.querySelector('input[name="client_cpf"]'), 'cpf');
+        bindMaskedInput(form.querySelector('input[name="client_phone"]'), 'phone');
+        initBreedSelectors(form);
+        bindWizard(form);
+        bindSubmit(form);
+
+        var template = document.getElementById('dps-pet-template');
+        if (template) {
+            initPetClone(template.textContent, function() {
+                initBreedSelectors(form);
+                if (state.currentStep === 3) {
+                    renderProductPrefsStep(form);
                     buildSummary(form);
                 }
             });
         }
-        
-        // Initialize Google Places if available
-        if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-            initGooglePlaces();
-        }
     }
-
-    // =========================================================================
-    // Expose for external use (pet template initialization)
-    // =========================================================================
 
     window.DPSRegistration = {
         init: init,
@@ -1663,11 +1189,11 @@
         validateEmail: validateEmail
     };
 
-    // Auto-init when DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', function() {
+            init(document);
+        });
     } else {
-        init();
+        init(document);
     }
-
-})();
+}());

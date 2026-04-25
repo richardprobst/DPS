@@ -1,0 +1,236 @@
+{
+  "generatedAt": "2026-04-25T14:38:06.746Z",
+  "target": "https://desi.pet/cadastro/",
+  "authenticatedUserRole": "administrator-temporary",
+  "breakpoints": {
+    "375": {
+      "formRendered": true,
+      "horizontalOverflow": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "addressTag": "INPUT",
+      "addressReady": "1",
+      "addressAutocomplete": true,
+      "hasSignatureForms": true,
+      "hasDPSRegistration": true,
+      "duplicateCheckEnabled": true,
+      "progressBarRadius": "0px",
+      "progressFillRadius": "0px",
+      "labelDisplay": "block",
+      "referralLabel": "Código de indicação",
+      "referralPlaceholder": "Seu código, se tiver"
+    },
+    "600": {
+      "formRendered": true,
+      "horizontalOverflow": false,
+      "scrollWidth": 600,
+      "clientWidth": 600,
+      "addressTag": "INPUT",
+      "addressReady": "1",
+      "addressAutocomplete": true,
+      "hasSignatureForms": true,
+      "hasDPSRegistration": true,
+      "duplicateCheckEnabled": true,
+      "progressBarRadius": "0px",
+      "progressFillRadius": "0px",
+      "labelDisplay": "block",
+      "referralLabel": "Código de indicação",
+      "referralPlaceholder": "Seu código, se tiver"
+    },
+    "840": {
+      "formRendered": true,
+      "horizontalOverflow": false,
+      "scrollWidth": 840,
+      "clientWidth": 840,
+      "addressTag": "INPUT",
+      "addressReady": "1",
+      "addressAutocomplete": true,
+      "hasSignatureForms": true,
+      "hasDPSRegistration": true,
+      "duplicateCheckEnabled": true,
+      "progressBarRadius": "0px",
+      "progressFillRadius": "0px",
+      "labelDisplay": "block",
+      "referralLabel": "Código de indicação",
+      "referralPlaceholder": "Seu código, se tiver"
+    },
+    "1200": {
+      "formRendered": true,
+      "horizontalOverflow": false,
+      "scrollWidth": 1200,
+      "clientWidth": 1200,
+      "addressTag": "INPUT",
+      "addressReady": "1",
+      "addressAutocomplete": true,
+      "hasSignatureForms": true,
+      "hasDPSRegistration": true,
+      "duplicateCheckEnabled": true,
+      "progressBarRadius": "0px",
+      "progressFillRadius": "0px",
+      "labelDisplay": "block",
+      "referralLabel": "Código de indicação",
+      "referralPlaceholder": "Seu código, se tiver"
+    },
+    "1920": {
+      "formRendered": true,
+      "horizontalOverflow": false,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "addressTag": "INPUT",
+      "addressReady": "1",
+      "addressAutocomplete": true,
+      "hasSignatureForms": true,
+      "hasDPSRegistration": true,
+      "duplicateCheckEnabled": true,
+      "progressBarRadius": "0px",
+      "progressFillRadius": "0px",
+      "labelDisplay": "block",
+      "referralLabel": "Código de indicação",
+      "referralPlaceholder": "Seu código, se tiver"
+    }
+  },
+  "flow": {
+    "blankState": {
+      "activeStep": "1",
+      "errors": [
+        "Informe o nome do tutor.",
+        "Informe o telefone ou WhatsApp."
+      ]
+    },
+    "petCloneState": {
+      "fieldsets": 2,
+      "aggressiveNames": [
+        "pet_aggressive[0]",
+        "pet_aggressive[1]"
+      ],
+      "legends": [
+        "Pet 1",
+        "Pet 2"
+      ]
+    },
+    "step3State": {
+      "activeStep": "3",
+      "productPrefs": 2,
+      "summarySections": 3,
+      "submitDisabledBeforeConfirm": true,
+      "submitDisabledAfterConfirm": false,
+      "referralLabel": "Código de indicação"
+    }
+  },
+  "requestUrls": [
+    "https://desi.pet/wp-json/wp/v2/users/me?context=edit&_locale=user",
+    "https://desi.pet/wp-admin/admin-ajax.php?action=fluent_smtp_get_dashboard_html",
+    "https://desi.pet/cadastro/?codex_cadastro_validation=1777127868230-375",
+    "https://maps.googleapis.com/maps/api/js?key=[redacted]&libraries=places&loading=async&callback=dpsSignatureGooglePlacesReady",
+    "https://maps.googleapis.com/maps-api-v3/api/js/64/9c/places.js",
+    "https://maps.googleapis.com/maps-api-v3/api/js/64/9c/main.js",
+    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777127869&plat=3%3A65536%2C4%3A65536%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro%2F%3Fcodex_cadastro_validation%3D1777127868230-375&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777127869021&bpp=3&bdt=415&idt=147&shv=r20260423&mjsv=m202604210101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=1711410267246&frm=20&pv=2&u_tz=-180&u_his=4&u_h=900&u_w=375&u_ah=900&u_aw=375&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=375&bih=900&scr_x=0&scr_y=0&eid=31097956%2C95366175%2C95387509%2C31098046%2C95387779&oid=2&pvsid=2082676414773309&tmod=1308692858&uas=3&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C375%2C0%2C375%2C900%2C375%2C900&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=175",
+    "https://maps.googleapis.com/maps/api/mapsjs/gen_204?csp_test=true",
+    "https://maps.googleapis.com/maps-api-v3/api/js/64/9c/common.js",
+    "https://maps.googleapis.com/maps-api-v3/api/js/64/9c/util.js",
+    "https://maps.googleapis.com/maps-api-v3/api/js/64/9c/controls.js",
+    "https://maps.googleapis.com/maps-api-v3/api/js/64/9c/places_impl.js",
+    "https://desi.pet/cadastro/?codex_cadastro_validation=1777127870929-600",
+    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777127871&plat=3%3A65536%2C4%3A65536%2C9%3A32768%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro%2F%3Fcodex_cadastro_validation%3D1777127870929-600&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777127871411&bpp=1&bdt=143&idt=15&shv=r20260423&mjsv=m202604210101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=5727132616211&frm=20&pv=2&u_tz=-180&u_his=5&u_h=1000&u_w=600&u_ah=1000&u_aw=600&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=600&bih=1000&scr_x=0&scr_y=0&eid=31098046%2C95386195%2C95387779&oid=2&pvsid=4304213656196429&tmod=1308692858&uas=3&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C600%2C0%2C600%2C1000%2C600%2C1000&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=23",
+    "https://desi.pet/cadastro/?codex_cadastro_validation=1777127873336-840",
+    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777127873&plat=3%3A65536%2C4%3A65536%2C9%3A32768%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro%2F%3Fcodex_cadastro_validation%3D1777127873336-840&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777127873786&bpp=1&bdt=119&idt=5&shv=r20260423&mjsv=m202604210101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=3937102081069&frm=20&pv=2&u_tz=-180&u_his=6&u_h=1100&u_w=840&u_ah=1100&u_aw=840&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=840&bih=1100&scr_x=0&scr_y=0&eid=31084128%2C31097956%2C31098046%2C95372614%2C95386362%2C95387777&oid=2&pvsid=1858325862374413&tmod=1308692858&uas=3&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C840%2C0%2C840%2C1100%2C840%2C1100&vis=1&rsz=%7C%7Cs%7C&abl=NS&cms=2&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=14",
+    "https://desi.pet/cadastro/?codex_cadastro_validation=1777127875707-1200",
+    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777127876&plat=3%3A16%2C4%3A16%2C9%3A32768%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro%2F%3Fcodex_cadastro_validation%3D1777127875707-1200&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777127876165&bpp=1&bdt=138&idt=7&shv=r20260423&mjsv=m202604210101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=3002113819241&frm=20&pv=2&u_tz=-180&u_his=7&u_h=1200&u_w=1200&u_ah=1200&u_aw=1200&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=1200&bih=1200&scr_x=0&scr_y=0&eid=31097956%2C42531706%2C31098046%2C95388298%2C95387777&oid=2&pvsid=3186185904110611&tmod=1308692858&uas=3&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C1200%2C1200%2C1200&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=22",
+    "https://desi.pet/cadastro/?codex_cadastro_validation=1777127878108-1920",
+    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777127878&plat=9%3A32776%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1081344%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro%2F%3Fcodex_cadastro_validation%3D1777127878108-1920&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777127878611&bpp=1&bdt=169&idt=13&shv=r20260423&mjsv=m202604210101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=692314892181&frm=20&pv=2&u_tz=-180&u_his=8&u_h=1200&u_w=1920&u_ah=1200&u_aw=1920&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=1920&bih=1200&scr_x=0&scr_y=0&eid=95387509%2C95389146%2C31098046%2C95386194%2C95387777&oid=2&pvsid=7609277238817424&tmod=1308692858&uas=3&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C1920%2C0%2C1920%2C1200%2C1920%2C1200&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&plas=366x945_l%7C366x945_r&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=44",
+    "https://desi.pet/cadastro/?codex_cadastro_validation=1777127880572-flow",
+    "https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-7636685651342410&output=html&adk=1812271804&adf=3025194257&lmt=1777127881&plat=3%3A16%2C4%3A16%2C9%3A32768%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A1048576%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&format=0x0&url=https%3A%2F%2Fdesi.pet%2Fcadastro%2F%3Fcodex_cadastro_validation%3D1777127880572-flow&host=ca-host-pub-2644536267352236&pra=5&asro=0&aiapmid=0.0001&aiactd=0&aicctd=0&ailctd=0&aimartd=4&aieuf=1&aicrs=1&uach=WyJXaW5kb3dzIiwiMTkuMC4wIiwieDg2IiwiIiwiMTQ3LjAuNzcyNy4xNSIsbnVsbCwwLG51bGwsIjY0IixbWyJIZWFkbGVzc0Nocm9tZSIsIjE0Ny4wLjc3MjcuMTUiXSxbIk5vdC5BL0JyYW5kIiwiOC4wLjAuMCJdLFsiQ2hyb21pdW0iLCIxNDcuMC43NzI3LjE1Il1dLDBd&abgtt=7&dt=1777127880947&bpp=269&bdt=38&idt=269&shv=r20260423&mjsv=m202604210101&ptt=9&saldr=aa&abxe=1&cookie_enabled=1&eoidce=1&nras=1&correlator=3911394659213&frm=20&pv=2&u_tz=-180&u_his=9&u_h=1200&u_w=1200&u_ah=1200&u_aw=1200&u_cd=24&u_sd=1&dmc=16&adx=-12245933&ady=-12245933&biw=1200&bih=1200&scr_x=0&scr_y=0&eid=31097955%2C95386814%2C31098046%2C95387779&oid=2&pvsid=8412681405069957&tmod=1308692858&uas=0&nvt=1&fsapi=1&fc=1920&brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C1200%2C1200%2C1200&vis=1&rsz=%7C%7Cs%7C&abl=NS&fu=32768&bc=31&bz=1&pgls=CAEaBTYuOS40~CAEQBBoHMS4xNzcuMA..~CAEQBRoFNC4wLjM.&ifi=1&uci=a!1&fsb=1&dtd=291",
+    "https://maps.googleapis.com/maps/api/js/AuthenticationService.Authenticate?1shttps%3A%2F%2Fdesi.pet%2Fcadastro%2F&4s[redacted-api-key]&8b0&callback=_xdc_._krakrx&key=[redacted]&token=[redacted]",
+    "https://maps.googleapis.com/maps/api/place/js/AutocompletionService.GetPredictions?1sRua%20Haddock%20Lobo%2C%201000%2C%20Sao%20Paulo&4sen-US&9sgeocode&15e3&20s7CCBA2DA812B4ADB9A65E423F98F44E2fxt0&21m1&2e1&r_url=https%3A%2F%2Fdesi.pet%2Fcadastro%2F&callback=_xdc_._7k6647&key=[redacted]&token=[redacted]"
+  ],
+  "consoleMessages": [
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "As of March 1st, 2025, google.maps.places.Autocomplete is not available to new customers. Please use google.maps.places.PlaceAutocompleteElement instead. At this time, google.maps.places.Autocomplete is not scheduled to be discontinued, but google.maps.places.PlaceAutocompleteElement is recommended over google.maps.places.Autocomplete. While google.maps.places.Autocomplete will continue to receive bug fixes for any major regressions, existing bugs in google.maps.places.Autocomplete will not be addressed. At least 12 months notice will be given before support is discontinued. Please see https://developers.google.com/maps/legacy for additional details and https://developers.google.com/maps/documentation/javascript/places-migration-overview for the migration guide."
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "As of March 1st, 2025, google.maps.places.Autocomplete is not available to new customers. Please use google.maps.places.PlaceAutocompleteElement instead. At this time, google.maps.places.Autocomplete is not scheduled to be discontinued, but google.maps.places.PlaceAutocompleteElement is recommended over google.maps.places.Autocomplete. While google.maps.places.Autocomplete will continue to receive bug fixes for any major regressions, existing bugs in google.maps.places.Autocomplete will not be addressed. At least 12 months notice will be given before support is discontinued. Please see https://developers.google.com/maps/legacy for additional details and https://developers.google.com/maps/documentation/javascript/places-migration-overview for the migration guide."
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "As of March 1st, 2025, google.maps.places.Autocomplete is not available to new customers. Please use google.maps.places.PlaceAutocompleteElement instead. At this time, google.maps.places.Autocomplete is not scheduled to be discontinued, but google.maps.places.PlaceAutocompleteElement is recommended over google.maps.places.Autocomplete. While google.maps.places.Autocomplete will continue to receive bug fixes for any major regressions, existing bugs in google.maps.places.Autocomplete will not be addressed. At least 12 months notice will be given before support is discontinued. Please see https://developers.google.com/maps/legacy for additional details and https://developers.google.com/maps/documentation/javascript/places-migration-overview for the migration guide."
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "As of March 1st, 2025, google.maps.places.Autocomplete is not available to new customers. Please use google.maps.places.PlaceAutocompleteElement instead. At this time, google.maps.places.Autocomplete is not scheduled to be discontinued, but google.maps.places.PlaceAutocompleteElement is recommended over google.maps.places.Autocomplete. While google.maps.places.Autocomplete will continue to receive bug fixes for any major regressions, existing bugs in google.maps.places.Autocomplete will not be addressed. At least 12 months notice will be given before support is discontinued. Please see https://developers.google.com/maps/legacy for additional details and https://developers.google.com/maps/documentation/javascript/places-migration-overview for the migration guide."
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "As of March 1st, 2025, google.maps.places.Autocomplete is not available to new customers. Please use google.maps.places.PlaceAutocompleteElement instead. At this time, google.maps.places.Autocomplete is not scheduled to be discontinued, but google.maps.places.PlaceAutocompleteElement is recommended over google.maps.places.Autocomplete. While google.maps.places.Autocomplete will continue to receive bug fixes for any major regressions, existing bugs in google.maps.places.Autocomplete will not be addressed. At least 12 months notice will be given before support is discontinued. Please see https://developers.google.com/maps/legacy for additional details and https://developers.google.com/maps/documentation/javascript/places-migration-overview for the migration guide."
+    },
+    {
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 3.4.1"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "As of March 1st, 2025, google.maps.places.Autocomplete is not available to new customers. Please use google.maps.places.PlaceAutocompleteElement instead. At this time, google.maps.places.Autocomplete is not scheduled to be discontinued, but google.maps.places.PlaceAutocompleteElement is recommended over google.maps.places.Autocomplete. While google.maps.places.Autocomplete will continue to receive bug fixes for any major regressions, existing bugs in google.maps.places.Autocomplete will not be addressed. At least 12 months notice will be given before support is discontinued. Please see https://developers.google.com/maps/legacy for additional details and https://developers.google.com/maps/documentation/javascript/places-migration-overview for the migration guide."
+    }
+  ],
+  "notes": [
+    "Google API keys, tokens and login-like parameters are redacted.",
+    "Legacy Google Places Autocomplete warnings are captured as residual vendor deprecation notices, not as InvalidValueError regressions."
+  ]
+}

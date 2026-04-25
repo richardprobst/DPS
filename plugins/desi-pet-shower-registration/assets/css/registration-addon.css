@@ -1,299 +1,198 @@
-﻿/**
- * Estilos do Registration Add-on - DPS
- * DPS Signature Legacy Fallback
+/**
+ * Registration Add-on public form.
  *
- * Este arquivo existe apenas como fallback quando o motor DPS Signature do frontend nÃ£o estÃ¡ ativo:
- * - Todas as cores via var(--dps-color-*) / var(--dps-*) tokens
- * - Formas via var(--dps-shape-*) tokens
- * - ElevaÃ§Ã£o via var(--dps-elevation-*) tokens
- * - Movimento via var(--dps-motion-*) tokens
- * - EspaÃ§amento via var(--dps-space-*) tokens
- * - Tipografia via var(--dps-font-*) / var(--dps-typescale-*) tokens
+ * DPS Signature implementation for the public customer and pet registration flow.
  *
- * Perfil: formulÃ¡rio pÃºblico do sistema
- * - Motion com resposta controlada
- * - Stagger animations para cards
- * - Elevated cards
- * - Tipografia pÃºblica com mais presenÃ§a
- * - BotÃµes pill-shaped
- *
- * Requer: dps-design-tokens.css carregado antes deste arquivo.
- *
- * Breakpoints:
- * - 1440px: Desktop extra grande
- * - 1200px: Desktop grande
- * - 1024px: Tablet grande
- * - 768px: Tablet (prioridade)
- * - 640px: Mobile
- * - 480px: Mobile pequeno
- * - 374px: Mobile muito pequeno
- *
- * @package Desi_Pet_Shower_Registration
- * @since 1.1.0
- * @since 1.4.0 Melhorias visuais seguindo padrÃ£o da Agenda
- * @version 2.0.0 MigraÃ§Ã£o completa para tokens DPS Signature
+ * @package DPS_Registration_Addon
  */
 
-/* ==========================================================================
-   CSS Variables - Design System Tokens
-   ========================================================================== */
-
 .dps-registration-form {
-    /* Tokens semÃ¢nticos DPS Signature (via dps-design-tokens.css) */
-    --dps-accent: var(--dps-color-primary);
-    --dps-accent-strong: var(--dps-color-primary-pressed);
-    --dps-accent-hover: var(--dps-color-primary-hover);
-    --dps-accent-soft: var(--dps-color-primary-container);
-    --dps-accent-on: var(--dps-color-on-primary);
-    --dps-accent-on-container: var(--dps-color-on-primary-container);
-    --dps-surface: var(--dps-color-surface-container-lowest);
-    --dps-background: var(--dps-color-surface);
-    --dps-border: var(--dps-color-outline-variant);
-    --dps-border-light: var(--dps-color-surface-container-low);
-    --dps-muted: var(--dps-color-on-surface-variant);
-    --dps-text-primary: var(--dps-color-on-surface);
-    --dps-text-secondary: var(--dps-color-on-surface-variant);
-    --dps-success: var(--dps-color-success);
-    --dps-success-soft: var(--dps-color-success-container);
-    --dps-warning: var(--dps-color-warning);
-    --dps-warning-soft: var(--dps-color-warning-container);
-    --dps-error: var(--dps-color-error);
-    --dps-error-soft: var(--dps-color-error-container);
-}
-
-/* ==========================================================================
-   1. Container Principal
-   ========================================================================== */
-
-.dps-registration-form {
-    max-width: 720px;
+    --dps-reg-ink: var(--dps-signature-ink, #11161c);
+    --dps-reg-petrol: var(--dps-signature-petrol, #173042);
+    --dps-reg-paper: var(--dps-signature-paper, #f7f2ea);
+    --dps-reg-bone: var(--dps-signature-bone, #ece2d3);
+    --dps-reg-line: var(--dps-signature-line, #d9ccba);
+    --dps-reg-sky: var(--dps-signature-sky, #bdd8e7);
+    --dps-reg-action: var(--dps-signature-action, #1f8c57);
+    --dps-reg-warning: var(--dps-signature-warning, #8a6622);
+    --dps-reg-danger: var(--dps-signature-danger, #a44439);
+    --dps-reg-muted: #5f666d;
+    --dps-reg-surface: #fffdf8;
+    --dps-reg-control: #ffffff;
+    --dps-reg-focus: rgba(23, 48, 66, 0.16);
+    --dps-reg-gap-xs: 4px;
+    --dps-reg-gap-sm: 8px;
+    --dps-reg-gap-md: 12px;
+    --dps-reg-gap-lg: 16px;
+    --dps-reg-gap-xl: 24px;
+    --dps-reg-gap-2xl: 32px;
+    width: min(100%, 1040px);
     margin: 0 auto;
-    padding: 32px;
-    background: var(--dps-surface);
-    border: 1px solid var(--dps-border);
-    border-radius: var(--dps-shape-large);
-    box-shadow: var(--dps-elevation-1);
-    font-family: var(--dps-font-body);
-    color: var(--dps-text-primary);
+    padding: 24px;
+    color: var(--dps-reg-ink);
+    font-family: var(--dps-signature-font-body, var(--dps-font-body, system-ui, sans-serif));
+    letter-spacing: 0;
 }
 
+.dps-registration-form,
 .dps-registration-form * {
     box-sizing: border-box;
 }
 
+.dps-registration-form a {
+    color: var(--dps-reg-petrol);
+}
+
+.dps-registration-wizard {
+    display: grid;
+    gap: var(--dps-reg-gap-xl);
+    padding: 24px;
+    border: 1px solid var(--dps-reg-line);
+    border-radius: 0;
+    background: var(--dps-reg-surface);
+}
+
+.dps-registration-form h4,
+.dps-registration-form h5,
+.dps-registration-form h6 {
+    margin: 0;
+    color: var(--dps-reg-ink);
+    font-family: var(--dps-signature-font-display, var(--dps-font-display, system-ui, sans-serif));
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.18;
+}
+
 .dps-registration-form h4 {
-    margin: 0 0 var(--dps-space-6);
-    padding: 0;
-    border: none;
-    font-size: var(--dps-typescale-title-large-size);
-    font-weight: var(--dps-typescale-title-large-weight);
-    font-family: var(--dps-font-display);
-    color: var(--dps-text-primary);
-    display: flex;
-    align-items: center;
-    gap: var(--dps-space-3);
+    padding-bottom: var(--dps-reg-gap-sm);
+    border-bottom: 1px solid var(--dps-reg-line);
+    font-size: 22px;
 }
 
-.dps-registration-form h4::before {
-    content: '';
-    display: inline-block;
-    width: 4px;
-    height: 24px;
-    background: var(--dps-accent);
-    border-radius: 2px;
+.dps-registration-form h5 {
+    font-size: 17px;
 }
 
-.dps-registration-form h4:first-of-type {
-    margin-top: 0;
-    padding-top: 0;
-    border-top: none;
+.dps-registration-form h6 {
+    font-size: 15px;
 }
 
-/* ==========================================================================
-   2. Progress Bar - Wizard Steps
-   ========================================================================== */
+.dps-required,
+.dps-signature-field__required {
+    color: var(--dps-reg-danger);
+    font-weight: 700;
+}
+
+.dps-required-legend {
+    margin: 0;
+    color: var(--dps-reg-muted);
+    font-size: 13px;
+}
 
 .dps-progress {
-    margin-bottom: 28px;
-    padding: 20px 24px;
-    background: var(--dps-accent-soft);
-    border: 1px solid var(--dps-border);
-    border-radius: var(--dps-shape-medium);
+    display: grid;
+    gap: var(--dps-reg-gap-md);
+    padding: 16px;
+    border: 1px solid var(--dps-reg-line);
+    border-radius: 0;
+    background: var(--dps-reg-bone);
 }
 
 .dps-progress-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-weight: 500;
-    color: var(--dps-text-secondary);
-    margin-bottom: var(--dps-space-3);
-    font-size: var(--dps-typescale-body-medium-size);
-}
-
-#dps-step-label {
-    display: flex;
-    align-items: center;
-    gap: var(--dps-space-2);
+    gap: var(--dps-reg-gap-md);
+    color: var(--dps-reg-ink);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 #dps-step-counter {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 42px;
-    padding: var(--dps-space-1) var(--dps-space-3);
-    background: var(--dps-accent);
-    color: var(--dps-accent-on);
-    font-size: var(--dps-typescale-label-small-size);
-    font-weight: var(--dps-typescale-label-small-weight);
-    border-radius: var(--dps-shape-full);
-    box-shadow: var(--dps-elevation-1);
+    min-width: 44px;
+    padding: 3px 8px;
+    border: 1px solid var(--dps-reg-petrol);
+    background: var(--dps-reg-paper);
+    color: var(--dps-reg-petrol);
+    text-align: center;
 }
 
 .dps-progress-bar {
     position: relative;
     width: 100%;
-    height: 10px;
-    background: var(--dps-color-surface-container-lowest);
-    border-radius: var(--dps-shape-full);
+    height: 8px;
+    border: 1px solid var(--dps-reg-line);
+    border-radius: 0 !important;
+    background: var(--dps-reg-paper);
     overflow: hidden;
-    border: 1px solid var(--dps-border);
 }
 
 .dps-progress-bar span {
     display: block;
+    width: 33.333%;
     height: 100%;
-    width: calc(100% / 3); /* Initial width for step 1 of 3 - updated via JS */
-    background: var(--dps-accent);
-    transition: width var(--dps-motion-expand);
-    border-radius: var(--dps-shape-full);
+    border-radius: 0 !important;
+    background: var(--dps-reg-petrol);
+    transition: width 160ms ease;
 }
 
-/* ==========================================================================
-   3. Steps Container and Navigation
-   ========================================================================== */
-
 .dps-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: grid;
+    gap: var(--dps-reg-gap-xl);
 }
 
 .dps-step {
     display: none;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity var(--dps-motion-enter), transform var(--dps-motion-enter);
 }
 
 .dps-step-active {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
+    display: grid;
+    gap: var(--dps-reg-gap-xl);
 }
-
-.dps-step-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 28px;
-    padding-top: 24px;
-    border-top: 1px solid var(--dps-border-light);
-}
-
-/* ==========================================================================
-   4. Navigation Buttons - DPS Signature Fallback
-   ========================================================================== */
-
-.dps-button-next,
-.dps-button-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--dps-space-2);
-    padding: var(--dps-space-3) var(--dps-space-6);
-    border-radius: var(--dps-shape-button);
-    font-size: var(--dps-typescale-label-large-size);
-    font-weight: var(--dps-typescale-label-large-weight);
-    font-family: var(--dps-font-body);
-    cursor: pointer;
-    transition: background-color var(--dps-motion-hover), border-color var(--dps-motion-hover), color var(--dps-motion-hover), box-shadow var(--dps-motion-hover), transform var(--dps-motion-hover);
-    text-decoration: none;
-}
-
-.dps-button-secondary {
-    background: var(--dps-surface);
-    border: 1px solid var(--dps-color-outline);
-    color: var(--dps-accent);
-    box-shadow: none;
-}
-
-.dps-button-secondary:hover {
-    background: var(--dps-accent-soft);
-    border-color: var(--dps-accent);
-    color: var(--dps-accent);
-    transform: translateY(-1px);
-    box-shadow: var(--dps-elevation-1);
-}
-
-.dps-button-secondary:active {
-    transform: translateY(0);
-    box-shadow: none;
-}
-
-.dps-button-next {
-    background: var(--dps-accent);
-    border: none;
-    color: var(--dps-accent-on);
-    box-shadow: var(--dps-elevation-button);
-}
-
-.dps-button-next:hover {
-    background: var(--dps-accent-hover);
-    transform: translateY(-2px);
-    box-shadow: var(--dps-elevation-2);
-    color: var(--dps-accent-on);
-}
-
-.dps-button-next:active {
-    transform: translateY(0);
-    box-shadow: var(--dps-elevation-1);
-}
-
-/* ==========================================================================
-   5. Form Grid and Fields
-   ========================================================================== */
 
 .dps-client-fields,
 .dps-pet-fieldset {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    margin-bottom: 24px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--dps-reg-gap-lg);
 }
 
 .dps-client-fields p,
-.dps-pet-fieldset p {
+.dps-pet-fieldset p,
+.dps-product-pref-field,
+.dps-admin-options p {
+    display: grid;
+    gap: var(--dps-reg-gap-sm);
+    min-width: 0;
     margin: 0;
 }
 
-/* Campos full-width */
-.dps-client-fields p.dps-field-full,
-.dps-pet-fieldset p.dps-field-full {
+.dps-field-full,
+.dps-pet-fieldset p:has(textarea),
+.dps-product-pref-field:has(textarea) {
     grid-column: 1 / -1;
 }
 
-/* ==========================================================================
-   6. Labels e Inputs - DPS Signature Fallback
-   ========================================================================== */
-
 .dps-registration-form label {
     display: block;
-    font-weight: var(--dps-typescale-label-large-weight);
-    color: var(--dps-text-secondary);
-    font-size: var(--dps-typescale-label-large-size);
-    font-family: var(--dps-font-body);
-    margin-bottom: var(--dps-space-2);
+    min-width: 0;
+    color: var(--dps-reg-ink);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.dps-registration-form label br {
+    display: none;
+}
+
+.dps-field-hint {
+    display: block;
+    margin-top: -2px;
+    color: var(--dps-reg-muted);
+    font-size: 12px;
+    line-height: 1.4;
 }
 
 .dps-registration-form input[type="text"],
@@ -303,1618 +202,629 @@
 .dps-registration-form input[type="number"],
 .dps-registration-form select,
 .dps-registration-form textarea {
+    display: block;
     width: 100%;
-    padding: var(--dps-space-4);
-    min-height: 48px;
-    border: 1px solid var(--dps-border);
-    border-radius: var(--dps-shape-input);
-    font-size: var(--dps-typescale-body-large-size);
-    font-family: var(--dps-font-body);
-    color: var(--dps-text-primary);
-    background: var(--dps-surface);
-    transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover), background var(--dps-motion-hover);
-    box-sizing: border-box;
+    min-height: 44px;
+    margin-top: var(--dps-reg-gap-sm);
+    padding: 10px 12px;
+    border: 1px solid var(--dps-reg-line);
+    border-radius: 2px;
+    background: var(--dps-reg-control);
+    color: var(--dps-reg-ink);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.45;
+    outline: none;
+    transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
 }
 
-.dps-registration-form input:not([type="checkbox"]):not([type="radio"]):hover,
-.dps-registration-form select:hover,
-.dps-registration-form textarea:hover {
-    border-color: var(--dps-color-outline);
-    background: var(--dps-color-surface-container-low);
+.dps-registration-form textarea {
+    min-height: 92px;
+    resize: vertical;
 }
 
-.dps-registration-form input:not([type="checkbox"]):not([type="radio"]):focus,
-.dps-registration-form select:focus,
-.dps-registration-form textarea:focus {
-    outline: 2px solid transparent;
-    border-color: var(--dps-accent);
-    box-shadow: 0 0 0 4px var(--dps-accent-soft);
-    background: var(--dps-surface);
+.dps-registration-form select {
+    appearance: none;
+    padding-right: 36px;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--dps-reg-petrol) 50%),
+        linear-gradient(135deg, var(--dps-reg-petrol) 50%, transparent 50%);
+    background-position:
+        calc(100% - 18px) calc(50% - 2px),
+        calc(100% - 12px) calc(50% - 2px);
+    background-repeat: no-repeat;
+    background-size: 6px 6px;
 }
 
 .dps-registration-form input::placeholder,
 .dps-registration-form textarea::placeholder {
-    color: var(--dps-color-on-surface-variant);
-}
-
-.dps-registration-form textarea {
-    min-height: 80px;
-    resize: vertical;
-}
-
-/* ==========================================================================
-   6.1. Field Hints - Accessibility
-   ========================================================================== */
-
-.dps-field-hint {
-    display: block;
-    margin-top: var(--dps-space-1);
-    font-size: var(--dps-typescale-body-small-size);
+    color: #8a8f94;
     font-weight: 400;
-    color: var(--dps-muted);
 }
 
-/* Focus visible para melhor acessibilidade com teclado */
-.dps-registration-form input:not([type="checkbox"]):not([type="radio"]):focus-visible,
-.dps-registration-form select:focus-visible,
-.dps-registration-form textarea:focus-visible {
-    outline: 2px solid var(--dps-accent);
-    outline-offset: 2px;
-    border-color: var(--dps-accent);
-    box-shadow: 0 0 0 4px var(--dps-accent-soft);
+.dps-registration-form input:hover,
+.dps-registration-form select:hover,
+.dps-registration-form textarea:hover {
+    border-color: var(--dps-reg-petrol);
 }
 
-/* ==========================================================================
-   7. Checkboxes - DPS Signature Fallback
-   ========================================================================== */
+.dps-registration-form input:focus,
+.dps-registration-form select:focus,
+.dps-registration-form textarea:focus {
+    border-color: var(--dps-reg-petrol);
+    box-shadow: 0 0 0 3px var(--dps-reg-focus);
+}
+
+.dps-registration-form [aria-invalid="true"] {
+    border-color: var(--dps-reg-danger) !important;
+    box-shadow: 0 0 0 3px rgba(164, 68, 57, 0.14);
+}
 
 .dps-registration-form input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    margin: 0 var(--dps-space-2) 0 0;
-    vertical-align: middle;
-    accent-color: var(--dps-accent);
-    cursor: pointer;
-    flex-shrink: 0;
+    margin: 1px 8px 0 0;
+    accent-color: var(--dps-reg-petrol);
 }
 
 .dps-registration-form label:has(input[type="checkbox"]) {
-    display: inline-flex;
-    align-items: center;
-    font-weight: 400;
-    font-size: var(--dps-typescale-body-medium-size);
-    color: var(--dps-text-primary);
-    cursor: pointer;
-    padding: var(--dps-space-1) 0;
-    background: none;
-    border: none;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--dps-reg-gap-sm);
+    min-height: 44px;
+    padding: 10px 0;
+    font-weight: 600;
+}
+
+.dps-pet-fieldset,
+.dps-product-prefs-pet,
+.dps-summary-box,
+.dps-admin-options,
+.dps-reg-success,
+.dps-reg-message,
+.dps-js-errors {
+    border: 1px solid var(--dps-reg-line);
     border-radius: 0;
-    transition: color var(--dps-motion-hover);
+    background: #ffffff;
 }
-
-.dps-registration-form label:has(input[type="checkbox"]):hover {
-    color: var(--dps-accent);
-    background: none;
-    border-color: transparent;
-}
-
-/* Fallback para navegadores sem suporte a :has() */
-.dps-registration-form .dps-checkbox-label {
-    display: inline-flex;
-    align-items: center;
-    font-weight: 400;
-    font-size: var(--dps-typescale-body-medium-size);
-    color: var(--dps-text-primary);
-    cursor: pointer;
-    padding: var(--dps-space-1) 0;
-    background: none;
-    border: none;
-    border-radius: 0;
-    transition: color var(--dps-motion-hover);
-}
-
-/* ==========================================================================
-   8. Pet Fieldset - DPS Signature Fallback
-   ========================================================================== */
 
 .dps-pet-fieldset {
-    border: 1px solid var(--dps-border);
-    border-radius: var(--dps-shape-card);
-    padding: 24px;
-    margin-bottom: 20px;
-    background: var(--dps-background);
-    position: relative;
-    transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
-    box-shadow: var(--dps-elevation-card);
-    animation: dps-enter-from-below var(--dps-motion-enter) backwards;
-}
-
-.dps-pet-fieldset:nth-child(2) {
-    animation-delay: 60ms;
-}
-
-.dps-pet-fieldset:nth-child(3) {
-    animation-delay: 120ms;
-}
-
-.dps-pet-fieldset:nth-child(4) {
-    animation-delay: 180ms;
-}
-
-.dps-pet-fieldset:nth-child(5) {
-    animation-delay: 240ms;
-}
-
-.dps-pet-fieldset:hover {
-    border-color: var(--dps-color-outline);
-}
-
-.dps-pet-fieldset:focus-within {
-    border-color: var(--dps-accent);
-    box-shadow: var(--dps-elevation-2), 0 0 0 4px var(--dps-accent-soft);
+    margin: 0;
+    padding: 18px;
 }
 
 .dps-pet-fieldset legend {
-    font-weight: 500;
-    color: var(--dps-accent-on);
-    padding: var(--dps-space-2) var(--dps-space-4);
-    font-size: var(--dps-typescale-label-large-size);
-    background: var(--dps-accent);
-    border-radius: var(--dps-shape-full);
-    box-shadow: var(--dps-elevation-1);
-    margin-left: var(--dps-space-2);
+    grid-column: 1 / -1;
+    padding: 0 8px;
+    color: var(--dps-reg-petrol);
+    font-family: var(--dps-signature-font-display, var(--dps-font-display, system-ui, sans-serif));
+    font-size: 15px;
+    font-weight: 700;
 }
 
 #dps-pets-wrapper {
-    margin-bottom: var(--dps-space-5);
+    display: grid;
+    gap: var(--dps-reg-gap-lg);
 }
 
-/* ==========================================================================
-   9. Buttons - DPS Signature Fallback
-   ========================================================================== */
+.dps-step-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dps-reg-gap-md);
+    justify-content: flex-end;
+    padding-top: var(--dps-reg-gap-lg);
+    border-top: 1px solid var(--dps-reg-line);
+}
 
-.dps-registration-form .button {
+.dps-button-next,
+.dps-button-secondary,
+#dps-add-pet,
+.dps-remove-pet,
+.dps-reg-success__cta-btn,
+.dps-modal-footer button,
+.dps-modal-footer a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--dps-space-2);
-    padding: var(--dps-space-3) var(--dps-space-6);
-    font-size: var(--dps-typescale-label-large-size);
-    font-weight: var(--dps-typescale-label-large-weight);
-    font-family: var(--dps-font-body);
-    border-radius: var(--dps-shape-button);
-    cursor: pointer;
-    transition: background-color var(--dps-motion-hover), border-color var(--dps-motion-hover), color var(--dps-motion-hover), box-shadow var(--dps-motion-hover), transform var(--dps-motion-hover);
+    min-height: 44px;
+    padding: 10px 16px;
+    border-radius: 0;
+    border: 1px solid transparent;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.2;
+    text-align: center;
     text-decoration: none;
-}
-
-.dps-registration-form .button-primary {
-    background: var(--dps-accent);
-    border: none;
-    color: var(--dps-accent-on);
-    box-shadow: var(--dps-elevation-button);
-    text-shadow: none;
-}
-
-.dps-registration-form .button-primary:hover {
-    background: var(--dps-accent-hover);
-    box-shadow: var(--dps-elevation-2);
-    transform: translateY(-2px);
-    color: var(--dps-accent-on);
-}
-
-.dps-registration-form .button-primary:active {
-    transform: translateY(0);
-    box-shadow: var(--dps-elevation-1);
-}
-
-/* Add Pet Button - Outline Style */
-#dps-add-pet {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--dps-space-2);
-    padding: var(--dps-space-3) var(--dps-space-6);
-    background: var(--dps-surface);
-    border: 1px dashed var(--dps-border);
-    border-radius: var(--dps-shape-medium);
-    color: var(--dps-muted);
-    font-weight: 500;
-    font-size: var(--dps-typescale-label-large-size);
-    transition: background-color var(--dps-motion-hover), border-color var(--dps-motion-hover), color var(--dps-motion-hover), box-shadow var(--dps-motion-hover), transform var(--dps-motion-hover);
     cursor: pointer;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
 }
 
-#dps-add-pet::before {
-    content: 'âž•';
-    font-size: 16px;
+.dps-button-next,
+.dps-reg-success__cta-btn {
+    border-color: var(--dps-reg-petrol);
+    background: var(--dps-reg-petrol);
+    color: #ffffff;
 }
 
-#dps-add-pet:hover {
-    background: var(--dps-accent-soft);
-    border-color: var(--dps-accent);
-    border-style: solid;
-    color: var(--dps-accent);
+.dps-button-next:hover,
+.dps-reg-success__cta-btn:hover {
+    border-color: var(--dps-reg-ink);
+    background: var(--dps-reg-ink);
+    color: #ffffff;
 }
 
-/* ==========================================================================
-   10. Summary Box - Review Before Submit
-   ========================================================================== */
+.dps-button-secondary,
+#dps-add-pet,
+.dps-remove-pet {
+    border-color: var(--dps-reg-petrol);
+    background: transparent;
+    color: var(--dps-reg-petrol);
+}
+
+.dps-button-secondary:hover,
+#dps-add-pet:hover,
+.dps-remove-pet:hover {
+    background: var(--dps-reg-bone);
+    color: var(--dps-reg-ink);
+}
+
+.dps-button-next:focus-visible,
+.dps-button-secondary:focus-visible,
+#dps-add-pet:focus-visible,
+.dps-remove-pet:focus-visible,
+.dps-modal-footer button:focus-visible,
+.dps-modal-footer a:focus-visible {
+    outline: 3px solid var(--dps-reg-focus);
+    outline-offset: 2px;
+}
+
+.dps-button-next:disabled,
+.dps-button-secondary:disabled {
+    border-color: var(--dps-reg-line);
+    background: #e7e0d6;
+    color: #78736b;
+    cursor: not-allowed;
+}
+
+.dps-loading {
+    cursor: wait;
+}
+
+#dps-add-pet {
+    width: fit-content;
+}
+
+.dps-remove-pet-wrap {
+    grid-column: 1 / -1;
+    justify-self: start;
+}
+
+.dps-step-description {
+    margin: 0;
+    padding: 12px 14px;
+    border-left: 3px solid var(--dps-reg-sky);
+    background: var(--dps-reg-paper);
+    color: var(--dps-reg-muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+#dps-product-prefs-wrapper {
+    display: grid;
+    gap: var(--dps-reg-gap-lg);
+}
+
+.dps-product-prefs-pet {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--dps-reg-gap-lg);
+    padding: 18px;
+}
+
+.dps-product-prefs-pet__title,
+.dps-product-pref-field:has(textarea) {
+    grid-column: 1 / -1;
+}
+
+.dps-product-pref-field label {
+    gap: var(--dps-reg-gap-sm);
+}
 
 .dps-summary-box {
-    margin-top: 24px;
-    padding: 0;
-    border: 1px solid var(--dps-border);
-    border-radius: var(--dps-shape-surface);
-    background: var(--dps-surface);
-    overflow: hidden;
-    box-shadow: var(--dps-elevation-1);
+    display: grid;
+    gap: var(--dps-reg-gap-lg);
+    padding: 18px;
+    background: var(--dps-reg-paper);
 }
 
 .dps-summary-header {
-    padding: 20px 24px;
-    background: var(--dps-accent-soft);
-    border-bottom: 1px solid var(--dps-border);
+    display: grid;
+    gap: var(--dps-reg-gap-xs);
 }
 
 .dps-summary-header h4 {
-    margin: 0 0 var(--dps-space-1) 0;
-    border: none;
-    padding: 0;
-    font-size: var(--dps-typescale-title-medium-size);
-    display: block;
+    padding-bottom: 0;
+    border-bottom: 0;
+    font-size: 18px;
 }
 
-.dps-summary-header h4::before {
-    display: none;
-}
-
-.dps-summary-subtitle {
+.dps-summary-subtitle,
+.dps-summary-empty,
+.dps-empty-message {
     margin: 0;
-    color: var(--dps-muted);
-    font-size: var(--dps-typescale-body-medium-size);
+    color: var(--dps-reg-muted);
+    line-height: 1.5;
 }
 
 .dps-summary-content {
-    padding: var(--dps-space-5) var(--dps-space-6);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--dps-reg-gap-lg);
 }
 
 .dps-summary-section {
-    margin-bottom: 20px;
-}
-
-.dps-summary-section:last-child {
-    margin-bottom: 0;
-}
-
-.dps-summary-section h5 {
-    display: flex;
-    align-items: center;
-    gap: var(--dps-space-2);
-    margin: 0 0 var(--dps-space-4) 0;
-    padding-bottom: var(--dps-space-2);
-    font-size: var(--dps-typescale-title-medium-size);
-    font-weight: var(--dps-typescale-title-medium-weight);
-    font-family: var(--dps-font-display);
-    color: var(--dps-text-primary);
-    border-bottom: 2px solid var(--dps-border);
-}
-
-.dps-summary-pet {
-    border: 1px solid var(--dps-border);
-    border-left: 3px solid var(--dps-accent);
-    border-radius: var(--dps-shape-small);
-    padding: var(--dps-space-4) var(--dps-space-5);
-    background: var(--dps-background);
-    margin-bottom: var(--dps-space-3);
-}
-
-.dps-summary-pet:last-child {
-    margin-bottom: 0;
-}
-
-.dps-summary-pet h6 {
-    display: flex;
-    align-items: center;
-    gap: var(--dps-space-2);
-    margin: 0 0 var(--dps-space-3) 0;
-    font-size: var(--dps-typescale-body-large-size);
-    font-weight: 500;
-    color: var(--dps-accent-strong);
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid var(--dps-reg-line);
+    background: #ffffff;
 }
 
 .dps-summary-section ul {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: var(--dps-space-2) var(--dps-space-5);
-    margin: 0;
+    gap: var(--dps-reg-gap-sm);
+    margin: var(--dps-reg-gap-md) 0 0;
     padding: 0;
     list-style: none;
 }
 
 .dps-summary-section li {
-    margin: 0;
-    font-size: var(--dps-typescale-body-medium-size);
-    color: var(--dps-text-primary);
-    display: flex;
-    gap: var(--dps-space-1);
+    display: grid;
+    grid-template-columns: minmax(96px, 0.42fr) minmax(0, 1fr);
+    gap: var(--dps-reg-gap-sm);
+    min-width: 0;
+    padding-bottom: var(--dps-reg-gap-sm);
+    border-bottom: 1px solid rgba(217, 204, 186, 0.65);
+    color: var(--dps-reg-muted);
+    overflow-wrap: anywhere;
 }
 
-.dps-summary-section li strong {
-    color: var(--dps-muted);
-    font-weight: 500;
-    flex-shrink: 0;
+.dps-summary-section li:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
 }
 
-.dps-summary-empty {
-    margin: 0;
-    padding: var(--dps-space-6);
-    color: var(--dps-muted);
-    font-size: var(--dps-typescale-body-medium-size);
-    text-align: center;
-    background: var(--dps-background);
-    border-radius: var(--dps-shape-small);
+.dps-summary-section strong {
+    color: var(--dps-reg-ink);
 }
 
 .dps-summary-confirm {
-    display: flex;
-    align-items: center;
-    gap: var(--dps-space-3);
-    margin: 0;
-    padding: var(--dps-space-5) var(--dps-space-6);
-    font-weight: 500;
-    color: var(--dps-text-primary);
-    background: var(--dps-background);
-    border-top: 1px solid var(--dps-border);
-    cursor: pointer;
-    transition: background var(--dps-motion-hover);
+    padding: 12px 0 0;
+    border-top: 1px solid var(--dps-reg-line);
 }
 
-.dps-summary-confirm:hover {
-    background: var(--dps-accent-soft);
-}
-
-/* ==========================================================================
-   11. Mensagens de Feedback - Enhanced
-   ========================================================================== */
-
-.dps-registration-form .dps-message-success {
-    background: var(--dps-success-soft);
-    border-left: 3px solid var(--dps-success);
-    color: var(--dps-color-on-success-container);
-    padding: var(--dps-space-4) var(--dps-space-5);
-    border-radius: var(--dps-shape-medium);
-    margin-bottom: var(--dps-space-6);
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: var(--dps-space-3);
-    animation: dps-success-pulse 400ms var(--dps-motion-easing-expressive-default);
-}
-
-.dps-registration-form .dps-message-success::before {
-    content: 'âœ“';
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    background: var(--dps-success);
-    color: var(--dps-color-on-success);
-    border-radius: 50%;
-    font-size: var(--dps-typescale-label-large-size);
-    font-weight: 500;
-    flex-shrink: 0;
-}
-
-.dps-registration-form .dps-message-error {
-    background: var(--dps-error-soft);
-    border-left: 3px solid var(--dps-error);
-    color: var(--dps-color-on-error-container);
-    padding: var(--dps-space-4) var(--dps-space-5);
-    border-radius: var(--dps-shape-medium);
-    margin-bottom: var(--dps-space-6);
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: var(--dps-space-3);
-}
-
-.dps-registration-form .dps-message-error::before {
-    content: '!';
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    background: var(--dps-error);
-    color: var(--dps-color-on-error);
-    border-radius: 50%;
-    font-size: var(--dps-typescale-label-large-size);
-    font-weight: 500;
-    flex-shrink: 0;
-}
-
-/* ==========================================================================
-   11.1. Registration Success Box - DPS Signature Tokens
-   ========================================================================== */
-
+.dps-js-errors,
+.dps-reg-message,
 .dps-reg-success {
-    padding: var(--dps-space-5) var(--dps-space-6);
-    margin-bottom: var(--dps-space-6);
-    border-radius: var(--dps-shape-medium);
-    background: var(--dps-success-soft);
-    border-left: 3px solid var(--dps-success);
-    color: var(--dps-color-on-success-container);
-    animation: dps-success-pulse 400ms var(--dps-motion-easing-expressive-default);
+    display: grid;
+    gap: var(--dps-reg-gap-sm);
+    padding: 14px 16px;
 }
 
-.dps-reg-success__title {
-    margin: 0 0 var(--dps-space-3) 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    font-size: var(--dps-typescale-title-medium-size) !important;
-    font-weight: 500;
-    font-family: var(--dps-font-display);
-    color: var(--dps-color-on-success-container) !important;
-    display: block !important;
-}
-
-.dps-reg-success__title::before {
-    display: none !important;
-}
-
-.dps-reg-success__text {
-    margin: 0 0 var(--dps-space-2) 0;
-    font-size: var(--dps-typescale-body-large-size);
-    line-height: var(--dps-typescale-body-large-line);
-    color: var(--dps-color-on-success-container);
-}
-
-.dps-reg-success__note {
-    margin: 0;
-    font-size: var(--dps-typescale-body-medium-size);
-    color: var(--dps-color-on-success-container);
-    opacity: 0.85;
-}
-
-.dps-reg-success__cta {
-    margin: var(--dps-space-4) 0 0 0;
-}
-
-.dps-reg-success__cta-btn {
-    background: var(--dps-color-success) !important;
-    border-color: var(--dps-color-success) !important;
-    color: var(--dps-color-on-success) !important;
-    text-decoration: none !important;
-    border-radius: var(--dps-shape-button) !important;
-}
-
-.dps-reg-success__cta-btn:hover {
-    opacity: 0.9;
-    box-shadow: var(--dps-elevation-2) !important;
-}
-
-/* ==========================================================================
-   11.2. Fallback Registration Messages - DPS Signature Tokens
-   ========================================================================== */
-
-.dps-reg-message {
-    padding: var(--dps-space-4) var(--dps-space-5);
-    margin-bottom: var(--dps-space-4);
-    border-radius: var(--dps-shape-medium);
-    font-size: var(--dps-typescale-body-large-size);
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: var(--dps-space-3);
-}
-
-.dps-reg-message--error {
-    background: var(--dps-error-soft);
-    border-left: 3px solid var(--dps-error);
-    color: var(--dps-color-on-error-container);
-}
-
-.dps-reg-message--success {
-    background: var(--dps-success-soft);
-    border-left: 3px solid var(--dps-success);
-    color: var(--dps-color-on-success-container);
-}
-
-/* ==========================================================================
-   12. Container de Mapa
-   ========================================================================== */
-
-#dps-client-address {
-    min-height: 60px;
-}
-
-.dps-map-container {
-    width: 100%;
-    height: 200px;
-    border: 2px solid var(--dps-border);
-    border-radius: var(--dps-shape-medium);
-    margin-top: 12px;
-    overflow: hidden;
-}
-
-/* SugestÃµes do Google Places */
-.pac-container {
-    border-radius: var(--dps-shape-small);
-    box-shadow: var(--dps-elevation-3);
-    border: 1px solid var(--dps-border);
-    margin-top: 4px;
-}
-
-.pac-item {
-    padding: 12px 16px;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.pac-item:hover {
-    background: var(--dps-accent-soft);
-}
-
-/* ==========================================================================
-   13. Honeypot (Anti-spam)
-   ========================================================================== */
-
-.dps-hp-field {
-    position: absolute;
-    left: -9999px;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-}
-
-/* ==========================================================================
-   14. Responsividade - Tablet Priority
-   ========================================================================== */
-
-/* Desktop grande (1024px+) */
-@media (min-width: 1025px) {
-    .dps-registration-form {
-        padding: 40px;
-    }
-}
-
-/* Desktop muito grande (1200px+) */
-@media (min-width: 1200px) {
-    .dps-registration-form {
-        max-width: 840px;
-        padding: 48px 56px;
-    }
-
-    .dps-registration-form h4 {
-        font-size: 22px;
-        margin-bottom: 28px;
-    }
-
-    .dps-client-fields,
-    .dps-pet-fieldset {
-        gap: 24px;
-    }
-
-    .dps-registration-form input[type="text"],
-    .dps-registration-form input[type="email"],
-    .dps-registration-form input[type="tel"],
-    .dps-registration-form input[type="date"],
-    .dps-registration-form input[type="number"],
-    .dps-registration-form select,
-    .dps-registration-form textarea {
-        padding: 14px 16px;
-    }
-
-    .dps-progress {
-        padding: 24px 28px;
-    }
-
-    .dps-pet-fieldset {
-        padding: 28px;
-    }
-
-    .dps-summary-content {
-        padding: 24px 28px;
-    }
-}
-
-/* Desktop extra grande (1440px+) */
-@media (min-width: 1440px) {
-    .dps-registration-form {
-        max-width: 920px;
-        padding: 56px 64px;
-        border-radius: var(--dps-shape-extra-large);
-    }
-
-    .dps-registration-form h4 {
-        font-size: 24px;
-        margin-bottom: 32px;
-    }
-
-    .dps-registration-form h4::before {
-        width: 5px;
-        height: 28px;
-    }
-
-    .dps-client-fields,
-    .dps-pet-fieldset {
-        gap: 28px;
-    }
-
-    .dps-registration-form label {
-        font-size: 15px;
-        margin-bottom: 10px;
-    }
-
-    .dps-registration-form input[type="text"],
-    .dps-registration-form input[type="email"],
-    .dps-registration-form input[type="tel"],
-    .dps-registration-form input[type="date"],
-    .dps-registration-form input[type="number"],
-    .dps-registration-form select,
-    .dps-registration-form textarea {
-        padding: 16px 18px;
-        font-size: 16px;
-        border-radius: var(--dps-shape-medium);
-    }
-
-    .dps-progress {
-        padding: 28px 32px;
-        border-radius: var(--dps-shape-large);
-        margin-bottom: 32px;
-    }
-
-    .dps-progress-bar {
-        height: 12px;
-    }
-
-    #dps-step-counter {
-        padding: 6px 14px;
-        font-size: 14px;
-    }
-
-    .dps-pet-fieldset {
-        padding: 32px;
-        border-radius: var(--dps-shape-extra-large);
-        margin-bottom: 24px;
-    }
-
-    .dps-pet-fieldset legend {
-        font-size: 17px;
-        padding: 10px 18px;
-    }
-
-    .dps-button-next,
-    .dps-button-secondary,
-    .dps-registration-form .button {
-        padding: 16px 32px;
-        font-size: 16px;
-    }
-
-    .dps-step-actions {
-        margin-top: 36px;
-        padding-top: 28px;
-    }
-
-    .dps-summary-box {
-        border-radius: var(--dps-shape-extra-large);
-    }
-
-    .dps-summary-header {
-        padding: 24px 28px;
-    }
-
-    .dps-summary-content {
-        padding: 28px 32px;
-    }
-
-    .dps-summary-confirm {
-        padding: 24px 28px;
-    }
-}
-
-/* Tablet grande (769px - 1024px) - PRIORIDADE */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .dps-registration-form {
-        max-width: 680px;
-        padding: 32px;
-        margin: 0 auto;
-    }
-
-    .dps-progress {
-        padding: 18px 22px;
-    }
-
-    .dps-client-fields,
-    .dps-pet-fieldset {
-        gap: 18px;
-    }
-
-    .dps-pet-fieldset {
-        padding: 22px;
-    }
-
-    .dps-step-actions {
-        flex-wrap: wrap;
-    }
-
-    .dps-button-next,
-    .dps-button-secondary,
-    .dps-registration-form .button {
-        flex: 1 1 auto;
-        min-width: 140px;
-    }
-}
-
-/* Tablet (768px) */
-@media (max-width: 768px) {
-    .dps-registration-form {
-        padding: 24px;
-        margin: 0 16px;
-        border-radius: var(--dps-shape-medium);
-    }
-
-    .dps-progress {
-        padding: 16px 20px;
-        margin-bottom: 24px;
-    }
-
-    .dps-progress-top {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        text-align: center;
-    }
-
-    .dps-client-fields,
-    .dps-pet-fieldset {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-
-    .dps-registration-form h4 {
-        font-size: 18px;
-    }
-
-    .dps-step-actions {
-        flex-direction: column;
-    }
-
-    .dps-button-next,
-    .dps-button-secondary,
-    .dps-registration-form .button {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .dps-summary-section ul {
-        grid-template-columns: 1fr;
-    }
-
-    .dps-summary-pet {
-        padding: 14px 16px;
-    }
-}
-
-/* Mobile (640px) */
-@media (max-width: 640px) {
-    .dps-registration-form {
-        padding: 20px;
-        margin: 0 12px;
-        border-radius: var(--dps-shape-medium);
-    }
-
-    .dps-progress {
-        padding: 14px 16px;
-        border-radius: var(--dps-shape-small);
-    }
-
-    .dps-progress-top {
-        font-size: 14px;
-    }
-
-    #dps-step-counter {
-        font-size: 12px;
-        padding: 4px 10px;
-    }
-
-    .dps-progress-bar {
-        height: 8px;
-    }
-
-    .dps-registration-form input[type="text"],
-    .dps-registration-form input[type="email"],
-    .dps-registration-form input[type="tel"],
-    .dps-registration-form input[type="date"],
-    .dps-registration-form input[type="number"],
-    .dps-registration-form select,
-    .dps-registration-form textarea {
-        font-size: 16px; /* Evita zoom automÃ¡tico no iOS */
-        padding: 14px 12px;
-    }
-
-    .dps-pet-fieldset {
-        padding: 18px;
-        border-radius: var(--dps-shape-medium);
-    }
-
-    .dps-pet-fieldset legend {
-        font-size: 14px;
-        padding: 6px 12px;
-    }
-
-    .dps-registration-form .button,
-    .dps-button-next,
-    .dps-button-secondary {
-        width: 100%;
-        justify-content: center;
-        padding: 14px 20px;
-        font-size: 15px;
-    }
-
-    .dps-step-actions {
-        width: 100%;
-    }
-
-    #dps-add-pet {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .dps-map-container {
-        height: 180px;
-    }
-
-    .dps-summary-box {
-        border-radius: var(--dps-shape-medium);
-    }
-
-    .dps-summary-header {
-        padding: 16px 18px;
-    }
-
-    .dps-summary-content {
-        padding: 16px 18px;
-    }
-
-    .dps-summary-confirm {
-        padding: 16px 18px;
-    }
-}
-
-/* Mobile pequeno (480px) */
-@media (max-width: 480px) {
-    .dps-registration-form {
-        padding: 16px;
-        margin: 0 8px;
-        border-radius: var(--dps-shape-small);
-    }
-
-    .dps-registration-form h4 {
-        font-size: 16px;
-        margin: 0 0 20px;
-    }
-
-    .dps-registration-form h4::before {
-        width: 3px;
-        height: 20px;
-    }
-
-    .dps-progress {
-        padding: 12px 14px;
-    }
-
-    .dps-client-fields,
-    .dps-pet-fieldset {
-        gap: 14px;
-    }
-
-    .dps-registration-form label {
-        font-size: 13px;
-    }
-
-    .dps-pet-fieldset {
-        padding: 14px;
-    }
-
-    .dps-pet-fieldset legend {
-        font-size: 13px;
-        padding: 5px 10px;
-    }
-
-    .dps-map-container {
-        height: 150px;
-    }
-
-    .dps-registration-form .dps-message-success,
-    .dps-registration-form .dps-message-error {
-        padding: 14px;
-        font-size: 14px;
-        border-radius: var(--dps-shape-small);
-    }
-
-    .dps-registration-form .dps-message-success::before,
-    .dps-registration-form .dps-message-error::before {
-        width: 24px;
-        height: 24px;
-        font-size: 14px;
-    }
-
-    .dps-summary-section h5 {
-        font-size: 15px;
-    }
-
-    .dps-summary-pet h6 {
-        font-size: 14px;
-    }
-
-    .dps-summary-section li {
-        font-size: 13px;
-    }
-}
-
-/* Mobile muito pequeno (375px e menor) */
-@media (max-width: 374px) {
-    .dps-registration-form {
-        padding: 12px;
-        margin: 0 4px;
-        border-radius: var(--dps-shape-small);
-    }
-
-    .dps-registration-form h4 {
-        font-size: 15px;
-        margin: 0 0 16px;
-        gap: 8px;
-    }
-
-    .dps-registration-form h4::before {
-        width: 3px;
-        height: 18px;
-    }
-
-    .dps-progress {
-        padding: 10px 12px;
-        border-radius: var(--dps-shape-small);
-    }
-
-    .dps-progress-top {
-        font-size: 13px;
-        gap: 8px;
-    }
-
-    #dps-step-counter {
-        font-size: 11px;
-        padding: 3px 8px;
-        min-width: 36px;
-    }
-
-    .dps-progress-bar {
-        height: 6px;
-    }
-
-    .dps-client-fields,
-    .dps-pet-fieldset {
-        gap: 12px;
-    }
-
-    .dps-registration-form label {
-        font-size: 12px;
-    }
-
-    .dps-registration-form input[type="text"],
-    .dps-registration-form input[type="email"],
-    .dps-registration-form input[type="tel"],
-    .dps-registration-form input[type="date"],
-    .dps-registration-form input[type="number"],
-    .dps-registration-form select,
-    .dps-registration-form textarea {
-        font-size: 16px;
-        padding: 12px 10px;
-        min-height: 44px;
-        border-radius: var(--dps-shape-small);
-    }
-
-    .dps-pet-fieldset {
-        padding: 12px;
-        border-radius: var(--dps-shape-small);
-    }
-
-    .dps-pet-fieldset legend {
-        font-size: 12px;
-        padding: 4px 8px;
-    }
-
-    .dps-registration-form .button,
-    .dps-button-next,
-    .dps-button-secondary {
-        padding: 12px 16px;
-        font-size: 14px;
-    }
-
-    #dps-add-pet {
-        padding: 12px 16px;
-        font-size: 14px;
-        border-radius: var(--dps-shape-small);
-    }
-
-    .dps-step-actions {
-        gap: 10px;
-        margin-top: 20px;
-        padding-top: 16px;
-    }
-
-    .dps-summary-box {
-        border-radius: var(--dps-shape-small);
-    }
-
-    .dps-summary-header {
-        padding: 14px;
-    }
-
-    .dps-summary-header h4 {
-        font-size: 15px;
-    }
-
-    .dps-summary-content {
-        padding: 14px;
-    }
-
-    .dps-summary-confirm {
-        padding: 12px 14px;
-        font-size: 13px;
-    }
-
-    .dps-summary-section h5 {
-        font-size: 14px;
-    }
-
-    .dps-summary-pet h6 {
-        font-size: 13px;
-    }
-
-    .dps-summary-section li {
-        font-size: 12px;
-    }
-
-    .dps-required-legend {
-        font-size: 12px;
-    }
-
-    .dps-step-description {
-        font-size: 13px;
-    }
-
-    .dps-field-hint {
-        font-size: 11px;
-    }
-}
-
-/* ==========================================================================
-   15. Acessibilidade
-   ========================================================================== */
-
-.dps-registration-form input:focus-visible,
-.dps-registration-form select:focus-visible,
-.dps-registration-form textarea:focus-visible,
-.dps-registration-form .button:focus-visible,
-.dps-button-next:focus-visible,
-.dps-button-secondary:focus-visible {
-    outline: 3px solid var(--dps-accent);
-    outline-offset: 2px;
-}
-
-/* Indicador de campo obrigatÃ³rio */
-.dps-required {
-    color: var(--dps-error);
-    margin-left: 3px;
-    font-weight: 500;
-}
-
-/* Campo com erro */
-.dps-field-error input,
-.dps-field-error select,
-.dps-field-error textarea {
-    border-color: var(--dps-error);
-    background: var(--dps-error-soft);
-}
-
-.dps-field-error-message {
-    color: var(--dps-error);
-    font-size: var(--dps-typescale-body-small-size);
-    margin-top: var(--dps-space-1);
-    display: flex;
-    align-items: center;
-    gap: var(--dps-space-1);
-}
-
-.dps-field-error-message::before {
-    content: 'âš ';
-}
-
-/* ==========================================================================
-   16. Estados de BotÃµes
-   ========================================================================== */
-
-/* BotÃ£o desabilitado - opacidade padronizada do fallback Signature */
-.dps-registration-form .button:disabled,
-.dps-registration-form .button[disabled],
-.dps-button-next:disabled,
-.dps-button-secondary:disabled {
-    opacity: 0.38;
-    cursor: not-allowed;
-    pointer-events: none;
-    transform: none !important;
-}
-
-.dps-registration-form .button-primary:disabled {
-    background: var(--dps-color-surface-container-high);
-    color: var(--dps-muted);
-    opacity: 0.5;
-    box-shadow: none;
-}
-
-/* Estado de loading */
-.dps-registration-form .button.dps-loading,
-.dps-button-next.dps-loading {
-    position: relative;
-    pointer-events: none;
-    color: transparent;
-}
-
-.dps-registration-form .button.dps-loading::after,
-.dps-button-next.dps-loading::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 20px;
-    height: 20px;
-    margin: -10px 0 0 -10px;
-    border: 3px solid var(--dps-color-surface-container-high);
-    border-top-color: var(--dps-accent-on);
-    border-radius: 50%;
-    animation: dps-spin 0.8s linear infinite;
-}
-
-@keyframes dps-spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ==========================================================================
-   17. Erros JS - Enhanced
-   ========================================================================== */
-
-.dps-js-errors {
-    margin-bottom: 20px;
+.dps-js-error,
+.dps-reg-message--error,
+.dps-message-error {
+    border-left: 3px solid var(--dps-reg-danger);
+    background: #fff5f2;
+    color: var(--dps-reg-danger);
 }
 
 .dps-js-error {
-    padding: var(--dps-space-3) var(--dps-space-4);
-    margin-bottom: var(--dps-space-2);
-    border-radius: var(--dps-shape-medium);
-    background: var(--dps-error-soft);
-    border-left: 3px solid var(--dps-error);
-    color: var(--dps-color-on-error-container);
-    font-size: var(--dps-typescale-body-medium-size);
-    font-weight: 500;
-    animation: dps-shake 0.4s ease;
-    display: flex;
-    align-items: center;
-    gap: var(--dps-space-2);
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 700;
 }
 
-.dps-js-error::before {
-    content: 'âš ï¸';
-    flex-shrink: 0;
+.dps-reg-message--success,
+.dps-message-success,
+.dps-reg-success {
+    border-left: 3px solid var(--dps-reg-action);
+    background: #f2fff6;
+    color: var(--dps-reg-ink);
 }
 
-@keyframes dps-shake {
-    0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-4px); }
-    40%, 80% { transform: translateX(4px); }
+.dps-reg-success__title {
+    border-bottom: 0;
+    color: var(--dps-reg-action);
 }
 
-/* ==========================================================================
-   18. Admin Preview Features
-   ========================================================================== */
-
-/* Banner informativo para administrador */
-.dps-admin-preview-banner {
-    background: var(--dps-accent-soft);
-    border-left: 3px solid var(--dps-accent);
-    padding: var(--dps-space-3) var(--dps-space-5);
-    margin-bottom: var(--dps-space-6);
-    border-radius: 0 var(--dps-shape-small) var(--dps-shape-small) 0;
-    font-size: var(--dps-typescale-body-medium-size);
-    color: var(--dps-accent-on-container);
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--dps-space-2);
+.dps-reg-success__text,
+.dps-reg-success__note {
+    margin: 0;
+    color: var(--dps-reg-ink);
+    line-height: 1.55;
 }
 
-.dps-admin-preview-banner::before {
-    content: 'ðŸ‘ï¸';
-    font-size: var(--dps-typescale-title-medium-size);
+.dps-reg-success__note {
+    color: var(--dps-reg-muted);
 }
 
-.dps-admin-preview-banner a {
-    color: var(--dps-accent);
-    text-decoration: none;
-    font-weight: 500;
+.dps-reg-success__cta {
+    margin: 0;
 }
 
-.dps-admin-preview-banner a:hover {
-    text-decoration: underline;
-}
-
-/* OpÃ§Ãµes administrativas */
 .dps-admin-options {
-    background: var(--dps-warning-soft);
-    border-left: 3px solid var(--dps-warning);
-    padding: var(--dps-space-5) var(--dps-space-6);
-    border-radius: 0 var(--dps-shape-small) var(--dps-shape-small) 0;
-    margin-top: var(--dps-space-4);
-    margin-bottom: var(--dps-space-6);
-}
-
-.dps-admin-options p {
-    margin: var(--dps-space-2) 0 !important;
-    flex: 1 1 100% !important;
-}
-
-.dps-admin-options label {
-    font-weight: 500 !important;
-    color: var(--dps-color-on-warning-container);
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--dps-reg-gap-md);
+    padding: 14px;
+    border-left: 3px solid var(--dps-reg-warning);
+    background: #fffaf0;
 }
 
 .dps-admin-options__title {
-    margin: 0 0 var(--dps-space-3) 0;
-    font-size: var(--dps-typescale-label-large-size);
-    font-weight: 500;
-    color: var(--dps-color-on-warning-container);
+    color: var(--dps-reg-warning);
 }
 
-/* Legenda de campos obrigatÃ³rios */
-.dps-required-legend {
-    font-size: var(--dps-typescale-body-small-size);
-    color: var(--dps-muted);
-    margin: 0 0 var(--dps-space-5) 0;
-    padding: var(--dps-space-2) var(--dps-space-3);
-    background: var(--dps-background);
-    border-radius: var(--dps-shape-small);
-    display: inline-flex;
-    align-items: center;
-    gap: var(--dps-space-1);
+.pac-container {
+    border: 1px solid var(--dps-reg-line);
+    border-radius: 0;
+    box-shadow: 0 8px 24px rgba(17, 22, 28, 0.16);
+    font-family: var(--dps-signature-font-body, var(--dps-font-body, system-ui, sans-serif));
+    z-index: 999999;
 }
 
-/* ==========================================================================
-19. Step Transitions - Signature Animation
-   ========================================================================== */
-
-.dps-step {
-    will-change: opacity, transform;
+.pac-item {
+    padding: 9px 12px;
+    border-top: 1px solid var(--dps-reg-line);
+    color: var(--dps-reg-ink);
+    cursor: pointer;
 }
 
-/* Responsive adjustments for admin options */
-@media (max-width: 768px) {
-    .dps-admin-preview-banner {
-        font-size: 13px;
-        padding: 12px 16px;
-    }
-
-    .dps-admin-preview-banner::before {
-        font-size: 16px;
-    }
+.pac-item:hover,
+.pac-item-selected {
+    background: var(--dps-reg-bone);
 }
 
-/* ==========================================================================
-   21. Product Preferences Step (Step 3) - Enhanced
-   ========================================================================== */
-
-.dps-step-description {
-    margin: 0 0 var(--dps-space-6);
-    padding: var(--dps-space-4) var(--dps-space-5);
-    background: var(--dps-accent-soft);
-    border: 1px solid var(--dps-border);
-    border-radius: var(--dps-shape-medium);
-    color: var(--dps-accent-on-container);
-    font-size: var(--dps-typescale-body-large-size);
-    line-height: var(--dps-typescale-body-large-line);
+.dps-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
     display: flex;
-    align-items: flex-start;
-    gap: var(--dps-space-3);
-}
-
-.dps-step-description::before {
-    content: 'ðŸ’¡';
-    font-size: var(--dps-typescale-title-large-size);
-    flex-shrink: 0;
-}
-
-#dps-product-prefs-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dps-space-6);
-    margin-bottom: var(--dps-space-6);
-}
-
-.dps-product-prefs-pet {
-    border: 1px solid var(--dps-border);
-    border-radius: var(--dps-shape-card);
-    padding: var(--dps-space-6);
-    background: var(--dps-background);
-    transition: border-color var(--dps-motion-hover);
-    box-shadow: var(--dps-elevation-card);
-}
-
-.dps-product-prefs-pet:hover {
-    border-color: var(--dps-color-outline);
-}
-
-.dps-product-prefs-pet__title {
-    margin: 0 0 var(--dps-space-5);
-    font-size: var(--dps-typescale-title-medium-size);
-    font-weight: var(--dps-typescale-title-medium-weight);
-    font-family: var(--dps-font-display);
-    color: var(--dps-text-primary);
-    padding-bottom: var(--dps-space-3);
-    border-bottom: 2px solid var(--dps-border);
-    display: flex;
-    align-items: center;
-    gap: var(--dps-space-2);
-}
-
-.dps-product-pref-field {
-    margin-bottom: var(--dps-space-4);
-}
-
-.dps-product-pref-field:last-child {
-    margin-bottom: 0;
-}
-
-.dps-product-pref-field label {
-    display: block;
-    font-size: var(--dps-typescale-label-large-size);
-    font-weight: var(--dps-typescale-label-large-weight);
-    color: var(--dps-text-secondary);
-}
-
-.dps-product-pref-field select,
-.dps-product-pref-field textarea {
-    width: 100%;
-    margin-top: var(--dps-space-1);
-    padding: var(--dps-space-3) var(--dps-space-4);
-    font-size: var(--dps-typescale-body-large-size);
-    border: 1px solid var(--dps-border);
-    border-radius: var(--dps-shape-input);
-    background: var(--dps-surface);
-    transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover);
-}
-
-.dps-product-pref-field select:focus,
-.dps-product-pref-field textarea:focus {
-    border-color: var(--dps-accent);
-    outline: 2px solid transparent;
-    box-shadow: 0 0 0 4px var(--dps-accent-soft);
-}
-
-.dps-product-pref-field--full {
-    flex: 1 1 100%;
-}
-
-.dps-empty-message {
-    padding: var(--dps-space-8);
-    text-align: center;
-    color: var(--dps-muted);
-    font-size: var(--dps-typescale-body-large-size);
-    background: var(--dps-background);
-    border: 1px dashed var(--dps-color-outline);
-    border-radius: var(--dps-shape-medium);
-}
-
-.dps-empty-message::before {
-    content: 'ðŸ“‹';
-    display: block;
-    font-size: var(--dps-typescale-headline-large-size);
-    margin-bottom: var(--dps-space-3);
-    opacity: 0.6;
-}
-
-/* Grid para campos de preferÃªncias */
-@media (min-width: 768px) {
-    .dps-product-prefs-pet {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-    }
-
-    .dps-product-prefs-pet__title {
-        grid-column: 1 / -1;
-    }
-
-    .dps-product-pref-field--full {
-        grid-column: 1 / -1;
-    }
-}
-
-@media (max-width: 767px) {
-    .dps-product-prefs-pet {
-        display: flex;
-        flex-direction: column;
-        padding: 20px;
-    }
-
-    .dps-product-prefs-pet__title {
-        font-size: 16px;
-        margin-bottom: 16px;
-    }
-}
-
-/* ==========================================================================
-   22. Visual Enhancements - DPS Signature Motion
-   ========================================================================== */
-
-/* Feedback visual ao interagir com campos */
-.dps-registration-form input:valid:not(:placeholder-shown),
-.dps-registration-form select:valid:not(:placeholder-shown) {
-    border-color: var(--dps-border);
-}
-
-/* TransiÃ§Ã£o suave ao focar */
-.dps-registration-form input,
-.dps-registration-form select,
-.dps-registration-form textarea {
-    transition: border-color var(--dps-motion-hover), box-shadow var(--dps-motion-hover), background var(--dps-motion-hover);
-}
-
-/* Step indicator visual - NÃºmero do passo */
-.dps-step-number {
-    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: var(--dps-accent);
-    color: var(--dps-accent-on);
-    border-radius: 50%;
-    font-weight: 500;
-    font-size: var(--dps-typescale-label-large-size);
-    margin-right: var(--dps-space-3);
-    flex-shrink: 0;
+    padding: 24px;
+    background: rgba(17, 22, 28, 0.58);
 }
 
-/* Card entry animation - Signature spring-based */
-@keyframes dps-enter-from-below {
-    0% {
-        opacity: 0;
-        transform: translateY(24px) scale(0.97);
-    }
-    60% {
-        opacity: 1;
-        transform: translateY(-4px) scale(1.005);
-    }
-    80% {
-        transform: translateY(2px) scale(0.998);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+.dps-modal {
+    width: min(100%, 540px);
+    max-height: min(720px, calc(100vh - 48px));
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    border: 1px solid var(--dps-reg-line);
+    border-radius: 0;
+    background: var(--dps-reg-surface);
+    box-shadow: 0 24px 64px rgba(17, 22, 28, 0.24);
+    overflow: hidden;
 }
 
-/* Success message pulse - Signature */
-@keyframes dps-success-pulse {
-    0% {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-    50% {
-        transform: scale(1.02);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
+.dps-modal-header,
+.dps-modal-body,
+.dps-modal-footer {
+    padding: 18px;
 }
 
-/* ==========================================================================
-   23. Print Styles
-   ========================================================================== */
+.dps-modal-header {
+    border-bottom: 1px solid var(--dps-reg-line);
+    background: var(--dps-reg-bone);
+}
 
-@media print {
+.dps-modal-body {
+    display: grid;
+    gap: var(--dps-reg-gap-md);
+    overflow: auto;
+}
+
+.dps-modal-body p {
+    margin: 0;
+    color: var(--dps-reg-muted);
+    line-height: 1.5;
+}
+
+.dps-modal-duplicate-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dps-reg-gap-sm);
+}
+
+.dps-duplicate-badge {
+    padding: 4px 8px;
+    border: 1px solid var(--dps-reg-warning);
+    background: #fffaf0;
+    color: var(--dps-reg-warning);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.dps-modal-client-info {
+    display: grid;
+    gap: var(--dps-reg-gap-xs);
+    padding: 12px;
+    border: 1px solid var(--dps-reg-line);
+    background: #ffffff;
+}
+
+.dps-client-label {
+    color: var(--dps-reg-muted);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.dps-client-name {
+    color: var(--dps-reg-ink);
+    font-weight: 800;
+}
+
+.dps-modal-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dps-reg-gap-md);
+    justify-content: flex-end;
+    border-top: 1px solid var(--dps-reg-line);
+}
+
+.dps-modal-btn-cancel {
+    border-color: var(--dps-reg-line);
+    background: #ffffff;
+    color: var(--dps-reg-ink);
+}
+
+.dps-modal-btn-view {
+    border-color: var(--dps-reg-petrol);
+    background: transparent;
+    color: var(--dps-reg-petrol);
+}
+
+.dps-modal-btn-continue {
+    border-color: var(--dps-reg-warning);
+    background: var(--dps-reg-warning);
+    color: #ffffff;
+}
+
+.dps-modal-btn-cancel:hover,
+.dps-modal-btn-view:hover {
+    background: var(--dps-reg-bone);
+    color: var(--dps-reg-ink);
+}
+
+.dps-modal-btn-continue:hover {
+    border-color: var(--dps-reg-ink);
+    background: var(--dps-reg-ink);
+    color: #ffffff;
+}
+
+.dps-hp-field {
+    pointer-events: none;
+}
+
+@media (min-width: 1200px) {
     .dps-registration-form {
-        max-width: 100%;
-        padding: 0;
-        border: none;
-        box-shadow: none;
+        padding: 32px;
     }
 
-    .dps-progress,
+    .dps-registration-wizard {
+        padding: 32px;
+    }
+}
+
+@media (min-width: 1600px) {
+    .dps-registration-form {
+        width: min(100%, 1120px);
+    }
+}
+
+@media (max-width: 840px) {
+    .dps-registration-form {
+        padding: 18px;
+    }
+
+    .dps-registration-wizard {
+        padding: 18px;
+    }
+
+    .dps-product-prefs-pet,
+    .dps-summary-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .dps-registration-form {
+        padding: 12px;
+    }
+
+    .dps-registration-wizard,
+    .dps-pet-fieldset,
+    .dps-product-prefs-pet,
+    .dps-summary-box {
+        padding: 14px;
+    }
+
+    .dps-client-fields,
+    .dps-pet-fieldset {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-progress-top,
     .dps-step-actions,
-    .dps-admin-preview-banner,
-    .dps-admin-options,
-    #dps-add-pet,
+    .dps-modal-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
     .dps-button-next,
     .dps-button-secondary,
-    .dps-registration-form .button {
-        display: none !important;
+    #dps-add-pet,
+    .dps-remove-pet,
+    .dps-modal-footer button,
+    .dps-modal-footer a {
+        width: 100%;
     }
 
-    .dps-step {
-        display: block !important;
-        opacity: 1 !important;
-        transform: none !important;
+    .dps-summary-section li {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+
+    .dps-modal-overlay {
+        align-items: stretch;
+        padding: 12px;
+    }
+
+    .dps-modal {
+        max-height: calc(100vh - 24px);
+    }
+}
+
+@media (max-width: 375px) {
+    .dps-registration-form {
+        padding-inline: 8px;
+    }
+
+    .dps-registration-wizard,
+    .dps-progress,
+    .dps-pet-fieldset,
+    .dps-product-prefs-pet,
+    .dps-summary-box,
+    .dps-modal-header,
+    .dps-modal-body,
+    .dps-modal-footer {
+        padding: 12px;
     }
 
     .dps-registration-form h4 {
-        page-break-after: avoid;
+        font-size: 19px;
     }
 
-    .dps-pet-fieldset,
-    .dps-summary-box {
-        page-break-inside: avoid;
-        border: 1px solid var(--dps-color-outline);
-        background: none;
-    }
-
-    .dps-registration-form input,
+    .dps-registration-form input[type="text"],
+    .dps-registration-form input[type="email"],
+    .dps-registration-form input[type="tel"],
+    .dps-registration-form input[type="date"],
+    .dps-registration-form input[type="number"],
     .dps-registration-form select,
     .dps-registration-form textarea {
-        border: 1px solid var(--dps-color-outline-variant);
-        background: none;
+        font-size: 16px;
     }
 }
-
-/* ==========================================================================
-   24. High Contrast Mode Support
-   ========================================================================== */
-
-@media (prefers-contrast: high) {
-    .dps-registration-form {
-        border-width: 2px;
-    }
-
-    .dps-registration-form input,
-    .dps-registration-form select,
-    .dps-registration-form textarea {
-        border-width: 2px;
-    }
-
-    .dps-button-next,
-    .dps-button-secondary,
-    .dps-registration-form .button {
-        border-width: 2px;
-    }
-}
-
-/* ==========================================================================
-   25. Reduced Motion Support
-   ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-    .dps-step,
-    .dps-registration-form input,
-    .dps-registration-form select,
-    .dps-registration-form textarea,
-    .dps-button-next,
-    .dps-button-secondary,
-    .dps-registration-form .button,
-    .dps-progress-bar span {
-        transition: none !important;
-        animation: none !important;
-    }
-
-    .dps-js-error {
-        animation: none !important;
-    }
-
-    .dps-pet-fieldset {
-        animation: none !important;
-    }
-
-    .dps-registration-form .dps-message-success {
-        animation: none !important;
+    .dps-registration-form *,
+    .dps-registration-form *::before,
+    .dps-registration-form *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
     }
 }

@@ -1,41 +1,63 @@
-# Screenshots 2026-04-25 - Auditoria do Cadastro Add-on
+# Screenshots 2026-04-25 - Cadastro Add-on DPS Signature
 
 ## Contexto
 
-- Objetivo: registrar baseline visual e funcional do formulario de Cadastro antes da reescrita integral proposta para DPS Signature.
+- Objetivo: registrar baseline de auditoria e evidencia final da reescrita do formulario publico de Cadastro para o padrao DPS Signature.
 - Ambiente: `https://desi.pet/cadastro/`, WordPress publicado.
-- Sessao: usuario temporario criado via WP-CLI com role administrator para validar a variante autenticada/admin; usuario removido ao final.
-- Referencia de design: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
+- Sessao: usuario temporario criado via WP-CLI com role administrator para validar a variante autenticada/admin; usuario removido no fechamento da entrega.
+- Referencia visual: `docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md` e `docs/visual/VISUAL_STYLE_GUIDE.md`.
 
 ## Antes/Depois
 
-- Antes: formulario atual ainda usa CSS legado, radius/elevacao fora do gate DPS Signature, callback proprio de Google Maps e `textarea` para endereco.
-- Depois: nao houve alteracao visual implementada nesta rodada. Este registro documenta o estado auditado e os artefatos para orientar a reescrita.
-- Arquivos de codigo alterados: nenhum arquivo de codigo foi alterado nesta rodada.
+- Antes: CSS legado, radius/elevacao fora do gate DPS Signature, callback proprio de Google Maps, campo de endereco como `textarea`, transients no rate limit/mensagens e indice incorreto em `pet_aggressive` clonado.
+- Depois: shell/formulario refeito em DPS Signature, endereco como `input`, loader compartilhado `DPSSignatureForms`, persistencia propria sem transients, controlador JS reescrito e formulario publicado validado nos breakpoints oficiais.
 
-## Capturas
+Arquivos de codigo alterados:
+- `plugins/desi-pet-shower-registration/desi-pet-shower-registration-addon.php`
+- `plugins/desi-pet-shower-registration/includes/class-dps-registration-storage.php`
+- `plugins/desi-pet-shower-registration/assets/css/registration-addon.css`
+- `plugins/desi-pet-shower-registration/assets/js/dps-registration.js`
+- `plugins/desi-pet-shower-registration/uninstall.php`
+- `plugins/desi-pet-shower-base/assets/js/dps-signature-forms.js`
+- `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php`
 
-- `./cadastro-audit-admin-375.png` - Cadastro autenticado/admin em 375px.
-- `./cadastro-audit-admin-600.png` - Cadastro autenticado/admin em 600px.
-- `./cadastro-audit-admin-840.png` - Cadastro autenticado/admin em 840px.
-- `./cadastro-audit-admin-1200.png` - Cadastro autenticado/admin em 1200px.
-- `./cadastro-audit-admin-1920.png` - Cadastro autenticado/admin em 1920px.
+## Capturas de auditoria
 
-## Evidencia funcional
+- `./cadastro-audit-admin-375.png` - Baseline autenticado/admin em 375px.
+- `./cadastro-audit-admin-600.png` - Baseline autenticado/admin em 600px.
+- `./cadastro-audit-admin-840.png` - Baseline autenticado/admin em 840px.
+- `./cadastro-audit-admin-1200.png` - Baseline autenticado/admin em 1200px.
+- `./cadastro-audit-admin-1920.png` - Baseline autenticado/admin em 1920px.
+- `./cadastro-audit-runtime-check.json` - Evidencia funcional da auditoria inicial.
 
-- `./cadastro-audit-runtime-check.json`
+## Capturas de implementacao
+
+- `./cadastro-implementation-admin-375.png` - Cadastro autenticado/admin em 375px.
+- `./cadastro-implementation-admin-600.png` - Cadastro autenticado/admin em 600px.
+- `./cadastro-implementation-admin-840.png` - Cadastro autenticado/admin em 840px.
+- `./cadastro-implementation-admin-1200.png` - Cadastro autenticado/admin em 1200px.
+- `./cadastro-implementation-admin-1920.png` - Cadastro autenticado/admin em 1920px.
+- `./cadastro-implementation-admin-flow-1200.png` - Fluxo preenchido ate etapa 3 em 1200px.
+
+## Evidencia funcional final
+
+- `./cadastro-implementation-runtime-check.json`
 
 Resumo:
 - formulario renderizou nos cinco breakpoints;
-- sem overflow horizontal detectado na coleta;
-- opcoes administrativas apareceram na sessao autenticada;
-- `duplicateCheck` estava ativo para admin;
-- validacao em branco bloqueou o avanco da etapa 1;
-- fluxo preenchido avancou ate a etapa 3, gerou resumo e habilitou submit apenas apos confirmacao;
-- Google Places apresentou erro publicado porque o campo `#dps-client-address` e `TEXTAREA`, enquanto o autocomplete legado espera `HTMLInputElement`.
+- sem overflow horizontal em `375`, `600`, `840`, `1200` e `1920`;
+- `#dps-client-address` renderizou como `INPUT`;
+- Google Places marcou `data-dps-places-ready="1"` e aplicou `pac-target-input`;
+- `DPSSignatureForms` e `DPSRegistration` estavam disponiveis no runtime;
+- `duplicateCheck` ficou ativo na sessao admin temporaria;
+- validacao em branco permaneceu na etapa 1 e exibiu `Informe o nome do tutor.` e `Informe o telefone ou WhatsApp.`;
+- clone de pet gerou dois fieldsets, legends `Pet 1` e `Pet 2`, e nomes `pet_aggressive[0]` / `pet_aggressive[1]`;
+- etapa 3 gerou preferencias e resumo para dois pets;
+- submit ficou desabilitado antes da confirmacao e habilitado apos marcar a confirmacao;
+- campo de indicacao do Loyalty apareceu como `Código de indicação`/`Seu código, se tiver` no runtime, sem mojibake visual.
 
 ## Observacoes
 
-- As capturas sao baseline de auditoria, nao evidencia de correcao visual.
-- O console tambem apresentou erro de recurso externo de anuncios, tratado como ruido fora do escopo do Cadastro Add-on.
-- O erro de Google Places e do escopo do Cadastro e deve ser corrigido na reescrita.
+- A URL do Google Maps registrada na evidencia usa `loading=async` e a callback compartilhada `dpsSignatureGooglePlacesReady`.
+- O console ainda registra aviso do Google sobre `google.maps.places.Autocomplete` legado. Nao houve `InvalidValueError`; a migracao para `PlaceAutocompleteElement` deve ser tratada em entrega futura por mudar o contrato operacional da API.
+- Requests com `key`, `token`, `login` ou `dps_token` foram redigidos no JSON de evidencia.

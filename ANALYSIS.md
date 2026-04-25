@@ -1654,30 +1654,42 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 **PropÃƒÂ³sito e funcionalidades principais**:
 - Permitir cadastro pÃƒÂºblico de clientes e pets via formulÃƒÂ¡rio web
-- Integrar com Google Maps para autocomplete de endereÃƒÂ§os
+- Integrar com Google Places via camada compartilhada `dps-signature-forms.js`, usando `data-dps-address-autocomplete` no campo `client_address`
 - Disparar hook para outros add-ons apÃƒÂ³s criaÃƒÂ§ÃƒÂ£o de cliente
+- Aplicar rate limiting e feedback curto por armazenamento persistente proprio, sem transients/cache
 
 **Shortcodes expostos**:
 - `[dps_registration_form]`: renderiza formulÃƒÂ¡rio de cadastro pÃƒÂºblico
+- `[dps_registration_v2]`: alias de compatibilidade para paginas publicadas pelo fluxo V2 removido
 
 **CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
-- NÃƒÂ£o cria CPTs prÃƒÂ³prios; cria posts do tipo `dps_client` e `dps_pet`
-- Options: `dps_google_maps_api_key` (chave de API do Google Maps)
+- Nao cria CPTs proprios; cria posts do tipo `dps_cliente` e `dps_pet`
+- Tabela propria: `{$wpdb->prefix}dps_registration_events`
+  - criada por `DPS_Registration_Storage::maybe_create_tables()`;
+  - versionada pela option `dps_registration_events_db_version`;
+  - armazena eventos de rate limit e mensagens de feedback com `created_at`, `expires_at` e `consumed_at`;
+  - substitui os antigos transients `dps_reg_rate_*`, `dps_reg_msg_*` e `dps_reg_api_*`.
+- Options principais: `dps_registration_page_id`, `dps_google_api_key`, chaves de reCAPTCHA, templates de email e limites da API REST.
 
-**Hooks consumidos**: Nenhum
+**Hooks consumidos**:
+- `dps_registration_spam_check`: permite bloquear cadastro publico apos nonce/honeypot e antes da gravacao.
+- `dps_registration_agenda_url`: permite trocar o CTA de agendamento exibido no sucesso.
 
 **Hooks disparados**:
 - `dps_registration_after_client_created`: disparado apÃƒÂ³s criar novo cliente
+- `dps_registration_after_fields`: permite extensoes adicionarem campos antes do rodape de acoes.
 
 **DependÃƒÂªncias**:
 - Depende do plugin base para CPTs de cliente e pet
 - Integra-se com add-on de Fidelidade para capturar cÃƒÂ³digos de indicaÃƒÂ§ÃƒÂ£o
+- Reutiliza `dps-design-tokens.css`, `dps-signature-forms.css` e `dps-signature-forms.js` para manter o padrao DPS Signature.
 
 **Introduzido em**: v0.1.0 (estimado)
 
 **ObservaÃƒÂ§ÃƒÂµes**:
 - Sanitiza todas as entradas antes de criar posts
-- Arquivo ÃƒÂºnico de 636 linhas; candidato a refatoraÃƒÂ§ÃƒÂ£o futura
+- O CSS publico e o controlador JS do formulario foram reescritos em 2026-04-25 para DPS Signature, preservando shortcodes, actions, nomes de campos, nonces, hooks e endpoint REST.
+- `uninstall.php` remove a tabela `dps_registration_events` e tambem limpa residuos de transients de versoes antigas.
 
 ---
 
