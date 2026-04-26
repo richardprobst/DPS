@@ -24,7 +24,8 @@
 - `./booking-side-rail-600.png` - Lateral direita e margens em 600px.
 - `./booking-side-rail-840.png` - Lateral direita e margens em 840px.
 - `./booking-side-rail-1200.png` - Lateral direita e margens em 1200px.
-- `./booking-side-rail-1920.png` - Lateral direita sticky em 1920px.
+- `./booking-side-rail-1920.png` - Lateral direita completa, sem rolagem interna, em 1920px.
+- `./booking-side-rail-1920-summary-filled.png` - Lateral direita em 1920px com resumo preenchido simulado, ainda sem rolagem interna.
 
 ## Evidencia automatizada
 
@@ -32,10 +33,12 @@
 - `./booking-side-rail-check.json`
 
 Resumo:
-- `cssVersion` confirmou `booking-addon.css?ver=1.4.6`;
+- `cssVersion` confirmou `booking-addon.css?ver=1.4.12`;
 - `notices`, `consoleCount` e `failedCount` ficaram `0` nos cinco breakpoints;
 - nao houve overflow horizontal real em `375`, `600`, `840`, `1200` e `1920`;
 - `1920px` passou a usar wrapper de `1520px` e grid `918px 420px`;
 - painel `Atribuicao`, CTA e chips de preco ficaram dentro da paleta/geometria DPS Signature.
-- a lateral direita final usa `.dps-form-side-rail`, com `sideRailTopDelta=0`, gap horizontal de `24px` e gaps internos de `16px` em `1920px`;
-- os paineis mantiveram padding minimo de `14px` e nenhum breakpoint apresentou overflow horizontal real.
+- a lateral direita final usa `.dps-form-side-rail`, sem rolagem interna, com `sideRailTopDelta=0`, gap horizontal de `24px`, `height=579` e `bottom=1048` em `1920px`;
+- a simulacao de resumo preenchido em `1920px` ficou com `height=700`, `bottom=1168`, `sideRailFitsViewport=true` e `hasInternalScrollbar=false`;
+- o resumo vazio respeitou `hidden`, com a lista e observacoes fora do layout ate haver dados reais;
+- os badges da lateral ficaram em `05,06` nos cinco breakpoints.

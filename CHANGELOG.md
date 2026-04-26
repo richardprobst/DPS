@@ -93,6 +93,9 @@ Antes de criar uma nova versÃ£o oficial:
 
 - Refinado o layout publicado do Agendamento no padrão DPS Signature, com painel de atribuição em paleta canônica, CTA final reto, chips de preço mais sóbrios e melhor aproveitamento de tela grande.
 - Reorganizada a lateral direita do Agendamento em um trilho operacional coeso para reduzir vãos verticais e manter resumo e ação mais acessíveis em tela grande.
+- Removida a rolagem interna da lateral direita do Agendamento, compactando o trilho para caber inteiro no viewport de tela grande.
+- Corrigida a cascata CSS do resumo do Agendamento para respeitar o atributo `hidden` e manter a lateral direita completa sem conteúdo vazio inflando a altura.
+- Corrigida a sequência visual dos badges da lateral do Agendamento para evitar numeração duplicada em Atribuição e Observações.
 - A página de Agendamento passou a suprimir scripts externos de marketing/telemetria não necessários ao fluxo operacional, removendo ruídos de CORS vindos de Ads/Site Kit/Elementor no runtime publicado sem alterar o formulário DPS.
 - Refeito o Booking Add-on como superfície de agendamento DPS Signature baseada no renderer canônico do núcleo, preservando `[dps_booking_form]`, `[dps_booking_v2]`, nonces, campos do POST e hooks de Services/Groomers.
 - Atualizada a página de Agendamento para usar confirmação pós-save por query assinada com nonce, sem transients, e URL canônica reconciliada com `/agendamento/`.
