@@ -12,6 +12,7 @@
 - O fluxo de formulÃƒÂ¡rios usa `dps_nonce` para CSRF e delega aÃƒÂ§ÃƒÂµes especÃƒÂ­ficas (`save_client`, `save_pet`, `save_appointment`, `update_appointment_status`) para mÃƒÂ©todos especializados, enquanto exclusÃƒÂµes limpam tambÃƒÂ©m dados financeiros relacionados quando disponÃƒÂ­veis. A classe principal ÃƒÂ© inicializada no hook `init` com prioridade 5, apÃƒÂ³s o carregamento do text domain em prioridade 1.
 - A exclusÃƒÂ£o de agendamentos dispara o hook `dps_finance_cleanup_for_appointment`, permitindo que add-ons financeiros tratem a remoÃƒÂ§ÃƒÂ£o de lanÃƒÂ§amentos vinculados sem depender de SQL no nÃƒÂºcleo.
 - O filtro `dps_tosa_consent_required` permite ajustar quando o consentimento de tosa com mÃƒÂ¡quina ÃƒÂ© exigido ao salvar agendamentos (parÃƒÂ¢metros: `$requires`, `$data`, `$service_ids`).
+- O filtro `dps_base_appointment_redirect_url` permite que add-ons ajustem a URL final após salvar agendamentos sem alterar o handler principal (parâmetros: `$redirect`, `$result`, `$client_id`, `$tab`, `$context`, `$pending_notice`). O Booking usa esse filtro para confirmação assinada por nonce, sem transients.
 - A criaÃƒÂ§ÃƒÂ£o de tabelas do nÃƒÂºcleo (ex.: `dps_logs`) ÃƒÂ© registrada no `register_activation_hook` e versionada via option `dps_logger_db_version`. Caso a flag de versÃƒÂ£o nÃƒÂ£o exista ou esteja desatualizada, `dbDelta` ÃƒÂ© chamado uma ÃƒÂºnica vez em `plugins_loaded` para alinhar o esquema, evitando consultas de verificaÃƒÂ§ÃƒÂ£o em todos os ciclos de `init`.
 - **OrganizaÃƒÂ§ÃƒÂ£o do menu admin**: o menu pai `desi-pet-shower` apresenta apenas hubs e itens principais. Um limpador dedicado (`DPS_Admin_Menu_Cleaner`) remove submenus duplicados que jÃƒÂ¡ estÃƒÂ£o cobertos por hubs (IntegraÃƒÂ§ÃƒÂµes, Sistema, Ferramentas, Agenda, IA, Portal). As pÃƒÂ¡ginas continuam acessÃƒÂ­veis via URL direta e pelas abas dos hubs, evitando poluiÃƒÂ§ÃƒÂ£o visual na navegaÃƒÂ§ÃƒÂ£o.
 
@@ -987,17 +988,18 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 
 ### Booking (`desi-pet-shower-booking`)
 
-**DiretÃƒÂ³rio**: `plugins/desi-pet-shower-booking`
-**VersÃƒÂ£o**: 1.3.1
+**Diretório**: `plugins/desi-pet-shower-booking`
+**Versão**: 1.4.1
 
 **PropÃƒÂ³sito e funcionalidades principais**:
-- PÃƒÂ¡gina dedicada de agendamentos para administradores
-- Mesma funcionalidade da aba Agendamentos do Painel de GestÃƒÂ£o DPS, porÃƒÂ©m em pÃƒÂ¡gina independente
-- FormulÃƒÂ¡rio completo com seleÃƒÂ§ÃƒÂ£o de cliente, pets, serviÃƒÂ§os, data/hora, tipo de agendamento (avulso/assinatura) e status de pagamento
-- Tela de confirmaÃƒÂ§ÃƒÂ£o pÃƒÂ³s-agendamento com resumo e aÃƒÂ§ÃƒÂµes rÃƒÂ¡pidas (novo agendamento, ver cliente e ver agenda quando os destinos existem)
-- Design system migrado para DPS Signature (v1.3.0)
-- OtimizaÃƒÂ§ÃƒÂµes de performance (batch queries para owners de pets)
-- ValidaÃƒÂ§ÃƒÂµes granulares de seguranÃƒÂ§a (verificaÃƒÂ§ÃƒÂ£o por agendamento especÃƒÂ­fico)
+- Página dedicada de agendamentos para administradores e operação autorizada.
+- Reutiliza `DPS_Appointments_Section_Renderer` como renderer canônico do formulário, evitando o fork HTML/CSS que existia no add-on.
+- Preserva o fluxo completo com seleção de cliente, pets, serviços, data/hora, tipo de agendamento, TaxiDog, assinatura, pagamento passado e observações.
+- Tela de confirmação pós-agendamento usa query args assinados por nonce (`dps_booking_confirmed` + `dps_booking_nonce`), sem transients nem armazenamento temporário.
+- Pendências financeiras e agregação multi-pet são resolvidas em tempo real por requisição, sem `static $cache`, transients ou arrays de reutilização para respostas.
+- Design system alinhado ao DPS Signature em `booking-addon.css`, com geometria reta, paleta `ink/petrol/paper/bone/line/sky/action/warning/danger` e overrides escopados para campos injetados por Services/Groomers.
+- Descoberta de URL canônica reconcilia `dps_booking_page_id` com a página real que contém `[dps_booking_form]` ou `[dps_booking_v2]`, incluindo metadados comuns de page builders.
+- Validações granulares de segurança mantêm `manage_options`/`dps_manage_appointments` para salvar e `can_edit_appointment()` para editar, duplicar ou visualizar confirmação.
 - **Auditoria 2026-04-26**: a pagina publicada `/agendamento/` foi validada com sessao temporaria autenticada via WP-CLI. O formulario renderiza e carrega pets/horarios, mas a reescrita integral foi planejada por uso proibido de transients na confirmacao, mojibake visivel, duplicacao do renderer do base, drift de metadados e desalinhamento visual com o DPS Signature canonico. Plano detalhado: `docs/analysis/BOOKING_AGENDAMENTO_DPS_SIGNATURE_AUDITORIA_PLANO_2026-04-26.md`.
 
 **Shortcodes expostos**:
@@ -1006,11 +1008,11 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 
 **CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
 - NÃƒÂ£o cria CPTs ou tabelas prÃƒÂ³prias; consome `dps_agendamento` do nÃƒÂºcleo
-- Cria pÃƒÂ¡gina automaticamente na ativaÃƒÂ§ÃƒÂ£o: "Agendamento de ServiÃƒÂ§os"
+- Cria ou reconcilia a página automaticamente na ativação: "Agendamento" (`/agendamento/`)
 - Options: `dps_booking_page_id`
 
 **Hooks consumidos**:
-- `dps_base_after_save_appointment`: captura agendamento salvo para exibir tela de confirmaÃƒÂ§ÃƒÂ£o
+- `dps_base_appointment_redirect_url`: ajusta a URL final pós-save para a confirmação assinada do Booking
 - `dps_base_appointment_fields`: permite injeÃƒÂ§ÃƒÂ£o de campos customizados por add-ons
 - `dps_base_appointment_assignment_fields`: permite adicionar campos de atribuiÃƒÂ§ÃƒÂ£o
 
@@ -1023,24 +1025,27 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - `dps_manage_appointments` (gestÃƒÂ£o de agendamentos)
 - ObservaÃƒÂ§ÃƒÂ£o: a pÃƒÂ¡gina dedicada de booking valida carregamento e salvamento com `manage_options` ou `dps_manage_appointments`, evitando que o formulÃƒÂ¡rio fique acessÃƒÂ­vel sem permissÃƒÂ£o real de agendamento.
 
-**Assets (v1.3.0)**:
-- `booking-addon.css`: Estilos DPS Signature com semantic mapping, 100% tokens DPS Signature
-- DependÃƒÂªncia condicional de `dps-design-tokens.css` via check de `DPS_BASE_URL`
+**Assets (v1.4.0)**:
+- `booking-addon.css`: superfície DPS Signature escopada para Booking, incluindo formulário base, confirmação e componentes injetados por Services/Groomers
+- Dependência condicional de `dps-design-tokens.css` via check de `DPS_BASE_URL`
 - Assets do base plugin carregados via `DPS_Base_Plugin::enqueue_frontend_assets()`
 
-**Melhorias de seguranÃƒÂ§a (v1.3.0)**:
-- MÃƒÂ©todo `can_edit_appointment()`: valida se usuÃƒÂ¡rio pode editar agendamento especÃƒÂ­fico
-- VerificaÃƒÂ§ÃƒÂ£o de `can_access()` antes de renderizar seÃƒÂ§ÃƒÂ£o
-- DocumentaÃƒÂ§ÃƒÂ£o phpcs para parÃƒÂ¢metros GET read-only
+**Melhorias de segurança (v1.4.0)**:
+- `can_edit_appointment()`: valida se o usuário pode editar, duplicar ou visualizar confirmação de agendamento específico
+- Confirmação pós-save validada por nonce por agendamento e usuário, sem transients
+- `DPS_Cache_Control` registra `[dps_booking_form]` e `[dps_booking_v2]` para no-cache preventivo por shortcode
+- Parâmetros `client_id/pet_id` continuam aceitos como aliases read-only para pré-seleção, sem alterar nomes de campos do POST
 
-**OtimizaÃƒÂ§ÃƒÂµes de performance (v1.3.0)**:
-- Batch fetch de owners de pets (reduÃƒÂ§ÃƒÂ£o de N+1 queries: 100+ Ã¢â€ â€™ 1)
-- Preparado para futura paginaÃƒÂ§ÃƒÂ£o de clientes
+**Manutenibilidade (v1.4.0)**:
+- O add-on deixou de duplicar o formulário de agendamento e passou a depender do renderer canônico do núcleo
+- O renderer base aceita opções de contexto (`section_id`, classes, título, hidden fields) para páginas dedicadas sem quebrar o painel principal
+- Leitura de `appointment_pet_id` ganhou fallback read-only para `appointment_pet` em dados legados
+- O caminho de agendamento público/base não mantém cache local de pendências ou agregados multi-pet; cada render/redirect calcula o estado atual diretamente.
 
-**Acessibilidade (v1.3.0)**:
-- `aria-hidden="true"` em todos emojis decorativos
-- Suporte a `prefers-reduced-motion` em animaÃƒÂ§ÃƒÂµes
-- ARIA roles e labels conforme padrÃƒÂµes do base plugin
+**Acessibilidade e UX (v1.4.0)**:
+- Hierarquia com H1 da página, superfície operacional e fieldsets numerados por CSS
+- Botões e campos com foco visível, áreas de toque estáveis e layout responsivo para `375`, `600`, `840`, `1200` e `1920`
+- Iconografia decorativa quebrada removida do Booking; labels textuais preservam compreensão sem depender de emoji
 
 **Endpoints AJAX**: Nenhum
 

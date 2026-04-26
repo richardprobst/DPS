@@ -102,6 +102,10 @@ class DPS_Appointments_Section_Renderer {
                     'appointment_total_value'        => get_post_meta( $source_id, 'appointment_total_value', true ),
                 ];
 
+                if ( empty( $meta['pet_id'] ) ) {
+                    $meta['pet_id'] = get_post_meta( $source_id, 'appointment_pet', true );
+                }
+
                 // Se está duplicando, limpa a data para forçar nova seleção.
                 if ( $duplicate_id ) {
                     $is_duplicate = true;
@@ -115,6 +119,12 @@ class DPS_Appointments_Section_Renderer {
         // Pré-seleção de cliente e pet via URL.
         $pref_client = isset( $_GET['pref_client'] ) ? intval( $_GET['pref_client'] ) : 0;
         $pref_pet    = isset( $_GET['pref_pet'] ) ? intval( $_GET['pref_pet'] ) : 0;
+        if ( ! $pref_client && isset( $_GET['client_id'] ) ) {
+            $pref_client = intval( $_GET['client_id'] );
+        }
+        if ( ! $pref_pet && isset( $_GET['pet_id'] ) ) {
+            $pref_pet = intval( $_GET['pet_id'] );
+        }
 
         // Se está duplicando, usa o cliente do agendamento original como preferência.
         if ( $is_duplicate && ! empty( $meta['client_id'] ) ) {
@@ -225,15 +235,28 @@ class DPS_Appointments_Section_Renderer {
         $options      = wp_parse_args(
             $options,
             [
-                'context'      => 'page',
-                'include_list' => true,
+                'context'              => 'page',
+                'include_list'         => true,
+                'section_id'           => '',
+                'section_classes'      => [],
+                'section_title'        => __( 'Agendamento de Serviços', 'desi-pet-shower' ),
+                'section_title_prefix' => '',
+                'surface_title'        => __( 'Agendar serviço', 'desi-pet-shower' ),
+                'surface_title_prefix' => '',
+                'hidden_fields'        => [],
             ]
         );
 
         $is_modal     = ( 'modal' === $options['context'] );
         $include_list = (bool) $options['include_list'];
-        $section_id   = $is_modal ? 'dps-section-agendas-modal' : 'dps-section-agendas';
+        $section_id   = $options['section_id'] ? sanitize_html_class( $options['section_id'] ) : ( $is_modal ? 'dps-section-agendas-modal' : 'dps-section-agendas' );
         $section_classes = [ 'dps-section' ];
+        foreach ( (array) $options['section_classes'] as $section_class ) {
+            $section_class = sanitize_html_class( $section_class );
+            if ( $section_class ) {
+                $section_classes[] = $section_class;
+            }
+        }
         if ( $is_modal ) {
             $section_classes[] = 'dps-section--modal';
             $section_classes[] = 'active'; // Garante exibição dentro do modal (base oculta se não estiver ativo).
@@ -243,10 +266,14 @@ class DPS_Appointments_Section_Renderer {
         echo '<div class="' . esc_attr( implode( ' ', $section_classes ) ) . '" id="' . esc_attr( $section_id ) . '">';
         
         // Título da seção (aparece para todos os usuários)
-        echo '<h2 class="dps-section-title">';
-        echo '<span class="dps-section-title__icon">📅</span>';
-        echo esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' );
-        echo '</h2>';
+        if ( '' !== $options['section_title'] ) {
+            echo '<h2 class="dps-section-title">';
+            if ( '' !== $options['section_title_prefix'] ) {
+                echo '<span class="dps-section-title__icon">' . esc_html( $options['section_title_prefix'] ) . '</span>';
+            }
+            echo esc_html( $options['section_title'] );
+            echo '</h2>';
+        }
         
         // Formulário de agendamento com estrutura Surface (mesmo padrão da aba CLIENTES)
         if ( ! $visitor_only ) {
@@ -257,8 +284,10 @@ class DPS_Appointments_Section_Renderer {
             
             echo '<div class="dps-surface dps-surface--info">';
             echo '<div class="dps-surface__title">';
-            echo '<span>📝</span>';
-            echo esc_html__( 'Agendar serviço', 'desi-pet-shower' );
+            if ( '' !== $options['surface_title_prefix'] ) {
+                echo '<span>' . esc_html( $options['surface_title_prefix'] ) . '</span>';
+            }
+            echo esc_html( $options['surface_title'] );
             echo '</div>';
             
             // Mensagem de duplicação
@@ -270,8 +299,20 @@ class DPS_Appointments_Section_Renderer {
             }
             
             if ( isset( $_GET['dps_notice'] ) && 'pending_payments' === $_GET['dps_notice'] ) {
-                $notice_key  = 'dps_pending_notice_' . get_current_user_id();
-                $notice_data = get_transient( $notice_key );
+                $notice_client_id = isset( $_GET['dps_notice_client'] ) ? absint( wp_unslash( $_GET['dps_notice_client'] ) ) : 0;
+                $notice_nonce     = isset( $_GET['dps_notice_nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_notice_nonce'] ) ) : '';
+                $notice_data      = [];
+                if (
+                    $notice_client_id
+                    && $notice_nonce
+                    && wp_verify_nonce( $notice_nonce, 'dps_pending_notice_' . $notice_client_id . '_' . get_current_user_id() )
+                ) {
+                    $client_post = get_post( $notice_client_id );
+                    $notice_data = [
+                        'client_name'  => $client_post ? $client_post->post_title : '',
+                        'transactions' => self::get_client_pending_transactions( $notice_client_id ),
+                    ];
+                }
                 if ( $notice_data && ! empty( $notice_data['transactions'] ) ) {
                     echo '<div class="dps-alert dps-alert--danger">';
                     $client_label = ! empty( $notice_data['client_name'] ) ? $notice_data['client_name'] : __( 'o cliente selecionado', 'desi-pet-shower' );
@@ -287,13 +328,19 @@ class DPS_Appointments_Section_Renderer {
                     echo '</ul>';
                     echo '</div>';
                 }
-                delete_transient( $notice_key );
             }
             
             echo '<form method="post" class="dps-form">';
             echo '<input type="hidden" name="dps_action" value="save_appointment">';
             wp_nonce_field( 'dps_action', 'dps_nonce_agendamentos' );
             echo '<input type="hidden" name="dps_redirect_url" value="' . esc_attr( $current_url ) . '">';
+            foreach ( (array) $options['hidden_fields'] as $hidden_name => $hidden_value ) {
+                $hidden_name = sanitize_key( $hidden_name );
+                if ( '' === $hidden_name ) {
+                    continue;
+                }
+                echo '<input type="hidden" name="' . esc_attr( $hidden_name ) . '" value="' . esc_attr( $hidden_value ) . '">';
+            }
             if ( $edit_id ) {
                 echo '<input type="hidden" name="appointment_id" value="' . esc_attr( $edit_id ) . '">';
             }
@@ -363,16 +410,16 @@ class DPS_Appointments_Section_Renderer {
             echo '<label for="dps-appointment-cliente">' . esc_html__( 'Cliente', 'desi-pet-shower' ) . ' <span class="dps-required">*</span></label>';
             echo '<select name="appointment_client_id" id="dps-appointment-cliente" class="dps-client-select" required>';
             echo '<option value="">' . esc_html__( 'Selecione...', 'desi-pet-shower' ) . '</option>';
-            $pending_cache = [];
+            $initial_pending_rows = [];
             foreach ( $clients as $client ) {
-                if ( ! array_key_exists( $client->ID, $pending_cache ) ) {
-                    $pending_cache[ $client->ID ] = self::get_client_pending_transactions( $client->ID );
-                }
-                $pending_rows = $pending_cache[ $client->ID ];
+                $pending_rows = self::get_client_pending_transactions( $client->ID );
                 $pending_attr = ' data-has-pending="' . ( $pending_rows ? '1' : '0' ) . '"';
                 $consent_data = DPS_Base_Frontend::get_client_tosa_consent_data( $client->ID );
                 $consent_attr = ' data-consent-status="' . esc_attr( $consent_data['status'] ) . '"';
                 $consent_attr .= ' data-consent-date="' . esc_attr( $consent_data['granted_at'] ?: $consent_data['revoked_at'] ) . '"';
+                if ( (string) $client->ID === (string) $sel_client ) {
+                    $initial_pending_rows = $pending_rows;
+                }
                 if ( $pending_rows ) {
                     $payload = [];
                     foreach ( $pending_rows as $row ) {
@@ -395,10 +442,6 @@ class DPS_Appointments_Section_Renderer {
             echo '</div>';
             
             // Alerta de pendências financeiras
-            $initial_pending_rows = [];
-            if ( $sel_client && isset( $pending_cache[ $sel_client ] ) ) {
-                $initial_pending_rows = $pending_cache[ $sel_client ];
-            }
             $initial_alert_html = '';
             if ( $initial_pending_rows ) {
                 $client_post = get_post( (int) $sel_client );

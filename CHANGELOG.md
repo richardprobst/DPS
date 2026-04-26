@@ -91,6 +91,8 @@ Antes de criar uma nova versÃ£o oficial:
 
 #### Changed (Alterado)
 
+- Refeito o Booking Add-on como superfície de agendamento DPS Signature baseada no renderer canônico do núcleo, preservando `[dps_booking_form]`, `[dps_booking_v2]`, nonces, campos do POST e hooks de Services/Groomers.
+- Atualizada a página de Agendamento para usar confirmação pós-save por query assinada com nonce, sem transients, e URL canônica reconciliada com `/agendamento/`.
 - Reafirmados `desi-pet-shower-registration` e `desi-pet-shower-booking` como implementações canônicas dos fluxos públicos de cadastro e agendamento, encerrando o dual-run do add-on `desi-pet-shower-frontend`.
 - Preservados `[dps_registration_v2]` e `[dps_booking_v2]` como aliases de compatibilidade nos plugins canônicos, evitando quebra de páginas publicadas após a remoção do add-on Frontend.
 - Consolidada a Agenda publicada como superfície operacional única do DPS Signature, sem navegação funcional por abas legadas e com navegação preservando apenas visão e período.
@@ -103,6 +105,10 @@ Antes de criar uma nova versÃ£o oficial:
 
 #### Fixed (Corrigido)
 
+- Corrigido o fluxo do Booking que usava `get_transient/set_transient/delete_transient` para confirmação de agendamento.
+- Removidos armazenamentos temporários em memória no caminho de agendamento público/base, mantendo pendências financeiras e cobranças multi-pet recalculadas em tempo real por requisição.
+- Corrigida a cobertura de no-cache para `[dps_booking_form]` e `[dps_booking_v2]` no `DPS_Cache_Control`.
+- Corrigida a pré-seleção/edição de pet no renderer de agendamento com fallback read-only de `appointment_pet` para o contrato canônico `appointment_pet_id`.
 - Corrigidos arquivos PHP do pacote DPS com BOM no ambiente publicado, eliminando contaminação de respostas JSON do AJAX e estabilizando modais, painéis e integrações que dependem de payload limpo.
 - Corrigida a telemetria de histórico para devolver `source` e `source_label`, permitindo badges coerentes para registros automáticos e ações manuais no modal de linha do tempo.
 - Validado no `desi.pet` que os modais de pet, serviços, operação, histórico e reagendamento abriram corretamente após a publicação final.
@@ -118,6 +124,8 @@ Antes de criar uma nova versÃ£o oficial:
 
 #### Refactoring (Interno)
 
+- Reduzida a duplicação do Booking Add-on ao remover o fork do formulário de agendamento e parametrizar `DPS_Appointments_Section_Renderer` para contextos dedicados.
+- Adicionado o filtro `dps_base_appointment_redirect_url` para ajustes de redirect pós-save por add-ons sem alterar o contrato do handler de agendamentos.
 - Removidos resíduos de CSS/JS/layout das antigas tabelas concorrentes da Agenda, mantendo o runtime ativo concentrado na fila operacional canônica do DPS Signature.
 - Simplificada a semântica do frontend para tratar a Agenda como modo operacional único, reduzindo dependências de `agenda_tab` no runtime publicado.
 - Consolidado o fluxo de servicos da Agenda no `agenda-addon.js`, removendo o arquivo legado `services-modal.js` e a dependencia de `agenda_tab` no frontend operacional.

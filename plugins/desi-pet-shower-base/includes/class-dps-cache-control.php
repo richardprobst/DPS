@@ -53,6 +53,9 @@ class DPS_Cache_Control {
         'dps_fin_docs',
         // Registration
         'dps_registration_form',
+        // Booking
+        'dps_booking_form',
+        'dps_booking_v2',
         // AI
         'dps_ai_chat',
     ];

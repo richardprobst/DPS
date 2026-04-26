@@ -1,0 +1,125 @@
+{
+  "url": "https://desi.pet/agendamento/",
+  "validatedAt": "2026-04-26T02:02:00-03:00",
+  "session": "Temporary authenticated WordPress administrator created via WP-CLI and removed after validation.",
+  "wrapperSelector": ".dps-booking-wrapper",
+  "breakpoints": [
+    {
+      "statusCode": 200,
+      "title": "Agendamentos - Desi Pet Shower",
+      "wrapper": true,
+      "formCount": 1,
+      "hiddenContextCount": 1,
+      "nonceCount": 1,
+      "cssLoaded": true,
+      "cssVersion": "1.4.1",
+      "overflowX": false,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "surfaceRadius": "0px",
+      "dateTimeColumns": "268.8px",
+      "mojibakeSequenceCount": 0,
+      "screenshot": "docs/screenshots/2026-04-26/booking-implementation-auth-375.png",
+      "viewport": 375
+    },
+    {
+      "statusCode": 200,
+      "title": "Agendamentos - Desi Pet Shower",
+      "wrapper": true,
+      "formCount": 1,
+      "hiddenContextCount": 1,
+      "nonceCount": 1,
+      "cssLoaded": true,
+      "cssVersion": "1.4.1",
+      "overflowX": false,
+      "scrollWidth": 600,
+      "clientWidth": 600,
+      "surfaceRadius": "0px",
+      "dateTimeColumns": "210.8px 210.8px",
+      "mojibakeSequenceCount": 0,
+      "screenshot": "docs/screenshots/2026-04-26/booking-implementation-auth-600.png",
+      "viewport": 600
+    },
+    {
+      "statusCode": 200,
+      "title": "Agendamentos - Desi Pet Shower",
+      "wrapper": true,
+      "formCount": 1,
+      "hiddenContextCount": 1,
+      "nonceCount": 1,
+      "cssLoaded": true,
+      "cssVersion": "1.4.1",
+      "overflowX": false,
+      "scrollWidth": 840,
+      "clientWidth": 840,
+      "surfaceRadius": "0px",
+      "dateTimeColumns": "322.8px 322.8px",
+      "mojibakeSequenceCount": 0,
+      "screenshot": "docs/screenshots/2026-04-26/booking-implementation-auth-840.png",
+      "viewport": 840
+    },
+    {
+      "statusCode": 200,
+      "title": "Agendamentos - Desi Pet Shower",
+      "wrapper": true,
+      "formCount": 1,
+      "hiddenContextCount": 1,
+      "nonceCount": 1,
+      "cssLoaded": true,
+      "cssVersion": "1.4.1",
+      "overflowX": false,
+      "scrollWidth": 1200,
+      "clientWidth": 1200,
+      "surfaceRadius": "0px",
+      "dateTimeColumns": "468.8px 468.8px",
+      "mojibakeSequenceCount": 0,
+      "screenshot": "docs/screenshots/2026-04-26/booking-implementation-auth-1200.png",
+      "viewport": 1200
+    },
+    {
+      "statusCode": 200,
+      "title": "Agendamentos - Desi Pet Shower",
+      "wrapper": true,
+      "formCount": 1,
+      "hiddenContextCount": 1,
+      "nonceCount": 1,
+      "cssLoaded": true,
+      "cssVersion": "1.4.1",
+      "overflowX": false,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "surfaceRadius": "0px",
+      "dateTimeColumns": "468.8px 468.8px",
+      "mojibakeSequenceCount": 0,
+      "screenshot": "docs/screenshots/2026-04-26/booking-implementation-auth-1920.png",
+      "viewport": 1920
+    }
+  ],
+  "functional": {
+    "clientOptions": 35,
+    "selectedClientValuePresent": true,
+    "selectedClientRedacted": true,
+    "petInputsAfterClient": 48,
+    "dateUsed": "2026-04-28",
+    "timeOptionsAfterDate": 22,
+    "hiddenContextCount": 1,
+    "nonceCount": 1
+  },
+  "consoleWarningsOrErrors": [
+    {
+      "type": "warning",
+      "text": "JQMIGRATE: jQuery.trim is deprecated; use String.prototype.trim"
+    },
+    {
+      "type": "external",
+      "text": "CORS failures from adsbygoogle and Mixpanel were observed in the published page; they are outside the Booking add-on request path."
+    }
+  ],
+  "failedRequests": [
+    {
+      "scope": "external",
+      "text": "Ads/Mixpanel/Kaspersky browser-extension requests failed during navigation; no Booking CSS, form, nonce or admin-ajax validation failure was observed."
+    }
+  ],
+  "privacy": "Visible text samples, selected client labels and external request URLs were redacted because the authenticated form contains client option labels and third-party URLs can include tokens."
+}

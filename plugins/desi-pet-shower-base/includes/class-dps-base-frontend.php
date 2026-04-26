@@ -88,15 +88,8 @@ class DPS_Base_Frontend {
      * @return array|null
      */
     public static function get_multi_pet_charge_data( $appt_id ) {
-        static $cache = [];
-
-        if ( array_key_exists( $appt_id, $cache ) ) {
-            return $cache[ $appt_id ];
-        }
-
         $pet_ids = get_post_meta( $appt_id, 'appointment_pet_ids', true );
         if ( ! is_array( $pet_ids ) || count( $pet_ids ) < 2 ) {
-            $cache[ $appt_id ] = null;
             return null;
         }
 
@@ -120,7 +113,6 @@ class DPS_Base_Frontend {
         ] );
 
         if ( empty( $related ) ) {
-            $cache[ $appt_id ] = null;
             return null;
         }
 
@@ -151,13 +143,12 @@ class DPS_Base_Frontend {
 
         $ids = array_map( 'intval', $ids );
         if ( count( $ids ) < 2 ) {
-            $cache[ $appt_id ] = null;
             return null;
         }
 
         sort( $ids );
 
-        $cache[ $appt_id ] = [
+        return [
             'ids'       => $ids,
             'pet_names' => array_values( array_unique( $pet_names ) ),
             'total'     => $total,
@@ -166,8 +157,6 @@ class DPS_Base_Frontend {
             'time'      => $time,
             'signature' => $signature,
         ];
-
-        return $cache[ $appt_id ];
     }
 
     /**
@@ -212,8 +201,6 @@ class DPS_Base_Frontend {
             if ( empty( $batch_ids ) ) {
                 break;
             }
-
-            update_meta_cache( 'post', $batch_ids );
 
             foreach ( $batch_ids as $appt_id ) {
                 $status_meta = get_post_meta( $appt_id, 'appointment_status', true );
@@ -557,7 +544,9 @@ class DPS_Base_Frontend {
             [ 
                 'dps_delete', 'id', 'dps_edit', 'dps_view', 'tab', 'dps_action',
                 'dps_nonce', 'dps_nonce_client_form', 'dps_nonce_pets', 
-                'dps_nonce_agendamentos', 'dps_nonce_agendamentos_status', 'dps_nonce_passwords'
+                'dps_nonce_agendamentos', 'dps_nonce_agendamentos_status', 'dps_nonce_passwords',
+                'dps_notice', 'dps_notice_client', 'dps_notice_nonce',
+                'dps_booking_confirmed', 'dps_booking_nonce', 'dps_booking_type'
             ],
             $base
         );
@@ -574,31 +563,46 @@ class DPS_Base_Frontend {
      *
      * @param int    $client_id ID do cliente relacionado ao agendamento.
      * @param string $tab       Aba para a qual o usuário deve ser redirecionado.
+     * @param string $context   Contexto de execução.
+     * @param array  $result    Dados retornados pelo handler de agendamento.
      */
-    private static function redirect_with_pending_notice( $client_id, $tab = 'agendas', $context = 'page' ) {
+    private static function redirect_with_pending_notice( $client_id, $tab = 'agendas', $context = 'page', array $result = [] ) {
         $redirect = self::get_redirect_url( $tab );
         $client_id = (int) $client_id;
         $pending_notice = [];
         if ( $client_id ) {
             $pending = self::get_client_pending_transactions( $client_id );
             if ( ! empty( $pending ) ) {
-                $notice_key  = 'dps_pending_notice_' . get_current_user_id();
                 $client_post = get_post( $client_id );
-                set_transient(
-                    $notice_key,
+                $redirect = add_query_arg(
                     [
-                        'client_name'  => $client_post ? $client_post->post_title : '',
-                        'transactions' => $pending,
+                        'dps_notice'        => 'pending_payments',
+                        'dps_notice_client' => $client_id,
+                        'dps_notice_nonce'  => wp_create_nonce( 'dps_pending_notice_' . $client_id . '_' . get_current_user_id() ),
                     ],
-                    MINUTE_IN_SECONDS * 10
+                    $redirect
                 );
-                $redirect = add_query_arg( 'dps_notice', 'pending_payments', $redirect );
                 $pending_notice = [
                     'client_name'  => $client_post ? $client_post->post_title : '',
                     'transactions' => $pending,
                 ];
             }
         }
+
+        /**
+         * Permite que add-ons ajustem a URL final após salvar agendamentos.
+         *
+         * @since 2.0.0
+         *
+         * @param string $redirect       URL final calculada pelo núcleo.
+         * @param array  $result         Resultado do handler de agendamento.
+         * @param int    $client_id      ID do cliente relacionado.
+         * @param string $tab            Aba de destino do núcleo.
+         * @param string $context        Contexto de execução: page ou ajax.
+         * @param array  $pending_notice Dados de pendências recalculados em tempo real.
+         */
+        $redirect = apply_filters( 'dps_base_appointment_redirect_url', $redirect, $result, $client_id, $tab, $context, $pending_notice );
+
         if ( 'ajax' === $context || wp_doing_ajax() ) {
             return [
                 'redirect'       => $redirect,
@@ -1328,7 +1332,7 @@ class DPS_Base_Frontend {
                 );
             }
 
-            $redirect_data = self::redirect_with_pending_notice( $result['client_id'], 'agendas', 'ajax' );
+            $redirect_data = self::redirect_with_pending_notice( $result['client_id'], 'agendas', 'ajax', $result );
 
             self::send_ajax_response(
                 true,
@@ -1349,7 +1353,7 @@ class DPS_Base_Frontend {
             exit;
         }
 
-        self::redirect_with_pending_notice( $result['client_id'] );
+        self::redirect_with_pending_notice( $result['client_id'], 'agendas', 'page', $result );
     }
 
     /**
