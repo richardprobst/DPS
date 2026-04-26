@@ -1,0 +1,46 @@
+{
+  "source": "published_runtime_authenticated",
+  "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=week",
+  "validated_at": "2026-04-24T19:16:00-03:00",
+  "actions": [
+    "services",
+    "operation",
+    "logistics",
+    "reschedule",
+    "history"
+  ],
+  "breakpoints": {
+    "375": {
+      "horizontalOverflow": false,
+      "sidebarVisible": false,
+      "dialogWidth": 336
+    },
+    "600": {
+      "horizontalOverflow": false,
+      "sidebarVisible": false,
+      "dialogWidth": 561
+    },
+    "840": {
+      "horizontalOverflow": false,
+      "sidebarVisible": false,
+      "dialogWidth": 672
+    },
+    "1200": {
+      "horizontalOverflow": false,
+      "sidebarVisible": true,
+      "dialogWidth": 672
+    },
+    "1920": {
+      "horizontalOverflow": false,
+      "sidebarVisible": true,
+      "dialogWidth": 672
+    }
+  },
+  "runtimeAssertions": {
+    "temporaryLoginEndpointRemoved": true,
+    "moreMenuIncludesAllExtraActions": true,
+    "operationActionOpensChecklistCheckinCheckout": true,
+    "sidebarIncludesResumoOperacaoAndAcoesExtras": true,
+    "logisticsDialogShowsMissingAddressExplicitly": true
+  }
+}

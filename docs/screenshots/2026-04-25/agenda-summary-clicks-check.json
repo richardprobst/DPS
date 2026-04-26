@@ -1,0 +1,102 @@
+[
+  {
+    "viewport": {
+      "width": 375,
+      "height": 920
+    },
+    "actionCount": 3,
+    "visibleActionCount": 0,
+    "horizontalOverflow": false,
+    "note": "Inspector lateral fica oculto neste breakpoint; botoes permanecem no DOM sem afetar layout mobile."
+  },
+  {
+    "viewport": {
+      "width": 600,
+      "height": 920
+    },
+    "actionCount": 3,
+    "visibleActionCount": 0,
+    "horizontalOverflow": false,
+    "note": "Inspector lateral fica oculto neste breakpoint; botoes permanecem no DOM sem afetar layout mobile."
+  },
+  {
+    "viewport": {
+      "width": 840,
+      "height": 920
+    },
+    "actionCount": 3,
+    "visibleActionCount": 0,
+    "horizontalOverflow": false,
+    "note": "Inspector lateral fica oculto neste breakpoint; botoes permanecem no DOM sem afetar layout intermediario."
+  },
+  {
+    "viewport": {
+      "width": 1200,
+      "height": 1080
+    },
+    "actionCount": 3,
+    "visibleActionCount": 3,
+    "horizontalOverflow": false,
+    "actions": [
+      {
+        "action": "services",
+        "text": "1 servico",
+        "height": "18.9px",
+        "minHeight": "0px",
+        "paddingTop": "0px",
+        "paddingBottom": "0px"
+      },
+      {
+        "action": "payment",
+        "text": "Cobrar R$ 89,90",
+        "height": "18.9px",
+        "minHeight": "0px",
+        "paddingTop": "0px",
+        "paddingBottom": "0px"
+      },
+      {
+        "action": "logistics",
+        "text": "TaxiDog solicitado",
+        "height": "18.9px",
+        "minHeight": "0px",
+        "paddingTop": "0px",
+        "paddingBottom": "0px"
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "actionCount": 3,
+    "visibleActionCount": 3,
+    "horizontalOverflow": false,
+    "actions": [
+      {
+        "action": "services",
+        "text": "1 servico",
+        "height": "18.9px",
+        "minHeight": "0px",
+        "paddingTop": "0px",
+        "paddingBottom": "0px"
+      },
+      {
+        "action": "payment",
+        "text": "Cobrar R$ 89,90",
+        "height": "18.9px",
+        "minHeight": "0px",
+        "paddingTop": "0px",
+        "paddingBottom": "0px"
+      },
+      {
+        "action": "logistics",
+        "text": "TaxiDog solicitado",
+        "height": "18.9px",
+        "minHeight": "0px",
+        "paddingTop": "0px",
+        "paddingBottom": "0px"
+      }
+    ]
+  }
+]

@@ -1,0 +1,186 @@
+{
+  "fixture": "agenda-workflow-action-preview.html",
+  "generatedAt": "2026-04-24T21:18:13.957Z",
+  "results": [
+    {
+      "width": 375,
+      "screenshot": "agenda-workflow-action-375.png",
+      "consoleMessages": [],
+      "viewport": 375,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "overflowX": false,
+      "workflowButtonCount": 5,
+      "paymentButtonCount": 1,
+      "operationButtonCount": 0,
+      "cancelledButtonCount": 1,
+      "actionText": [
+        [
+          "Confirmar",
+          "Mais"
+        ],
+        [
+          "Finalizar",
+          "Mais"
+        ],
+        [
+          "Finalizado",
+          "Cobrar cliente",
+          "Mais"
+        ],
+        [
+          "Pago",
+          "Mais"
+        ],
+        [
+          "Cancelado",
+          "Mais"
+        ]
+      ]
+    },
+    {
+      "width": 600,
+      "screenshot": "agenda-workflow-action-600.png",
+      "consoleMessages": [],
+      "viewport": 600,
+      "scrollWidth": 600,
+      "clientWidth": 600,
+      "overflowX": false,
+      "workflowButtonCount": 5,
+      "paymentButtonCount": 1,
+      "operationButtonCount": 0,
+      "cancelledButtonCount": 1,
+      "actionText": [
+        [
+          "Confirmar",
+          "Mais"
+        ],
+        [
+          "Finalizar",
+          "Mais"
+        ],
+        [
+          "Finalizado",
+          "Cobrar cliente",
+          "Mais"
+        ],
+        [
+          "Pago",
+          "Mais"
+        ],
+        [
+          "Cancelado",
+          "Mais"
+        ]
+      ]
+    },
+    {
+      "width": 840,
+      "screenshot": "agenda-workflow-action-840.png",
+      "consoleMessages": [],
+      "viewport": 840,
+      "scrollWidth": 840,
+      "clientWidth": 840,
+      "overflowX": false,
+      "workflowButtonCount": 5,
+      "paymentButtonCount": 1,
+      "operationButtonCount": 0,
+      "cancelledButtonCount": 1,
+      "actionText": [
+        [
+          "Confirmar",
+          "Mais"
+        ],
+        [
+          "Finalizar",
+          "Mais"
+        ],
+        [
+          "Finalizado",
+          "Cobrar cliente",
+          "Mais"
+        ],
+        [
+          "Pago",
+          "Mais"
+        ],
+        [
+          "Cancelado",
+          "Mais"
+        ]
+      ]
+    },
+    {
+      "width": 1200,
+      "screenshot": "agenda-workflow-action-1200.png",
+      "consoleMessages": [],
+      "viewport": 1200,
+      "scrollWidth": 1200,
+      "clientWidth": 1200,
+      "overflowX": false,
+      "workflowButtonCount": 5,
+      "paymentButtonCount": 1,
+      "operationButtonCount": 0,
+      "cancelledButtonCount": 1,
+      "actionText": [
+        [
+          "Confirmar",
+          "Mais"
+        ],
+        [
+          "Finalizar",
+          "Mais"
+        ],
+        [
+          "Finalizado",
+          "Cobrar cliente",
+          "Mais"
+        ],
+        [
+          "Pago",
+          "Mais"
+        ],
+        [
+          "Cancelado",
+          "Mais"
+        ]
+      ]
+    },
+    {
+      "width": 1920,
+      "screenshot": "agenda-workflow-action-1920.png",
+      "consoleMessages": [],
+      "viewport": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflowX": false,
+      "workflowButtonCount": 5,
+      "paymentButtonCount": 1,
+      "operationButtonCount": 0,
+      "cancelledButtonCount": 1,
+      "actionText": [
+        [
+          "Confirmar",
+          "Mais"
+        ],
+        [
+          "Finalizar",
+          "Mais"
+        ],
+        [
+          "Finalizado",
+          "Cobrar cliente",
+          "Mais"
+        ],
+        [
+          "Pago",
+          "Mais"
+        ],
+        [
+          "Cancelado",
+          "Mais"
+        ]
+      ]
+    }
+  ]
+}

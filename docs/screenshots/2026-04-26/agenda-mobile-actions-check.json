@@ -1,0 +1,76 @@
+{
+  "context": "Agenda publicada - distribuicao mobile dos botoes do card operacional",
+  "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=week&codex_bust=mobile-actions-20260426-final",
+  "date": "2026-04-26",
+  "reference": [
+    "docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md",
+    "docs/visual/VISUAL_STYLE_GUIDE.md"
+  ],
+  "mobileActionStyles": {
+    "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
+    "gridAutoRows": "minmax(52px, auto)",
+    "buttonFontSize": "10px",
+    "buttonLineHeight": "1.1",
+    "buttonLetterSpacing": "0.035em",
+    "buttonWhiteSpace": "nowrap"
+  },
+  "checks": [
+    {
+      "width": 375,
+      "cardFound": true,
+      "horizontalOverflow": false,
+      "buttonRows": 2,
+      "buttonHeightMin": 62,
+      "buttonHeightMax": 62,
+      "anyButtonOverflow": false,
+      "ownerTextInCard": false
+    },
+    {
+      "width": 600,
+      "cardFound": true,
+      "horizontalOverflow": false,
+      "buttonRows": 2,
+      "buttonHeightMin": 62,
+      "buttonHeightMax": 62,
+      "anyButtonOverflow": false,
+      "ownerTextInCard": false
+    },
+    {
+      "width": 840,
+      "cardFound": true,
+      "horizontalOverflow": false,
+      "buttonRows": 2,
+      "buttonHeightMin": 50,
+      "buttonHeightMax": 50,
+      "anyButtonOverflow": false,
+      "ownerTextInCard": false
+    },
+    {
+      "width": 1200,
+      "cardFound": true,
+      "horizontalOverflow": false,
+      "buttonRows": 1,
+      "buttonHeightMin": 44,
+      "buttonHeightMax": 44,
+      "anyButtonOverflow": false,
+      "ownerTextInCard": false
+    },
+    {
+      "width": 1920,
+      "cardFound": true,
+      "horizontalOverflow": false,
+      "buttonRows": 1,
+      "buttonHeightMin": 44,
+      "buttonHeightMax": 44,
+      "anyButtonOverflow": false,
+      "ownerTextInCard": false
+    }
+  ],
+  "console": {
+    "addonErrors": 0,
+    "externalNoise": [
+      "Google ads CORS/resource blocked",
+      "Mixpanel flags CORS/resource blocked"
+    ]
+  }
+}

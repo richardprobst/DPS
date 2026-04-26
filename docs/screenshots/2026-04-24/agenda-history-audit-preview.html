@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agenda - Historico auditavel</title>
+  <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css">
+  <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css">
+  <style>
+    body {
+      margin: 0;
+      background: #f7f2ea;
+      color: #11161c;
+      font-family: var(--dps-signature-font-body, "Manrope", Arial, sans-serif);
+    }
+
+    .dps-screenshot-fixture {
+      width: min(100%, 980px);
+      margin: 0 auto;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 600px) {
+      .dps-screenshot-fixture {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="dps-screenshot-fixture">
+    <section class="dps-agenda-dialog dps-agenda-dialog--medium dps-agenda-dialog--workflow" aria-label="Linha do tempo do atendimento">
+      <div class="dps-agenda-dialog__header">
+        <div class="dps-agenda-dialog__heading">
+          <h3 class="dps-agenda-dialog__title">Linha do tempo do atendimento</h3>
+          <p class="dps-agenda-dialog__subtitle">Alteracoes e interacoes registradas com campo, valor anterior e novo valor.</p>
+        </div>
+      </div>
+      <div class="dps-agenda-dialog__body">
+        <div class="dps-agenda-history-list">
+          <article class="dps-agenda-history-item">
+            <div class="dps-agenda-history-item__head">
+              <strong>Status alterado</strong>
+              <span>24/04/2026 08:30</span>
+            </div>
+            <div class="dps-agenda-history-item__meta">
+              <span>Administrador</span>
+              <span class="dps-agenda-history-item__source dps-agenda-history-item__source--manual">Acao manual</span>
+            </div>
+            <div class="dps-agenda-history-item__detail"><strong>Campo alterado:</strong> Status do atendimento</div>
+            <div class="dps-agenda-history-item__detail"><strong>Valor anterior:</strong> Pendente</div>
+            <div class="dps-agenda-history-item__detail"><strong>Novo valor:</strong> Finalizado</div>
+            <div class="dps-agenda-history-item__detail">Status do atendimento alterado de Pendente para Finalizado.</div>
+          </article>
+
+          <article class="dps-agenda-history-item">
+            <div class="dps-agenda-history-item__head">
+              <strong>Confirmacao alterada</strong>
+              <span>24/04/2026 08:25</span>
+            </div>
+            <div class="dps-agenda-history-item__meta">
+              <span>Administrador</span>
+              <span class="dps-agenda-history-item__source dps-agenda-history-item__source--manual">Acao manual</span>
+            </div>
+            <div class="dps-agenda-history-item__detail"><strong>Campo alterado:</strong> Confirmacao do atendimento</div>
+            <div class="dps-agenda-history-item__detail"><strong>Valor anterior:</strong> Nao enviado</div>
+            <div class="dps-agenda-history-item__detail"><strong>Novo valor:</strong> Confirmado</div>
+            <div class="dps-agenda-history-item__detail">Confirmacao alterada de Nao enviado para Confirmado.</div>
+          </article>
+
+          <article class="dps-agenda-history-item">
+            <div class="dps-agenda-history-item__head">
+              <strong>TaxiDog atualizado</strong>
+              <span>24/04/2026 08:20</span>
+            </div>
+            <div class="dps-agenda-history-item__meta">
+              <span>Sistema</span>
+              <span class="dps-agenda-history-item__source dps-agenda-history-item__source--system">Registro automatico</span>
+            </div>
+            <div class="dps-agenda-history-item__detail"><strong>Campo alterado:</strong> TaxiDog</div>
+            <div class="dps-agenda-history-item__detail"><strong>Valor anterior:</strong> Sem TaxiDog</div>
+            <div class="dps-agenda-history-item__detail"><strong>Novo valor:</strong> TaxiDog solicitado</div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

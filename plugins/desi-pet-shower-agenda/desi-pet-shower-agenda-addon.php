@@ -248,6 +248,22 @@ class DPS_Agenda_Addon {
 
     private static $instance = null;
 
+    /**
+     * Meta key para evidencias visuais vinculadas ao atendimento.
+     *
+     * @since 1.2.2
+     * @var string
+     */
+    private const PET_EVIDENCE_META_KEY = '_dps_pet_evidence';
+
+    /**
+     * Limite funcional para upload de evidencias visuais.
+     *
+     * @since 1.2.2
+     * @var int
+     */
+    private const PET_EVIDENCE_MAX_BYTES = 52428800;
+
 
 
     /**
@@ -292,6 +308,52 @@ class DPS_Agenda_Addon {
         }
 
         return (string) $fallback_version;
+
+    }
+
+
+
+    /**
+     * Retorna os MIME types permitidos para evidencias do pet.
+     *
+     * @since 1.2.2
+     * @return array<string, string>
+     */
+    private static function get_pet_evidence_allowed_mimes() {
+
+        return [
+            'jpg|jpeg|jpe' => 'image/jpeg',
+            'png'          => 'image/png',
+            'webp'         => 'image/webp',
+            'heic'         => 'image/heic',
+            'heif'         => 'image/heif',
+            'mp4|m4v'      => 'video/mp4',
+            'mov|qt'       => 'video/quicktime',
+            'webm'         => 'video/webm',
+        ];
+
+    }
+
+
+
+    /**
+     * Retorna a lista accept usada pelo input de upload.
+     *
+     * @since 1.2.2
+     * @return string[]
+     */
+    private static function get_pet_evidence_accept_types() {
+
+        return [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/heic',
+            'image/heif',
+            'video/mp4',
+            'video/quicktime',
+            'video/webm',
+        ];
 
     }
 
@@ -488,6 +550,48 @@ class DPS_Agenda_Addon {
     }
 
 
+    /**
+     * Recupera o status mais seguro para reabrir um atendimento cancelado.
+     *
+     * @param int $appt_id ID do agendamento.
+     * @return string
+     */
+    private function get_cancelled_reopen_status( $appt_id ) {
+
+        $valid_statuses = [ 'pendente', 'finalizado', 'finalizado_pago' ];
+        $history        = get_post_meta( $appt_id, '_dps_appointment_history', true );
+
+        if ( is_array( $history ) ) {
+
+            for ( $index = count( $history ) - 1; $index >= 0; $index-- ) {
+
+                $entry = isset( $history[ $index ] ) && is_array( $history[ $index ] ) ? $history[ $index ] : [];
+
+                if ( 'status_change' !== ( $entry['action'] ?? '' ) ) {
+
+                    continue;
+
+                }
+
+                $details    = isset( $entry['details'] ) && is_array( $entry['details'] ) ? $entry['details'] : [];
+                $old_status = ! empty( $details['old_status'] ) ? sanitize_key( (string) $details['old_status'] ) : '';
+                $new_status = ! empty( $details['new_status'] ) ? sanitize_key( (string) $details['new_status'] ) : '';
+
+                if ( 'cancelado' === $new_status && in_array( $old_status, $valid_statuses, true ) ) {
+
+                    return $old_status;
+
+                }
+
+            }
+
+        }
+
+        return 'pendente';
+
+    }
+
+
 
     /**
 
@@ -655,6 +759,10 @@ class DPS_Agenda_Addon {
 
         add_action( 'wp_ajax_dps_appointment_checkout', [ $this, 'appointment_checkout_ajax' ] );
 
+        add_action( 'wp_ajax_dps_pet_evidence_upload', [ $this, 'pet_evidence_upload_ajax' ] );
+
+        add_action( 'wp_ajax_dps_pet_evidence_remove', [ $this, 'pet_evidence_remove_ajax' ] );
+
 
 
         // FASE 5: Registra alterações de status no histórico
@@ -727,7 +835,7 @@ class DPS_Agenda_Addon {
      */
     public function filter_operational_checklist_steps( $steps ) {
         $defaults = [
-            'pre_bath'   => [ 'label' => __( 'Pre-banho (desembaraco / escovacao)', 'dps-agenda-addon' ), 'icon' => 'PB' ],
+            'pre_bath'   => [ 'label' => __( 'Pré-banho (desembaraço / escovação)', 'dps-agenda-addon' ), 'icon' => 'PB' ],
             'bath'       => [ 'label' => __( 'Banho', 'dps-agenda-addon' ), 'icon' => 'BA' ],
             'drying'     => [ 'label' => __( 'Secagem', 'dps-agenda-addon' ), 'icon' => 'SE' ],
             'cutting'    => [ 'label' => __( 'Tosa / Corte', 'dps-agenda-addon' ), 'icon' => 'TC' ],
@@ -763,7 +871,7 @@ class DPS_Agenda_Addon {
             'pulgas'        => [ 'label' => __( 'Pulgas', 'dps-agenda-addon' ), 'icon' => 'PU', 'severity' => 'warning' ],
             'carrapatos'    => [ 'label' => __( 'Carrapatos', 'dps-agenda-addon' ), 'icon' => 'CA', 'severity' => 'warning' ],
             'feridinhas'    => [ 'label' => __( 'Feridinhas / Lesoes', 'dps-agenda-addon' ), 'icon' => 'FE', 'severity' => 'alert' ],
-            'alergia'       => [ 'label' => __( 'Alergia / Irritacao', 'dps-agenda-addon' ), 'icon' => 'AL', 'severity' => 'alert' ],
+            'alergia'       => [ 'label' => __( 'Alergia / Irritação', 'dps-agenda-addon' ), 'icon' => 'AL', 'severity' => 'alert' ],
             'otite'         => [ 'label' => __( 'Otite / Orelha inflamada', 'dps-agenda-addon' ), 'icon' => 'OT', 'severity' => 'alert' ],
             'nos'           => [ 'label' => __( 'Nos / Pelos embolados', 'dps-agenda-addon' ), 'icon' => 'NO', 'severity' => 'info' ],
             'comportamento' => [ 'label' => __( 'Agressivo / Ansioso', 'dps-agenda-addon' ), 'icon' => 'AG', 'severity' => 'warning' ],
@@ -1943,6 +2051,8 @@ class DPS_Agenda_Addon {
 
         $checklist_css_version   = $this->get_asset_version( 'assets/css/checklist-checkin.css', '1.2.1' );
 
+        $checklist_js_version    = $this->get_asset_version( 'assets/js/checklist-checkin.js', '1.2.1' );
+
         $signature_fonts_version = $this->get_asset_version( '../desi-pet-shower-base/assets/css/dps-signature-fonts.css', '1.0.0' );
 
         $has_agenda_shortcode    = $current_post ? has_shortcode( $current_content, 'dps_agenda_page' ) : false;
@@ -2079,7 +2189,7 @@ class DPS_Agenda_Addon {
 
                 [ 'jquery', 'dps-agenda-addon' ],
 
-                '1.2.0',
+                $checklist_js_version,
 
                 true
 
@@ -2094,6 +2204,13 @@ class DPS_Agenda_Addon {
                 'nonce_checklist' => wp_create_nonce( 'dps_checklist' ),
 
                 'nonce_checkin'   => wp_create_nonce( 'dps_checkin' ),
+
+                'nonce_evidence'  => wp_create_nonce( 'dps_pet_evidence' ),
+
+                'evidence'        => [
+                    'maxSizeMb' => round( min( self::PET_EVIDENCE_MAX_BYTES, wp_max_upload_size() ) / MB_IN_BYTES, 1 ),
+                    'accept'    => implode( ',', array_values( self::get_pet_evidence_accept_types() ) ),
+                ],
 
                 'messages'        => [
 
@@ -2120,6 +2237,16 @@ class DPS_Agenda_Addon {
                     'checkin'          => __( 'Check-in', 'dps-agenda-addon' ),
 
                     'checkout'         => __( 'Check-out', 'dps-agenda-addon' ),
+
+                    'evidenceUpload'   => __( 'Adicionar foto/vídeo', 'dps-agenda-addon' ),
+
+                    'evidenceUploading'=> __( 'Enviando evidência...', 'dps-agenda-addon' ),
+
+                    'evidenceRemove'   => __( 'Remover evidência', 'dps-agenda-addon' ),
+
+                    'evidenceConfirmRemove' => __( 'Remover esta evidência do atendimento? O arquivo permanecerá preservado na Biblioteca de Mídia.', 'dps-agenda-addon' ),
+
+                    'evidenceSelectFile' => __( 'Selecione uma foto ou vídeo para anexar.', 'dps-agenda-addon' ),
 
                     'sendWhatsApp'     => __( 'Enviar relatório via WhatsApp', 'dps-agenda-addon' ),
 
@@ -2218,12 +2345,18 @@ class DPS_Agenda_Addon {
                     'action_status_change' => __( 'Status alterado', 'dps-agenda-addon' ),
 
                     'action_rescheduled'   => __( 'Reagendado', 'dps-agenda-addon' ),
+                    'action_confirmation_change' => __( 'Confirmação alterada', 'dps-agenda-addon' ),
+                    'action_taxidog_update' => __( 'TaxiDog atualizado', 'dps-agenda-addon' ),
+                    'action_taxidog_requested' => __( 'TaxiDog solicitado', 'dps-agenda-addon' ),
+                    'action_payment_resend' => __( 'Cobrança reenviada', 'dps-agenda-addon' ),
                     'action_checklist_update' => __( 'Checklist atualizado', 'dps-agenda-addon' ),
                     'action_checklist_rework' => __( 'Retrabalho registrado', 'dps-agenda-addon' ),
                     'action_checkin_created'  => __( 'Check-in registrado', 'dps-agenda-addon' ),
                     'action_checkin_updated'  => __( 'Check-in atualizado', 'dps-agenda-addon' ),
                     'action_checkout_created' => __( 'Check-out registrado', 'dps-agenda-addon' ),
                     'action_checkout_updated' => __( 'Check-out atualizado', 'dps-agenda-addon' ),
+                    'action_pet_evidence_added' => __( 'Evidência do pet adicionada', 'dps-agenda-addon' ),
+                    'action_pet_evidence_removed' => __( 'Evidência do pet removida', 'dps-agenda-addon' ),
 
                     'close'           => __( 'Fechar', 'dps-agenda-addon' ),
 
@@ -2418,7 +2551,7 @@ class DPS_Agenda_Addon {
         ob_start();
 
         echo '<section class="dps-agenda-day-panel dps-agenda-day-panel--operational">';
-        $day_count_text = sprintf( _n( '%d atendimento no periodo', '%d atendimentos no periodo', $day_total, 'dps-agenda-addon' ), $day_total );
+        $day_count_text = sprintf( _n( '%d atendimento no período', '%d atendimentos no período', $day_total, 'dps-agenda-addon' ), $day_total );
 
         echo '<div class="dps-agenda-day-panel__header">';
         echo '<div>';
@@ -2432,7 +2565,7 @@ class DPS_Agenda_Addon {
         echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
         echo '<th>' . esc_html__( 'Pet e tutor', 'dps-agenda-addon' ) . '</th>';
         echo '<th>' . esc_html__( 'Serviços', 'dps-agenda-addon' ) . '</th>';
-        echo '<th>' . esc_html__( 'Etapa', 'dps-agenda-addon' ) . '</th>';
+        echo '<th>' . esc_html__( 'Status', 'dps-agenda-addon' ) . '</th>';
         echo '<th>' . esc_html__( 'Financeiro', 'dps-agenda-addon' ) . '</th>';
         echo '<th>' . esc_html__( 'Operação', 'dps-agenda-addon' ) . '</th>';
         echo '<th>' . esc_html__( 'Logística', 'dps-agenda-addon' ) . '</th>';
@@ -2562,7 +2695,7 @@ class DPS_Agenda_Addon {
 
         }
 
-        // Base URL sem parametros volateis; a navegacao preserva o modo operacional publicado.
+        // Base URL sem parâmetros voláteis; a navegação preserva o modo operacional publicado.
 
         $base_url = DPS_URL_Builder::safe_get_permalink();
 
@@ -2592,9 +2725,9 @@ class DPS_Agenda_Addon {
 
         echo '<h3>' . esc_html__( 'Agenda de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
 
-        echo '<p class="dps-current-date dps-current-date--header" title="' . esc_attr__( 'Periodo em foco', 'dps-agenda-addon' ) . '">';
+        echo '<p class="dps-current-date dps-current-date--header" title="' . esc_attr__( 'Período em foco', 'dps-agenda-addon' ) . '">';
 
-        echo '<span class="dps-current-date__label">' . esc_html__( 'Periodo ativo', 'dps-agenda-addon' ) . '</span>';
+        echo '<span class="dps-current-date__label">' . esc_html__( 'Período ativo', 'dps-agenda-addon' ) . '</span>';
 
         echo '<strong>' . esc_html( $scope_label ) . '</strong>';
 
@@ -2640,13 +2773,13 @@ class DPS_Agenda_Addon {
 
         $cal_active = ( $view === 'calendar' && ! $show_all ) ? ' dps-view-btn--active' : '';
 
-        $view_buttons[] = '<a href="' . esc_url( add_query_arg( $cal_args, $base_url ) ) . '" class="dps-view-btn' . $cal_active . '" title="' . esc_attr__( 'Ver calendario mensal', 'dps-agenda-addon' ) . '"' . ( $cal_active ? ' aria-current="page"' : '' ) . '>' . esc_html__( 'Mes', 'dps-agenda-addon' ) . '</a>';
+        $view_buttons[] = '<a href="' . esc_url( add_query_arg( $cal_args, $base_url ) ) . '" class="dps-view-btn' . $cal_active . '" title="' . esc_attr__( 'Ver calendário mensal', 'dps-agenda-addon' ) . '"' . ( $cal_active ? ' aria-current="page"' : '' ) . '>' . esc_html__( 'Mês', 'dps-agenda-addon' ) . '</a>';
 
 
 
         if ( $show_all ) {
 
-            $view_buttons[] = '<a href="' . esc_url( add_query_arg( $focused_view_args, $base_url ) ) . '" class="dps-view-btn dps-view-btn--all dps-view-btn--active" title="' . esc_attr__( 'Voltar para o periodo atual', 'dps-agenda-addon' ) . '" aria-current="page">' . esc_html__( 'Completa', 'dps-agenda-addon' ) . '</a>';
+            $view_buttons[] = '<a href="' . esc_url( add_query_arg( $focused_view_args, $base_url ) ) . '" class="dps-view-btn dps-view-btn--all dps-view-btn--active" title="' . esc_attr__( 'Voltar para o período atual', 'dps-agenda-addon' ) . '" aria-current="page">' . esc_html__( 'Completa', 'dps-agenda-addon' ) . '</a>';
 
         } else {
 
@@ -2660,7 +2793,7 @@ class DPS_Agenda_Addon {
 
         echo '<div class="dps-view-buttons dps-view-buttons--date-nav">';
 
-        echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--prev" title="' . esc_attr( $is_week_view ? __( 'Ver periodo anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '" aria-label="' . esc_attr( $is_week_view ? __( 'Ver periodo anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '">';
+        echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--prev" title="' . esc_attr( $is_week_view ? __( 'Ver período anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '" aria-label="' . esc_attr( $is_week_view ? __( 'Ver período anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '">';
 
         echo '&larr;';
 
@@ -2672,7 +2805,7 @@ class DPS_Agenda_Addon {
 
         echo '</a>';
 
-        echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--next" title="' . esc_attr( $is_week_view ? __( 'Ver proximo periodo', 'dps-agenda-addon' ) : __( 'Ver proximo dia', 'dps-agenda-addon' ) ) . '" aria-label="' . esc_attr( $is_week_view ? __( 'Ver proximo periodo', 'dps-agenda-addon' ) : __( 'Ver proximo dia', 'dps-agenda-addon' ) ) . '">';
+        echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--next" title="' . esc_attr( $is_week_view ? __( 'Ver próximo período', 'dps-agenda-addon' ) : __( 'Ver próximo dia', 'dps-agenda-addon' ) ) . '" aria-label="' . esc_attr( $is_week_view ? __( 'Ver próximo período', 'dps-agenda-addon' ) : __( 'Ver próximo dia', 'dps-agenda-addon' ) ) . '">';
 
         echo '&rarr;';
 
@@ -3013,7 +3146,7 @@ class DPS_Agenda_Addon {
         echo '<div class="dps-agenda-operational-shell__header">';
         echo '<div class="dps-agenda-operational-shell__header-copy">';
         echo '<h3 class="dps-agenda-operational-shell__title">' . esc_html__( 'Fila operacional', 'dps-agenda-addon' ) . '</h3>';
-        echo '<p class="dps-agenda-operational-shell__subtitle">' . esc_html__( 'Uma fila unica por atendimento, com acao primaria definida pela etapa atual.', 'dps-agenda-addon' ) . '</p>';
+        echo '<p class="dps-agenda-operational-shell__subtitle">' . esc_html__( 'Uma fila única por atendimento, com ação primária definida pela etapa atual.', 'dps-agenda-addon' ) . '</p>';
         echo '</div>';
         echo '</div>';
 
@@ -3059,7 +3192,7 @@ class DPS_Agenda_Addon {
         } else {
             echo '<div class="dps-agenda-empty" role="status">';
             echo '<strong>' . esc_html__( 'Nenhum atendimento neste recorte.', 'dps-agenda-addon' ) . '</strong>';
-            echo '<p>' . esc_html__( 'Ajuste o periodo ou abra a agenda completa para continuar a operacao.', 'dps-agenda-addon' ) . '</p>';
+            echo '<p>' . esc_html__( 'Ajuste o período ou abra a agenda completa para continuar a operação.', 'dps-agenda-addon' ) . '</p>';
             echo '</div>';
         }
 
@@ -3279,6 +3412,14 @@ class DPS_Agenda_Addon {
 
         // Atualiza meta de status. Remove entradas anteriores para garantir que não haja valores duplicados.
 
+        $old_status = get_post_meta( $id, 'appointment_status', true );
+
+        if ( ! $old_status ) {
+
+            $old_status = 'pendente';
+
+        }
+
         delete_post_meta( $id, 'appointment_status' );
 
         add_post_meta( $id, 'appointment_status', $status, true );
@@ -3286,6 +3427,19 @@ class DPS_Agenda_Addon {
         $new_version = $current_version + 1;
 
         update_post_meta( $id, '_dps_appointment_version', $new_version );
+
+        do_action(
+            'dps_appointment_status_changed',
+            $id,
+            $old_status,
+            $status,
+            [
+                'source'  => 'manual',
+                'user_id' => get_current_user_id(),
+                'context' => 'agenda_status_ajax',
+                'version' => $new_version,
+            ]
+        );
 
 
 
@@ -3310,6 +3464,8 @@ class DPS_Agenda_Addon {
                 [
 
                     'appointment_id' => $id,
+
+                    'old_status'     => $old_status,
 
                     'new_status'     => $status,
 
@@ -4374,6 +4530,20 @@ class DPS_Agenda_Addon {
 
         update_post_meta( $appt_id, '_dps_appointment_version', $new_version );
 
+        do_action(
+            'dps_appointment_status_changed',
+            $appt_id,
+            $old_status,
+            $new_status,
+            [
+                'source'  => 'manual',
+                'user_id' => get_current_user_id(),
+                'context' => 'agenda_quick_action',
+                'action'  => $action,
+                'version' => $new_version,
+            ]
+        );
+
 
 
         // Log de auditoria
@@ -4527,6 +4697,14 @@ class DPS_Agenda_Addon {
 
         // Atualiza status de confirmação usando helper
 
+        $old_confirmation_status = get_post_meta( $appt_id, 'appointment_confirmation_status', true );
+
+        if ( ! $old_confirmation_status ) {
+
+            $old_confirmation_status = 'not_sent';
+
+        }
+
         $success = $this->set_confirmation_status( $appt_id, $confirmation_status, get_current_user_id() );
 
 
@@ -4534,6 +4712,30 @@ class DPS_Agenda_Addon {
         if ( ! $success ) {
 
             wp_send_json_error( [ 'message' => __( 'Erro ao atualizar status de confirmação.', 'dps-agenda-addon' ) ] );
+
+        }
+
+        if ( $old_confirmation_status !== $confirmation_status ) {
+
+            $old_label = $this->get_confirmation_status_label( $old_confirmation_status );
+            $new_label = $this->get_confirmation_status_label( $confirmation_status );
+
+            $this->add_to_appointment_history(
+                $appt_id,
+                'confirmation_change',
+                [
+                    'field'     => __( 'Confirmação do atendimento', 'dps-agenda-addon' ),
+                    'old_value' => $old_label,
+                    'new_value' => $new_label,
+                    'message'   => sprintf(
+                        __( 'Confirmação alterada de %1$s para %2$s.', 'dps-agenda-addon' ),
+                        $old_label,
+                        $new_label
+                    ),
+                ],
+                'manual',
+                get_current_user_id()
+            );
 
         }
 
@@ -4560,6 +4762,8 @@ class DPS_Agenda_Addon {
                 [
 
                     'appointment_id'      => $appt_id,
+
+                    'old_confirmation_status' => $old_confirmation_status,
 
                     'confirmation_status' => $confirmation_status,
 
@@ -4614,10 +4818,53 @@ class DPS_Agenda_Addon {
     }
 
     /**
+     * Retorna o rótulo legível do status de confirmação.
+     *
+     * @param string $status Status interno.
+     * @return string
+     */
+    private function get_confirmation_status_label( $status ) {
+
+        $labels = [
+            'not_sent'  => __( 'Nao enviado', 'dps-agenda-addon' ),
+            'sent'      => __( 'Enviado', 'dps-agenda-addon' ),
+            'confirmed' => __( 'Confirmado', 'dps-agenda-addon' ),
+            'denied'    => __( 'Negado', 'dps-agenda-addon' ),
+            'no_answer' => __( 'Nao confirmado', 'dps-agenda-addon' ),
+        ];
+
+        return isset( $labels[ $status ] ) ? $labels[ $status ] : $status;
+
+    }
+
+    /**
+     * Retorna o rotulo legivel do status de TaxiDog.
+     *
+     * @param string $status Status interno.
+     * @return string
+     */
+    private function get_taxidog_status_label( $status ) {
+
+        if ( class_exists( 'DPS_Agenda_TaxiDog_Helper' ) && method_exists( 'DPS_Agenda_TaxiDog_Helper', 'get_taxidog_badge_config' ) ) {
+            $config = DPS_Agenda_TaxiDog_Helper::get_taxidog_badge_config( $status );
+            if ( ! empty( $config['label'] ) ) {
+                return $config['label'];
+            }
+        }
+
+        if ( 'none' === $status || '' === $status ) {
+            return __( 'Sem TaxiDog', 'dps-agenda-addon' );
+        }
+
+        return $status;
+
+    }
+
+    /**
      * Persiste a confirmação fora da camada de renderização.
      *
      * @param int    $appointment_id ID do agendamento.
-     * @param string $status Status já normalizado.
+     * @param string $status Status ja normalizado.
      * @param int    $user_id ID do usuário que executou a ação.
      * @return bool
      */
@@ -4706,6 +4953,8 @@ class DPS_Agenda_Addon {
 
 
 
+        $old_status = DPS_Agenda_TaxiDog_Helper::get_taxidog_status( $appt_id );
+
         // Atualiza status usando o helper
 
         $success = DPS_Agenda_TaxiDog_Helper::update_taxidog_status( $appt_id, $new_status );
@@ -4715,6 +4964,30 @@ class DPS_Agenda_Addon {
         if ( ! $success ) {
 
             wp_send_json_error( [ 'message' => __( 'Status de TaxiDog inválido.', 'dps-agenda-addon' ) ] );
+
+        }
+
+        if ( $old_status !== $new_status ) {
+
+            $old_label = $this->get_taxidog_status_label( $old_status );
+            $new_label = $this->get_taxidog_status_label( $new_status );
+
+            $this->add_to_appointment_history(
+                $appt_id,
+                'taxidog_update',
+                [
+                    'field'     => __( 'TaxiDog', 'dps-agenda-addon' ),
+                    'old_value' => $old_label,
+                    'new_value' => $new_label,
+                    'message'   => sprintf(
+                        __( 'TaxiDog alterado de %1$s para %2$s.', 'dps-agenda-addon' ),
+                        $old_label,
+                        $new_label
+                    ),
+                ],
+                'manual',
+                get_current_user_id()
+            );
 
         }
 
@@ -4807,11 +5080,46 @@ class DPS_Agenda_Addon {
 
 
 
+        $old_status = DPS_Agenda_TaxiDog_Helper::get_taxidog_status( $appt_id );
+
         // Habilita TaxiDog no agendamento
 
         update_post_meta( $appt_id, 'appointment_taxidog', 1 );
 
+        update_post_meta( $appt_id, 'appointment_taxidog_status', 'requested' );
+
         update_post_meta( $appt_id, '_dps_taxidog_status', 'requested' );
+
+        $new_label = $this->get_taxidog_status_label( 'requested' );
+
+        $this->add_to_appointment_history(
+            $appt_id,
+            'taxidog_requested',
+            [
+                'field'     => __( 'TaxiDog', 'dps-agenda-addon' ),
+                'old_value' => $this->get_taxidog_status_label( $old_status ),
+                'new_value' => $new_label,
+                'message'   => sprintf(
+                    __( 'TaxiDog solicitado: %s.', 'dps-agenda-addon' ),
+                    $new_label
+                ),
+            ],
+            'manual',
+            get_current_user_id()
+        );
+
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::info(
+                sprintf( 'Agendamento #%d: TaxiDog solicitado por usuário #%d', $appt_id, get_current_user_id() ),
+                [
+                    'appointment_id'     => $appt_id,
+                    'old_taxidog_status' => $old_status,
+                    'new_taxidog_status' => 'requested',
+                    'user_id'            => get_current_user_id(),
+                ],
+                'agenda_taxidog'
+            );
+        }
 
 
 
@@ -4970,6 +5278,9 @@ class DPS_Agenda_Addon {
 
         // Tenta reenviar via Payment Add-on se disponível
 
+        $old_payment_status = get_post_meta( $appt_id, '_dps_payment_link_status', true );
+        $old_resent_at      = get_post_meta( $appt_id, '_dps_payment_resent_at', true );
+
         $success = false;
 
         $message = '';
@@ -5001,6 +5312,41 @@ class DPS_Agenda_Addon {
 
 
         if ( $success ) {
+
+            $new_payment_status = get_post_meta( $appt_id, '_dps_payment_link_status', true );
+
+            if ( ! $new_payment_status ) {
+
+                $new_payment_status = __( 'Reenvio solicitado', 'dps-agenda-addon' );
+
+            }
+
+            $this->add_to_appointment_history(
+                $appt_id,
+                'payment_resend',
+                [
+                    'field'     => __( 'Cobrança', 'dps-agenda-addon' ),
+                    'old_value' => $old_payment_status ? $old_payment_status : ( $old_resent_at ? $old_resent_at : __( 'Sem reenvio registrado', 'dps-agenda-addon' ) ),
+                    'new_value' => $new_payment_status,
+                    'message'   => $message ?: __( 'Link de pagamento reenviado.', 'dps-agenda-addon' ),
+                ],
+                'manual',
+                get_current_user_id()
+            );
+
+            if ( class_exists( 'DPS_Logger' ) ) {
+                DPS_Logger::info(
+                    sprintf( 'Agendamento #%d: Link de pagamento reenviado por usuário #%d', $appt_id, get_current_user_id() ),
+                    [
+                        'appointment_id'     => $appt_id,
+                        'old_payment_status' => $old_payment_status,
+                        'new_payment_status' => $new_payment_status,
+                        'old_resent_at'      => $old_resent_at,
+                        'user_id'            => get_current_user_id(),
+                    ],
+                    'agenda'
+                );
+            }
 
             // Renderiza HTML da linha atualizada
 
@@ -7045,6 +7391,14 @@ class DPS_Agenda_Addon {
 
         $old_time = get_post_meta( $appt_id, 'appointment_time', true );
 
+        $old_status = get_post_meta( $appt_id, 'appointment_status', true );
+
+        if ( ! $old_status ) {
+
+            $old_status = 'pendente';
+
+        }
+
 
 
         // Atualizar data e hora
@@ -7059,7 +7413,33 @@ class DPS_Agenda_Addon {
 
         $version = intval( get_post_meta( $appt_id, '_dps_appointment_version', true ) );
 
-        update_post_meta( $appt_id, '_dps_appointment_version', $version + 1 );
+        $new_version = $version + 1;
+
+        update_post_meta( $appt_id, '_dps_appointment_version', $new_version );
+
+        $reopened_status = '';
+
+        if ( 'cancelado' === $old_status ) {
+
+            $reopened_status = $this->get_cancelled_reopen_status( $appt_id );
+
+            delete_post_meta( $appt_id, 'appointment_status' );
+            add_post_meta( $appt_id, 'appointment_status', $reopened_status, true );
+
+            do_action(
+                'dps_appointment_status_changed',
+                $appt_id,
+                $old_status,
+                $reopened_status,
+                [
+                    'source'  => 'manual',
+                    'user_id' => get_current_user_id(),
+                    'context' => 'agenda_reschedule_reopen',
+                    'version' => $new_version,
+                ]
+            );
+
+        }
 
 
 
@@ -7087,11 +7467,13 @@ class DPS_Agenda_Addon {
 
         wp_send_json_success( [
 
-            'message' => __( 'Agendamento reagendado com sucesso.', 'dps-agenda-addon' ),
+            'message' => $reopened_status ? __( 'Agendamento reagendado e reaberto com sucesso.', 'dps-agenda-addon' ) : __( 'Agendamento reagendado com sucesso.', 'dps-agenda-addon' ),
 
             'new_date' => date_i18n( 'd/m/Y', strtotime( $new_date ) ),
 
             'new_time' => $new_time,
+
+            'status'   => $reopened_status,
 
         ] );
 
@@ -7525,7 +7907,27 @@ class DPS_Agenda_Addon {
 
      */
 
-    public function log_status_change( $appt_id, $old_status, $new_status, $user_id ) {
+    public function log_status_change( $appt_id, $old_status, $new_status, $context = [] ) {
+
+        $old_status = $old_status ? sanitize_key( (string) $old_status ) : 'pendente';
+        $new_status = $new_status ? sanitize_key( (string) $new_status ) : '';
+
+        if ( ! $appt_id || ! $new_status || $old_status === $new_status ) {
+            return;
+        }
+
+        $user_id = get_current_user_id();
+        $source  = 'manual';
+
+        if ( is_array( $context ) ) {
+            $user_id = ! empty( $context['user_id'] ) ? absint( $context['user_id'] ) : $user_id;
+            $source  = ! empty( $context['source'] ) ? sanitize_key( (string) $context['source'] ) : $source;
+        } elseif ( is_numeric( $context ) ) {
+            $user_id = absint( $context );
+        }
+
+        $old_label = self::get_status_label( $old_status );
+        $new_label = self::get_status_label( $new_status );
 
         $this->add_to_appointment_history( $appt_id, 'status_change', [
 
@@ -7533,7 +7935,19 @@ class DPS_Agenda_Addon {
 
             'new_status' => $new_status,
 
-        ] );
+            'field'      => __( 'Status do atendimento', 'dps-agenda-addon' ),
+
+            'old_value'  => $old_label,
+
+            'new_value'  => $new_label,
+
+            'message'    => sprintf(
+                __( 'Status do atendimento alterado de %1$s para %2$s.', 'dps-agenda-addon' ),
+                $old_label,
+                $new_label
+            ),
+
+        ], $source, $user_id );
 
     }
 
@@ -7557,7 +7971,15 @@ class DPS_Agenda_Addon {
 
      */
 
-    private function add_to_appointment_history( $appt_id, $action, $details = [], $source = '' ) {
+    private function add_to_appointment_history( $appt_id, $action, $details = [], $source = '', $user_id = 0 ) {
+
+        $action = sanitize_key( (string) $action );
+
+        if ( ! $appt_id || ! $action ) {
+
+            return;
+
+        }
 
         $history = get_post_meta( $appt_id, '_dps_appointment_history', true );
 
@@ -7577,13 +7999,21 @@ class DPS_Agenda_Addon {
 
         }
 
+        $history_user_id = absint( $user_id );
+
+        if ( $history_user_id <= 0 ) {
+
+            $history_user_id = get_current_user_id();
+
+        }
+
         $history[] = [
 
             'action'  => $action,
 
             'date'    => current_time( 'Y-m-d H:i:s' ),
 
-            'user_id' => get_current_user_id(),
+            'user_id' => $history_user_id,
 
             'details' => $details,
 
@@ -7604,6 +8034,26 @@ class DPS_Agenda_Addon {
 
 
         update_post_meta( $appt_id, '_dps_appointment_history', $history );
+
+        if ( class_exists( 'DPS_Logger' ) ) {
+
+            DPS_Logger::info(
+                sprintf(
+                    'Agendamento #%d: Histórico registrado (%s)',
+                    $appt_id,
+                    $action
+                ),
+                [
+                    'appointment_id' => $appt_id,
+                    'history_action' => $action,
+                    'source'         => $source,
+                    'user_id'        => $history_user_id,
+                    'details'        => $details,
+                ],
+                'agenda_history'
+            );
+
+        }
 
     }
 
@@ -8371,6 +8821,476 @@ class DPS_Agenda_Addon {
 
 
     /**
+     * AJAX: adiciona foto ou video de evidencia ao atendimento.
+     *
+     * @since 1.2.2
+     * @return void
+     */
+    public function pet_evidence_upload_ajax() {
+
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) || ! current_user_can( 'upload_files' ) ) {
+
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+
+        }
+
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_pet_evidence' ) ) {
+
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+
+        }
+
+        $appointment_id = isset( $_POST['appointment_id'] ) ? absint( $_POST['appointment_id'] ) : 0;
+        $stage          = isset( $_POST['stage'] ) ? sanitize_key( wp_unslash( $_POST['stage'] ) ) : '';
+        $safety_slug    = isset( $_POST['safety_slug'] ) ? sanitize_key( wp_unslash( $_POST['safety_slug'] ) ) : '';
+        $caption        = isset( $_POST['caption'] ) ? sanitize_textarea_field( wp_unslash( $_POST['caption'] ) ) : '';
+
+        $validation = self::validate_pet_evidence_context( $appointment_id, $stage, $safety_slug );
+        if ( is_wp_error( $validation ) ) {
+
+            wp_send_json_error( [ 'message' => $validation->get_error_message() ] );
+
+        }
+
+        if ( empty( $_FILES['evidence_file'] ) || ! is_array( $_FILES['evidence_file'] ) ) {
+
+            wp_send_json_error( [ 'message' => __( 'Selecione uma foto ou vídeo para anexar.', 'dps-agenda-addon' ) ] );
+
+        }
+
+        $file = $_FILES['evidence_file'];
+        if ( isset( $file['name'] ) && is_array( $file['name'] ) ) {
+
+            wp_send_json_error( [ 'message' => __( 'Envie apenas uma evidência por vez.', 'dps-agenda-addon' ) ] );
+
+        }
+
+        if ( ! empty( $file['error'] ) ) {
+
+            wp_send_json_error( [ 'message' => self::get_pet_evidence_upload_error_message( (int) $file['error'] ) ] );
+
+        }
+
+        $max_bytes = min( self::PET_EVIDENCE_MAX_BYTES, wp_max_upload_size() );
+        $file_size = isset( $file['size'] ) ? (int) $file['size'] : 0;
+        if ( $file_size <= 0 || $file_size > $max_bytes ) {
+
+            wp_send_json_error(
+                [
+                    'message' => sprintf(
+                        __( 'Arquivo inválido ou acima do limite de %s MB.', 'dps-agenda-addon' ),
+                        round( $max_bytes / MB_IN_BYTES, 1 )
+                    ),
+                ]
+            );
+
+        }
+
+        $file_name = isset( $file['name'] ) ? sanitize_file_name( wp_unslash( $file['name'] ) ) : '';
+        $tmp_name  = isset( $file['tmp_name'] ) ? $file['tmp_name'] : '';
+        if ( ! $file_name || ! $tmp_name || ! is_uploaded_file( $tmp_name ) ) {
+
+            wp_send_json_error( [ 'message' => __( 'Arquivo de evidência inválido.', 'dps-agenda-addon' ) ] );
+
+        }
+
+        $_FILES['evidence_file']['name'] = $file_name;
+        $checked_filetype                = wp_check_filetype_and_ext( $tmp_name, $file_name, self::get_pet_evidence_allowed_mimes() );
+        if ( empty( $checked_filetype['type'] ) || empty( $checked_filetype['ext'] ) ) {
+
+            wp_send_json_error( [ 'message' => __( 'Use apenas imagens JPG, PNG, WEBP, HEIC ou vídeos MP4, MOV e WEBM.', 'dps-agenda-addon' ) ] );
+
+        }
+
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/media.php';
+        require_once ABSPATH . 'wp-admin/includes/image.php';
+
+        $safety_label  = self::get_pet_evidence_safety_label( $safety_slug );
+        $stage_label   = self::get_pet_evidence_stage_label( $stage );
+        $attachment_id = media_handle_upload(
+            'evidence_file',
+            $appointment_id,
+            [
+                'post_title'   => sanitize_text_field( sprintf( 'Evidência %s - %s', $stage_label, $safety_label ) ),
+                'post_excerpt' => $caption,
+            ],
+            [
+                'test_form' => false,
+                'mimes'     => self::get_pet_evidence_allowed_mimes(),
+            ]
+        );
+
+        if ( is_wp_error( $attachment_id ) ) {
+
+            wp_send_json_error( [ 'message' => $attachment_id->get_error_message() ] );
+
+        }
+
+        $record  = self::build_pet_evidence_record( $attachment_id, $stage, $safety_slug, $caption );
+        $records = self::get_pet_evidence_records( $appointment_id, true );
+        $records[] = $record;
+
+        update_post_meta( $appointment_id, self::PET_EVIDENCE_META_KEY, array_values( $records ) );
+        update_post_meta(
+            $attachment_id,
+            '_dps_pet_evidence_context',
+            [
+                'appointment_id' => $appointment_id,
+                'stage'          => $stage,
+                'stage_label'    => $stage_label,
+                'safety_slug'    => $safety_slug,
+                'safety_label'   => $safety_label,
+                'created_at'     => $record['created_at'],
+                'created_by'     => $record['created_by'],
+            ]
+        );
+
+        $message = sprintf(
+            __( 'Evidência anexada em %1$s: %2$s.', 'dps-agenda-addon' ),
+            $stage_label,
+            $safety_label
+        );
+
+        $this->add_to_appointment_history(
+            $appointment_id,
+            'pet_evidence_added',
+            [
+                'message'       => $message,
+                'field'         => __( 'Evidência visual do pet', 'dps-agenda-addon' ),
+                'old_value'     => '-',
+                'new_value'     => sprintf( '%s - %s', $stage_label, $safety_label ),
+                'attachment_id' => $attachment_id,
+                'evidence_id'   => $record['id'],
+                'file'          => $record['filename'],
+                'stage'         => $stage,
+                'safety_slug'   => $safety_slug,
+            ],
+            'manual'
+        );
+
+        $response            = $this->build_checkin_response( $appointment_id );
+        $response['message'] = $message;
+
+        wp_send_json_success( $response );
+
+    }
+
+
+
+    /**
+     * AJAX: remove uma evidencia visual da lista ativa do atendimento.
+     *
+     * @since 1.2.2
+     * @return void
+     */
+    public function pet_evidence_remove_ajax() {
+
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+
+        }
+
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_pet_evidence' ) ) {
+
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+
+        }
+
+        $appointment_id = isset( $_POST['appointment_id'] ) ? absint( $_POST['appointment_id'] ) : 0;
+        $evidence_id    = isset( $_POST['evidence_id'] ) ? sanitize_text_field( wp_unslash( $_POST['evidence_id'] ) ) : '';
+
+        $appointment = get_post( $appointment_id );
+        if ( ! $appointment instanceof WP_Post || 'dps_agendamento' !== $appointment->post_type || ! $evidence_id ) {
+
+            wp_send_json_error( [ 'message' => __( 'Evidência não encontrada.', 'dps-agenda-addon' ) ] );
+
+        }
+
+        $records       = self::get_pet_evidence_records( $appointment_id, true );
+        $removed       = null;
+        $updated_items = [];
+
+        foreach ( $records as $record ) {
+            if ( $record['id'] === $evidence_id && empty( $record['removed_at'] ) ) {
+                $record['removed_at'] = current_time( 'mysql' );
+                $record['removed_by'] = get_current_user_id();
+                $removed              = $record;
+            }
+
+            $updated_items[] = $record;
+        }
+
+        if ( ! $removed ) {
+
+            wp_send_json_error( [ 'message' => __( 'Evidência não encontrada.', 'dps-agenda-addon' ) ] );
+
+        }
+
+        update_post_meta( $appointment_id, self::PET_EVIDENCE_META_KEY, array_values( $updated_items ) );
+        if ( ! empty( $removed['attachment_id'] ) ) {
+            update_post_meta( (int) $removed['attachment_id'], '_dps_pet_evidence_removed_at', $removed['removed_at'] );
+        }
+
+        $stage_label  = self::get_pet_evidence_stage_label( $removed['stage'] );
+        $safety_label = self::get_pet_evidence_safety_label( $removed['safety_slug'] );
+        $message      = sprintf(
+            __( 'Evidência removida de %1$s: %2$s.', 'dps-agenda-addon' ),
+            $stage_label,
+            $safety_label
+        );
+
+        $this->add_to_appointment_history(
+            $appointment_id,
+            'pet_evidence_removed',
+            [
+                'message'       => $message,
+                'field'         => __( 'Evidência visual do pet', 'dps-agenda-addon' ),
+                'old_value'     => sprintf( '%s - %s', $stage_label, $safety_label ),
+                'new_value'     => __( 'Removida da lista ativa', 'dps-agenda-addon' ),
+                'attachment_id' => (int) $removed['attachment_id'],
+                'evidence_id'   => $removed['id'],
+                'file'          => $removed['filename'],
+                'stage'         => $removed['stage'],
+                'safety_slug'   => $removed['safety_slug'],
+            ],
+            'manual'
+        );
+
+        $response            = $this->build_checkin_response( $appointment_id );
+        $response['message'] = $message;
+
+        wp_send_json_success( $response );
+
+    }
+
+
+
+    /**
+     * Valida o contexto operacional da evidencia.
+     *
+     * @since 1.2.2
+     * @param int    $appointment_id ID do atendimento.
+     * @param string $stage          Etapa operacional.
+     * @param string $safety_slug    Item de seguranca.
+     * @return true|WP_Error
+     */
+    private static function validate_pet_evidence_context( $appointment_id, $stage, $safety_slug ) {
+
+        $appointment = get_post( $appointment_id );
+        if ( ! $appointment instanceof WP_Post || 'dps_agendamento' !== $appointment->post_type ) {
+            return new WP_Error( 'dps_invalid_appointment', __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) );
+        }
+
+        if ( ! in_array( $stage, [ 'checkin', 'checkout' ], true ) ) {
+            return new WP_Error( 'dps_invalid_stage', __( 'Etapa operacional inválida.', 'dps-agenda-addon' ) );
+        }
+
+        if ( 'checkout' === $stage && ! DPS_Agenda_Checkin_Service::has_checkin( $appointment_id ) ) {
+            return new WP_Error( 'dps_checkout_locked', __( 'O check-out será liberado após o registro do check-in.', 'dps-agenda-addon' ) );
+        }
+
+        $safety_items = DPS_Agenda_Checkin_Service::get_safety_items();
+        if ( ! isset( $safety_items[ $safety_slug ] ) ) {
+            return new WP_Error( 'dps_invalid_safety_item', __( 'Item de segurança não encontrado.', 'dps-agenda-addon' ) );
+        }
+
+        return true;
+
+    }
+
+
+
+    /**
+     * Retorna registros de evidencias do atendimento.
+     *
+     * @since 1.2.2
+     * @param int  $appointment_id  ID do atendimento.
+     * @param bool $include_removed Incluir registros removidos da lista ativa.
+     * @return array<int, array<string, mixed>>
+     */
+    private static function get_pet_evidence_records( $appointment_id, $include_removed = false ) {
+
+        $records = get_post_meta( absint( $appointment_id ), self::PET_EVIDENCE_META_KEY, true );
+        if ( ! is_array( $records ) ) {
+            return [];
+        }
+
+        $normalized = [];
+        foreach ( $records as $record ) {
+            if ( ! is_array( $record ) || empty( $record['id'] ) ) {
+                continue;
+            }
+
+            $item = [
+                'id'            => sanitize_text_field( (string) $record['id'] ),
+                'attachment_id' => isset( $record['attachment_id'] ) ? absint( $record['attachment_id'] ) : 0,
+                'stage'         => isset( $record['stage'] ) ? sanitize_key( (string) $record['stage'] ) : '',
+                'stage_label'   => isset( $record['stage_label'] ) ? sanitize_text_field( (string) $record['stage_label'] ) : '',
+                'safety_slug'   => isset( $record['safety_slug'] ) ? sanitize_key( (string) $record['safety_slug'] ) : '',
+                'safety_label'  => isset( $record['safety_label'] ) ? sanitize_text_field( (string) $record['safety_label'] ) : '',
+                'caption'       => isset( $record['caption'] ) ? sanitize_textarea_field( (string) $record['caption'] ) : '',
+                'mime'          => isset( $record['mime'] ) ? sanitize_text_field( (string) $record['mime'] ) : '',
+                'type'          => isset( $record['type'] ) ? sanitize_key( (string) $record['type'] ) : '',
+                'url'           => isset( $record['url'] ) ? esc_url_raw( (string) $record['url'] ) : '',
+                'thumb'         => isset( $record['thumb'] ) ? esc_url_raw( (string) $record['thumb'] ) : '',
+                'filename'      => isset( $record['filename'] ) ? sanitize_file_name( (string) $record['filename'] ) : '',
+                'created_at'    => isset( $record['created_at'] ) ? sanitize_text_field( (string) $record['created_at'] ) : '',
+                'created_by'    => isset( $record['created_by'] ) ? absint( $record['created_by'] ) : 0,
+                'removed_at'    => isset( $record['removed_at'] ) ? sanitize_text_field( (string) $record['removed_at'] ) : '',
+                'removed_by'    => isset( $record['removed_by'] ) ? absint( $record['removed_by'] ) : 0,
+            ];
+
+            if ( ! $include_removed && ! empty( $item['removed_at'] ) ) {
+                continue;
+            }
+
+            $normalized[] = $item;
+        }
+
+        return $normalized;
+
+    }
+
+
+
+    /**
+     * Retorna evidencias filtradas por etapa e item.
+     *
+     * @since 1.2.2
+     * @param int    $appointment_id ID do atendimento.
+     * @param string $stage          Etapa operacional.
+     * @param string $safety_slug    Item de seguranca.
+     * @return array<int, array<string, mixed>>
+     */
+    private static function get_pet_evidence_for_item( $appointment_id, $stage, $safety_slug ) {
+
+        $stage       = sanitize_key( (string) $stage );
+        $safety_slug = sanitize_key( (string) $safety_slug );
+
+        return array_values(
+            array_filter(
+                self::get_pet_evidence_records( $appointment_id ),
+                static function( $record ) use ( $stage, $safety_slug ) {
+                    return $stage === $record['stage'] && $safety_slug === $record['safety_slug'];
+                }
+            )
+        );
+
+    }
+
+
+
+    /**
+     * Monta o registro estruturado da evidencia.
+     *
+     * @since 1.2.2
+     * @param int    $attachment_id ID do anexo.
+     * @param string $stage         Etapa operacional.
+     * @param string $safety_slug   Item de seguranca.
+     * @param string $caption       Descricao operacional.
+     * @return array<string, mixed>
+     */
+    private static function build_pet_evidence_record( $attachment_id, $stage, $safety_slug, $caption ) {
+
+        $attachment_id = absint( $attachment_id );
+        $mime          = (string) get_post_mime_type( $attachment_id );
+        $type          = str_starts_with( $mime, 'video/' ) ? 'video' : 'image';
+        $url           = wp_get_attachment_url( $attachment_id );
+        $thumb         = wp_get_attachment_image_url( $attachment_id, 'medium' );
+        $file_path     = get_attached_file( $attachment_id );
+
+        return [
+            'id'            => wp_generate_uuid4(),
+            'attachment_id' => $attachment_id,
+            'stage'         => sanitize_key( $stage ),
+            'stage_label'   => self::get_pet_evidence_stage_label( $stage ),
+            'safety_slug'   => sanitize_key( $safety_slug ),
+            'safety_label'  => self::get_pet_evidence_safety_label( $safety_slug ),
+            'caption'       => sanitize_textarea_field( $caption ),
+            'mime'          => $mime,
+            'type'          => $type,
+            'url'           => $url ? esc_url_raw( $url ) : '',
+            'thumb'         => $thumb ? esc_url_raw( $thumb ) : '',
+            'filename'      => $file_path ? sanitize_file_name( wp_basename( $file_path ) ) : sanitize_file_name( get_the_title( $attachment_id ) ),
+            'created_at'    => current_time( 'mysql' ),
+            'created_by'    => get_current_user_id(),
+            'removed_at'    => '',
+            'removed_by'    => 0,
+        ];
+
+    }
+
+
+
+    /**
+     * Retorna mensagem amigavel de erro de upload.
+     *
+     * @since 1.2.2
+     * @param int $error_code Codigo PHP de upload.
+     * @return string
+     */
+    private static function get_pet_evidence_upload_error_message( $error_code ) {
+
+        $messages = [
+            UPLOAD_ERR_INI_SIZE   => __( 'Arquivo acima do limite permitido pelo servidor.', 'dps-agenda-addon' ),
+            UPLOAD_ERR_FORM_SIZE  => __( 'Arquivo acima do limite permitido pelo formulário.', 'dps-agenda-addon' ),
+            UPLOAD_ERR_PARTIAL    => __( 'Upload incompleto. Tente novamente.', 'dps-agenda-addon' ),
+            UPLOAD_ERR_NO_FILE    => __( 'Selecione uma foto ou vídeo para anexar.', 'dps-agenda-addon' ),
+            UPLOAD_ERR_NO_TMP_DIR => __( 'Diretório temporário de upload indisponível.', 'dps-agenda-addon' ),
+            UPLOAD_ERR_CANT_WRITE => __( 'Não foi possível gravar o arquivo enviado.', 'dps-agenda-addon' ),
+            UPLOAD_ERR_EXTENSION  => __( 'Upload bloqueado por uma extensão do servidor.', 'dps-agenda-addon' ),
+        ];
+
+        return isset( $messages[ $error_code ] )
+            ? $messages[ $error_code ]
+            : __( 'Não foi possível anexar a evidência.', 'dps-agenda-addon' );
+
+    }
+
+
+
+    /**
+     * Label humano da etapa operacional.
+     *
+     * @since 1.2.2
+     * @param string $stage Etapa.
+     * @return string
+     */
+    private static function get_pet_evidence_stage_label( $stage ) {
+
+        return 'checkout' === sanitize_key( $stage )
+            ? __( 'Check-out', 'dps-agenda-addon' )
+            : __( 'Check-in', 'dps-agenda-addon' );
+
+    }
+
+
+
+    /**
+     * Label humano do item de seguranca.
+     *
+     * @since 1.2.2
+     * @param string $safety_slug Slug do item.
+     * @return string
+     */
+    private static function get_pet_evidence_safety_label( $safety_slug ) {
+
+        $safety_items = DPS_Agenda_Checkin_Service::get_safety_items();
+        $safety_slug  = sanitize_key( $safety_slug );
+
+        return isset( $safety_items[ $safety_slug ]['label'] )
+            ? $safety_items[ $safety_slug ]['label']
+            : $safety_slug;
+
+    }
+
+
+
+    /**
 
      * Monta a resposta padrão do painel de check-in/check-out.
 
@@ -8789,13 +9709,14 @@ class DPS_Agenda_Addon {
      */
     private static function render_checkin_panel_signature( $appointment_id ) {
 
-        $checkin      = DPS_Agenda_Checkin_Service::get_checkin( $appointment_id );
-        $checkout     = DPS_Agenda_Checkin_Service::get_checkout( $appointment_id );
-        $duration     = DPS_Agenda_Checkin_Service::get_duration_minutes( $appointment_id );
-        $safety_items = DPS_Agenda_Checkin_Service::get_safety_items();
-        $summary      = DPS_Agenda_Checkin_Service::get_safety_summary( $appointment_id );
-        $instance     = self::get_instance();
-        $wa_url       = $checkin ? $instance->build_checkin_whatsapp_url( $appointment_id ) : '';
+        $checkin        = DPS_Agenda_Checkin_Service::get_checkin( $appointment_id );
+        $checkout       = DPS_Agenda_Checkin_Service::get_checkout( $appointment_id );
+        $duration       = DPS_Agenda_Checkin_Service::get_duration_minutes( $appointment_id );
+        $evidence_count = count( self::get_pet_evidence_records( $appointment_id ) );
+        $safety_items   = DPS_Agenda_Checkin_Service::get_safety_items();
+        $summary        = DPS_Agenda_Checkin_Service::get_safety_summary( $appointment_id );
+        $instance       = self::get_instance();
+        $wa_url         = $checkin ? $instance->build_checkin_whatsapp_url( $appointment_id ) : '';
 
         ob_start();
         ?>
@@ -8824,6 +9745,12 @@ class DPS_Agenda_Addon {
                         <?php esc_html_e( 'Aguardando check-in', 'dps-agenda-addon' ); ?>
                     </span>
                 <?php endif; ?>
+
+                <?php if ( $evidence_count > 0 ) : ?>
+                    <span class="dps-checkin-status-badge dps-checkin-status-badge--evidence">
+                        <?php esc_html_e( 'Evidências', 'dps-agenda-addon' ); ?>: <?php echo esc_html( $evidence_count ); ?>
+                    </span>
+                <?php endif; ?>
             </div>
 
             <?php if ( ! empty( $summary ) ) : ?>
@@ -8839,6 +9766,7 @@ class DPS_Agenda_Addon {
             <div class="dps-checkin-stage-list">
                 <?php
                 echo self::render_checkin_stage_signature(
+                    $appointment_id,
                     'checkin',
                     $checkin,
                     $safety_items,
@@ -8852,6 +9780,7 @@ class DPS_Agenda_Addon {
                 );
 
                 echo self::render_checkin_stage_signature(
+                    $appointment_id,
                     'checkout',
                     $checkout,
                     $safety_items,
@@ -8883,16 +9812,91 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Renderiza uma etapa editável de check-in ou check-out.
+     * Renderiza o painel de evidencias de um item operacional.
      *
-     * @param string $stage_key Identificador da etapa.
-     * @param array|false $stage_data Dados salvos da etapa.
-     * @param array $safety_items Itens de segurança disponíveis.
-     * @param array $config Configuração visual da etapa.
+     * @since 1.2.2
+     * @param int    $appointment_id ID do agendamento.
+     * @param string $stage_key      Etapa operacional.
+     * @param string $safety_slug    Item de seguranca.
+     * @param bool   $disabled       Se a etapa esta bloqueada.
      * @return string
      */
-    private static function render_checkin_stage_signature( $stage_key, $stage_data, $safety_items, $config ) {
+    private static function render_pet_evidence_panel( $appointment_id, $stage_key, $safety_slug, $disabled = false ) {
 
+        $appointment_id = absint( $appointment_id );
+        $stage_key      = sanitize_key( $stage_key );
+        $safety_slug    = sanitize_key( $safety_slug );
+        $items          = self::get_pet_evidence_for_item( $appointment_id, $stage_key, $safety_slug );
+        $accept         = implode( ',', array_values( self::get_pet_evidence_accept_types() ) );
+
+        ob_start();
+        ?>
+        <div class="dps-pet-evidence" data-stage="<?php echo esc_attr( $stage_key ); ?>" data-safety-slug="<?php echo esc_attr( $safety_slug ); ?>">
+            <div class="dps-pet-evidence__head">
+                <span class="dps-pet-evidence__title"><?php esc_html_e( 'Evidências do pet', 'dps-agenda-addon' ); ?></span>
+                <span class="dps-pet-evidence__count"><?php echo esc_html( count( $items ) ); ?></span>
+            </div>
+
+            <div class="dps-pet-evidence__upload">
+                <textarea class="dps-pet-evidence__caption" rows="2" placeholder="<?php esc_attr_e( 'Contexto da foto/vídeo: local, intensidade, orientação recebida...', 'dps-agenda-addon' ); ?>" <?php disabled( $disabled ); ?>></textarea>
+                <div class="dps-pet-evidence__actions">
+                    <button type="button" class="dps-pet-evidence__trigger" <?php disabled( $disabled ); ?>>
+                        <?php esc_html_e( 'Adicionar foto/vídeo', 'dps-agenda-addon' ); ?>
+                    </button>
+                    <span class="dps-pet-evidence__hint"><?php esc_html_e( 'JPG, PNG, WEBP, HEIC, MP4, MOV ou WEBM.', 'dps-agenda-addon' ); ?></span>
+                    <input type="file" class="dps-pet-evidence__input" accept="<?php echo esc_attr( $accept ); ?>" <?php disabled( $disabled ); ?>>
+                </div>
+            </div>
+
+            <?php if ( ! empty( $items ) ) : ?>
+                <div class="dps-pet-evidence__grid">
+                    <?php foreach ( $items as $evidence ) : ?>
+                        <article class="dps-pet-evidence-card" data-evidence-id="<?php echo esc_attr( $evidence['id'] ); ?>">
+                            <a class="dps-pet-evidence-card__media" href="<?php echo esc_url( $evidence['url'] ); ?>" target="_blank" rel="noopener noreferrer">
+                                <?php if ( 'image' === $evidence['type'] && ! empty( $evidence['thumb'] ) ) : ?>
+                                    <img src="<?php echo esc_url( $evidence['thumb'] ); ?>" alt="<?php echo esc_attr( $evidence['safety_label'] ); ?>">
+                                <?php else : ?>
+                                    <span class="dps-pet-evidence-card__video"><?php esc_html_e( 'VIDEO', 'dps-agenda-addon' ); ?></span>
+                                <?php endif; ?>
+                            </a>
+                            <div class="dps-pet-evidence-card__body">
+                                <strong><?php echo esc_html( $evidence['filename'] ); ?></strong>
+                                <?php if ( ! empty( $evidence['caption'] ) ) : ?>
+                                    <p><?php echo esc_html( $evidence['caption'] ); ?></p>
+                                <?php endif; ?>
+                                <span><?php echo esc_html( $evidence['created_at'] ? date_i18n( 'd/m H:i', strtotime( $evidence['created_at'] ) ) : '' ); ?></span>
+                            </div>
+                            <?php if ( ! $disabled ) : ?>
+                                <button type="button" class="dps-pet-evidence-card__remove" data-evidence-id="<?php echo esc_attr( $evidence['id'] ); ?>">
+                                    <?php esc_html_e( 'Remover', 'dps-agenda-addon' ); ?>
+                                </button>
+                            <?php endif; ?>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
+            <?php else : ?>
+                <p class="dps-pet-evidence__empty"><?php esc_html_e( 'Nenhuma evidência anexada para este item.', 'dps-agenda-addon' ); ?></p>
+            <?php endif; ?>
+        </div>
+        <?php
+
+        return ob_get_clean();
+
+    }
+
+    /**
+     * Renderiza uma etapa editavel de check-in ou check-out.
+     *
+     * @param int         $appointment_id ID do agendamento.
+     * @param string      $stage_key      Identificador da etapa.
+     * @param array|false $stage_data     Dados salvos da etapa.
+     * @param array       $safety_items   Itens de seguranca disponiveis.
+     * @param array       $config         Configuracao visual da etapa.
+     * @return string
+     */
+    private static function render_checkin_stage_signature( $appointment_id, $stage_key, $stage_data, $safety_items, $config ) {
+
+        $appointment_id = absint( $appointment_id );
         $stage_data = is_array( $stage_data ) ? $stage_data : [];
         $disabled   = ! empty( $config['disabled'] );
         $stage_time = ! empty( $stage_data['time'] ) ? mysql2date( 'H:i', $stage_data['time'] ) : '';
@@ -8930,6 +9934,7 @@ class DPS_Agenda_Addon {
                                 <?php echo esc_html( $item['label'] ); ?>
                             </label>
                             <textarea class="dps-safety-item-notes" rows="2" placeholder="<?php esc_attr_e( 'Detalhes...', 'dps-agenda-addon' ); ?>" <?php disabled( $disabled ); ?>><?php echo esc_textarea( $item_notes ); ?></textarea>
+                            <?php echo self::render_pet_evidence_panel( $appointment_id, $stage_key, $slug, $disabled ); ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -8969,11 +9974,12 @@ class DPS_Agenda_Addon {
 
         }
 
-        $progress     = DPS_Agenda_Checklist_Service::get_progress( $appointment_id );
-        $rework_count = DPS_Agenda_Checklist_Service::count_reworks( $appointment_id );
-        $checkin      = DPS_Agenda_Checkin_Service::get_checkin( $appointment_id );
-        $checkout     = DPS_Agenda_Checkin_Service::get_checkout( $appointment_id );
-        $duration     = DPS_Agenda_Checkin_Service::get_duration_minutes( $appointment_id );
+        $progress       = DPS_Agenda_Checklist_Service::get_progress( $appointment_id );
+        $rework_count   = DPS_Agenda_Checklist_Service::count_reworks( $appointment_id );
+        $checkin        = DPS_Agenda_Checkin_Service::get_checkin( $appointment_id );
+        $checkout       = DPS_Agenda_Checkin_Service::get_checkout( $appointment_id );
+        $duration       = DPS_Agenda_Checkin_Service::get_duration_minutes( $appointment_id );
+        $evidence_count = count( self::get_pet_evidence_records( $appointment_id ) );
 
         ob_start();
         ?>
@@ -9009,6 +10015,13 @@ class DPS_Agenda_Addon {
                     <span class="dps-operational-metric dps-operational-metric--summary">
                         <span class="dps-operational-metric__label"><?php esc_html_e( 'Duração', 'dps-agenda-addon' ); ?></span>
                         <strong class="dps-operational-metric__value"><?php printf( esc_html__( '%d min', 'dps-agenda-addon' ), $duration ); ?></strong>
+                    </span>
+                <?php endif; ?>
+
+                <?php if ( $evidence_count > 0 ) : ?>
+                    <span class="dps-operational-metric dps-operational-metric--evidence">
+                        <span class="dps-operational-metric__label"><?php esc_html_e( 'Evidências', 'dps-agenda-addon' ); ?></span>
+                        <strong class="dps-operational-metric__value"><?php echo esc_html( $evidence_count ); ?></strong>
                     </span>
                 <?php endif; ?>
             </div>
@@ -9199,7 +10212,7 @@ class DPS_Agenda_Addon {
 
                 <div class="dps-history-ops-row">
 
-                    <span class="dps-history-ops-label"><?php esc_html_e( 'Duracao', 'dps-agenda-addon' ); ?></span>
+                    <span class="dps-history-ops-label"><?php esc_html_e( 'Duração', 'dps-agenda-addon' ); ?></span>
 
                     <span class="dps-history-ops-value"><?php printf( esc_html__( '%d min', 'dps-agenda-addon' ), $duration ); ?></span>
 

@@ -1,0 +1,29 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - navigation [ref=e7]:
+          - link "Desi Pet Shower" [ref=e9] [cursor=pointer]:
+            - /url: https://desi.pet/
+          - list [ref=e11]
+          - generic
+        - generic [ref=e29]:
+          - list [ref=e31]
+          - generic
+          - text: 
+    - main [ref=e37]:
+      - main [ref=e38]:
+        - generic [ref=e44]:
+          - generic [ref=e46]
+          - generic [ref=e53]
+          - generic [ref=e65]
+    - contentinfo [ref=e145]:
+      - generic [ref=e149]:
+        - text: Copyright 2026 ©
+        - strong [ref=e150]: Desi.Pet By PROst
+      - button "Go to top":
+        - generic: 
+  - text: 
+  - generic [ref=e151]: desktop

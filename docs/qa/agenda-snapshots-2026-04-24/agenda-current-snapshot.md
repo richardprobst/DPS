@@ -1,0 +1,18 @@
+- generic [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]
+    - main [ref=e37]:
+      - main [ref=e38]
+    - contentinfo [ref=e145]:
+      - generic [ref=e149]
+      - button "Go to top"
+  - text: 
+  - generic [ref=e151]: desktop
+  - dialog "Fluxo operacional do atendimento" [ref=e152]:
+    - document [ref=e153]:
+      - generic [ref=e154]
+      - generic [ref=e160]
+      - button "Fechar" [ref=e338] [cursor=pointer]

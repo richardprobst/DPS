@@ -1,0 +1,294 @@
+{
+  "timestamp": "2026-04-25T01:33:12.126Z",
+  "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=week&codex_bust=integral-20260424-final1",
+  "appointment": {
+    "id": "1667",
+    "hasRow": true,
+    "stage": "Pago",
+    "payment": "Pago",
+    "checklistProgress": "100",
+    "hasTaxidog": true
+  },
+  "visualCopy": {
+    "hasCorrectPeriod": true,
+    "hasCorrectMonth": true,
+    "hasCorrectOperationalIntro": true,
+    "hasLegacyPlainPeriod": false,
+    "hasLegacyPlainMonth": false,
+    "hasLegacyPlainAction": false
+  },
+  "layout": {
+    "clientWidth": 1521,
+    "scrollWidth": 1521,
+    "hasHorizontalOverflow": false
+  },
+  "filters": {
+    "late": {
+      "selected": true,
+      "rowVisible": false,
+      "emptyStateVisible": true
+    },
+    "taxidog": {
+      "selected": true,
+      "rowVisible": true
+    },
+    "all": {
+      "selected": true,
+      "rowVisible": true
+    }
+  },
+  "workflow": {
+    "initialButton": "Pago",
+    "initialDataset": {
+      "workflowStep": "finalize",
+      "versionPresent": true
+    },
+    "finalizeModal": {
+      "title": "Finalizar atendimento",
+      "subtitle": "A decisão ajusta o status e libera a próxima ação visível na Agenda.",
+      "buttons": [
+        "×",
+        "Finalizado",
+        "Finalizado e pago",
+        "Cancelado",
+        "Fechar"
+      ],
+      "hasChecklist": false,
+      "hasCheckinCheckout": false,
+      "hasFieldChanged": false,
+      "hasOldNew": false,
+      "textProbe": "Finalizar atendimentoA decisão ajusta o status e libera a próxima ação visível na Agenda.×Selecione como este atendimento deve sair da fila operacional.FinalizadoFinalizado e pagoCanceladoFechar"
+    },
+    "cancelSecondaryModal": {
+      "title": "Cancelar ou reagendar",
+      "subtitle": "Cancelar encerra o atendimento. Reagendar mantém o fluxo ativo em outra data.",
+      "buttons": [
+        "×",
+        "Cancelar",
+        "Reagendar",
+        "Fechar"
+      ],
+      "hasChecklist": false,
+      "hasCheckinCheckout": false,
+      "hasFieldChanged": false,
+      "hasOldNew": false,
+      "textProbe": "Cancelar ou reagendarCancelar encerra o atendimento. Reagendar mantém o fluxo ativo em outra data.×Escolha se este atendimento deve ser cancelado agora ou se a próxima ação é reagendar.CancelarReagendarFechar"
+    },
+    "cancelledRecoveryModal": {
+      "title": "Atendimento cancelado",
+      "subtitle": "Reabrir corrige um cancelamento acidental. Reagendar mantém a decisão registrada até a nova data ser salva.",
+      "buttons": [
+        "×",
+        "Reabrir atendimento",
+        "Reagendar",
+        "Fechar"
+      ],
+      "hasChecklist": false,
+      "hasCheckinCheckout": false,
+      "hasFieldChanged": false,
+      "hasOldNew": false,
+      "textProbe": "Atendimento canceladoReabrir corrige um cancelamento acidental. Reagendar mantém a decisão registrada até a nova data ser salva.×Este atendimento está cancelado. Escolha se deseja corrigir o cancelamento ou reagendar par"
+    }
+  },
+  "more": {
+    "hub": {
+      "title": "Mais ações",
+      "subtitle": "Hub de interações extras do atendimento.",
+      "buttons": [
+        "×",
+        "Serviços e observações1 serviço",
+        "Checklist OperacionalProgresso 100%",
+        "Check-in / Check-outCheck-in 15:54 | Check-out 15:57",
+        "Logística e TaxiDogTaxiDog solicitado",
+        "Reagendar20/04/2026 23:30",
+        "Histórico e logsLinha do tempo auditável",
+        "Fechar"
+      ],
+      "hasChecklist": true,
+      "hasCheckinCheckout": true,
+      "hasFieldChanged": false,
+      "hasOldNew": false,
+      "textProbe": "Mais açõesHub de interações extras do atendimento.×QA Smoke Pet1 serviço | Pago | TaxiDog solicitadoServiços e observações1 serviçoChecklist OperacionalProgresso 100%Check-in / Check-outCheck-in 15:54 | Check-out 15:57Lo"
+    },
+    "hubActionKeys": [
+      "services",
+      "checklist",
+      "checkinout",
+      "logistics",
+      "reschedule",
+      "history"
+    ]
+  },
+  "modals": {
+    "services": {
+      "title": "Serviços do atendimento",
+      "subtitle": "Mesmo shell operacional da Agenda, com serviços, tempo e observações do atendimento.",
+      "buttons": [
+        "×",
+        "Fechar"
+      ],
+      "hasChecklist": false,
+      "hasCheckinCheckout": false,
+      "hasFieldChanged": false,
+      "hasOldNew": false,
+      "textProbe": "Serviços do atendimentoMesmo shell operacional da Agenda, com serviços, tempo e observações do atendimento.×AtendimentoQA Smoke PetPequeno • Sem raça definida • 8 kgServiços2Tempo estimado1h 30minOrdem de execuçãoServiço"
+    },
+    "operationChecklist": {
+      "title": "Fluxo operacional do atendimento",
+      "subtitle": "Checklist, check-in e check-out centralizados em um único modal.",
+      "buttons": [
+        "×",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Salvar edição do check-in",
+        "Salvar edição do check-out",
+        "Fechar"
+      ],
+      "hasChecklist": true,
+      "hasCheckinCheckout": true,
+      "hasFieldChanged": false,
+      "hasOldNew": false,
+      "textProbe": "Fluxo operacional do atendimentoChecklist, check-in e check-out centralizados em um único modal.× Checklist 100% Check-in 15:54 Check-out 15:57 Duração 2 min Checklist Operacional 100% PB Pré-banho (desembaraço / escovaç"
+    },
+    "checkinout": {
+      "title": "Fluxo operacional do atendimento",
+      "subtitle": "Checklist, check-in e check-out centralizados em um único modal.",
+      "buttons": [
+        "×",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Salvar edição do check-in",
+        "Salvar edição do check-out",
+        "Fechar"
+      ],
+      "hasChecklist": true,
+      "hasCheckinCheckout": true,
+      "hasFieldChanged": false,
+      "hasOldNew": false,
+      "textProbe": "Fluxo operacional do atendimentoChecklist, check-in e check-out centralizados em um único modal.× Checklist 100% Check-in 15:54 Check-out 15:57 Duração 2 min Checklist Operacional 100% PB Pré-banho (desembaraço / escovaç"
+    },
+    "reschedule": {
+      "title": "Reagendar atendimento",
+      "subtitle": "Atualize data e horário sem sair da lista.",
+      "buttons": [
+        "×",
+        "Cancelar",
+        "Salvar"
+      ],
+      "hasChecklist": false,
+      "hasCheckinCheckout": false,
+      "hasFieldChanged": false,
+      "hasOldNew": false,
+      "textProbe": "Reagendar atendimentoAtualize data e horário sem sair da lista.×Nova dataNovo horárioCancelarSalvar"
+    },
+    "rescheduleFields": {
+      "hasDate": true,
+      "hasTime": true,
+      "hasSave": true
+    },
+    "logistics": {
+      "title": "Logística e TaxiDog",
+      "subtitle": "QA Smoke Pet",
+      "buttons": [
+        "×",
+        "Motorista a caminho",
+        "Cancelar TaxiDog",
+        "Fechar"
+      ],
+      "hasChecklist": false,
+      "hasCheckinCheckout": false,
+      "hasFieldChanged": false,
+      "hasOldNew": false,
+      "textProbe": "Logística e TaxiDogQA Smoke Pet×Status TaxiDogTaxiDog solicitadoEndereçoSem endereço cadastradoSem mapa ou rota cadastrados para este atendimento.Motorista a caminhoCancelar TaxiDogFechar"
+    },
+    "logisticsHasTaxidogActions": true,
+    "taxidogConfirm": {
+      "title": "Atualizar TaxiDog",
+      "subtitle": "Motorista a caminho",
+      "buttons": [
+        "×",
+        "Cancelar",
+        "Confirmar"
+      ],
+      "hasChecklist": false,
+      "hasCheckinCheckout": false,
+      "hasFieldChanged": false,
+      "hasOldNew": false,
+      "textProbe": "Atualizar TaxiDogMotorista a caminho×Confirmar alteração de TaxiDog para este atendimento?CancelarConfirmar"
+    },
+    "history": {
+      "title": "Linha do tempo do atendimento",
+      "subtitle": "",
+      "buttons": [
+        "×",
+        "Fechar histórico"
+      ],
+      "hasChecklist": false,
+      "hasCheckinCheckout": false,
+      "hasFieldChanged": true,
+      "hasOldNew": true,
+      "textProbe": "Linha do tempo do atendimento×Status alterado24/04/2026 18:34Richard ProbstAção manualCampo alterado: Status do atendimentoValor anterior: FinalizadoNovo valor: Finalizado e pagoStatus do atendimento alterado de Finaliza"
+    },
+    "historyItemCount": 8
+  },
+  "mockedFinish": {
+    "calls": [
+      {
+        "action": "dps_update_status",
+        "status": "finalizado",
+        "hasNonce": true,
+        "hasId": true
+      }
+    ],
+    "operationModal": {
+      "title": "Fluxo operacional do atendimento",
+      "subtitle": "Checklist, check-in e check-out centralizados em um único modal.",
+      "buttons": [
+        "×",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Desfazer",
+        "Refazer",
+        "Salvar edição do check-in",
+        "Salvar edição do check-out",
+        "Fechar"
+      ],
+      "hasChecklist": true,
+      "hasCheckinCheckout": true,
+      "hasFieldChanged": false,
+      "hasOldNew": false,
+      "textProbe": "Fluxo operacional do atendimentoChecklist, check-in e check-out centralizados em um único modal.× Checklist 100% Check-in 15:54 Check-out 15:57 Duração 2 min Checklist Operacional 100% PB Pré-banho (desembaraço / escovaç"
+    }
+  },
+  "notes": [
+    "Ações finais de cancelamento, reagendamento, TaxiDog, cobrança e status real não foram confirmadas nesta rodada automatizada."
+  ]
+}

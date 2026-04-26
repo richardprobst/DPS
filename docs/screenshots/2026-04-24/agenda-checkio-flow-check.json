@@ -1,0 +1,50 @@
+{
+  "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=week&codex_bust=checkio-label-20260424-233056",
+  "viewport": 1200,
+  "appointmentId": "1667",
+  "mainState": {
+    "checkin": "Check-in 15:54",
+    "checkout": "Check-out 15:57",
+    "checkioLabel": "Editar check-in/out",
+    "statusLabel": "Pago",
+    "actionsText": "Editar check-in/outPagoMais"
+  },
+  "choiceDialog": {
+    "title": "Check-in / Check-out",
+    "choices": [
+      {
+        "text": "Editar check-in - Ja feito: Check-in 15:54",
+        "disabled": false
+      },
+      {
+        "text": "Editar check-out - Ja feito: Check-out 15:57",
+        "disabled": false
+      }
+    ]
+  },
+  "checkinDialog": {
+    "title": "Check-in",
+    "panelTitle": "Check-in",
+    "checklistVisible": false,
+    "checkinVisible": true,
+    "checkoutVisible": false
+  },
+  "checkoutDialog": {
+    "title": "Check-out",
+    "panelTitle": "Check-out",
+    "checklistVisible": false,
+    "checkinVisible": false,
+    "checkoutVisible": true
+  },
+  "checklistDialog": {
+    "title": "Checklist Operacional",
+    "checklistVisible": true,
+    "checkinPanelVisible": false,
+    "checkinVisible": false,
+    "checkoutVisible": false
+  },
+  "notes": [
+    "Nenhum botao de salvar check-in, check-out ou checklist foi acionado durante esta validacao.",
+    "As alteracoes persistentes continuam passando pelos endpoints existentes, que registram historico e logs."
+  ]
+}

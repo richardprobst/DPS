@@ -1,0 +1,127 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - navigation [ref=e7]:
+          - link "Desi Pet Shower" [ref=e9] [cursor=pointer]:
+            - /url: https://desi.pet/
+          - list [ref=e11]:
+            - listitem [ref=e12]:
+              - link "HOME" [ref=e13] [cursor=pointer]:
+                - /url: https://desi.pet/
+            - listitem [ref=e14]:
+              - link "AGENDA" [ref=e15] [cursor=pointer]:
+                - /url: https://desi.pet/agenda-de-atendimentos/
+            - listitem [ref=e16]:
+              - link "AGENDAMENTO" [ref=e17] [cursor=pointer]:
+                - /url: https://desi.pet/agendamento/
+            - listitem [ref=e18]:
+              - link "CADASTRO" [ref=e19] [cursor=pointer]:
+                - /url: https://desi.pet/cadastro-de-clientes-e-pets/
+            - listitem [ref=e20]:
+              - link "ADMINISTRATIVO" [ref=e21] [cursor=pointer]:
+                - /url: https://desi.pet/administrativo/
+            - listitem [ref=e22]:
+              - link "DESI PET SHOWER" [ref=e23] [cursor=pointer]:
+                - /url: "#"
+                - text: DESI PET SHOWER
+                - generic [ref=e24]: 
+            - listitem [ref=e25]:
+              - link "PORTAL DO CLIENTE" [ref=e26] [cursor=pointer]:
+                - /url: https://desi.pet/portal-do-cliente/
+          - generic:
+            - list
+        - generic [ref=e29]:
+          - list [ref=e31]:
+            - listitem [ref=e32]:
+              - link "ADMIN" [ref=e33] [cursor=pointer]:
+                - /url: https://desi.pet/wp-admin
+          - generic:
+            - list
+          - text: 
+    - main [ref=e37]:
+      - main [ref=e38]:
+        - generic [ref=e44]:
+          - generic [ref=e46]:
+            - heading "Agenda de Atendimentos" [level=3] [ref=e47]
+            - paragraph [ref=e48]:
+              - generic [ref=e49]: Período ativo
+              - strong [ref=e50]: Semana de 20/04 a 26/04
+          - generic [ref=e53]:
+            - generic [ref=e54]: "Ver:"
+            - generic [ref=e55]:
+              - link "Dia" [ref=e56] [cursor=pointer]:
+                - /url: https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=day
+              - link "Semana" [ref=e57] [cursor=pointer]:
+                - /url: https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=week
+              - link "Mês" [ref=e58] [cursor=pointer]:
+                - /url: https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=calendar
+              - link "Completa" [ref=e59] [cursor=pointer]:
+                - /url: https://desi.pet/agenda-de-atendimentos/?show_all=1
+            - generic [ref=e60]:
+              - link "Ver período anterior" [ref=e61] [cursor=pointer]:
+                - /url: https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-17&view=week
+                - text: ←
+              - link "Ver agendamentos de hoje" [ref=e62] [cursor=pointer]:
+                - /url: https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=week
+                - text: Hoje
+              - link "Ver próximo período" [ref=e63] [cursor=pointer]:
+                - /url: https://desi.pet/agenda-de-atendimentos/?dps_date=2026-05-01&view=week
+                - text: →
+          - generic [ref=e65]:
+            - generic [ref=e67]:
+              - heading "Fila operacional" [level=3] [ref=e68]
+              - paragraph [ref=e69]: Uma fila única por atendimento, com ação primária definida pela etapa atual.
+            - generic "Filtros da fila operacional" [ref=e70]:
+              - group "Filtrar fila operacional" [ref=e71]:
+                - button "Todos" [pressed] [ref=e72] [cursor=pointer]
+                - button "Atrasados" [ref=e73] [cursor=pointer]
+                - button "TaxiDog" [ref=e74] [cursor=pointer]
+            - generic [ref=e75]:
+              - generic [ref=e77]:
+                - generic [ref=e79]:
+                  - heading "Segunda-feira, 20/04" [level=4] [ref=e80]
+                  - paragraph [ref=e81]: 1 atendimento no período
+                - generic "Atendimentos em cards operacionais" [ref=e82]:
+                  - article [ref=e83]:
+                    - generic [ref=e84]
+                    - generic [ref=e89]
+                    - generic [ref=e96]
+              - complementary [ref=e99]:
+                - generic [ref=e100]:
+                  - generic [ref=e101]: Atendimento selecionado
+                  - heading "QA Smoke Pet" [level=3] [ref=e102]
+                  - paragraph [ref=e103]: QA Smoke Cliente
+                - generic [ref=e104]:
+                  - generic [ref=e105]:
+                    - generic [ref=e106]: Etapa
+                    - strong [ref=e107]: Pago
+                  - generic [ref=e108]:
+                    - generic [ref=e109]: Resumo
+                    - generic [ref=e110]
+                  - generic [ref=e120]:
+                    - generic [ref=e121]: Checklist Operacional
+                    - generic [ref=e123]: 100%
+                    - generic [ref=e127]: Sem retrabalho
+                  - generic [ref=e128]:
+                    - generic [ref=e129]: Check-in / Check-out
+                    - generic [ref=e130]
+                  - generic [ref=e133]:
+                    - generic [ref=e134]: Ações extras
+                    - paragraph [ref=e135]: "Mais: serviços, checklist operacional, check-in/check-out, logística, reagendar e histórico."
+                  - generic [ref=e136]:
+                    - generic [ref=e137]: Observações
+                    - paragraph [ref=e138]: Agendamento temporário para smoke suite de QA.
+                  - generic [ref=e139]:
+                    - generic [ref=e140]: Últimos logs
+                    - list [ref=e141]
+    - contentinfo [ref=e145]:
+      - generic [ref=e149]:
+        - text: Copyright 2026 ©
+        - strong [ref=e150]: Desi.Pet By PROst
+      - button "Go to top":
+        - generic: 
+  - text: 
+  - generic [ref=e151]: desktop

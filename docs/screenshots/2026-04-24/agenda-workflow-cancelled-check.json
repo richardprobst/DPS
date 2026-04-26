@@ -1,0 +1,106 @@
+{
+  "fixture": "agenda-workflow-cancelled-preview.html",
+  "generatedAt": "2026-04-24T21:18:19.151Z",
+  "results": [
+    {
+      "width": 375,
+      "screenshot": "agenda-workflow-cancelled-375.png",
+      "consoleMessages": [],
+      "viewport": 375,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "overflowX": false,
+      "dialogWidth": 351,
+      "dialogHeight": 413,
+      "gridTemplateColumns": "309px",
+      "actionText": [
+        "Reabrir atendimento",
+        "Reagendar"
+      ],
+      "hasReopenAction": true,
+      "hasRescheduleAction": true,
+      "primaryBackground": "rgb(31, 140, 87)",
+      "footerSecondaryBackground": "rgb(255, 250, 242)"
+    },
+    {
+      "width": 600,
+      "screenshot": "agenda-workflow-cancelled-600.png",
+      "consoleMessages": [],
+      "viewport": 600,
+      "scrollWidth": 600,
+      "clientWidth": 600,
+      "overflowX": false,
+      "dialogWidth": 562,
+      "dialogHeight": 376,
+      "gridTemplateColumns": "520px",
+      "actionText": [
+        "Reabrir atendimento",
+        "Reagendar"
+      ],
+      "hasReopenAction": true,
+      "hasRescheduleAction": true,
+      "primaryBackground": "rgb(31, 140, 87)",
+      "footerSecondaryBackground": "rgb(255, 250, 242)"
+    },
+    {
+      "width": 840,
+      "screenshot": "agenda-workflow-cancelled-840.png",
+      "consoleMessages": [],
+      "viewport": 840,
+      "scrollWidth": 840,
+      "clientWidth": 840,
+      "overflowX": false,
+      "dialogWidth": 562,
+      "dialogHeight": 324,
+      "gridTemplateColumns": "256px 256px",
+      "actionText": [
+        "Reabrir atendimento",
+        "Reagendar"
+      ],
+      "hasReopenAction": true,
+      "hasRescheduleAction": true,
+      "primaryBackground": "rgb(31, 140, 87)",
+      "footerSecondaryBackground": "rgb(255, 250, 242)"
+    },
+    {
+      "width": 1200,
+      "screenshot": "agenda-workflow-cancelled-1200.png",
+      "consoleMessages": [],
+      "viewport": 1200,
+      "scrollWidth": 1200,
+      "clientWidth": 1200,
+      "overflowX": false,
+      "dialogWidth": 562,
+      "dialogHeight": 324,
+      "gridTemplateColumns": "256px 256px",
+      "actionText": [
+        "Reabrir atendimento",
+        "Reagendar"
+      ],
+      "hasReopenAction": true,
+      "hasRescheduleAction": true,
+      "primaryBackground": "rgb(31, 140, 87)",
+      "footerSecondaryBackground": "rgb(255, 250, 242)"
+    },
+    {
+      "width": 1920,
+      "screenshot": "agenda-workflow-cancelled-1920.png",
+      "consoleMessages": [],
+      "viewport": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflowX": false,
+      "dialogWidth": 562,
+      "dialogHeight": 327,
+      "gridTemplateColumns": "256px 256px",
+      "actionText": [
+        "Reabrir atendimento",
+        "Reagendar"
+      ],
+      "hasReopenAction": true,
+      "hasRescheduleAction": true,
+      "primaryBackground": "rgb(31, 140, 87)",
+      "footerSecondaryBackground": "rgb(255, 250, 242)"
+    }
+  ]
+}

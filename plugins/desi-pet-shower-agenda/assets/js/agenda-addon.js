@@ -201,7 +201,7 @@
 
   function showAgendaConfirmDialog(options) {
     var settings = $.extend({
-      title: getMessage('confirmAction', 'Confirmar acao'),
+      title: getMessage('confirmAction', 'Confirmar ação'),
       subtitle: '',
       bodyHtml: '',
       confirmLabel: getMessage('confirmProceed', 'Confirmar'),
@@ -263,6 +263,97 @@
     }, 120);
   }
 
+  function getOperationModeConfig(mode, focusTarget) {
+    var normalizedMode = mode || '';
+    var normalizedFocus = focusTarget || '';
+
+    if (!normalizedMode && (normalizedFocus === 'checkin' || normalizedFocus === 'checkout')) {
+      normalizedMode = normalizedFocus;
+    }
+
+    if (!normalizedMode) {
+      normalizedMode = 'full';
+    }
+
+    var configs = {
+      full: {
+        title: getMessage('operationDialogTitle', 'Opera\u00e7\u00e3o do atendimento'),
+        subtitle: getMessage('operationDialogSubtitle', 'Checklist, check-in e check-out em um fluxo \u00fanico.')
+      },
+      checklist: {
+        title: 'Checklist Operacional',
+        subtitle: 'Revise as etapas operacionais deste atendimento.'
+      },
+      checkin: {
+        title: 'Check-in',
+        subtitle: 'Registre ou edite a entrada do pet no atendimento.'
+      },
+      checkout: {
+        title: 'Check-out',
+        subtitle: 'Registre ou edite a sa\u00edda do pet no atendimento.'
+      },
+      checkinout: {
+        title: 'Check-in / Check-out',
+        subtitle: 'Escolha entre check-in e check-out e acompanhe o que j\u00e1 foi registrado.'
+      }
+    };
+
+    return $.extend({ mode: normalizedMode }, configs[normalizedMode] || configs.full);
+  }
+
+  function setOperationSectionVisibility(target, visible) {
+    if (!target || !target.length) {
+      return;
+    }
+
+    target.prop('hidden', !visible).attr('aria-hidden', visible ? 'false' : 'true');
+  }
+
+  function applyOperationPanelMode(dialog, mode, focusTarget) {
+    if (!dialog || !dialog.length) {
+      return;
+    }
+
+    var config = getOperationModeConfig(mode || dialog.data('operationMode'), focusTarget || dialog.data('operationFocusTarget'));
+    var body = dialog.find('.dps-agenda-dialog__body');
+    var shell = body.find('.dps-operation-modal-shell').first();
+    var showChecklist = config.mode === 'full' || config.mode === 'checklist';
+    var showCheckio = config.mode === 'full' || config.mode === 'checkinout' || config.mode === 'checkin' || config.mode === 'checkout';
+    var showCheckinStage = config.mode !== 'checkout';
+    var showCheckoutStage = config.mode !== 'checkin';
+
+    dialog.data('operationMode', config.mode);
+    dialog.data('operationFocusTarget', focusTarget || dialog.data('operationFocusTarget') || 'checklist');
+    dialog.attr('data-operation-mode', config.mode);
+
+    dialog.find('.dps-agenda-dialog__title').first().text(config.title);
+    dialog.find('.dps-agenda-dialog__subtitle').first().text(config.subtitle);
+
+    if (shell.length) {
+      shell.removeClass('dps-operation-modal-shell--mode-full dps-operation-modal-shell--mode-checklist dps-operation-modal-shell--mode-checkin dps-operation-modal-shell--mode-checkout dps-operation-modal-shell--mode-checkinout')
+        .addClass('dps-operation-modal-shell--mode-' + config.mode);
+    }
+
+    setOperationSectionVisibility(body.find('.dps-checklist-panel'), showChecklist);
+    setOperationSectionVisibility(body.find('.dps-checkin-panel'), showCheckio);
+    setOperationSectionVisibility(body.find('.dps-checkin-stage[data-stage="checkin"]'), showCheckio && showCheckinStage);
+    setOperationSectionVisibility(body.find('.dps-checkin-stage[data-stage="checkout"]'), showCheckio && showCheckoutStage);
+
+    setOperationSectionVisibility(body.find('.dps-operational-metric--checklist, .dps-operational-metric--rework'), showChecklist);
+    setOperationSectionVisibility(body.find('.dps-operational-metric--checkin'), config.mode === 'full' || config.mode === 'checkin' || config.mode === 'checkinout' || config.mode === 'checkout');
+    setOperationSectionVisibility(body.find('.dps-operational-metric--checkout, .dps-operational-metric--summary'), config.mode === 'full' || config.mode === 'checkinout' || config.mode === 'checkout');
+
+    setOperationSectionVisibility(body.find('.dps-checkin-status-badge--out, .dps-checkin-status-badge--duration'), config.mode !== 'checkin');
+
+    if (config.mode === 'checkin') {
+      body.find('.dps-checkin-panel > h4').first().text('Check-in');
+    } else if (config.mode === 'checkout') {
+      body.find('.dps-checkin-panel > h4').first().text('Check-out');
+    } else {
+      body.find('.dps-checkin-panel > h4').first().text('Check-in / Check-out');
+    }
+  }
+
   function normalizeAjaxJsonResponse(resp) {
     if (typeof resp !== 'string') {
       return resp;
@@ -279,8 +370,10 @@
     var settings = $.extend({
       focusPanel: false,
       focusTarget: 'checklist',
+      mode: '',
       toast: ''
     }, options || {});
+    var modeConfig = getOperationModeConfig(settings.mode, settings.focusTarget);
     var row = $('tr[data-appt-id="' + apptId + '"], .dps-operational-card[data-appt-id="' + apptId + '"]').first();
     var trigger = row.find('[data-operation-focus="' + settings.focusTarget + '"]').first();
 
@@ -289,14 +382,17 @@
     }
 
     var dialog = showAgendaContentDialog({
-      title: getMessage('operationDialogTitle', 'Operação do atendimento'),
-      subtitle: getMessage('operationDialogSubtitle', 'Checklist, check-in e check-out em um fluxo único.'),
+      title: modeConfig.title,
+      subtitle: modeConfig.subtitle,
       size: 'large',
       trigger: trigger.length ? trigger : null,
       bodyHtml: '<p class="dps-checklist-modal-loading">' + escapeHtml(getMessage('checklistLoading', 'Carregando checklist...')) + '</p>'
     });
 
     dialog.attr('data-operation-appt-id', apptId);
+    dialog.attr('data-operation-mode', modeConfig.mode);
+    dialog.data('operationMode', modeConfig.mode);
+    dialog.data('operationFocusTarget', settings.focusTarget);
 
     $.ajax({
       url: DPS_AG_Addon.ajax,
@@ -311,6 +407,7 @@
       resp = normalizeAjaxJsonResponse(resp);
       if (resp && resp.success && resp.data && resp.data.html) {
         dialog.find('.dps-agenda-dialog__body').html(resp.data.html);
+        applyOperationPanelMode(dialog, modeConfig.mode, settings.focusTarget);
         focusOperationModal(dialog, settings.focusTarget);
       } else {
         dialog.find('.dps-agenda-dialog__body').html('<p class="dps-checklist-modal-error">' + escapeHtml(getMessage('checklistError', 'Não foi possível carregar o checklist.')) + '</p>');
@@ -319,6 +416,7 @@
       var fallback = normalizeAjaxJsonResponse(xhr && xhr.responseText ? xhr.responseText : null);
       if (fallback && fallback.success && fallback.data && fallback.data.html) {
         dialog.find('.dps-agenda-dialog__body').html(fallback.data.html);
+        applyOperationPanelMode(dialog, modeConfig.mode, settings.focusTarget);
         focusOperationModal(dialog, settings.focusTarget);
         return;
       }
@@ -341,7 +439,8 @@
 
   window.DPSAgendaOperation = {
     open: openOperationPanel,
-    focus: focusOperationModal
+    focus: focusOperationModal,
+    applyMode: applyOperationPanelMode
   };
 
   window.DPSAgendaShared = {
@@ -573,7 +672,7 @@
       });
 
       function handleQuickActionError(response){
-        showToast(getAjaxErrorMessage(response, 'Erro ao executar a acao. Tente novamente.'), 'error');
+        showToast(getAjaxErrorMessage(response, 'Erro ao executar a ação. Tente novamente.'), 'error');
         row.find('.dps-quick-action-btn').prop('disabled', false).removeClass('is-loading');
         setTimeout(function(){
           location.reload();
@@ -768,11 +867,16 @@
       pet: target.data('dps-pet') || '',
       tutor: target.data('dps-tutor') || '',
       stage: target.data('dps-stage') || '',
+      stageClass: String(target.data('dps-stage-class') || 'confirm').replace(/[^a-z0-9_-]/gi, ''),
       service: target.data('dps-service') || '',
       payment: target.data('dps-payment') || '',
       logistics: target.data('dps-logistics') || '',
       notes: target.data('dps-notes') || '',
-      progress: String(target.data('dps-progress') || '0') + '%'
+      progress: String(target.data('dps-progress') || '0') + '%',
+      checkin: target.data('dps-checkin') || '',
+      checkout: target.data('dps-checkout') || '',
+      reworks: target.data('dps-reworks') || '',
+      extras: target.data('dps-extra-actions') || 'Mais: serviços, checklist operacional, check-in/check-out, logística, reagendar e histórico.'
     };
 
     $('[data-inspector-field="pet"]').text(fields.pet);
@@ -783,7 +887,15 @@
     $('[data-inspector-field="logistics"]').text(fields.logistics);
     $('[data-inspector-field="notes"]').text(fields.notes);
     $('[data-inspector-field="progress"]').text(fields.progress);
+    $('[data-inspector-field="checkin"]').text(fields.checkin);
+    $('[data-inspector-field="checkout"]').text(fields.checkout);
+    $('[data-inspector-field="reworks"]').text(fields.reworks);
+    $('[data-inspector-field="extras"]').text(fields.extras);
     $('[data-inspector-progress-bar]').css('width', fields.progress);
+    $('[data-inspector-action]').attr('data-appt-id', target.data('appt-id')).data('appt-id', target.data('appt-id'));
+    $('[data-inspector-section="stage"]')
+      .removeClass('dps-operational-inspector__section--stage-confirm dps-operational-inspector__section--stage-ready dps-operational-inspector__section--stage-service dps-operational-inspector__section--stage-done dps-operational-inspector__section--stage-danger')
+      .addClass('dps-operational-inspector__section--stage-' + fields.stageClass);
 
     $('tr[data-appt-id], .dps-operational-card[data-appt-id]').removeClass('is-selected');
     $('tr[data-appt-id="' + target.data('appt-id') + '"], .dps-operational-card[data-appt-id="' + target.data('appt-id') + '"]').addClass('is-selected');
@@ -914,6 +1026,582 @@
     filterOperationalList();
   });
 
+  function getWorkflowTarget(source, apptId) {
+    var sourceTarget = getOperationalTarget(source);
+    var row = getCanonicalRow(apptId);
+    return row.length ? row : sourceTarget;
+  }
+
+  function refreshWorkflowTarget(target, payload) {
+    var updatedTarget = refreshAgendaMarkup(target, payload);
+    if (updatedTarget && updatedTarget.length) {
+      syncOperationalInspector(updatedTarget);
+    }
+    return updatedTarget;
+  }
+
+  function triggerWorkflowReschedule(apptId, source) {
+    var sourceTarget = getOperationalTarget(source);
+    var row = getCanonicalRow(apptId);
+    var card = getCanonicalCard(apptId);
+    var dataSource = row.length ? row : (card.length ? card : sourceTarget);
+    var date = dataSource.data('dps-date') || '';
+    var time = dataSource.data('dps-time') || '';
+
+    $('<button type="button" class="dps-quick-reschedule" data-appt-id="' + parseInt(apptId, 10) + '" data-date="' + escapeHtml(date) + '" data-time="' + escapeHtml(time) + '"></button>')
+      .appendTo('body')
+      .trigger('click')
+      .remove();
+  }
+
+  function getOperationalAttr(target, name, fallback) {
+    var value = target && target.length ? target.attr('data-dps-' + name) : '';
+    if (value === undefined || value === null || value === '') {
+      return fallback || '';
+    }
+    return value;
+  }
+
+  function getSecondaryActionData(apptId, source) {
+    var sourceTarget = getOperationalTarget(source);
+    var row = getCanonicalRow(apptId);
+    var card = getCanonicalCard(apptId);
+    var dataSource = sourceTarget.length ? sourceTarget : (card.length ? card : row);
+    var hasTaxidog = getOperationalAttr(dataSource, 'taxidog', '0') === '1';
+
+    return {
+      apptId: parseInt(apptId, 10) || 0,
+      date: getOperationalAttr(dataSource, 'date', ''),
+      time: getOperationalAttr(dataSource, 'time', ''),
+      pet: getOperationalAttr(dataSource, 'pet', ''),
+      tutor: getOperationalAttr(dataSource, 'tutor', ''),
+      stage: getOperationalAttr(dataSource, 'stage', ''),
+      service: getOperationalAttr(dataSource, 'service', ''),
+      payment: getOperationalAttr(dataSource, 'payment', ''),
+      logistics: getOperationalAttr(dataSource, 'logistics', ''),
+      progress: getOperationalAttr(dataSource, 'progress', '0'),
+      checkin: getOperationalAttr(dataSource, 'checkin', ''),
+      checkout: getOperationalAttr(dataSource, 'checkout', ''),
+      reworks: getOperationalAttr(dataSource, 'reworks', ''),
+      hasTaxidog: hasTaxidog,
+      taxidogStatus: getOperationalAttr(dataSource, 'taxidog-status', hasTaxidog ? 'requested' : 'none'),
+      taxidogLabel: getOperationalAttr(dataSource, 'taxidog-label', hasTaxidog ? 'TaxiDog solicitado' : 'Sem TaxiDog'),
+      address: getOperationalAttr(dataSource, 'address', ''),
+      mapUrl: getOperationalAttr(dataSource, 'map-url', ''),
+      routeUrl: getOperationalAttr(dataSource, 'route-url', '')
+    };
+  }
+
+  function getInspectorActionSource(apptId) {
+    var row = getCanonicalRow(apptId);
+    var card = getCanonicalCard(apptId);
+
+    if (row.length && row.is(':visible')) {
+      return row;
+    }
+
+    if (card.length && card.is(':visible')) {
+      return card;
+    }
+
+    return row.length ? row : card;
+  }
+
+  function openInspectorPaymentSummary(apptId, source, trigger) {
+    var data = getSecondaryActionData(apptId, source);
+    var bodyHtml = '<div class="dps-payment-info">' +
+      '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Pet</span><span class="dps-payment-info-value">' + escapeHtml(data.pet || 'Atendimento') + '</span></div>' +
+      '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Tutor</span><span class="dps-payment-info-value">' + escapeHtml(data.tutor || 'Tutor não definido') + '</span></div>' +
+      '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Financeiro</span><span class="dps-payment-info-value">' + escapeHtml(data.payment || 'Financeiro em aberto') + '</span></div>' +
+      '</div>';
+
+    openAgendaDialog({
+      title: 'Financeiro do atendimento',
+      subtitle: data.pet || '',
+      size: 'small',
+      trigger: trigger && trigger.jquery ? trigger : $(trigger),
+      dialogClass: 'dps-agenda-dialog--payment-summary',
+      bodyHtml: bodyHtml,
+      footerHtml: '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + escapeHtml(getMessage('close', 'Fechar')) + '</button>'
+    });
+  }
+
+  function buildSecondaryActionCard(action, title, meta, tone) {
+    var toneClass = tone ? ' dps-secondary-action-card--' + tone : '';
+    return '<button type="button" class="dps-secondary-action-card' + toneClass + '" data-secondary-action="' + escapeHtml(action) + '">' +
+      '<span class="dps-secondary-action-card__title">' + escapeHtml(title) + '</span>' +
+      '<small>' + escapeHtml(meta || '') + '</small>' +
+    '</button>';
+  }
+
+  function formatOperationalDate(dateValue) {
+    var match = String(dateValue || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) {
+      return dateValue || '';
+    }
+
+    return match[3] + '/' + match[2] + '/' + match[1];
+  }
+
+  function formatOperationalDateTime(dateValue, timeValue) {
+    var dateText = formatOperationalDate(dateValue);
+    return [dateText, timeValue || ''].filter(Boolean).join(' ');
+  }
+
+  function buildSecondaryActionsBody(data) {
+    var scheduleText = formatOperationalDateTime(data.date, data.time);
+    var summary = [
+      data.service || 'Sem serviços',
+      data.payment || 'Financeiro em aberto',
+      data.taxidogLabel || data.logistics || 'Sem logística'
+    ].filter(Boolean).join(' | ');
+
+    return '<div class="dps-secondary-action-panel">' +
+      '<div class="dps-secondary-action-summary">' +
+        '<strong>' + escapeHtml(data.pet || 'Atendimento') + '</strong>' +
+        '<span>' + escapeHtml(summary) + '</span>' +
+      '</div>' +
+      '<div class="dps-secondary-action-grid dps-secondary-action-grid--complete">' +
+        buildSecondaryActionCard('services', 'Serviços e observações', data.service || 'Abrir composição do atendimento', 'primary') +
+        buildSecondaryActionCard('checklist', 'Checklist Operacional', 'Progresso ' + (data.progress || '0') + '%', 'primary') +
+        buildSecondaryActionCard('checkinout', 'Check-in / Check-out', [data.checkin, data.checkout].filter(Boolean).join(' | ') || 'Registrar entrada e saída', 'primary') +
+        buildSecondaryActionCard('logistics', 'Logística e TaxiDog', data.taxidogLabel || data.logistics || 'Mapa, rota e transporte', 'primary') +
+        buildSecondaryActionCard('reschedule', 'Reagendar', scheduleText || 'Abrir reagendamento', '') +
+        buildSecondaryActionCard('history', 'Histórico e logs', 'Linha do tempo auditável', '') +
+      '</div>' +
+    '</div>';
+  }
+
+  function isCheckioDone(label) {
+    var value = String(label || '').toLowerCase();
+    return !!value && value.indexOf('pendente') === -1 && value.indexOf('ainda') === -1;
+  }
+
+  function buildCheckioChoiceCard(stage, title, meta, disabled) {
+    var disabledAttr = disabled ? ' disabled aria-disabled="true"' : '';
+    var stateClass = disabled ? ' dps-checkio-choice-card--disabled' : '';
+
+    return '<button type="button" class="dps-checkio-choice-card' + stateClass + '" data-checkio-choice="' + escapeHtml(stage) + '"' + disabledAttr + '>' +
+      '<span class="dps-checkio-choice-card__title">' + escapeHtml(title) + '</span>' +
+      '<small>' + escapeHtml(meta || '') + '</small>' +
+    '</button>';
+  }
+
+  function buildCheckioChoiceBody(data) {
+    var checkinDone = isCheckioDone(data.checkin);
+    var checkoutDone = isCheckioDone(data.checkout);
+    var checkinMeta = checkinDone ? 'J\u00e1 feito: ' + data.checkin : (data.checkin || 'Check-in pendente');
+    var checkoutMeta = checkoutDone ? 'J\u00e1 feito: ' + data.checkout : (data.checkout || 'Check-out pendente');
+
+    if (!checkinDone) {
+      checkoutMeta = 'Liberado ap\u00f3s o check-in';
+    }
+
+    return '<div class="dps-checkio-choice-panel">' +
+      '<div class="dps-secondary-action-summary">' +
+        '<strong>' + escapeHtml(data.pet || 'Atendimento') + '</strong>' +
+        '<span>' + escapeHtml([data.checkin || 'Check-in pendente', data.checkout || 'Check-out pendente'].filter(Boolean).join(' | ')) + '</span>' +
+      '</div>' +
+      '<div class="dps-checkio-choice-grid">' +
+        buildCheckioChoiceCard('checkin', checkinDone ? 'Editar check-in' : 'Registrar check-in', checkinMeta, false) +
+        buildCheckioChoiceCard('checkout', checkoutDone ? 'Editar check-out' : 'Registrar check-out', checkoutMeta, !checkinDone) +
+      '</div>' +
+    '</div>';
+  }
+
+  function openCheckioChoiceDialog(apptId, source) {
+    var actionData = getSecondaryActionData(apptId, source);
+    var dialog = showAgendaContentDialog({
+      title: 'Check-in / Check-out',
+      subtitle: 'Escolha qual registro deseja abrir. Altera\u00e7\u00f5es salvas continuam entrando nos logs do atendimento.',
+      size: 'medium',
+      trigger: source && source.length ? source : null,
+      dialogClass: 'dps-agenda-dialog--checkio-choice',
+      bodyHtml: buildCheckioChoiceBody(actionData)
+    });
+
+    dialog.on('click', '[data-checkio-choice]', function() {
+      var choice = $(this).data('checkio-choice');
+      if ($(this).is(':disabled')) {
+        return;
+      }
+
+      closeAgendaDialog(dialog, 'checkio-choice');
+      openOperationPanel(apptId, {
+        focusPanel: true,
+        focusTarget: choice,
+        mode: choice,
+        toast: choice === 'checkin' ? 'Check-in aberto.' : 'Check-out aberto.'
+      });
+    });
+  }
+
+  function getTaxidogNextActions(status) {
+    var actions = {
+      none: [
+        { status: 'requested', label: 'Solicitar TaxiDog', tone: 'primary' }
+      ],
+      requested: [
+        { status: 'driver_on_way', label: 'Motorista a caminho', tone: 'primary' },
+        { status: 'none', label: 'Cancelar TaxiDog', tone: 'danger' }
+      ],
+      driver_on_way: [
+        { status: 'pet_on_board', label: 'Pet a bordo', tone: 'primary' },
+        { status: 'none', label: 'Cancelar TaxiDog', tone: 'danger' }
+      ],
+      pet_on_board: [
+        { status: 'completed', label: 'Finalizar TaxiDog', tone: 'primary' },
+        { status: 'none', label: 'Cancelar TaxiDog', tone: 'danger' }
+      ],
+      completed: []
+    };
+
+    return actions[status] || actions.none;
+  }
+
+  function buildLogisticsDialogBody(data) {
+    var links = '';
+    var taxidogActions = getTaxidogNextActions(data.taxidogStatus || 'none');
+    var actionHtml = '';
+
+    if (data.mapUrl) {
+      links += '<a class="dps-secondary-logistics-link" href="' + escapeHtml(data.mapUrl) + '" target="_blank" rel="noopener noreferrer">Abrir mapa</a>';
+    }
+
+    if (data.routeUrl) {
+      links += '<a class="dps-secondary-logistics-link dps-secondary-logistics-link--route" href="' + escapeHtml(data.routeUrl) + '" target="_blank" rel="noopener noreferrer">Abrir rota</a>';
+    }
+
+    if (!links) {
+      links = '<p class="dps-secondary-logistics-empty">Sem mapa ou rota cadastrados para este atendimento.</p>';
+    }
+
+    taxidogActions.forEach(function(item){
+      actionHtml += '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--' + (item.tone === 'danger' ? 'danger' : 'secondary') + '" data-taxidog-status="' + escapeHtml(item.status) + '">' + escapeHtml(item.label) + '</button>';
+    });
+
+    if (!actionHtml) {
+      actionHtml = '<p class="dps-secondary-logistics-empty">TaxiDog sem ações pendentes.</p>';
+    }
+
+    return '<div class="dps-secondary-logistics-panel">' +
+      '<dl class="dps-secondary-logistics-facts">' +
+        '<div><dt>Status TaxiDog</dt><dd>' + escapeHtml(data.taxidogLabel || 'Sem TaxiDog') + '</dd></div>' +
+        '<div><dt>Endereço</dt><dd>' + escapeHtml(data.address || 'Sem endereço cadastrado') + '</dd></div>' +
+      '</dl>' +
+      '<div class="dps-secondary-logistics-links">' + links + '</div>' +
+      '<div class="dps-secondary-logistics-actions">' + actionHtml + '</div>' +
+    '</div>';
+  }
+
+  function postSecondaryTaxidogStatus(apptId, status, source) {
+    var target = getWorkflowTarget(source, apptId);
+    var payload = {
+      appt_id: apptId,
+      nonce: DPS_AG_Addon.nonce_taxidog
+    };
+
+    if (status === 'requested') {
+      payload.action = 'dps_agenda_request_taxidog';
+    } else {
+      payload.action = 'dps_agenda_update_taxidog';
+      payload.taxidog_status = status;
+    }
+
+    $.post(DPS_AG_Addon.ajax, payload, function(resp){
+      if (resp && resp.success) {
+        if (resp.data && (resp.data.row_html || resp.data.card_html)) {
+          refreshWorkflowTarget(target, resp.data);
+        }
+        showToast(resp.data && resp.data.message ? resp.data.message : 'TaxiDog atualizado.', 'success', 1600);
+      } else {
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar TaxiDog.', 'error');
+      }
+    }).fail(function(xhr){
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
+    });
+  }
+
+  function openSecondaryLogisticsDialog(apptId, source) {
+    var data = getSecondaryActionData(apptId, source);
+    var dialog = openAgendaDialog({
+      title: 'Logística e TaxiDog',
+      subtitle: data.pet || '',
+      size: 'small',
+      trigger: source && source.jquery ? source : $(source),
+      dialogClass: 'dps-agenda-dialog--secondary-logistics',
+      bodyHtml: buildLogisticsDialogBody(data),
+      footerHtml: '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + escapeHtml(getMessage('close', 'Fechar')) + '</button>'
+    });
+
+    dialog.on('click', '[data-taxidog-status]', function(){
+      var btn = $(this);
+      var status = btn.data('taxidog-status');
+      var label = btn.text();
+
+      closeAgendaDialog(dialog, 'taxidog-action');
+      showAgendaConfirmDialog({
+        title: 'Atualizar TaxiDog',
+        subtitle: label,
+        bodyHtml: '<p class="dps-agenda-dialog-copy">Confirmar alteração de TaxiDog para este atendimento?</p>',
+        confirmLabel: getMessage('confirmProceed', 'Confirmar'),
+        trigger: btn,
+        onConfirm: function() {
+          postSecondaryTaxidogStatus(apptId, status, source);
+        }
+      });
+    });
+  }
+
+  function postWorkflowConfirmation(source, apptId, confirmationStatus, successMessage, afterSuccess) {
+    var sourceBtn = source && source.jquery ? source : $(source);
+    var target = getWorkflowTarget(sourceBtn, apptId);
+
+    sourceBtn.prop('disabled', true).addClass('is-loading');
+
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_agenda_update_confirmation',
+      appt_id: apptId,
+      confirmation_status: confirmationStatus,
+      nonce: DPS_AG_Addon.nonce_confirmation
+    }, function(resp){
+      if (resp && resp.success) {
+        if (resp.data && (resp.data.row_html || resp.data.card_html)) {
+          target = refreshWorkflowTarget(target, resp.data);
+        }
+        showToast(successMessage || (resp.data && resp.data.message ? resp.data.message : 'Confirmação atualizada.'), 'success', 1600);
+        if (typeof afterSuccess === 'function') {
+          afterSuccess(target);
+        }
+      } else {
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar confirmação.', 'error');
+      }
+    }).fail(function(xhr){
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
+    }).always(function(){
+      sourceBtn.prop('disabled', false).removeClass('is-loading');
+    });
+  }
+
+  function postWorkflowStatus(source, apptId, status, version, successMessage, afterSuccess) {
+    var sourceBtn = source && source.jquery ? source : $(source);
+    var target = getWorkflowTarget(sourceBtn, apptId);
+
+    sourceBtn.prop('disabled', true).addClass('is-loading');
+
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_update_status',
+      id: apptId,
+      status: status,
+      version: version,
+      nonce: DPS_AG_Addon.nonce_status
+    }, function(resp){
+      if (resp && resp.success) {
+        if (resp.data && (resp.data.row_html || resp.data.card_html)) {
+          target = refreshWorkflowTarget(target, resp.data);
+        }
+        showToast(successMessage || (resp.data && resp.data.message ? resp.data.message : 'Status atualizado.'), 'success', 1600);
+        if (typeof afterSuccess === 'function') {
+          afterSuccess(target, resp.data || {});
+        }
+      } else if (resp && resp.data && resp.data.error_code === 'version_conflict') {
+        showToast(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.'), 'warning');
+      } else {
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar status.', 'error');
+      }
+    }).fail(function(xhr){
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
+    }).always(function(){
+      sourceBtn.prop('disabled', false).removeClass('is-loading');
+    });
+  }
+
+  function openWorkflowReschedulePrompt(source, apptId) {
+    openAgendaDialog({
+      title: 'Reagendar atendimento?',
+      subtitle: 'O atendimento ficará marcado como não confirmado até uma nova data ser salva.',
+      size: 'small',
+      dialogClass: 'dps-agenda-dialog--workflow',
+      trigger: source,
+      bodyHtml: '<p class="dps-workflow-dialog-copy">Escolha se deseja manter o registro como está ou abrir o reagendamento agora.</p>',
+      footerHtml:
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">Manter</button>' +
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--primary" data-workflow-reschedule-confirm="true">Reagendar</button>'
+    });
+
+    $(document).off('click.dpsWorkflowReschedulePrompt').one('click.dpsWorkflowReschedulePrompt', '[data-workflow-reschedule-confirm]', function(){
+      closeAgendaDialog($(this), 'workflow-reschedule');
+      triggerWorkflowReschedule(apptId, source);
+    });
+  }
+
+  function openWorkflowConfirmDialog(source, apptId) {
+    var bodyHtml = '<p class="dps-workflow-dialog-copy">Defina se o atendimento está confirmado para seguir para a etapa de finalização.</p>' +
+      '<div class="dps-workflow-action-grid">' +
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--primary" data-workflow-confirm-choice="confirmed">Confirmar</button>' +
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-workflow-confirm-choice="no_answer">Não confirmado</button>' +
+      '</div>';
+
+    openAgendaDialog({
+      title: 'Confirmar atendimento',
+      subtitle: 'A escolha atualiza a etapa operacional da Agenda.',
+      size: 'small',
+      dialogClass: 'dps-agenda-dialog--workflow',
+      trigger: source,
+      bodyHtml: bodyHtml,
+      footerHtml: '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + escapeHtml(getMessage('close', 'Fechar')) + '</button>'
+    });
+
+    $(document).off('click.dpsWorkflowConfirm').one('click.dpsWorkflowConfirm', '[data-workflow-confirm-choice]', function(){
+      var choice = $(this).data('workflow-confirm-choice');
+      closeAgendaDialog($(this), 'workflow-confirm');
+
+      if (choice === 'confirmed') {
+        postWorkflowConfirmation(source, apptId, 'confirmed', 'Atendimento confirmado.');
+        return;
+      }
+
+      postWorkflowConfirmation(source, apptId, 'no_answer', 'Atendimento marcado como não confirmado.', function(){
+        setTimeout(function(){
+          openWorkflowReschedulePrompt(source, apptId);
+        }, 120);
+      });
+    });
+  }
+
+  function openWorkflowCancelDialog(source, apptId, version) {
+    var bodyHtml = '<p class="dps-workflow-dialog-copy">Escolha se este atendimento deve ser cancelado agora ou se a próxima ação é reagendar.</p>' +
+      '<div class="dps-workflow-action-grid">' +
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--danger" data-workflow-cancel-choice="cancel">Cancelar</button>' +
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--primary" data-workflow-cancel-choice="reschedule">Reagendar</button>' +
+      '</div>';
+
+    openAgendaDialog({
+      title: 'Cancelar ou reagendar',
+      subtitle: 'Cancelar encerra o atendimento. Reagendar mantém o fluxo ativo em outra data.',
+      size: 'small',
+      dialogClass: 'dps-agenda-dialog--workflow',
+      trigger: source,
+      bodyHtml: bodyHtml,
+      footerHtml: '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + escapeHtml(getMessage('close', 'Fechar')) + '</button>'
+    });
+
+    $(document).off('click.dpsWorkflowCancel').one('click.dpsWorkflowCancel', '[data-workflow-cancel-choice]', function(){
+      var choice = $(this).data('workflow-cancel-choice');
+      closeAgendaDialog($(this), 'workflow-cancel');
+
+      if (choice === 'cancel') {
+        postWorkflowStatus(source, apptId, 'cancelado', version, 'Atendimento cancelado.');
+        return;
+      }
+
+      triggerWorkflowReschedule(apptId, source);
+    });
+  }
+
+  function openWorkflowCancelledDialog(source, apptId, version, reopenStatus) {
+    var safeReopenStatus = /^(pendente|finalizado|finalizado_pago)$/.test(reopenStatus || '') ? reopenStatus : 'pendente';
+    var bodyHtml = '<p class="dps-workflow-dialog-copy">Este atendimento está cancelado. Escolha se deseja corrigir o cancelamento ou reagendar para uma nova data.</p>' +
+      '<div class="dps-workflow-action-grid">' +
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--primary" data-workflow-cancelled-choice="reopen">Reabrir atendimento</button>' +
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-workflow-cancelled-choice="reschedule">Reagendar</button>' +
+      '</div>';
+
+    openAgendaDialog({
+      title: 'Atendimento cancelado',
+      subtitle: 'Reabrir corrige um cancelamento acidental. Reagendar mantém a decisão registrada até a nova data ser salva.',
+      size: 'small',
+      dialogClass: 'dps-agenda-dialog--workflow',
+      trigger: source,
+      bodyHtml: bodyHtml,
+      footerHtml: '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + escapeHtml(getMessage('close', 'Fechar')) + '</button>'
+    });
+
+    $(document).off('click.dpsWorkflowCancelled').one('click.dpsWorkflowCancelled', '[data-workflow-cancelled-choice]', function(){
+      var choice = $(this).data('workflow-cancelled-choice');
+      closeAgendaDialog($(this), 'workflow-cancelled');
+
+      if (choice === 'reopen') {
+        postWorkflowStatus(source, apptId, safeReopenStatus, version, 'Atendimento reaberto.');
+        return;
+      }
+
+      triggerWorkflowReschedule(apptId, source);
+    });
+  }
+
+  function openWorkflowFinalizeDialog(source, apptId, version) {
+    var bodyHtml = '<p class="dps-workflow-dialog-copy">Selecione como este atendimento deve sair da fila operacional.</p>' +
+      '<div class="dps-workflow-action-grid dps-workflow-action-grid--status">' +
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-workflow-status-choice="finalizado">Finalizado</button>' +
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--primary" data-workflow-status-choice="finalizado_pago">Finalizado e pago</button>' +
+        '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--danger" data-workflow-status-choice="cancelado">Cancelado</button>' +
+      '</div>';
+
+    openAgendaDialog({
+      title: 'Finalizar atendimento',
+      subtitle: 'A decisão ajusta o status e libera a próxima ação visível na Agenda.',
+      size: 'medium',
+      dialogClass: 'dps-agenda-dialog--workflow',
+      trigger: source,
+      bodyHtml: bodyHtml,
+      footerHtml: '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + escapeHtml(getMessage('close', 'Fechar')) + '</button>'
+    });
+
+    $(document).off('click.dpsWorkflowStatus').one('click.dpsWorkflowStatus', '[data-workflow-status-choice]', function(){
+      var status = $(this).data('workflow-status-choice');
+      closeAgendaDialog($(this), 'workflow-status');
+
+      if (status === 'cancelado') {
+        openWorkflowCancelDialog(source, apptId, version);
+        return;
+      }
+
+      var openChecklistAfterFinish = function(){
+        setTimeout(function(){
+          openOperationPanel(apptId, {
+            focusPanel: true,
+            focusTarget: 'checklist',
+            mode: 'checklist',
+            toast: getMessage('operationChecklistRequired', 'Revise o Checklist Operacional antes de encerrar o atendimento.')
+          });
+        }, 140);
+      };
+
+      if (status === 'finalizado_pago') {
+        postWorkflowStatus(source, apptId, status, version, 'Atendimento finalizado e pago.', openChecklistAfterFinish);
+        return;
+      }
+
+      postWorkflowStatus(source, apptId, status, version, 'Atendimento finalizado. Cobrança disponível.', openChecklistAfterFinish);
+    });
+  }
+
+  $(document).on('click', '.dps-agenda-flow-action', function(e){
+    var btn = $(this);
+    if (btn.hasClass('dps-quick-reschedule')) {
+      return;
+    }
+
+    e.preventDefault();
+
+    var apptId = btn.data('appt-id');
+    var step = btn.data('workflow-step') || '';
+    var version = parseInt(btn.data('appt-version'), 10) || 1;
+
+    if (step === 'confirm') {
+      openWorkflowConfirmDialog(btn, apptId);
+      return;
+    }
+
+    if (step === 'cancelled') {
+      openWorkflowCancelledDialog(btn, apptId, version, btn.data('reopen-status') || 'pendente');
+      return;
+    }
+
+    openWorkflowFinalizeDialog(btn, apptId, version);
+  });
+
   $(document).on('click', '.dps-agenda-primary-confirm', function(e){
     e.preventDefault();
     var btn = $(this);
@@ -967,6 +1655,7 @@
           openOperationPanel(apptId, {
             focusPanel: true,
             focusTarget: 'checklist',
+            mode: 'checklist',
             toast: getMessage('operationPanelContinue', 'Continue o fluxo operacional no modal do atendimento.')
           });
         }, 120);
@@ -982,39 +1671,101 @@
     });
   });
 
+  $(document).on('click', '.dps-agenda-checkio-action', function(e){
+    e.preventDefault();
+
+    var btn = $(this);
+    var apptId = btn.data('appt-id');
+    var stage = btn.data('checkio-stage') || 'choice';
+
+    if (stage === 'checkin') {
+      openOperationPanel(apptId, {
+        focusPanel: true,
+        focusTarget: 'checkin',
+        mode: 'checkin',
+        toast: 'Check-in aberto.'
+      });
+      return;
+    }
+
+    openCheckioChoiceDialog(apptId, btn);
+  });
+
   $(document).on('click', '.dps-agenda-secondary-actions', function(e){
     e.preventDefault();
     var btn = $(this);
     var apptId = btn.data('appt-id');
-    var row = getCanonicalRow(apptId);
-    var date = row.data('dps-date') || '';
-    var time = row.data('dps-time') || '';
-    var bodyHtml = '<div class="dps-secondary-action-grid">' +
-      '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-secondary-action="services">Serviços</button>' +
-      '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-secondary-action="reschedule">Reagendar</button>' +
-      '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-secondary-action="history">Histórico</button>' +
-      '</div>';
-
-    openAgendaDialog({
-      title: 'Ações do atendimento',
-      subtitle: 'Ações secundárias agrupadas para manter a fila limpa.',
-      size: 'small',
+    var actionData = getSecondaryActionData(apptId, btn);
+    var dialog = openAgendaDialog({
+      title: 'Mais ações',
+      subtitle: 'Hub de interações extras do atendimento.',
+      size: 'medium',
       trigger: btn,
-      bodyHtml: bodyHtml,
+      dialogClass: 'dps-agenda-dialog--secondary-actions',
+      bodyHtml: buildSecondaryActionsBody(actionData),
       footerHtml: '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + escapeHtml(getMessage('close', 'Fechar')) + '</button>'
     });
 
-    $(document).one('click.dpsSecondaryActions', '[data-secondary-action]', function(){
+    dialog.on('click', '[data-secondary-action]', function(){
       var action = $(this).data('secondary-action');
-      closeAgendaDialog($(AGENDA_DIALOG_SELECTOR).last(), 'secondary-action');
+      closeAgendaDialog(dialog, 'secondary-action');
       if (action === 'services') {
-        row.find('.dps-services-popup-btn').trigger('click');
+        fetchAndOpenServicesDialog(btn, apptId);
+      } else if (action === 'checklist') {
+        openOperationPanel(apptId, {
+          focusPanel: true,
+          focusTarget: 'checklist',
+          mode: 'checklist',
+          toast: getMessage('operationChecklistOpened', 'Checklist Operacional aberto.')
+        });
+      } else if (action === 'checkinout') {
+        openCheckioChoiceDialog(apptId, btn);
+      } else if (action === 'logistics') {
+        openSecondaryLogisticsDialog(apptId, btn);
       } else if (action === 'history') {
         $('<button type="button" class="dps-history-indicator" data-appt-id="' + apptId + '"></button>').appendTo('body').trigger('click').remove();
       } else if (action === 'reschedule') {
-        $('<button type="button" class="dps-quick-reschedule" data-appt-id="' + apptId + '" data-date="' + escapeHtml(date) + '" data-time="' + escapeHtml(time) + '"></button>').appendTo('body').trigger('click').remove();
+        triggerWorkflowReschedule(apptId, btn);
       }
     });
+  });
+
+  $(document).on('click', '.dps-operational-inspector__fact-action', function(e){
+    e.preventDefault();
+
+    var btn = $(this);
+    var action = btn.data('inspector-action') || '';
+    var apptId = parseInt(btn.attr('data-appt-id') || btn.data('appt-id'), 10) || 0;
+    var source = getInspectorActionSource(apptId);
+    var paymentBtn;
+
+    if (!apptId) {
+      showToast('Atendimento inválido.', 'error');
+      return;
+    }
+
+    if (action === 'services') {
+      fetchAndOpenServicesDialog(btn, apptId);
+      return;
+    }
+
+    if (action === 'payment') {
+      paymentBtn = getCanonicalRow(apptId).find('.dps-payment-popup-btn').first();
+      if (!paymentBtn.length) {
+        paymentBtn = getCanonicalCard(apptId).find('.dps-payment-popup-btn').first();
+      }
+
+      if (paymentBtn.length) {
+        paymentBtn.trigger('click');
+      } else {
+        openInspectorPaymentSummary(apptId, source, btn);
+      }
+      return;
+    }
+
+    if (action === 'logistics') {
+      openSecondaryLogisticsDialog(apptId, source.length ? source : btn);
+    }
   });
 
   function parseAjaxPayload(text){
@@ -1108,7 +1859,7 @@
 
     openAgendaDialog({
       title: getMessage('rescheduleDialogTitle', getMessage('reschedule_title', 'Reagendar atendimento')),
-      subtitle: 'Atualize data e horario sem sair da lista.',
+      subtitle: 'Atualize data e horário sem sair da lista.',
       size: 'small',
       trigger: btn,
       bodyHtml:
@@ -1118,7 +1869,7 @@
             '<input type="date" id="dps-reschedule-date" value="' + escapeHtml(currentDate) + '" required>' +
           '</div>' +
           '<div class="dps-reschedule-field">' +
-            '<label>' + escapeHtml(getMessage('new_time', 'Novo horario')) + '</label>' +
+            '<label>' + escapeHtml(getMessage('new_time', 'Novo horário')) + '</label>' +
             '<input type="time" id="dps-reschedule-time" value="' + escapeHtml(currentTime) + '" required>' +
           '</div>' +
         '</div>',
@@ -1186,7 +1937,12 @@
         '</div>';
 
       if ( entry.details ) {
-        if ( entry.details.old_status && entry.details.new_status ) {
+        if ( entry.details.field && (entry.details.old_value || entry.details.new_value) ) {
+          html += '<div class="dps-agenda-history-item__detail"><strong>Campo alterado:</strong> ' + escapeHtml(entry.details.field) + '</div>';
+          html += '<div class="dps-agenda-history-item__detail"><strong>Valor anterior:</strong> ' + escapeHtml(entry.details.old_value || '-') + '</div>';
+          html += '<div class="dps-agenda-history-item__detail"><strong>Novo valor:</strong> ' + escapeHtml(entry.details.new_value || '-') + '</div>';
+        }
+        if ( entry.details.old_status && entry.details.new_status && !entry.details.field ) {
           html += '<div class="dps-agenda-history-item__detail">De ' + escapeHtml(entry.details.old_status) + ' para ' + escapeHtml(entry.details.new_status) + '</div>';
         }
         if ( entry.details.old_date && entry.details.new_date ) {
@@ -1241,13 +1997,19 @@
     var labels = {
       'created': getMessage('action_created', 'Criado'),
       'status_change': getMessage('action_status_change', 'Status alterado'),
+      'confirmation_change': getMessage('action_confirmation_change', 'Confirmação alterada'),
       'rescheduled': getMessage('action_rescheduled', 'Reagendado'),
+      'taxidog_update': getMessage('action_taxidog_update', 'TaxiDog atualizado'),
+      'taxidog_requested': getMessage('action_taxidog_requested', 'TaxiDog solicitado'),
+      'payment_resend': getMessage('action_payment_resend', 'Cobrança reenviada'),
       'checklist_update': getMessage('action_checklist_update', 'Checklist atualizado'),
       'checklist_rework': getMessage('action_checklist_rework', 'Retrabalho registrado'),
       'checkin_created': getMessage('action_checkin_created', 'Check-in registrado'),
       'checkin_updated': getMessage('action_checkin_updated', 'Check-in atualizado'),
       'checkout_created': getMessage('action_checkout_created', 'Check-out registrado'),
-      'checkout_updated': getMessage('action_checkout_updated', 'Check-out atualizado')
+      'checkout_updated': getMessage('action_checkout_updated', 'Check-out atualizado'),
+      'pet_evidence_added': getMessage('action_pet_evidence_added', 'Evidência do pet adicionada'),
+      'pet_evidence_removed': getMessage('action_pet_evidence_removed', 'Evidência do pet removida')
     };
     return labels[action] || action;
   }
@@ -1280,7 +2042,7 @@
         row.find('.dps-taxidog-action-btn').prop('disabled', false).css('opacity', 1);
       }
     }).fail(function(xhr){
-      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao ao atualizar TaxiDog.'), 'error');
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação ao atualizar TaxiDog.'), 'error');
       row.find('.dps-taxidog-action-btn').prop('disabled', false).css('opacity', 1);
     });
   });
@@ -1320,8 +2082,8 @@
     var row = btn.closest('tr');
 
     showAgendaConfirmDialog({
-      title: getMessage('confirmAction', 'Confirmar acao'),
-      subtitle: 'Cobranca',
+      title: getMessage('confirmAction', 'Confirmar ação'),
+      subtitle: 'Cobrança',
       bodyHtml: '<p class="dps-agenda-dialog-copy">' + escapeHtml(getMessage('confirmResendPayment', 'Deseja reenviar o link de pagamento para este atendimento?')) + '</p>',
       trigger: btn,
       onConfirm: function() {
@@ -1343,7 +2105,7 @@
             btn.prop('disabled', false).text('Reenviar');
           }
         }).fail(function(xhr){
-          showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao ao reenviar link.'), 'error');
+          showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação ao reenviar link.'), 'error');
           btn.prop('disabled', false).text('Reenviar');
         });
       }
@@ -1392,7 +2154,7 @@
         showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar confirmação.', 'error');
       }
     }).fail(function(xhr){
-      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
     }).always(function(){
       select.prop('disabled', false).removeClass('is-loading');
     });
@@ -1429,6 +2191,8 @@
             setTimeout(function(){
               openOperationPanel(apptId, {
               focusPanel: true,
+              focusTarget: 'checklist',
+              mode: 'checklist',
               toast: getMessage('operationPanelContinue', 'Continue no painel operacional.')
             });
             }, 150);
@@ -1454,6 +2218,8 @@
             if (status === 'finalizado' || status === 'finalizado_pago') {
               openOperationPanel(apptId, {
               focusPanel: true,
+              focusTarget: 'checklist',
+              mode: 'checklist',
               toast: getMessage('operationPanelContinue', 'Continue no painel operacional.')
             });
             } else {
@@ -1470,14 +2236,14 @@
         select.val(previous);
       }
     }).fail(function(xhr){
-      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
       select.val(previous);
     }).always(function(){
       select.prop('disabled', false).removeClass('is-loading');
     });
   });
 
-  // Handler para servicos no dialog canonico DPS Signature
+  // Handler para serviços no dialog canônico DPS Signature
   function formatServiceDuration(totalDuration) {
     var minutes = parseInt(totalDuration, 10) || 0;
     var hours = Math.floor(minutes / 60);
@@ -1665,7 +2431,7 @@
 
     showAgendaContentDialog({
       title: 'Servi\u00e7os do atendimento',
-      subtitle: 'Mesmo shell operacional da Agenda, com servicos, tempo e observacoes do atendimento.',
+      subtitle: 'Mesmo shell operacional da Agenda, com serviços, tempo e observações do atendimento.',
       size: 'large',
       trigger: trigger,
       dialogClass: 'dps-agenda-dialog--services',
@@ -1701,10 +2467,10 @@
 
         openServicesDialog(trigger, services, notes, pet, totalDuration);
       } else {
-        showToast(resp && resp.data ? resp.data.message : 'Erro ao carregar servicos.', 'error');
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao carregar serviços.', 'error');
       }
     }).fail(function(xhr){
-      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
     }).always(function(){
       if (trigger && trigger.length) {
         trigger.prop('disabled', false);
@@ -1761,7 +2527,7 @@
     var petName = btn.data('pet-name');
     var totalValue = btn.data('total-value');
 
-    var whatsappNumber = (clientPhone || '').replace(/\D/g, '');
+    var whatsappNumber = String(clientPhone || '').replace(/\D/g, '');
     if (whatsappNumber.length === 10 || whatsappNumber.length === 11) {
       whatsappNumber = '55' + whatsappNumber;
     }
@@ -1778,7 +2544,7 @@
       '</div>';
 
     openAgendaDialog({
-      title: getMessage('paymentDialogTitle', 'Cobranca do atendimento'),
+      title: getMessage('paymentDialogTitle', 'Cobrança do atendimento'),
       subtitle: 'Envie o link pelo canal preferido do cliente.',
       size: 'small',
       trigger: btn,
@@ -1842,7 +2608,7 @@
         showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar TaxiDog.', 'error');
       }
     }).fail(function(xhr){
-      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
+      showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
     }).always(function(){
       select.prop('disabled', false).removeClass('is-loading');
     });
@@ -1857,7 +2623,7 @@
     var row = btn.closest('tr');
 
     showAgendaConfirmDialog({
-      title: getMessage('confirmAction', 'Confirmar acao'),
+      title: getMessage('confirmAction', 'Confirmar ação'),
       subtitle: 'TaxiDog',
       bodyHtml: '<p class="dps-agenda-dialog-copy">' + escapeHtml(getMessage('confirmTaxidogRequest', 'Deseja solicitar TaxiDog para este atendimento?')) + '</p>',
       trigger: btn,
@@ -1881,7 +2647,7 @@
             btn.prop('disabled', false).text('Solicitar TaxiDog');
           }
         }).fail(function(xhr){
-          showToast(getAjaxErrorMessage(xhr, 'Erro de comunicacao.'), 'error');
+          showToast(getAjaxErrorMessage(xhr, 'Erro de comunicação.'), 'error');
           btn.prop('disabled', false).text('Solicitar TaxiDog');
         });
       }
@@ -1900,6 +2666,8 @@
   function openChecklistPopup(apptId) {
     if (openOperationPanel(apptId, {
       focusPanel: true,
+      focusTarget: 'checklist',
+      mode: 'checklist',
       toast: getMessage('operationPanelOpened', 'Painel operacional aberto.')
     })) {
       return;

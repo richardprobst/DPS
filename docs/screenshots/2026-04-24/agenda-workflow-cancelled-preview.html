@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agenda - Modal de atendimento cancelado</title>
+  <link rel="stylesheet" href="../../../plugins/desi-pet-shower-base/assets/css/dps-design-tokens.css">
+  <link rel="stylesheet" href="../../../plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f7f2ea;
+      color: #11161c;
+      font-family: var(--dps-signature-font-body, "Manrope", Arial, sans-serif);
+    }
+
+    .dps-fixture-backdrop {
+      min-height: 100vh;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .dps-fixture-card {
+      max-width: 760px;
+      margin: 0 auto;
+      border-left: 4px solid #a44439;
+    }
+
+    @media (max-width: 600px) {
+      .dps-fixture-backdrop {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body class="dps-agenda-dialog-open">
+  <main class="dps-fixture-backdrop">
+    <article class="dps-operational-card dps-fixture-card status-cancelado">
+      <header class="dps-operational-card__header">
+        <div class="dps-agenda-time-block"><strong class="dps-agenda-time-block__value">19:30</strong></div>
+        <span class="dps-operational-stage dps-operational-card__stage dps-operational-stage--danger">Cancelado</span>
+      </header>
+      <div class="dps-operational-card__body">
+        <div class="dps-agenda-pet-stack">
+          <button type="button" class="dps-agenda-flow-action dps-agenda-flow-action--cancelled">Cancelado</button>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <div class="dps-agenda-dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="workflow-cancelled-title" aria-describedby="workflow-cancelled-body">
+    <div class="dps-agenda-dialog dps-agenda-dialog--small dps-agenda-dialog--workflow" tabindex="-1">
+      <div class="dps-agenda-dialog__header">
+        <div class="dps-agenda-dialog__heading">
+          <h3 id="workflow-cancelled-title" class="dps-agenda-dialog__title">Atendimento cancelado</h3>
+          <p class="dps-agenda-dialog__subtitle">Reabrir corrige um cancelamento acidental. Reagendar mantém a decisão registrada até a nova data ser salva.</p>
+        </div>
+        <button type="button" class="dps-agenda-dialog__close" aria-label="Fechar">&times;</button>
+      </div>
+      <div id="workflow-cancelled-body" class="dps-agenda-dialog__body">
+        <p class="dps-workflow-dialog-copy">Este atendimento está cancelado. Escolha se deseja corrigir o cancelamento ou reagendar para uma nova data.</p>
+        <div class="dps-workflow-action-grid">
+          <button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--primary">Reabrir atendimento</button>
+          <button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary">Reagendar</button>
+        </div>
+      </div>
+      <div class="dps-agenda-dialog__footer">
+        <button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary">Fechar</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

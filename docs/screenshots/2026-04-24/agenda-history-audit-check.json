@@ -1,0 +1,81 @@
+{
+  "fixture": "agenda-history-audit-preview.html",
+  "generatedAt": "2026-04-24T14:38:18.545Z",
+  "results": [
+    {
+      "width": 375,
+      "screenshot": "agenda-history-audit-375.png",
+      "consoleMessages": [],
+      "viewport": 375,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "overflowX": false,
+      "itemCount": 3,
+      "manualSourceCount": 2,
+      "systemSourceCount": 1,
+      "hasFieldLabel": true,
+      "hasOldValueLabel": true,
+      "hasNewValueLabel": true
+    },
+    {
+      "width": 600,
+      "screenshot": "agenda-history-audit-600.png",
+      "consoleMessages": [],
+      "viewport": 600,
+      "scrollWidth": 600,
+      "clientWidth": 600,
+      "overflowX": false,
+      "itemCount": 3,
+      "manualSourceCount": 2,
+      "systemSourceCount": 1,
+      "hasFieldLabel": true,
+      "hasOldValueLabel": true,
+      "hasNewValueLabel": true
+    },
+    {
+      "width": 840,
+      "screenshot": "agenda-history-audit-840.png",
+      "consoleMessages": [],
+      "viewport": 840,
+      "scrollWidth": 840,
+      "clientWidth": 840,
+      "overflowX": false,
+      "itemCount": 3,
+      "manualSourceCount": 2,
+      "systemSourceCount": 1,
+      "hasFieldLabel": true,
+      "hasOldValueLabel": true,
+      "hasNewValueLabel": true
+    },
+    {
+      "width": 1200,
+      "screenshot": "agenda-history-audit-1200.png",
+      "consoleMessages": [],
+      "viewport": 1200,
+      "scrollWidth": 1200,
+      "clientWidth": 1200,
+      "overflowX": false,
+      "itemCount": 3,
+      "manualSourceCount": 2,
+      "systemSourceCount": 1,
+      "hasFieldLabel": true,
+      "hasOldValueLabel": true,
+      "hasNewValueLabel": true
+    },
+    {
+      "width": 1920,
+      "screenshot": "agenda-history-audit-1920.png",
+      "consoleMessages": [],
+      "viewport": 1920,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "overflowX": false,
+      "itemCount": 3,
+      "manualSourceCount": 2,
+      "systemSourceCount": 1,
+      "hasFieldLabel": true,
+      "hasOldValueLabel": true,
+      "hasNewValueLabel": true
+    }
+  ]
+}

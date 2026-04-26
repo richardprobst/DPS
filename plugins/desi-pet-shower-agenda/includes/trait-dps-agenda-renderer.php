@@ -381,7 +381,7 @@ trait DPS_Agenda_Renderer {
         if ( is_array( $service_ids ) && ! empty( $service_ids ) ) {
             // Link com ícone para abrir modal de serviços (FASE 2)
             echo '<a href="#" class="dps-services-link" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Ver detalhes dos serviços', 'dps-agenda-addon' ) . '">';
-            echo esc_html__( 'Ver servicos', 'dps-agenda-addon' );
+                echo esc_html__( 'Ver serviços', 'dps-agenda-addon' );
             echo '</a>';
         } else {
             echo '-';
@@ -538,7 +538,7 @@ trait DPS_Agenda_Renderer {
                     $wa_url = 'https://wa.me/' . $whatsapp . '?text=' . rawurlencode( $message );
                 }
                 echo '<div class="dps-confirmation-whatsapp">';
-                echo '<a href="' . esc_url( $wa_url ) . '" target="_blank" class="dps-whatsapp-link" title="' . esc_attr__( 'Enviar mensagem de confirmacao via WhatsApp', 'dps-agenda-addon' ) . '">' . esc_html__( 'Enviar WhatsApp', 'dps-agenda-addon' ) . '</a>';
+        echo '<a href="' . esc_url( $wa_url ) . '" target="_blank" class="dps-whatsapp-link" title="' . esc_attr__( 'Enviar mensagem de confirmação via WhatsApp', 'dps-agenda-addon' ) . '">' . esc_html__( 'Enviar WhatsApp', 'dps-agenda-addon' ) . '</a>';
                 echo '</div>';
             }
         }
@@ -653,7 +653,7 @@ trait DPS_Agenda_Renderer {
         // Indicador de histórico
         $history = get_post_meta( $appt->ID, '_dps_appointment_history', true );
         if ( is_array( $history ) && ! empty( $history ) ) {
-            echo ' <span class="dps-history-indicator" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Ver historico', 'dps-agenda-addon' ) . '">LOG ' . count( $history ) . '</span>';
+            echo ' <span class="dps-history-indicator" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Ver histórico', 'dps-agenda-addon' ) . '">LOG ' . count( $history ) . '</span>';
         }
 
         echo '</td>';
@@ -801,7 +801,7 @@ trait DPS_Agenda_Renderer {
      * @return string
      */
     private function render_agenda_time_cell( $time, $is_late ) {
-        $html  = '<td class="dps-agenda-cell dps-agenda-cell--time" data-label="' . esc_attr__( 'Horario', 'dps-agenda-addon' ) . '">';
+        $html  = '<td class="dps-agenda-cell dps-agenda-cell--time" data-label="' . esc_attr__( 'Horário', 'dps-agenda-addon' ) . '">';
         $html .= '<div class="dps-agenda-time-block">';
         $html .= '<strong class="dps-agenda-time-block__value">' . esc_html( $time ) . '</strong>';
         if ( $is_late ) {
@@ -934,6 +934,9 @@ trait DPS_Agenda_Renderer {
         $total_fmt        = number_format_i18n( $total_val, 2 );
         $notes            = get_post_meta( $appt->ID, 'appointment_notes', true );
         $taxidog          = get_post_meta( $appt->ID, 'appointment_taxidog', true );
+        $taxidog_status   = class_exists( 'DPS_Agenda_TaxiDog_Helper' ) ? DPS_Agenda_TaxiDog_Helper::get_taxidog_status( $appt->ID ) : ( $taxidog ? 'requested' : 'none' );
+        $taxidog_config   = class_exists( 'DPS_Agenda_TaxiDog_Helper' ) && method_exists( 'DPS_Agenda_TaxiDog_Helper', 'get_taxidog_badge_config' ) ? DPS_Agenda_TaxiDog_Helper::get_taxidog_badge_config( $taxidog_status ) : [];
+        $taxidog_label    = ! empty( $taxidog_config['label'] ) ? $taxidog_config['label'] : ( $taxidog ? __( 'TaxiDog solicitado', 'dps-agenda-addon' ) : __( 'Sem TaxiDog', 'dps-agenda-addon' ) );
         $client_name      = $client_post ? $client_post->post_title : '';
         $pet_name         = $pet_post ? $pet_post->post_title : '';
         $client_phone     = $client_post ? get_post_meta( $client_post->ID, 'client_phone', true ) : '';
@@ -1005,6 +1008,8 @@ trait DPS_Agenda_Renderer {
             'total_fmt'       => $total_fmt,
             'notes'           => $notes,
             'taxidog'         => $taxidog,
+            'taxidog_status'  => $taxidog_status,
+            'taxidog_label'   => $taxidog_label,
             'confirmation'    => $confirmation,
             'has_checkin'     => $has_checkin,
             'has_checkout'    => $has_checkout,
@@ -1036,12 +1041,23 @@ trait DPS_Agenda_Renderer {
             'data-dps-date'      => $data['date'],
             'data-dps-time'      => $data['time'],
             'data-dps-stage'     => $data['stage_label'],
+            'data-dps-stage-class' => $data['stage_class'],
             'data-dps-service'   => $data['service_label'],
+            'data-dps-service-count' => $data['service_count'],
             'data-dps-payment'   => $this->get_operational_payment_label( $data ),
-            'data-dps-logistics' => $data['address'] ? $data['address'] : ( $data['taxidog'] ? __( 'TaxiDog solicitado', 'dps-agenda-addon' ) : __( 'Sem endereço para logística', 'dps-agenda-addon' ) ),
             'data-dps-notes'     => $data['notes'] ? wp_strip_all_tags( $data['notes'] ) : __( 'Sem observações registradas.', 'dps-agenda-addon' ),
             'data-dps-progress'  => $data['progress'],
+            'data-dps-checkin'   => $this->get_operational_check_label( $data, 'checkin' ),
+            'data-dps-checkout'  => $this->get_operational_check_label( $data, 'checkout' ),
+            'data-dps-reworks'   => $data['rework_count'] > 0 ? sprintf( _n( '%d retrabalho', '%d retrabalhos', $data['rework_count'], 'dps-agenda-addon' ), $data['rework_count'] ) : __( 'Sem retrabalho', 'dps-agenda-addon' ),
             'data-dps-taxidog'   => $data['taxidog'] ? '1' : '0',
+            'data-dps-logistics' => $this->get_operational_logistics_label( $data ),
+            'data-dps-taxidog-status' => $data['taxidog_status'],
+            'data-dps-taxidog-label'  => $data['taxidog_label'],
+            'data-dps-address'   => $data['address'],
+            'data-dps-map-url'   => $data['map_url'],
+            'data-dps-route-url' => $data['route_url'],
+            'data-dps-extra-actions' => __( 'Mais: serviços, checklist operacional, check-in/check-out, logística, reagendar e histórico.', 'dps-agenda-addon' ),
             'data-dps-late'      => $data['is_late'] ? '1' : '0',
         ];
 
@@ -1051,6 +1067,67 @@ trait DPS_Agenda_Renderer {
         }
 
         return $html;
+    }
+
+    /**
+     * Retorna label operacional de check-in/check-out.
+     *
+     * @param array  $data  Dados preparados do atendimento.
+     * @param string $stage checkin|checkout.
+     * @return string
+     */
+    private function get_operational_check_label( $data, $stage ) {
+        $is_checkout = 'checkout' === $stage;
+        $has_stage   = $is_checkout ? $data['has_checkout'] : $data['has_checkin'];
+        $stage_data  = $is_checkout ? $data['checkout_data'] : $data['checkin_data'];
+        $fallback    = $is_checkout ? __( 'Check-out pendente', 'dps-agenda-addon' ) : __( 'Check-in pendente', 'dps-agenda-addon' );
+
+        if ( ! $has_stage || empty( $stage_data['time'] ) ) {
+            return $fallback;
+        }
+
+        return sprintf(
+            $is_checkout ? __( 'Check-out %s', 'dps-agenda-addon' ) : __( 'Check-in %s', 'dps-agenda-addon' ),
+            mysql2date( 'H:i', $stage_data['time'] )
+        );
+    }
+
+    /**
+     * Retorna label de logistica para card, inspetor e dialogos.
+     *
+     * @param array $data Dados preparados do atendimento.
+     * @return string
+     */
+    private function get_operational_logistics_label( $data ) {
+        if ( ! empty( $data['address'] ) ) {
+            return $data['address'];
+        }
+
+        if ( ! empty( $data['taxidog'] ) ) {
+            return ! empty( $data['taxidog_label'] ) ? $data['taxidog_label'] : __( 'TaxiDog solicitado', 'dps-agenda-addon' );
+        }
+
+        return __( 'Sem endereÃ§o para logÃ­stica', 'dps-agenda-addon' );
+    }
+
+    /**
+     * Renderiza uma linha acionavel no resumo do inspetor operacional.
+     *
+     * @param string $label   Label do campo.
+     * @param string $field   Campo sincronizado pelo JS.
+     * @param string $action  Acao do modal.
+     * @param string $value   Valor visivel.
+     * @param int    $appt_id ID do atendimento.
+     * @return string
+     */
+    private function render_operational_inspector_fact_action( $label, $field, $action, $value, $appt_id ) {
+        $aria_label = sprintf(
+            /* translators: %s: resumo field label. */
+            __( 'Abrir modal de %s do atendimento', 'dps-agenda-addon' ),
+            $label
+        );
+
+        return '<div><dt>' . esc_html( $label ) . '</dt><dd><button type="button" class="dps-operational-inspector__fact-action" data-inspector-action="' . esc_attr( $action ) . '" data-inspector-field="' . esc_attr( $field ) . '" data-appt-id="' . esc_attr( $appt_id ) . '" aria-label="' . esc_attr( $aria_label ) . '">' . esc_html( $value ) . '</button></dd></div>';
     }
 
     /**
@@ -1099,7 +1176,17 @@ trait DPS_Agenda_Renderer {
     }
 
     /**
-     * Renderiza a ação primária da linha canônica.
+     * Define se a acao financeira deve aparecer no fluxo operacional.
+     *
+     * @param array $data Dados preparados do atendimento.
+     * @return bool
+     */
+    private function should_render_operational_payment_action( $data ) {
+        return 'finalizado' === $data['status'] && ! $data['is_subscription'];
+    }
+
+    /**
+     * Renderiza a acao de cobranca da linha canonica.
      *
      * @param array $data Dados preparados do atendimento.
      * @return string
@@ -1129,32 +1216,73 @@ trait DPS_Agenda_Renderer {
         return $html;
     }
 
-    private function render_operational_primary_action( $data ) {
+    /**
+     * Renderiza o botao multifuncao do fluxo operacional.
+     *
+     * @param array $data Dados preparados do atendimento.
+     * @return string
+     */
+    private function render_operational_workflow_action( $data ) {
         if ( 'cancelado' === $data['status'] ) {
-            return $this->render_agenda_reschedule_cta( $data['id'], $data['date'], $data['time'] );
+            $reopen_status = $this->get_cancelled_reopen_status( $data['id'] );
+
+            return '<button type="button" class="dps-agenda-flow-action dps-agenda-flow-action--cancelled" data-appt-id="' . esc_attr( $data['id'] ) . '" data-workflow-step="cancelled" data-appt-version="' . esc_attr( $data['version'] ) . '" data-date="' . esc_attr( $data['date'] ) . '" data-time="' . esc_attr( $data['time'] ) . '" data-reopen-status="' . esc_attr( $reopen_status ) . '" aria-haspopup="dialog" title="' . esc_attr__( 'Reagendar ou reabrir atendimento cancelado', 'dps-agenda-addon' ) . '">' . esc_html__( 'Cancelado', 'dps-agenda-addon' ) . '</button>';
         }
 
         if ( 'confirmed' !== $data['confirmation'] ) {
-            return '<button type="button" class="dps-agenda-primary-action dps-agenda-primary-action--confirm dps-agenda-primary-confirm" data-appt-id="' . esc_attr( $data['id'] ) . '">' . esc_html__( 'Confirmar', 'dps-agenda-addon' ) . '</button>';
+            return '<button type="button" class="dps-agenda-flow-action dps-agenda-flow-action--confirm" data-appt-id="' . esc_attr( $data['id'] ) . '" data-workflow-step="confirm" aria-haspopup="dialog">' . esc_html__( 'Confirmar', 'dps-agenda-addon' ) . '</button>';
         }
 
-        if ( ! $data['has_checkin'] ) {
-            return '<button type="button" class="dps-agenda-primary-action dps-operation-action-btn dps-operation-action-btn--checkin" data-appt-id="' . esc_attr( $data['id'] ) . '" data-operation-focus="checkin" aria-haspopup="dialog">' . esc_html__( 'Iniciar check-in', 'dps-agenda-addon' ) . '</button>';
+        if ( 'finalizado_pago' === $data['status'] ) {
+            return '<button type="button" class="dps-agenda-flow-action dps-agenda-flow-action--paid" data-appt-id="' . esc_attr( $data['id'] ) . '" data-workflow-step="finalize" data-appt-version="' . esc_attr( $data['version'] ) . '" aria-haspopup="dialog" title="' . esc_attr__( 'Finalizado e pago', 'dps-agenda-addon' ) . '">' . esc_html__( 'Pago', 'dps-agenda-addon' ) . '</button>';
         }
 
-        if ( ! in_array( $data['status'], [ 'finalizado', 'finalizado_pago' ], true ) ) {
-            return '<button type="button" class="dps-agenda-primary-action dps-agenda-primary-action--finish dps-agenda-finalize-btn" data-appt-id="' . esc_attr( $data['id'] ) . '" data-appt-version="' . esc_attr( $data['version'] ) . '">' . esc_html__( 'Finalizar', 'dps-agenda-addon' ) . '</button>';
+        if ( 'finalizado' === $data['status'] ) {
+            return '<button type="button" class="dps-agenda-flow-action dps-agenda-flow-action--finalized" data-appt-id="' . esc_attr( $data['id'] ) . '" data-workflow-step="finalize" data-appt-version="' . esc_attr( $data['version'] ) . '" aria-haspopup="dialog">' . esc_html__( 'Finalizado', 'dps-agenda-addon' ) . '</button>';
         }
 
-        if ( 'finalizado' === $data['status'] && ! $data['is_subscription'] ) {
-            return $this->render_operational_payment_action( $data );
-        }
-
-        return '<button type="button" class="dps-agenda-primary-action dps-operation-modal-btn dps-expand-panels-btn--done" data-appt-id="' . esc_attr( $data['id'] ) . '" data-operation-focus="checklist" aria-haspopup="dialog">' . esc_html__( 'Revisar operação', 'dps-agenda-addon' ) . '</button>';
+        return '<button type="button" class="dps-agenda-flow-action dps-agenda-flow-action--finish" data-appt-id="' . esc_attr( $data['id'] ) . '" data-workflow-step="finalize" data-appt-version="' . esc_attr( $data['version'] ) . '" aria-haspopup="dialog">' . esc_html__( 'Finalizar', 'dps-agenda-addon' ) . '</button>';
     }
 
     /**
-     * Renderiza a linha canônica da Agenda operacional.
+     * Renderiza o atalho principal de check-in/check-out antes da alteracao de status.
+     *
+     * @param array $data Dados preparados do atendimento.
+     * @return string
+     */
+    private function render_operational_checkio_action( $data ) {
+        if ( empty( $data['has_checkin'] ) ) {
+            $stage    = 'checkin';
+            $modifier = 'checkin';
+            $label    = __( 'Check-in', 'dps-agenda-addon' );
+            $title    = __( 'Registrar check-in do atendimento', 'dps-agenda-addon' );
+        } elseif ( empty( $data['has_checkout'] ) ) {
+            $stage    = 'choice';
+            $modifier = 'checkout';
+            $label    = __( 'Check-out', 'dps-agenda-addon' );
+            $title    = __( 'Registrar check-out ou editar o check-in', 'dps-agenda-addon' );
+        } else {
+            $stage    = 'choice';
+            $modifier = 'edit';
+            $label    = __( 'Editar check-in/out', 'dps-agenda-addon' );
+            $title    = __( 'Editar check-in ou check-out', 'dps-agenda-addon' );
+        }
+
+        $html  = '<button type="button" class="dps-agenda-checkio-action dps-agenda-checkio-action--' . esc_attr( $modifier ) . '"';
+        $html .= ' data-appt-id="' . esc_attr( $data['id'] ) . '"';
+        $html .= ' data-checkio-stage="' . esc_attr( $stage ) . '"';
+        $html .= ' data-operation-focus="' . esc_attr( 'checkin' === $stage ? 'checkin' : 'checkinout' ) . '"';
+        $html .= ' data-has-checkin="' . esc_attr( ! empty( $data['has_checkin'] ) ? '1' : '0' ) . '"';
+        $html .= ' data-has-checkout="' . esc_attr( ! empty( $data['has_checkout'] ) ? '1' : '0' ) . '"';
+        $html .= ' aria-haspopup="dialog" title="' . esc_attr( $title ) . '">';
+        $html .= esc_html( $label );
+        $html .= '</button>';
+
+        return $html;
+    }
+
+    /**
+     * Renderiza a linha canonica da Agenda operacional.
      *
      * @param WP_Post $appt          Agendamento.
      * @param array   $column_labels Labels das colunas.
@@ -1193,8 +1321,7 @@ trait DPS_Agenda_Renderer {
         echo '<span class="dps-operational-muted">' . esc_html( $data['notes'] ? wp_trim_words( $data['notes'], 8, '...' ) : __( 'Sem observações', 'dps-agenda-addon' ) ) . '</span>';
         echo '</td>';
 
-        echo '<td class="dps-agenda-cell dps-agenda-cell--stage" data-label="' . esc_attr__( 'Etapa', 'dps-agenda-addon' ) . '">';
-        echo '<span class="dps-operational-stage dps-operational-stage--' . esc_attr( $data['stage_class'] ) . '">' . esc_html( $data['stage_label'] ) . '</span>';
+        echo '<td class="dps-agenda-cell dps-agenda-cell--stage" data-label="' . esc_attr__( 'Status', 'dps-agenda-addon' ) . '">';
         echo '<div class="dps-operational-selects">';
         echo '<select class="dps-confirmation-dropdown dps-dropdown--' . esc_attr( $confirmation_class ) . '" data-appt-id="' . esc_attr( $data['id'] ) . '" aria-label="' . esc_attr__( 'Status de confirmação', 'dps-agenda-addon' ) . '">';
         echo '<option value="confirmed"' . selected( $data['confirmation'], 'confirmed', false ) . '>' . esc_html__( 'Confirmado', 'dps-agenda-addon' ) . '</option>';
@@ -1255,7 +1382,11 @@ trait DPS_Agenda_Renderer {
 
         echo '<td class="dps-agenda-cell dps-agenda-cell--actions" data-label="' . esc_attr__( 'Ações', 'dps-agenda-addon' ) . '">';
         echo '<div class="dps-agenda-row-actions dps-agenda-row-actions--canonical">';
-        echo $this->render_operational_primary_action( $data );
+        echo $this->render_operational_checkio_action( $data );
+        echo $this->render_operational_workflow_action( $data );
+        if ( $this->should_render_operational_payment_action( $data ) ) {
+            echo $this->render_operational_payment_action( $data );
+        }
         echo '<button type="button" class="dps-agenda-action-link dps-agenda-action-link--secondary dps-agenda-secondary-actions" data-appt-id="' . esc_attr( $data['id'] ) . '" aria-haspopup="dialog">' . esc_html__( 'Mais', 'dps-agenda-addon' ) . '</button>';
         echo '</div>';
         echo '</td>';
@@ -1277,31 +1408,57 @@ trait DPS_Agenda_Renderer {
         ob_start();
 
         echo '<article class="dps-operational-card status-' . esc_attr( $data['status'] ) . ( $data['is_late'] ? ' is-late' : '' ) . '"' . $this->render_operational_data_attrs( $data ) . '>';
-        echo '<header class="dps-operational-card__header">';
-        echo '<div class="dps-agenda-time-block"><strong class="dps-agenda-time-block__value">' . esc_html( $data['time'] ) . '</strong>';
+        echo '<header class="dps-operational-card__header dps-operational-card__header--compact">';
+        echo '<div class="dps-operational-card__identity">';
+        echo '<span class="dps-operational-card__time">' . esc_html( $data['time'] ) . '</span>';
+        echo '<div class="dps-operational-card__pet">';
+        echo $this->render_pet_profile_trigger( $data['pet_post'], $data['client_post'] );
+        echo '</div>';
         if ( $data['is_late'] ) {
             echo '<span class="dps-agenda-time-block__meta">' . esc_html__( 'Atrasado', 'dps-agenda-addon' ) . '</span>';
         }
         echo '</div>';
-        echo '<span class="dps-operational-stage dps-operational-card__stage dps-operational-stage--' . esc_attr( $data['stage_class'] ) . '">' . esc_html( $data['stage_label'] ) . '</span>';
         echo '</header>';
 
-        echo '<div class="dps-operational-card__body">';
-        echo '<div class="dps-agenda-pet-stack">';
-        echo $this->render_pet_profile_trigger( $data['pet_post'], $data['client_post'] );
-        if ( $data['client_name'] ) {
-            echo '<p class="dps-agenda-pet-owner"><span class="dps-agenda-pet-owner__label">' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</span><span class="dps-agenda-pet-owner__value">' . esc_html( $data['client_name'] ) . '</span></p>';
-        }
-        echo '</div>';
-        echo '</div>';
-
         echo '<footer class="dps-operational-card__actions">';
-        echo $this->render_operational_primary_action( $data );
+        echo $this->render_operational_checkio_action( $data );
+        echo $this->render_operational_workflow_action( $data );
+        if ( $this->should_render_operational_payment_action( $data ) ) {
+            echo $this->render_operational_payment_action( $data );
+        }
         echo '<button type="button" class="dps-agenda-action-link dps-agenda-action-link--secondary dps-agenda-secondary-actions" data-appt-id="' . esc_attr( $data['id'] ) . '" aria-haspopup="dialog">' . esc_html__( 'Mais', 'dps-agenda-addon' ) . '</button>';
         echo '</footer>';
         echo '</article>';
 
         return ob_get_clean();
+    }
+
+    /**
+     * Retorna o rótulo legível de uma ação do histórico operacional.
+     *
+     * @param string $action Ação registrada.
+     * @return string
+     */
+    private function get_operational_history_action_label( $action ) {
+        $action = sanitize_key( (string) $action );
+
+        $labels = [
+            'created'             => __( 'Criado', 'dps-agenda-addon' ),
+            'status_change'       => __( 'Status alterado', 'dps-agenda-addon' ),
+            'confirmation_change' => __( 'Confirmação alterada', 'dps-agenda-addon' ),
+            'rescheduled'         => __( 'Reagendado', 'dps-agenda-addon' ),
+            'taxidog_update'      => __( 'TaxiDog atualizado', 'dps-agenda-addon' ),
+            'taxidog_requested'   => __( 'TaxiDog solicitado', 'dps-agenda-addon' ),
+            'payment_resend'      => __( 'Cobrança reenviada', 'dps-agenda-addon' ),
+            'checklist_update'    => __( 'Checklist atualizado', 'dps-agenda-addon' ),
+            'checklist_rework'    => __( 'Retrabalho registrado', 'dps-agenda-addon' ),
+            'checkin_created'     => __( 'Check-in registrado', 'dps-agenda-addon' ),
+            'checkin_updated'     => __( 'Check-in atualizado', 'dps-agenda-addon' ),
+            'checkout_created'    => __( 'Check-out registrado', 'dps-agenda-addon' ),
+            'checkout_updated'    => __( 'Check-out atualizado', 'dps-agenda-addon' ),
+        ];
+
+        return $labels[ $action ] ?? __( 'Registro operacional', 'dps-agenda-addon' );
     }
 
     /**
@@ -1326,18 +1483,25 @@ trait DPS_Agenda_Renderer {
         echo '<p data-inspector-field="tutor">' . esc_html( $data['client_name'] ? $data['client_name'] : __( 'Tutor não definido', 'dps-agenda-addon' ) ) . '</p>';
         echo '</header>';
         echo '<div class="dps-operational-inspector__body">';
-        echo '<section class="dps-operational-inspector__section"><span>' . esc_html__( 'Etapa', 'dps-agenda-addon' ) . '</span><strong data-inspector-field="stage">' . esc_html( $data['stage_label'] ) . '</strong></section>';
-        echo '<section class="dps-operational-inspector__section"><span>' . esc_html__( 'Serviços', 'dps-agenda-addon' ) . '</span><strong data-inspector-field="service">' . esc_html( $data['service_label'] ) . '</strong></section>';
-        echo '<section class="dps-operational-inspector__section"><span>' . esc_html__( 'Financeiro', 'dps-agenda-addon' ) . '</span><strong data-inspector-field="payment">' . esc_html( $this->get_operational_payment_label( $data ) ) . '</strong></section>';
-        echo '<section class="dps-operational-inspector__section"><span>' . esc_html__( 'Logística', 'dps-agenda-addon' ) . '</span><strong data-inspector-field="logistics">' . esc_html( $data['address'] ? $data['address'] : ( $data['taxidog'] ? __( 'TaxiDog solicitado', 'dps-agenda-addon' ) : __( 'Sem endereço para logística', 'dps-agenda-addon' ) ) ) . '</strong></section>';
-        echo '<section class="dps-operational-inspector__section"><span>' . esc_html__( 'Checklist', 'dps-agenda-addon' ) . '</span><div class="dps-operational-progress"><span data-inspector-field="progress">' . esc_html( $data['progress'] ) . '%</span><div class="dps-operational-progress__bar"><span data-inspector-progress-bar style="width:' . esc_attr( $data['progress'] ) . '%"></span></div></div></section>';
+        echo '<section class="dps-operational-inspector__section dps-operational-inspector__section--stage dps-operational-inspector__section--stage-' . esc_attr( $data['stage_class'] ) . '" data-inspector-section="stage"><span>' . esc_html__( 'Etapa', 'dps-agenda-addon' ) . '</span><strong data-inspector-field="stage">' . esc_html( $data['stage_label'] ) . '</strong></section>';
+        echo '<section class="dps-operational-inspector__section dps-operational-inspector__section--context"><span>' . esc_html__( 'Resumo', 'dps-agenda-addon' ) . '</span><dl class="dps-operational-inspector__facts">';
+        echo $this->render_operational_inspector_fact_action( __( 'Serviços', 'dps-agenda-addon' ), 'service', 'services', $data['service_label'], $data['id'] );
+        echo $this->render_operational_inspector_fact_action( __( 'Financeiro', 'dps-agenda-addon' ), 'payment', 'payment', $this->get_operational_payment_label( $data ), $data['id'] );
+        echo $this->render_operational_inspector_fact_action( __( 'Logística', 'dps-agenda-addon' ), 'logistics', 'logistics', $this->get_operational_logistics_label( $data ), $data['id'] );
+        echo '</dl></section>';
+        echo '<section class="dps-operational-inspector__section"><span>' . esc_html__( 'Checklist Operacional', 'dps-agenda-addon' ) . '</span><div class="dps-operational-progress"><span data-inspector-field="progress">' . esc_html( $data['progress'] ) . '%</span><div class="dps-operational-progress__bar"><span data-inspector-progress-bar style="width:' . esc_attr( $data['progress'] ) . '%"></span></div></div><div class="dps-operational-inspector__meta"><span data-inspector-field="reworks">' . esc_html( $data['rework_count'] > 0 ? sprintf( _n( '%d retrabalho', '%d retrabalhos', $data['rework_count'], 'dps-agenda-addon' ), $data['rework_count'] ) : __( 'Sem retrabalho', 'dps-agenda-addon' ) ) . '</span></div></section>';
+        echo '<section class="dps-operational-inspector__section"><span>' . esc_html__( 'Check-in / Check-out', 'dps-agenda-addon' ) . '</span><div class="dps-operational-inspector__meta"><span data-inspector-field="checkin">' . esc_html( $this->get_operational_check_label( $data, 'checkin' ) ) . '</span><span data-inspector-field="checkout">' . esc_html( $this->get_operational_check_label( $data, 'checkout' ) ) . '</span></div></section>';
+        echo '<section class="dps-operational-inspector__section"><span>' . esc_html__( 'Ações extras', 'dps-agenda-addon' ) . '</span><p data-inspector-field="extras">' . esc_html__( 'MAIS: serviços, checklist operacional, check-in/check-out, logística, reagendar e histórico.', 'dps-agenda-addon' ) . '</p></section>';
         echo '<section class="dps-operational-inspector__section"><span>' . esc_html__( 'Observações', 'dps-agenda-addon' ) . '</span><p data-inspector-field="notes">' . esc_html( $data['notes'] ? $data['notes'] : __( 'Sem observações registradas.', 'dps-agenda-addon' ) ) . '</p></section>';
         echo '<section class="dps-operational-inspector__section"><span>' . esc_html__( 'Últimos logs', 'dps-agenda-addon' ) . '</span>';
         if ( ! empty( $data['history'] ) ) {
             echo '<ul class="dps-operational-log">';
             foreach ( $data['history'] as $entry ) {
-                $label = isset( $entry['action'] ) ? $entry['action'] : __( 'Registro', 'dps-agenda-addon' );
-                $time  = isset( $entry['timestamp'] ) ? $entry['timestamp'] : '';
+                $label = $this->get_operational_history_action_label( $entry['action'] ?? '' );
+                $time  = $entry['date'] ?? ( $entry['timestamp'] ?? '' );
+                if ( $time ) {
+                    $time = date_i18n( 'd/m H:i', strtotime( $time ) );
+                }
                 echo '<li>' . esc_html( trim( $label . ' ' . $time ) ) . '</li>';
             }
             echo '</ul>';

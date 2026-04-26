@@ -1,0 +1,69 @@
+{
+  "runtime_url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=week&codex_bust=pet-evidence-20260424-0003",
+  "appointment_id": 1667,
+  "feature": "Evidencias do pet no Check-in / Check-out",
+  "upload_result": {
+    "uploaded": true,
+    "stage": "checkin",
+    "safety_slug": "pulgas",
+    "active_cards_after_upload": 1
+  },
+  "remove_result": {
+    "removed_from_active_list": true,
+    "active_cards_after_remove": 0,
+    "stored_records_after_remove": 1,
+    "active_records_after_remove": 0
+  },
+  "history_result": {
+    "pet_evidence_added": true,
+    "pet_evidence_removed": true,
+    "field_label": "Evidencia visual do pet",
+    "old_value_visible": true,
+    "new_value_visible": true,
+    "manual_source_visible": true
+  },
+  "responsive": [
+    {
+      "size": 375,
+      "horizontal_overflow": false,
+      "evidence_panels": 14,
+      "upload_buttons": 14,
+      "overflowing_buttons": 0
+    },
+    {
+      "size": 600,
+      "horizontal_overflow": false,
+      "evidence_panels": 14,
+      "upload_buttons": 14,
+      "overflowing_buttons": 0
+    },
+    {
+      "size": 840,
+      "horizontal_overflow": false,
+      "evidence_panels": 14,
+      "upload_buttons": 14,
+      "overflowing_buttons": 0
+    },
+    {
+      "size": 1200,
+      "horizontal_overflow": false,
+      "evidence_panels": 14,
+      "upload_buttons": 14,
+      "overflowing_buttons": 0
+    },
+    {
+      "size": 1920,
+      "horizontal_overflow": false,
+      "evidence_panels": 14,
+      "upload_buttons": 14,
+      "overflowing_buttons": 0
+    }
+  ],
+  "console_notes": [
+    "Foram observados erros CORS externos de Google Ads e Mixpanel ja existentes no runtime; nenhuma falha funcional da Agenda foi associada ao fluxo de evidencias."
+  ],
+  "cleanup": {
+    "temporary_wp_user_removed": true,
+    "local_temp_files_removed": true
+  }
+}

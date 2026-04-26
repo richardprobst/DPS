@@ -4995,7 +4995,7 @@ tr.dps-row-updated {
 
 
 
-/* === Modal de Popup de Servicos === */
+/* === Modal de popup de serviços === */
 
 .dps-agenda-dialog--pet-profile {
 
@@ -7421,7 +7421,7 @@ tr.dps-row-updated {
 
     overflow: hidden;
 
-    animation: dpsAgendaHeaderSurfaceShift 18s var(--dps-motion-easing-expressive-slow) infinite alternate;
+    animation: dpsAgendaHeaderSurfaceShift 18s var(--dps-motion-easing-signature-slow) infinite alternate;
 
 }
 
@@ -7461,7 +7461,7 @@ tr.dps-row-updated {
 
     opacity: 0.64;
 
-    animation: dpsAgendaHeaderWavePrimary 20s var(--dps-motion-easing-expressive-default) infinite alternate;
+    animation: dpsAgendaHeaderWavePrimary 20s var(--dps-motion-easing-signature-default) infinite alternate;
 
 }
 
@@ -7481,7 +7481,7 @@ tr.dps-row-updated {
 
     opacity: 0.46;
 
-    animation: dpsAgendaHeaderWaveSecondary 28s var(--dps-motion-easing-expressive-slow) infinite alternate;
+    animation: dpsAgendaHeaderWaveSecondary 28s var(--dps-motion-easing-signature-slow) infinite alternate;
 
 }
 
@@ -8515,7 +8515,7 @@ tr.dps-row-updated {
 
 
 
-/* === Ajustes DPS Signature: Coluna Servicos e Modal de Servicos === */
+/* === Ajustes DPS Signature: coluna Serviços e modal de Serviços === */
 
 .dps-services-popup-btn {
 
@@ -10898,6 +10898,8 @@ tr.dps-row-updated {
 }
 
 .dps-agenda-primary-action,
+.dps-agenda-checkio-action,
+.dps-agenda-flow-action,
 .dps-agenda-secondary-actions {
     min-height: 42px;
     border: 1px solid var(--dps-color-petrol, #173042);
@@ -10913,20 +10915,294 @@ tr.dps-row-updated {
     text-align: center;
 }
 
+.dps-agenda-checkio-action {
+    border-color: var(--dps-color-petrol, #173042);
+    background: var(--dps-color-petrol, #173042);
+    color: #fffaf2;
+}
+
+.dps-agenda-checkio-action--edit {
+    border-color: color-mix(in srgb, var(--dps-color-sky, #bdd8e7) 72%, var(--dps-color-petrol, #173042));
+    background: color-mix(in srgb, var(--dps-color-sky, #bdd8e7) 20%, #fffaf2);
+    color: var(--dps-color-petrol, #173042);
+}
+
+.dps-agenda-flow-action {
+    background: transparent;
+    color: var(--dps-color-petrol, #173042);
+}
+
 .dps-agenda-secondary-actions {
     background: transparent;
     color: var(--dps-color-petrol, #173042);
 }
 
-.dps-agenda-primary-action--finish {
+.dps-agenda-primary-action--finish,
+.dps-agenda-flow-action--confirm,
+.dps-agenda-flow-action--finish {
     border-color: var(--dps-color-action, #1f8c57);
     background: var(--dps-color-action, #1f8c57);
+    color: #fffaf2;
+}
+
+.dps-agenda-flow-action--finalized,
+.dps-agenda-flow-action--paid {
+    border-color: var(--dps-color-action, #1f8c57);
+    background: rgba(31, 140, 87, .08);
+    color: var(--dps-color-action, #1f8c57);
+}
+
+.dps-agenda-flow-action--cancelled {
+    border-color: var(--dps-color-danger, #a44439);
+    background: rgba(164, 68, 57, .08);
+    color: var(--dps-color-danger, #a44439);
+}
+
+.dps-agenda-flow-action--reschedule {
+    border-color: var(--dps-color-warning, #8a6622);
+    background: rgba(138, 102, 34, .08);
+    color: var(--dps-color-warning, #8a6622);
 }
 
 .dps-secondary-action-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
+}
+
+.dps-secondary-action-panel {
+    display: grid;
+    gap: 14px;
+}
+
+.dps-secondary-action-summary {
+    display: grid;
+    gap: 4px;
+    padding: 12px;
+    border: 1px solid var(--dps-color-line, #d9ccba);
+    background: #fffaf2;
+}
+
+.dps-secondary-action-summary strong {
+    color: var(--dps-color-ink, #11161c);
+    font-size: 14px;
+    line-height: 1.3;
+}
+
+.dps-secondary-action-summary span {
+    color: #65717d;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.dps-secondary-action-grid--complete {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dps-secondary-action-card {
+    display: grid;
+    gap: 6px;
+    min-height: 72px;
+    padding: 12px;
+    border: 1px solid var(--dps-color-line, #d9ccba);
+    border-radius: 0;
+    background: #fffaf2;
+    color: var(--dps-color-petrol, #173042);
+    text-align: left;
+    cursor: pointer;
+}
+
+.dps-secondary-action-card:hover,
+.dps-secondary-action-card:focus-visible {
+    border-color: var(--dps-color-petrol, #173042);
+    background: #fbf6ee;
+}
+
+.dps-secondary-action-card--primary {
+    border-color: color-mix(in srgb, var(--dps-color-petrol, #173042) 42%, var(--dps-color-line, #d9ccba));
+}
+
+.dps-secondary-action-card__title {
+    color: inherit;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    line-height: 1.25;
+    text-transform: uppercase;
+}
+
+.dps-secondary-action-card small {
+    color: #65717d;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.dps-checkio-choice-panel {
+    display: grid;
+    gap: 14px;
+}
+
+.dps-checkio-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.dps-checkio-choice-card {
+    display: grid;
+    gap: 6px;
+    min-height: 88px;
+    padding: 14px;
+    border: 1px solid color-mix(in srgb, var(--dps-color-petrol, #173042) 42%, var(--dps-color-line, #d9ccba));
+    border-radius: 0;
+    background: #fffaf2;
+    color: var(--dps-color-petrol, #173042);
+    text-align: left;
+    cursor: pointer;
+}
+
+.dps-checkio-choice-card:hover,
+.dps-checkio-choice-card:focus-visible {
+    border-color: var(--dps-color-petrol, #173042);
+    background: #fbf6ee;
+}
+
+.dps-checkio-choice-card--disabled,
+.dps-checkio-choice-card:disabled {
+    cursor: not-allowed;
+    opacity: .58;
+}
+
+.dps-checkio-choice-card__title {
+    color: inherit;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    line-height: 1.25;
+    text-transform: uppercase;
+}
+
+.dps-checkio-choice-card small {
+    color: #65717d;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.dps-secondary-logistics-panel {
+    display: grid;
+    gap: 14px;
+}
+
+.dps-secondary-logistics-facts {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+}
+
+.dps-secondary-logistics-facts div {
+    display: grid;
+    gap: 4px;
+    padding: 12px;
+    border: 1px solid var(--dps-color-line, #d9ccba);
+    background: #fffaf2;
+}
+
+.dps-secondary-logistics-facts dt {
+    color: #65717d;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.dps-secondary-logistics-facts dd {
+    margin: 0;
+    color: var(--dps-color-ink, #11161c);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.dps-secondary-logistics-links,
+.dps-secondary-logistics-actions {
+    display: grid;
+    gap: 8px;
+}
+
+.dps-secondary-logistics-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 10px 12px;
+    border: 1px solid var(--dps-color-petrol, #173042);
+    background: var(--dps-color-petrol, #173042);
+    color: #fffaf2;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.dps-secondary-logistics-link--route {
+    background: transparent;
+    color: var(--dps-color-petrol, #173042);
+}
+
+.dps-secondary-logistics-empty {
+    margin: 0;
+    padding: 12px;
+    border: 1px solid var(--dps-color-line, #d9ccba);
+    color: #65717d;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.dps-workflow-dialog-copy {
+    margin: 0 0 12px;
+    color: var(--dps-color-ink, #11161c);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.dps-workflow-action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.dps-workflow-action-grid--status {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dps-workflow-action-grid .dps-agenda-dialog__action--primary {
+    border-color: var(--dps-color-action, #1f8c57);
+    background: var(--dps-color-action, #1f8c57);
+    color: #fffaf2;
+}
+
+.dps-workflow-action-grid .dps-agenda-dialog__action--secondary {
+    border-color: var(--dps-color-line, #d9ccba);
+    background: #fffaf2;
+    color: var(--dps-color-petrol, #173042);
+}
+
+.dps-agenda-dialog--workflow .dps-agenda-dialog__action--primary {
+    border-color: var(--dps-color-action, #1f8c57);
+    background: var(--dps-color-action, #1f8c57);
+    color: #fffaf2;
+}
+
+.dps-agenda-dialog--workflow .dps-agenda-dialog__action--secondary {
+    border-color: var(--dps-color-line, #d9ccba);
+    background: #fffaf2;
+    color: var(--dps-color-petrol, #173042);
+}
+
+.dps-agenda-dialog__action--danger {
+    border-color: var(--dps-color-danger, #a44439);
+    background: var(--dps-color-danger, #a44439);
+    color: #fffaf2;
 }
 
 .dps-operational-inspector {
@@ -10977,6 +11253,54 @@ tr.dps-row-updated {
     padding: 14px;
 }
 
+.dps-operational-inspector__section--stage {
+    border-left: 5px solid var(--dps-color-line, #d9ccba);
+    background: #fffaf2;
+}
+
+.dps-operational-inspector__section.dps-operational-inspector__section--stage strong {
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.dps-operational-inspector__section--stage-confirm {
+    border-left-color: var(--dps-status-pending, #8a6622);
+    background: rgba(138, 102, 34, .08);
+}
+
+.dps-operational-inspector__section--stage-ready {
+    border-left-color: var(--dps-color-petrol, #173042);
+    background: rgba(189, 216, 231, .3);
+}
+
+.dps-operational-inspector__section--stage-service,
+.dps-operational-inspector__section--stage-done {
+    border-left-color: var(--dps-status-paid, #1f8c57);
+    background: rgba(31, 140, 87, .09);
+}
+
+.dps-operational-inspector__section--stage-danger {
+    border-left-color: var(--dps-status-cancelled, #a44439);
+    background: rgba(164, 68, 57, .09);
+}
+
+.dps-operational-inspector__section.dps-operational-inspector__section--stage-confirm strong {
+    color: var(--dps-status-pending, #8a6622);
+}
+
+.dps-operational-inspector__section.dps-operational-inspector__section--stage-ready strong {
+    color: var(--dps-color-petrol, #173042);
+}
+
+.dps-operational-inspector__section.dps-operational-inspector__section--stage-service strong,
+.dps-operational-inspector__section.dps-operational-inspector__section--stage-done strong {
+    color: var(--dps-status-paid, #1f8c57);
+}
+
+.dps-operational-inspector__section.dps-operational-inspector__section--stage-danger strong {
+    color: var(--dps-status-cancelled, #a44439);
+}
+
 .dps-operational-inspector__section > span {
     display: block;
     margin-bottom: 7px;
@@ -10993,6 +11317,82 @@ tr.dps-row-updated {
     color: var(--dps-color-ink, #11161c);
     font-size: 14px;
     line-height: 1.45;
+}
+
+.dps-operational-inspector__facts,
+.dps-operational-inspector__meta {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+}
+
+.dps-operational-inspector__facts div {
+    display: grid;
+    gap: 3px;
+}
+
+.dps-operational-inspector__facts dt {
+    color: #65717d;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.dps-operational-inspector__facts dd {
+    margin: 0;
+    color: var(--dps-color-ink, #11161c);
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.dps-operational-inspector__fact-action {
+    display: inline-block;
+    width: auto;
+    max-width: 100%;
+    min-height: 0;
+    margin: 0;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0;
+    background: transparent !important;
+    box-shadow: none;
+    color: var(--dps-color-ink, #11161c);
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.35;
+    text-align: left;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--dps-color-petrol, #173042) 34%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-transform: none;
+    cursor: pointer;
+}
+
+.dps-operational-inspector__fact-action:hover,
+.dps-operational-inspector__fact-action:focus-visible {
+    color: var(--dps-color-petrol, #173042);
+    text-decoration-color: currentColor;
+    outline: none;
+}
+
+.dps-operational-inspector__fact-action:focus-visible {
+    box-shadow: 0 2px 0 var(--dps-color-sky, #bdd8e7);
+}
+
+.dps-operational-inspector__meta {
+    margin-top: 10px;
+}
+
+.dps-operational-inspector__meta span {
+    padding-left: 10px;
+    border-left: 2px solid var(--dps-color-line, #d9ccba);
+    color: #65717d;
+    font-size: 12px;
+    line-height: 1.35;
 }
 
 .dps-operational-log {
@@ -11033,6 +11433,41 @@ tr.dps-row-updated {
     justify-content: space-between;
     gap: 12px;
     background: #fbf6ee;
+}
+
+.dps-operational-card__header--compact {
+    align-items: center;
+}
+
+.dps-operational-card__identity {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+}
+
+.dps-operational-card__time {
+    align-self: start;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 10px;
+    border: 1px solid rgba(23, 48, 66, 0.28);
+    border-left: 3px solid var(--dps-color-petrol, #173042);
+    background: var(--dps-color-paper, #f7f2ea);
+    color: var(--dps-color-petrol, #173042);
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.dps-operational-card__pet {
+    min-width: 0;
 }
 
 .dps-operational-card__stage {
@@ -11122,7 +11557,9 @@ tr.dps-row-updated {
 
     .dps-agenda-operational-filters,
     .dps-operational-card__actions,
-    .dps-secondary-action-grid {
+    .dps-secondary-action-grid,
+    .dps-workflow-action-grid,
+    .dps-workflow-action-grid--status {
         grid-template-columns: 1fr;
     }
 
@@ -11688,6 +12125,10 @@ tr.dps-operational-row.is-filter-hidden,
 }
 
 @media (max-width: 600px) {
+    .dps-checkio-choice-grid {
+        grid-template-columns: 1fr;
+    }
+
     .dps-view-buttons {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         width: 100%;
@@ -11771,36 +12212,31 @@ tr.dps-operational-row.is-filter-hidden,
 
     .dps-operational-card__header {
         display: grid;
-        grid-template-columns: minmax(92px, 112px) minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr);
         align-items: center;
         gap: 18px;
-        padding: 18px 24px 10px;
+        padding: 18px 24px 12px;
         border-bottom: 0;
         background: transparent;
     }
 
     .dps-operational-card__body {
-        display: grid;
-        grid-template-columns: minmax(0, 560px);
+        display: none;
+        grid-template-columns: minmax(0, 1fr);
         gap: 18px 24px;
         align-items: start;
-        padding: 0 24px 14px;
+        padding: 0;
         border-bottom: 0;
     }
 
     .dps-operational-card__actions {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
+        display: grid;
+        grid-template-columns: repeat(4, max-content);
+        align-items: stretch;
         gap: 10px;
-        max-width: 560px;
+        max-width: none;
         padding: 0 24px 18px;
         border-bottom: 0;
-    }
-
-    .dps-operational-card .dps-agenda-pet-stack {
-        gap: 10px;
-        padding-right: 16px;
     }
 
     .dps-operational-card .dps-pet-profile-trigger {
@@ -11816,6 +12252,8 @@ tr.dps-operational-row.is-filter-hidden,
     }
 
     .dps-operational-card__actions .dps-agenda-primary-action,
+    .dps-operational-card__actions .dps-agenda-checkio-action,
+    .dps-operational-card__actions .dps-agenda-flow-action,
     .dps-operational-card__actions .dps-agenda-secondary-actions {
         display: inline-flex;
         width: auto !important;
@@ -11842,6 +12280,30 @@ tr.dps-operational-row.is-filter-hidden,
 @media (max-width: 600px) {
     .dps-operational-card__actions {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-auto-rows: minmax(52px, auto);
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .dps-operational-card__actions .dps-agenda-primary-action,
+    .dps-operational-card__actions .dps-agenda-checkio-action,
+    .dps-operational-card__actions .dps-agenda-flow-action,
+    .dps-operational-card__actions .dps-agenda-secondary-actions {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100% !important;
+        min-width: 0;
+        min-height: 52px;
+        height: 100%;
+        padding: 8px 6px;
+        font-size: 10px;
+        line-height: 1.1;
+        letter-spacing: 0.035em;
+        white-space: nowrap;
+        overflow-wrap: normal;
+        word-break: normal;
+        hyphens: none;
     }
 }
 

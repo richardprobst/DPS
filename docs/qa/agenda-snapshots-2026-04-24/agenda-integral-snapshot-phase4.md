@@ -1,0 +1,29 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - navigation [ref=e7]:
+          - link "Desi Pet Shower" [ref=e9] [cursor=pointer]:
+            - /url: https://desi.pet/
+          - list [ref=e11]
+          - generic
+        - generic [ref=e21]:
+          - list [ref=e23]
+          - generic
+          - text: 
+    - main [ref=e29]:
+      - main [ref=e30]:
+        - paragraph [ref=e36]:
+          - text: Você precisa estar logado como administrador para acessar a agenda.
+          - link "Fazer login" [ref=e37] [cursor=pointer]:
+            - /url: https://desi.pet/wp-login.php?redirect_to=https%3A%2F%2Fdesi.pet%2Fagenda-de-atendimentos%2F
+    - contentinfo [ref=e38]:
+      - generic [ref=e42]:
+        - text: Copyright 2026 ©
+        - strong [ref=e43]: Desi.Pet By PROst
+      - button "Go to top":
+        - generic: 
+  - text: 
+  - generic [ref=e44]: desktop

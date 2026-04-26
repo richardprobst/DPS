@@ -130,6 +130,10 @@
       updateOperationTrigger(dialog, appointmentId, settings.focusTarget);
 
       if (window.DPSAgendaOperation && typeof window.DPSAgendaOperation.focus === 'function') {
+        if (typeof window.DPSAgendaOperation.applyMode === 'function') {
+          window.DPSAgendaOperation.applyMode(dialog, dialog.data('operationMode') || settings.focusTarget, settings.focusTarget);
+        }
+
         window.DPSAgendaOperation.focus(dialog, settings.focusTarget);
       }
     }
@@ -190,6 +194,150 @@
       $btn.prop('disabled', false).removeAttr('aria-disabled').html(originalHtml);
     }).always(function () {
       $stage.removeClass('dps-checkin-stage--saving');
+    });
+  }
+
+  function getEvidenceMessage(key, fallback) {
+    return cfg.messages && cfg.messages[key] ? cfg.messages[key] : fallback;
+  }
+
+  function setEvidenceBusy($panel, isBusy) {
+    var $trigger = $panel.find('.dps-pet-evidence__trigger');
+
+    $panel.toggleClass('dps-pet-evidence--busy', !!isBusy).attr('aria-busy', isBusy ? 'true' : 'false');
+    $trigger
+      .prop('disabled', !!isBusy)
+      .attr('aria-disabled', isBusy ? 'true' : 'false')
+      .text(isBusy ? getEvidenceMessage('evidenceUploading', 'Enviando evidência...') : getEvidenceMessage('evidenceUpload', 'Adicionar foto/vídeo'));
+  }
+
+  function getEvidenceFileLimitBytes() {
+    var maxSizeMb = cfg.evidence && cfg.evidence.maxSizeMb ? parseFloat(cfg.evidence.maxSizeMb) : 0;
+    return maxSizeMb > 0 ? maxSizeMb * 1024 * 1024 : 0;
+  }
+
+  function uploadPetEvidence($input, droppedFile) {
+    var $panel = $input.closest('.dps-pet-evidence');
+    var $checkinPanel = $panel.closest('.dps-checkin-panel');
+    var appointmentId = $checkinPanel.data('appointment');
+    var stage = $panel.data('stage') || $panel.closest('.dps-checkin-stage').data('stage') || 'checkin';
+    var safetySlug = $panel.data('safety-slug') || $panel.closest('.dps-safety-item').data('slug');
+    var file = droppedFile || ($input[0] && $input[0].files ? $input[0].files[0] : null);
+    var fileLimit = getEvidenceFileLimitBytes();
+    var formData = new FormData();
+
+    if (!file) {
+      showFeedback(getEvidenceMessage('evidenceSelectFile', 'Selecione uma foto ou vídeo para anexar.'), 'error');
+      return;
+    }
+
+    if (fileLimit && file.size > fileLimit) {
+      showFeedback('Arquivo acima do limite de ' + (cfg.evidence.maxSizeMb || '50') + ' MB.', 'error');
+      return;
+    }
+
+    formData.append('action', 'dps_pet_evidence_upload');
+    formData.append('nonce', cfg.nonce_evidence || '');
+    formData.append('appointment_id', appointmentId);
+    formData.append('stage', stage);
+    formData.append('safety_slug', safetySlug);
+    formData.append('caption', $panel.find('.dps-pet-evidence__caption').val() || '');
+    formData.append('evidence_file', file);
+
+    setEvidenceBusy($panel, true);
+
+    $.ajax({
+      url: cfg.ajax,
+      method: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false
+    }).done(function (response) {
+      if (response && response.success && response.data) {
+        refreshOperationUi(appointmentId, response.data, {
+          focusTarget: stage,
+          message: response.data.message || ''
+        });
+      } else {
+        showFeedback(response && response.data ? response.data.message : cfg.messages.error, 'error');
+      }
+    }).fail(function () {
+      showFeedback(cfg.messages.error, 'error');
+    }).always(function () {
+      $input.val('');
+      setEvidenceBusy($panel, false);
+    });
+  }
+
+  function closeEvidenceConfirm(dialog) {
+    if (dialog && dialog.length && window.DPSAgendaDialog && typeof window.DPSAgendaDialog.close === 'function') {
+      window.DPSAgendaDialog.close(dialog, 'confirmed');
+      return;
+    }
+
+    $('.dps-agenda-dialog-overlay--pet-evidence-remove').remove();
+  }
+
+  function confirmPetEvidenceRemoval($btn, onConfirm) {
+    var message = getEvidenceMessage(
+      'evidenceConfirmRemove',
+      'Remover esta evidência do atendimento? O arquivo permanecerá preservado na Biblioteca de Mídia.'
+    );
+
+    if (window.DPSAgendaDialog && typeof window.DPSAgendaDialog.open === 'function') {
+      var dialog = window.DPSAgendaDialog.open({
+        title: getEvidenceMessage('evidenceRemove', 'Remover evidência'),
+        size: 'small',
+        overlayClass: 'dps-agenda-dialog-overlay--pet-evidence-remove',
+        bodyHtml: '<p class="dps-pet-evidence-confirm-text">' + escapeHtml(message) + '</p>',
+        footerHtml:
+          '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--secondary" data-dialog-close="true">' + escapeHtml(cfg.messages.cancel || 'Cancelar') + '</button>' +
+          '<button type="button" class="dps-agenda-dialog__action dps-agenda-dialog__action--primary dps-pet-evidence-confirm-remove">' + escapeHtml(getEvidenceMessage('evidenceRemove', 'Remover evidência')) + '</button>'
+      });
+
+      dialog.on('click', '.dps-pet-evidence-confirm-remove', function () {
+        onConfirm(function () {
+          closeEvidenceConfirm(dialog);
+        });
+      });
+      return;
+    }
+
+    if (window.confirm(message)) {
+      onConfirm(function () {});
+    }
+  }
+
+  function removePetEvidence($btn) {
+    var $panel = $btn.closest('.dps-pet-evidence');
+    var $checkinPanel = $panel.closest('.dps-checkin-panel');
+    var appointmentId = $checkinPanel.data('appointment');
+    var stage = $panel.data('stage') || $panel.closest('.dps-checkin-stage').data('stage') || 'checkin';
+    var evidenceId = $btn.data('evidence-id');
+
+    confirmPetEvidenceRemoval($btn, function (closeConfirm) {
+      setEvidenceBusy($panel, true);
+
+      $.post(cfg.ajax, {
+        action: 'dps_pet_evidence_remove',
+        nonce: cfg.nonce_evidence || '',
+        appointment_id: appointmentId,
+        evidence_id: evidenceId
+      }, function (response) {
+        if (response && response.success && response.data) {
+          refreshOperationUi(appointmentId, response.data, {
+            focusTarget: stage,
+            message: response.data.message || ''
+          });
+          closeConfirm();
+        } else {
+          showFeedback(response && response.data ? response.data.message : cfg.messages.error, 'error');
+        }
+      }).fail(function () {
+        showFeedback(cfg.messages.error, 'error');
+      }).always(function () {
+        setEvidenceBusy($panel, false);
+      });
     });
   }
 
@@ -333,6 +481,49 @@
     $(this).closest('.dps-safety-item').toggleClass('dps-safety-item--checked', this.checked);
   });
 
+  $(document).on('click', '.dps-pet-evidence__trigger', function (event) {
+    event.preventDefault();
+    $(this).closest('.dps-pet-evidence').find('.dps-pet-evidence__input').trigger('click');
+  });
+
+  $(document).on('change', '.dps-pet-evidence__input', function () {
+    uploadPetEvidence($(this));
+  });
+
+  $(document).on('click', '.dps-pet-evidence-card__remove', function (event) {
+    event.preventDefault();
+    removePetEvidence($(this));
+  });
+
+  $(document).on('dragover', '.dps-pet-evidence', function (event) {
+    if ($(this).find('.dps-pet-evidence__input').prop('disabled')) {
+      return;
+    }
+
+    event.preventDefault();
+    $(this).addClass('dps-pet-evidence--dragover');
+  });
+
+  $(document).on('dragleave drop', '.dps-pet-evidence', function () {
+    $(this).removeClass('dps-pet-evidence--dragover');
+  });
+
+  $(document).on('drop', '.dps-pet-evidence', function (event) {
+    var transfer = event.originalEvent && event.originalEvent.dataTransfer;
+    var files = transfer && transfer.files ? transfer.files : null;
+    var $input = $(this).find('.dps-pet-evidence__input');
+
+    if ($input.prop('disabled')) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (files && files.length) {
+      uploadPetEvidence($input, files[0]);
+    }
+  });
+
   $(document).on('click', '.dps-checkin-btn--checkin', function (event) {
     event.preventDefault();
     submitStageAction($(this), 'dps_appointment_checkin', 'checkin');
@@ -352,7 +543,8 @@
 
     window.DPSAgendaOperation.open($(this).data('appt-id'), {
       focusPanel: true,
-      focusTarget: 'checklist'
+      focusTarget: 'checklist',
+      mode: 'checklist'
     });
   });
 
@@ -368,7 +560,8 @@
 
     window.DPSAgendaOperation.open($btn.data('appt-id'), {
       focusPanel: true,
-      focusTarget: focusTarget
+      focusTarget: focusTarget,
+      mode: focusTarget
     });
   });
 })(jQuery);

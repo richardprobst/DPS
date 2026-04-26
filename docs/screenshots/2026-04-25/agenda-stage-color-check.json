@@ -1,0 +1,162 @@
+[
+  {
+    "viewport": {
+      "width": 375,
+      "height": 920
+    },
+    "stageText": "Finalizado",
+    "stageClass": "dps-operational-inspector__section dps-operational-inspector__section--stage dps-operational-inspector__section--stage-done",
+    "stageTextColor": "rgb(26, 122, 58)",
+    "stageBorderColor": "rgb(26, 122, 58)",
+    "visibleStageBadgeCount": 0,
+    "horizontalOverflow": false,
+    "actionButtons": [
+      "Editar check-in/out",
+      "Finalizado",
+      "Cobrar cliente",
+      "Mais"
+    ],
+    "rowStates": [
+      {
+        "id": "1667",
+        "stage": "Finalizado",
+        "stageClass": "done",
+        "display": "flex"
+      },
+      {
+        "id": "1667",
+        "stage": "Finalizado",
+        "stageClass": "done",
+        "display": "block"
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 600,
+      "height": 920
+    },
+    "stageText": "Finalizado",
+    "stageClass": "dps-operational-inspector__section dps-operational-inspector__section--stage dps-operational-inspector__section--stage-done",
+    "stageTextColor": "rgb(26, 122, 58)",
+    "stageBorderColor": "rgb(26, 122, 58)",
+    "visibleStageBadgeCount": 0,
+    "horizontalOverflow": false,
+    "actionButtons": [
+      "Editar check-in/out",
+      "Finalizado",
+      "Cobrar cliente",
+      "Mais"
+    ],
+    "rowStates": [
+      {
+        "id": "1667",
+        "stage": "Finalizado",
+        "stageClass": "done",
+        "display": "flex"
+      },
+      {
+        "id": "1667",
+        "stage": "Finalizado",
+        "stageClass": "done",
+        "display": "block"
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 840,
+      "height": 920
+    },
+    "stageText": "Finalizado",
+    "stageClass": "dps-operational-inspector__section dps-operational-inspector__section--stage dps-operational-inspector__section--stage-done",
+    "stageTextColor": "rgb(26, 122, 58)",
+    "stageBorderColor": "rgb(26, 122, 58)",
+    "visibleStageBadgeCount": 0,
+    "horizontalOverflow": false,
+    "actionButtons": [
+      "Editar check-in/out",
+      "Finalizado",
+      "Cobrar cliente",
+      "Mais"
+    ],
+    "rowStates": [
+      {
+        "id": "1667",
+        "stage": "Finalizado",
+        "stageClass": "done",
+        "display": "table-row"
+      },
+      {
+        "id": "1667",
+        "stage": "Finalizado",
+        "stageClass": "done",
+        "display": "block"
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 1200,
+      "height": 1080
+    },
+    "stageText": "Finalizado",
+    "stageClass": "dps-operational-inspector__section dps-operational-inspector__section--stage dps-operational-inspector__section--stage-done",
+    "stageTextColor": "rgb(26, 122, 58)",
+    "stageBorderColor": "rgb(26, 122, 58)",
+    "visibleStageBadgeCount": 0,
+    "horizontalOverflow": false,
+    "actionButtons": [
+      "Editar check-in/out",
+      "Finalizado",
+      "Cobrar cliente",
+      "Mais"
+    ],
+    "rowStates": [
+      {
+        "id": "1667",
+        "stage": "Finalizado",
+        "stageClass": "done",
+        "display": "table-row"
+      },
+      {
+        "id": "1667",
+        "stage": "Finalizado",
+        "stageClass": "done",
+        "display": "block"
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "stageText": "Finalizado",
+    "stageClass": "dps-operational-inspector__section dps-operational-inspector__section--stage dps-operational-inspector__section--stage-done",
+    "stageTextColor": "rgb(26, 122, 58)",
+    "stageBorderColor": "rgb(26, 122, 58)",
+    "visibleStageBadgeCount": 0,
+    "horizontalOverflow": false,
+    "actionButtons": [
+      "Editar check-in/out",
+      "Finalizado",
+      "Cobrar cliente",
+      "Mais"
+    ],
+    "rowStates": [
+      {
+        "id": "1667",
+        "stage": "Finalizado",
+        "stageClass": "done",
+        "display": "table-row"
+      },
+      {
+        "id": "1667",
+        "stage": "Finalizado",
+        "stageClass": "done",
+        "display": "block"
+      }
+    ]
+  }
+]

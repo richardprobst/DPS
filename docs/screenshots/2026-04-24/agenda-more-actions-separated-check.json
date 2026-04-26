@@ -1,0 +1,47 @@
+{
+  "source": "published_runtime_authenticated",
+  "url": "https://desi.pet/agenda-de-atendimentos/?dps_date=2026-04-24&view=week",
+  "validated_at": "2026-04-24T19:28:00-03:00",
+  "actions": [
+    "services",
+    "checklist",
+    "checkinout",
+    "logistics",
+    "reschedule",
+    "history"
+  ],
+  "breakpoints": {
+    "375": {
+      "horizontalOverflow": false,
+      "sidebarHasSplitSections": true,
+      "dialogWidth": 336
+    },
+    "600": {
+      "horizontalOverflow": false,
+      "sidebarHasSplitSections": true,
+      "dialogWidth": 561
+    },
+    "840": {
+      "horizontalOverflow": false,
+      "sidebarHasSplitSections": true,
+      "dialogWidth": 672
+    },
+    "1200": {
+      "horizontalOverflow": false,
+      "sidebarHasSplitSections": true,
+      "dialogWidth": 672
+    },
+    "1920": {
+      "horizontalOverflow": false,
+      "sidebarHasSplitSections": true,
+      "dialogWidth": 672
+    }
+  },
+  "runtimeAssertions": {
+    "moreMenuSeparatesChecklistFromCheckinCheckout": true,
+    "sidebarSeparatesChecklistFromCheckinCheckout": true,
+    "checklistActionOpensOperationalChecklist": true,
+    "checkinoutActionOpensCheckinCheckoutArea": true,
+    "finalizadoPagoOpensChecklistAutomatically": true
+  }
+}
