@@ -89,6 +89,7 @@ Resumo:
 - autorizacao de publicacao de foto movida para um fieldset obrigatorio acima do botao `Proximo`, com opcoes destacadas `Autorizo` e `Nao autorizo`;
 - opcoes administrativas validadas como painel premium DPS Signature com 2 cards suportados pelo backend: `Ativar imediatamente` e `Enviar boas-vindas`;
 - autorizacao de foto refinada para cabecalho `Uso de imagem` e cards de decisao obrigatorios, mantendo `client_photo_auth` com 2 radios required;
+- margens e bordas dos paineis finais foram revalidadas com `adminPanelAlignedWithOptionalDetails: true` e `photoAuthPanelAlignedWithAdmin: true` em `375`, `600`, `840`, `1200` e `1920`;
 - validacao em branco passou a bloquear avanco tambem com `Informe se autoriza ou nao autoriza a publicacao da foto do pet.`;
 - runtime publicado confirmou `photoAuthFieldExists: true`, `photoAuthOptions: 2`, `photoAuthRequired: true` e `summaryHasPhotoAuth: true`;
 - campo Telefone/WhatsApp validado sem o texto fixo `Formato: (DDD) numero com 8 ou 9 digitos`; `phoneHintExists: false` nos cinco breakpoints e grid essencial com menor espaco vertical entre linhas;

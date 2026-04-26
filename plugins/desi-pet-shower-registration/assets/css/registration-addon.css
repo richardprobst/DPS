@@ -511,7 +511,7 @@
     gap: var(--dps-reg-gap-md);
     min-width: 0;
     margin: 0;
-    padding: 16px;
+    padding: 16px 16px 16px 14px;
     border: 1px solid var(--dps-reg-line);
     border-left: 3px solid var(--dps-reg-petrol);
     border-radius: 0;
@@ -520,8 +520,10 @@
 
 .dps-photo-auth-choice__header {
     display: grid;
-    gap: 5px;
+    gap: 6px;
     min-width: 0;
+    padding-bottom: var(--dps-reg-gap-sm);
+    border-bottom: 1px solid rgba(217, 204, 186, 0.75);
 }
 
 .dps-photo-auth-choice__eyebrow,
@@ -549,17 +551,18 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--dps-reg-gap-md);
+    align-items: stretch;
 }
 
 .dps-photo-auth-option {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: 22px minmax(0, 1fr);
     gap: var(--dps-reg-gap-sm);
     align-items: start;
     min-width: 0;
     min-height: 112px;
     margin: 0;
-    padding: 14px;
+    padding: 14px 14px 14px 13px;
     border: 1px solid var(--dps-reg-line);
     border-radius: 0;
     background: #ffffff;
@@ -582,8 +585,13 @@
 .dps-photo-auth-option input[type="radio"] {
     width: 18px;
     height: 18px;
+    justify-self: start;
     margin: 1px 0 0;
     accent-color: var(--dps-reg-petrol);
+}
+
+.dps-photo-auth-choice .dps-field-hint {
+    margin: 0;
 }
 
 .dps-photo-auth-option__text {
@@ -944,15 +952,17 @@
     grid-column: 1 / -1;
     display: grid;
     gap: var(--dps-reg-gap-md);
-    padding: 16px;
+    padding: 16px 16px 16px 14px;
     border-left: 3px solid var(--dps-reg-petrol);
     background: var(--dps-reg-paper);
 }
 
 .dps-admin-options__header {
     display: grid;
-    gap: 5px;
+    gap: 6px;
     min-width: 0;
+    padding-bottom: var(--dps-reg-gap-sm);
+    border-bottom: 1px solid rgba(217, 204, 186, 0.75);
 }
 
 .dps-admin-options__title {
@@ -977,17 +987,18 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--dps-reg-gap-md);
+    align-items: stretch;
 }
 
 .dps-admin-option {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: 22px minmax(0, 1fr);
     gap: var(--dps-reg-gap-sm);
     align-items: start;
     min-width: 0;
     min-height: 104px;
     margin: 0;
-    padding: 14px;
+    padding: 14px 14px 14px 13px;
     border: 1px solid var(--dps-reg-line);
     border-radius: 0;
     background: #ffffff;
@@ -1012,6 +1023,7 @@
 .dps-admin-option input[type="checkbox"] {
     width: 18px;
     height: 18px;
+    justify-self: start;
     margin: 2px 0 0;
     accent-color: var(--dps-reg-petrol);
 }
@@ -1281,6 +1293,11 @@
         padding: 14px;
     }
 
+    .dps-admin-options,
+    .dps-photo-auth-choice {
+        padding-left: 12px;
+    }
+
     .dps-client-fields,
     .dps-pet-fieldset,
     .dps-field-group__body,
@@ -1355,6 +1372,11 @@
     .dps-modal-body,
     .dps-modal-footer {
         padding: 12px;
+    }
+
+    .dps-admin-options,
+    .dps-photo-auth-choice {
+        padding-left: 10px;
     }
 
     .dps-registration-form h4 {

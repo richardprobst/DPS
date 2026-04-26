@@ -87,6 +87,23 @@ async function inspectCurrentPage(page, width) {
             const node = document.querySelector(selector);
             return node ? node.textContent.trim() : '';
         };
+        const getRect = (selector) => {
+            const node = document.querySelector(selector);
+            if (!node) {
+                return null;
+            }
+            const rect = node.getBoundingClientRect();
+            return {
+                left: Math.round(rect.left * 100) / 100,
+                width: Math.round(rect.width * 100) / 100,
+            };
+        };
+        const optionalRect = getRect('.dps-optional-details');
+        const adminRect = getRect('.dps-admin-options');
+        const photoAuthRect = getRect('.dps-photo-auth-choice');
+        const edgeDelta = (a, b, key) => (
+            a && b ? Math.round(Math.abs(a[key] - b[key]) * 100) / 100 : null
+        );
 
         return {
             breakpoint,
@@ -100,11 +117,13 @@ async function inspectCurrentPage(page, width) {
             petFieldsets: document.querySelectorAll('#dps-pets-wrapper .dps-pet-fieldset').length,
             adminOptions: document.querySelectorAll('.dps-admin-option').length,
             adminOptionsDescriptionExists: !!document.querySelector('.dps-admin-options__description'),
+            adminPanelAlignedWithOptionalDetails: edgeDelta(optionalRect, adminRect, 'left') !== null && edgeDelta(optionalRect, adminRect, 'left') <= 1 && edgeDelta(optionalRect, adminRect, 'width') <= 1,
             photoAuthFieldExists: !!document.querySelector('[data-dps-photo-auth-field]'),
             photoAuthOptions: photoAuthInputs.length,
             photoAuthRequired: photoAuthInputs.length === 2 && photoAuthInputs.every((input) => input.required),
             photoAuthEyebrowText: getText('.dps-photo-auth-choice__eyebrow'),
             photoAuthHeaderText: getText('.dps-photo-auth-choice__title'),
+            photoAuthPanelAlignedWithAdmin: edgeDelta(adminRect, photoAuthRect, 'left') !== null && edgeDelta(adminRect, photoAuthRect, 'left') <= 1 && edgeDelta(adminRect, photoAuthRect, 'width') <= 1,
             phoneHintExists: !!document.querySelector('#dps-phone-hint'),
             publicReadonlyOwnerFields: [...document.querySelectorAll('input[readonly]')].filter((input) => /cliente|owner/i.test(input.name || input.id || '')).length,
             addressTag: address ? address.tagName : '',
