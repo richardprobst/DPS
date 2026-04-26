@@ -508,10 +508,10 @@
 .dps-photo-auth-choice {
     grid-column: 1 / -1;
     display: grid;
-    gap: var(--dps-reg-gap-md);
+    gap: var(--dps-reg-gap-lg);
     min-width: 0;
     margin: 0;
-    padding: 16px 16px 16px 14px;
+    padding: 20px;
     border: 1px solid var(--dps-reg-line);
     border-left: 3px solid var(--dps-reg-petrol);
     border-radius: 0;
@@ -550,19 +550,19 @@
 .dps-photo-auth-options {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--dps-reg-gap-md);
+    gap: var(--dps-reg-gap-lg);
     align-items: stretch;
 }
 
-.dps-photo-auth-option {
+.dps-registration-form label.dps-photo-auth-option {
     display: grid;
-    grid-template-columns: 22px minmax(0, 1fr);
-    gap: var(--dps-reg-gap-sm);
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: var(--dps-reg-gap-md);
     align-items: start;
     min-width: 0;
     min-height: 112px;
     margin: 0;
-    padding: 14px 14px 14px 13px;
+    padding: 16px 18px;
     border: 1px solid var(--dps-reg-line);
     border-radius: 0;
     background: #ffffff;
@@ -579,7 +579,6 @@
 .dps-photo-auth-option:has(input:checked) {
     border-color: var(--dps-reg-petrol);
     background: #f4f8f8;
-    box-shadow: inset 3px 0 0 var(--dps-reg-petrol);
 }
 
 .dps-photo-auth-option input[type="radio"] {
@@ -951,8 +950,8 @@
 .dps-admin-options {
     grid-column: 1 / -1;
     display: grid;
-    gap: var(--dps-reg-gap-md);
-    padding: 16px 16px 16px 14px;
+    gap: var(--dps-reg-gap-lg);
+    padding: 20px;
     border-left: 3px solid var(--dps-reg-petrol);
     background: var(--dps-reg-paper);
 }
@@ -986,19 +985,19 @@
 .dps-admin-options__grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--dps-reg-gap-md);
+    gap: var(--dps-reg-gap-lg);
     align-items: stretch;
 }
 
-.dps-admin-option {
+.dps-registration-form label.dps-admin-option:has(input[type="checkbox"]) {
     display: grid;
-    grid-template-columns: 22px minmax(0, 1fr);
-    gap: var(--dps-reg-gap-sm);
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: var(--dps-reg-gap-md);
     align-items: start;
     min-width: 0;
     min-height: 104px;
     margin: 0;
-    padding: 14px 14px 14px 13px;
+    padding: 16px 18px;
     border: 1px solid var(--dps-reg-line);
     border-radius: 0;
     background: #ffffff;
@@ -1017,7 +1016,6 @@
 .dps-admin-option:has(input:checked) {
     border-color: var(--dps-reg-petrol);
     background: #f4f8f8;
-    box-shadow: inset 3px 0 0 var(--dps-reg-petrol);
 }
 
 .dps-admin-option input[type="checkbox"] {
@@ -1293,11 +1291,6 @@
         padding: 14px;
     }
 
-    .dps-admin-options,
-    .dps-photo-auth-choice {
-        padding-left: 12px;
-    }
-
     .dps-client-fields,
     .dps-pet-fieldset,
     .dps-field-group__body,
@@ -1372,11 +1365,6 @@
     .dps-modal-body,
     .dps-modal-footer {
         padding: 12px;
-    }
-
-    .dps-admin-options,
-    .dps-photo-auth-choice {
-        padding-left: 10px;
     }
 
     .dps-registration-form h4 {

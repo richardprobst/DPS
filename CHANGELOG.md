@@ -107,6 +107,7 @@ Antes de criar uma nova versÃ£o oficial:
 - Transformada a autorização de publicação da foto do pet em escolha obrigatória `Autorizo`/`Não autorizo`, destacada acima do botão Próximo.
 - Redesenhadas as áreas de opções administrativas e autorização de foto do Cadastro com hierarquia, microcopy e cards de decisão no padrão DPS Signature.
 - Refinadas margens, bordas e alinhamentos dos painéis finais do Cadastro para manter recuos consistentes entre desktop e mobile.
+- Corrigido o posicionamento dos checkboxes/radios nos cards finais do Cadastro, evitando herança dos estilos globais de `label`.
 - Adicionado indicador `Expandir`/`Recolher` aos disclosures opcionais do Cadastro para deixar a área expansível explícita.
 - Removida a dica fixa de formato do campo Telefone/WhatsApp e compactado o espaçamento vertical dos campos essenciais.
 - Corrigido contraste do componente Google Places no campo Endereço completo, forçando superfície clara e texto legível no padrão DPS Signature.

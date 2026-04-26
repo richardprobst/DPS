@@ -95,8 +95,14 @@ async function inspectCurrentPage(page, width) {
             const rect = node.getBoundingClientRect();
             return {
                 left: Math.round(rect.left * 100) / 100,
+                top: Math.round(rect.top * 100) / 100,
                 width: Math.round(rect.width * 100) / 100,
+                height: Math.round(rect.height * 100) / 100,
             };
+        };
+        const getDisplay = (selector) => {
+            const node = document.querySelector(selector);
+            return node ? window.getComputedStyle(node).display : '';
         };
         const optionalRect = getRect('.dps-optional-details');
         const adminRect = getRect('.dps-admin-options');
@@ -104,6 +110,19 @@ async function inspectCurrentPage(page, width) {
         const edgeDelta = (a, b, key) => (
             a && b ? Math.round(Math.abs(a[key] - b[key]) * 100) / 100 : null
         );
+        const controlPlacement = (cardSelector, inputSelector, textSelector) => {
+            const cardRect = getRect(cardSelector);
+            const inputRect = getRect(inputSelector);
+            const textRect = getRect(textSelector);
+
+            return {
+                display: getDisplay(cardSelector),
+                inside: !!(cardRect && inputRect && inputRect.left >= cardRect.left + 10 && inputRect.left <= cardRect.left + 34),
+                inline: !!(inputRect && textRect && inputRect.left < textRect.left && Math.abs(inputRect.top - textRect.top) <= 8),
+            };
+        };
+        const adminControl = controlPlacement('.dps-admin-option:has(input:checked)', '.dps-admin-option:has(input:checked) input', '.dps-admin-option:has(input:checked) .dps-admin-option__label');
+        const photoControl = controlPlacement('.dps-photo-auth-option', '.dps-photo-auth-option input', '.dps-photo-auth-option__text strong');
 
         return {
             breakpoint,
@@ -118,12 +137,18 @@ async function inspectCurrentPage(page, width) {
             adminOptions: document.querySelectorAll('.dps-admin-option').length,
             adminOptionsDescriptionExists: !!document.querySelector('.dps-admin-options__description'),
             adminPanelAlignedWithOptionalDetails: edgeDelta(optionalRect, adminRect, 'left') !== null && edgeDelta(optionalRect, adminRect, 'left') <= 1 && edgeDelta(optionalRect, adminRect, 'width') <= 1,
+            adminSelectionDisplay: adminControl.display,
+            adminSelectionControlInsideCard: adminControl.inside,
+            adminSelectionControlInlineWithText: adminControl.inline,
             photoAuthFieldExists: !!document.querySelector('[data-dps-photo-auth-field]'),
             photoAuthOptions: photoAuthInputs.length,
             photoAuthRequired: photoAuthInputs.length === 2 && photoAuthInputs.every((input) => input.required),
             photoAuthEyebrowText: getText('.dps-photo-auth-choice__eyebrow'),
             photoAuthHeaderText: getText('.dps-photo-auth-choice__title'),
             photoAuthPanelAlignedWithAdmin: edgeDelta(adminRect, photoAuthRect, 'left') !== null && edgeDelta(adminRect, photoAuthRect, 'left') <= 1 && edgeDelta(adminRect, photoAuthRect, 'width') <= 1,
+            photoSelectionDisplay: photoControl.display,
+            photoSelectionControlInsideCard: photoControl.inside,
+            photoSelectionControlInlineWithText: photoControl.inline,
             phoneHintExists: !!document.querySelector('#dps-phone-hint'),
             publicReadonlyOwnerFields: [...document.querySelectorAll('input[readonly]')].filter((input) => /cliente|owner/i.test(input.name || input.id || '')).length,
             addressTag: address ? address.tagName : '',
