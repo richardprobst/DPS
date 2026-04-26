@@ -1,0 +1,116 @@
+{
+  "url": "https://desi.pet/agendamento/",
+  "actions": [],
+  "initial": {
+    "clients": 35,
+    "services": 30,
+    "timeOptions": 1,
+    "nonce": true
+  },
+  "selectedClient": "1334",
+  "serviceCheckedAttempt": false,
+  "after": {
+    "selectedClient": "1334",
+    "visiblePetOptions": 1,
+    "selectedDate": "2026-04-28",
+    "timeOptions": [
+      {
+        "value": "",
+        "text": "Selecione um horário"
+      },
+      {
+        "value": "08:00",
+        "text": "08:00"
+      },
+      {
+        "value": "08:30",
+        "text": "08:30"
+      },
+      {
+        "value": "09:00",
+        "text": "09:00"
+      },
+      {
+        "value": "09:30",
+        "text": "09:30"
+      },
+      {
+        "value": "10:00",
+        "text": "10:00"
+      },
+      {
+        "value": "10:30",
+        "text": "10:30"
+      },
+      {
+        "value": "11:00",
+        "text": "11:00"
+      },
+      {
+        "value": "11:30",
+        "text": "11:30"
+      },
+      {
+        "value": "12:00",
+        "text": "12:00"
+      },
+      {
+        "value": "12:30",
+        "text": "12:30"
+      },
+      {
+        "value": "13:00",
+        "text": "13:00"
+      },
+      {
+        "value": "13:30",
+        "text": "13:30"
+      },
+      {
+        "value": "14:00",
+        "text": "14:00"
+      },
+      {
+        "value": "14:30",
+        "text": "14:30"
+      },
+      {
+        "value": "15:00",
+        "text": "15:00"
+      },
+      {
+        "value": "15:30",
+        "text": "15:30"
+      },
+      {
+        "value": "16:00",
+        "text": "16:00"
+      },
+      {
+        "value": "16:30",
+        "text": "16:30"
+      },
+      {
+        "value": "17:00",
+        "text": "17:00"
+      },
+      {
+        "value": "17:30",
+        "text": "17:30"
+      },
+      {
+        "value": "18:00",
+        "text": "18:00"
+      }
+    ],
+    "checkedServices": 0,
+    "summaryText": "ðŸ“‹\nResumo do agendamento\n\nPreencha cliente, pet, data e horÃ¡rio para ver o resumo aqui.",
+    "total": "0",
+    "formError": ""
+  },
+  "networkRelevant": [
+    "https://desi.pet/wp-json/dps/v1/pets?page=1&owner=1334&search=",
+    "https://desi.pet/wp-admin/admin-ajax.php"
+  ],
+  "consoleIssues": []
+}

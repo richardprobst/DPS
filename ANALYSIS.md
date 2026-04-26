@@ -988,19 +988,21 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 ### Booking (`desi-pet-shower-booking`)
 
 **DiretÃƒÂ³rio**: `plugins/desi-pet-shower-booking`
-**VersÃƒÂ£o**: 1.3.0
+**VersÃƒÂ£o**: 1.3.1
 
 **PropÃƒÂ³sito e funcionalidades principais**:
 - PÃƒÂ¡gina dedicada de agendamentos para administradores
 - Mesma funcionalidade da aba Agendamentos do Painel de GestÃƒÂ£o DPS, porÃƒÂ©m em pÃƒÂ¡gina independente
 - FormulÃƒÂ¡rio completo com seleÃƒÂ§ÃƒÂ£o de cliente, pets, serviÃƒÂ§os, data/hora, tipo de agendamento (avulso/assinatura) e status de pagamento
-- Tela de confirmaÃƒÂ§ÃƒÂ£o pÃƒÂ³s-agendamento com resumo e aÃƒÂ§ÃƒÂµes rÃƒÂ¡pidas (WhatsApp, novo agendamento, voltar ao painel)
+- Tela de confirmaÃƒÂ§ÃƒÂ£o pÃƒÂ³s-agendamento com resumo e aÃƒÂ§ÃƒÂµes rÃƒÂ¡pidas (novo agendamento, ver cliente e ver agenda quando os destinos existem)
 - Design system migrado para DPS Signature (v1.3.0)
 - OtimizaÃƒÂ§ÃƒÂµes de performance (batch queries para owners de pets)
 - ValidaÃƒÂ§ÃƒÂµes granulares de seguranÃƒÂ§a (verificaÃƒÂ§ÃƒÂ£o por agendamento especÃƒÂ­fico)
+- **Auditoria 2026-04-26**: a pagina publicada `/agendamento/` foi validada com sessao temporaria autenticada via WP-CLI. O formulario renderiza e carrega pets/horarios, mas a reescrita integral foi planejada por uso proibido de transients na confirmacao, mojibake visivel, duplicacao do renderer do base, drift de metadados e desalinhamento visual com o DPS Signature canonico. Plano detalhado: `docs/analysis/BOOKING_AGENDAMENTO_DPS_SIGNATURE_AUDITORIA_PLANO_2026-04-26.md`.
 
 **Shortcodes expostos**:
 - `[dps_booking_form]`: renderiza formulÃƒÂ¡rio completo de agendamento
+- `[dps_booking_v2]`: alias de compatibilidade preservado apos a extincao do add-on Frontend
 
 **CPTs, tabelas e opÃƒÂ§ÃƒÂµes**:
 - NÃƒÂ£o cria CPTs ou tabelas prÃƒÂ³prias; consome `dps_agendamento` do nÃƒÂºcleo
@@ -1050,8 +1052,8 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 **Introduzido em**: v1.0.0
 
 **Assets**:
-- `assets/css/dps-booking-form.css`: estilos do formulÃƒÂ¡rio de agendamento
-- `assets/js/dps-booking-form.js`: interaÃƒÂ§ÃƒÂµes do formulÃƒÂ¡rio (seleÃƒÂ§ÃƒÂ£o de pets, datas, etc.)
+- `assets/css/booking-addon.css`: ajustes especificos da pagina dedicada
+- JavaScript proprio: nenhum; a pagina consome os assets do plugin base para interacoes do formulario
 
 **ObservaÃƒÂ§ÃƒÂµes**:
 - Assets carregados condicionalmente apenas na pÃƒÂ¡gina de agendamento (`dps_booking_page_id`)
