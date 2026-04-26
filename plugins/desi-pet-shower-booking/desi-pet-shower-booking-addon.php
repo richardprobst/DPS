@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst - Booking Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página dedicada de agendamento para a operação DPS, reaproveitando o renderer canônico do núcleo.
- * Version:           1.4.6
+ * Version:           1.4.7
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-booking-addon
@@ -65,7 +65,7 @@ class DPS_Booking_Addon {
     /**
      * Versão do add-on.
      */
-    const VERSION = '1.4.6';
+    const VERSION = '1.4.7';
 
     /**
      * Instância única.
@@ -400,6 +400,7 @@ class DPS_Booking_Addon {
                 'section_classes' => [ 'dps-section--booking' ],
                 'section_title'  => '',
                 'surface_title'  => $edit_id ? __( 'Editar agendamento', 'dps-booking-addon' ) : __( 'Novo agendamento', 'dps-booking-addon' ),
+                'side_rail'      => true,
                 'hidden_fields'  => [
                     'dps_booking_context' => '1',
                 ],

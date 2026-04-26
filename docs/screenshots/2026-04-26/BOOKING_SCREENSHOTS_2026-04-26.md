@@ -20,10 +20,16 @@
 - `./booking-visual-fixes-840.png` - Agendamento publicado em 840px.
 - `./booking-visual-fixes-1200.png` - Agendamento publicado em 1200px.
 - `./booking-visual-fixes-1920.png` - Agendamento publicado em 1920px.
+- `./booking-side-rail-375.png` - Lateral direita e margens em 375px.
+- `./booking-side-rail-600.png` - Lateral direita e margens em 600px.
+- `./booking-side-rail-840.png` - Lateral direita e margens em 840px.
+- `./booking-side-rail-1200.png` - Lateral direita e margens em 1200px.
+- `./booking-side-rail-1920.png` - Lateral direita sticky em 1920px.
 
 ## Evidencia automatizada
 
 - `./booking-visual-fixes-check.json`
+- `./booking-side-rail-check.json`
 
 Resumo:
 - `cssVersion` confirmou `booking-addon.css?ver=1.4.6`;
@@ -31,3 +37,5 @@ Resumo:
 - nao houve overflow horizontal real em `375`, `600`, `840`, `1200` e `1920`;
 - `1920px` passou a usar wrapper de `1520px` e grid `918px 420px`;
 - painel `Atribuicao`, CTA e chips de preco ficaram dentro da paleta/geometria DPS Signature.
+- a lateral direita final usa `.dps-form-side-rail`, com `sideRailTopDelta=0`, gap horizontal de `24px` e gaps internos de `16px` em `1920px`;
+- os paineis mantiveram padding minimo de `14px` e nenhum breakpoint apresentou overflow horizontal real.

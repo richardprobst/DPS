@@ -244,11 +244,13 @@ class DPS_Appointments_Section_Renderer {
                 'surface_title'        => __( 'Agendar serviço', 'desi-pet-shower' ),
                 'surface_title_prefix' => '',
                 'hidden_fields'        => [],
+                'side_rail'            => false,
             ]
         );
 
         $is_modal     = ( 'modal' === $options['context'] );
         $include_list = (bool) $options['include_list'];
+        $use_side_rail = (bool) $options['side_rail'];
         $section_id   = $options['section_id'] ? sanitize_html_class( $options['section_id'] ) : ( $is_modal ? 'dps-section-agendas-modal' : 'dps-section-agendas' );
         $section_classes = [ 'dps-section' ];
         foreach ( (array) $options['section_classes'] as $section_class ) {
@@ -695,6 +697,10 @@ class DPS_Appointments_Section_Renderer {
             do_action( 'dps_base_appointment_fields', $edit_id, $meta );
             
             echo '</fieldset>';
+
+            if ( $use_side_rail ) {
+                echo '<div class="dps-form-side-rail" aria-label="' . esc_attr__( 'Resumo e finalização do agendamento', 'desi-pet-shower' ) . '">';
+            }
             
             // FIELDSET 5: Atribuição (Profissionais responsáveis)
             // Hook para add-ons injetarem campo de profissionais
@@ -798,6 +804,10 @@ class DPS_Appointments_Section_Renderer {
             
             // Bloco de erros de validação (FASE 2)
             echo '<div class="dps-form-error" role="alert" aria-live="assertive" hidden></div>';
+
+            if ( $use_side_rail ) {
+                echo '</div>';
+            }
             
             // Script inline REMOVED - agora em dps-appointment-form.js
             echo '</form>';
