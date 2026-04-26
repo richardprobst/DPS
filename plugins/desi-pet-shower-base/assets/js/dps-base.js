@@ -5,7 +5,11 @@
 (function($){
   // Constantes de configuração
   var DPS_MOBILE_BREAKPOINT = 768; // Deve corresponder ao breakpoint CSS em dps-base.css
-  
+
+  function trimValue(value) {
+    return String(value == null ? '' : value).trim();
+  }
+
   $(document).ready(function(){
     // Controle das abas - seletores específicos para o painel de gestão
     var $navContainer = $('.dps-base-wrapper .dps-nav-container');
@@ -217,7 +221,7 @@
             $clientSelect.removeClass('dps-client-select--warning');
             return;
           }
-          var clientName = $.trim($selected.text());
+          var clientName = trimValue($selected.text());
           var titleText = clientName ?
             dpsBaseL10n.pendingTitle.replace('%s', clientName) :
             dpsBaseL10n.pendingGenericTitle;
@@ -847,8 +851,8 @@
         var errors = [];
 
         if ($form.find('[name="client_name"]').length) {
-          var clientName = $.trim($form.find('[name="client_name"]').val());
-          var clientPhone = $.trim($form.find('[name="client_phone"]').val());
+          var clientName = trimValue($form.find('[name="client_name"]').val());
+          var clientPhone = trimValue($form.find('[name="client_phone"]').val());
 
           if (!clientName) {
             errors.push((window.dpsBaseL10n && dpsBaseL10n.clientNameRequired) || 'O campo Nome é obrigatório.');
@@ -859,11 +863,11 @@
         }
 
         if ($form.find('[name="pet_name"]').length) {
-          var petName = $.trim($form.find('[name="pet_name"]').val());
-          var ownerId = $.trim($form.find('[name="owner_id"]').val());
-          var species = $.trim($form.find('[name="pet_species"]').val());
-          var petSex = $.trim($form.find('[name="pet_sex"]').val());
-          var petSize = $.trim($form.find('[name="pet_size"]').val());
+          var petName = trimValue($form.find('[name="pet_name"]').val());
+          var ownerId = trimValue($form.find('[name="owner_id"]').val());
+          var species = trimValue($form.find('[name="pet_species"]').val());
+          var petSex = trimValue($form.find('[name="pet_sex"]').val());
+          var petSize = trimValue($form.find('[name="pet_size"]').val());
 
           if (!petName) {
             errors.push((window.dpsBaseL10n && dpsBaseL10n.petNameRequired) || 'O campo Nome do Pet é obrigatório.');

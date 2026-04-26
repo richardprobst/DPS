@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst - Booking Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página dedicada de agendamento para a operação DPS, reaproveitando o renderer canônico do núcleo.
- * Version:           1.4.1
+ * Version:           1.4.2
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-booking-addon
@@ -65,7 +65,7 @@ class DPS_Booking_Addon {
     /**
      * Versão do add-on.
      */
-    const VERSION = '1.4.1';
+    const VERSION = '1.4.2';
 
     /**
      * Instância única.
@@ -103,6 +103,9 @@ class DPS_Booking_Addon {
         }
 
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+        add_action( 'wp_enqueue_scripts', [ $this, 'suppress_operational_third_party_scripts' ], 999 );
+        add_action( 'template_redirect', [ $this, 'maybe_start_external_noise_guard' ], 0 );
+        add_filter( 'wp_resource_hints', [ $this, 'filter_operational_resource_hints' ], 10, 2 );
         add_filter( 'dps_base_appointment_redirect_url', [ $this, 'filter_booking_redirect_url' ], 10, 6 );
 
         if ( class_exists( 'DPS_Cache_Control' ) ) {
@@ -176,6 +179,105 @@ class DPS_Booking_Addon {
             $deps,
             self::VERSION
         );
+    }
+
+    /**
+     * Remove scripts externos que nao sao necessarios para a tela operacional de Booking.
+     */
+    public function suppress_operational_third_party_scripts() {
+        if ( ! $this->is_booking_screen() ) {
+            return;
+        }
+
+        $handles = [
+            'google_gtagjs',
+            'google_gtagjs-js',
+            'googlesitekit-google_gtagjs',
+            'googlesitekit-adsense',
+            'googlesitekit-sign-in-with-google',
+            'elementor-common',
+            'elementor-webpack-runtime',
+            'elementor-frontend-modules',
+            'elementor-frontend',
+            'elementor-pro-webpack-runtime',
+            'elementor-pro-frontend',
+            'pro-elements-handlers',
+        ];
+
+        foreach ( $handles as $handle ) {
+            wp_dequeue_script( $handle );
+            wp_deregister_script( $handle );
+        }
+    }
+
+    /**
+     * Remove hints DNS/preconnect de marketing/telemetria na tela de Booking.
+     *
+     * @param array<int,string|array> $urls          URLs de resource hints.
+     * @param string                  $relation_type Tipo de hint.
+     * @return array<int,string|array>
+     */
+    public function filter_operational_resource_hints( $urls, $relation_type ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+        if ( ! $this->is_booking_screen() ) {
+            return $urls;
+        }
+
+        return array_values(
+            array_filter(
+                $urls,
+                function ( $url ) {
+                    $href = is_array( $url ) && isset( $url['href'] ) ? (string) $url['href'] : (string) $url;
+                    foreach ( [ 'pagead2.googlesyndication.com', 'googletagmanager.com', 'api-eu.mixpanel.com' ] as $blocked ) {
+                        if ( false !== strpos( $href, $blocked ) ) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+            )
+        );
+    }
+
+    /**
+     * Inicia filtro HTML extremamente restrito para scripts externos impressos fora do WP enqueue.
+     */
+    public function maybe_start_external_noise_guard() {
+        if ( is_admin() || wp_doing_ajax() || ! $this->is_booking_screen() ) {
+            return;
+        }
+
+        ob_start( [ $this, 'filter_external_noise_markup' ] );
+    }
+
+    /**
+     * Remove apenas tags externas conhecidas de marketing/telemetria da pagina de Booking.
+     *
+     * @param string $html HTML final.
+     * @return string
+     */
+    public function filter_external_noise_markup( $html ) {
+        $has_noise_marker = false !== stripos( $html, 'googlesyndication' )
+            || false !== stripos( $html, 'google_gtagjs' )
+            || false !== stripos( $html, '/elementor/assets/js/common.js' );
+
+        if ( '' === $html || ! $has_noise_marker ) {
+            return $html;
+        }
+
+        $patterns = [
+            '#<script\b[^>]*src=["\'][^"\']*pagead2\.googlesyndication\.com/pagead/js/adsbygoogle\.js[^"\']*["\'][^>]*>\s*</script>#i',
+            '#<link\b[^>]*href=["\'][^"\']*pagead2\.googlesyndication\.com[^"\']*["\'][^>]*>\s*#i',
+            '#<script\b[^>]*src=["\'][^"\']*googletagmanager\.com/gtag/js[^"\']*["\'][^>]*>\s*</script>#i',
+            '#<script\b[^>]*id=["\']google_gtagjs-js-after["\'][^>]*>.*?</script>#is',
+            '#<link\b[^>]*href=["\'][^"\']*googletagmanager\.com[^"\']*["\'][^>]*>\s*#i',
+            '#<script\b[^>]*id=["\']elementor-common-js-before["\'][^>]*>.*?</script>#is',
+            '#<script\b[^>]*src=["\'][^"\']*/wp-content/plugins/elementor/assets/js/common\.js[^"\']*["\'][^>]*>\s*</script>#i',
+        ];
+
+        $filtered = preg_replace( $patterns, '', $html );
+
+        return is_string( $filtered ) ? $filtered : $html;
     }
 
     /**

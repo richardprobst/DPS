@@ -1,0 +1,23 @@
+{
+  "url": "https://desi.pet/agendamento/",
+  "validatedAt": "2026-04-26T07:52:57.0600048-03:00",
+  "scope": "Booking runtime noise cleanup",
+  "statusCode": 200,
+  "authenticatedViaWpCliUser": true,
+  "formCount": 1,
+  "bookingCssVersion": "1.4.2",
+  "baseJsPresent": true,
+  "gtagScripts": 0,
+  "adsScripts": 0,
+  "elementorRuntimeScripts": 0,
+  "elementorCommonScripts": 0,
+  "pageadHints": 0,
+  "mixpanelHints": 0,
+  "relevantConsoleCount": 0,
+  "relevantFailedRequestCount": 0,
+  "jqTrimReferences": 0,
+  "overflowX": false,
+  "screenshot": "./booking-runtime-noise-1200.png",
+  "sourceFinding": "Mixpanel CORS was triggered by Elementor common.js on authenticated admin runtime, not by Booking code.",
+  "privacy": "Third-party URLs with tokens, credentials, and customer data were not persisted."
+}

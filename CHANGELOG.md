@@ -91,6 +91,7 @@ Antes de criar uma nova versÃ£o oficial:
 
 #### Changed (Alterado)
 
+- A página de Agendamento passou a suprimir scripts externos de marketing/telemetria não necessários ao fluxo operacional, removendo ruídos de CORS vindos de Ads/Site Kit/Elementor no runtime publicado sem alterar o formulário DPS.
 - Refeito o Booking Add-on como superfície de agendamento DPS Signature baseada no renderer canônico do núcleo, preservando `[dps_booking_form]`, `[dps_booking_v2]`, nonces, campos do POST e hooks de Services/Groomers.
 - Atualizada a página de Agendamento para usar confirmação pós-save por query assinada com nonce, sem transients, e URL canônica reconciliada com `/agendamento/`.
 - Reafirmados `desi-pet-shower-registration` e `desi-pet-shower-booking` como implementações canônicas dos fluxos públicos de cadastro e agendamento, encerrando o dual-run do add-on `desi-pet-shower-frontend`.
@@ -105,6 +106,7 @@ Antes de criar uma nova versÃ£o oficial:
 
 #### Fixed (Corrigido)
 
+- Removido uso deprecated de `$.trim` no JS ativo do plugin base, eliminando o warning global do jQuery Migrate no Agendamento.
 - Corrigido o fluxo do Booking que usava `get_transient/set_transient/delete_transient` para confirmação de agendamento.
 - Removidos armazenamentos temporários em memória no caminho de agendamento público/base, mantendo pendências financeiras e cobranças multi-pet recalculadas em tempo real por requisição.
 - Corrigida a cobertura de no-cache para `[dps_booking_form]` e `[dps_booking_v2]` no `DPS_Cache_Control`.
