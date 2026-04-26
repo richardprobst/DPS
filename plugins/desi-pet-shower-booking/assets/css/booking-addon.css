@@ -129,6 +129,12 @@
     min-inline-size: 0;
 }
 
+.dps-booking-wrapper .dps-assignment-fieldset {
+    background: var(--booking-bone) !important;
+    border-color: var(--booking-line) !important;
+    border-left-color: var(--booking-sky) !important;
+}
+
 .dps-booking-wrapper .dps-fieldset__legend {
     display: inline-flex;
     align-items: center;
@@ -477,14 +483,22 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 4px 6px;
-    background: var(--booking-bone);
+    padding: 3px 6px;
+    background: var(--booking-white) !important;
     color: var(--booking-petrol);
-    border: 1px solid var(--booking-line);
+    border: 1px solid var(--booking-line) !important;
+    border-radius: 2px !important;
+}
+
+.dps-booking-wrapper .dps-price-size[data-size="small"],
+.dps-booking-wrapper .dps-price-size[data-size="medium"],
+.dps-booking-wrapper .dps-price-size[data-size="large"] {
+    background: var(--booking-white) !important;
+    border-color: var(--booking-line) !important;
 }
 
 .dps-booking-wrapper .dps-price-label {
-    color: var(--booking-muted);
+    color: var(--booking-ink) !important;
     font-size: 10px;
     font-weight: 800;
 }
@@ -615,7 +629,11 @@
     flex-wrap: wrap;
     gap: 10px;
     align-items: center;
-    padding-top: 4px;
+    justify-content: center;
+    padding: 14px;
+    background: var(--booking-paper) !important;
+    border: 1px solid var(--booking-line) !important;
+    border-radius: 0 !important;
 }
 
 .dps-booking-wrapper .dps-alert,
@@ -778,6 +796,71 @@
 
     .dps-booking-wrapper .dps-fieldset__legend {
         font-size: 17px;
+    }
+}
+
+@media (min-width: 1440px) {
+    .dps-booking-wrapper {
+        width: min(1520px, calc(100vw - 96px));
+        max-width: none;
+        margin-left: 50%;
+        padding-inline: 48px;
+        transform: translateX(-50%);
+    }
+
+    .dps-booking-wrapper .dps-form {
+        grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);
+        align-items: start;
+        column-gap: 24px;
+    }
+
+    .dps-booking-wrapper .dps-form > .dps-fieldset:nth-of-type(1) {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .dps-booking-wrapper .dps-form > .dps-fieldset:nth-of-type(2) {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .dps-booking-wrapper .dps-form > .dps-fieldset:nth-of-type(3) {
+        grid-column: 1;
+        grid-row: 3;
+    }
+
+    .dps-booking-wrapper .dps-form > .dps-taxidog-section {
+        grid-column: 1;
+        grid-row: 4;
+    }
+
+    .dps-booking-wrapper .dps-form > .dps-fieldset:nth-of-type(4) {
+        grid-column: 1;
+        grid-row: 5;
+    }
+
+    .dps-booking-wrapper .dps-form > .dps-assignment-fieldset {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .dps-booking-wrapper .dps-form > .dps-fieldset:has(#appointment_notes) {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    .dps-booking-wrapper .dps-form > .dps-appointment-summary {
+        grid-column: 2;
+        grid-row: 5;
+    }
+
+    .dps-booking-wrapper .dps-form > .dps-form-actions {
+        grid-column: 2;
+        grid-row: 4;
+    }
+
+    .dps-booking-wrapper .dps-form > #dps-past-payment-wrapper {
+        grid-column: 2;
     }
 }
 

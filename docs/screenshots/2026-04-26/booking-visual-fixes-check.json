@@ -1,0 +1,2016 @@
+{
+  "generatedAt": "2026-04-26T11:24:43.179Z",
+  "results": [
+    {
+      "viewport": 375,
+      "url": "https://desi.pet/agendamento/?dom_services=1&codex_visual_fix=146&bp=375",
+      "cssVersion": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-booking/assets/css/booking-addon.css?ver=1.4.6"
+      ],
+      "pageTitle": "Agendamentos – Desi Pet Shower",
+      "adminBarVisible": false,
+      "bodyClientWidth": 375,
+      "bodyScrollWidth": 375,
+      "horizontalOverflow": false,
+      "overflow": [],
+      "notices": [],
+      "mainRect": {
+        "x": 10,
+        "y": 129.2,
+        "width": 355,
+        "height": 8077.9,
+        "right": 365,
+        "bottom": 8207.1
+      },
+      "formRect": {
+        "x": 25,
+        "y": 403.5,
+        "width": 325,
+        "height": 7764.6,
+        "right": 350,
+        "bottom": 8168.1
+      },
+      "formGrid": {
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "rgb(17, 22, 28)",
+        "borderLeft": "rgb(17, 22, 28)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "grid",
+        "gridTemplateColumns": "297px",
+        "justifyContent": "normal"
+      },
+      "widthRatio": 0.947,
+      "assignment": {
+        "background": "rgb(236, 226, 211)",
+        "border": "rgb(217, 204, 186) rgb(217, 204, 186) rgb(217, 204, 186) rgb(189, 216, 231)",
+        "borderLeft": "rgb(189, 216, 231)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "grid",
+        "gridTemplateColumns": "none",
+        "justifyContent": "normal"
+      },
+      "cta": {
+        "background": "rgb(247, 242, 234)",
+        "border": "rgb(217, 204, 186)",
+        "borderLeft": "rgb(217, 204, 186)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "grid",
+        "gridTemplateColumns": "267px",
+        "justifyContent": "center",
+        "rect": {
+          "x": 39,
+          "y": 8063.1,
+          "width": 297,
+          "height": 85,
+          "right": 336,
+          "bottom": 8148.1
+        }
+      },
+      "chipUnique": [
+        {
+          "background": "rgb(255, 250, 243)",
+          "border": "rgb(217, 204, 186)",
+          "radius": "2px",
+          "color": "rgb(23, 48, 66)"
+        }
+      ],
+      "chipCount": 88,
+      "sections": [
+        {
+          "index": 0,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 1,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 2,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 3,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 4,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 5,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "TIPO DE AGENDAMENTO",
+          "rect": {
+            "x": 39,
+            "y": 423.5,
+            "width": 297,
+            "height": 341.4,
+            "right": 336,
+            "bottom": 764.9
+          }
+        },
+        {
+          "index": 6,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "CLIENTE E PET(S)",
+          "rect": {
+            "x": 39,
+            "y": 782.9,
+            "width": 297,
+            "height": 480.7,
+            "right": 336,
+            "bottom": 1263.5
+          }
+        },
+        {
+          "index": 7,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "DATA E HORÁRIO",
+          "rect": {
+            "x": 39,
+            "y": 1281.5,
+            "width": 297,
+            "height": 347.3,
+            "right": 336,
+            "bottom": 1628.8
+          }
+        },
+        {
+          "index": 8,
+          "tag": "div",
+          "cls": "dps-taxidog-section",
+          "title": "",
+          "rect": {
+            "x": 39,
+            "y": 1670.8,
+            "width": 297,
+            "height": 104.8,
+            "right": 336,
+            "bottom": 1775.6
+          }
+        },
+        {
+          "index": 9,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "SERVIÇOS E EXTRAS",
+          "rect": {
+            "x": 39,
+            "y": 1817.6,
+            "width": 297,
+            "height": 4928.4,
+            "right": 336,
+            "bottom": 6746
+          }
+        },
+        {
+          "index": 10,
+          "tag": "fieldset",
+          "cls": "dps-fieldset dps-assignment-fieldset",
+          "title": "ATRIBUIÇÃO",
+          "rect": {
+            "x": 39,
+            "y": 6764,
+            "width": 297,
+            "height": 201,
+            "right": 336,
+            "bottom": 6965
+          }
+        },
+        {
+          "index": 11,
+          "tag": "fieldset",
+          "cls": "dps-fieldset dps-conditional-field",
+          "title": "Informações de Pagamento",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 12,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "OBSERVAÇÕES E NOTAS",
+          "rect": {
+            "x": 39,
+            "y": 6983,
+            "width": 297,
+            "height": 271,
+            "right": 336,
+            "bottom": 7254
+          }
+        },
+        {
+          "index": 13,
+          "tag": "div",
+          "cls": "dps-appointment-summary",
+          "title": "Resumo do agendamento",
+          "rect": {
+            "x": 39,
+            "y": 7296,
+            "width": 297,
+            "height": 709,
+            "right": 336,
+            "bottom": 8005.1
+          }
+        },
+        {
+          "index": 14,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 15,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 16,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 17,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 18,
+          "tag": "div",
+          "cls": "dps-form-actions",
+          "title": "",
+          "rect": {
+            "x": 39,
+            "y": 8063.1,
+            "width": 297,
+            "height": 85,
+            "right": 336,
+            "bottom": 8148.1
+          }
+        },
+        {
+          "index": 19,
+          "tag": "div",
+          "cls": "dps-form-error",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        }
+      ],
+      "gapDateToTaxidog": 42,
+      "gapTaxidogToServices": 42,
+      "summaryRect": {
+        "x": 39,
+        "y": 7296,
+        "width": 297,
+        "height": 709,
+        "right": 336,
+        "bottom": 8005.1
+      },
+      "console": [],
+      "failedRequests": [],
+      "screenshot": "C:/Users/casaprobst/DPS/docs/screenshots/2026-04-26/booking-visual-fixes-375.png"
+    },
+    {
+      "viewport": 600,
+      "url": "https://desi.pet/agendamento/?dom_services=1&codex_visual_fix=146&bp=600",
+      "cssVersion": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-booking/assets/css/booking-addon.css?ver=1.4.6"
+      ],
+      "pageTitle": "Agendamentos – Desi Pet Shower",
+      "adminBarVisible": false,
+      "bodyClientWidth": 600,
+      "bodyScrollWidth": 600,
+      "horizontalOverflow": false,
+      "overflow": [],
+      "notices": [],
+      "mainRect": {
+        "x": 10,
+        "y": 149.2,
+        "width": 580,
+        "height": 5711.8,
+        "right": 590,
+        "bottom": 5860.9
+      },
+      "formRect": {
+        "x": 37,
+        "y": 439,
+        "width": 526,
+        "height": 5362.9,
+        "right": 563,
+        "bottom": 5801.9
+      },
+      "formGrid": {
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "rgb(17, 22, 28)",
+        "borderLeft": "rgb(17, 22, 28)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "grid",
+        "gridTemplateColumns": "478px",
+        "justifyContent": "normal"
+      },
+      "widthRatio": 0.967,
+      "assignment": {
+        "background": "rgb(236, 226, 211)",
+        "border": "rgb(217, 204, 186) rgb(217, 204, 186) rgb(217, 204, 186) rgb(189, 216, 231)",
+        "borderLeft": "rgb(189, 216, 231)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "grid",
+        "gridTemplateColumns": "none",
+        "justifyContent": "normal"
+      },
+      "cta": {
+        "background": "rgb(247, 242, 234)",
+        "border": "rgb(217, 204, 186)",
+        "borderLeft": "rgb(217, 204, 186)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "flex",
+        "gridTemplateColumns": "none",
+        "justifyContent": "center",
+        "rect": {
+          "x": 61,
+          "y": 5692.9,
+          "width": 478,
+          "height": 85,
+          "right": 539,
+          "bottom": 5777.9
+        }
+      },
+      "chipUnique": [
+        {
+          "background": "rgb(255, 250, 243)",
+          "border": "rgb(217, 204, 186)",
+          "radius": "2px",
+          "color": "rgb(23, 48, 66)"
+        }
+      ],
+      "chipCount": 88,
+      "sections": [
+        {
+          "index": 0,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 1,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 2,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 3,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 4,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 5,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "TIPO DE AGENDAMENTO",
+          "rect": {
+            "x": 61,
+            "y": 463,
+            "width": 478,
+            "height": 302.8,
+            "right": 539,
+            "bottom": 765.8
+          }
+        },
+        {
+          "index": 6,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "CLIENTE E PET(S)",
+          "rect": {
+            "x": 61,
+            "y": 783.8,
+            "width": 478,
+            "height": 397.8,
+            "right": 539,
+            "bottom": 1181.5
+          }
+        },
+        {
+          "index": 7,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "DATA E HORÁRIO",
+          "rect": {
+            "x": 61,
+            "y": 1199.5,
+            "width": 478,
+            "height": 241,
+            "right": 539,
+            "bottom": 1440.5
+          }
+        },
+        {
+          "index": 8,
+          "tag": "div",
+          "cls": "dps-taxidog-section",
+          "title": "",
+          "rect": {
+            "x": 61,
+            "y": 1482.5,
+            "width": 478,
+            "height": 87.4,
+            "right": 539,
+            "bottom": 1569.9
+          }
+        },
+        {
+          "index": 9,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "SERVIÇOS E EXTRAS",
+          "rect": {
+            "x": 61,
+            "y": 1611.9,
+            "width": 478,
+            "height": 2939.4,
+            "right": 539,
+            "bottom": 4551.3
+          }
+        },
+        {
+          "index": 10,
+          "tag": "fieldset",
+          "cls": "dps-fieldset dps-assignment-fieldset",
+          "title": "ATRIBUIÇÃO",
+          "rect": {
+            "x": 61,
+            "y": 4569.3,
+            "width": 478,
+            "height": 195.6,
+            "right": 539,
+            "bottom": 4764.9
+          }
+        },
+        {
+          "index": 11,
+          "tag": "fieldset",
+          "cls": "dps-fieldset dps-conditional-field",
+          "title": "Informações de Pagamento",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 12,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "OBSERVAÇÕES E NOTAS",
+          "rect": {
+            "x": 61,
+            "y": 4782.9,
+            "width": 478,
+            "height": 265.6,
+            "right": 539,
+            "bottom": 5048.6
+          }
+        },
+        {
+          "index": 13,
+          "tag": "div",
+          "cls": "dps-appointment-summary",
+          "title": "Resumo do agendamento",
+          "rect": {
+            "x": 61,
+            "y": 5098.6,
+            "width": 478,
+            "height": 528.4,
+            "right": 539,
+            "bottom": 5626.9
+          }
+        },
+        {
+          "index": 14,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 15,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 16,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 17,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 18,
+          "tag": "div",
+          "cls": "dps-form-actions",
+          "title": "",
+          "rect": {
+            "x": 61,
+            "y": 5692.9,
+            "width": 478,
+            "height": 85,
+            "right": 539,
+            "bottom": 5777.9
+          }
+        },
+        {
+          "index": 19,
+          "tag": "div",
+          "cls": "dps-form-error",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        }
+      ],
+      "gapDateToTaxidog": 42,
+      "gapTaxidogToServices": 42,
+      "summaryRect": {
+        "x": 61,
+        "y": 5098.6,
+        "width": 478,
+        "height": 528.4,
+        "right": 539,
+        "bottom": 5626.9
+      },
+      "console": [],
+      "failedRequests": [],
+      "screenshot": "C:/Users/casaprobst/DPS/docs/screenshots/2026-04-26/booking-visual-fixes-600.png"
+    },
+    {
+      "viewport": 840,
+      "url": "https://desi.pet/agendamento/?dom_services=1&codex_visual_fix=146&bp=840",
+      "cssVersion": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-booking/assets/css/booking-addon.css?ver=1.4.6"
+      ],
+      "pageTitle": "Agendamentos – Desi Pet Shower",
+      "adminBarVisible": false,
+      "bodyClientWidth": 840,
+      "bodyScrollWidth": 840,
+      "horizontalOverflow": false,
+      "overflow": [],
+      "notices": [],
+      "mainRect": {
+        "x": 10,
+        "y": 149.2,
+        "width": 820,
+        "height": 5114,
+        "right": 830,
+        "bottom": 5263.2
+      },
+      "formRect": {
+        "x": 45,
+        "y": 449,
+        "width": 750,
+        "height": 4755.2,
+        "right": 795,
+        "bottom": 5204.2
+      },
+      "formGrid": {
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "rgb(17, 22, 28)",
+        "borderLeft": "rgb(17, 22, 28)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "grid",
+        "gridTemplateColumns": "702px",
+        "justifyContent": "normal"
+      },
+      "widthRatio": 0.976,
+      "assignment": {
+        "background": "rgb(236, 226, 211)",
+        "border": "rgb(217, 204, 186) rgb(217, 204, 186) rgb(217, 204, 186) rgb(189, 216, 231)",
+        "borderLeft": "rgb(189, 216, 231)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "grid",
+        "gridTemplateColumns": "none",
+        "justifyContent": "normal"
+      },
+      "cta": {
+        "background": "rgb(247, 242, 234)",
+        "border": "rgb(217, 204, 186)",
+        "borderLeft": "rgb(217, 204, 186)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "flex",
+        "gridTemplateColumns": "none",
+        "justifyContent": "center",
+        "rect": {
+          "x": 69,
+          "y": 5095.2,
+          "width": 702,
+          "height": 85,
+          "right": 771,
+          "bottom": 5180.2
+        }
+      },
+      "chipUnique": [
+        {
+          "background": "rgb(255, 250, 243)",
+          "border": "rgb(217, 204, 186)",
+          "radius": "2px",
+          "color": "rgb(23, 48, 66)"
+        }
+      ],
+      "chipCount": 88,
+      "sections": [
+        {
+          "index": 0,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 1,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 2,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 3,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 4,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 5,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "TIPO DE AGENDAMENTO",
+          "rect": {
+            "x": 69,
+            "y": 473,
+            "width": 702,
+            "height": 183.4,
+            "right": 771,
+            "bottom": 656.4
+          }
+        },
+        {
+          "index": 6,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "CLIENTE E PET(S)",
+          "rect": {
+            "x": 69,
+            "y": 676.4,
+            "width": 702,
+            "height": 397.8,
+            "right": 771,
+            "bottom": 1074.1
+          }
+        },
+        {
+          "index": 7,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "DATA E HORÁRIO",
+          "rect": {
+            "x": 69,
+            "y": 1094.1,
+            "width": 702,
+            "height": 241,
+            "right": 771,
+            "bottom": 1335.2
+          }
+        },
+        {
+          "index": 8,
+          "tag": "div",
+          "cls": "dps-taxidog-section",
+          "title": "",
+          "rect": {
+            "x": 69,
+            "y": 1379.2,
+            "width": 702,
+            "height": 87.4,
+            "right": 771,
+            "bottom": 1466.5
+          }
+        },
+        {
+          "index": 9,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "SERVIÇOS E EXTRAS",
+          "rect": {
+            "x": 69,
+            "y": 1510.5,
+            "width": 702,
+            "height": 2594.4,
+            "right": 771,
+            "bottom": 4104.9
+          }
+        },
+        {
+          "index": 10,
+          "tag": "fieldset",
+          "cls": "dps-fieldset dps-assignment-fieldset",
+          "title": "ATRIBUIÇÃO",
+          "rect": {
+            "x": 69,
+            "y": 4124.9,
+            "width": 702,
+            "height": 195.6,
+            "right": 771,
+            "bottom": 4320.5
+          }
+        },
+        {
+          "index": 11,
+          "tag": "fieldset",
+          "cls": "dps-fieldset dps-conditional-field",
+          "title": "Informações de Pagamento",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 12,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "OBSERVAÇÕES E NOTAS",
+          "rect": {
+            "x": 69,
+            "y": 4340.5,
+            "width": 702,
+            "height": 265.6,
+            "right": 771,
+            "bottom": 4606.2
+          }
+        },
+        {
+          "index": 13,
+          "tag": "div",
+          "cls": "dps-appointment-summary",
+          "title": "Resumo do agendamento",
+          "rect": {
+            "x": 69,
+            "y": 4658.2,
+            "width": 702,
+            "height": 369,
+            "right": 771,
+            "bottom": 5027.2
+          }
+        },
+        {
+          "index": 14,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 15,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 16,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 17,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 18,
+          "tag": "div",
+          "cls": "dps-form-actions",
+          "title": "",
+          "rect": {
+            "x": 69,
+            "y": 5095.2,
+            "width": 702,
+            "height": 85,
+            "right": 771,
+            "bottom": 5180.2
+          }
+        },
+        {
+          "index": 19,
+          "tag": "div",
+          "cls": "dps-form-error",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        }
+      ],
+      "gapDateToTaxidog": 44,
+      "gapTaxidogToServices": 44,
+      "summaryRect": {
+        "x": 69,
+        "y": 4658.2,
+        "width": 702,
+        "height": 369,
+        "right": 771,
+        "bottom": 5027.2
+      },
+      "console": [],
+      "failedRequests": [],
+      "screenshot": "C:/Users/casaprobst/DPS/docs/screenshots/2026-04-26/booking-visual-fixes-840.png"
+    },
+    {
+      "viewport": 1200,
+      "url": "https://desi.pet/agendamento/?dom_services=1&codex_visual_fix=146&bp=1200",
+      "cssVersion": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-booking/assets/css/booking-addon.css?ver=1.4.6"
+      ],
+      "pageTitle": "Agendamentos – Desi Pet Shower",
+      "adminBarVisible": false,
+      "bodyClientWidth": 1200,
+      "bodyScrollWidth": 1200,
+      "horizontalOverflow": false,
+      "overflow": [
+        {
+          "tag": "ul",
+          "cls": "sub-menu nav-dropdown nav-dropdown-default",
+          "text": "",
+          "left": -99262,
+          "right": -99002,
+          "width": 260
+        },
+        {
+          "tag": "li",
+          "cls": "menu-item menu-item-type-post_type menu-item-object-page menu-item-1430",
+          "text": "",
+          "left": -99240,
+          "right": -99024,
+          "width": 216
+        },
+        {
+          "tag": "a",
+          "cls": "",
+          "text": "",
+          "left": -99230,
+          "right": -99034,
+          "width": 196
+        },
+        {
+          "tag": "li",
+          "cls": "menu-item menu-item-type-post_type menu-item-object-page menu-item-1439",
+          "text": "",
+          "left": -99240,
+          "right": -99024,
+          "width": 216
+        },
+        {
+          "tag": "a",
+          "cls": "",
+          "text": "",
+          "left": -99230,
+          "right": -99034,
+          "width": 196
+        },
+        {
+          "tag": "li",
+          "cls": "menu-item menu-item-type-post_type menu-item-object-page menu-item-1445",
+          "text": "",
+          "left": -99240,
+          "right": -99024,
+          "width": 216
+        },
+        {
+          "tag": "a",
+          "cls": "",
+          "text": "",
+          "left": -99230,
+          "right": -99034,
+          "width": 196
+        },
+        {
+          "tag": "li",
+          "cls": "menu-item menu-item-type-post_type menu-item-object-page menu-item-privacy-policy menu-item-1434",
+          "text": "",
+          "left": -99240,
+          "right": -99024,
+          "width": 216
+        },
+        {
+          "tag": "a",
+          "cls": "",
+          "text": "",
+          "left": -99230,
+          "right": -99034,
+          "width": 196
+        }
+      ],
+      "notices": [],
+      "mainRect": {
+        "x": 30,
+        "y": 140.5,
+        "width": 1140,
+        "height": 5040.4,
+        "right": 1170,
+        "bottom": 5180.8
+      },
+      "formRect": {
+        "x": 73,
+        "y": 440.3,
+        "width": 1054,
+        "height": 4681.5,
+        "right": 1127,
+        "bottom": 5121.8
+      },
+      "formGrid": {
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "rgb(17, 22, 28)",
+        "borderLeft": "rgb(17, 22, 28)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "grid",
+        "gridTemplateColumns": "998px",
+        "justifyContent": "normal"
+      },
+      "widthRatio": 0.95,
+      "assignment": {
+        "background": "rgb(236, 226, 211)",
+        "border": "rgb(217, 204, 186) rgb(217, 204, 186) rgb(217, 204, 186) rgb(189, 216, 231)",
+        "borderLeft": "rgb(189, 216, 231)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "grid",
+        "gridTemplateColumns": "none",
+        "justifyContent": "normal"
+      },
+      "cta": {
+        "background": "rgb(247, 242, 234)",
+        "border": "rgb(217, 204, 186)",
+        "borderLeft": "rgb(217, 204, 186)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "flex",
+        "gridTemplateColumns": "none",
+        "justifyContent": "center",
+        "rect": {
+          "x": 101,
+          "y": 5008.8,
+          "width": 998,
+          "height": 85,
+          "right": 1099,
+          "bottom": 5093.8
+        }
+      },
+      "chipUnique": [
+        {
+          "background": "rgb(255, 250, 243)",
+          "border": "rgb(217, 204, 186)",
+          "radius": "2px",
+          "color": "rgb(23, 48, 66)"
+        }
+      ],
+      "chipCount": 88,
+      "sections": [
+        {
+          "index": 0,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 1,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 2,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 3,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 4,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 5,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "TIPO DE AGENDAMENTO",
+          "rect": {
+            "x": 101,
+            "y": 468.3,
+            "width": 998,
+            "height": 169.9,
+            "right": 1099,
+            "bottom": 638.2
+          }
+        },
+        {
+          "index": 6,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "CLIENTE E PET(S)",
+          "rect": {
+            "x": 101,
+            "y": 658.2,
+            "width": 998,
+            "height": 401.8,
+            "right": 1099,
+            "bottom": 1059.9
+          }
+        },
+        {
+          "index": 7,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "DATA E HORÁRIO",
+          "rect": {
+            "x": 101,
+            "y": 1079.9,
+            "width": 998,
+            "height": 227.6,
+            "right": 1099,
+            "bottom": 1307.6
+          }
+        },
+        {
+          "index": 8,
+          "tag": "div",
+          "cls": "dps-taxidog-section",
+          "title": "",
+          "rect": {
+            "x": 101,
+            "y": 1351.6,
+            "width": 998,
+            "height": 87.4,
+            "right": 1099,
+            "bottom": 1439
+          }
+        },
+        {
+          "index": 9,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "SERVIÇOS E EXTRAS",
+          "rect": {
+            "x": 101,
+            "y": 1483,
+            "width": 998,
+            "height": 2583.4,
+            "right": 1099,
+            "bottom": 4066.3
+          }
+        },
+        {
+          "index": 10,
+          "tag": "fieldset",
+          "cls": "dps-fieldset dps-assignment-fieldset",
+          "title": "ATRIBUIÇÃO",
+          "rect": {
+            "x": 101,
+            "y": 4086.3,
+            "width": 998,
+            "height": 199.6,
+            "right": 1099,
+            "bottom": 4286
+          }
+        },
+        {
+          "index": 11,
+          "tag": "fieldset",
+          "cls": "dps-fieldset dps-conditional-field",
+          "title": "Informações de Pagamento",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 12,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "OBSERVAÇÕES E NOTAS",
+          "rect": {
+            "x": 101,
+            "y": 4306,
+            "width": 998,
+            "height": 269.6,
+            "right": 1099,
+            "bottom": 4575.6
+          }
+        },
+        {
+          "index": 13,
+          "tag": "div",
+          "cls": "dps-appointment-summary",
+          "title": "Resumo do agendamento",
+          "rect": {
+            "x": 101,
+            "y": 4627.6,
+            "width": 998,
+            "height": 313.3,
+            "right": 1099,
+            "bottom": 4940.8
+          }
+        },
+        {
+          "index": 14,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 15,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 16,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 17,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 18,
+          "tag": "div",
+          "cls": "dps-form-actions",
+          "title": "",
+          "rect": {
+            "x": 101,
+            "y": 5008.8,
+            "width": 998,
+            "height": 85,
+            "right": 1099,
+            "bottom": 5093.8
+          }
+        },
+        {
+          "index": 19,
+          "tag": "div",
+          "cls": "dps-form-error",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        }
+      ],
+      "gapDateToTaxidog": 44,
+      "gapTaxidogToServices": 44,
+      "summaryRect": {
+        "x": 101,
+        "y": 4627.6,
+        "width": 998,
+        "height": 313.3,
+        "right": 1099,
+        "bottom": 4940.8
+      },
+      "console": [],
+      "failedRequests": [],
+      "screenshot": "C:/Users/casaprobst/DPS/docs/screenshots/2026-04-26/booking-visual-fixes-1200.png"
+    },
+    {
+      "viewport": 1920,
+      "url": "https://desi.pet/agendamento/?dom_services=1&codex_visual_fix=146&bp=1920",
+      "cssVersion": [
+        "https://desi.pet/wp-content/plugins/desi-pet-shower-booking/assets/css/booking-addon.css?ver=1.4.6"
+      ],
+      "pageTitle": "Agendamentos – Desi Pet Shower",
+      "adminBarVisible": false,
+      "bodyClientWidth": 1920,
+      "bodyScrollWidth": 1920,
+      "horizontalOverflow": false,
+      "overflow": [
+        {
+          "tag": "ul",
+          "cls": "sub-menu nav-dropdown nav-dropdown-default",
+          "text": "",
+          "left": -98902,
+          "right": -98642,
+          "width": 260
+        },
+        {
+          "tag": "li",
+          "cls": "menu-item menu-item-type-post_type menu-item-object-page menu-item-1430",
+          "text": "",
+          "left": -98880,
+          "right": -98664,
+          "width": 216
+        },
+        {
+          "tag": "a",
+          "cls": "",
+          "text": "",
+          "left": -98870,
+          "right": -98674,
+          "width": 196
+        },
+        {
+          "tag": "li",
+          "cls": "menu-item menu-item-type-post_type menu-item-object-page menu-item-1439",
+          "text": "",
+          "left": -98880,
+          "right": -98664,
+          "width": 216
+        },
+        {
+          "tag": "a",
+          "cls": "",
+          "text": "",
+          "left": -98870,
+          "right": -98674,
+          "width": 196
+        },
+        {
+          "tag": "li",
+          "cls": "menu-item menu-item-type-post_type menu-item-object-page menu-item-1445",
+          "text": "",
+          "left": -98880,
+          "right": -98664,
+          "width": 216
+        },
+        {
+          "tag": "a",
+          "cls": "",
+          "text": "",
+          "left": -98870,
+          "right": -98674,
+          "width": 196
+        },
+        {
+          "tag": "li",
+          "cls": "menu-item menu-item-type-post_type menu-item-object-page menu-item-privacy-policy menu-item-1434",
+          "text": "",
+          "left": -98880,
+          "right": -98664,
+          "width": 216
+        },
+        {
+          "tag": "a",
+          "cls": "",
+          "text": "",
+          "left": -98870,
+          "right": -98674,
+          "width": 196
+        }
+      ],
+      "notices": [],
+      "mainRect": {
+        "x": 200,
+        "y": 140.5,
+        "width": 1520,
+        "height": 4042.6,
+        "right": 1720,
+        "bottom": 4183.1
+      },
+      "formRect": {
+        "x": 251,
+        "y": 440.3,
+        "width": 1418,
+        "height": 3683.8,
+        "right": 1669,
+        "bottom": 4124.1
+      },
+      "formGrid": {
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "rgb(17, 22, 28)",
+        "borderLeft": "rgb(17, 22, 28)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "grid",
+        "gridTemplateColumns": "918px 420px",
+        "justifyContent": "normal"
+      },
+      "widthRatio": 0.792,
+      "assignment": {
+        "background": "rgb(236, 226, 211)",
+        "border": "rgb(217, 204, 186) rgb(217, 204, 186) rgb(217, 204, 186) rgb(189, 216, 231)",
+        "borderLeft": "rgb(189, 216, 231)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "grid",
+        "gridTemplateColumns": "none",
+        "justifyContent": "normal"
+      },
+      "cta": {
+        "background": "rgb(247, 242, 234)",
+        "border": "rgb(217, 204, 186)",
+        "borderLeft": "rgb(217, 204, 186)",
+        "radius": "0px",
+        "color": "rgb(17, 22, 28)",
+        "display": "flex",
+        "gridTemplateColumns": "none",
+        "justifyContent": "center",
+        "rect": {
+          "x": 1221,
+          "y": 1381.3,
+          "width": 420,
+          "height": 85,
+          "right": 1641,
+          "bottom": 1466.3
+        }
+      },
+      "chipUnique": [
+        {
+          "background": "rgb(255, 250, 243)",
+          "border": "rgb(217, 204, 186)",
+          "radius": "2px",
+          "color": "rgb(23, 48, 66)"
+        }
+      ],
+      "chipCount": 88,
+      "sections": [
+        {
+          "index": 0,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 1,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 2,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 3,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 4,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 5,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "TIPO DE AGENDAMENTO",
+          "rect": {
+            "x": 279,
+            "y": 468.3,
+            "width": 918,
+            "height": 169.9,
+            "right": 1197,
+            "bottom": 638.2
+          }
+        },
+        {
+          "index": 6,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "CLIENTE E PET(S)",
+          "rect": {
+            "x": 279,
+            "y": 687.9,
+            "width": 918,
+            "height": 401.8,
+            "right": 1197,
+            "bottom": 1089.7
+          }
+        },
+        {
+          "index": 7,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "DATA E HORÁRIO",
+          "rect": {
+            "x": 279,
+            "y": 1109.7,
+            "width": 918,
+            "height": 227.6,
+            "right": 1197,
+            "bottom": 1337.3
+          }
+        },
+        {
+          "index": 8,
+          "tag": "div",
+          "cls": "dps-taxidog-section",
+          "title": "",
+          "rect": {
+            "x": 279,
+            "y": 1381.3,
+            "width": 918,
+            "height": 87.4,
+            "right": 1197,
+            "bottom": 1468.7
+          }
+        },
+        {
+          "index": 9,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "SERVIÇOS E EXTRAS",
+          "rect": {
+            "x": 279,
+            "y": 1512.7,
+            "width": 918,
+            "height": 2583.4,
+            "right": 1197,
+            "bottom": 4096.1
+          }
+        },
+        {
+          "index": 10,
+          "tag": "fieldset",
+          "cls": "dps-fieldset dps-assignment-fieldset",
+          "title": "ATRIBUIÇÃO",
+          "rect": {
+            "x": 1221,
+            "y": 468.3,
+            "width": 420,
+            "height": 199.6,
+            "right": 1641,
+            "bottom": 667.9
+          }
+        },
+        {
+          "index": 11,
+          "tag": "fieldset",
+          "cls": "dps-fieldset dps-conditional-field",
+          "title": "Informações de Pagamento",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 12,
+          "tag": "fieldset",
+          "cls": "dps-fieldset",
+          "title": "OBSERVAÇÕES E NOTAS",
+          "rect": {
+            "x": 1221,
+            "y": 687.9,
+            "width": 420,
+            "height": 269.6,
+            "right": 1641,
+            "bottom": 957.6
+          }
+        },
+        {
+          "index": 13,
+          "tag": "div",
+          "cls": "dps-appointment-summary",
+          "title": "Resumo do agendamento",
+          "rect": {
+            "x": 1221,
+            "y": 1544.7,
+            "width": 420,
+            "height": 557.2,
+            "right": 1641,
+            "bottom": 2101.9
+          }
+        },
+        {
+          "index": 14,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 15,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 16,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 17,
+          "tag": "input",
+          "cls": "",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        },
+        {
+          "index": 18,
+          "tag": "div",
+          "cls": "dps-form-actions",
+          "title": "",
+          "rect": {
+            "x": 1221,
+            "y": 1381.3,
+            "width": 420,
+            "height": 85,
+            "right": 1641,
+            "bottom": 1466.3
+          }
+        },
+        {
+          "index": 19,
+          "tag": "div",
+          "cls": "dps-form-error",
+          "title": "",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "right": 0,
+            "bottom": 0
+          }
+        }
+      ],
+      "gapDateToTaxidog": 44,
+      "gapTaxidogToServices": 44,
+      "summaryRect": {
+        "x": 1221,
+        "y": 1544.7,
+        "width": 420,
+        "height": 557.2,
+        "right": 1641,
+        "bottom": 2101.9
+      },
+      "console": [],
+      "failedRequests": [],
+      "screenshot": "C:/Users/casaprobst/DPS/docs/screenshots/2026-04-26/booking-visual-fixes-1920.png"
+    }
+  ]
+}

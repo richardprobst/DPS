@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst - Booking Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página dedicada de agendamento para a operação DPS, reaproveitando o renderer canônico do núcleo.
- * Version:           1.4.2
+ * Version:           1.4.6
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-booking-addon
@@ -65,7 +65,7 @@ class DPS_Booking_Addon {
     /**
      * Versão do add-on.
      */
-    const VERSION = '1.4.2';
+    const VERSION = '1.4.6';
 
     /**
      * Instância única.
@@ -196,6 +196,7 @@ class DPS_Booking_Addon {
             'googlesitekit-adsense',
             'googlesitekit-sign-in-with-google',
             'elementor-common',
+            'elementor-app-loader',
             'elementor-webpack-runtime',
             'elementor-frontend-modules',
             'elementor-frontend',
@@ -206,7 +207,6 @@ class DPS_Booking_Addon {
 
         foreach ( $handles as $handle ) {
             wp_dequeue_script( $handle );
-            wp_deregister_script( $handle );
         }
     }
 
@@ -259,7 +259,8 @@ class DPS_Booking_Addon {
     public function filter_external_noise_markup( $html ) {
         $has_noise_marker = false !== stripos( $html, 'googlesyndication' )
             || false !== stripos( $html, 'google_gtagjs' )
-            || false !== stripos( $html, '/elementor/assets/js/common.js' );
+            || false !== stripos( $html, '/elementor/assets/js/common.js' )
+            || false !== stripos( $html, '/elementor/assets/js/app-loader' );
 
         if ( '' === $html || ! $has_noise_marker ) {
             return $html;
@@ -273,6 +274,8 @@ class DPS_Booking_Addon {
             '#<link\b[^>]*href=["\'][^"\']*googletagmanager\.com[^"\']*["\'][^>]*>\s*#i',
             '#<script\b[^>]*id=["\']elementor-common-js-before["\'][^>]*>.*?</script>#is',
             '#<script\b[^>]*src=["\'][^"\']*/wp-content/plugins/elementor/assets/js/common\.js[^"\']*["\'][^>]*>\s*</script>#i',
+            '#<script\b[^>]*id=["\']elementor-app-loader-js-before["\'][^>]*>.*?</script>#is',
+            '#<script\b[^>]*src=["\'][^"\']*/wp-content/plugins/elementor/assets/js/app-loader[^"\']*["\'][^>]*>\s*</script>#i',
         ];
 
         $filtered = preg_replace( $patterns, '', $html );

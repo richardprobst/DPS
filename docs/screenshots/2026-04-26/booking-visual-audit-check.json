@@ -1,0 +1,99 @@
+{
+  "url": "https://desi.pet/agendamento/",
+  "validatedAt": "2026-04-26",
+  "scope": "Auditoria visual real do Agendamento sem implementacao",
+  "reference": [
+    "docs/visual/FRONTEND_DESIGN_INSTRUCTIONS.md",
+    "docs/visual/VISUAL_STYLE_GUIDE.md"
+  ],
+  "breakpoints": {
+    "375": {
+      "overflowX": false,
+      "mainWidthRatio": 0.907,
+      "debugNoticeMatches": 12,
+      "overflowingDebugTextNodes": 3,
+      "assignmentBackground": "rgb(245, 217, 255)",
+      "submitParentRadius": "12px",
+      "avgServiceRowHeight": 39
+    },
+    "600": {
+      "overflowX": false,
+      "mainWidthRatio": 0.942,
+      "debugNoticeMatches": 12,
+      "assignmentBackground": "rgb(245, 217, 255)",
+      "submitParentRadius": "12px",
+      "avgServiceRowHeight": 34
+    },
+    "840": {
+      "overflowX": false,
+      "mainWidthRatio": 0.958,
+      "debugNoticeMatches": 12,
+      "assignmentBackground": "rgb(245, 217, 255)",
+      "submitParentRadius": "12px",
+      "avgServiceRowHeight": 21
+    },
+    "1200": {
+      "overflowX": false,
+      "mainWidthRatio": 0.95,
+      "debugNoticeMatches": 12,
+      "assignmentBackground": "rgb(245, 217, 255)",
+      "submitParentRadius": "12px",
+      "avgServiceRowHeight": 20
+    },
+    "1920": {
+      "overflowX": false,
+      "mainWidthRatio": 0.594,
+      "debugNoticeMatches": 12,
+      "assignmentBackground": "rgb(245, 217, 255)",
+      "submitParentRadius": "12px",
+      "avgServiceRowHeight": 20
+    }
+  },
+  "globalMetrics": {
+    "formCount": 1,
+    "fieldsetCount": 7,
+    "priceChipCount": 147,
+    "priceChipBackgrounds": [
+      "rgba(0, 0, 0, 0)",
+      "rgb(255, 251, 235)",
+      "rgb(239, 246, 255)",
+      "rgb(254, 242, 242)",
+      "rgb(236, 226, 211)"
+    ],
+    "screenshots": [
+      "./booking-visual-audit-375.png",
+      "./booking-visual-audit-600.png",
+      "./booking-visual-audit-840.png",
+      "./booking-visual-audit-1200.png",
+      "./booking-visual-audit-1920.png"
+    ]
+  },
+  "findings": [
+    {
+      "severity": "Alta",
+      "title": "Notices do WordPress aparecem no corpo da pagina e quebram a apresentacao",
+      "evidence": "12 ocorrencias de Notice/WP_Scripts::add/Depurar o WordPress; em 375px ha 3 nos de caminho PHP ultrapassando a viewport."
+    },
+    {
+      "severity": "Media",
+      "title": "Painel Atribuicao usa roxo fora da paleta DPS Signature",
+      "evidence": "fieldset.dps-assignment-fieldset usa rgb(245, 217, 255), destoando dos papeis paper/bone/sky/line."
+    },
+    {
+      "severity": "Media",
+      "title": "Tela grande subutiliza a largura operacional",
+      "evidence": "Em 1920px, o conteudo principal ocupa 1140px, apenas 59.4% da viewport, mantendo lista longa em coluna unica."
+    },
+    {
+      "severity": "Media",
+      "title": "Container do CTA final tem raio 12px e visual de card macio",
+      "evidence": "O wrapper do botao Salvar Agendamento usa border-radius 12px em todos os breakpoints."
+    },
+    {
+      "severity": "Baixa",
+      "title": "Chips de preco repetem varias cores e criam ruido visual",
+      "evidence": "147 chips de preco foram detectados com fundos amarelo, azul, vermelho claro e bone."
+    }
+  ],
+  "temporaryUser": "Criado via WP-CLI apenas para a sessao autenticada; removido ao final."
+}

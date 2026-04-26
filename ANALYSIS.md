@@ -998,6 +998,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - Tela de confirmação pós-agendamento usa query args assinados por nonce (`dps_booking_confirmed` + `dps_booking_nonce`), sem transients nem armazenamento temporário.
 - Pendências financeiras e agregação multi-pet são resolvidas em tempo real por requisição, sem `static $cache`, transients ou arrays de reutilização para respostas.
 - Design system alinhado ao DPS Signature em `booking-addon.css`, com geometria reta, paleta `ink/petrol/paper/bone/line/sky/action/warning/danger` e overrides escopados para campos injetados por Services/Groomers.
+- Auditoria visual pós-publicação consolidou ajustes de tela grande e mobile: o Booking mantém geometria reta, remove o roxo fora de paleta da atribuição, neutraliza chips de preço multicoloridos e reorganiza o fluxo em coluna lateral a partir de `1440px` sem mudar campos, hooks ou shortcodes.
 - Descoberta de URL canônica reconcilia `dps_booking_page_id` com a página real que contém `[dps_booking_form]` ou `[dps_booking_v2]`, incluindo metadados comuns de page builders.
 - Validações granulares de segurança mantêm `manage_options`/`dps_manage_appointments` para salvar e `can_edit_appointment()` para editar, duplicar ou visualizar confirmação.
 - A tela operacional suprime scripts externos de marketing/telemetria que não participam do formulário (`google_gtagjs`, Ads/Site Kit e JS runtime do Elementor/Pro), mantendo CSS/HTML do tema e evitando ruídos de CORS na validação publicada.
@@ -1036,7 +1037,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - Confirmação pós-save validada por nonce por agendamento e usuário, sem transients
 - `DPS_Cache_Control` registra `[dps_booking_form]` e `[dps_booking_v2]` para no-cache preventivo por shortcode
 - Parâmetros `client_id/pet_id` continuam aceitos como aliases read-only para pré-seleção, sem alterar nomes de campos do POST
-- `filter_external_noise_markup()` remove apenas tags externas conhecidas de Ads/GTag/Elementor Common quando impressas fora do WP enqueue; não altera scripts DPS, nonces, campos do formulário, AJAX ou hooks do núcleo.
+- `filter_external_noise_markup()` remove apenas tags externas conhecidas de Ads/GTag/Elementor Common/App Loader quando impressas fora do WP enqueue; a supressão usa `wp_dequeue_script()` sem desregistrar handles, preservando dependências de terceiros e evitando notices `WP_Scripts::add`.
 
 **Manutenibilidade (v1.4.0)**:
 - O add-on deixou de duplicar o formulário de agendamento e passou a depender do renderer canônico do núcleo
